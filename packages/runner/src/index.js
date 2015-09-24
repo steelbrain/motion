@@ -239,7 +239,7 @@ function buildScripts(cb) {
       }
     }))
     .pipe(babel({
-      stage: 0,
+      stage: 2,
       blacklist: ['flow', 'react'],
       optional: ['bluebirdCoroutines']
     }))
