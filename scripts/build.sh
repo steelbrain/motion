@@ -15,4 +15,21 @@ for f in packages/*; do
   fi
 done
 
+if [ $1="--watch" ]; then
+  echo "Watching CLI for relink"
+  chsum1=""
+  cd packages/cli
+
+  sleep 2
+  while [[ true ]]
+  do
+      chsum2=`find lib -type f -exec md5 {} \;`
+      if [[ $chsum1 != $chsum2 ]] ; then
+          npm link
+          chsum1=$chsum2
+      fi
+      sleep 2
+  done
+fi
+
 wait
