@@ -3,10 +3,16 @@ require("shelljs/global");
 var path = require("path");
 var fs   = require("fs");
 
-// uninstall global babel install
-try {
-  exec("npm uninstall -g babel");
-} catch (err) {}
+// setup flint-babel
+cd('vendor/babel');
+exec('make bootstrap')
+cd('../..')
+
+// setup flint-react-tools
+cd('vendor/react-tools')
+exec('npm install')
+exec('npm link')
+cd('../..')
 
 // get packages
 var packages = [];
