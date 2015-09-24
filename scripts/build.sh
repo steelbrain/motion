@@ -16,6 +16,12 @@ for f in packages/*; do
 done
 
 if [ $1="--watch" ]; then
+  # Run babel build
+  cd vendor/babel
+  make watch &
+  cd ../..
+
+  # Relink CLI watcher
   echo "Watching CLI for relink"
   chsum1=""
   cd packages/cli
@@ -23,12 +29,14 @@ if [ $1="--watch" ]; then
   sleep 2
   while [[ true ]]
   do
+    if [ -d 'lib' ]; then
       chsum2=`find lib -type f -exec md5 {} \;`
       if [[ $chsum1 != $chsum2 ]] ; then
-          npm link
-          chsum1=$chsum2
+        npm link
+        chsum1=$chsum2
       fi
-      sleep 2
+    fi
+    sleep 2
   done
 fi
 

@@ -244,7 +244,7 @@ function buildScripts(cb) {
     }))
     .pipe(babel({
       stage: 2,
-      blacklist: ['flow', 'react'],
+      blacklist: ['flow', 'react', 'es6.tailCall'],
       optional: ['bluebirdCoroutines']
     }))
     .pipe(flint('post', {
