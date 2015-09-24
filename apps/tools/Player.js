@@ -1,15 +1,15 @@
 view Player {
-  @playing = false
-  @playInterval = false
+  let playing = false
+  let playInterval = false
 
   pause = () => {
-    @playing = false
-    clearInterval(@playInterval)
+    playing = false
+    clearInterval(playInterval)
   }
 
   play = () => {
-    @playing = true
-    @playInterval = setInterval(() => {
+    playing = true
+    playInterval = setInterval(() => {
       if (^cur < ^snapshots.length)
         ^playNext()
       else
@@ -22,14 +22,13 @@ view Player {
       icon={<Rwd />} />
     <Button
       icon={<Play />}
-      show = {!@playing}
+      show = {!playing}
       onClick={play} />
     <Button
       icon={<Pause />}
-      show = {@playing}
+      show = {playing}
       onClick={pause} />
     <Button
-      click :: {false}
       icon={<Fwd />} />
   </Group>
 

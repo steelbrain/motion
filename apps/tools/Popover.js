@@ -1,22 +1,22 @@
-popoverBG = '#fafafa'
-isObject = obj => typeof obj === 'object' && !Array.isArray(obj) && obj !== null
-getValue = label => f().values[devInspector.id][label]
-update = (label, value) => {
+const popoverBG = '#fafafa'
+const isObject = obj => typeof obj === 'object' && !Array.isArray(obj) && obj !== null
+const getValue = label => f().values[devInspector.id][label]
+const update = (label, value) => {
   currentVal = getValue(label)
   if (!isNaN(value)) {value = +value} // if is number
   f().set(devInspector.id, label, value)
 }
 
 view FPopover {
-  @isOpen = false
-  @selector = null
-  @states = []
-  @props = []
-  @view = {}
+  let isOpen = false
+  let selector = null
+  let states = []
+  let props = []
+  let view = {}
 
   window.addEventListener('keydown', e => {
-    if (@isOpen && e.keyCode === 27)
-      @isOpen = !@isOpen
+    if (isOpen && e.keyCode === 27)
+      isOpen = !isOpen
   })
 
   window.devInspector = {
@@ -27,15 +27,15 @@ view FPopover {
       f().on("render:" + devInspector.id, render)
       f().on("traveling", render)
       render()
-      @selector = '[data-flint-id="' + id + '"]'
-      @isOpen = true
+      selector = '[data-flint-id="' + id + '"]'
+      isOpen = true
     },
     id: null,
     refresh(state, view) {
-      @view = view
-      @states = Object.keys(state)
+      view = view
+      states = Object.keys(state)
         .map(label => ({ label, value: state[label] }))
-      @props = Object.keys(view.props)
+      props = Object.keys(view.props)
         .filter(name => !name.match(/(children|data-flint-id|className|style)$/))
         .map(label => ({ label, value: view.props[label] }))
     }
@@ -47,16 +47,16 @@ view FPopover {
         <bg />
         <content>
           <viewName>
-            <wrap>{@view.name}</wrap>
+            <wrap>{view.name}</wrap>
           </viewName>
-          <Pane title="Props" variables={@props} />
-          <Pane title="State" variables={@states} />
+          <Pane title="Props" variables={props} />
+          <Pane title="State" variables={states} />
         </content>
       </box>
     }
-    isOpen={@isOpen}
+    isOpen={isOpen}
     tipSize={8}
-    target={document.querySelectorAll(@selector)[0]}>
+    target={document.querySelectorAll(selector)[0]}>
   </Popover>
 
   $Popover = {
@@ -95,7 +95,7 @@ view FPopover {
 }
 
 
-styles = document.createElement('style');
+const styles = document.createElement('style');
 styles.innerHTML = `
   /* Styles that give the Popover a look-and-feel. */
 

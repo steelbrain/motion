@@ -1,10 +1,10 @@
 view State.Tree {
-  isObject = v => (!!v) && (v.constructor === Object)
-  isArray = v => (!!v) && (v.constructor === Array)
-  isComplex = v => isObject(v) || isArray(v)
+  const isObject = v => (!!v) && (v.constructor === Object)
+  const isArray = v => (!!v) && (v.constructor === Array)
+  const isComplex = v => isObject(v) || isArray(v)
 
-  orange = { fontWeight: 600, color: 'rgba(227, 147, 0, 0.71)' }
-  typeStyle = {
+  const orange = { fontWeight: 600, color: 'rgba(227, 147, 0, 0.71)' }
+  const typeStyle = {
     string: {
       color: 'green',
     },
@@ -13,7 +13,7 @@ view State.Tree {
     number: orange
   }
 
-  toS = v => {
+  const toS = v => {
     if (v === null) return "null"
     if (v.toString) return v.toString()
   }

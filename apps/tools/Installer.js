@@ -1,28 +1,28 @@
 view Installer {
-  @name = ''
-  @state = 0
+  let name = ''
+  let state = 0
 
   window._DT.on('package:install', () => {
     console.log("intalling package", window._DT.data)
-    @state = 1
-    @name = window._DT.data.name
+    state = 1
+    name = window._DT.data.name
   });
 
   window._DT.on('package:installed', () => {
-    @state = 2
+    state = 2
     setTimeout(() => {
-      @state = 0
+      state = 0
     }, 2000)
   });
 
 
-  <img if={@state < 2} src="/assets/flint-tools/loading.svg" />
-  <two if={@state == 1}>Installing {@name}</two>
-  <three if={@state == 2}>Installed!</three>
+  <img if={state < 2} src="/assets/flint-tools/loading.svg" />
+  <two if={state == 1}>Installing {name}</two>
+  <three if={state == 2}>Installed!</three>
 
   $ = {
     position: 'absolute',
-    top: @state > 0 ? 20 : -100,
+    top: state > 0 ? 20 : -100,
     right: 20,
     padding: [6, 10],
     background: '#f2f2f2',

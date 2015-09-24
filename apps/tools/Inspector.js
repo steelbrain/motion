@@ -1,17 +1,17 @@
-furthest = (n, ls) => {
-  index = ls.map(i => i < n).indexOf(false)
+const furthest = (n, ls) => {
+  const index = ls.map(i => i < n).indexOf(false)
   return ls[((index == -1 ? ls.length : index)-1)]
 }
 
 view Inspector {
-  liveProfiling = false
-  @curViewName = null
-  @curViewLine = null
-  @editorState = null
+  const liveProfiling = false
+  let curViewName = null
+  let curViewLine = null
+  let editorState = null
 
   /*
 
-    @appView = {
+    appView = {
       '/path/to/filename.js': {
         views: {
           0: 'Main',
@@ -22,29 +22,29 @@ view Inspector {
       }
     }
 
-    @editorState = {
+    editorState = {
       file: '/path/to/filename.js',
       line: 96
     }
 
   */
-  @appViews = null
+  let appViews = null
 
   window._DT.on('editor:location', () => {
     if (!liveProfiling) return
-    @editorState = window._DT.editorLocation
+    editorState = window._DT.editorLocation
 
-    if (@appViews) {
-      viewState = @appViews[@editorState.file]
-      @curViewLine = furthest(@editorState.line, viewState.locations)
-      @curViewName = viewState.views[@curViewLine]
-      dark(@curViewName.toLowerCase())
+    if (appViews) {
+      const viewState = appViews[editorState.file]
+      curViewLine = furthest(editorState.line, viewState.locations)
+      curViewName = viewState.views[curViewLine]
+      dark(curViewName.toLowerCase())
     }
   });
 
   window._DT.on('view:locations', () => {
     if (!liveProfiling) return
-    @appViews = window._DT.viewLocations
+    appViews = window._DT.viewLocations
   });
 
   <inspector></inspector>

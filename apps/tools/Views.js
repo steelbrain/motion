@@ -1,4 +1,4 @@
-lastUnique = (arr, num) => {
+const lastUnique = (arr, num) => {
   let taken = {};
   result = [];
   arr.forEach(val => {
@@ -9,21 +9,21 @@ lastUnique = (arr, num) => {
   })
   return result;
 }
-type = prop => (typeof prop).split().slice(3).join('')
-inspect = (obj, name) => ({
+const type = prop => (typeof prop).split().slice(3).join('')
+const inspect = (obj, name) => ({
   name,
   type: type(obj[name]),
   val: typeof obj[name] === 'object' ? JSON.stringify(obj[name]) : obj[name]
 })
-info = obj => Object.keys(obj)
+const info = obj => Object.keys(obj)
   .reduce((acc, val) => acc.concat(inspect(obj, val)), [])
 
 view Views {
-  @views = []
+  let views = []
 
   listen('viewChange', () => {
-    flint = f()
-    @views = flint.activeViews && flint.variables &&
+    const flint = f()
+    views = flint.activeViews && flint.variables &&
       lastUnique(flint.lastChangedViews, 5)
       .map(id => ({
         props: info(flint.activeViews[id].props),
@@ -31,7 +31,7 @@ view Views {
       }))
   })
 
-  <views repeat={@views}>{view =>
+  <views repeat={views}>{view =>
     null
   }</views>
 

@@ -1,12 +1,12 @@
-split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
+const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 
-niceRuntimeError = err => {
+const niceRuntimeError = err => {
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
     .replace(/\_vars\./g, String.fromCharCode('64'))
 }
 
-niceCompilerMessage = err => {
+const niceCompilerMessage = err => {
   err.niceMessage = err.message
     .replace(err.file + ': ', '')
     .replace(/identifier ([a-z]*)\s*Unknown global name/, '$' + '1 is not defined')
@@ -14,7 +14,7 @@ niceCompilerMessage = err => {
     .replace(/Line [0-9]+\:\s*/, '')
 }
 
-niceStack = err => {
+const niceStack = err => {
   if (err.stack) {
     console.log(err.stack)
     err.stack.split("\n").forEach(line => {
@@ -25,7 +25,7 @@ niceStack = err => {
           .replace(/\_vars\./g, String.fromCharCode('64'))
           .replace(/\>\s*[0-9]+\s*\|\s*/, '')
 
-        colIndex = err.col - 1
+        const colIndex = err.col - 1
         err.niceStack = split(err.niceStack, colIndex)
       }
     })
@@ -33,51 +33,51 @@ niceStack = err => {
 }
 
 view Errors {
-  @error = null
-  @compileError = null
-  @runtimeError = null
-  @errorDelayTimeout = null
+  let error = null
+  let compileError = null
+  let runtimeError = null
+  let errorDelayTimeout = null
 
   /* only set @error if there is an error,
      giving compile priority */
 
   setError = () => {
-    clearTimeout(@errorDelayTimeout)
+    clearTimeout(errorDelayTimeout)
 
-    if (!@compileError && !@runtimeError) {
-      @error = null
+    if (!compileError && !runtimeError) {
+      error = null
     } else {
-      @errorDelayTimeout = setTimeout(() => {
-        if (@runtimeError) {
-          niceRuntimeError(@runtimeError)
-          @error = @runtimeError
+      errorDelayTimeout = setTimeout(() => {
+        if (runtimeError) {
+          niceRuntimeError(runtimeError)
+          error = runtimeError
         }
-        if (@compileError) {
-          niceCompilerMessage(@compileError)
-          niceStack(@compileError)
-          @error = @compileError
+        if (compileError) {
+          niceCompilerMessage(compileError)
+          niceStack(compileError)
+          error = compileError
         }
-      }, @compileError ? 200 : 800)
+      }, compileError ? 200 : 800)
     }
   }
 
   window._DT.on('compile:error', () => {
     console.log("compile error", window._DT.data)
-    @runtimeError = null
-    @compileError = window._DT.data
+    runtimeError = null
+    compileError = window._DT.data
     setError()
   });
 
   window._DT.on('runtime:error', () => {
     // on multiple errors, prefer the first
-    if (@runtimeError) return
-    @compileError = null
-    @runtimeError = window._DT.data
+    if (runtimeError) return
+    compileError = null
+    runtimeError = window._DT.data
     setError()
   });
 
   window._DT.on('runtime:success', () => {
-    @runtimeError = null
+    runtimeError = null
     setError()
   })
 
@@ -90,14 +90,14 @@ view Errors {
 }
 
 view Errors.ErrorMessage {
-  last = arr => arr[arr.length - 1]
-  fileName = url => last(url.split('/'))
+  const last = arr => arr[arr.length - 1]
+  const fileName = url => last(url.split('/'))
 
-  devHeight = 0 // 34 with bar
-  closedHeight = 55
-  openHeight = 200
+  const devHeight = 0 // 34 with bar
+  const closedHeight = 55
+  const openHeight = 200
 
-  @open = false
+  let open = false
 
   <error>
     <inner if={^error}>
@@ -123,7 +123,7 @@ view Errors.ErrorMessage {
     borderTop: '1px solid rgba(255,0,0,0.2)',
     position: 'fixed',
     left: 0,
-    height: @open ? openHeight : 'auto',
+    height: open ? openHeight : 'auto',
     bottom: (^error) ? devHeight : (devHeight - closedHeight),
     transition: 'all 300ms ease-in',
     right: 0,

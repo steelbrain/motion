@@ -1,16 +1,18 @@
 view Console {
-  @value = "Console"
+  let value = "Console"
 
   handleFocus = () => {
-    if (@value === 'Console') @value = ''
+    if (value === 'Console')
+      value = ''
   }
   handleBlur = () => {
-    if (@value === '') @value = 'Console'
+    if (value === '')
+      value = 'Console'
   }
 
   <Arrow />
   <input
-    sync={@value}
+    sync={value}
     onFocus={handleFocus}
     onBlur={handleBlur} />
 

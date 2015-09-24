@@ -1,57 +1,57 @@
-addEvent = (e, cb) => window.addEventListener(e, cb)
-removeEvent = (e, cb) => window.removeEventListener(e, cb)
+const addEvent = (e, cb) => window.addEventListener(e, cb)
+const removeEvent = (e, cb) => window.removeEventListener(e, cb)
 
 view Scrubber {
-  size = 16
-  maxLeft = '98%'
+  const size = 16
+  const maxLeft = '98%'
 
-  @dragging = false
-  @left = maxLeft
+  let dragging = false
+  let left = maxLeft
 
-  inRange = percent =>
+  const inRange = percent =>
     Math.max(1, Math.min(percent, parseInt(maxLeft)))
 
-  setLeft = () => {
-    if (@dragging) return
+  const setLeft = () => {
+    if (dragging) return
     // return (100*(^cur / ^snapshots.length)) + '%'
     if (^cur === 0 && ^snapshots.length === 0) {
-      return @left = maxLeft
+      return left = maxLeft
     }
-    @left = inRange(100*(^cur / ^snapshots.length)) + '%'
+    left = inRange(100*(^cur / ^snapshots.length)) + '%'
   }
 
-  beforeRender = () => {
+  const beforeRender = () => {
     setLeft()
   }
 
-  withinWindow = x => Math.max(Math.min(x, window.innerWidth - 10) - size, 0)
+  const withinWindow = x => Math.max(Math.min(x, window.innerWidth - 10) - size, 0)
 
-  onProps = setLeft
+  const onProps = setLeft
 
-  @moveListener = null
-  @upListener = null
+  let moveListener = null
+  let upListener = null
 
-  drag = (e) => {
-    @dragging = true
-    @left = withinWindow(e.pageX);
-    ^scrub(@left / window.innerWidth);
+  const drag = (e) => {
+    dragging = true
+    left = withinWindow(e.pageX);
+    ^scrub(left / window.innerWidth);
   }
 
-  dragEnd = () => {
-    @dragging = false
-    perc = @left / window.innerWidth
+  const dragEnd = () => {
+    dragging = false
+    perc = left / window.innerWidth
     if (perc > 0.88) {
       ^scrub(^snapshots.length)
-      @left = maxLeft
+      left = maxLeft
     } else {
       setLeft()
     }
   }
 
-  dragStart = () => {
+  const dragStart = () => {
     addEvent('mousemove', drag)
 
-    unbindDragEnd = () => {
+    const unbindDragEnd = () => {
       removeEvent('mousemove', drag)
       removeEvent('mouseup', unbindDragEnd)
       dragEnd()
@@ -62,14 +62,14 @@ view Scrubber {
 
   <bar>
     <pos
-      class={{ dragging: @dragging }}
+      class={{ dragging }}
       mouseDown = {dragStart}
     />
   </bar>
 
   $bar = {
     background: 'rgba(0,0,0,0.2)',
-    height: (@dragging) ? 3 : 0, //State.@hovered ||
+    height: (dragging) ? 3 : 0, //State.hovered ||
     position: 'absolute',
     borderTop: '1px solid rgba(0, 0, 0, 0.0005)',
     top: 0,
@@ -83,7 +83,7 @@ view Scrubber {
     position: 'absolute',
     top: -(size * .49),
     borderRadius: 100,
-    left: @left,
+    left: left,
     width: size,
     height: size,
     background: 'linear-gradient(#3CAAFF, #2D7DBA)',
