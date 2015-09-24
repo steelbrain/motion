@@ -1,4 +1,4 @@
 {
-  "url": "localhost:4000",
-  "tools": "false"
+  "friendlyUrl": "tools.dev",
+  "useFriendly": false
 }
