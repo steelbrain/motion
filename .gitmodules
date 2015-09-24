@@ -1,0 +1,6 @@
+[submodule "vendor/babel"]
+	path = vendor/babel
+	url = https://github.com/flintjs/babel
+[submodule "vendor/react-tools"]
+	path = vendor/react-tools
+	url = https://github.com/flintjs/react-tools
