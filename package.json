@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "5.8.21",
+    "shelljs": "^0.5.1"
+  },
+  "babel": {
+    "ignore": [
+      "packages/babel-cli/src/babel-plugin/templates"
+    ],
+    "stage": 0,
+    "loose": [
+      "all"
+    ],
+    "blacklist": [
+      "es6.tailCall"
+    ],
+    "optional": [
+      "optimisation.flow.forOf",
+      "bluebirdCoroutines",
+      "runtime"
+    ],
+    "env": {
+      "test": {
+        "auxiliaryCommentBefore": "istanbul ignore next"
+      }
+    }
+  },
+  "dependencies": {
+    "webpack": "^1.12.2"
+  }
+}

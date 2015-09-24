@@ -1,0 +1,254 @@
+#!/usr/bin/env node
+
+var Program = require('commander');
+var Promise = require('es6-promise').Promise;
+var colors = require('colors');
+var fs = require('fs');
+var path = require('path');
+var p = path.join;
+var rimraf = require('rimraf');
+var replace = require('replace');
+var mkdirp = require('mkdirp');
+var ncp = require('ncp');
+var Spinner = require('../ui').Spinner;
+var fetch = require('node-fetch');
+
+Program
+  .option('-d, --debug', 'output extra information for debugging')
+  .parse(process.argv);
+
+var args = Program.args;
+
+if (!args.length) {
+  console.log('Must give a name (flint new nameOfApp)'.red);
+  process.exit(1);
+}
+
+if (args.length > 2) {
+  console.log('Only one name should be provided'.red);
+  process.exit(1);
+}
+
+// allow custom repos
+var repo = 'flint-lang';
+var repoName = 'base';
+
+if (args.length === 2) {
+  var repoArg = args[1];
+  if (repoArg.indexOf('/') !== -1) {
+    repo = repoArg.split('/')[0];
+    repoName = repoArg.split('/')[1];
+  }
+  else {
+    repoName = repoArg;
+  }
+}
+
+var name = args[0];
+var spinner, fps = 60;
+var FLINT = {
+  dir: __dirname,
+  scaffoldDir: p(__dirname, 'scaffold'),
+  scaffoldRepo: 'https://github.com/' + repo + (repoName == 'base' ? '/scaffold' : 'flint-scaffold-'+repoName),
+  scaffoldSHA: p(__dirname, 'scaffoldSHA'),
+  dest: process.cwd() + '/' + name,
+}
+
+if (fs.existsSync(FLINT.dest)) {
+  console.log("Error! Directory %s already exists\n".red, FLINT.dest);
+}
+else {
+  spinner = new Spinner('Creating app...  ');
+  spinner.start({ fps: fps });
+  start();
+}
+
+function start() {
+  makeFolder()
+    .then(getScaffold)
+    .then(wait)
+    .then(initGit)
+    .then(replaceGivenNameInApp)
+    .then(finish)
+    .then(function() {
+      spinner.stop();
+    })
+    .catch(function(err) {
+      spinner.stop();
+      console.log("\n", 'Error'.bold.red);
+      console.log(err);
+    });
+}
+
+function makeFolder() {
+  return new Promise(function(resolve, reject) {
+    mkdirp(FLINT.dest, function(err) {
+      if (err)
+        reject(err);
+      else
+        resolve();
+    });
+  });
+}
+
+function getScaffold() {
+  return updateScaffold().then(copyScaffold);
+}
+
+function updateScaffold() {
+  if (Program.debug)
+    console.log('Looking for updated scaffold in %s', FLINT.scaffoldRepo);
+
+  return new Promise(function(resolve, reject) {
+    // check if online
+    checkNewScaffold(function(needsNew) {
+      if (!needsNew)
+        return resolve();
+
+      var cmd = 'git clone --depth=1 ' + FLINT.scaffoldRepo + ' '+ FLINT.scaffoldDir;
+
+      // remove old scaffold
+      rimraf(FLINT.scaffoldDir, function(err) {
+        // clone new scaffold
+        promiseProcess(cmd, { msg: false })
+          // delete git
+          .then(deleteGitFolder)
+          // done
+          .then(function() { resolve() })
+      })
+    });
+  })
+}
+
+function checkNewScaffold(cb) {
+  fs.readFile(FLINT.scaffoldSHA, function(err, data) {
+    if (err) return cb(true);
+
+    var local = data.toString().trim();
+
+    fetch('https://api.github.com/repos/flintjs/scaffold/commits')
+      .then(function(res) { return res.json() })
+      .then(function(commits) {
+        var remote = commits[0].sha.trim();
+
+        if (local != remote) {
+          message('Fetching latest scaffold...')
+          // new
+          cb(true);
+        }
+        else {
+          // no new
+          cb(false)
+        }
+      })
+  });
+}
+
+function deleteGitFolder() {
+  return new Promise(function(resolve, reject) {
+    // copy latest SHA into folder
+    var head = p(FLINT.scaffoldDir, '.git', 'refs', 'heads', 'master');
+    ncp(head, FLINT.scaffoldSHA, function(err) {
+      if (err) return console.log(err);
+
+      // delete git dir
+      rimraf(p(FLINT.scaffoldDir, '/.git'), function(err, data) {
+        if (err) return reject(err);
+        resolve(data);
+      })
+    })
+  });
+}
+
+function copyScaffold() {
+  return ncp(FLINT.scaffoldDir, FLINT.dest, function(err) {
+    if (err) {
+      console.log("Error, couldn't copy scaffold folder".red)
+      console.log(FLINT.scaffoldDir, FLINT.dest);
+      process.exit(1);
+    }
+  })
+}
+
+function initGit() {
+  return promiseProcess('git init', { msg: false });
+}
+
+function replaceGivenNameInApp() {
+  message('Setting app name...');
+  return new Promise(function(resolve, reject) {
+    replace({
+      regex: 'flint-scaffold',
+      replacement: name,
+      paths: [FLINT.dest],
+      recursive: true,
+      silent: true
+    });
+
+    resolve();
+  });
+}
+
+function npmInstall() {
+  return promiseProcess('npm install', {
+    msg: 'Running npm install...',
+    dir: FLINT.dest + '/.flint'
+  });
+}
+
+function tryLinkFlint() {
+  return promiseProcess('npm link flintjs', {
+    msg: false,
+    dir: FLINT.dest + '/.flint'
+  });
+}
+
+function promiseProcess(cmd, opts) {
+  opts = opts || {};
+
+  if (opts.msg !== false)
+    message(opts.msg || cmd);
+
+  return new Promise(function(resolve, reject) {
+    process.chdir(opts.dir || FLINT.dest);
+    var exec = require('child_process').exec, child;
+    child = exec(cmd, {
+      uid: process.getuid()
+    }, handleChildProcess.bind(this, resolve, reject));
+  });
+}
+
+function handleChildProcess(resolve, reject, error, stdout, stderr) {
+  if (error)
+    return reject(error);
+
+  if (Program.debug)
+    message(stderr);
+
+  resolve();
+}
+
+function finish() {
+  message('Done!');
+  spinner.stop();
+
+  wait().then(function() {
+    console.log();
+    console.log('Your new Flint app is ready in ./%s'.green.bold, name);
+    console.log();
+    process.exit(1)
+  })
+}
+
+function message(str) {
+  spinner.message(str);
+  console.log();
+}
+
+function wait() {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      resolve();
+    }, fps);
+  });
+}
