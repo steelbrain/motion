@@ -1,8 +1,8 @@
-var handleError = require('./lib/handleError');
-var addPackage = require('./npm/addPackage');
-var gutil = require('gulp-util');
-var through = require('through2');
-//var flow = require('gulp-flowtype');
+import handleError from './lib/handleError'
+import addPackage from './npm/addPackage'
+import gutil from 'gulp-util'
+import through from 'through2'
+// import flow from 'gulp-flowtype'
 
 var views = [];
 var VIEW_LOCATIONS = {};
