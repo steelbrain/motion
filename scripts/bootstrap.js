@@ -3,6 +3,8 @@ require("shelljs/global");
 var path = require("path");
 var fs   = require("fs");
 
+exec('git submodule update --init')
+
 // setup flint-babel
 cd('vendor/babel');
 exec('make bootstrap')
@@ -45,7 +47,7 @@ packageNames.forEach(function (loc) {
   cd("apps/" + app + "/.flint")
   exec("npm install")
   exec("npm link")
-  cd("../..")
+  cd("../../..")
 })
 
 // create links
@@ -64,14 +66,15 @@ packages.forEach(function (pkg) {
     }
   });
 
-  cd("packages/" + pkg.folder);
-  exec("npm install");
-  exec("npm link");
+  cd("packages/" + pkg.folder)
+  exec("npm install")
 
   pkg.links.forEach(function(link) {
     console.log('LINKING IN ', link)
     exec("npm link " + link)
   })
+
+  exec("npm link")
 
   cd("../..");
 });
