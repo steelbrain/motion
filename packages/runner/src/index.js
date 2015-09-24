@@ -238,6 +238,10 @@ function buildScripts(cb) {
         bridge.message('view:locations', APP_VIEWS);
       }
     }))
+    .pipe(through.obj(function(file, enc, next) {
+      // console.log(file.contents.toString())
+      next(null, file);
+    }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react'],

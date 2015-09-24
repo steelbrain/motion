@@ -10,3 +10,6 @@ watch: clean
 bootstrap:
 	npm install
 	node scripts/bootstrap.js
+
+link:
+	node scripts/links.js
