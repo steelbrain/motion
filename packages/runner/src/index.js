@@ -491,10 +491,11 @@ function runServer(cb) {
 
   // local flint or installed flint
   // server.use('/assets/flint', express.static('~/flint/flint-js/dist'));
-  server.use('/assets/flint', express.static('.flint/node_modules/flintjs/dist'));
+  server.use('/assets/flint', express.static('.flint/node_modules/flint-js/dist'));
 
-  server.use('/assets/flint-tools', express.static(__dirname + '/node_modules/flint-tools/build/_'));
-  server.use('/assets/flintjs', express.static(__dirname + '/node_modules/flintjs'));
+  var modulesPath = p(__dirname, '..', 'node_modules');
+  server.use('/assets/flint-tools', express.static(p(modulesPath, 'flint-tools', 'build', '_')));
+  server.use('/assets/flintjs', express.static(p(modulesPath, 'flint-js')));
 
   server.get('*', function(req, res) {
     afterInitialBuild(function() {
