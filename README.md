@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://flintjs.com/">
+  <a href="http://flintjs.com/">
     <img alt="Flint" src="http://flintjs.com/images/flintlogo20.png" width="260">
   </a>
 </p>
