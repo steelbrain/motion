@@ -2,7 +2,7 @@ import './lib/shimFlintMap'
 import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
-import Radium from 'radium'
+// import Radium from 'radium'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import equal from 'deep-equal'
@@ -87,20 +87,17 @@ function run(browserNode, userOpts, afterRenderCb) {
 
     makeReactComponent(name, component, options = {}) {
       let id;
-      const Flint = this;
 
       const spec = {
         displayName: name,
 
         update() {
-          if (this.hasRun) {
-            this.forceUpdate();
-          }
+          if (this.hasRun) this.forceUpdate();
         },
 
         el: createElement,
-        Flint,
         name,
+        Flint,
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
@@ -153,7 +150,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
           return els && resolveStyles(this, React.cloneElement(els, {
             __disableWrapper: wrapperStyle ? wrapperStyle() === false : false
-          }));
+          }))
         }
       }
 

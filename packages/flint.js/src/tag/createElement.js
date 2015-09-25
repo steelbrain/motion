@@ -27,7 +27,6 @@ const flatToCamel = {
 export default function createElement(key, fullname, props, ...args) {
   props = props || {};
   const view = this;
-  const Flint = this.Flint;
 
   let name = fullname;
   let tag;
@@ -57,7 +56,7 @@ export default function createElement(key, fullname, props, ...args) {
       })
     }
     else {
-      tag = Flint.getView(name);
+      tag = view.Flint.getView(name);
     }
   }
 
