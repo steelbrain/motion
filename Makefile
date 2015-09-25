@@ -13,3 +13,15 @@ bootstrap:
 
 link:
 	node scripts/links.js
+
+
+# release (npm patch)
+
+cli:
+	scripts/release.sh cli
+
+flint.js:
+	scripts/release.sh flint.js
+
+runner:
+	scripts/release.sh runner

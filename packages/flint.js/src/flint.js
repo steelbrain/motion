@@ -22,6 +22,7 @@ const root = inBrowser ? window : global
 // GLOBALS
 root.on = on
 root.Promise = Promise
+root.module = {}
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -31,7 +32,6 @@ const assignToGlobal = (name, val) => {
     throw `You're attempting to define a global that is already defined:
         ${name} = ${JSON.stringify(root[name])}`
 
-        console.log('assign to global', val)
   root[name] = val
 }
 
@@ -134,9 +134,11 @@ function run(browserNode, userOpts, afterRenderCb) {
             props: []
           };
 
+          const viewOn = (name, cb) => on(this, name, cb);
+
            // watch for errors with ran
           let ran = false;
-          this._render = component.call(void 0, this, (e, cb) => on(this, e, cb))
+          this._render = component.call(void 0, this, viewOn)
           ran = true;
 
           if (!ran) return null;
@@ -166,7 +168,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          const els = this._render.call(this);
+          const els = this._render.call(this, );
           const wrapperStyle = this.style && this.style['style']
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
