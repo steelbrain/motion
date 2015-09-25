@@ -26,6 +26,14 @@ root.Promise = Promise
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name].length && queue[name].forEach(e => e())
+const assignToGlobal = (name, val) => {
+  if (typeof root[name] != 'undefined')
+    throw `You're attempting to define a global that is already defined:
+        ${name} = ${JSON.stringify(root[name])}`
+
+        console.log('assign to global', val)
+  root[name] = val
+}
 
 root.inView = false
 
@@ -310,22 +318,15 @@ function run(browserNode, userOpts, afterRenderCb) {
       const names = Object.keys(exports);
 
       if (names.length) {
-        var i = 0;
-        var len = names.length;
+        names.forEach(name => {
+          if (name === 'default') {
+            Object.keys(exports.default).forEach(key => {
+              assignToGlobal(key, exports.default[key])
+            })
+          }
 
-        for (; i < len; i++) {
-          var name = names[i]
-
-          if (root[name])
-            throw (
-              "You're attempting to define a global that is already defined: "
-              + name
-              + " = "
-              + JSON.stringify(root[name])
-            );
-
-          root[name] = exports[name]
-        }
+          assignToGlobal(name, exports[name])
+        })
       }
     }
   };
