@@ -12,17 +12,17 @@ function addListener(name, target, cb) {
   }
 }
 
-const on = (scope, name, cb) => {
-  if (!scope) scope = root
-  if (typeof cb != 'function') throw "Needs callback function"
-  if (typeof name != 'string') throw "Needs name of event string"
+const on = (scope, name) =>
+  new Promise((resolve) => {
+    if (!scope) scope = root
+    if (typeof name != 'string') throw "Needs name of event string"
 
-  if (scope.events && scope.events[name]) {
-    scope.events[name].push(cb)
-    return
-  }
+    if (scope.events && scope.events[name]) {
+      scope.events[name].push(resolve)
+      return
+    }
 
-  return scope.addEventListener(name, cb);
-}
+    return scope.addEventListener(name, resolve);
+  })
 
 export default on

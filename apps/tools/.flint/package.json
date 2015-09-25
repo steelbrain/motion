@@ -1,10 +1,10 @@
 {
   "author": "",
-  "name": "flint-tools",
-  "repository": "https://github.com/flint-tools",
-  "description": "flint-tools",
-  "version": "1.0.52",
-  "main": "./build",
+  "name": "tools",
+  "repository": "https://github.com/tools",
+  "description": "tools",
+  "version": "1.0.0",
+  "main": "",
   "scripts": {},
   "dependencies": {
     "flintjs": "^1.0.0"
