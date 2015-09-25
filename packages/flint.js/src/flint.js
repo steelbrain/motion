@@ -1,22 +1,23 @@
-import './lib/shimFlintMap'
 import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
+import { Promise } from 'bluebird'
+
+import './lib/shimFlintMap'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import mainComponent from './lib/mainComponent'
-import { Promise } from 'bluebird'
 
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
-const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name].length && queue[name].forEach(e => e())
@@ -97,7 +98,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         update() {
           if (this.hasRun && !this.isPaused)
-            this.forceUpdate();
+            raf(() => this.forceUpdate());
         },
 
         pause() {
