@@ -125,8 +125,6 @@ var Parser = {
 
     var transformedSource = source
       .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
-      .replace(/\+\+/g, '+= 1')
-      .replace(/\-\-/g, '-= 1')
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
       .replace(/\^/g, props)
       .split("\n")
