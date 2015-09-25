@@ -9,7 +9,7 @@ var VIEW_LOCATIONS = {};
 var emit;
 
 const id = function(c) { return c }
-const props = id("__.props.")
+const props = id("view.props.")
 const replaceJSXOpenTag = function(match, tagName) {
   return '<' + tagName + ' '
 }
@@ -26,9 +26,9 @@ const viewTemplates = {}
 
 const jsxEnd = function(view) {
   return [
-    "return (__) => {",
+    "return () => {",
     "  return (",
-    '    <' + getWrapper(view) + ' view={__}>',
+    '    <' + getWrapper(view) + ' view={view}>',
     '      ' + viewTemplates[view].join('\n'),
     '    </' + getWrapper(view) + '>',
     '  )',
@@ -52,7 +52,7 @@ var Parser = {
     // source = babelPostProcess(source)
 
     // TODO: fix this in babel
-    source = source.replace('__.update(); __.update();', '__.update();');
+    source = source.replace('view.update(); view.update();', 'view.update();');
 
     // restore bad Flint.data
     // source = source.replace('Flint.data(\\"\\")', '#')
@@ -119,8 +119,8 @@ var Parser = {
 
     var replaceStyles = function(line) {
       return line
-        .replace(styleSetterMatcher, '__.style["style$1"] = (_index) => false || ')
-        .replace(styleMatcher, '__.style["style$1"]')
+        .replace(styleSetterMatcher, 'view.style["style$1"] = (_index) => false || ')
+        .replace(styleMatcher, 'view.style["style$1"]')
     }
 
     var transformedSource = source
@@ -128,7 +128,7 @@ var Parser = {
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
-      .replace(/([\s\;\,]+)on\(([\'\"\`])/g, '$1on(this, $2')
+      .replace(/([\s\;\,]+)on\(([\'\"\`])/g, '$1on(view, $2')
       .replace(/::[\s*]{/g, "= {() => ")
       .replace(/\^/g, props)
       .replace(/store ([A-Z][A-Za-z_]*)\s*\{/g, storeReplacer)
@@ -254,7 +254,7 @@ function viewReplacer(match, name, params) {
 function viewOpen(name, hash, params) {
   //return 'declare var ' + name.replace('.', '') + ': any; Flint.defineView("' + name + '", "' + hash + '", (function '
   //+ "()" + ' {';
-  return 'Flint.view("' + name + '", "' + hash + '", (__) => {'
+  return 'Flint.view("' + name + '", "' + hash + '", (view) => {'
 }
 
 function getMatches(string, regex, index) {

@@ -18,7 +18,9 @@ const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
 
 root.inView = false
-root.__ = { update: () => {} }
+
+// shim view
+root.view = { update: () => {} }
 
 if (!inBrowser) {
   // for isomorphic help
@@ -162,7 +164,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          const els = this._render.call(this, this);
+          const els = this._render.call(this);
           const wrapperStyle = this.styles && this.styles['style']
 
           return els && resolveStyles(this, React.cloneElement(els, {
@@ -222,8 +224,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, hash, component) {
-      // console.log('define view', name, hash, component, Flint.firstRender)
-
       // if new view
       if (Flint.views[name] == undefined) {
         let fComponent = Flint.makeReactComponent(name, component, { isNew: true });
