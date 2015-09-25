@@ -67,9 +67,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // if hasn't rendered main, don't push snapshots
     stores: {},
     id: uuid(),
-    hotUpdates: {},
     activeViews: {},
-    lastChangedViews: [],
     snapshots: [],
     snapshot: [],
     views: {},
@@ -77,9 +75,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     firstRender: true,
     // async functions needed before loading app
     preloaders: [],
-    // for avoiding multiple updates
-    isBatchingChanges: false,
-    batchedChanges: [],
     routes: null,
 
     element: createElement,
@@ -103,11 +98,6 @@ function run(browserNode, userOpts, afterRenderCb) {
 
           // main updates hot loading automatically
           if (id == 'Main') return
-
-          if (Flint.hotUpdates[name]) {
-            Flint.hotUpdates[name].call(this)
-            Flint.setHotVars(id, beforeHot)
-          }
         },
 
         update() {
@@ -176,14 +166,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       return React.createClass(spec);
     },
 
-    // make all array methods non-mutative
-    shimProperties(id, name, val) {
-      if (Array.isArray(val)) {
-        // add ref to array
-        val.__flintRef = { id, name };
-      }
-    },
-
     getView(name) {
       if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
         return Wrapper;
@@ -248,7 +230,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       // if changed
       const setView = (name, flintComponent) => {
         Flint.views[name] = Flint.makeView(hash, flintComponent)
-        Flint.hotUpdates[name] = component
         setComponent(name, flintComponent) // puts on namespace
         if (Flint.firstRender) return
       }
@@ -280,10 +261,17 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       raf(() => {
         activeViewsToRemove.map(id => delete Flint.activeViews[id])
-        delete Flint.hotUpdates[name]
       })
 
       onViewLoaded() //tools errors todo
+    },
+
+    // make all array methods non-mutative
+    shimProperties(id, name, val) {
+      if (Array.isArray(val)) {
+        // add ref to array
+        val.__flintRef = { id, name };
+      }
     },
 
     setHotVars(id, values) {
