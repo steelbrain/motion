@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const getFirstChild = children => {
   let child;
@@ -8,38 +8,35 @@ const getFirstChild = children => {
   return child;
 }
 
-export default class Wrapper {
-  render() {
-    const children = this.props.children;
-    let viewProps;
+const Wrapper = ({ children, style, onClick, __disableWrapper, view }) => {
+  let viewProps;
 
-    if (this.props.style || this.props.onClick)
-      viewProps = {};
+  if (style || onClick)
+    viewProps = {};
 
-    if (this.props.onClick)
-      viewProps.onClick = this.props.onClick;
+  if (onClick)
+    viewProps.onClick = onClick;
 
-    if (this.props.style)
-      viewProps.style = this.props.style;
+  if (style)
+    viewProps.style = style;
 
-    // Check if a user manually disabled the wrapper with `$ = false`
-    if (this.props.__disableWrapper)
-      return children;
+  // Check if a user manually disabled the wrapper with `$ = false`
+  if (__disableWrapper)
+    return children;
 
-    // Check if we have our only element === viewname, for not wrapping
-    if (React.Children.count(children) == 1) {
-      let first = getFirstChild(children)
-      let type = first && first.type
+  // Check if we have our only element === viewname, for not wrapping
+  if (React.Children.count(children) == 1) {
+    let first = getFirstChild(children)
+    let type = first && first.type
 
-      // if tagname === viewname
-      if (type && type.toLowerCase && type.toLowerCase() == this.props.view.name.toLowerCase())
-        return first
-      else
-        return wrapped(this.props.view.name, viewProps, children);
-    }
-    else {
-      return wrapped(this.props.view.name, viewProps, children);
-    }
+    // if tagname === viewname
+    if (type && type.toLowerCase && type.toLowerCase() == view.name.toLowerCase())
+      return first
+    else
+      return wrapped(view.name, viewProps, children);
+  }
+  else {
+    return wrapped(view.name, viewProps, children);
   }
 }
 
@@ -50,3 +47,5 @@ function wrapped(name, props, children) {
     </div>
   )
 }
+
+export default Wrapper

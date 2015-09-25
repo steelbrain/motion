@@ -3,6 +3,7 @@ import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
+import ReactDOM from 'react-dom'
 import equal from 'deep-equal'
 import clone from 'clone'
 import createElement from './tag/createElement'
@@ -51,7 +52,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           afterRenderCb(Flint.renderedToString);
       }
       else {
-        React.render(<MainComponent />, document.getElementById(browserNode))
+        ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
       }
 
       Flint.firstRender = false

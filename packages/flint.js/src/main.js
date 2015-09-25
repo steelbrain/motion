@@ -1,14 +1,11 @@
 import React from 'react'
-import tapEventPlugin from 'react-tap-event-plugin'
-import rafBatch from 'react-raf-batching'
+// import tapEventPlugin from 'react-tap-event-plugin'
+import rafBatch from './lib/reactRaf'
 import runFlint from './flint'
 import browserRequire from './lib/browserRequire'
 import on from './lib/on'
 import { Promise } from 'bluebird'
 import 'isomorphic-fetch'
-
-React.initializeTouchEvents(true)
-tapEventPlugin()
 
 if (process.env.production)
   rafBatch.inject();
