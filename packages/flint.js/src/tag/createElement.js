@@ -72,8 +72,7 @@ export default function createElement(key, fullname, props, ...args) {
   if (!props.key && !props.nokey) {
     // repeats can use a key on object
     if (props.repeat) {
-      // props.key = view.repeatObject[view.repeatObject.key];
-      props.key = Math.random();
+      props.key = key();
     }
     else {
       props.key = key;
