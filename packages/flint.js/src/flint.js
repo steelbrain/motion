@@ -2,6 +2,7 @@ import './lib/shimFlintMap'
 import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
+import Radium from 'radium'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import equal from 'deep-equal'
@@ -17,6 +18,7 @@ const root = inBrowser ? window : global
 
 const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
+const runEvents(queue, name) => queue && queue.length && queue[name].forEach(e => e())
 
 root.inView = false
 
@@ -91,14 +93,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         displayName: name,
 
         componentWillUpdate(nextProps) {
-          if (this.beforeRender)
-            this.beforeRender(nextProps);
-
           this.props = nextProps
-          const id = this.entityId
-
-          // main updates hot loading automatically
-          if (id == 'Main') return
         },
 
         update() {
@@ -107,7 +102,6 @@ function run(browserNode, userOpts, afterRenderCb) {
           }
         },
 
-        style: {},
         el: createElement,
         Flint,
         name,
@@ -115,43 +109,45 @@ function run(browserNode, userOpts, afterRenderCb) {
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
 
-          this.name = name;
+          this.style = {};
           this.entityId = id;
           this.cachedChildren = {};
-          this.appName = opts.app;
-
+          this.updatedProps = false
           this.events = {
             mount: [],
+            unmount: [],
+            update: [],
             props: []
           };
 
-          this.updatedProps = false
-
-          let ran = false; // watch for errors
-          this._render = component.call(this, this) // run component render
+           // watch for errors with ran
+          let ran = false;
+          this._render = component.call(void 0, this)
           ran = true;
 
-          if (ran) {
-            this.hasRun = true;
-            Flint.activeViews[id] = this;
-          }
+          if (!ran) return null;
+
+          this.hasRun = true;
+          Flint.activeViews[id] = this;
 
           return null;
         },
 
+        componentWillReceiveProps(nextProps) {
+          runEvents(this.events, 'props')
+        },
+
         componentDidMount() {
-          if (this.events.mount.length)
-            this.events.mount.forEach(e => e());
+          runEvents(this.events, 'mount')
         },
 
         componentWillUnmount() {
-          // if (id) {
-          //   // TODO: this is fishy, ID is tied to class, not instance
-          //   // see styles.js for where the fix should start
-          //   delete Flint.cachedViewState[id]
-          //   delete Flint.styleFunctions[id]
-          //   delete Flint.activeViews[id]
-          // }
+          runEvents(this.events, 'unmount')
+          delete Flint.activeViews[id];
+        },
+
+        componentDidUpdate() {
+          runEvents(this.events, 'update')
         },
 
         render() {
