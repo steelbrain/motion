@@ -128,10 +128,7 @@ var Parser = {
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
-      .replace(/([\s\;\,]+)on\(([\'\"\`])/g, '$1on(view, $2')
-      .replace(/::[\s*]{/g, "= {() => ")
       .replace(/\^/g, props)
-      .replace(/store ([A-Z][A-Za-z_]*)\s*\{/g, storeReplacer)
       .split("\n")
       .map(function(line, index) {
         if (line.charAt(0) == "\t")
