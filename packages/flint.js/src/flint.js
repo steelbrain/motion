@@ -18,7 +18,7 @@ const root = inBrowser ? window : global
 
 const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
-const runEvents(queue, name) => queue && queue.length && queue[name].forEach(e => e())
+const runEvents = (queue, name) => queue && queue.length && queue[name].forEach(e => e())
 
 root.inView = false
 
@@ -92,10 +92,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       const spec = {
         displayName: name,
 
-        componentWillUpdate(nextProps) {
-          this.props = nextProps
-        },
-
         update() {
           if (this.hasRun) {
             this.forceUpdate();
@@ -134,6 +130,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentWillReceiveProps(nextProps) {
+          this.props = nextProps
           runEvents(this.events, 'props')
         },
 
