@@ -43,6 +43,7 @@ var proc = process;
 var newLine = "\n";
 var lastSavedTimestamp = {}
 var APP_DIR = path.normalize(process.cwd());
+var MODULES_DIR = p(__dirname, '..', 'node_modules');
 var FLINT_DIR = p(APP_DIR, '.flint');
 var OPTS, CONFIG, CONFIG_DIR, TYPED_OUT_DIR, OUT_DIR,
     BUILD_ONLY, BUILD_DIR, BUILD_NAME,
@@ -98,12 +99,13 @@ function cat(msg) {
 
 function clearBuildDir(cb) {
   recreateDir(p(FLINT_DIR, 'out'), function() {
-    recreateDir(p(FLINT_DIR, 'build'), cb)
+    recreateDir(p(FLINT_DIR, 'build', '_'), cb)
   })
 }
 
 function build() {
   buildFlint();
+  buildReact();
   buildPackages();
   buildAssets();
 
@@ -124,6 +126,7 @@ function buildTemplate() {
     data = data
       .replace('/static', '/_/static')
       .replace('<!-- SCRIPTS -->', (
+        '<script src="/_/react.js"></script>' +
         '<script src="/_/flint.js"></script>' +
         '<script src="/_/packages.js"></script>' +
         newLine + '<script src="/_/'+BUILD_NAME+'.js"></script>' +
@@ -151,8 +154,14 @@ function buildTemplate() {
 }
 
 function buildFlint(cb) {
-  var read = p(__dirname, 'node_modules/flint-js/dist/flint.prod.js');
+  var read = p(MODULES_DIR, 'flint-js', 'dist', 'flint.prod.js');
   var write = p(BUILD_DIR, '_', 'flint.js');
+  copyFile(read, write, cb)
+}
+
+function buildReact(cb) {
+  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.js');
+  var write = p(BUILD_DIR, '_', 'react.js');
   copyFile(read, write, cb)
 }
 
@@ -498,10 +507,8 @@ function runServer(cb) {
   // local flint or installed flint
   // server.use('/assets/flint', express.static('~/flint/flint-js/dist'));
   server.use('/assets/flint', express.static('.flint/node_modules/flint-js/dist'));
-
-  var modulesPath = p(__dirname, '..', 'node_modules');
-  server.use('/assets/flint-tools', express.static(p(modulesPath, 'flint-tools', 'build', '_')));
-  server.use('/assets/flintjs', express.static(p(modulesPath, 'flint-js')));
+  server.use('/assets/flint-tools', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
+  server.use('/assets/flintjs', express.static(p(MODULES_DIR, 'flint-js')));
 
   server.get('*', function(req, res) {
     afterInitialBuild(function() {

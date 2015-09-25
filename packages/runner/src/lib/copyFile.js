@@ -5,10 +5,12 @@ module.exports = function copyFile(source, target, cb) {
 
   var rd = fs.createReadStream(source);
   rd.on("error", function(err) {
+    console.log('read error', err);
     done(err);
   });
   var wr = fs.createWriteStream(target);
   wr.on("error", function(err) {
+    console.log('write error', err)
     done(err);
   });
   wr.on("close", function(ex) {
