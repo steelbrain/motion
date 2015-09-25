@@ -21,8 +21,6 @@
     "raf": "^3.1.0",
     "react": "^0.14.0-rc1",
     "react-dom": "^0.14.0-rc1",
-    "react-raf-batching": "raleksandar/react-raf-batching",
-    "react-tap-event-plugin": "^0.1.7",
     "reapp-object-assign": "^1.0.0",
     "strip-ansi": "^2.0.1"
   },
