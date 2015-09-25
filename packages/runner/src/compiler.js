@@ -213,7 +213,7 @@ const viewReplacer = (match, name, params) => {
 }
 
 const viewOpen = (name, hash, params) =>
-  'Flint.view("' + name + '", "' + hash + '", (view) => {'
+  'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
 
 const getMatches = (string, regex, index) => {
   index || (index = 1); // default to the first capturing group

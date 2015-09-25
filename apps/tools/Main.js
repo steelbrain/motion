@@ -1,14 +1,19 @@
+const replaceViewDef = /Flint.view\(\"([a-zA-Z]*)\".*\{/g ///Flint.view\(\"([^\"]*)([^_]*)/g
+
+const unflint = msg =>
+  // get around flint style syntax
+  msg.replace(replaceViewDef, 'view $' + '1 {') //'view $' + '1')
 
 view Main {
   <ErrorBar />
 }
 
+let msg = 'Flint.view("ErrorBar", "2029915753", (__) => {'
+
 view ErrorBar {
   const errorBG = '#eb522d'
 
-  <errorBar>
-    Please close JSX, line 30
-  </errorBar>
+  <errorBar>{unflint(msg)}</errorBar>
 
   $errorBar = {
     background: errorBG,
