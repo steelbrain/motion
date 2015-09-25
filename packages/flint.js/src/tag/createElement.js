@@ -27,7 +27,6 @@ const flatToCamel = {
 export default function createElement(key, fullname, props, ...args) {
   props = props || {};
   const view = this;
-  const Flint = this.Flint;
 
   let name = fullname;
   let tag;
@@ -57,7 +56,7 @@ export default function createElement(key, fullname, props, ...args) {
       })
     }
     else {
-      tag = Flint.getView(name);
+      tag = view.Flint.getView(name);
     }
   }
 
@@ -72,8 +71,7 @@ export default function createElement(key, fullname, props, ...args) {
   if (!props.key && !props.nokey) {
     // repeats can use a key on object
     if (props.repeat) {
-      // props.key = view.repeatObject[view.repeatObject.key];
-      props.key = Math.random();
+      props.key = key();
     }
     else {
       props.key = key;

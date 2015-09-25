@@ -1,24 +1,31 @@
-import './lib/shimFlintMap'
 import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
+// import Radium from 'radium'
 import React from 'react'
+import ReactDOM from 'react-dom'
+import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
+import { Promise } from 'bluebird'
+
+import './lib/shimFlintMap'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import mainComponent from './lib/mainComponent'
-import { Promise } from 'bluebird'
 
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
-const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
+const runEvents = (queue, name) =>
+  queue && queue[name].length && queue[name].forEach(e => e())
 
 root.inView = false
-root.__ = { update: () => {} }
+
+// shim view
+root.view = { update: () => {} }
 
 if (!inBrowser) {
   // for isomorphic help
@@ -49,7 +56,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           afterRenderCb(Flint.renderedToString);
       }
       else {
-        React.render(<MainComponent />, document.getElementById(browserNode))
+        ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
       }
 
       Flint.firstRender = false
@@ -65,9 +72,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // if hasn't rendered main, don't push snapshots
     stores: {},
     id: uuid(),
-    hotUpdates: {},
     activeViews: {},
-    lastChangedViews: [],
     snapshots: [],
     snapshot: [],
     views: {},
@@ -75,9 +80,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     firstRender: true,
     // async functions needed before loading app
     preloaders: [],
-    // for avoiding multiple updates
-    isBatchingChanges: false,
-    batchedChanges: [],
     routes: null,
 
     element: createElement,
@@ -87,99 +89,80 @@ function run(browserNode, userOpts, afterRenderCb) {
 
     makeReactComponent(name, component, options = {}) {
       let id;
-      const Flint = this;
 
       const spec = {
         displayName: name,
-
-        componentWillUpdate(nextProps) {
-          if (this.beforeRender)
-            this.beforeRender(nextProps);
-
-          this.props = nextProps
-          const id = this.entityId
-
-          // main updates hot loading automatically
-          if (id == 'Main') return
-
-          if (Flint.hotUpdates[name]) {
-            Flint.hotUpdates[name].call(this)
-            Flint.setHotVars(id, beforeHot)
-          }
-        },
+        el: createElement,
+        name,
+        Flint,
 
         update() {
-          if (this.hasRun) {
-            this.forceUpdate();
-          }
+          if (this.hasRun && !this.isPaused)
+            raf(() => this.forceUpdate());
         },
 
-        style: {},
-        el: createElement,
-        Flint,
-        name,
+        pause() {
+          this.isPaused = true
+        },
+
+        resume() {
+          this.isPaused = false
+        },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
 
-          this.name = name;
+          this.style = {};
           this.entityId = id;
-          this.cachedChildren = {};
-          this.appName = opts.app;
-
           this.events = {
             mount: [],
+            unmount: [],
+            update: [],
             props: []
           };
 
-          this.updatedProps = false
-
-          let ran = false; // watch for errors
-          this._render = component.call(this, this) // run component render
+           // watch for errors with ran
+          let ran = false;
+          this._render = component.call(void 0, this)
           ran = true;
 
-          if (ran) {
-            this.hasRun = true;
-            Flint.activeViews[id] = this;
-          }
+          if (!ran) return null;
+
+          this.hasRun = true;
+          Flint.activeViews[id] = this;
 
           return null;
         },
 
+        componentWillReceiveProps(nextProps) {
+          this.props = nextProps
+          runEvents(this.events, 'props')
+        },
+
         componentDidMount() {
-          if (this.events.mount.length)
-            this.events.mount.forEach(e => e());
+          runEvents(this.events, 'mount')
         },
 
         componentWillUnmount() {
-          // if (id) {
-          //   // TODO: this is fishy, ID is tied to class, not instance
-          //   // see styles.js for where the fix should start
-          //   delete Flint.cachedViewState[id]
-          //   delete Flint.styleFunctions[id]
-          //   delete Flint.activeViews[id]
-          // }
+          runEvents(this.events, 'unmount')
+          delete Flint.activeViews[id];
+        },
+
+        componentDidUpdate() {
+          runEvents(this.events, 'update')
         },
 
         render() {
-          const els = this._render.call(this, this);
+          const els = this._render.call(this);
           const wrapperStyle = this.styles && this.styles['style']
 
           return els && resolveStyles(this, React.cloneElement(els, {
             __disableWrapper: wrapperStyle ? wrapperStyle() === false : false
-          }));
+          }))
         }
       }
 
       return React.createClass(spec);
-    },
-
-    // make all array methods non-mutative
-    shimProperties(id, name, val) {
-      if (Array.isArray(val)) {
-        // add ref to array
-        val.__flintRef = { id, name };
-      }
     },
 
     getView(name) {
@@ -222,8 +205,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, hash, component) {
-      // console.log('define view', name, hash, component, Flint.firstRender)
-
       // if new view
       if (Flint.views[name] == undefined) {
         let fComponent = Flint.makeReactComponent(name, component, { isNew: true });
@@ -248,7 +229,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       // if changed
       const setView = (name, flintComponent) => {
         Flint.views[name] = Flint.makeView(hash, flintComponent)
-        Flint.hotUpdates[name] = component
         setComponent(name, flintComponent) // puts on namespace
         if (Flint.firstRender) return
       }
@@ -280,10 +260,17 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       raf(() => {
         activeViewsToRemove.map(id => delete Flint.activeViews[id])
-        delete Flint.hotUpdates[name]
       })
 
       onViewLoaded() //tools errors todo
+    },
+
+    // make all array methods non-mutative
+    shimProperties(id, name, val) {
+      if (Array.isArray(val)) {
+        // add ref to array
+        val.__flintRef = { id, name };
+      }
     },
 
     setHotVars(id, values) {

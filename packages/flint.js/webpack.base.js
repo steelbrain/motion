@@ -10,6 +10,7 @@ module.exports = function(opts) {
       }
     })
     // , new webpack.PrefetchPlugin(['react'])
+    , new webpack.optimize.CommonsChunkPlugin('react', 'react.js')
   ];
 
   if (opts.minify)
@@ -29,7 +30,8 @@ module.exports = function(opts) {
 
     entry: opts.entry || {
       flint: './src/main',
-      devtools: './src/tools/main'
+      devtools: './src/tools/main',
+      react: ['react']
     },
 
     module: {

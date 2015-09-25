@@ -4,70 +4,38 @@ import gutil from 'gulp-util'
 import through from 'through2'
 // import flow from 'gulp-flowtype'
 
-var views = [];
-var VIEW_LOCATIONS = {};
-var emit;
+let views = [];
+let VIEW_LOCATIONS = {};
+let emit;
 
-const id = function(c) { return c }
-const props = id("__.props.")
-const replaceJSXOpenTag = function(match, tagName) {
-  return '<' + tagName + ' '
-}
-
-const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g;
-const viewEnd = [
-  '})',
-].join('\n')
-
-const capitalize = function(s) { return s.charAt(0).toUpperCase() + s.slice(1) }
-const getWrapper = function(view) { return 'Flint.' + capitalize(view) + 'Wrapper' }
-
+const id = x => x
+const props = id('view.props.')
+const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
+const viewEnd = '})'
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
+const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
-
-const jsxEnd = function(view) {
-  return [
-    "return (__) => {",
-    "  return (",
-    '    <' + getWrapper(view) + ' view={__}>',
-    '      ' + viewTemplates[view].join('\n'),
-    '    </' + getWrapper(view) + '>',
-    '  )',
-    '}',
-    '})',
-  ].join('\n')
-}
-const styleMatcher = /\$([a-zA-Z0-9\.\-\_]+)/g;
-const styleSetterMatcher = /^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/;
-
-const babelPostProcess = function(source) {
-  //return "/* @flow */ declare var Flint: any; declare var _require:any; " + source
-  return source
-}
+const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
+const jsxEnd = view => `  return () => {
+    return (
+      <${getWrapper(view)} view={view}>
+        ${viewTemplates[view].join('\n')}
+      </${getWrapper(view)}>
+    )
+  }
+})`
 
 // track app deps
-var deps, depDir;
+let deps, depDir;
 
 var Parser = {
   post: function(file, source, opts) {
-    // source = babelPostProcess(source)
+    // source = addFlow(source)
 
     // TODO: fix this in babel
-    source = source.replace('__.update(); __.update();', '__.update();');
+    source = source.replace('view.update(); view.update();', 'view.update();');
 
-    // restore bad Flint.data
-    // source = source.replace('Flint.data(\\"\\")', '#')
-
-    // restore bad @
-    source = source.replace('_vars.media (', '@media (')
-
-    // source = source.replace(/Flint\.data\(\'[^']+\'\)\.\s/, )
-
-    // source = source
-    //   .replace(
-    //     /_vars.[^\n]+\n[^\n]+\"ARROW\" &&/g,
-    //     '"flintReactive", function() { return '
-    //   )
-
+    // NPM
     if (!deps) {
       depDir = opts.dir;
       var packageInfo = require(opts.dir + '/package.json');
@@ -80,9 +48,7 @@ var Parser = {
     const requires = getMatches(source, /require\(['"]([^']+)['"]\)/g, 1) || []
 
     if (deps && requires) {
-      const newDeps = requires.filter(function(x) {
-        return deps.indexOf(x) < 0
-      })
+      const newDeps = requires.filter(x => deps.indexOf(x) < 0)
 
       if (newDeps.length) {
         console.log('new deps', newDeps)
@@ -107,31 +73,25 @@ var Parser = {
   },
 
   pre: function(file, source) {
-    var inStyle = false
-    var inJSX = false
-    var inView = false
-    var currentView = { name: null, contents: [] }
-    var viewLines = [];
+    let currentView = { name: null, contents: [] }
+    let inStyle = false
+    let inJSX = false
+    let inView = false
+    let viewLines = [];
+
     VIEW_LOCATIONS[file] = {
       locations: [],
       views: {}
     };
 
-    var replaceStyles = function(line) {
-      return line
-        .replace(styleSetterMatcher, '__.style["style$1"] = (_index) => false || ')
-        .replace(styleMatcher, '__.style["style$1"]')
-    }
+    // style setter ($x = {}), then getter ($x)
+    const replaceStyles = line => line
+      .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.style["style$1"] = (_index) => false || ')
+      .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.style["style$1"]')
 
-    var transformedSource = source
-      .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
-      .replace(/\+\+/g, '+= 1')
-      .replace(/\-\-/g, '-= 1')
+    const transformedSource = source
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
-      .replace(/([\s\;\,]+)on\(([\'\"\`])/g, '$1on(this, $2')
-      .replace(/::[\s*]{/g, "= {() => ")
       .replace(/\^/g, props)
-      .replace(/store ([A-Z][A-Za-z_]*)\s*\{/g, storeReplacer)
       .split("\n")
       .map(function(line, index) {
         if (line.charAt(0) == "\t")
@@ -164,16 +124,20 @@ var Parser = {
           inJSX = false
         }
 
+        // in view (ONLY JSX)
         if (inJSX) {
           result = result
-            .replace(/\<([A-Za-z1-9\-\.]+)/g, replaceJSXOpenTag)
-            .replace(/\sclass=([\"\{\'])/g, 'className=$1')
+            .replace(/\sclass=([\"\{\'])/g, ' className=$1')
+            .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           viewTemplates[currentView.name].push(result)
-        } else {
+        }
+        // in view (NOT JSX)
+        else {
           result = replaceStyles(result)
         }
 
+        // in view (ALL)
         if (inView) {
           currentView.contents.push(result);
         }
@@ -234,30 +198,24 @@ function compile(type, opts) {
   })
 }
 
-function replaceSync(match, inner) {
-  return ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
-}
+const replaceSync = (match, inner) =>
+  ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
 
-function storeReplacer(match, name) {
-  return ['_stores.', name, ' = function _flintStore() { '].join('');
-}
+const storeReplacer = (match, name) =>
+  ['_stores.', name, ' = function _flintStore() { '].join('')
 
-function makeHash(str) {
-  return str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-}
+const makeHash = (str) =>
+  str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
 
-function viewReplacer(match, name, params) {
+const viewReplacer = (match, name, params) => {
   const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
   return viewOpen(name, hash, params);
 }
 
-function viewOpen(name, hash, params) {
-  //return 'declare var ' + name.replace('.', '') + ': any; Flint.defineView("' + name + '", "' + hash + '", (function '
-  //+ "()" + ' {';
-  return 'Flint.view("' + name + '", "' + hash + '", (__) => {'
-}
+const viewOpen = (name, hash, params) =>
+  'Flint.view("' + name + '", "' + hash + '", (view) => {'
 
-function getMatches(string, regex, index) {
+const getMatches = (string, regex, index) => {
   index || (index = 1); // default to the first capturing group
   var matches = [];
   var match;
