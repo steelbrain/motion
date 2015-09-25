@@ -18,7 +18,8 @@ const root = inBrowser ? window : global
 
 const raf = (fn) => inBrowser ? requestAnimationFrame(fn) : setTimeout(fn)
 const uuid = () => Math.floor(Math.random() * 1000000)
-const runEvents = (queue, name) => queue && queue.length && queue[name].forEach(e => e())
+const runEvents = (queue, name) =>
+  queue && queue[name].length && queue[name].forEach(e => e())
 
 root.inView = false
 
@@ -90,22 +91,28 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       const spec = {
         displayName: name,
-
-        update() {
-          if (this.hasRun) this.forceUpdate();
-        },
-
         el: createElement,
         name,
         Flint,
+
+        update() {
+          if (this.hasRun && !this.isPaused)
+            this.forceUpdate();
+        },
+
+        pause() {
+          this.isPaused = true
+        },
+
+        resume() {
+          this.isPaused = false
+        },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
 
           this.style = {};
           this.entityId = id;
-          this.cachedChildren = {};
-          this.updatedProps = false
           this.events = {
             mount: [],
             unmount: [],
