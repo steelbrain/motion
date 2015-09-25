@@ -32,7 +32,7 @@ import portfinder from 'portfinder'
 import cp from 'child_process'
 import open from 'open'
 import readdirp from 'readdirp'
-import browserify from 'browserify'
+import webpack from 'webpack'
 import editor from 'editor'
 
 const exec = cp.exec;
@@ -70,7 +70,7 @@ function main(opts, isBuild) {
 
       clearBuildDir(function() {
         if (BUILD_ONLY) {
-          build();
+          makeDependencyBundle(build);
 
           if (OPTS.watch)
             gulp.watch(SCRIPTS_GLOB, ['build'])
@@ -445,6 +445,7 @@ function getScriptTags(files, req) {
     '<!-- FLINT JS -->' +
     newLine +
     [
+      '<script src="/assets/flintjs/dist/react.js"></script>',
       '<script src="/assets/flintjs/dist/flint.js"></script>',
       '<script id="__flintPackages" src="/packages/packages.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
@@ -671,10 +672,15 @@ function makeDependencyBundle(cb) {
   }
 
   function bundleDeps() {
-    var b = browserify();
-    b.add(DEPS_FILE)
-    b.bundle(handleError(function(buf) {
-      fs.writeFile(p(DEP_DIR, 'packages.js'), buf)
+    webpack({
+      entry: DEPS_FILE,
+      externals: {
+        'react': 'window.React'
+      },
+      output: {
+        filename: p(DEP_DIR, 'packages.js')
+      }
+    }, handleError(function() {
       if (cb) cb();
     }))
   }
