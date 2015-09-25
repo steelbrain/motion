@@ -132,10 +132,10 @@ function buildTemplate() {
 
     // TODO: try running flint build --isomorphic
     if (OPTS.isomorphic) {
-      var Flint = require('flintjs/dist/flint.node');
+      var Flint = require('flint-js/dist/flint.node');
       var app = require(p(BUILD_DIR, '_', BUILD_NAME));
 
-      var FlintApp = app(false, { Flint: Flint }, function(output) {
+      var FlintApp = app(false, { Flint }, function(output) {
         data = data.replace(
           '<div id="_flintapp"></div>',
           '<div id="_flintapp">' + output + '</div>'
@@ -151,7 +151,7 @@ function buildTemplate() {
 }
 
 function buildFlint(cb) {
-  var read = p(__dirname, 'node_modules/flintjs/dist/flint.prod.js');
+  var read = p(__dirname, 'node_modules/flint-js/dist/flint.prod.js');
   var write = p(BUILD_DIR, '_', 'flint.js');
   copyFile(read, write, cb)
 }

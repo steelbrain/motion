@@ -2,6 +2,10 @@ var webpack = require('webpack');
 var path = require('path');
 
 module.exports = function(opts) {
+  var entry = {
+    flint: './src/main',
+    devtools: './src/tools/main',
+  }
 
   var plugins = [
     new webpack.DefinePlugin({
@@ -10,30 +14,32 @@ module.exports = function(opts) {
       }
     })
     // , new webpack.PrefetchPlugin(['react'])
-    , new webpack.optimize.CommonsChunkPlugin('react', 'react.js')
-  ];
+  ]
+
+  if (opts.target != 'node') {
+    splitReact()
+  }
 
   if (opts.minify)
     plugins.push(
       new webpack.optimize.UglifyJsPlugin({
         compress: { warnings: false }
       })
-    );
+    )
 
   if (opts.dedupe)
     plugins.push(
       new webpack.optimize.DedupePlugin()
     )
 
+  function splitReact() {
+    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.js'))
+    entry.react = ['react']
+  }
+
   return {
     target: opts.target || 'web',
-
-    entry: opts.entry || {
-      flint: './src/main',
-      devtools: './src/tools/main',
-      react: ['react']
-    },
-
+    entry: opts.entry || entry,
     module: {
       loaders: [
         {

@@ -25,7 +25,7 @@ const mergeStyles = (obj, ...styles)  => {
 // TODO remove prefix, it's just there so the empty style $ = {}.. isn't ['']
 const prefix = 'style'
 
-export default function elementStyles(Flint, view, name, tag, props) {
+export default function elementStyles(view, name, tag, props) {
   if (typeof name !== 'string') {
     return
   }

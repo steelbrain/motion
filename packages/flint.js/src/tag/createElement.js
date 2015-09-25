@@ -66,7 +66,7 @@ export default function createElement(key, fullname, props, ...args) {
     props.className = classnames(props.className)
 
   // TRANSFORMATIONS:
-  elementStyles(Flint, view, name, tag, props);
+  elementStyles(view, name, tag, props);
 
   if (!props.key && !props.nokey) {
     props.key = props.repeat ? key() : key
@@ -91,8 +91,8 @@ export default function createElement(key, fullname, props, ...args) {
     }
   }
 
-  // if (props.yield)
-  //   props = Object.assign(props, view.props, { style: props.style });
+  if (props.yield)
+    props = Object.assign(props, view.props, { style: props.style });
 
   if (props.lazy) {
     if (view.updatedProps === false) {

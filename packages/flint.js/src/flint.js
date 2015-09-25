@@ -10,6 +10,7 @@ import clone from 'clone'
 import { Promise } from 'bluebird'
 
 import './lib/shimFlintMap'
+import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
@@ -17,6 +18,10 @@ import mainComponent from './lib/mainComponent'
 
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
+
+// GLOBALS
+root.on = on
+root.Promise = Promise
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -154,11 +159,11 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           const els = this._render.call(this);
-          const wrapperStyle = this.styles && this.styles['style']
-
-          return els && resolveStyles(this, React.cloneElement(els, {
-            __disableWrapper: wrapperStyle ? wrapperStyle() === false : false
-          }))
+          const wrapperStyle = this.style && this.style['style']
+          const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
+          const withProps = React.cloneElement(els, { __disableWrapper });
+          const styled = els && resolveStyles(this, withProps)
+          return styled
         }
       }
 
