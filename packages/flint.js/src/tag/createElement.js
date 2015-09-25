@@ -36,18 +36,20 @@ export default function createElement(key, fullname, props, ...args) {
     tag = fullname;
   }
   else {
-    const isHTMLElement = fullname[0].toLowerCase() == fullname[0] && fullname.indexOf('.') == -1;
+    const isHTMLElement = fullname[0].toLowerCase() == fullname[0]
+      && fullname.indexOf('.') == -1
 
     // get tag type and name of tag
     if (isHTMLElement) {
-      [name, tag] = fullname.indexOf('-') !== -1 ? fullname.split('-') : [fullname, fullname];
+      [name, tag] = fullname.indexOf('-') !== -1
+        ? fullname.split('-')
+        : [fullname, fullname]
 
       if (divWhitelist.indexOf(tag) !== -1) {
         tag = 'div'
       }
 
-      // all lowercase to camelcase for stuff like autoplay => autoPlay,
-      // to please React
+      // lowercase => camelcase, autoplay => autoPlay, to please React
       Object.keys(flatToCamel).forEach(prop => {
         if (props[prop]) {
           props[flatToCamel[prop]] = props[prop] || true;
@@ -66,16 +68,8 @@ export default function createElement(key, fullname, props, ...args) {
   // TRANSFORMATIONS:
   elementStyles(Flint, view, name, tag, props);
 
-  // todo: do this right, this is because radium wants unique keys
-  // we could probably use the "name" + some sort of index/view
   if (!props.key && !props.nokey) {
-    // repeats can use a key on object
-    if (props.repeat) {
-      props.key = key();
-    }
-    else {
-      props.key = key;
-    }
+    props.key = props.repeat ? key() : key
   }
 
   // map shorthand events to onEvent
