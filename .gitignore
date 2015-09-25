@@ -5,3 +5,4 @@ npm-debug.log
 *.cache
 dist
 /packages/*/lib
+.flint/build
