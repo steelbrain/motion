@@ -33,7 +33,8 @@ var Parser = {
     // source = addFlow(source)
 
     // TODO: fix this in babel
-    source = source.replace('view.update(); view.update();', 'view.update();');
+    source = source.replace('view.update(); view.update();', 'view.update();')
+                   .replace('["default"]', '.default')
 
     // NPM
     if (!deps) {
