@@ -134,7 +134,13 @@ function run(browserNode, userOpts, afterRenderCb) {
             props: []
           };
 
-          const viewOn = (name, cb) => on(this, name, cb);
+          const viewOn = (scope, name, cb) => {
+            // check if they defined their own scope
+            if (name && typeof name == 'string')
+              return on(scope, name, cb)
+            else
+              return on(this, scope, name)
+          };
 
            // watch for errors with ran
           let ran = false;

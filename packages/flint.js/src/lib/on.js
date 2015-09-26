@@ -31,7 +31,6 @@ const on = (scope, name, cb) => {
       throw "Needs name of event string"
 
     const finish = () => {
-      console.log('finish', name, cb)
       if (cb) cb();
       else resolve()
     }
