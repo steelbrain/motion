@@ -25,7 +25,7 @@ const mergeStyles = (obj, ...styles)  => {
 // TODO remove prefix, it's just there so the empty style $ = {}.. isn't ['']
 const prefix = 'style'
 
-export default function elementStyles(view, name, tag, props) {
+export default function elementStyles(key, view, name, tag, props) {
   if (typeof name !== 'string') {
     return
   }
@@ -47,7 +47,7 @@ export default function elementStyles(view, name, tag, props) {
     const nameStyle = viewStyles[prefix + name]
     const tagStyle = viewStyles[prefix + tag]
 
-    const index = view.repeatObject_index;
+    const index = props.repeat ? key()[0] : void 0;
     const uniqueTagId = view.entityId + name + tag;
 
     let tagStyles;

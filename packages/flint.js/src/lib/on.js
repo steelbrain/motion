@@ -12,17 +12,35 @@ function addListener(name, target, cb) {
   }
 }
 
-const on = (scope, name) =>
-  new Promise((resolve) => {
-    if (!scope) scope = root
-    if (typeof name != 'string') throw "Needs name of event string"
-
-    if (scope.events && scope.events[name]) {
-      scope.events[name].push(resolve)
-      return
+const on = (scope, name, cb) => {
+  return new Promise((resolve) => {
+    // callback with no scope
+    if (typeof name == 'function') {
+      cb = name
+      name = scope
+      scope = root
     }
 
-    return scope.addEventListener(name, resolve);
+    // no scope
+    if (!name) {
+      name = scope
+      scope = root
+    }
+
+    if (typeof name != 'string')
+      throw "Needs name of event string"
+
+    const finish = () => {
+      if (cb) cb();
+      else resolve()
+    }
+
+    if (scope.events && scope.events[name]) {
+      scope.events[name].push(finish)
+    }
+    else
+      return scope.addEventListener(name, finish);
   })
+}
 
 export default on

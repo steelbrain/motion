@@ -4,6 +4,7 @@ import classnames from 'classnames'
 import eventShorthands from './eventShorthands'
 import elementStyles from './styles'
 
+const add = (a, b) => a + b
 const contains = (i, ls) => ls.indexOf(i) != -1
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
@@ -66,10 +67,10 @@ export default function createElement(key, fullname, props, ...args) {
     props.className = classnames(props.className)
 
   // TRANSFORMATIONS:
-  elementStyles(view, name, tag, props);
+  elementStyles(key, view, name, tag, props);
 
   if (!props.key && !props.nokey) {
-    props.key = props.repeat ? key() : key
+    props.key = props.repeat ? key().reduce(add, 0) : key
   }
 
   // map shorthand events to onEvent
