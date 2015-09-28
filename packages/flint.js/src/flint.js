@@ -144,11 +144,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
            // watch for errors with ran
           let ran = false;
-<<<<<<< HEAD
-          this._render = component.call(void 0, this, (e) => on(this, e))
-=======
           this._render = component.call(void 0, this, viewOn)
->>>>>>> 979a0092b327bddadd7c3ae83764a78214518430
           ran = true;
 
           if (!ran) return null;
