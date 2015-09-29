@@ -33,6 +33,10 @@ var Parser = {
     // source = addFlow(source)
 
     // TODO: fix this in babel
+    let prefix = "var FlintFile = '" + file + "'; Flint.startHot(FlintFile);"
+    let suffix = "Flint.endHot(FlintFile);"
+
+    source = prefix + source + suffix
     source = source.replace('view.update(); view.update();', 'view.update();')
                    .replace('["default"]', '.default')
 
@@ -93,6 +97,8 @@ var Parser = {
     const transformedSource = source
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
       .replace(/\^/g, props)
+      .replace(/\+\+/g, '+= 1')
+      .replace(/\-\-/g, '-= 1')
       .split("\n")
       .map(function(line, index) {
         if (line.charAt(0) == "\t")

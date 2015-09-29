@@ -70,7 +70,7 @@ export default function createElement(key, fullname, props, ...args) {
   elementStyles(key, view, name, tag, props);
 
   if (!props.key && !props.nokey) {
-    props.key = props.repeat ? key().reduce(add, 0) : key
+    props.key = props.repeat ? key() : key
   }
 
   // map shorthand events to onEvent

@@ -1,3 +1,5 @@
+import unflint from '../lib/unflint'
+
 let browser = window;
 
 const browserData = data => {
@@ -25,6 +27,7 @@ export default function run(b, opts) {
 }
 
 export function compileError(error) {
+  console.log('compile error', unflint(error.stack))
   if (error.loc) {
     const { message, fileName, loc, stack } = error;
     browserData({ message, stack, file: fileName, line: loc.line, col: loc.column });

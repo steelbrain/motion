@@ -13,6 +13,7 @@ export default function run(browser, opts) {
     },
 
     'script:add': msg => {
+      console.log('adding script', msg)
       browser.emitter.emit('runtime:success')
       addScript(msg, Flint.render);
     },

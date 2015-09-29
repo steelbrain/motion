@@ -3,6 +3,7 @@ import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
 import React from 'react'
+import ArrayDiff from './lib/arrayDiff'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
@@ -77,17 +78,19 @@ function run(browserNode, userOpts, afterRenderCb) {
     })
   }
 
+  const removeComponent = key => {
+    Flint.views[key] = undefined
+    root[key] = undefined
+  }
+
   const setComponent = (key, val) => (opts.namespace[key] = val)
   const getComponent = (key) => opts.namespace[key]
   const emitter = ee({})
 
   let Flint = {
-    // if hasn't rendered main, don't push snapshots
-    stores: {},
     id: uuid(),
     activeViews: {},
-    snapshots: [],
-    snapshot: [],
+    isUpdating: false,
     views: {},
     lastWorkingView: {},
     firstRender: true,
@@ -100,6 +103,30 @@ function run(browserNode, userOpts, afterRenderCb) {
 
     on(name, cb) { emitter.on(name, cb) },
 
+    // map of views in various files
+    viewCache: {},
+    // current build up of running hot insertion
+    viewsInFile: {},
+    // current file that is running
+    currentHotFile: null,
+    startHot(file) {
+      Flint.viewsInFile[file] = []
+      Flint.currentHotFile = file
+    },
+
+    endHot(file) {
+      const cached = Flint.viewCache[file] || []
+      const views = Flint.viewsInFile[file]
+      const added = ArrayDiff(views, cached)
+      const removed = ArrayDiff(cached, views)
+
+      // remove views that werent made
+      removed.map(removeComponent)
+      Flint.currentHotFile = null
+      Flint.viewCache[file] = Flint.viewsInFile[file]
+      raf(() => Flint.activeViews.Main && Flint.activeViews.Main.forceUpdate())
+    },
+
     makeReactComponent(name, component, options = {}) {
       let id;
 
@@ -110,7 +137,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (this.hasRun && !this.isPaused)
+          if (!Flint.isUpdating && this.hasRun && !this.isPaused)
             raf(() => this.forceUpdate());
         },
 
@@ -170,7 +197,9 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentDidUpdate() {
+          Flint.isUpdating = true
           runEvents(this.events, 'update')
+          Flint.isUpdating = false
         },
 
         render() {
@@ -209,14 +238,17 @@ function run(browserNode, userOpts, afterRenderCb) {
       //   return Flint.views[subName].component
 
       // no view
-      if (Flint.views[name])
+
+      if (Flint.views[name]) {
         return Flint.views[name].component;
+      }
 
       const namespaceView = opts.namespace[name] || root[name];
 
       if (namespaceView)
         return namespaceView;
 
+      console.log("cannot find view ", name)
       return class NotFound {
         render() {
           const message = `Flint: view "${name}" not found`
@@ -226,6 +258,8 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, hash, component) {
+      Flint.viewsInFile[Flint.currentHotFile].push(name)
+
       // if new view
       if (Flint.views[name] == undefined) {
         let fComponent = Flint.makeReactComponent(name, component, { isNew: true });
@@ -275,14 +309,6 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       let flintComponent = Flint.makeReactComponent(name, component, { isChanged: true });
       setView(name, flintComponent);
-
-      let active = Flint.activeViews
-      let activeViewsToRemove = Object.keys(active).filter(id => active[id].name == name)
-
-      raf(() => {
-        activeViewsToRemove.map(id => delete Flint.activeViews[id])
-      })
-
       onViewLoaded() //tools errors todo
     },
 
@@ -292,21 +318,6 @@ function run(browserNode, userOpts, afterRenderCb) {
         // add ref to array
         val.__flintRef = { id, name };
       }
-    },
-
-    setHotVars(id, values) {
-      if (!values) return
-
-      const nowValues = clone(Flint.values[id])
-      if (!Flint.cachedViewState[id]) Flint.cachedViewState[id] = {}
-      let original = Flint.cachedViewState[id]
-
-      Object.keys(values).map(key => {
-        if (Flint.values[id][key] === original[key]) {
-          Flint.set(id, key, values[key])
-        }
-      })
-      Flint.cachedViewState[id] = nowValues
     },
 
     makeView(hash, component) {
