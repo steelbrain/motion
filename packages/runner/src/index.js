@@ -6,6 +6,7 @@ import watchEditor from './bridge/watchEditor'
 import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
+import npmInstall from './npm/install'
 
 import fs from 'fs'
 import path from 'path'
@@ -71,19 +72,18 @@ function main(opts, isBuild) {
 
       clearBuildDir(function() {
         if (BUILD_ONLY) {
-          makeDependencyBundle(build);
+          makeDependencyBundle(build, true);
 
           if (OPTS.watch)
             gulp.watch(SCRIPTS_GLOB, ['build'])
         }
         else {
           runServer(function() {
-            bridge.start(wport());
+            bridge.start(wport())
           });
-          watchEditor();
-          buildScripts();
-          makeDependencyBundle();
-          setTimeout(openInBrowser, 100)
+          buildScripts()
+          watchEditor()
+          makeDependencyBundle(openInBrowser, true);
         }
       })
     });
@@ -328,6 +328,7 @@ function buildScripts(cb) {
             newLine +
             ' • O'.green.bold + 'pen browser'.green + newLine +
             ' • E'.green.bold + 'ditor'.green + newLine +
+            ' • I'.green.bold + 'nstall packages'.green + newLine +
             ' • V'.green.bold + 'erbose logging'.green + newLine
           )
           HAS_RUN_INITIAL_BUILD = true;
@@ -389,6 +390,10 @@ function listenForKeys() {
     // open editor
     if (key.name == 'e')
       editor('.')
+
+    // install npm
+    if (key.name == 'i')
+      makeDependencyBundle(null, true);
 
     // verbose logging
     if (key.name == 'v') {
@@ -655,42 +660,52 @@ function flowCheck(cb) {
   })
 }
 
-function makeDependencyBundle(cb) {
-  var pkg = require(FLINT_DIR + '/package.json');
-  var deps = Object.keys(pkg.dependencies)
-    .filter(function(name) { return name !== 'flintjs' });
+function makeDependencyBundle(cb, doInstall) {
+  console.log(newLine, 'Checking packages...'.bold.blue)
+  let preInstall = cb => cb();
 
-  var requireString = deps.map(function(name) {
-    return 'window.__flintPackages["' + name + '"] = require("'+ name +'");'
-  }).join("\n");
-
-  var DEP_DIR = p(FLINT_DIR, 'deps');
-  var DEPS_FILE = p(DEP_DIR, 'deps.js');
-
-  // make dep dir
-  mkdirp(DEP_DIR, handleError(function() {
-    writeDeps();
-  }));
-
-  function writeDeps() {
-    fs.writeFile(DEPS_FILE, requireString, handleError(function() {
-      bundleDeps();
-    }))
+  // TODO: make this do a check if it needs to run on startup
+  if (doInstall) {
+    preInstall = npmInstall.bind(null, p(FLINT_DIR));
   }
 
-  function bundleDeps() {
-    webpack({
-      entry: DEPS_FILE,
-      externals: {
-        'react': 'window.React'
-      },
-      output: {
-        filename: p(DEP_DIR, 'packages.js')
-      }
-    }, handleError(function() {
-      if (cb) cb();
-    }))
-  }
+  preInstall(() => {
+    console.log('Bundling dependencies...'.blue)
+    const pkg = require(FLINT_DIR + '/package.json');
+    const deps = Object.keys(pkg.dependencies)
+      .filter(function(name) { return name !== 'flintjs' });
+
+    const requireString = deps
+      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
+      .join(newLine)
+
+    const DEP_DIR = p(FLINT_DIR, 'deps');
+    const DEPS_FILE = p(DEP_DIR, 'deps.js');
+
+    const writeDeps = () =>
+      fs.writeFile(DEPS_FILE, requireString,
+        handleError(bundleDeps))
+
+    // make dep dir
+    mkdirp(DEP_DIR, handleError(writeDeps));
+
+    function bundleDeps() {
+      webpack({
+        entry: DEPS_FILE,
+        externals: {
+          'react': 'window.React'
+        },
+        output: {
+          filename: p(DEP_DIR, 'packages.js')
+        }
+      }, handleError(() => {
+        console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
+
+        if (cb)
+          cb();
+      }))
+    }
+  })
 }
 
 var isDone = {};
