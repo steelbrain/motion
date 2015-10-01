@@ -243,7 +243,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (namespaceView)
         return namespaceView;
 
-      console.log("cannot find view ", name)
       return class NotFound {
         render() {
           const message = `Flint: view "${name}" not found`
