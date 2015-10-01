@@ -203,7 +203,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          const els = this._render.call(this, );
+          const els = this._render();
           const wrapperStyle = this.style && this.style['style']
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
