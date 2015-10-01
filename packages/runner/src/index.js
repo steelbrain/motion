@@ -138,6 +138,8 @@ function buildTemplate() {
       var Flint = require('flint-js/dist/flint.node');
       var app = require(p(BUILD_DIR, '_', BUILD_NAME));
 
+      console.log(Flint)
+
       var FlintApp = app(false, { Flint }, function(output) {
         data = data.replace(
           '<div id="_flintapp"></div>',

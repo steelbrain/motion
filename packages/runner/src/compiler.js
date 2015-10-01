@@ -8,6 +8,7 @@ let views = [];
 let VIEW_LOCATIONS = {};
 let emit;
 
+const isNotIn = (x,y) => x.indexOf(y) == -1
 const id = x => x
 const props = id('view.props.')
 const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
@@ -124,9 +125,12 @@ var Parser = {
         }
 
         // if third character is actually code, leave jsx
-        const jsxThirdChars = ['}', ' ', '<', '']
-        var shouldLeaveJSX = line.charAt(0) == '}' || (jsxThirdChars.indexOf(line.charAt(2)) == -1)
-        var leavingJSX = inJSX && shouldLeaveJSX
+        const shouldLeaveJSX = (
+          line.charAt(0) == '}' ||
+          isNotIn(['}', ' ', '<', '', ']', '/'], line.charAt(2))
+        )
+        const leavingJSX = inJSX && shouldLeaveJSX
+
         if (leavingJSX) {
           inJSX = false
         }
