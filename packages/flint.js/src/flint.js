@@ -141,7 +141,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         update() {
           if (!Flint.isUpdating && this.hasRun)
-            raf(() => this.forceUpdate())
+            this.forceUpdate()
         },
 
         getInitialState() {
