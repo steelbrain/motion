@@ -1,6 +1,6 @@
 import unflint from '../lib/unflint'
 
-let browser = window;
+let browser;
 
 const browserData = data => {
   browser.data = data;
@@ -9,7 +9,6 @@ const browserData = data => {
 // this is for using in runview
 const flintRuntimeError = window.flintRuntimeError =
   (message, file, line, col, error) => {
-    console.log('got runtime error')
     browserData({ message, file, line, col, stack: error.stack });
     browser.emitter.emit('runtime:error')
   }

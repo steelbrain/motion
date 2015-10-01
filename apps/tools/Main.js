@@ -53,21 +53,16 @@ view Main {
 
     const delay = compileError ? 200 : 800
     errDelay = setTimeout(() => {
-      console.log('check errors', runtimeError, compileError)
       if (runtimeError) {
-        console.log('runtime', niceRuntimeError(runtimeError))
         error = niceRuntimeError(runtimeError)
       }
-
       if (compileError) {
-        console.log(niceStack(niceCompilerMessage(compileError)))
         error = niceStack(niceCompilerMessage(compileError))
       }
     }, delay)
   }
 
   window._DT.on('compile:error', () => {
-    console.log("compile error", window._DT.data)
     runtimeError = null
     compileError = window._DT.data
     setError()
@@ -75,10 +70,9 @@ view Main {
 
   window._DT.on('runtime:error', () => {
     // on multiple errors, prefer the first
-    // if (runtimeError) return
+    if (runtimeError) return
     compileError = null
     runtimeError = window._DT.data
-    console.log('set error!!!!!!!')
     setError()
   })
 
@@ -92,10 +86,6 @@ view Main {
     setError()
   })
 
-  <div>
-    Error is: {error}
-    {console.log('in view >>>', error)}
-  </div>
   <ErrorMessage error={error} />
 
   $div = {
@@ -113,7 +103,7 @@ view ErrorMessage {
   const closedHeight = 55
   const openHeight = 200
 
-  let open = true
+  let open = false
 
   <error>
     <inner if={^error}>

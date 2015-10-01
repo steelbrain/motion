@@ -127,7 +127,10 @@ function run(browserNode, userOpts, afterRenderCb) {
       removed.map(removeComponent)
       Flint.currentHotFile = null
       Flint.viewCache[file] = Flint.viewsInFile[file]
-      raf(() => Flint.activeViews.Main && Flint.activeViews.Main.forceUpdate())
+      raf(() => {
+        Flint.activeViews.Main &&
+        Flint.activeViews.Main.forceUpdate()
+      })
     },
 
     makeReactComponent(name, component, options = {}) {
@@ -140,7 +143,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun)
+          if (!Flint.isUpdating && this.hasRun && this.isMounted)
             this.forceUpdate()
         },
 
@@ -183,10 +186,12 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentDidMount() {
+          this.isMounted = true
           runEvents(this.events, 'mount')
         },
 
         componentWillUnmount() {
+          this.isMounted = false
           runEvents(this.events, 'unmount')
           delete Flint.activeViews[id];
         },
@@ -285,6 +290,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       let viewRanSuccessfully = true;
 
+      // recover from errorful views
       root.onerror = (...args) => {
         viewRanSuccessfully = false;
 
@@ -293,11 +299,13 @@ function run(browserNode, userOpts, afterRenderCb) {
           render()
         }
 
-        if (flintRuntimeError)
-          flintRuntimeError(...args)
-
-        // catch errors if not in production
-        return !process.env.production
+        // run devtools
+        if (!process.env.production) {
+          if (root.flintRuntimeError)
+            root.flintRuntimeError(...args)
+          // catch errors if not in production
+          return false
+        }
       }
 
       Flint.on("afterRender", () => {

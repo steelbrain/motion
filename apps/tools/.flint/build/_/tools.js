@@ -34,7 +34,7 @@ var niceStack = function niceStack(err) {
   return err;
 };
 
-Flint.view("Main", "-2036689102", function (view, on) {
+Flint.view("Main", "1738422769", function (view, on) {
   var error = null;
   var compileError = null;
   var runtimeError = null;
@@ -53,21 +53,16 @@ Flint.view("Main", "-2036689102", function (view, on) {
 
     var delay = compileError ? 200 : 800;
     view.update(errDelay = setTimeout(function () {
-      console.log('check errors', runtimeError, compileError);
       if (runtimeError) {
-        console.log('runtime', niceRuntimeError(runtimeError));
         view.update(error = niceRuntimeError(runtimeError));
       }
-
       if (compileError) {
-        console.log(niceStack(niceCompilerMessage(compileError)));
         view.update(error = niceStack(niceCompilerMessage(compileError)));
       }
     }, delay));
   };
 
   window._DT.on('compile:error', function () {
-    console.log("compile error", window._DT.data);
     view.update(runtimeError = null);
     view.update(compileError = window._DT.data);
     setError();
@@ -75,10 +70,9 @@ Flint.view("Main", "-2036689102", function (view, on) {
 
   window._DT.on('runtime:error', function () {
     // on multiple errors, prefer the first
-    // if (runtimeError) return
+    if (runtimeError) return;
     view.update(compileError = null);
     view.update(runtimeError = window._DT.data);
-    console.log('set error!!!!!!!');
     setError();
   });
 
@@ -100,18 +94,14 @@ Flint.view("Main", "-2036689102", function (view, on) {
     };
   });
   return function () {
-    return view.el(0, "Flint.MainWrapper", {view: view}, 
-        view.el(1, "div", null, 
-    "Error is: ", error, 
-    console.log('in view >>>', error)
-  ), 
-  view.el(2, "ErrorMessage", {error: error})
+    return view.el(101, "Flint.MainWrapper", {view: view}, 
+        view.el(102, "ErrorMessage", {error: error})
 
       );
   };
 });
 
-Flint.view("ErrorMessage", "-2030256742", function (view, on) {
+Flint.view("ErrorMessage", "-1688487785", function (view, on) {
   var last = function last(arr) {
     return arr[arr.length - 1];
   };
@@ -123,7 +113,7 @@ Flint.view("ErrorMessage", "-2030256742", function (view, on) {
   var closedHeight = 55;
   var openHeight = 200;
 
-  var open = true;
+  var open = false;
 
   view.update(view.style["styleerror"] = function (_index) {
     return false || {
@@ -220,16 +210,16 @@ Flint.view("ErrorMessage", "-2030256742", function (view, on) {
     };
   });
   return function () {
-    return view.el(3, "Flint.ErrorMessageWrapper", {view: view}, 
-        view.el(4, "error", null, 
-    view.props.error && view.el(5, "inner", {if: view.props.error}, 
-      view.el(6, "where", null, fileName(view.props.error.file), view.props.error.line && ' (L' + (view.props.error.line - 1) + ')'), 
+    return view.el(103, "Flint.ErrorMessageWrapper", {view: view}, 
+        view.el(104, "error", null, 
+    view.props.error && view.el(105, "inner", {if: view.props.error}, 
+      view.el(106, "where", null, fileName(view.props.error.file), view.props.error.line && ' (L' + (view.props.error.line - 1) + ')'), 
       ' ', 
-      view.el(7, "errorTitle", null, 
+      view.el(107, "errorTitle", null, 
         view.props.error.niceMessage || view.props.error.message, 
-        view.props.error.niceStack && view.el(8, "niceStack", null, 
+        view.props.error.niceStack && view.el(108, "niceStack", null, 
             view.props.error.niceStack[0], 
-            view.el(9, "errCol", null, view.props.error.niceStack[1]), 
+            view.el(109, "errCol", null, view.props.error.niceStack[1]), 
             view.props.error.niceStack[2]
           )
       )
@@ -253,11 +243,11 @@ Flint.view("ErrorIcon", "1478709636", function (view, on) {
     };
   });
   return function () {
-    return view.el(10, "Flint.ErrorIconWrapper", {view: view}, 
-        view.el(11, "svg", {viewBox: "0 0 27.963 27.963"}, 
-    view.el(12, "path", {d: "M13.983,0C6.261,0,0.001,6.259,0.001,13.979c0,7.724,6.26,13.984,13.982,13.984s13.98-6.261,13.98-13.984\\n      C27.963,6.259,21.705,0,13.983,0z M13.983,26.531c-6.933,0-12.55-5.62-12.55-12.553c0-6.93,5.617-12.548,12.55-12.548\\n      c6.931,0,12.549,5.618,12.549,12.548C26.531,20.911,20.913,26.531,13.983,26.531z"}), 
-    view.el(13, "polygon", {points: "15.579,17.158 16.191,4.579 11.804,4.579 12.414,17.158"}), 
-    view.el(14, "path", {d: "M13.998,18.546c-1.471,0-2.5,1.029-2.5,2.526c0,1.443,0.999,2.528,2.444,2.528h0.056c1.499,0,2.469-1.085,2.469-2.528\\n      C16.441,19.575,15.468,18.546,13.998,18.546z"})
+    return view.el(110, "Flint.ErrorIconWrapper", {view: view}, 
+        view.el(111, "svg", {viewBox: "0 0 27.963 27.963"}, 
+    view.el(112, "path", {d: "M13.983,0C6.261,0,0.001,6.259,0.001,13.979c0,7.724,6.26,13.984,13.982,13.984s13.98-6.261,13.98-13.984\\n      C27.963,6.259,21.705,0,13.983,0z M13.983,26.531c-6.933,0-12.55-5.62-12.55-12.553c0-6.93,5.617-12.548,12.55-12.548\\n      c6.931,0,12.549,5.618,12.549,12.548C26.531,20.911,20.913,26.531,13.983,26.531z"}), 
+    view.el(113, "polygon", {points: "15.579,17.158 16.191,4.579 11.804,4.579 12.414,17.158"}), 
+    view.el(114, "path", {d: "M13.998,18.546c-1.471,0-2.5,1.029-2.5,2.526c0,1.443,0.999,2.528,2.444,2.528h0.056c1.499,0,2.469-1.085,2.469-2.528\\n      C16.441,19.575,15.468,18.546,13.998,18.546z"})
   )
 
       );
