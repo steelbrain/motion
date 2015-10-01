@@ -157,7 +157,7 @@ function buildFlint(cb) {
 }
 
 function buildReact(cb) {
-  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.js');
+  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.production.js');
   var write = p(BUILD_DIR, '_', 'react.js');
   copyFile(read, write, cb)
 }
@@ -455,7 +455,7 @@ function getScriptTags(files, req) {
     '<!-- FLINT JS -->' +
     newLine +
     [
-      '<script src="/assets/flintjs/dist/react.js"></script>',
+      '<script src="/assets/flintjs/dist/react.development.js"></script>',
       '<script src="/assets/flintjs/dist/flint.js"></script>',
       '<script id="__flintPackages" src="/packages/packages.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',

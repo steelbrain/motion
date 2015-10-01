@@ -63,8 +63,6 @@ view Main {
         console.log(niceStack(niceCompilerMessage(compileError)))
         error = niceStack(niceCompilerMessage(compileError))
       }
-
-      console.log('GOT ERROR', error)
     }, delay)
   }
 

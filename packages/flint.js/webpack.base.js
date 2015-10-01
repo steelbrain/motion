@@ -17,7 +17,7 @@ module.exports = function(opts) {
   ]
 
   if (opts.target != 'node') {
-    splitReact()
+    splitReact(opts.env)
   }
 
   if (opts.minify)
@@ -32,8 +32,8 @@ module.exports = function(opts) {
       new webpack.optimize.DedupePlugin()
     )
 
-  function splitReact() {
-    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.js'))
+  function splitReact(env) {
+    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+env+'.js'))
     entry.react = ['react']
   }
 
