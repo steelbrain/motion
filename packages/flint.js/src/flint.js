@@ -3,7 +3,6 @@ import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
 import React from 'react'
-import ArrayDiff from './lib/arrayDiff'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
@@ -11,6 +10,7 @@ import clone from 'clone'
 import { Promise } from 'bluebird'
 
 import './lib/shimFlintMap'
+import arrayDiff from './lib/arrayDiff'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
@@ -117,8 +117,8 @@ function run(browserNode, userOpts, afterRenderCb) {
     endHot(file) {
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
-      const added = ArrayDiff(views, cached)
-      const removed = ArrayDiff(cached, views)
+      const added = arrayDiff(views, cached)
+      const removed = arrayDiff(cached, views)
 
       // remove views that werent made
       removed.map(removeComponent)
