@@ -29,9 +29,12 @@ const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name].length && queue[name].forEach(e => e())
 const assignToGlobal = (name, val) => {
+  // TODO reenable after solving the saving issue
+  /*
   if (typeof root[name] != 'undefined')
     throw `You're attempting to define a global that is already defined:
         ${name} = ${JSON.stringify(root[name])}`
+  */
 
   root[name] = val
 }
@@ -137,16 +140,8 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun && !this.isPaused)
-            raf(() => this.forceUpdate());
-        },
-
-        pause() {
-          this.isPaused = true
-        },
-
-        resume() {
-          this.isPaused = false
+          if (!Flint.isUpdating && this.hasRun)
+            this.forceUpdate()
         },
 
         getInitialState() {
