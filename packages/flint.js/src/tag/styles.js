@@ -114,30 +114,41 @@ export default function elementStyles(key, view, name, tag, props) {
 
   // HELPERS
   if (props.style) {
+    const ps = props.style;
+
     // position
-    if (Array.isArray(props.style.position)) {
-      props.style.top = props.style.position[0];
-      props.style.right = props.style.position[1];
-      props.style.bottom = props.style.position[2];
-      props.style.left = props.style.position[3];
-      props.style.position = 'absolute'
+    if (Array.isArray(ps.position)) {
+      ps.top = ps.position[0];
+      ps.right = ps.position[1];
+      ps.bottom = ps.position[2];
+      ps.left = ps.position[3];
+      ps.position = 'absolute'
     }
 
     // array to string
-    Object.keys(props.style).forEach(key => {
-      if (Array.isArray(props.style[key])) {
-        props.style[key] = props.style[key].map(style =>
+    Object.keys(ps).forEach(key => {
+      if (Array.isArray(ps[key])) {
+        ps[key] = ps[key].map(style =>
           typeof style == 'number' ? `${style}px` : style
         ).join(' ')
       }
     })
 
     // { transform: { x: 10, y: 10, z: 10 } }
-    const ps = props.style;
     if (typeof ps.transform === 'object') {
       ps.transform = Object.keys(ps.transform).map(key =>
         `${transformKeysMap[key] || key}(${ps.transform[key]})`
       ).join(' ');
+    }
+
+    // background { r, g, b, a }
+    if (ps.background && typeof ps.background == 'object') {
+      const bg = ps.background
+
+      if (bg.a)
+        ps.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
+      else
+        ps.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
     }
   }
 
