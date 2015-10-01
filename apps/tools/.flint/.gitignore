@@ -3,7 +3,4 @@ typed
 node_modules
 .DS_Store
 npm-debug.log
-build/_/react.js
-build/_/flint.js
-build/_/packages.js
-build/_/static
+build
