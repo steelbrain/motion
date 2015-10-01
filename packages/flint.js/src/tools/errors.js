@@ -1,6 +1,6 @@
 import unflint from '../lib/unflint'
 
-let browser = window;
+let browser;
 
 const browserData = data => {
   browser.data = data;
@@ -15,12 +15,6 @@ const flintRuntimeError = window.flintRuntimeError =
 
 export default function run(b, opts) {
   browser = b;
-
-  // catch all errors
-  window.onerror = (...args) => {
-    flintRuntimeError(...args);
-    return false;
-  }
 
   window.onViewLoaded = () =>
     browserData('success', null);

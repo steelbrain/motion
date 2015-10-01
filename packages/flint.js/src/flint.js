@@ -3,7 +3,6 @@ import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
 import React from 'react'
-import ArrayDiff from './lib/arrayDiff'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
@@ -11,6 +10,7 @@ import clone from 'clone'
 import { Promise } from 'bluebird'
 
 import './lib/shimFlintMap'
+import arrayDiff from './lib/arrayDiff'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
@@ -120,14 +120,17 @@ function run(browserNode, userOpts, afterRenderCb) {
     endHot(file) {
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
-      const added = ArrayDiff(views, cached)
-      const removed = ArrayDiff(cached, views)
+      const added = arrayDiff(views, cached)
+      const removed = arrayDiff(cached, views)
 
       // remove views that werent made
       removed.map(removeComponent)
       Flint.currentHotFile = null
       Flint.viewCache[file] = Flint.viewsInFile[file]
-      raf(() => Flint.activeViews.Main && Flint.activeViews.Main.forceUpdate())
+      raf(() => {
+        Flint.activeViews.Main &&
+        Flint.activeViews.Main.forceUpdate()
+      })
     },
 
     makeReactComponent(name, component, options = {}) {
@@ -140,7 +143,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun)
+          if (!Flint.isUpdating && this.hasRun && this.isMounted)
             this.forceUpdate()
         },
 
@@ -183,10 +186,12 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentDidMount() {
+          this.isMounted = true
           runEvents(this.events, 'mount')
         },
 
         componentWillUnmount() {
+          this.isMounted = false
           runEvents(this.events, 'unmount')
           delete Flint.activeViews[id];
         },
@@ -284,6 +289,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       let viewRanSuccessfully = true;
 
+      // recover from errorful views
       root.onerror = (...args) => {
         viewRanSuccessfully = false;
 
@@ -292,8 +298,13 @@ function run(browserNode, userOpts, afterRenderCb) {
           render()
         }
 
-        flintRuntimeError(...args)
-        return false
+        // run devtools
+        if (!process.env.production) {
+          if (root.flintRuntimeError)
+            root.flintRuntimeError(...args)
+          // catch errors if not in production
+          return false
+        }
       }
 
       Flint.on("afterRender", () => {
