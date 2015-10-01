@@ -306,8 +306,7 @@ function buildScripts(cb) {
         // })
       }
 
-      if (cb)
-        cb();
+      if (cb && !(BUILD_ONLY && OPTS.watch)) cb();
 
       if (BUILD_ONLY && !OPTS.watch)
         done('scripts');
@@ -658,26 +657,25 @@ function flowCheck(cb) {
 }
 
 function makeDependencyBundle(cb, doInstall) {
-  console.log(newLine, 'Checking packages...'.bold.blue)
-  let preInstall = cb => cb();
+  console.log('Checking packages...'.bold.blue)
+  let preInstall = cb => cb()
 
   // TODO: make this do a check if it needs to run on startup
   if (doInstall) {
-    preInstall = npmInstall.bind(null, p(FLINT_DIR));
+    preInstall = npmInstall.bind(null, p(FLINT_DIR))
   }
 
   preInstall(() => {
-    console.log('Bundling dependencies...'.blue)
-    const pkg = require(FLINT_DIR + '/package.json');
+    const pkg = require(FLINT_DIR + '/package.json')
     const deps = Object.keys(pkg.dependencies)
-      .filter(function(name) { return name !== 'flintjs' });
+      .filter(p => p != 'flint-js')
 
     const requireString = deps
       .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
       .join(newLine)
 
-    const DEP_DIR = p(FLINT_DIR, 'deps');
-    const DEPS_FILE = p(DEP_DIR, 'deps.js');
+    const DEP_DIR = p(FLINT_DIR, 'deps')
+    const DEPS_FILE = p(DEP_DIR, 'deps.js')
 
     const bundleDeps = () => {
       webpack({
@@ -685,7 +683,9 @@ function makeDependencyBundle(cb, doInstall) {
         externals: { 'react': 'React' },
         output: { filename: p(DEP_DIR, 'packages.js') }
       }, handleError(() => {
-        console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
+        if (deps.length)
+          console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
+
         if (cb) cb();
       }))
     }

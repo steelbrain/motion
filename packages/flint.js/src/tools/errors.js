@@ -9,18 +9,13 @@ const browserData = data => {
 // this is for using in runview
 const flintRuntimeError = window.flintRuntimeError =
   (message, file, line, col, error) => {
+    console.log('got runtime error')
     browserData({ message, file, line, col, stack: error.stack });
     browser.emitter.emit('runtime:error')
   }
 
 export default function run(b, opts) {
   browser = b;
-
-  // catch all errors
-  window.onerror = (...args) => {
-    flintRuntimeError(...args);
-    return false;
-  }
 
   window.onViewLoaded = () =>
     browserData('success', null);

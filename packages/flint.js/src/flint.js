@@ -141,7 +141,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         update() {
           if (!Flint.isUpdating && this.hasRun)
-            this.forceUpdate()
+            raf(() => this.forceUpdate())
         },
 
         getInitialState() {
@@ -293,8 +293,11 @@ function run(browserNode, userOpts, afterRenderCb) {
           render()
         }
 
-        flintRuntimeError(...args)
-        return false
+        if (flintRuntimeError)
+          flintRuntimeError(...args)
+
+        // catch errors if not in production
+        return !process.env.production
       }
 
       Flint.on("afterRender", () => {
