@@ -108,10 +108,7 @@ function build() {
   buildReact();
   buildPackages();
   buildAssets();
-
-  buildScripts(function() {
-    buildTemplate();
-  });
+  buildScripts(buildTemplate);
 }
 
 function mkBuildDir(cb) {
@@ -137,8 +134,6 @@ function buildTemplate() {
     if (OPTS.isomorphic) {
       var Flint = require('flint-js/dist/flint.node');
       var app = require(p(BUILD_DIR, '_', BUILD_NAME));
-
-      console.log(Flint)
 
       var FlintApp = app(false, { Flint }, function(output) {
         data = data.replace(
@@ -684,29 +679,24 @@ function makeDependencyBundle(cb, doInstall) {
     const DEP_DIR = p(FLINT_DIR, 'deps');
     const DEPS_FILE = p(DEP_DIR, 'deps.js');
 
-    const writeDeps = () =>
-      fs.writeFile(DEPS_FILE, requireString,
-        handleError(bundleDeps))
-
-    // make dep dir
-    mkdirp(DEP_DIR, handleError(writeDeps));
-
-    function bundleDeps() {
+    const bundleDeps = () => {
       webpack({
         entry: DEPS_FILE,
-        externals: {
-          'react': 'window.React'
-        },
-        output: {
-          filename: p(DEP_DIR, 'packages.js')
-        }
+        externals: { 'react': 'React' },
+        output: { filename: p(DEP_DIR, 'packages.js') }
       }, handleError(() => {
         console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
-
-        if (cb)
-          cb();
+        if (cb) cb();
       }))
     }
+
+    const writeDeps = () => {
+      fs.writeFile(DEPS_FILE, requireString,
+        handleError(bundleDeps))
+    }
+
+    // make dep dir
+    mkdirp(DEP_DIR, handleError(writeDeps))
   })
 }
 
