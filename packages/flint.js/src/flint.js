@@ -140,7 +140,6 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          console.log("updating now")
           if (!Flint.isUpdating && this.hasRun)
             this.forceUpdate()
         },
