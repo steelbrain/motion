@@ -38,8 +38,7 @@ var Parser = {
     let suffix = "Flint.endHot(FlintFile);"
 
     source = prefix + source + suffix
-    source = source.replace('view.update(); view.update();', 'view.update();')
-                   .replace('["default"]', '.default')
+    source = source.replace('["default"]', '.default')
 
     // NPM
     if (!deps) {

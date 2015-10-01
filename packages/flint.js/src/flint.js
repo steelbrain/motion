@@ -1,4 +1,7 @@
 import 'reapp-object-assign'
+import 'isomorphic-fetch'
+import './lib/shimFlintMap'
+
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
@@ -9,12 +12,12 @@ import equal from 'deep-equal'
 import clone from 'clone'
 import { Promise } from 'bluebird'
 
-import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
+import NotFound from './views/NotFound'
 import mainComponent from './lib/mainComponent'
 
 const inBrowser = typeof window != 'undefined'
@@ -24,6 +27,7 @@ const root = inBrowser ? window : global
 root.on = on
 root.Promise = Promise
 root.module = {}
+root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -248,13 +252,8 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (namespaceView)
         return namespaceView;
 
-      console.log("cannot find view ", name)
-      return class NotFound {
-        render() {
-          const message = `Flint: view "${name}" not found`
-          return <div style={{ display: 'block' }}>{message}</div>
-        }
-      }
+      console.warn("Can't find view:", name)
+      return NotFound(name)
     },
 
     view(name, hash, component) {

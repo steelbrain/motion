@@ -3,7 +3,6 @@ import React from 'react'
 import rafBatch from './lib/reactRaf'
 import runFlint from './flint'
 import browserRequire from './lib/browserRequire'
-import 'isomorphic-fetch'
 
 if (process.env.production)
   rafBatch.inject();

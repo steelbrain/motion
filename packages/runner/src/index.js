@@ -256,12 +256,12 @@ function buildScripts(cb) {
     .pipe(flint('post', {
       dir: FLINT_DIR,
       onPackageStart: function(name) {
-        bridge.message('package:install', { name: name })
+        bridge.message('package:install', { name })
       },
       onPackage: function(name) {
         console.log('UPDATE PACKAGES', name)
         makeDependencyBundle();
-        bridge.message('package:installed', { name: name })
+        bridge.message('package:installed', { name })
         bridge.message('packages:reload', {})
       }
     }))
