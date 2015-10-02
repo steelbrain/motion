@@ -260,9 +260,10 @@ function buildScripts(cb) {
       },
       onPackage: function(name) {
         console.log('UPDATE PACKAGES', name)
-        makeDependencyBundle();
-        bridge.message('package:installed', { name })
-        bridge.message('packages:reload', {})
+        makeDependencyBundle(() => {
+          bridge.message('package:installed', { name })
+          bridge.message('packages:reload', {})
+        });
       }
     }))
     .pipe(rename({ extname: '.js' }))
