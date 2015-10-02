@@ -17,13 +17,11 @@ const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
 const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
-const jsxEnd = view => `  return () => {
-    return (
-      <${getWrapper(view)} view={view}>
-        ${viewTemplates[view].join('\n')}
-      </${getWrapper(view)}>
-    )
-  }
+const jsxEnd = view => `  return () => (
+    <${getWrapper(view)} view={view}>
+      ${viewTemplates[view].join('\n')}
+    </${getWrapper(view)}>
+  )
 })`
 
 // track app deps
