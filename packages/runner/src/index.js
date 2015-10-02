@@ -201,10 +201,7 @@ function buildScripts(cb) {
       file.startTime = gulpStartTime
       next(null, file);
     }))
-    .pipe(gulpif(VERBOSE,
-      debug({ title: 'build:', minimal: false }),
-      debug({ title: 'build:', minimal: true })
-    ))
+    .pipe(debug({ title: 'build:', minimal: true }))
     .pipe(plumber({
       errorHandler: function(err) {
         gulpErr = true;
@@ -244,10 +241,6 @@ function buildScripts(cb) {
         bridge.message('view:locations', APP_VIEWS);
       }
     }))
-    .pipe(through.obj(function(file, enc, next) {
-      // console.log(file.contents.toString())
-      next(null, file);
-    }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],
@@ -256,17 +249,17 @@ function buildScripts(cb) {
     .pipe(flint('post', {
       dir: FLINT_DIR,
       onPackageStart: function(name) {
-        bridge.message('package:install', { name: name })
+        bridge.message('package:install', { name })
       },
       onPackage: function(name) {
-        console.log('UPDATE PACKAGES', name)
-        makeDependencyBundle();
-        bridge.message('package:installed', { name: name })
-        bridge.message('packages:reload', {})
+        makeDependencyBundle(() => {
+          bridge.message('package:installed', { name })
+          bridge.message('packages:reload', {})
+        });
       }
     }))
     .pipe(rename({ extname: '.js' }))
-    .pipe(gulp.dest(TYPED_OUT_DIR))
+    // .pipe(gulp.dest(TYPED_OUT_DIR))
     .pipe(react({
       stripTypes: true,
       es6module: true
@@ -666,37 +659,41 @@ function makeDependencyBundle(cb, doInstall) {
   }
 
   preInstall(() => {
-    const pkg = require(FLINT_DIR + '/package.json')
-    const deps = Object.keys(pkg.dependencies)
-      .filter(p => p != 'flint-js')
+    fs.readFile(p(FLINT_DIR, 'package.json'), handleError(file => {
+      const depsObject = JSON.parse(file).dependencies
+      const deps = Object.keys(depsObject).filter(p => p != 'flint-js')
 
-    const requireString = deps
-      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine)
+      const requireString = deps
+        .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
+        .join(newLine)
 
-    const DEP_DIR = p(FLINT_DIR, 'deps')
-    const DEPS_FILE = p(DEP_DIR, 'deps.js')
+      const DEP_DIR = p(FLINT_DIR, 'deps')
+      const DEPS_FILE = p(DEP_DIR, 'deps.js')
 
-    const bundleDeps = () => {
-      webpack({
-        entry: DEPS_FILE,
-        externals: { 'react': 'React' },
-        output: { filename: p(DEP_DIR, 'packages.js') }
-      }, handleError(() => {
-        if (deps.length)
-          console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
+      const bundleDeps = () => {
+        webpack({
+          entry: DEPS_FILE,
+          externals: {
+            react: 'React',
+            bluebird: '_bluebird'
+          },
+          output: { filename: p(DEP_DIR, 'packages.js') }
+        }, handleError(() => {
+          if (deps.length)
+            console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
 
-        if (cb) cb();
-      }))
-    }
+          if (cb) cb();
+        }))
+      }
 
-    const writeDeps = () => {
-      fs.writeFile(DEPS_FILE, requireString,
-        handleError(bundleDeps))
-    }
+      const writeDeps = () => {
+        fs.writeFile(DEPS_FILE, requireString,
+          handleError(bundleDeps))
+      }
 
-    // make dep dir
-    mkdirp(DEP_DIR, handleError(writeDeps))
+      // make dep dir
+      mkdirp(DEP_DIR, handleError(writeDeps))
+    }))
   })
 }
 

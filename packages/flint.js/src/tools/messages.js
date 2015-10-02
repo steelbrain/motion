@@ -31,29 +31,26 @@ export default function run(browser, opts) {
     },
 
     'packages:reload': msg => {
-      var el = document.getElementById('__flintPackages');
-      var src = el.src;
+      const el = document.getElementById('__flintPackages');
+      const src = el.src;
       removeEl(el);
-      addScript({ src }, Flint.render);
+      const tag = addScript({ src }, Flint.render);
+      tag.setAttribute('id', '__flintPackages')
     }
-  };
+  }
 
   ws.onmessage = function(message) {
-    // console.log('got message', message)
-    message = JSON.parse(message.data);
-    if (!message) return;
-    if (!message._type) {
-      debugger
-    }
+    message = JSON.parse(message.data)
+    if (!message) return
 
     const action = actions[message._type];
 
     if (action)
-      action(message);
+      action(message)
 
-    browser.data = message;
+    browser.data = message
     browser.emitter.emit(message._type)
-  };
+  }
 }
 
 let lastLoadedScript = {};
@@ -70,6 +67,8 @@ function addScript(message, cb) {
     body.appendChild(script);
 
     script.onload = cb;
+
+    return script
   }
 }
 

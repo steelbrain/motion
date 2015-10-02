@@ -38,8 +38,7 @@ var Parser = {
     let suffix = "Flint.endHot(FlintFile);"
 
     source = prefix + source + suffix
-    source = source.replace('view.update(); view.update();', 'view.update();')
-                   .replace('["default"]', '.default')
+    source = source.replace('["default"]', '.default')
 
     // NPM
     if (!deps) {
@@ -57,15 +56,12 @@ var Parser = {
       const newDeps = requires.filter(x => deps.indexOf(x) < 0)
 
       if (newDeps.length) {
-        console.log('new deps', newDeps)
         newDeps.forEach(function(name) {
           if (opts.onPackageStart)
             opts.onPackageStart(name);
 
           addPackage(depDir, name, handleError(function() {
             deps = deps.concat(name);
-
-            console.log('added package to package.json', name);
 
             if (opts.onPackage)
               opts.onPackage(name);
@@ -103,7 +99,7 @@ var Parser = {
       .split("\n")
       .map(function(line, index) {
         if (line.charAt(0) == "\t")
-          console.log("Flint uses spaces over tabs")
+          console.log('Flint uses spaces over tabs')
 
         var result = line
         var view = result.match(viewMatcher);
