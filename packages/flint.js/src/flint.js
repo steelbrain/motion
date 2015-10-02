@@ -67,7 +67,7 @@ function run(browserNode, userOpts, afterRenderCb) {
   const isTools = opts.app == 'devTools'
 
   const render = () => {
-    const MainComponent = getComponent('Main') || mainComponent;
+    const MainComponent = getView('Main') || mainComponent;
     const preloaders = Flint.preloaders.map(loader => loader())
 
     Promise.all(preloaders).then(() => {
@@ -87,11 +87,15 @@ function run(browserNode, userOpts, afterRenderCb) {
 
   const removeComponent = key => {
     Flint.views[key] = undefined
-    root[key] = undefined
+    opts.namespace[key] = undefined
   }
 
-  const setComponent = (key, val) => (opts.namespace[key] = val)
-  const getComponent = (key) => opts.namespace[key]
+  const getView = (key) => opts.namespace[key]
+  const setView = (key, view, hash) => {
+    opts.namespace[key] = view
+    Flint.views[key] = { hash, view }
+  }
+
   const emitter = ee({})
 
   let Flint = {
@@ -137,7 +141,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       })
     },
 
-    makeReactComponent(name, component, options = {}) {
+    makeReactComponent(name, view, options = {}) {
       let id;
 
       const spec = {
@@ -177,7 +181,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
            // watch for errors with ran
           let ran = false;
-          this._render = component.call(void 0, this, viewOn)
+          this._render = view.call(void 0, this, viewOn)
           ran = true;
 
           if (!ran) return null;
@@ -223,6 +227,69 @@ function run(browserNode, userOpts, afterRenderCb) {
       return React.createClass(spec);
     },
 
+    /*
+      Define a view,
+        - hash should be optional only for dev mode
+    */
+    view(name, hash, body) {
+      // track views in file
+      Flint.viewsInFile[Flint.currentHotFile].push(name)
+
+      // if new view
+      if (Flint.views[name] == undefined) {
+        let view = Flint.makeReactComponent(name, body, { isNew: true });
+        Flint.lastWorkingView[name] = Flint.views[name] && Flint.views[name].view;
+        setView(name, view, hash) // puts on namespace
+        return
+      }
+
+      // if unchanged
+      if (Flint.views[name].hash == hash) return
+
+      // if first render & view defined twice
+      if (Flint.views[name] && Flint.firstRender) {
+        console.error('Defined a view twice!', name, hash)
+        setView(name, ErrorDefinedTwice(name))
+        return
+      }
+
+      // start with a success and maybe an error will fire before next frame
+      // root._DT.emitter.emit('runtime:success')
+
+      let viewRanSuccessfully = true;
+
+      // recover from errorful views
+      root.onerror = (...args) => {
+        viewRanSuccessfully = false;
+
+        if (Flint.lastWorkingView[name]) {
+          setView(name, Flint.lastWorkingView[name])
+          render()
+        }
+        else {
+          setView(name, ErrorDefinedTwice(name))
+          render()
+        }
+
+        // run devtools
+        if (!process.env.production) {
+          if (root.flintRuntimeError)
+            root.flintRuntimeError(...args)
+          // catch errors if not in production
+          return false
+        }
+      }
+
+      Flint.on('afterRender', () => {
+        if (viewRanSuccessfully)
+          Flint.lastWorkingView[name] = Flint.views[name].view
+      })
+
+      let view = Flint.makeReactComponent(name, body, { isChanged: true });
+      setView(name, view, hash);
+      window.onViewLoaded() // tools undo errors
+    },
+
     getView(name) {
       if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
         return Wrapper;
@@ -243,12 +310,12 @@ function run(browserNode, userOpts, afterRenderCb) {
       //
       // // subview
       // if (Flint.views[subName])
-      //   return Flint.views[subName].component
+      //   return Flint.views[subName].view
 
       // no view
 
       if (Flint.views[name]) {
-        return Flint.views[name].component;
+        return Flint.views[name].view;
       }
 
       const namespaceView = opts.namespace[name] || root[name];
@@ -260,77 +327,12 @@ function run(browserNode, userOpts, afterRenderCb) {
       return NotFound(name)
     },
 
-    view(name, hash, component) {
-      Flint.viewsInFile[Flint.currentHotFile].push(name)
-
-      // if new view
-      if (Flint.views[name] == undefined) {
-        let fComponent = Flint.makeReactComponent(name, component, { isNew: true });
-        Flint.views[name] = Flint.makeView(hash, fComponent);
-        Flint.lastWorkingView[name] = Flint.views[name].component;
-        setComponent(name, fComponent) // puts on namespace
-        return
-      }
-      // if first render & view is defined twice
-      // we have a bug!
-      else if (Flint.firstRender) {
-        console.error('Defined a view twice!', name, hash)
-        setComponent(name, ErrorDefinedTwice)
-        return
-      }
-
-      // if unchanged
-      if (Flint.views[name].hash == hash) return
-      // start with a success and maybe an error will fire before next frame
-      root._DT.emitter.emit('runtime:success')
-
-      // if changed
-      const setView = (name, flintComponent) => {
-        Flint.views[name] = Flint.makeView(hash, flintComponent)
-        setComponent(name, flintComponent) // puts on namespace
-        if (Flint.firstRender) return
-      }
-
-      let viewRanSuccessfully = true;
-
-      // recover from errorful views
-      root.onerror = (...args) => {
-        viewRanSuccessfully = false;
-
-        if (Flint.lastWorkingView[name]) {
-          setView(name, Flint.lastWorkingView[name])
-          render()
-        }
-
-        // run devtools
-        if (!process.env.production) {
-          if (root.flintRuntimeError)
-            root.flintRuntimeError(...args)
-          // catch errors if not in production
-          return false
-        }
-      }
-
-      Flint.on("afterRender", () => {
-        if (viewRanSuccessfully)
-          Flint.lastWorkingView[name] = Flint.views[name].component
-      })
-
-      let flintComponent = Flint.makeReactComponent(name, component, { isChanged: true });
-      setView(name, flintComponent);
-      onViewLoaded() //tools errors todo
-    },
-
     // make all array methods non-mutative
     shimProperties(id, name, val) {
       if (Array.isArray(val)) {
         // add ref to array
         val.__flintRef = { id, name };
       }
-    },
-
-    makeView(hash, component) {
-      return { hash, component };
     },
 
     getStyle(id, name) {

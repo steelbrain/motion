@@ -7,9 +7,12 @@ const niceRuntimeError = err => {
   return err
 }
 
+const niceCompilerError = err =>
+  niceCompilerMessage(niceStack(err))
+
 const niceCompilerMessage = err => {
   err.niceMessage = err.message
-    .replace(err.file + ': ', '')
+    .replace(err.fileName + ': ', '')
     .replace(/identifier ([a-z]*)\s*Unknown global name/, '$' + '1 is not defined')
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
@@ -20,14 +23,23 @@ const niceStack = err => {
   if (err.stack) {
     err.stack.split("\n").forEach(line => {
       if (line[0] === '>') {
-        err.niceStack = line
-          .replace('const ', '')
-          .replace(/Flint.([a-zA-Z]*)Wrapper/g, '$' + '1')
-          .replace(/\_vars\./g, String.fromCharCode('64'))
-          .replace(/\>\s*[0-9]+\s*\|\s*/, '')
+        let result = line
+        let replacedChars = 0
 
-        const colIndex = err.col - 1
-        err.niceStack = split(err.niceStack, colIndex)
+        const matchProps = 'view.props.'
+        const matchingProps = line.match(matchProps).length
+        if (matchingProps) {
+          result = result.replace(matchProps, String.fromCharCode('94'))
+          replacedChars += (matchingProps * 10) // * len of replacement
+        }
+
+        result = result
+          .replace(/\>\s*[0-9]+\s*\|\s*/g, '')
+
+        const colIndex = err.loc.column - 1
+        const afterUnflintIndex = colIndex - replacedChars
+
+        err.niceStack = split(result, afterUnflintIndex)
       }
     })
   }
@@ -57,14 +69,14 @@ view Errors {
         error = niceRuntimeError(runtimeError)
       }
       if (compileError) {
-        error = niceStack(niceCompilerMessage(compileError))
+        error = niceCompilerError(compileError)
       }
     }, delay)
   }
 
   window._DT.on('compile:error', () => {
     runtimeError = null
-    compileError = window._DT.data
+    compileError = window._DT.data.error
     setError()
   })
 
@@ -97,43 +109,49 @@ view Errors {
 
 view ErrorMessage {
   const last = arr => arr[arr.length - 1]
-  const fileName = url => last(url.split('/'))
-
+  const fileName = url => url && last(url.split('/'))
+  const getLine = err => err && (err.line || err.loc && err.loc.line)
   const devHeight = 0 // 34 with bar
   const closedHeight = 55
   const openHeight = 200
 
   let open = false
+  let line = getLine(^error)
 
-  <error>
-    <inner if={^error}>
-      <where>{fileName(^error.file)}{^error.line &&
-        ` (L${^error.line - 1})`
-      }</where>
-      {' '}
-      <errorTitle>
-        {^error.niceMessage || ^error.message}
-        {^error.niceStack &&
-          <niceStack>
-            {^error.niceStack[0]}
-            <errCol>{^error.niceStack[1]}</errCol>
-            {^error.niceStack[2]}
-          </niceStack>
-        }
-      </errorTitle>
-    </inner>
-  </error>
+  on('props', () => {
+    line = getLine(^error)
+  })
 
-  $error = {
+  <inner if={^error}>
+    <where>
+      {fileName(^error.file || ^error.fileName)}
+      {line && ` line ${line}`}
+    </where>
+    {' '}
+    <errorTitle>
+      {^error.niceMessage || ^error.message}
+      {^error.niceStack &&
+        <niceStack>
+          {^error.niceStack[0]}
+          <errCol>{^error.niceStack[1]}</errCol>
+          {^error.niceStack[2]}
+        </niceStack>
+      }
+    </errorTitle>
+  </inner>
+
+  const red = '#C51E19'
+
+  $ = {
     background: '#fff',
-    borderTop: '1px solid rgba(255,0,0,0.2)',
+    borderTop: '1px solid #ddd',
+    borderLeft: '4px solid ' + red,
     position: 'fixed',
     left: 0,
     height: open ? openHeight : 'auto',
     bottom: (^error) ? devHeight : (devHeight - closedHeight),
     transition: 'all 300ms ease-in',
     right: 0,
-    boxShadow: `0 0 40px rgba(0, 0, 0, 0.1) inset`,
     fontFamily: 'helvetica',
     color: '#222',
     fontSize: 15,
@@ -152,7 +170,7 @@ view ErrorMessage {
     fontSize: 15,
     pointerEvents: 'all',
     fontWeight: 'bold',
-    color: '#C51E19'
+    color: red
   }
 
   $errorTitle = {
@@ -171,12 +189,14 @@ view ErrorMessage {
     display: 'inline',
     fontFamily: 'Meslo, Menlo, Monaco, monospace',
     fontSize: 14,
-    padding: '0 10px'
+    padding: [0, 5]
   }
 
   $errCol = {
     display: 'inline',
     background: 'red',
+    borderBottom: '2px solid red',
+    marginBottom: -2,
     color: 'white'
   }
 
