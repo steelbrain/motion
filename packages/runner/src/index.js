@@ -201,10 +201,7 @@ function buildScripts(cb) {
       file.startTime = gulpStartTime
       next(null, file);
     }))
-    .pipe(gulpif(VERBOSE,
-      debug({ title: 'build:', minimal: false }),
-      debug({ title: 'build:', minimal: true })
-    ))
+    .pipe(debug({ title: 'build:', minimal: true }))
     .pipe(plumber({
       errorHandler: function(err) {
         gulpErr = true;
@@ -244,10 +241,6 @@ function buildScripts(cb) {
         bridge.message('view:locations', APP_VIEWS);
       }
     }))
-    .pipe(through.obj(function(file, enc, next) {
-      // console.log(file.contents.toString())
-      next(null, file);
-    }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],
@@ -259,7 +252,6 @@ function buildScripts(cb) {
         bridge.message('package:install', { name })
       },
       onPackage: function(name) {
-        console.log('UPDATE PACKAGES', name)
         makeDependencyBundle(() => {
           bridge.message('package:installed', { name })
           bridge.message('packages:reload', {})
@@ -267,7 +259,7 @@ function buildScripts(cb) {
       }
     }))
     .pipe(rename({ extname: '.js' }))
-    .pipe(gulp.dest(TYPED_OUT_DIR))
+    // .pipe(gulp.dest(TYPED_OUT_DIR))
     .pipe(react({
       stripTypes: true,
       es6module: true

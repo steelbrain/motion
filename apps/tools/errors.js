@@ -1,9 +1,11 @@
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
+const propsMatch = /view\.props\./g
+const propsReplace = String.fromCharCode('94')
 
 const niceRuntimeError = err => {
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
-    .replace(/\_vars\./g, String.fromCharCode('64'))
+    .replace(propsMatch, propsReplace)
   return err
 }
 
@@ -26,10 +28,9 @@ const niceStack = err => {
         let result = line
         let replacedChars = 0
 
-        const matchProps = 'view.props.'
-        const matchingProps = line.match(matchProps).length
+        const matchingProps = line.match(propsMatch).length
         if (matchingProps) {
-          result = result.replace(matchProps, String.fromCharCode('94'))
+          result = result.replace(propsMatch, propsReplace)
           replacedChars += (matchingProps * 10) // * len of replacement
         }
 

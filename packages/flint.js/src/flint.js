@@ -164,6 +164,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
           this.style = {};
           this.entityId = id;
+          this.ons = []
           this.events = {
             mount: [],
             unmount: [],
@@ -244,7 +245,8 @@ function run(browserNode, userOpts, afterRenderCb) {
       }
 
       // if unchanged
-      if (Flint.views[name].hash == hash) return
+      if (Flint.views[name].hash == hash)
+        return
 
       // if first render & view defined twice
       if (Flint.views[name] && Flint.firstRender) {
@@ -256,11 +258,11 @@ function run(browserNode, userOpts, afterRenderCb) {
       // start with a success and maybe an error will fire before next frame
       // root._DT.emitter.emit('runtime:success')
 
-      let viewRanSuccessfully = true;
+      let viewRanSuccessfully = true
 
       // recover from errorful views
       root.onerror = (...args) => {
-        viewRanSuccessfully = false;
+        viewRanSuccessfully = false
 
         if (Flint.lastWorkingView[name]) {
           setView(name, Flint.lastWorkingView[name])
