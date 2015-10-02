@@ -20,6 +20,14 @@ module.exports = function(opts) {
     splitReact(opts.env)
   }
 
+  if (opts.target == 'node') {
+    plugins.push(
+      new webpack.ProvidePlugin({
+        'fetch': 'imports?this=>global!exports?global.fetch!node-fetch'
+      })
+    )
+  }
+
   if (opts.minify)
     plugins.push(
       new webpack.optimize.UglifyJsPlugin({

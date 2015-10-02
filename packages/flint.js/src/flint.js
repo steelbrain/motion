@@ -1,5 +1,4 @@
 import 'reapp-object-assign'
-import 'isomorphic-fetch'
 import './lib/shimFlintMap'
 
 import ee from 'event-emitter'
@@ -148,9 +147,13 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun && this.isMounted)
+          if (!Flint.isUpdating && this.hasRun && this.isMounted && !this.isPaused)
             this.forceUpdate()
         },
+
+        // for use in views
+        pause() { this.isPaused = true },
+        resume() { this.isPaused = false },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();

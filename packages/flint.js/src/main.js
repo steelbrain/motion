@@ -1,3 +1,4 @@
+import fetch from 'whatwg-fetch'
 import React from 'react'
 // import tapEventPlugin from 'react-tap-event-plugin'
 import rafBatch from './lib/reactRaf'
@@ -7,6 +8,7 @@ import browserRequire from './lib/browserRequire'
 if (process.env.production)
   rafBatch.inject();
 
+window.fetch = fetch
 window.React = React
 window.runFlint = runFlint
 window.require = browserRequire
