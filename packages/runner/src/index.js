@@ -66,19 +66,21 @@ gulp.task('build', buildScripts)
 
 function main(opts, isBuild) {
   setGlobals(opts, isBuild);
-  readConfig(function() {
-    firstRun(function() {
+  readConfig(() => {
+    firstRun(() => {
       writeFlowFile();
 
-      clearBuildDir(function() {
+      clearOutDir(() => {
         if (BUILD_ONLY) {
-          makeDependencyBundle(build, true);
+          clearBuildDir(() => {
+            makeDependencyBundle(build, true);
 
-          if (OPTS.watch)
-            gulp.watch(SCRIPTS_GLOB, ['build'])
+            if (OPTS.watch)
+              gulp.watch(SCRIPTS_GLOB, ['build'])
+          })
         }
         else {
-          runServer(function() {
+          runServer(() => {
             bridge.start(wport())
           });
           buildScripts()
@@ -97,10 +99,12 @@ function cat(msg) {
   })
 }
 
+function clearOutDir(cb) {
+  recreateDir(p(FLINT_DIR, 'out'), cb)
+}
+
 function clearBuildDir(cb) {
-  recreateDir(p(FLINT_DIR, 'out'), function() {
-    recreateDir(p(FLINT_DIR, 'build', '_'), cb)
-  })
+  recreateDir(p(FLINT_DIR, 'build', '_'), cb)
 }
 
 function build() {

@@ -9,17 +9,16 @@ module.exports = function(opts) {
 
   var plugins = [
     new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(opts.env || 'production')
-      }
+      'process.env': { NODE_ENV: JSON.stringify(opts.env || 'production') }
     })
-    // , new webpack.PrefetchPlugin(['react'])
   ]
 
+  // split react if not node
   if (opts.target != 'node') {
     splitReact(opts.env)
   }
 
+  // if node, shim fetch
   if (opts.target == 'node') {
     plugins.push(
       new webpack.ProvidePlugin({
@@ -36,9 +35,7 @@ module.exports = function(opts) {
     )
 
   if (opts.dedupe)
-    plugins.push(
-      new webpack.optimize.DedupePlugin()
-    )
+    plugins.push(new webpack.optimize.DedupePlugin())
 
   function splitReact(env) {
     plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+env+'.js'))
