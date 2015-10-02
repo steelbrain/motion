@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
-import { Promise } from 'bluebird'
+import Bluebird, { Promise } from 'bluebird'
 
 import arrayDiff from './lib/arrayDiff'
 import on from './lib/on'
@@ -24,6 +24,7 @@ const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
 // GLOBALS
+root._bluebird = Bluebird
 root.on = on
 root.Promise = Promise
 root.module = {}

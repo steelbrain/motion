@@ -666,37 +666,41 @@ function makeDependencyBundle(cb, doInstall) {
   }
 
   preInstall(() => {
-    const pkg = require(FLINT_DIR + '/package.json')
-    const deps = Object.keys(pkg.dependencies)
-      .filter(p => p != 'flint-js')
+    fs.readFile(p(FLINT_DIR, 'package.json'), handleError(file => {
+      const depsObject = JSON.parse(file).dependencies
+      const deps = Object.keys(depsObject).filter(p => p != 'flint-js')
 
-    const requireString = deps
-      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine)
+      const requireString = deps
+        .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
+        .join(newLine)
 
-    const DEP_DIR = p(FLINT_DIR, 'deps')
-    const DEPS_FILE = p(DEP_DIR, 'deps.js')
+      const DEP_DIR = p(FLINT_DIR, 'deps')
+      const DEPS_FILE = p(DEP_DIR, 'deps.js')
 
-    const bundleDeps = () => {
-      webpack({
-        entry: DEPS_FILE,
-        externals: { 'react': 'React' },
-        output: { filename: p(DEP_DIR, 'packages.js') }
-      }, handleError(() => {
-        if (deps.length)
-          console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
+      const bundleDeps = () => {
+        webpack({
+          entry: DEPS_FILE,
+          externals: {
+            react: 'React',
+            bluebird: '_bluebird'
+          },
+          output: { filename: p(DEP_DIR, 'packages.js') }
+        }, handleError(() => {
+          if (deps.length)
+            console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
 
-        if (cb) cb();
-      }))
-    }
+          if (cb) cb();
+        }))
+      }
 
-    const writeDeps = () => {
-      fs.writeFile(DEPS_FILE, requireString,
-        handleError(bundleDeps))
-    }
+      const writeDeps = () => {
+        fs.writeFile(DEPS_FILE, requireString,
+          handleError(bundleDeps))
+      }
 
-    // make dep dir
-    mkdirp(DEP_DIR, handleError(writeDeps))
+      // make dep dir
+      mkdirp(DEP_DIR, handleError(writeDeps))
+    }))
   })
 }
 
