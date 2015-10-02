@@ -15,7 +15,7 @@ module.exports = function(opts) {
 
   // split react if not node
   if (opts.target != 'node') {
-    splitReact(opts.env)
+    splitReact(opts.name)
   }
 
   // if node, shim fetch
@@ -37,8 +37,8 @@ module.exports = function(opts) {
   if (opts.dedupe)
     plugins.push(new webpack.optimize.DedupePlugin())
 
-  function splitReact(env) {
-    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+env+'.js'))
+  function splitReact(name) {
+    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js'))
     entry.react = ['react']
   }
 

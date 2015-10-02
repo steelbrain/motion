@@ -70,24 +70,24 @@ function main(opts, isBuild) {
     firstRun(() => {
       writeFlowFile();
 
-      clearOutDir(() => {
-        if (BUILD_ONLY) {
-          clearBuildDir(() => {
-            makeDependencyBundle(build, true);
+      if (BUILD_ONLY) {
+        clearBuildDir(() => {
+          makeDependencyBundle(build, true);
 
-            if (OPTS.watch)
-              gulp.watch(SCRIPTS_GLOB, ['build'])
-          })
-        }
-        else {
+          if (OPTS.watch)
+            gulp.watch(SCRIPTS_GLOB, ['build'])
+        })
+      }
+      else {
+        clearOutDir(() => {
           runServer(() => {
             bridge.start(wport())
           });
           buildScripts()
           watchEditor()
           makeDependencyBundle(openInBrowser, true);
-        }
-      })
+        })
+      }
     });
   });
 }
@@ -161,7 +161,7 @@ function buildFlint(cb) {
 }
 
 function buildReact(cb) {
-  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.production.js');
+  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.prod.js');
   var write = p(BUILD_DIR, '_', 'react.js');
   copyFile(read, write, cb)
 }
@@ -452,7 +452,7 @@ function getScriptTags(files, req) {
     '<!-- FLINT JS -->' +
     newLine +
     [
-      '<script src="/assets/flintjs/dist/react.development.js"></script>',
+      '<script src="/assets/flintjs/dist/react.dev.js"></script>',
       '<script src="/assets/flintjs/dist/flint.js"></script>',
       '<script id="__flintPackages" src="/packages/packages.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',

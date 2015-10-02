@@ -5,5 +5,5 @@ module.exports = makeConf({
   prod: true,
   // dedupe: true,
   env: 'production',
-  // minify: true
+  minify: true
 })
