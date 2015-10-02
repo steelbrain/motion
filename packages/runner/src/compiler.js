@@ -2,6 +2,7 @@ import handleError from './lib/handleError'
 import addPackage from './npm/addPackage'
 import gutil from 'gulp-util'
 import through from 'through2'
+import fs from 'fs'
 // import flow from 'gulp-flowtype'
 
 let views = [];
@@ -41,30 +42,37 @@ var Parser = {
     // NPM
     if (!deps) {
       depDir = opts.dir;
-      var packageInfo = require(opts.dir + '/package.json');
 
-      if (packageInfo && typeof packageInfo.dependencies == 'object') {
-        deps = Object.keys(packageInfo.dependencies);
-      }
+      var packageInfo = fs.readFile(opts.dir + '/package.json', handleError(pkg => {
+        if (pkg && typeof pkg.dependencies == 'object') {
+          deps = Object.keys(pkg.dependencies);
+          checkRequires()
+        }
+      }));
+    }
+    else {
+      checkRequires();
     }
 
-    const requires = getMatches(source, /require\(['"]([^']+)['"]\)/g, 1) || []
+    function checkRequires() {
+      const requires = getMatches(source, /require\(['"]([^']+)['"]\)/g, 1) || []
 
-    if (deps && requires) {
-      const newDeps = requires.filter(x => deps.indexOf(x) < 0)
+      if (deps && requires) {
+        const newDeps = requires.filter(x => deps.indexOf(x) < 0)
 
-      if (newDeps.length) {
-        newDeps.forEach(function(name) {
-          if (opts.onPackageStart)
-            opts.onPackageStart(name);
+        if (newDeps.length) {
+          newDeps.forEach(function(name) {
+            if (opts.onPackageStart)
+              opts.onPackageStart(name);
 
-          addPackage(depDir, name, handleError(function() {
-            deps = deps.concat(name);
+            addPackage(depDir, name, handleError(function() {
+              deps = deps.concat(name);
 
-            if (opts.onPackage)
-              opts.onPackage(name);
-          }))
-        })
+              if (opts.onPackage)
+                opts.onPackage(name);
+            }))
+          })
+        }
       }
     }
 

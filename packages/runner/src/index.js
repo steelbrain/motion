@@ -64,7 +64,7 @@ var SCRIPTS_GLOB = [
 
 gulp.task('build', buildScripts)
 
-function main(opts, isBuild) {
+export function run(opts, isBuild) {
   setGlobals(opts, isBuild);
   readConfig(() => {
     firstRun(() => {
@@ -185,13 +185,13 @@ function buildAssets() {
   })
 }
 
-function buildScripts(cb) {
+export function buildScripts(cb, stream) {
   log('build scripts')
   var gulpErr, gulpScript;
   var gulpStartTime = Date.now();
-  var gulpDest = BUILD_DIR ? p(BUILD_DIR, '_') : OUT_DIR;
+  var gulpDest = BUILD_DIR ? p(BUILD_DIR, '_') : OUT_DIR || '.';
 
-  return gulp.src(SCRIPTS_GLOB)
+  return (stream ? stream : gulp.src(SCRIPTS_GLOB))
     .pipe(gulpif(!BUILD_ONLY,
       watch(SCRIPTS_GLOB)
     ))
@@ -214,13 +214,13 @@ function buildScripts(cb) {
           err.stack = stripAnsi(unicodeToChar(err.stack || err.codeFrame));
 
         if (err.plugin == 'gulp-babel') {
-          console.log('JS error: %s: '.red.bold, err.message.replace(APP_DIR, ''));
+          console.log('JS error: %s: ', err.message.replace(APP_DIR, ''));
           if (err.name != 'TypeError' && err.loc)
-            console.log('  > line: %s, col: %s'.red.bold, err.loc.line, err.loc.column);
+            console.log('  > line: %s, col: %s', err.loc.line, err.loc.column);
           console.log(' Stack:', newLine, err.stack)
         }
         else
-          console.log('ERROR'.red.bold, err);
+          console.log('ERROR', err);
 
         var path = err.fileName
 
@@ -262,7 +262,7 @@ function buildScripts(cb) {
         });
       }
     }))
-    .pipe(rename({ extname: '.js' }))
+    .pipe(gulpif(!stream, rename({ extname: '.js' })))
     // .pipe(gulp.dest(TYPED_OUT_DIR))
     .pipe(react({
       stripTypes: true,
@@ -277,10 +277,8 @@ function buildScripts(cb) {
       )
     ))
     .pipe(gulpif(function(file) {
-      if (!gulpErr)
-        gulp.dest(gulpDest);
-      else
-        return false
+      if (stream) return false
+      if (gulpErr) return false
 
       var endTime = Date.now() - gulpStartTime;
       log('build took ', endTime, 'ms')
@@ -291,7 +289,9 @@ function buildScripts(cb) {
         return true
       }
       return false
-    }, gulp.dest(gulpDest)))
+    },
+      gulp.dest(gulpDest))
+    )
     .pipe(through.obj(function(file, enc, next) {
       if (!gulpErr) {
         bridge.message('script:add', gulpScript);
@@ -303,7 +303,9 @@ function buildScripts(cb) {
         // })
       }
 
-      if (cb && !(BUILD_ONLY && OPTS.watch)) cb();
+      if (cb && !(BUILD_ONLY && OPTS.watch)) {
+        cb(stream ? file.contents.toString() : undefined)
+      }
 
       if (BUILD_ONLY && !OPTS.watch)
         done('scripts');
@@ -711,5 +713,3 @@ function done(which) {
 function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
 }
-
-module.exports = main;
