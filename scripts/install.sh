@@ -32,6 +32,18 @@ echo_bad() {
   echo "${RED}${BOLD}$1${NONE}${NORMAL}"
 }
 
+echo_error() {
+cat <<"EOF"
+
+  Open an issue at:
+    https://github.com/flintjs/flint/issues
+
+  Or join our Slack:
+    http://flint-slack.herokuapp.com
+
+EOF
+}
+
 # Let's display everything on stderr.
 exec 1>&2
 
@@ -87,7 +99,9 @@ EOF
       sleep 1
       npm install -g flint
     else
-      echo "Uh oh! Couldn't fix permissions!"
+      echo
+      echo_bad "Uh oh! Couldn't fix permissions!"
+      echo_error
       exit 1
     fi
   # else not wanted to fix
@@ -135,15 +149,7 @@ else
   #
   echo
   echo_bad "Flint not installed!"
-cat <<"EOF"
-
-  Open an issue at:
-    https://github.com/flintjs/flint/issues
-
-  Or join our Slack:
-    http://flint-slack.herokuapp.com
-
-EOF
+  echo_error
   #
 fi
 
