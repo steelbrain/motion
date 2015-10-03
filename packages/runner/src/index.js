@@ -269,8 +269,6 @@ export function buildScripts(cb, stream) {
       stripTypes: true,
       es6module: true
     }))
-    // wrap in file scope
-    .pipe(wrap({ src: __dirname + '/../templates/file.template.js' }))
     .pipe(gulpif(BUILD_ONLY,
       multipipe(
         concat(BUILD_NAME + '.js'),
@@ -456,7 +454,7 @@ function getScriptTags(files, req) {
     newLine +
     [
       '<script src="/assets/flintjs/dist/react.dev.js"></script>',
-      '<script src="/assets/flintjs/dist/flint.prod.js"></script>',
+      '<script src="/assets/flintjs/dist/flint.dev.js"></script>',
       '<script id="__flintPackages" src="/packages/packages.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/assets/flintjs/dist/devtools.js"></script>'

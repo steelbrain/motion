@@ -32,9 +32,8 @@ var Parser = {
   post: function(file, source, opts) {
     // source = addFlow(source)
 
-    // TODO: fix this in babel
-    let prefix = `Flint.hotload('${file}', function(global, exports) { \n`
-    let suffix = '\nreturn exports; }, window, {}) // ends hotload'
+    let prefix = `(function(global) { Flint.hotload('${file}', function() { \n`
+    let suffix = ';return exports }) })(window, {});'
 
     source = prefix + source + suffix
       .replace('["default"]', '.default')
@@ -167,7 +166,7 @@ var Parser = {
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 
-    console.log("final source", transformedSource)
+    // console.log("final source", transformedSource)
     return {
       file: transformedSource,
       views: viewLines
