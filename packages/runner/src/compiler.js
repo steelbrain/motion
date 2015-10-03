@@ -18,11 +18,11 @@ const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
 const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
-const jsxEnd = view => `  return () => (
+const jsxEnd = view => `
+  return () =>
     <${getWrapper(view)} view={view}>
       ${viewTemplates[view].join('\n')}
     </${getWrapper(view)}>
-  )
 })`
 
 // track app deps
@@ -33,11 +33,11 @@ var Parser = {
     // source = addFlow(source)
 
     // TODO: fix this in babel
-    let prefix = "var FlintFile = '" + file + "'; Flint.startHot(FlintFile);"
-    let suffix = "Flint.endHot(FlintFile);"
+    let prefix = `Flint.hotload('${file}', function(global, exports) { \n`
+    let suffix = '\nreturn exports; }, window, {}) // ends hotload'
 
     source = prefix + source + suffix
-    source = source.replace('["default"]', '.default')
+      .replace('["default"]', '.default')
 
     // NPM
     if (!deps) {
@@ -82,7 +82,6 @@ var Parser = {
 
   pre: function(file, source) {
     let currentView = { name: null, contents: [] }
-    let inStyle = false
     let inJSX = false
     let inView = false
     let viewLines = [];
@@ -91,11 +90,6 @@ var Parser = {
       locations: [],
       views: {}
     };
-
-    // style setter ($x = {}), then getter ($x)
-    const replaceStyles = line => line
-      .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.style["style$1"] = (_index) => false || ')
-      .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.style["style$1"]')
 
     const transformedSource = source
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
@@ -145,10 +139,6 @@ var Parser = {
 
           viewTemplates[currentView.name].push(result)
         }
-        // in view (NOT JSX)
-        else {
-          result = replaceStyles(result)
-        }
 
         // in view (ALL)
         if (inView) {
@@ -169,12 +159,15 @@ var Parser = {
         }
 
         // dont render jsx
-        if (inJSX) return ''
+        if (inJSX) return null
         return result;
-      }).join("\n")
+      })
+      // remove invalid lines
+      .filter(l => l != null)
+      .join("\n")
       .replace(viewMatcher, viewReplacer)
 
-    // console.log("final source", transformedSource)
+    console.log("final source", transformedSource)
     return {
       file: transformedSource,
       views: viewLines

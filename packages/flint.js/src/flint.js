@@ -1,6 +1,4 @@
 import 'reapp-object-assign'
-import './lib/shimFlintMap'
-
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 // import Radium from 'radium'
@@ -9,28 +7,23 @@ import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
-import Bluebird, { Promise } from 'bluebird'
+import { Promise } from 'bluebird'
 
+import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
-import NotFound from './views/NotFound'
 import mainComponent from './lib/mainComponent'
 
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
-if (inBrowser) window.root = window
-else global.root = global
-
 // GLOBALS
-root._bluebird = Bluebird
 root.on = on
 root.Promise = Promise
 root.module = {}
-root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -70,7 +63,7 @@ function run(browserNode, userOpts, afterRenderCb) {
   const isTools = opts.app == 'devTools'
 
   const render = () => {
-    const MainComponent = getView('Main') || mainComponent;
+    const MainComponent = getComponent('Main') || mainComponent;
     const preloaders = Flint.preloaders.map(loader => loader())
 
     Promise.all(preloaders).then(() => {
@@ -90,15 +83,11 @@ function run(browserNode, userOpts, afterRenderCb) {
 
   const removeComponent = key => {
     Flint.views[key] = undefined
-    opts.namespace[key] = undefined
+    root[key] = undefined
   }
 
-  const getView = (key) => opts.namespace[key]
-  const setView = (key, view, hash) => {
-    opts.namespace[key] = view
-    Flint.views[key] = { hash, view }
-  }
-
+  const setComponent = (key, val) => (opts.namespace[key] = val)
+  const getComponent = (key) => opts.namespace[key]
   const emitter = ee({})
 
   let Flint = {
@@ -123,12 +112,12 @@ function run(browserNode, userOpts, afterRenderCb) {
     viewsInFile: {},
     // current file that is running
     currentHotFile: null,
-    startHot(file) {
+
+    hotload(file, run, global, _exports) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
-    },
-
-    endHot(file) {
+      const exports = run(global, _exports)
+      Flint.setExports(exports)
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
       const added = arrayDiff(views, cached)
@@ -144,7 +133,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       })
     },
 
-    makeReactComponent(name, view, options = {}) {
+    makeReactComponent(name, component, options = {}) {
       let id;
 
       const spec = {
@@ -154,20 +143,15 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun && this.isMounted && !this.isPaused)
+          if (!Flint.isUpdating && this.hasRun && this.isMounted)
             this.forceUpdate()
         },
-
-        // for use in views
-        pause() { this.isPaused = true },
-        resume() { this.isPaused = false },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
 
-          this.style = {};
+          this.styles = {};
           this.entityId = id;
-          this.ons = []
           this.events = {
             mount: [],
             unmount: [],
@@ -185,7 +169,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
            // watch for errors with ran
           let ran = false;
-          this._render = view.call(void 0, this, viewOn)
+          this._render = component.call(void 0, this, viewOn)
           ran = true;
 
           if (!ran) return null;
@@ -220,7 +204,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           const els = this._render();
-          const wrapperStyle = this.style && this.style['style']
+          const wrapperStyle = this.style && this.style['self']
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
@@ -272,48 +256,45 @@ function run(browserNode, userOpts, afterRenderCb) {
       }
     },
 
-    /*
-      Define a view,
-        - hash should be optional only for dev mode
-    */
-    view(name, hash, body) {
-      // track views in file
+    view(name, hash, component) {
       Flint.viewsInFile[Flint.currentHotFile].push(name)
 
       // if new view
       if (Flint.views[name] == undefined) {
-        let view = Flint.makeReactComponent(name, body, { isNew: true });
-        Flint.lastWorkingView[name] = Flint.views[name] && Flint.views[name].view;
-        setView(name, view, hash) // puts on namespace
+        let fComponent = Flint.makeReactComponent(name, component, { isNew: true });
+        Flint.views[name] = Flint.makeView(hash, fComponent);
+        Flint.lastWorkingView[name] = Flint.views[name].component;
+        setComponent(name, fComponent) // puts on namespace
+        return
+      }
+      // if first render & view is defined twice
+      // we have a bug!
+      else if (Flint.firstRender) {
+        console.error('Defined a view twice!', name, hash)
+        setComponent(name, ErrorDefinedTwice)
         return
       }
 
       // if unchanged
-      if (Flint.views[name].hash == hash)
-        return
+      if (Flint.views[name].hash == hash) return
+      // start with a success and maybe an error will fire before next frame
+      root._DT.emitter.emit('runtime:success')
 
-      // if first render & view defined twice
-      if (Flint.views[name] && Flint.firstRender) {
-        console.error('Defined a view twice!', name, hash)
-        setView(name, ErrorDefinedTwice(name))
-        return
+      // if changed
+      const setView = (name, flintComponent) => {
+        Flint.views[name] = Flint.makeView(hash, flintComponent)
+        setComponent(name, flintComponent) // puts on namespace
+        if (Flint.firstRender) return
       }
 
-      // start with a success and maybe an error will fire before next frame
-      // root._DT.emitter.emit('runtime:success')
-
-      let viewRanSuccessfully = true
+      let viewRanSuccessfully = true;
 
       // recover from errorful views
       root.onerror = (...args) => {
-        viewRanSuccessfully = false
+        viewRanSuccessfully = false;
 
         if (Flint.lastWorkingView[name]) {
           setView(name, Flint.lastWorkingView[name])
-          render()
-        }
-        else {
-          setView(name, ErrorDefinedTwice(name))
           render()
         }
 
@@ -326,51 +307,14 @@ function run(browserNode, userOpts, afterRenderCb) {
         }
       }
 
-      Flint.on('afterRender', () => {
+      Flint.on("afterRender", () => {
         if (viewRanSuccessfully)
-          Flint.lastWorkingView[name] = Flint.views[name].view
+          Flint.lastWorkingView[name] = Flint.views[name].component
       })
 
-      let view = Flint.makeReactComponent(name, body, { isChanged: true });
-      setView(name, view, hash);
-      window.onViewLoaded() // tools undo errors
-    },
-
-    getView(name) {
-      if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
-        return Wrapper;
-
-      // When importing something, babel may put it into __reactMotion.Spring,
-      // which comes in as a string, so we need to lookup on root
-      if (name.indexOf('.') !== -1) {
-        const appView = name.split('.').reduce((acc, cur) => (acc || {})[cur], root);
-        if (appView) return appView
-      }
-
-      // TODO: this fixes importing a react element, but its sloppy
-      // import Element from 'some-element'; can be used <Element>
-      if (root[name])
-        return root[name];
-
-      // const subName = `${view}.${name}`
-      //
-      // // subview
-      // if (Flint.views[subName])
-      //   return Flint.views[subName].view
-
-      // no view
-
-      if (Flint.views[name]) {
-        return Flint.views[name].view;
-      }
-
-      const namespaceView = opts.namespace[name] || root[name];
-
-      if (namespaceView)
-        return namespaceView;
-
-      console.warn("Can't find view:", name)
-      return NotFound(name)
+      let flintComponent = Flint.makeReactComponent(name, component, { isChanged: true });
+      setView(name, flintComponent);
+      onViewLoaded() //tools errors todo
     },
 
     // make all array methods non-mutative
@@ -379,6 +323,10 @@ function run(browserNode, userOpts, afterRenderCb) {
         // add ref to array
         val.__flintRef = { id, name };
       }
+    },
+
+    makeView(hash, component) {
+      return { hash, component };
     },
 
     getStyle(id, name) {

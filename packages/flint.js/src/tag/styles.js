@@ -22,30 +22,25 @@ const mergeStyles = (obj, ...styles)  => {
   }, result);
 }
 
-// TODO remove prefix, it's just there so the empty style $ = {}.. isn't ['']
-const prefix = 'style'
-
 export default function elementStyles(key, view, name, tag, props) {
   if (typeof name !== 'string') {
     return
   }
 
-  const prefixed = prefix + name
-
   // if its the root element (name === view or Wrapper)
   const isViewBaseElement = name.indexOf('Flint.') == 0 || view.name.toLowerCase() == name
 
-  if (view.style) {
-    const viewStyles = view.style;
+  if (view.styles) {
+    const viewStyles = view.styles;
     // allows for $ to access everything
 
     /*
       if <foobar> is root, then apply both the base($) and ($foobar)
     */
 
-    const viewStyle = viewStyles[prefix]
-    const nameStyle = viewStyles[prefix + name]
-    const tagStyle = viewStyles[prefix + tag]
+    const viewStyle = viewStyles['self']
+    const nameStyle = viewStyles[name]
+    const tagStyle = viewStyles[tag]
 
     const index = props.repeat ? key()[0] : void 0;
     const uniqueTagId = view.entityId + name + tag;
@@ -67,8 +62,8 @@ export default function elementStyles(key, view, name, tag, props) {
       // add class styles
       if (props.className) {
         props.className.split(' ').forEach(className => {
-          const classSelector = `${prefix}.${className}`;
-          const tagWithClassSelector = prefixed + classSelector;
+          const classSelector = `.${className}`;
+          const tagWithClassSelector = classSelector;
 
           if (viewStyles[tagWithClassSelector])
             tagStyles = mergeStyles(null, tagStyles, viewStyles[tagWithClassSelector](index))

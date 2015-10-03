@@ -128,7 +128,7 @@ function buildTemplate() {
       .replace('/static', '/_/static')
       .replace('<!-- SCRIPTS -->', (
         '<script src="/_/react.js"></script>' +
-        '<script src="/_/flint.js"></script>' +
+        '<script src="/_/flint.prod.js"></script>' +
         '<script src="/_/packages.js"></script>' +
         newLine + '<script src="/_/'+BUILD_NAME+'.js"></script>' +
         newLine + '<script>window.Flint = flintRun_'+BUILD_NAME+'("_flintapp", { namespace:window, app:"userMain" });</script>'
@@ -247,7 +247,8 @@ export function buildScripts(cb, stream) {
     }))
     .pipe(babel({
       stage: 2,
-      blacklist: ['flow', 'react', 'es6.tailCall'],
+      blacklist: ['useStrict', 'flow', 'react', 'es6.tailCall'],
+      retainLines: true,
       optional: ['bluebirdCoroutines']
     }))
     .pipe(flint('post', {
@@ -455,7 +456,7 @@ function getScriptTags(files, req) {
     newLine +
     [
       '<script src="/assets/flintjs/dist/react.dev.js"></script>',
-      '<script src="/assets/flintjs/dist/flint.js"></script>',
+      '<script src="/assets/flintjs/dist/flint.prod.js"></script>',
       '<script id="__flintPackages" src="/packages/packages.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/assets/flintjs/dist/devtools.js"></script>'

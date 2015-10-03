@@ -12,12 +12,16 @@ const niceRuntimeError = err => {
 const niceCompilerError = err =>
   niceCompilerMessage(niceStack(err))
 
-const niceCompilerMessage = err => {
-  err.niceMessage = err.message
-    .replace(err.fileName + ': ', '')
+const replaceCompilerMsg = (msg, filename = '') =>
+  msg
+    .replace(filename + ': ', '')
     .replace(/identifier ([a-z]*)\s*Unknown global name/, '$' + '1 is not defined')
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
+    .replace(/Flint.([A-Za-z1-9_]*)Wrapper/, '$' + '1')
+
+const niceCompilerMessage = err => {
+  err.niceMessage = replaceCompilerMsg(err.message, err.fileName)
   return err
 }
 
@@ -28,7 +32,8 @@ const niceStack = err => {
         let result = line
         let replacedChars = 0
 
-        const matchingProps = line.match(propsMatch).length
+        const matches = line.match(propsMatch)
+        const matchingProps = matches || 0
         if (matchingProps) {
           result = result.replace(propsMatch, propsReplace)
           replacedChars += (matchingProps * 10) // * len of replacement
@@ -37,9 +42,10 @@ const niceStack = err => {
         result = result
           .replace(/\>\s*[0-9]+\s*\|\s*/g, '')
 
+        result = replaceCompilerMsg(result)
+
         const colIndex = err.loc.column - 1
         const afterUnflintIndex = colIndex - replacedChars
-
         err.niceStack = split(result, afterUnflintIndex)
       }
     })
@@ -82,6 +88,7 @@ view Errors {
   })
 
   window._DT.on('runtime:error', () => {
+    console.log("got runtime error", window._DT.data)
     // on multiple errors, prefer the first
     if (runtimeError) return
     compileError = null
