@@ -28,12 +28,18 @@ const jsxEnd = view => `
 // track app deps
 let deps, depDir;
 
+// allow style syntax
+const replaceStyles = line => line
+  .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
+  .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
+  .replace('__STYLE__', '$')
+
 var Parser = {
   post: function(file, source, opts) {
     // source = addFlow(source)
 
-    let prefix = `(function(global) { Flint.hotload('${file}', function() { \n`
-    let suffix = ';return exports }) })(window, {});'
+    let prefix = `(function() { Flint.hotload('${file}', function(exports) { \n`
+    let suffix = ';return exports }) })();'
 
     source = prefix + source + suffix
       .replace('["default"]', '.default')
@@ -56,7 +62,7 @@ var Parser = {
     function checkRequires() {
       const requires = getMatches(source, /require\(['"]([^']+)['"]\)/g, 1) || []
 
-      if (deps && requires) {
+      if (deps && requires.length) {
         const newDeps = requires.filter(x => deps.indexOf(x) < 0)
 
         if (newDeps.length) {
@@ -88,7 +94,7 @@ var Parser = {
     VIEW_LOCATIONS[file] = {
       locations: [],
       views: {}
-    };
+    }
 
     const transformedSource = source
       .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
@@ -137,6 +143,10 @@ var Parser = {
             .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           viewTemplates[currentView.name].push(result)
+        }
+        // in view (NOT JSX)
+        else {
+          result = replaceStyles(result)
         }
 
         // in view (ALL)

@@ -22,6 +22,8 @@ const mergeStyles = (obj, ...styles)  => {
   }, result);
 }
 
+const prefix = '$'
+
 export default function elementStyles(key, view, name, tag, props) {
   if (typeof name !== 'string') {
     return
@@ -38,9 +40,9 @@ export default function elementStyles(key, view, name, tag, props) {
       if <foobar> is root, then apply both the base($) and ($foobar)
     */
 
-    const viewStyle = viewStyles['self']
-    const nameStyle = viewStyles[name]
-    const tagStyle = viewStyles[tag]
+    const viewStyle = viewStyles[prefix]
+    const nameStyle = viewStyles[prefix + name]
+    const tagStyle = viewStyles[prefix + tag]
 
     const index = props.repeat ? key()[0] : void 0;
     const uniqueTagId = view.entityId + name + tag;

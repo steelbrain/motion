@@ -118,10 +118,10 @@ function run(browserNode, userOpts, afterRenderCb) {
     // current file that is running
     currentHotFile: null,
 
-    hotload(file, run, global, _exports) {
+    hotload(file, run) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
-      const exports = run(global, _exports)
+      const exports = run({})
       Flint.setExports(exports)
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
