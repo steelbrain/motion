@@ -1,1 +1,1 @@
-<%= contents %>
+(function(global, exports) {<%= contents %>})(root, {});

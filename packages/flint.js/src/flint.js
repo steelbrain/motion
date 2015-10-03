@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom'
 import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
-import { Promise } from 'bluebird'
+import Bluebird, { Promise } from 'bluebird'
 
 import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
@@ -20,10 +20,15 @@ import mainComponent from './lib/mainComponent'
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
+if (inBrowser) window.root = window
+else global.root = global
+
 // GLOBALS
+root._bluebird = Bluebird
 root.on = on
 root.Promise = Promise
 root.module = {}
+root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -143,9 +148,12 @@ function run(browserNode, userOpts, afterRenderCb) {
         Flint,
 
         update() {
-          if (!Flint.isUpdating && this.hasRun && this.isMounted)
+          if (!Flint.isUpdating && this.hasRun && this.isMounted && !this.isPaused)
             this.forceUpdate()
         },
+
+        pause() { this.isPaused = true },
+        resume() { this.isPaused = false },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
@@ -204,7 +212,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           const els = this._render();
-          const wrapperStyle = this.style && this.style['self']
+          const wrapperStyle = this.style && this.style['$']
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
@@ -271,12 +279,14 @@ function run(browserNode, userOpts, afterRenderCb) {
       // we have a bug!
       else if (Flint.firstRender) {
         console.error('Defined a view twice!', name, hash)
-        setComponent(name, ErrorDefinedTwice)
+        setComponent(name, ErrorDefinedTwice(name))
         return
       }
 
       // if unchanged
-      if (Flint.views[name].hash == hash) return
+      if (Flint.views[name].hash == hash)
+        return
+
       // start with a success and maybe an error will fire before next frame
       root._DT.emitter.emit('runtime:success')
 
@@ -297,6 +307,10 @@ function run(browserNode, userOpts, afterRenderCb) {
           setView(name, Flint.lastWorkingView[name])
           render()
         }
+        else {
+          setView(name, ErrorDefinedTwice(name))
+          render()
+        }
 
         // run devtools
         if (!process.env.production) {
@@ -307,14 +321,14 @@ function run(browserNode, userOpts, afterRenderCb) {
         }
       }
 
-      Flint.on("afterRender", () => {
+      Flint.on('afterRender', () => {
         if (viewRanSuccessfully)
           Flint.lastWorkingView[name] = Flint.views[name].component
       })
 
       let flintComponent = Flint.makeReactComponent(name, component, { isChanged: true });
       setView(name, flintComponent);
-      onViewLoaded() //tools errors todo
+      window.onViewLoaded() //tools errors todo
     },
 
     // make all array methods non-mutative
