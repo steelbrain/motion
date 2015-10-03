@@ -64,8 +64,8 @@ export default function elementStyles(key, view, name, tag, props) {
       // add class styles
       if (props.className) {
         props.className.split(' ').forEach(className => {
-          const classSelector = `.${className}`;
-          const tagWithClassSelector = classSelector;
+          const classSelector = `${prefix}.${className}`;
+          const tagWithClassSelector = prefix + name + classSelector;
 
           if (viewStyles[tagWithClassSelector])
             tagStyles = mergeStyles(null, tagStyles, viewStyles[tagWithClassSelector](index))
