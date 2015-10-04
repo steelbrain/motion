@@ -1,14 +1,11 @@
 module.exports = function handleError(cb) {
-  return function(err) {
+  return function(err, ...args) {
     if (err) {
       console.log(err)
       // process.exit(1);
+      return
     }
-    else {
-      cb.apply(
-        this,
-        Array.prototype.slice.call(arguments, 1)
-      )
-    }
+
+    cb && cb(...args)
   }
 }

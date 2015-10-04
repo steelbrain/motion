@@ -2,7 +2,7 @@ import flint from './compiler'
 import react from './gulp/react'
 import babel from './gulp/babel'
 import bridge from './bridge/message'
-import watchEditor from './bridge/watchEditor'
+// import watchEditor from './bridge/watchEditor'
 import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
@@ -84,7 +84,7 @@ export function run(opts, isBuild) {
             bridge.start(wport())
           });
           buildScripts()
-          watchEditor()
+          // watchEditor()
           makeDependencyBundle(openInBrowser, true);
         })
       }

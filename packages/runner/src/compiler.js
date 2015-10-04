@@ -26,7 +26,7 @@ const jsxEnd = view => `
 })`
 
 // track app deps
-let deps, depDir;
+let deps;
 
 // allow style syntax
 const replaceStyles = line => line
@@ -34,58 +34,51 @@ const replaceStyles = line => line
   .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
   .replace('__STYLE__', '$')
 
+const filePrefix = file => `(function() { Flint.hotload('${file}', function(exports) { \n`
+const fileSuffix = ';return exports }) })();'
+
+const checkDependencies = (source, deps, opts, cb) => {
+  deps = deps || []
+
+  const parseDeps = data => {
+    const parsedData = JSON.parse(data)
+    const depVersions = parsedData.dependencies
+    const installedDeps = Object.keys(depVersions)
+
+    if (!installedDeps.length) return
+
+    const foundDeps = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
+    const newDeps = foundDeps.filter(x => deps.indexOf(x) < 0)
+
+    console.log(foundDeps)
+
+    newDeps.forEach(dep => {
+      if (opts.onPackageStart) opts.onPackageStart(dep);
+      addPackage(opts.dir, dep, handleError(() => {
+        cb(deps.concat(dep))
+        if (opts.onPackage) opts.onPackage(dep);
+      }))
+    })
+  }
+
+  fs.readFile(opts.dir+'/package.json', handleError(parseDeps));
+}
+
 var Parser = {
-  post: function(file, source, opts) {
+  post(file, source, opts) {
+    source = filePrefix(file) + source + fileSuffix
+    source = source.replace('["default"]', '.default')
+
+    checkDependencies(source, deps, opts, newDeps => {
+      deps = newDeps
+    })
+
     // source = addFlow(source)
-
-    let prefix = `(function() { Flint.hotload('${file}', function(exports) { \n`
-    let suffix = ';return exports }) })();'
-
-    source = prefix + source + suffix
-      .replace('["default"]', '.default')
-
-    // NPM
-    if (!deps) {
-      depDir = opts.dir;
-
-      var packageInfo = fs.readFile(opts.dir + '/package.json', handleError(pkg => {
-        if (pkg && typeof pkg.dependencies == 'object') {
-          deps = Object.keys(pkg.dependencies);
-          checkRequires()
-        }
-      }));
-    }
-    else {
-      checkRequires();
-    }
-
-    function checkRequires() {
-      const requires = getMatches(source, /require\(['"]([^']+)['"]\)/g, 1) || []
-
-      if (deps && requires.length) {
-        const newDeps = requires.filter(x => deps.indexOf(x) < 0)
-
-        if (newDeps.length) {
-          newDeps.forEach(function(name) {
-            if (opts.onPackageStart)
-              opts.onPackageStart(name);
-
-            addPackage(depDir, name, handleError(function() {
-              deps = deps.concat(name);
-
-              if (opts.onPackage)
-                opts.onPackage(name);
-            }))
-          })
-        }
-      }
-    }
-
     //flow.check()
     return { file: source }
   },
 
-  pre: function(file, source) {
+  pre(file, source) {
     let currentView = { name: null, contents: [] }
     let inJSX = false
     let inView = false
@@ -102,7 +95,7 @@ var Parser = {
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
       .split("\n")
-      .map(function(line, index) {
+      .map((line, index) => {
         if (line.charAt(0) == "\t")
           console.log('Flint uses spaces over tabs')
 
