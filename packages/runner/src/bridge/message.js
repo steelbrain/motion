@@ -1,51 +1,49 @@
-var WebSocketServer = require('ws').Server
-var WSS;
-var connected = false;
-var queue = [];
+import { server as WebSocketServer } from 'websocket'
+import http from 'http'
 
-function message(type, obj) {
-  if (!obj) obj = {};
+let wsServer, server
+let connected = false
+let clients = []
+let queue = []
 
-  obj._type = type;
-  obj.timestamp = Date.now();
-
-  // console.log('sending message', type, obj)
-
-  var msg = JSON.stringify(obj);
-
-  if (connected && WSS)
-    WSS.broadcast(msg);
-  else
-    queue.push(msg)
+function broadcast(data) {
+  clients.forEach(client => client.send(data))
 }
 
 function runQueue() {
-  if (queue.length && WSS) {
-    queue.forEach(function(msg) {
-      WSS.broadcast(msg);
-    })
-
+  if (queue.length && wsServer) {
+    queue.forEach(broadcast)
     queue = [];
   }
 }
 
-module.exports = {
-  message: message,
-  start: function(port) {
-    WSS = new WebSocketServer({ port: port });
+export function message(type, obj = {}) {
+  obj._type = type
+  obj.timestamp = Date.now()
 
-    WSS.broadcast = function broadcast(data) {
-      WSS.clients.forEach(function each(client) {
-        client.send(data);
-      });
-    }
-
-    WSS.on('connection', function() {
-      if (!connected) {
-        runQueue()
-      }
-
-      connected = true;
-    });
-  }
+  let msg = JSON.stringify(obj)
+  // console.log('sending message', connected, type, obj)
+  if (connected && wsServer)
+    broadcast(msg)
+  else
+    queue.push(msg)
 }
+
+export function start(port) {
+  server = http.createServer((_, res) => res.writeHead(404) && res.end())
+  server.listen(port)
+
+  wsServer = new WebSocketServer({
+    httpServer: server,
+    autoAcceptConnections: true
+  })
+
+  wsServer.on('connect', req => {
+    clients.push(req)
+    if (connected) return
+    connected = true
+    runQueue()
+  })
+}
+
+export default { start, message }

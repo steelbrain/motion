@@ -1,7 +1,7 @@
 import { compileError, compileSuccess } from './errors';
 
 export default function run(browser, opts) {
-  const ws = new WebSocket('ws://localhost:' + opts.websocketPort)
+  const ws = new WebSocket('ws://localhost:' + opts.websocketPort + '/', 'flint')
 
   const actions = {
     'editor:location': msg => {
@@ -13,7 +13,6 @@ export default function run(browser, opts) {
     },
 
     'script:add': msg => {
-      console.log('adding script', msg)
       browser.emitter.emit('runtime:success')
       addScript(msg, Flint.render);
     },
@@ -40,6 +39,7 @@ export default function run(browser, opts) {
   }
 
   ws.onmessage = function(message) {
+    console.log(message)
     message = JSON.parse(message.data)
     if (!message) return
 
