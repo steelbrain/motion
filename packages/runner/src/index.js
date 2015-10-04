@@ -83,7 +83,12 @@ export function run(opts, isBuild) {
           runServer(() => {
             bridge.start(wport())
           });
-          buildScripts()
+
+          flint('init', {
+            dir: FLINT_DIR,
+            after: buildScripts
+          })
+
           // watchEditor()
           makeDependencyBundle(openInBrowser, true);
         })
@@ -256,7 +261,8 @@ export function buildScripts(cb, stream) {
       onPackageStart: function(name) {
         bridge.message('package:install', { name })
       },
-      onPackage: function(name) {
+      onPackageFinish: function(name) {
+        console.log('finish package', name)
         makeDependencyBundle(() => {
           bridge.message('package:installed', { name })
           bridge.message('packages:reload', {})
@@ -666,7 +672,8 @@ function makeDependencyBundle(cb, doInstall) {
   preInstall(() => {
     fs.readFile(p(FLINT_DIR, 'package.json'), handleError(file => {
       const depsObject = JSON.parse(file).dependencies
-      const deps = Object.keys(depsObject).filter(p => p != 'flint-js')
+      const deps = Object.keys(depsObject)
+        .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
 
       const requireString = deps
         .map(name => `window.__flintPackages["${name}"] = require("${name}");`)

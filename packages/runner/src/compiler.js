@@ -5,9 +5,9 @@ import through from 'through2'
 import fs from 'fs'
 // import flow from 'gulp-flowtype'
 
-let views = [];
-let VIEW_LOCATIONS = {};
-let emit;
+let views = []
+let VIEW_LOCATIONS = {}
+let emit
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const id = x => x
@@ -25,9 +25,6 @@ const jsxEnd = view => `
     </${getWrapper(view)}>
 })`
 
-// track app deps
-let deps;
-
 // allow style syntax
 const replaceStyles = line => line
   .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
@@ -37,41 +34,77 @@ const replaceStyles = line => line
 const filePrefix = file => `(function() { Flint.hotload('${file}', function(exports) { \n`
 const fileSuffix = ';return exports }) })();'
 
-const checkDependencies = (source, deps, opts, cb) => {
-  deps = deps || []
-
-  const parseDeps = data => {
-    const parsedData = JSON.parse(data)
-    const depVersions = parsedData.dependencies
-    const installedDeps = Object.keys(depVersions)
-
-    if (!installedDeps.length) return
-
-    const foundDeps = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-    const newDeps = foundDeps.filter(x => deps.indexOf(x) < 0)
-
-    console.log(foundDeps)
-
-    newDeps.forEach(dep => {
-      if (opts.onPackageStart) opts.onPackageStart(dep);
-      addPackage(opts.dir, dep, handleError(() => {
-        cb(deps.concat(dep))
-        if (opts.onPackage) opts.onPackage(dep);
-      }))
-    })
+const readPackageJsonDeps = (dir, cb) => {
+  try {
+    fs.readFile(dir + '/package.json', handleError(data => {
+      cb(Object.keys(JSON.parse(data).dependencies))
+    }))
   }
+  catch(e) {
+    console.log('Error reading app package.json')
+    console.log(e)
+  }
+}
 
-  fs.readFile(opts.dir+'/package.json', handleError(parseDeps));
+// deps cache
+let installing = false
+let newDeps = []
+let installedDeps = []
+
+const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => {
+  try {
+    const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
+    const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
+
+    // no new ones found
+    if (!fresh.length) return
+
+    // add new ones to queue
+    newDeps = newDeps.concat(found)
+
+    // we've queued and may already be installing, hold off
+    if (installing) return
+
+    // install deps one by one
+    const installNextDep = () => {
+      const dep = newDeps.shift()
+      onPackageStart(dep)
+      addPackage(dir, dep, handleError(packageInstalled))
+      const packageInstalled = () => {
+        installedDeps.push(dep)
+        onPackageFinish(dep)
+
+        // continue installing
+        if (newDeps.length)
+          installNextDep()
+        else
+          installing = false
+      }
+    }
+
+    installing = true
+    installNextDep()
+  }
+  catch (e) {
+    console.log('Error installing dependencies!')
+    console.log(e)
+  }
 }
 
 var Parser = {
+  init(opts) {
+    // set initial local cache of installedDeps
+    readPackageJsonDeps(opts.dir, installed => {
+      installedDeps = installed
+      opts.after()
+    })
+  },
+
   post(file, source, opts) {
     source = filePrefix(file) + source + fileSuffix
     source = source.replace('["default"]', '.default')
 
-    checkDependencies(source, deps, opts, newDeps => {
-      deps = newDeps
-    })
+    checkDependencies(source, opts)
 
     // source = addFlow(source)
     //flow.check()
@@ -178,6 +211,9 @@ var Parser = {
 }
 
 function compile(type, opts) {
+  if (type == 'init')
+    return Parser.init(opts)
+
   return through.obj(function(file, enc, cb) {
     if (file.isNull()) {
       cb(null, file);
