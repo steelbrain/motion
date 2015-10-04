@@ -8,6 +8,7 @@ import fs from 'fs'
 let views = []
 let VIEW_LOCATIONS = {}
 let emit
+let OPTS
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const id = x => x
@@ -55,6 +56,8 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
   try {
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
     const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
+    log('Found packages in file:', found)
+    log('New packages in file:', fresh)
 
     // no new ones found
     if (!fresh.length) return
@@ -68,9 +71,10 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
     // install deps one by one
     const installNextDep = () => {
       const dep = newDeps.shift()
-      onPackageStart(dep)
-      addPackage(dir, dep, handleError(packageInstalled))
+      log('new dep is', dep)
+
       const packageInstalled = () => {
+        log('package installed', dep)
         installedDeps.push(dep)
         onPackageFinish(dep)
 
@@ -80,6 +84,9 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
         else
           installing = false
       }
+
+      onPackageStart(dep)
+      addPackage(dir, dep, handleError(packageInstalled))
     }
 
     installing = true
@@ -93,6 +100,7 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
 
 var Parser = {
   init(opts) {
+    OPTS = opts
     // set initial local cache of installedDeps
     readPackageJsonDeps(opts.dir, installed => {
       installedDeps = installed
@@ -101,6 +109,7 @@ var Parser = {
   },
 
   post(file, source, opts) {
+    OPTS = opts
     source = filePrefix(file) + source + fileSuffix
     source = source.replace('["default"]', '.default')
 
@@ -267,6 +276,10 @@ const getMatches = (string, regex, index) => {
     matches.push(match[index]);
   }
   return matches;
+}
+
+function log(...args) {
+  if (OPTS.debug || OPTS.verbose) console.log(...args)
 }
 
 module.exports = compile;

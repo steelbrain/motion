@@ -47,8 +47,7 @@ var APP_DIR = path.normalize(process.cwd());
 var MODULES_DIR = p(__dirname, '..', 'node_modules');
 var FLINT_DIR = p(APP_DIR, '.flint');
 var OPTS, CONFIG, CONFIG_DIR, TYPED_OUT_DIR, OUT_DIR,
-    BUILD_ONLY, BUILD_DIR, BUILD_NAME,
-    VERBOSE, TEMPLATE, WSS, CUSTOM_OUT, DEV_URL, APP_NAME,
+    BUILD_ONLY, BUILD_DIR, BUILD_NAME, TEMPLATE, WSS, CUSTOM_OUT, DEV_URL, APP_NAME,
     HAS_RUN_INITIAL_BUILD, ACTIVE_PORT;
 var APP_VIEWS = {};
 
@@ -262,7 +261,7 @@ export function buildScripts(cb, stream) {
         bridge.message('package:install', { name })
       },
       onPackageFinish: function(name) {
-        console.log('finish package', name)
+        log('finish package, make new bundle', name)
         makeDependencyBundle(() => {
           bridge.message('package:installed', { name })
           bridge.message('packages:reload', {})
@@ -397,8 +396,8 @@ function listenForKeys() {
 
     // verbose logging
     if (key.name == 'v') {
-      VERBOSE = !VERBOSE;
-      console.log(VERBOSE ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine);
+      OPTS.verbose = !OPTS.verbose;
+      console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine);
     }
 
     // exit
@@ -597,10 +596,8 @@ function makeTemplate(req, cb) {
     });
 }
 
-function log(verbose) {
-  if (verbose && VERBOSE || !verbose)
-    if (OPTS.debug || VERBOSE)
-      console.log(Array.prototype.slice.call(arguments))
+function log(...args) {
+  if (OPTS.debug || OPTS.verbose) console.log(...args)
 }
 
 function unicodeToChar(text) {
