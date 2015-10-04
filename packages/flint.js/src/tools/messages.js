@@ -39,7 +39,6 @@ export default function run(browser, opts) {
   }
 
   ws.onmessage = function(message) {
-    console.log(message)
     message = JSON.parse(message.data)
     if (!message) return
 
