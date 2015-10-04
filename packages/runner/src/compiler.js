@@ -1,5 +1,5 @@
 import handleError from './lib/handleError'
-import addPackage from './npm/addPackage'
+import npm from './lib/npm'
 import gutil from 'gulp-util'
 import through from 'through2'
 import fs from 'fs'
@@ -71,9 +71,11 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
     // install deps one by one
     const installNextDep = () => {
       const dep = newDeps.shift()
+      onPackageStart(dep)
       log('new dep is', dep)
 
-      const packageInstalled = () => {
+      npm.save(dep, dir)
+      .then(() => {
         log('package installed', dep)
         installedDeps.push(dep)
         onPackageFinish(dep)
@@ -83,10 +85,7 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
           installNextDep()
         else
           installing = false
-      }
-
-      onPackageStart(dep)
-      addPackage(dir, dep, handleError(packageInstalled))
+      })
     }
 
     installing = true

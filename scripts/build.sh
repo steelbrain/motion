@@ -11,7 +11,7 @@ for f in packages/*; do
     cd ../..
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" --copy-files $1 &
+    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" --stage 1 --copy-files $1 &
   fi
 done
 
