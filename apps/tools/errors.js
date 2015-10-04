@@ -33,10 +33,10 @@ const niceStack = err => {
         let replacedChars = 0
 
         // this undoes flint stuff but keeps the highlighted area
-        const matches = line.match(propsMatch).length
-        if (matches) {
+        const matches = line.match(propsMatch)
+        if (matches && matches.length) {
           result = result.replace(propsMatch, propsReplace)
-          replacedChars += (matches * 10) // * len of replacement
+          replacedChars += (matches.length * 10) // * len of replacement
         }
 
         result = result
