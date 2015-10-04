@@ -128,7 +128,7 @@ function buildTemplate() {
       .replace('/static', '/_/static')
       .replace('<!-- SCRIPTS -->', (
         '<script src="/_/react.js"></script>' +
-        '<script src="/_/flint.prod.js"></script>' +
+        '<script src="/_/flint.js"></script>' +
         '<script src="/_/packages.js"></script>' +
         newLine + '<script src="/_/'+BUILD_NAME+'.js"></script>' +
         newLine + '<script>window.Flint = flintRun_'+BUILD_NAME+'("_flintapp", { namespace:window, app:"userMain" });</script>'
