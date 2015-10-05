@@ -51,6 +51,20 @@ EOF
 # Let's display everything on stderr.
 exec 1>&2
 
+# Check git exists
+if hash git 2>/dev/null; then
+  echo_good "Checking git... ✓"
+else
+cat <<"EOF"
+
+  You don't have git! You must have a new machine...
+
+  Install git then re-run this script.
+
+EOF
+  exit 1
+fi
+
 # Check npm exists
 if hash npm 2>/dev/null; then
   echo_good "Checking node/npm... ✓"
@@ -61,7 +75,7 @@ cat <<"EOF"
 
   Download: https://nodejs.org
 
-  And re-run!
+  Then re-run this script.
 
 EOF
   exit 1
