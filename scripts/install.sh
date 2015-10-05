@@ -82,7 +82,7 @@ EOF
 fi
 
 # Check sudo privelege on global node_modules
-if [ -w $NODE_MODULES ]; then
+if [ -w "$NODE_MODULES" ]; then
   echo_good "Checking global node_modules permissions... ✓"
   echo
   echo "Installing Flint..."
@@ -103,7 +103,7 @@ EOF
   echo
 
   # if wanted to fix
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
     sudo chown -R $USER ~/.npm
     sudo chown -R $USER $NODE_MODULES
     sudo chmod ug+w $NODE_MODULES
@@ -163,7 +163,7 @@ if hash flint 2>/dev/null; then
   echo
 
   # if wanted to fix
-  if [[ $REPLY =~ ^[a-z]+$ ]]; then
+  if [[ "$REPLY" =~ ^[a-z]+$ ]]; then
     EDITOR=$REPLY; export EDITOR
     echo "Editor changed to $EDITOR!"
   fi
