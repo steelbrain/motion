@@ -90,7 +90,8 @@ EOF
   # if wanted to fix
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo chown -R $USER ~/.npm
-    sudo chown -R $USER /usr/local/lib/node_modules
+    sudo chown -R $USER $NODE_MODULES
+    sudo chmod ug+w $NODE_MODULES
 
     # if fixed
     if [ -w $NODE_MODULES ]; then
@@ -103,6 +104,7 @@ EOF
     else
       echo
       echo_bad "Uh oh! Couldn't fix permissions!"
+      echo "  (You can install without sudo, just run this script again)"
       echo_error
       exit 1
     fi
