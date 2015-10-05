@@ -89,7 +89,7 @@ EOF
 
   # if wanted to fix
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    sudo shown -R $USER ~/.npm
+    sudo chown -R $USER ~/.npm
     sudo chown -R $USER /usr/local/lib/node_modules
 
     # if fixed
@@ -143,7 +143,7 @@ if hash flint 2>/dev/null; then
 
   # enter editor
   echo "Example editor commands: atom, subl, vim"
-  read -p "Enter new editor command (or just press enter to skip): " -n 1 -r
+  read -p "Enter new editor command (or just press enter to skip): " REPLY
   echo
 
   # if wanted to fix
