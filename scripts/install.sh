@@ -85,7 +85,7 @@ cat <<"EOF"
 
 EOF
   #
-  read -p "Would you like us to try and fix npm permissions [y/n]? " -i "y" REPLY
+  read -p "Would you like us to try and fix npm permissions [y/n]? " REPLY
   echo
 
   # if wanted to fix
