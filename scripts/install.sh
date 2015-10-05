@@ -84,7 +84,6 @@ cat <<"EOF"
   (and it won't work offline).
 
 EOF
-  #
   read -p "Would you like us to try and fix npm permissions [y/n]? " REPLY
   echo
 
