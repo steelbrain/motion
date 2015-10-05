@@ -6,7 +6,7 @@ let queue = []
 
 function broadcast(data) {
   wsServer.connections.forEach(conn => {
-    console.log('send', data)
+    // console.log('send', data)
     conn.sendText(data)
   })
 }
@@ -49,7 +49,7 @@ export function once(type, cb) {
 export function start(port) {
   wsServer = ws.createServer(conn => {
     conn.on('error', err => {
-      console.log(err)
+      // console.log(err)
     })
 
     if (connected) return

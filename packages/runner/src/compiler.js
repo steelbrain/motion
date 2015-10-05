@@ -111,7 +111,6 @@ var Parser = {
     OPTS = opts
     // set initial local cache of installedDeps
     readPackageJsonDeps(opts.dir, installed => {
-      console.log('INSTALLED', installed)
       installedDeps = installed
       opts.after()
     })
