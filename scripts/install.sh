@@ -135,11 +135,11 @@ fi
 if hash flint 2>/dev/null; then
   echo
   if [ -z "$EDITOR" ]; then
-    echo_bold "Your default editor is set to $EDITOR"
-    echo "Would you like to change your default editor?"
-  else
     echo_bold "No EDITOR set in your shell"
     echo "If you'd like, Flint lets you open your editor after starting"
+  else
+    echo_bold "Your default editor is set to $EDITOR"
+    echo "Would you like to change your default editor?"
   fi
 
   # enter editor
