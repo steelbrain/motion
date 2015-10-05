@@ -9,8 +9,13 @@ if [ $1 = "tools" ]; then
   cd apps/tools/.flint
 	npm version patch
 	npm publish
+  cd ../..
 else
   cd packages/$1
   npm version patch
   npm publish
+  cd ../..
 fi
+
+git commit -am 'vbump'
+git push origin head
