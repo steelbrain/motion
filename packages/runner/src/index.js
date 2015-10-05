@@ -45,7 +45,7 @@ var newLine = "\n";
 var lastSavedTimestamp = {}
 var APP_DIR = path.normalize(process.cwd());
 var MODULES_DIR = p(__dirname, '..', 'node_modules');
-var FLINT_DIR = p(APP_DIR, '.flint');
+var APP_FLINT_DIR = p(APP_DIR, '.flint');
 var OPTS, CONFIG, CONFIG_DIR, TYPED_OUT_DIR, OUT_DIR,
     BUILD_ONLY, BUILD_DIR, BUILD_NAME, TEMPLATE, WSS, CUSTOM_OUT, DEV_URL, APP_NAME,
     HAS_RUN_INITIAL_BUILD, ACTIVE_PORT;
@@ -84,7 +84,7 @@ export function run(opts, isBuild) {
           });
 
           flint('init', {
-            dir: FLINT_DIR,
+            dir: APP_FLINT_DIR,
             after: buildScripts
           })
 
@@ -104,11 +104,11 @@ function cat(msg) {
 }
 
 function clearOutDir(cb) {
-  recreateDir(p(FLINT_DIR, 'out'), cb)
+  recreateDir(p(APP_FLINT_DIR, 'out'), cb)
 }
 
 function clearBuildDir(cb) {
-  recreateDir(p(FLINT_DIR, 'build', '_'), cb)
+  recreateDir(p(APP_FLINT_DIR, 'build', '_'), cb)
 }
 
 function build() {
@@ -124,7 +124,7 @@ function mkBuildDir(cb) {
 }
 
 function buildTemplate() {
-  var template = p(FLINT_DIR, 'index.html');
+  var template = p(APP_FLINT_DIR, 'index.html');
   var out = p(BUILD_DIR, 'index.html');
 
   fs.readFile(template, 'utf8', handleError(function(data) {
@@ -171,7 +171,7 @@ function buildReact(cb) {
 }
 
 function buildPackages(cb) {
-  var read = p(FLINT_DIR, 'deps', 'packages.js')
+  var read = p(APP_FLINT_DIR, 'deps', 'packages.js')
   var write = p(BUILD_DIR, '_', 'packages.js')
   copyFile(read, write, cb);
 }
@@ -256,7 +256,7 @@ export function buildScripts(cb, stream) {
       optional: ['bluebirdCoroutines']
     }))
     .pipe(flint('post', {
-      dir: FLINT_DIR,
+      dir: APP_FLINT_DIR,
       onPackageStart: function(name, cb) {
         bridge.message('package:install', { name })
       },
@@ -353,9 +353,9 @@ function setGlobals(opts, build) {
   OPTS.dir = OPTS.dir || APP_DIR;
   OPTS.template = OPTS.template || '.flint/index.html';
 
-  CONFIG_DIR = p(FLINT_DIR, 'config');
-  OUT_DIR = p(FLINT_DIR, 'out');
-  TYPED_OUT_DIR = p(FLINT_DIR, 'typed');
+  CONFIG_DIR = p(APP_FLINT_DIR, 'config');
+  OUT_DIR = p(APP_FLINT_DIR, 'out');
+  TYPED_OUT_DIR = p(APP_FLINT_DIR, 'typed');
 
   BUILD_NAME = (OPTS.outName || path.basename(process.cwd()));
 
@@ -364,7 +364,7 @@ function setGlobals(opts, build) {
   DEV_URL = APP_NAME + '.dev'
 
   if (BUILD_ONLY) {
-    BUILD_DIR = OPTS.out ? p(OPTS.out) : p(FLINT_DIR, 'build');
+    BUILD_DIR = OPTS.out ? p(OPTS.out) : p(APP_FLINT_DIR, 'build');
     console.log("\nBuilding %s to %s\n".bold.white, BUILD_NAME + '.js', path.normalize(BUILD_DIR))
   }
 }
@@ -512,8 +512,6 @@ function runServer(cb) {
   server.use('/', express.static('.'));
 
   // local flint or installed flint
-  // server.use('/assets/flint', express.static('~/flint/flint-js/dist'));
-  server.use('/assets/flint', express.static('.flint/node_modules/flint-js/dist'));
   server.use('/assets/flint-tools', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
   server.use('/assets/flintjs', express.static(p(MODULES_DIR, 'flint-js')));
 
@@ -571,7 +569,7 @@ function makeTemplate(req, cb) {
 
   var files = []
 
-  readdirp({ root: p(FLINT_DIR, 'out') },
+  readdirp({ root: p(APP_FLINT_DIR, 'out') },
     function(err, res) {
       var mainIndex = -1;
 
@@ -666,11 +664,11 @@ function makeDependencyBundle(cb, doInstall) {
 
   // TODO: make this do a check if it needs to run on startup
   if (doInstall) {
-    preInstall = cb => npm.install(p(FLINT_DIR)).then(cb)
+    preInstall = cb => npm.install(p(APP_FLINT_DIR)).then(cb)
   }
 
   preInstall(() => {
-    fs.readFile(p(FLINT_DIR, 'package.json'), handleError(file => {
+    fs.readFile(p(APP_FLINT_DIR, 'package.json'), handleError(file => {
       const depsObject = JSON.parse(file).dependencies
       const deps = Object.keys(depsObject)
         .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
@@ -679,7 +677,7 @@ function makeDependencyBundle(cb, doInstall) {
         .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
         .join(newLine)
 
-      const DEP_DIR = p(FLINT_DIR, 'deps')
+      const DEP_DIR = p(APP_FLINT_DIR, 'deps')
       const DEPS_FILE = p(DEP_DIR, 'deps.js')
 
       const bundleDeps = () => {

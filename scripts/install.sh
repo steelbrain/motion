@@ -15,6 +15,10 @@ echo
 USER=$(whoami)
 NODE_MODULES=$(npm root -g)
 
+# This was breaking `read` :(
+# set -e
+# set -u
+
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 GREEN='\033[01;32m'
