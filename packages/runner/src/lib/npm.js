@@ -1,6 +1,6 @@
 import exec from './exec'
 import handleError from './handleError'
-import npmview from 'npmview'
+// import npmview from 'npmview'
 
 // npm install --save 'name'
 export function save(name, dir) {
