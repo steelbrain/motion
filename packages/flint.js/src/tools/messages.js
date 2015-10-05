@@ -1,7 +1,7 @@
 import { compileError, compileSuccess } from './errors';
 
 export default function run(browser, opts) {
-  const ws = new WebSocket('ws://localhost:' + opts.websocketPort + '/', 'flint')
+  const ws = new WebSocket('ws://localhost:' + opts.websocketPort + '/')
 
   const actions = {
     'editor:location': msg => {

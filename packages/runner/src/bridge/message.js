@@ -1,13 +1,14 @@
-import { server as WebSocketServer } from 'websocket'
-import http from 'http'
+import ws from 'nodejs-websocket'
 
-let wsServer, server
+let wsServer
 let connected = false
-let clients = []
 let queue = []
 
 function broadcast(data) {
-  clients.forEach(client => client.send(data))
+  wsServer.connections.forEach(conn => {
+    console.log('send', data)
+    conn.sendText(data)
+  })
 }
 
 function runQueue() {
@@ -35,8 +36,8 @@ export function message(type, obj) {
 export function once(type, cb) {
   let recieved = false
 
-  clients.forEach(client => {
-    client.on('message', message => {
+  wsServer.connections.forEach(conn => {
+    conn.on('data', message => {
       if (message.type != type) return
       if (recieved) return
       recieved = true
@@ -46,20 +47,15 @@ export function once(type, cb) {
 }
 
 export function start(port) {
-  server = http.createServer((_, res) => res.writeHead(404) && res.end())
-  server.listen(port)
+  wsServer = ws.createServer(conn => {
+    conn.on('error', err => {
+      console.log(err)
+    })
 
-  wsServer = new WebSocketServer({
-    httpServer: server,
-    autoAcceptConnections: true
-  })
-
-  wsServer.on('connect', req => {
-    clients.push(req)
     if (connected) return
     connected = true
     runQueue()
-  })
+  }).listen(port)
 }
 
 export default { start, message, once }
