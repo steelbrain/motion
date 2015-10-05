@@ -383,18 +383,19 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     // export globals
-    setExports(exports) {
-      const names = Object.keys(exports);
+    setExports(_exports) {
+      if (!_exports) return
+      const names = Object.keys(_exports);
 
       if (names.length) {
         names.forEach(name => {
           if (name === 'default') {
-            Object.keys(exports.default).forEach(key => {
-              assignToGlobal(key, exports.default[key])
+            Object.keys(_exports.default).forEach(key => {
+              assignToGlobal(key, _exports.default[key])
             })
           }
 
-          assignToGlobal(name, exports[name])
+          assignToGlobal(name, _exports[name])
         })
       }
     }
