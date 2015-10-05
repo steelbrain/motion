@@ -6,7 +6,7 @@ import bridge from './bridge/message'
 import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
-import npmInstall from './npm/install'
+import npm from './lib/npm'
 
 import fs from 'fs'
 import path from 'path'
@@ -663,7 +663,7 @@ function makeDependencyBundle(cb, doInstall) {
 
   // TODO: make this do a check if it needs to run on startup
   if (doInstall) {
-    preInstall = npmInstall.bind(null, p(FLINT_DIR))
+    preInstall = cb => npm.install(p(FLINT_DIR)).then(cb)
   }
 
   preInstall(() => {

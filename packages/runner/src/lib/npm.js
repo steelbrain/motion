@@ -29,7 +29,7 @@ export function versions(name) {
 // npm install
 export function install(dir) {
   return new Promise((res, rej) => {
-    exec('npm install', dir, () => {
+    exec('npm install', dir, err => {
       if (err) rej(err)
       else res()
     })

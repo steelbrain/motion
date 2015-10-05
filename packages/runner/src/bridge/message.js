@@ -17,7 +17,10 @@ function runQueue() {
   }
 }
 
-export function message(type, obj = {}) {
+export function message(type, obj) {
+  if (!connected) return
+
+  obj = obj || {}
   obj._type = type
   obj.timestamp = Date.now()
 
