@@ -32,6 +32,10 @@ echo_bad() {
   echo "${RED}${BOLD}$1${NONE}${NORMAL}"
 }
 
+echo_bold() {
+  echo "${BOLD}$1${NORMAL}"
+}
+
 echo_error() {
 cat <<"EOF"
 
@@ -81,7 +85,7 @@ cat <<"EOF"
 
 EOF
   #
-  read -p "Would you like us to try to fix npm permissions [y/n]? " -n 1 -r
+  read -p "Would you like us to try and fix npm permissions [y/n]? " -n 1 -r
   echo
 
   # if wanted to fix
@@ -96,7 +100,6 @@ EOF
       echo
       echo "Installing flint..."
       echo
-      sleep 1
       npm install -g flint
     else
       echo
@@ -132,7 +135,20 @@ fi
 if hash flint 2>/dev/null; then
   #
   echo
+  echo_bold "Your default editor is set to $EDITOR"
+  #
+  read -p "To update it, enter your editor (or press enter to skip): " -n 1 -r
+  echo
+
+  # if wanted to fix
+  if [[ $REPLY =~ ^[a-z]+$ ]]; then
+    EDITOR=$REPLY; export EDITOR
+    echo "Editor changed to $EDITOR"
+  fi
+
+  echo
   echo_good "Flint has been installed!"
+  #
 cat <<"EOF"
 
   Run Flint with:

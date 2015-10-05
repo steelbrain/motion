@@ -7,11 +7,19 @@
   },
   "babel": {
     "stage": 0,
-    "loose": [ "all" ],
-    "blacklist": [ "es6.tailCall" ],
-    "optional": [ "optimisation.flow.forOf", "bluebirdCoroutines" ]
+    "loose": [
+      "all"
+    ],
+    "blacklist": [
+      "es6.tailCall"
+    ],
+    "optional": [
+      "optimisation.flow.forOf",
+      "bluebirdCoroutines"
+    ]
   },
   "dependencies": {
+    "json-loader": "^0.5.3",
     "webpack": "^1.12.2"
   }
 }
