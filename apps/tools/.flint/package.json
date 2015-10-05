@@ -1,9 +1,9 @@
 {
   "author": "",
-  "name": "tools",
+  "name": "flint-tools",
   "repository": "https://github.com/tools",
   "description": "tools",
-  "version": "1.0.0",
+  "version": "1.0.20",
   "main": "",
   "scripts": {},
   "dependencies": {}

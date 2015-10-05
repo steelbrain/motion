@@ -25,3 +25,8 @@ flint.js:
 
 runner:
 	scripts/release.sh runner
+
+tools:
+	scripts/release.sh tools
+
+all: cli flint.js runner tools
