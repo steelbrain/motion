@@ -71,20 +71,27 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
     // install deps one by one
     const installNextDep = () => {
       const dep = newDeps.shift()
-      onPackageStart(dep)
       log('new dep is', dep)
 
-      npm.save(dep, dir)
-      .then(() => {
-        log('package installed', dep)
-        installedDeps.push(dep)
-        onPackageFinish(dep)
+      onPackageStart(dep, version => {
+        log('got version', version)
 
-        // continue installing
-        if (newDeps.length)
-          installNextDep()
-        else
-          installing = false
+        npm.save(dep, dir)
+        .then(() => {
+          log('package installed', dep)
+          installedDeps.push(dep)
+          onPackageFinish(dep)
+
+          // continue installing
+          if (newDeps.length)
+            installNextDep()
+          else
+            installing = false
+        })
+        .error(err => {
+          log('NPM error', err)
+          onPackageError(err)
+        })
       })
     }
 

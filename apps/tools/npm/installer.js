@@ -1,10 +1,11 @@
 const tools = window._DT
 
 view Installer {
-  let versions = ['1.0', '2.0', '3.0']
+  let version = ''
+  let versions = []
   let name = ''
-  let error = 'Could not find package something or other'
-  let state = 4
+  let error = ''
+  let state = 0
 
   tools.on('package:install', () => {
     state = 1
@@ -26,20 +27,24 @@ view Installer {
     versions = tools.data.versions
   })
 
-  const selectVersion = version => {
-    tools.data.version = version
-    tools.emit('package:select')
+  const selectVersion = v => {
+    version = v
+    tools.data.version = v
+    tools.emitter.emit('package:select')
     state = 1
   }
+
   const closeModal = () => state = 0
+
   const title = state => {
     switch(state) {
-      case 1: return `Installing`; break
+      case 1: return `Installing ${name}${version ? ' ' + version : ''}...`; break
       case 2: return `Installed!`; break
       case 3: return `Error`; break
       case 4: return `Select version`; break
     }
   }
+
   const body = state => {
     switch(state) {
       case 1: return null; break
@@ -87,18 +92,33 @@ view InstallerLoading {
 
 view Versions {
   <version repeat={^versions} onClick={() => ^onSelect(_)}>
-    {_}
+    <inner>
+      <v key={'v' + _index}>{_.version}</v>
+      <info>{_.description}</info>
+      <a href={_.homepage} target="_blank">Info</a>
+    </inner>
   </version>
 
   $version = {
     textAlign: 'left',
     padding: [2, 4],
-    borderRadius: 2,
+    borderRadius: 2
+  }
+
+  $inner = {
+    flexFlow: 'row'
+  }
+
+  $v = {
+    flexGrow: 1,
+    fontWeight: 'bold',
 
     ':hover': {
       background: '#fff',
-      fontWeight: 'bold',
       cursor: 'pointer'
     }
+  }
+
+  $info = {
   }
 }

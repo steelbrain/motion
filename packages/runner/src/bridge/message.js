@@ -32,6 +32,20 @@ export function message(type, obj) {
     queue.push(msg)
 }
 
+// receive a message one time
+export function once(type, cb) {
+  let recieved = false
+
+  clients.forEach(client => {
+    client.on('message', message => {
+      if (message.type != type) return
+      if (recieved) return
+      recieved = true
+      cb(message)
+    })
+  })
+}
+
 export function start(port) {
   server = http.createServer((_, res) => res.writeHead(404) && res.end())
   server.listen(port)

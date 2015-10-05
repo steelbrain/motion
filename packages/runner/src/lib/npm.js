@@ -20,7 +20,26 @@ export function versions(name) {
     npmview(name, (err, version, info) => {
       if (err) rej(err)
       else {
-        res(info.versions.reverse())
+        let versions = info.versions.reverse().slice(10)
+        const total = versions.length
+
+        if (!total) return res(null)
+
+        // get detailed info for last three
+        Promise.all(
+          versions.slice(3).map(v => new Promise((res, rej) =>
+            npmview(`${name}@${v}`, (err, v, { description, homepage }) => {
+              if (err) return rej(err)
+              res({ description, homepage })
+            })
+          ))
+        ).then(infos => {
+          // add info onto versions
+          versions = versions
+            .map((v, i) => ({ version: v, ...(infos[i] || {}) }))
+
+          res(versions)
+        })
       }
     })
   })

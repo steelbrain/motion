@@ -257,8 +257,12 @@ export function buildScripts(cb, stream) {
     }))
     .pipe(flint('post', {
       dir: FLINT_DIR,
-      onPackageStart: function(name) {
+      onPackageStart: function(name, cb) {
         bridge.message('package:install', { name })
+        bridge.once('package:version', cb)
+      },
+      onPackageError: function(error) {
+        bridge.message('package:error', { error })
       },
       onPackageFinish: function(name) {
         log('finish package, make new bundle', name)
