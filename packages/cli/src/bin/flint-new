@@ -14,6 +14,7 @@ var Spinner = require('../ui').Spinner;
 var fetch = require('node-fetch');
 
 Program
+  .option('-n, --nocache', 'dont use local cache of latest flint scaffold')
   .option('-d, --debug', 'output extra information for debugging')
   .parse(process.argv);
 
@@ -65,7 +66,7 @@ else {
 
 function start() {
   makeFolder()
-    .then(getScaffold)
+    .then(Program.nocache ? cloneDirectly : getScaffold)
     .then(wait)
     .then(initGit)
     .then(replaceGivenNameInApp)
@@ -92,29 +93,27 @@ function makeFolder() {
 }
 
 function getScaffold() {
-  return updateScaffold().then(copyScaffold);
+  return updateScaffoldCache()
+    .then(copyScaffold)
+    .catch(cloneDirectly);
 }
 
-function updateScaffold() {
+function updateScaffoldCache() {
   if (Program.debug)
     console.log('Looking for updated scaffold in %s', FLINT.scaffoldRepo);
 
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     // check if online
-    checkNewScaffold(function(needsNew) {
-      if (!needsNew)
-        return resolve();
-
-      var cmd = 'git clone --depth=1 ' + FLINT.scaffoldRepo + ' '+ FLINT.scaffoldDir;
+    checkNewScaffold(needsNew => {
+      if (!needsNew) return resolve();
 
       // remove old scaffold
       rimraf(FLINT.scaffoldDir, function(err) {
         // clone new scaffold
-        promiseProcess(cmd, { msg: false })
-          // delete git
-          .then(deleteGitFolder)
-          // done
-          .then(function() { resolve() })
+        promiseProcess(gitClone(FLINT.scaffoldDir), { msg: false })
+          .then(copyLatestSHA(FLINT.scaffoldDir))
+          .then(deleteGitFolder(FLINT.scaffoldDir))
+          .then(resolve)
       })
     });
   })
@@ -144,20 +143,27 @@ function checkNewScaffold(cb) {
   });
 }
 
-function deleteGitFolder() {
-  return new Promise(function(resolve, reject) {
-    // copy latest SHA into folder
-    var head = p(FLINT.scaffoldDir, '.git', 'refs', 'heads', 'master');
-    ncp(head, FLINT.scaffoldSHA, function(err) {
-      if (err) return console.log(err);
-
+function deleteGitFolder(dir) {
+  return function() {
+    return new Promise(function(resolve, reject) {
       // delete git dir
-      rimraf(p(FLINT.scaffoldDir, '/.git'), function(err, data) {
+      rimraf(p(dir, '/.git'), function(err, data) {
         if (err) return reject(err);
         resolve(data);
       })
     })
-  });
+  }
+}
+
+function copyLatestSHA(dir) {
+  return new Promise((res, rej) => {
+    // copy latest SHA into folder
+    var head = p(dir, '.git', 'refs', 'heads', 'master');
+    ncp(head, FLINT.scaffoldSHA, function(err) {
+      if (err) return rej(err);
+      else res()
+    })
+  })
 }
 
 function copyScaffold() {
@@ -168,6 +174,16 @@ function copyScaffold() {
       process.exit(1);
     }
   })
+}
+
+function gitClone(dest) {
+  return 'git clone --depth=1 ' + FLINT.scaffoldRepo + ' '+ dest
+}
+
+// clone right into target new folder
+function cloneDirectly() {
+  return promiseProcess(gitClone(FLINT.dest), { msg: false })
+    .then(deleteGitFolder(FLINT.dest))
 }
 
 function initGit() {
