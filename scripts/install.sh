@@ -13,7 +13,7 @@ do_install () {
 echo
 
 USER=$(whoami)
-NODE_MODULES="/usr/local/lib/node_modules"
+NODE_MODULES=$(npm root -g)
 
 set -e
 set -u
