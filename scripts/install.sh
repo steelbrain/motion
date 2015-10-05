@@ -15,9 +15,6 @@ echo
 USER=$(whoami)
 NODE_MODULES=$(npm root -g)
 
-set -e
-set -u
-
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 GREEN='\033[01;32m'
