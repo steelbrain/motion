@@ -6,10 +6,8 @@ import npmview from 'npmview'
 export function save(name, dir) {
   return new Promise((res, rej) => {
     exec('npm install --save ' + name, dir, err => {
-      if (err) rej(err)
-      else {
-        res(name)
-      }
+      if (err) rej('Install failed for package ' + name)
+      else res(name)
     })
   })
 }

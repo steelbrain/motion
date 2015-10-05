@@ -18,16 +18,15 @@ function runQueue() {
 }
 
 export function message(type, obj) {
-  if (!connected) return
-
   obj = obj || {}
   obj._type = type
   obj.timestamp = Date.now()
 
   let msg = JSON.stringify(obj)
-  // console.log('sending message', connected, type, obj)
-  if (connected && wsServer)
+
+  if (connected && wsServer) {
     broadcast(msg)
+  }
   else
     queue.push(msg)
 }
@@ -63,4 +62,4 @@ export function start(port) {
   })
 }
 
-export default { start, message }
+export default { start, message, once }

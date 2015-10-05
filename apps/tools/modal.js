@@ -1,6 +1,6 @@
 view Modal {
   <modal>
-    <close>X</close>
+    <close onClick={^onClose}>X</close>
     <title if={^title}>{^title}</title>
     <message>{^children}</message>
   </modal>

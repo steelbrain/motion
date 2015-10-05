@@ -52,18 +52,20 @@ let installing = false
 let newDeps = []
 let installedDeps = []
 
-const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => {
+const checkDependencies = (source, { dir, onPackageStart, onPackageFinish, onPackageError }) => {
   try {
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
     const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
-    log('Found packages in file:', found)
-    log('New packages in file:', fresh)
+    // console.log('Found packages in file:', found)
+    // console.log('New packages in file:', fresh)
 
     // no new ones found
     if (!fresh.length) return
 
     // add new ones to queue
-    newDeps = newDeps.concat(found)
+    newDeps = newDeps.concat(fresh)
+
+    // console.log('newdeps', newDeps, installing)
 
     // we've queued and may already be installing, hold off
     if (installing) return
@@ -71,28 +73,28 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish }) => 
     // install deps one by one
     const installNextDep = () => {
       const dep = newDeps.shift()
-      log('new dep is', dep)
+      // console.log('new dep is', dep)
 
-      onPackageStart(dep, version => {
-        log('got version', version)
-
-        npm.save(dep, dir)
-        .then(() => {
-          log('package installed', dep)
-          installedDeps.push(dep)
-          onPackageFinish(dep)
-
-          // continue installing
-          if (newDeps.length)
-            installNextDep()
-          else
-            installing = false
-        })
-        .error(err => {
-          log('NPM error', err)
-          onPackageError(err)
-        })
+      onPackageStart(dep)
+      npm.save(dep, dir)
+      .then(() => {
+        log('package installed', dep)
+        installedDeps.push(dep)
+        onPackageFinish(dep)
+        next()
       })
+      .catch(err => {
+        onPackageError(err)
+        next()
+      })
+    }
+
+    // continue installing
+    const next = () => {
+      if (newDeps.length)
+        installNextDep()
+      else
+        installing = false
     }
 
     installing = true
@@ -109,6 +111,7 @@ var Parser = {
     OPTS = opts
     // set initial local cache of installedDeps
     readPackageJsonDeps(opts.dir, installed => {
+      console.log('INSTALLED', installed)
       installedDeps = installed
       opts.after()
     })

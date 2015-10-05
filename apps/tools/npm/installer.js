@@ -18,11 +18,13 @@ view Installer {
   })
 
   tools.on('package:error', () => {
+    debugger
     state = 3
     error = tools.data.error
   })
 
   tools.on('package:select', () => {
+    debugger
     state = 4
     versions = tools.data.versions
   })
