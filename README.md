@@ -1,6 +1,6 @@
 <p align="center">
   <a href="http://flintjs.com/">
-    <img alt="Flint" src="http://flintjs.com/images/flintlogo20.png" width="260">
+    <img alt="Flint" src="http://flintjs.com/assets/images/flintlogo20.png" width="260">
   </a>
 </p>
 
@@ -21,7 +21,7 @@
 ----
 
 <p align="center">
-  For questions and support please visit the <a href="https://flint-slack.herokuapp.com">Slack community</a> or <a href="http://stackoverflow.com/questions/tagged/flintjs">StackOverflow</a>. The Babel issue tracker is <strong>exclusively</strong> for bug reports and feature requests.
+  For questions and support please visit the <a href="https://flint-slack.herokuapp.com">Slack community</a>!
 </p>
 
 <p align="center">
