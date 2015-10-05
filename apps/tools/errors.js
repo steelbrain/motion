@@ -1,3 +1,4 @@
+const tools = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 const propsMatch = /view\.props\./g
 const propsReplace = String.fromCharCode('94')
@@ -81,32 +82,33 @@ view Errors {
     }, delay)
   }
 
-  window._DT.on('compile:error', () => {
+  tools.on('compile:error', () => {
     runtimeError = null
-    compileError = window._DT.data.error
+    compileError = tools.data.error
     setError()
   })
 
-  window._DT.on('runtime:error', () => {
-    console.log("got runtime error", window._DT.data)
-    // on multiple errors, prefer the first
-    if (runtimeError) return
+  tools.on('runtime:error', () => {
     compileError = null
-    runtimeError = window._DT.data
+    runtimeError = tools.data
     setError()
   })
 
-  window._DT.on('runtime:success', () => {
+  tools.on('runtime:success', () => {
     runtimeError = null
     setError()
   })
 
-  window._DT.on('compile:success', () => {
+  tools.on('compile:success', () => {
     compileError = null
     setError()
   })
 
-  <ErrorMessage error={error} />
+  <ErrorMessage
+    error={error}
+    runtime={runtimeError}
+    compile={compileError}
+  />
 
   $div = {
     position: 'absolute',
@@ -118,7 +120,9 @@ view Errors {
 view ErrorMessage {
   const last = arr => arr[arr.length - 1]
   const fileName = url => url && last(url.split('/'))
-  const getLine = err => err && (err.line || err.loc && err.loc.line)
+  const getLine = err => err && (err.line || err.loc && err.loc.line) + (
+    ^runtime ? -1 : 0
+  )
   const devHeight = 0 // 34 with bar
   const closedHeight = 55
   const openHeight = 200

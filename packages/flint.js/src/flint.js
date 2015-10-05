@@ -29,6 +29,35 @@ root.on = on
 root.Promise = Promise
 root.module = {}
 root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
+root.onerror = reportError
+
+const reportError = (...args) => {
+  if (process.env.production) return
+  if (!root.flintRuntimeError) return
+
+  let err = args
+
+  // if coming from catch
+  if (typeof args[0] == 'object') {
+    const lines = args[0].stack.split("\n")
+    err = [args[0].message, lines[1], 0, 0, args[0].stack]
+  }
+
+  root.flintRuntimeError(...err)
+}
+
+const safeRun = fn => {
+  if (process.env.production)
+    fn()
+  else {
+    try {
+      fn()
+    }
+    catch({ name, message, stack }) {
+      reportError({ name, message, stack })
+    }
+  }
+}
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -68,6 +97,7 @@ function run(browserNode, userOpts, afterRenderCb) {
   const isTools = opts.app == 'devTools'
 
   const render = () => {
+    root.onerror = reportError
     const MainComponent = getComponent('Main') || mainComponent;
     const preloaders = Flint.preloaders.map(loader => loader())
 
@@ -121,8 +151,13 @@ function run(browserNode, userOpts, afterRenderCb) {
     hotload(file, run) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
-      const exports = run({})
-      Flint.setExports(exports)
+      let fileExports
+
+      safeRun(() => {
+        fileExports = run({})
+      })
+
+      Flint.setExports(fileExports)
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
       const added = arrayDiff(views, cached)
@@ -177,10 +212,14 @@ function run(browserNode, userOpts, afterRenderCb) {
 
            // watch for errors with ran
           let ran = false;
-          this._render = component.call(void 0, this, viewOn)
-          ran = true;
 
-          if (!ran) return null;
+          safeRun(() => {
+            this._render = component.call(void 0, this, viewOn)
+            ran = true
+          })
+
+          if (!ran)
+            return null
 
           this.hasRun = true;
           Flint.activeViews[id] = this;
@@ -297,11 +336,11 @@ function run(browserNode, userOpts, afterRenderCb) {
         if (Flint.firstRender) return
       }
 
-      let viewRanSuccessfully = true;
+      let viewRanSuccessfully = true
 
-      // recover from errorful views
-      root.onerror = (...args) => {
-        viewRanSuccessfully = false;
+      // recover from bad views
+      window.onerror = (...args) => {
+        viewRanSuccessfully = false
 
         if (Flint.lastWorkingView[name]) {
           setView(name, Flint.lastWorkingView[name])
@@ -310,14 +349,6 @@ function run(browserNode, userOpts, afterRenderCb) {
         else {
           setView(name, ErrorDefinedTwice(name))
           render()
-        }
-
-        // run devtools
-        if (!process.env.production) {
-          if (root.flintRuntimeError)
-            root.flintRuntimeError(...args)
-          // catch errors if not in production
-          return false
         }
       }
 

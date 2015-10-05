@@ -251,7 +251,7 @@ export function buildScripts(cb, stream) {
     }))
     .pipe(babel({
       stage: 2,
-      blacklist: ['useStrict', 'flow', 'react', 'es6.tailCall'],
+      blacklist: ['flow', 'react', 'es6.tailCall'],
       retainLines: true,
       optional: ['bluebirdCoroutines']
     }))
