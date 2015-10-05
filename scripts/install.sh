@@ -129,7 +129,6 @@ EOF
     echo
     echo "Installing flint with sudo..."
     echo
-    sleep 1
     sudo npm install -g flint
   fi
 fi
