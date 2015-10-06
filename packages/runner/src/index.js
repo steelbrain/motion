@@ -83,15 +83,19 @@ export function run(opts, isBuild) {
             bridge.start(wport())
           });
 
-          let hasRun = false
+          let afterRun, hasOpened = false
 
           flint('init', {
             dir: APP_FLINT_DIR,
             after: () => {
               buildScripts().pipe(pipefn(() => {
-                if (hasRun) return
-                hasRun = true
-                openInBrowser()
+                if (hasOpened) return
+                // open in browser after delay
+                if (afterRun) clearTimeout(afterRun)
+                afterRun = setTimeout(() => {
+                  hasOpened = true
+                  openInBrowser()
+                }, 450)
               }))
             }
           })
