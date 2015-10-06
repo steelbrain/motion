@@ -45,6 +45,9 @@ const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 
 // promisify
 const mkdir = Promise.promisify(mkdirp)
+const readJSONFile = Promise.promisify(jf.readFile)
+const readFile = Promise.promisify(fs.readFile)
+const writeFile = Promise.promisify(fs.writeFile)
 
 let lastSavedTimestamp = {}
 let APP_DIR = path.normalize(process.cwd());
@@ -59,8 +62,6 @@ Array.prototype.move = function(from, to) {
 }
 
 gulp.task('build', buildScripts)
-
-const readJSONFile = Promise.promisify(jf.readFile)
 
 // prompts for domain they want to use
 const firstRunPreferences = () =>
@@ -589,9 +590,6 @@ function logInstalled(deps) {
   })
   console.log()
 }
-
-const readFile = Promise.promisify(fs.readFile)
-const writeFile = Promise.promisify(fs.writeFile)
 
 async function makeDependencyBundle(doInstall) {
   const outDir = p(APP_FLINT_DIR, 'deps')
