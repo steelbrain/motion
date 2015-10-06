@@ -44,6 +44,9 @@ const proc = process
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 
+// promisify
+const mkdir = Promise.promisify(mkdirp)
+
 let lastSavedTimestamp = {}
 let APP_DIR = path.normalize(process.cwd());
 let MODULES_DIR = p(__dirname, '..', 'node_modules');
@@ -95,14 +98,13 @@ const clearBuildDir = () =>
 const clearOutDir = () =>
   recreateDir(p(APP_FLINT_DIR, 'out'))
 
-const initCompiler = () => {
-  return new Promise((res, rej) => {
+const initCompiler = () =>
+  new Promise((res, rej) => {
     flint('init', {
       dir: APP_FLINT_DIR,
       after: res
     })
   })
-}
 
 /* FIRST BUILD STUFF */
 
@@ -143,11 +145,11 @@ function cat(msg) {
 }
 
 function build() {
-  buildFlint();
-  buildReact();
-  buildPackages();
-  buildAssets();
-  buildScripts(buildTemplate);
+  buildFlint()
+  buildReact()
+  buildPackages()
+  buildAssets()
+  buildScripts(buildTemplate)
 }
 
 function mkBuildDir(cb) {
@@ -168,6 +170,8 @@ function buildTemplate() {
         '  <script src="/_/'+OPTS.name+'.js"></script>',
         '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
       ].join(newLine))
+
+      console.log('Writing template', data, 'to', out)
 
     // TODO: try running flint build --isomorphic
     if (OPTS.isomorphic) {
@@ -282,8 +286,9 @@ function buildScripts(cb, stream) {
         bridge.message('package:error', { error })
       },
       onPackageFinish: (name) => {
+        if (OPTS.build) return
         log('finish package, make new bundle', name)
-        makeDependencyBundle(() => {
+        makeDependencyBundle().then(() => {
           bridge.message('package:installed', { name })
           bridge.message('packages:reload', {})
         });
@@ -317,13 +322,11 @@ function buildScripts(cb, stream) {
       gulp.dest(gulpDest))
     )
     .pipe(pipefn(file => {
-      if (!cb) return
-      if (!(OPTS.build && OPTS.watch)) return
-      cb(stream ? file.contents.toString() : undefined)
-    }))
-    .pipe(pipefn(() => {
       // *ONLY AFTER* initial build
       if (HAS_RUN_INITIAL_BUILD) {
+        if (cb)
+          cb(stream ? file.contents.toString() : undefined)
+
         if (!gulpErr) {
           bridge.message('script:add', gulpScript);
           bridge.message('compile:success', gulpScript);
@@ -388,7 +391,7 @@ function listenForKeys() {
 
     // install npm
     if (key.name == 'i')
-      makeDependencyBundle(null, true);
+      makeDependencyBundle(true)
 
     // verbose logging
     if (key.name == 'v') {
@@ -594,52 +597,59 @@ function debounce(fn, delay) {
   }
 }
 
-function makeDependencyBundle(cb, doInstall) {
-  console.log('Checking packages...'.bold.blue)
-  let preInstall = cb => cb()
+function logInstalled(deps) {
+  if (!deps.length) return
+  console.log()
+  console.log(`Installed ${deps.length} packages`.blue.bold)
+  deps.forEach(dep => {
+    console.log(` - ${dep}`)
+  })
+  console.log()
+}
 
-  // TODO: make this do a check if it needs to run on startup
-  if (doInstall) {
-    preInstall = cb => npm.install(p(APP_FLINT_DIR)).then(cb)
+const readFile = Promise.promisify(fs.readFile)
+const writeFile = Promise.promisify(fs.writeFile)
+
+async function makeDependencyBundle(doInstall) {
+  const outDir = p(APP_FLINT_DIR, 'deps')
+  const outFile = p(outDir, 'deps.js')
+
+  const bundleDeps = () =>
+    new Promise((res, rej) => {
+      webpack({
+        entry: outFile,
+        externals: { react: 'React', bluebird: '_bluebird' },
+        output: { filename: p(outDir, 'packages.js') }
+      }, err => {
+        if (err) return rej(err)
+        res()
+      })
+    })
+
+  const run = async () => {
+    console.log("Installing npm packages...\n".bold.blue)
+
+    if (doInstall)
+      await npm.install(p(APP_FLINT_DIR))
+
+    const file = await readFile(p(APP_FLINT_DIR, 'package.json'))
+    const depsObject = JSON.parse(file).dependencies
+    const deps = Object.keys(depsObject)
+      .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
+    const requireString = deps
+      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
+      .join(newLine)
+
+    // make dep dir
+    await mkdir(outDir)
+    await writeFile(outFile, requireString)
+    await bundleDeps()
+    logInstalled(deps)
   }
 
-  preInstall(() => {
-    fs.readFile(p(APP_FLINT_DIR, 'package.json'), handleError(file => {
-      const depsObject = JSON.parse(file).dependencies
-      const deps = Object.keys(depsObject)
-        .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-
-      const requireString = deps
-        .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-        .join(newLine)
-
-      const DEP_DIR = p(APP_FLINT_DIR, 'deps')
-      const DEPS_FILE = p(DEP_DIR, 'deps.js')
-
-      const bundleDeps = () => {
-        webpack({
-          entry: DEPS_FILE,
-          externals: {
-            react: 'React',
-            bluebird: '_bluebird'
-          },
-          output: { filename: p(DEP_DIR, 'packages.js') }
-        }, handleError(() => {
-          if (deps.length)
-            console.log(`Installed ${deps.length} packages: ${deps.join(', ')}`.blue.bold)
-
-          if (cb) cb();
-        }))
-      }
-
-      const writeDeps = () => {
-        fs.writeFile(DEPS_FILE, requireString,
-          handleError(bundleDeps))
-      }
-
-      // make dep dir
-      mkdirp(DEP_DIR, handleError(writeDeps))
-    }))
+  return new Promise(async (res, rej) => {
+    await run()
+    res()
   })
 }
 
@@ -663,12 +673,18 @@ export async function run(opts, isBuild) {
   // building...
   if (OPTS.build) {
     await clearBuildDir()
-    await makeDependencyBundle(build, true);
-    await afterFirstBuild()
+    build()
+    await* [
+      makeDependencyBundle(true),
+      afterFirstBuild()
+    ]
+
     console.log("\nBuild Complete! Check your .flint/build directory\n".green.bold)
 
     if (OPTS.watch)
       gulp.watch(SCRIPTS_GLOB, ['build'])
+    else
+      process.exit(1)
   }
   // running...
   else {
