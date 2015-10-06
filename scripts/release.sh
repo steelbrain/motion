@@ -13,7 +13,7 @@ release_package() {
 }
 
 release_tools() {
-  cd apps/$1/.flint
+  cd apps/tools/.flint
 	npm version patch
 	npm publish
   cd ../..
