@@ -109,7 +109,7 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish, onPac
 
 var Parser = {
   init(opts) {
-    OPTS = opts
+    OPTS = opts || {}
     // set initial local cache of installedDeps
     readPackageJsonDeps(opts.dir, installed => {
       installedDeps = installed
@@ -118,7 +118,7 @@ var Parser = {
   },
 
   post(file, source, opts) {
-    OPTS = opts
+    OPTS = opts || {}
     source = filePrefix(file) + source + fileSuffix
     source = source
       .replace('["default"]', '.default')
@@ -230,7 +230,7 @@ var Parser = {
   }
 }
 
-function compile(type, opts) {
+function compile(type, opts = {}) {
   if (type == 'init')
     return Parser.init(opts)
 

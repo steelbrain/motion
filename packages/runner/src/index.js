@@ -231,15 +231,13 @@ function buildScripts(cb, stream) {
     .pipe(gulpif(!OPTS.build,
       watch(SCRIPTS_GLOB)
     ))
-    .pipe(through.obj(function(file, enc, next) {
+    .pipe(pipefn(file => {
       // reset
       gulpErr = false;
       gulpScript = null;
-
       // time build
-      gulpStartTime = Date.now();
+      gulpStartTime = Date.now()
       file.startTime = gulpStartTime
-      next(null, file);
     }))
     .pipe(debug({ title: 'build:', minimal: true }))
     .pipe(plumber({
@@ -263,24 +261,12 @@ function buildScripts(cb, stream) {
         bridge.message('compile:error', { error: err });
       }
     }))
-    .pipe(through.obj(function(file, enc, next) {
-      if (!OPTS.build) {
-        var name = file.path.replace(APP_DIR, '');
-        gulpScript = {
-          name: name,
-          compiledAt: gulpStartTime
-        }
-      }
-      next(null, file);
+    .pipe(pipefn(file => {
+      if (OPTS.build) return
+      let name = file.path.replace(APP_DIR, '')
+      gulpScript = { name, compiledAt: gulpStartTime }
     }))
-    .pipe(flint('pre', {
-      setViewLocations: function(views) {
-        return
-        if (OPTS.build) return;
-        Object.assign(APP_VIEWS, views);
-        bridge.message('view:locations', APP_VIEWS);
-      }
-    }))
+    .pipe(flint('pre'))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],
@@ -289,13 +275,13 @@ function buildScripts(cb, stream) {
     }))
     .pipe(flint('post', {
       dir: APP_FLINT_DIR,
-      onPackageStart: function(name, cb) {
+      onPackageStart: (name) => {
         bridge.message('package:install', { name })
       },
-      onPackageError: function(error) {
+      onPackageError: (error) => {
         bridge.message('package:error', { error })
       },
-      onPackageFinish: function(name) {
+      onPackageFinish: (name) => {
         log('finish package, make new bundle', name)
         makeDependencyBundle(() => {
           bridge.message('package:installed', { name })
@@ -318,10 +304,10 @@ function buildScripts(cb, stream) {
       if (stream) return false
       if (gulpErr) return false
 
-      var endTime = Date.now() - gulpStartTime;
+      let endTime = Date.now() - gulpStartTime;
       log('build took ', endTime, 'ms')
-
       log('new file time', file.startTime, lastSavedTimestamp[file.path])
+
       if (!lastSavedTimestamp[file.path] || file.startTime > lastSavedTimestamp[file.path]) {
         lastSavedTimestamp[file.path] = file.startTime
         return true
@@ -330,29 +316,30 @@ function buildScripts(cb, stream) {
     },
       gulp.dest(gulpDest))
     )
-    .pipe(through.obj(function(file, enc, next) {
-      if (!gulpErr) {
-        bridge.message('script:add', gulpScript);
-        bridge.message('compile:success', gulpScript);
-      }
-
-      if (cb && !(OPTS.build && OPTS.watch)) {
-        cb(stream ? file.contents.toString() : undefined)
-      }
-
-      if (OPTS.build && !OPTS.watch)
-        done('scripts');
-
-      next(null, file)
+    .pipe(pipefn(file => {
+      if (!cb) return
+      if (!(OPTS.build && OPTS.watch)) return
+      cb(stream ? file.contents.toString() : undefined)
     }))
-    // watch for first complete build to finish
     .pipe(pipefn(() => {
-      if (HAS_RUN_INITIAL_BUILD) return
-      if (buildingTimeout) clearTimeout(buildingTimeout)
-      buildingTimeout = setTimeout(() => {
-        HAS_RUN_INITIAL_BUILD = true
-        runAfterFirstBuilds()
-      }, 450)
+      // *ONLY AFTER* initial build
+      if (HAS_RUN_INITIAL_BUILD) {
+        if (!gulpErr) {
+          bridge.message('script:add', gulpScript);
+          bridge.message('compile:success', gulpScript);
+        }
+
+        if (OPTS.build && !OPTS.watch)
+          done('scripts')
+      }
+      // *ONLY BEFORE* initial build
+      else {
+        if (buildingTimeout) clearTimeout(buildingTimeout)
+        buildingTimeout = setTimeout(() => {
+          HAS_RUN_INITIAL_BUILD = true
+          runAfterFirstBuilds()
+        }, 450)
+      }
     }))
 }
 

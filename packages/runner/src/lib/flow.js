@@ -1,3 +1,13 @@
+// .pipe(flint('pre', {
+//   setViewLocations: function(views) {
+//     return
+//     if (OPTS.build) return;
+//     Object.assign(APP_VIEWS, views);
+//     bridge.message('view:locations', APP_VIEWS);
+//   }
+// }))
+
+
 // todo: re-enable this
 // .pipe(gulp.dest(TYPED_OUT_DIR))
 // TYPED_OUT_DIR = p(APP_FLINT_DIR, 'typed');
