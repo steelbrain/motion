@@ -119,7 +119,11 @@ function clearOutDir(cb) {
 }
 
 function clearBuildDir(cb) {
-  recreateDir(p(APP_FLINT_DIR, 'build', '_'), cb)
+  recreateDir(p(APP_FLINT_DIR, 'build'), () => {
+    mkdirp(p(APP_FLINT_DIR, 'build', '_'), () => {
+      cb()
+    })
+  })
 }
 
 function build() {
@@ -140,7 +144,7 @@ function buildTemplate() {
 
   fs.readFile(template, 'utf8', handleError(function(data) {
     data = data
-      .replace('/static', '/__/static')
+      .replace('/static', '/_/static')
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.js"></script>',
         '  <script src="/_/flint.js"></script>',
@@ -520,7 +524,7 @@ function runServer(cb) {
   // user non-js files
   server.use('/', express.static('.'));
   // user static files...
-  server.use('/static', express.static('.flint/static'));
+  server.use('/_/static', express.static('.flint/static'));
 
   // INTERNAL files
   // packages.js
@@ -533,7 +537,7 @@ function runServer(cb) {
   server.get('*', function(req, res) {
     afterInitialBuild(function() {
       makeTemplate(req, function(template) {
-        res.send(template);
+        res.send(template.replace('/static', '/_/static'));
       })
     })
 
