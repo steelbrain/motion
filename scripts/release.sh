@@ -17,5 +17,5 @@ else
   cd ../..
 fi
 
-git commit -am 'vbump'
-git push origin head
+# git commit -am 'vbump'
+# git push origin head
