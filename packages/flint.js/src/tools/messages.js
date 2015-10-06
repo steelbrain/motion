@@ -62,7 +62,7 @@ function addScript(message, cb) {
 
     const body = document.getElementsByTagName('body')[0];
     const script = document.createElement('script');
-    script.src = src || '/assets' + name;
+    script.src = src || '/_' + name;
     body.appendChild(script);
 
     script.onload = cb;
