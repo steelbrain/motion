@@ -2,7 +2,6 @@ import flint from './compiler'
 import react from './gulp/react'
 import babel from './gulp/babel'
 import bridge from './bridge/message'
-// import watchEditor from './bridge/watchEditor'
 import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
@@ -61,13 +60,7 @@ Array.prototype.move = function(from, to) {
 
 gulp.task('build', buildScripts)
 
-const readConfig = () =>
-  new Promise((res, rej) =>
-    jf.readFile(OPTS.configFile, function(err, confObj) {
-      if (err) return rej(err)
-      CONFIG = confObj
-      res()
-    }))
+const readJSONFile = Promise.promisify(jf.readFile)
 
 // prompts for domain they want to use
 const firstRunPreferences = () =>
@@ -144,13 +137,14 @@ function cat(msg) {
   return pipefn(() => msg && console.log(msg))
 }
 
-function build() {
+async function build() {
   buildFlint()
   buildReact()
   buildPackages()
   buildAssets()
   buildScripts()
-  afterFirstBuild(buildTemplate)
+  await afterFirstBuild()
+  buildTemplate()
 }
 
 function mkBuildDir(cb) {
@@ -171,8 +165,6 @@ function buildTemplate() {
         '  <script src="/_/'+OPTS.name+'.js"></script>',
         '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
       ].join(newLine))
-
-      console.log('Writing template', data, 'to', out)
 
     // TODO: try running flint build --isomorphic
     if (OPTS.isomorphic) {
@@ -219,10 +211,6 @@ function buildAssets() {
   var stream = gulp
     .src(['*', '**/*', '!**/*.js', ], { dot: false })
     .pipe(gulp.dest(p(OPTS.buildDir)));
-
-  stream.on('end', function() {
-    done('assets');
-  })
 }
 
 function buildScripts(cb, stream) {
@@ -329,9 +317,6 @@ function buildScripts(cb, stream) {
           bridge.message('script:add', gulpScript);
           bridge.message('compile:success', gulpScript);
         }
-
-        if (OPTS.build && !OPTS.watch)
-          done('scripts')
       }
       // *ONLY BEFORE* initial build
       else {
@@ -651,13 +636,6 @@ async function makeDependencyBundle(doInstall) {
   })
 }
 
-var isDone = {};
-function done(which) {
-  isDone[which] = true;
-  if (isDone.scripts && isDone.assets)
-    process.exit();
-}
-
 function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
 }
@@ -665,7 +643,7 @@ function wport() {
 export async function run(opts, isBuild) {
   setOptions(opts, isBuild)
 
-  await readConfig()
+  CONFIG = await readJSONFile(OPTS.configFile)
   await firstRunPreferences()
 
   // building...
