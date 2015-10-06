@@ -149,7 +149,8 @@ function build() {
   buildReact()
   buildPackages()
   buildAssets()
-  buildScripts(buildTemplate)
+  buildScripts()
+  afterFirstBuild(buildTemplate)
 }
 
 function mkBuildDir(cb) {
@@ -324,9 +325,6 @@ function buildScripts(cb, stream) {
     .pipe(pipefn(file => {
       // *ONLY AFTER* initial build
       if (HAS_RUN_INITIAL_BUILD) {
-        if (cb)
-          cb(stream ? file.contents.toString() : undefined)
-
         if (!gulpErr) {
           bridge.message('script:add', gulpScript);
           bridge.message('compile:success', gulpScript);
