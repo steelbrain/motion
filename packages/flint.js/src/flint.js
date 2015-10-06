@@ -20,11 +20,12 @@ import mainComponent from './lib/mainComponent'
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
+// set root variable
 if (inBrowser) window.root = window
 else global.root = global
 
 // GLOBALS
-root._bluebird = Bluebird
+root._bluebird = Bluebird // for imported modules to use
 root.on = on
 root.Promise = Promise
 root.module = {}

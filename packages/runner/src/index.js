@@ -140,7 +140,7 @@ function buildTemplate() {
 
   fs.readFile(template, 'utf8', handleError(function(data) {
     data = data
-      .replace('/static', '/_/static')
+      .replace('/static', '/__/static')
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.js"></script>',
         '  <script src="/_/flint.js"></script>',
@@ -474,37 +474,29 @@ function askForUrlPreference(cb) {
 
 function getScriptTags(files, req) {
   return newLine +
-    '<!-- FLINT JS -->' +
-    newLine +
     [
-      '<script src="/assets/flintjs/dist/react.dev.js"></script>',
-      '<script src="/assets/flintjs/dist/flint.dev.js"></script>',
-      '<script id="__flintPackages" src="/packages/packages.js"></script>',
+      '<!-- FLINT JS -->',
+      '<script src="/__/react.dev.js"></script>',
+      '<script src="/__/flint.dev.js"></script>',
+      '<script src="/__/packages.js" id="__flintPackages"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
-      '<script src="/assets/flintjs/dist/devtools.js"></script>'
-    ].join(newLine) +
-    newLine +
-    // devtools
-    (
+      '<script src="/__/devtools.js"></script>',
+      // devtools
       devToolsDisabled(req) ? '' : [
-        '<script src="/assets/flint-tools/tools.js"></script>',
-        '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>',
-      ].join(newLine) || ''
-    ) +
-    newLine +
-    // user files
-    '<script>window.Flint = runFlint(window.renderToID || "_flintapp", { namespace: window, app: "userMain" });</script>' +
-    newLine +
-    assetScriptTags(files) +
-    newLine +
-    '<script>Flint.render()</script>' +
-    '<!-- END FLINT JS -->' +
-    newLine;
+        '<script src="/__/tools.js"></script>',
+        '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
+      ].join(newLine),
+      // user files
+      '<script>window.Flint = runFlint(window.renderToID || "_flintapp", { namespace: window, app: "userMain" });</script>',
+      assetScriptTags(files),
+      '<script>Flint.render()</script>',
+      '<!-- END FLINT JS -->'
+    ].join(newLine)
 }
 
 function assetScriptTags(scripts) {
   return scripts.map(function(file) {
-    return '<script src="/assets/' + file + '"></script>';
+    return '<script src="/_/' + file + '"></script>';
   }).join(newLine);
 }
 
@@ -522,14 +514,21 @@ function runServer(cb) {
   server.use(cors());
   server.use(allowCrossDomain)
 
-  server.use('/assets', express.static('.flint/out'));
+  // USER files
+  // user js files at '/_/filename.js'
+  server.use('/_', express.static('.flint/out'));
+  // user non-js files at '/_/image.jpg'
+  server.use('/_', express.static('.'));
+  // user static files...
   server.use('/static', express.static('.flint/static'));
-  server.use('/packages', express.static('.flint/deps'));
-  server.use('/', express.static('.'));
 
-  // local flint or installed flint
-  server.use('/assets/flint-tools', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
-  server.use('/assets/flintjs', express.static(p(MODULES_DIR, 'flint-js')));
+  // INTERNAL files
+  // packages.js
+  server.use('/__', express.static('.flint/deps'));
+  // tools.js
+  server.use('/__', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
+  // flint.js & react.js
+  server.use('/__', express.static(p(MODULES_DIR, 'flint-js', 'dist')));
 
   server.get('*', function(req, res) {
     afterInitialBuild(function() {
