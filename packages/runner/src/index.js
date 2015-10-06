@@ -35,76 +35,100 @@ import open from 'open'
 import readdirp from 'readdirp'
 import webpack from 'webpack'
 import editor from 'editor'
+import { Promise } from 'bluebird'
 
-const exec = cp.exec;
-const spawn = cp.spawn;
+const exec = cp.exec
+const spawn = cp.spawn
+const p = path.join
+const proc = process
+const newLine = "\n"
+const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 
-var p = path.join;
-var proc = process;
-var newLine = "\n";
-var lastSavedTimestamp = {}
-var APP_DIR = path.normalize(process.cwd());
-var MODULES_DIR = p(__dirname, '..', 'node_modules');
-var APP_FLINT_DIR = p(APP_DIR, '.flint');
-var OPTS, CONFIG, CONFIG_DIR, TYPED_OUT_DIR, OUT_DIR,
-    BUILD_ONLY, BUILD_DIR, BUILD_NAME, TEMPLATE, WSS, CUSTOM_OUT, DEV_URL, APP_NAME,
-    HAS_RUN_INITIAL_BUILD, ACTIVE_PORT;
-var APP_VIEWS = {};
+let lastSavedTimestamp = {}
+let APP_DIR = path.normalize(process.cwd());
+let MODULES_DIR = p(__dirname, '..', 'node_modules');
+let APP_FLINT_DIR = p(APP_DIR, '.flint');
+let APP_VIEWS = {}
+let HAS_RUN_INITIAL_BUILD = false
+let OPTS, CONFIG, ACTIVE_PORT
 
 Array.prototype.move = function(from, to) {
   this.splice(to, 0, this.splice(from, 1)[0]);
-};
-
-var SCRIPTS_GLOB = [
-  '**/*.js',
-  '!node_modules{,/**}',
-  '!.flint{,/**}'
-];
+}
 
 gulp.task('build', buildScripts)
 
-export function run(opts, isBuild) {
-  setGlobals(opts, isBuild);
-  readConfig(() => {
-    firstRun(() => {
-      writeFlowFile();
+const readConfig = () =>
+  new Promise((res, rej) =>
+    jf.readFile(OPTS.configFile, function(err, confObj) {
+      if (err) return rej(err)
+      CONFIG = confObj
+      res()
+    }))
 
-      if (BUILD_ONLY) {
-        clearBuildDir(() => {
-          makeDependencyBundle(build, true);
+// prompts for domain they want to use
+const firstRunPreferences = () =>
+  new Promise((res, rej) => {
+    const hasRunBefore = OPTS.build || CONFIG
+    if (hasRunBefore) return res()
 
-          if (OPTS.watch)
-            gulp.watch(SCRIPTS_GLOB, ['build'])
+    askForUrlPreference(useFriendly => {
+      CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
+      openInBrowser()
+      writeConfig(CONFIG)
+      res()
+    })
+  })
+
+const clearBuildDir = () =>
+  new Promise((res, rej) =>
+    recreateDir(p(APP_FLINT_DIR, 'build'))
+      .catch(rej)
+      .then(() => {
+        mkdirp(p(APP_FLINT_DIR, 'build', '_'), err => {
+          if (err) return rej(err)
+          res()
         })
-      }
-      else {
-        clearOutDir(() => {
-          runServer(() => {
-            bridge.start(wport())
-          });
+      })
+    )
 
-          let afterRun, hasOpened = false
+const clearOutDir = () =>
+  recreateDir(p(APP_FLINT_DIR, 'out'))
 
-          flint('init', {
-            dir: APP_FLINT_DIR,
-            after: () => {
-              buildScripts().pipe(pipefn(() => {
-                if (hasOpened) return
-                // open in browser after delay
-                if (afterRun) clearTimeout(afterRun)
-                afterRun = setTimeout(() => {
-                  hasOpened = true
-                  openInBrowser()
-                }, 450)
-              }))
-            }
-          })
+const initCompiler = () => {
+  return new Promise((res, rej) => {
+    flint('init', {
+      dir: APP_FLINT_DIR,
+      after: res
+    })
+  })
+}
 
-          // watchEditor()
-        })
-      }
-    });
-  });
+/* FIRST BUILD STUFF */
+
+let waitingForFirstBuild = []
+
+const afterFirstBuild = () =>
+  new Promise((res, rej) => {
+    if (HAS_RUN_INITIAL_BUILD) return res()
+    else waitingForFirstBuild.push(res)
+  })
+
+const runAfterFirstBuilds = () =>
+  waitingForFirstBuild.forEach(res => res())
+
+/* END FIRST BUILD STUFF */
+
+function watchingMessage() {
+  listenForKeys()
+  console.log(
+    newLine +
+    ' • O'.green.bold + 'pen browser'.green + newLine +
+    ' • E'.green.bold + 'ditor'.green + newLine +
+    ' • I'.green.bold + 'nstall packages'.green + newLine +
+    ' • V'.green.bold + 'erbose logging'.green + newLine
+  )
+  resumeListenForKeys()
 }
 
 function pipefn(fn) {
@@ -118,18 +142,6 @@ function cat(msg) {
   return pipefn(() => msg && console.log(msg))
 }
 
-function clearOutDir(cb) {
-  recreateDir(p(APP_FLINT_DIR, 'out'), cb)
-}
-
-function clearBuildDir(cb) {
-  recreateDir(p(APP_FLINT_DIR, 'build'), () => {
-    mkdirp(p(APP_FLINT_DIR, 'build', '_'), () => {
-      cb()
-    })
-  })
-}
-
 function build() {
   buildFlint();
   buildReact();
@@ -139,12 +151,12 @@ function build() {
 }
 
 function mkBuildDir(cb) {
-  mkdirp(p(BUILD_DIR, '_'), handleError(cb));
+  mkdirp(p(OPTS.buildDir, '_'), handleError(cb));
 }
 
 function buildTemplate() {
   var template = p(APP_FLINT_DIR, 'index.html');
-  var out = p(BUILD_DIR, 'index.html');
+  var out = p(OPTS.buildDir, 'index.html');
 
   fs.readFile(template, 'utf8', handleError(function(data) {
     data = data
@@ -153,14 +165,14 @@ function buildTemplate() {
         '<script src="/_/react.js"></script>',
         '  <script src="/_/flint.js"></script>',
         '  <script src="/_/packages.js"></script>',
-        '  <script src="/_/'+BUILD_NAME+'.js"></script>',
-        '  <script>window.Flint = flintRun_'+BUILD_NAME+'("_flintapp", { namespace:window, app:"userMain" });</script>'
+        '  <script src="/_/'+OPTS.name+'.js"></script>',
+        '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
       ].join(newLine))
 
     // TODO: try running flint build --isomorphic
     if (OPTS.isomorphic) {
       var Flint = require('flint-js/dist/flint.node');
-      var app = require(p(BUILD_DIR, '_', BUILD_NAME));
+      var app = require(p(OPTS.buildDir, '_', OPTS.name));
 
       var FlintApp = app(false, { Flint }, function(output) {
         data = data.replace(
@@ -179,43 +191,44 @@ function buildTemplate() {
 
 function buildFlint(cb) {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'flint.prod.js');
-  var write = p(BUILD_DIR, '_', 'flint.js');
+  var write = p(OPTS.buildDir, '_', 'flint.js');
   copyFile(read, write, cb)
 }
 
 function buildReact(cb) {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.prod.js');
-  var write = p(BUILD_DIR, '_', 'react.js');
+  var write = p(OPTS.buildDir, '_', 'react.js');
   copyFile(read, write, cb)
 }
 
 function buildPackages(cb) {
   var read = p(APP_FLINT_DIR, 'deps', 'packages.js')
-  var write = p(BUILD_DIR, '_', 'packages.js')
+  var write = p(OPTS.buildDir, '_', 'packages.js')
   copyFile(read, write, cb);
 }
 
 function buildAssets() {
   gulp.src('.flint/static/**')
-    .pipe(gulp.dest(p(BUILD_DIR, '_', 'static')))
+    .pipe(gulp.dest(p(OPTS.buildDir, '_', 'static')))
 
   var stream = gulp
     .src(['*', '**/*', '!**/*.js', ], { dot: false })
-    .pipe(gulp.dest(p(BUILD_DIR)));
+    .pipe(gulp.dest(p(OPTS.buildDir)));
 
   stream.on('end', function() {
     done('assets');
   })
 }
 
-export function buildScripts(cb, stream) {
+function buildScripts(cb, stream) {
   log('build scripts')
-  var gulpErr, gulpScript;
-  var gulpStartTime = Date.now();
-  var gulpDest = BUILD_DIR ? p(BUILD_DIR, '_') : OUT_DIR || '.';
+  let gulpErr, gulpScript;
+  let gulpStartTime = Date.now();
+  let gulpDest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.';
+  let buildingTimeout
 
   return (stream ? stream : gulp.src(SCRIPTS_GLOB))
-    .pipe(gulpif(!BUILD_ONLY,
+    .pipe(gulpif(!OPTS.build,
       watch(SCRIPTS_GLOB)
     ))
     .pipe(through.obj(function(file, enc, next) {
@@ -251,7 +264,7 @@ export function buildScripts(cb, stream) {
       }
     }))
     .pipe(through.obj(function(file, enc, next) {
-      if (!BUILD_ONLY) {
+      if (!OPTS.build) {
         var name = file.path.replace(APP_DIR, '');
         gulpScript = {
           name: name,
@@ -263,7 +276,7 @@ export function buildScripts(cb, stream) {
     .pipe(flint('pre', {
       setViewLocations: function(views) {
         return
-        if (BUILD_ONLY) return;
+        if (OPTS.build) return;
         Object.assign(APP_VIEWS, views);
         bridge.message('view:locations', APP_VIEWS);
       }
@@ -291,15 +304,14 @@ export function buildScripts(cb, stream) {
       }
     }))
     .pipe(gulpif(!stream, rename({ extname: '.js' })))
-    // .pipe(gulp.dest(TYPED_OUT_DIR))
     .pipe(react({
       stripTypes: true,
       es6module: true
     }))
-    .pipe(gulpif(BUILD_ONLY,
+    .pipe(gulpif(OPTS.build,
       multipipe(
-        concat(BUILD_NAME + '.js'),
-        wrap({ src: __dirname + '/../templates/build.template.js' }, { name: BUILD_NAME } , { variable: 'data' })
+        concat(OPTS.name + '.js'),
+        wrap({ src: __dirname + '/../templates/build.template.js' }, { name: OPTS.name } , { variable: 'data' })
       )
     ))
     .pipe(gulpif(function(file) {
@@ -322,83 +334,53 @@ export function buildScripts(cb, stream) {
       if (!gulpErr) {
         bridge.message('script:add', gulpScript);
         bridge.message('compile:success', gulpScript);
-
-        // flow.check(function(passed, error) {
-        //   if (!passed)
-        //     bridge.message('compile:error', { error: error });
-        // })
       }
 
-      if (cb && !(BUILD_ONLY && OPTS.watch)) {
+      if (cb && !(OPTS.build && OPTS.watch)) {
         cb(stream ? file.contents.toString() : undefined)
       }
 
-      if (BUILD_ONLY && !OPTS.watch)
+      if (OPTS.build && !OPTS.watch)
         done('scripts');
-
-      if (!HAS_RUN_INITIAL_BUILD) {
-        if (BUILD_ONLY) {
-          console.log(
-            newLine
-            + 'Build Complete! Check your .flint/build directory'.green.bold
-            + newLine
-          );
-        } else {
-          listenForKeys();
-          console.log(
-            newLine +
-            ' • O'.green.bold + 'pen browser'.green + newLine +
-            ' • E'.green.bold + 'ditor'.green + newLine +
-            ' • I'.green.bold + 'nstall packages'.green + newLine +
-            ' • V'.green.bold + 'erbose logging'.green + newLine
-          )
-          HAS_RUN_INITIAL_BUILD = true;
-          resumeListenForKeys();
-        }
-      }
 
       next(null, file)
     }))
-    .pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat())
-    .pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat())
-    .pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat()).pipe(cat())
+    // watch for first complete build to finish
+    .pipe(pipefn(() => {
+      if (HAS_RUN_INITIAL_BUILD) return
+      if (buildingTimeout) clearTimeout(buildingTimeout)
+      buildingTimeout = setTimeout(() => {
+        HAS_RUN_INITIAL_BUILD = true
+        runAfterFirstBuilds()
+      }, 450)
+    }))
 }
 
-function setGlobals(opts, build) {
-  BUILD_ONLY = build;
-  OPTS = opts || {};
+function setOptions(opts, build) {
+  OPTS = opts || {}
+  OPTS.build = build
 
   OPTS.defaultPort = 4000
-  OPTS.dir = OPTS.dir || APP_DIR;
-  OPTS.template = OPTS.template || '.flint/index.html';
+  OPTS.dir = OPTS.dir || APP_DIR
+  OPTS.template = OPTS.template || '.flint/index.html'
 
-  CONFIG_DIR = p(APP_FLINT_DIR, 'config');
-  OUT_DIR = p(APP_FLINT_DIR, 'out');
-  TYPED_OUT_DIR = p(APP_FLINT_DIR, 'typed');
+  OPTS.configFile = p(APP_FLINT_DIR, 'config')
+  OPTS.outDir = p(APP_FLINT_DIR, 'out')
 
-  BUILD_NAME = (OPTS.outName || path.basename(process.cwd()));
+  OPTS.name = path.basename(process.cwd())
 
-  var folders = OPTS.dir.split('/');
-  APP_NAME = folders[folders.length - 1]
-  DEV_URL = APP_NAME + '.dev'
+  var folders = OPTS.dir.split('/')
+  OPTS.name = folders[folders.length - 1]
+  OPTS.url = OPTS.name + '.dev'
 
-  if (BUILD_ONLY) {
-    BUILD_DIR = OPTS.out ? p(OPTS.out) : p(APP_FLINT_DIR, 'build');
-    console.log("\nBuilding %s to %s\n".bold.white, BUILD_NAME + '.js', path.normalize(BUILD_DIR))
+  if (OPTS.build) {
+    OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(APP_FLINT_DIR, 'build')
+    console.log("\nBuilding %s to %s\n".bold.white, OPTS.name + '.js', path.normalize(OPTS.buildDir))
   }
 }
 
 function writeConfig(config) {
-  jf.writeFile(CONFIG_DIR, config);
-}
-
-function readConfig(cb) {
-  jf.readFile(CONFIG_DIR, function(err, confObj) {
-    if (err) return console.log(err)
-    CONFIG = confObj;
-    log('got config', CONFIG)
-    cb();
-  });
+  jf.writeFile(OPTS.configFile, config);
 }
 
 function listenForKeys() {
@@ -449,32 +431,14 @@ function resumeListenForKeys() {
   proc.stdin.resume();
 }
 
-// prompts for domain they want to use
-function firstRun(cb) {
-  var firstRun = BUILD_ONLY || CONFIG;
-
-  log('first run?', firstRun)
-  if (firstRun) {
-    return cb();
-  }
-
-  console.log();
-  askForUrlPreference(function(useFriendly) {
-    CONFIG = { friendlyUrl: DEV_URL, useFriendly: useFriendly };
-    openInBrowser();
-    writeConfig(CONFIG)
-    cb();
-  });
-}
-
 // ask for preferred url and set /etc/hosts
 function askForUrlPreference(cb) {
   // var promptly = require('promptly');
-  var askCounter = 'Run on ' + DEV_URL + '?';
+  var askCounter = 'Run on ' + OPTS.url + '?';
 
   // promptly.prompt(askCounter, {}, function(err, val) {
     var useFriendly = false; // val == 'y';
-    if (useFriendly) hostile.set('127.0.0.1', DEV_URL)
+    if (useFriendly) hostile.set('127.0.0.1', OPTS.url)
     cb(useFriendly)
   // });
 }
@@ -517,78 +481,81 @@ function allowCrossDomain(req, res, next) {
   next();
 }
 
-function runServer(cb) {
-  var server = express();
-  server.use(cors());
-  server.use(allowCrossDomain)
+function runServer() {
+  return new Promise((res, rej) => {
+    var server = express();
+    server.use(cors());
+    server.use(allowCrossDomain)
 
-  // USER files
-  // user js files at '/_/filename.js'
-  server.use('/_', express.static('.flint/out'));
-  // user non-js files
-  server.use('/', express.static('.'));
-  // user static files...
-  server.use('/_/static', express.static('.flint/static'));
+    // USER files
+    // user js files at '/_/filename.js'
+    server.use('/_', express.static('.flint/out'));
+    // user non-js files
+    server.use('/', express.static('.'));
+    // user static files...
+    server.use('/_/static', express.static('.flint/static'));
 
-  // INTERNAL files
-  // packages.js
-  server.use('/__', express.static('.flint/deps'));
-  // tools.js
-  server.use('/__', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
-  // flint.js & react.js
-  server.use('/__', express.static(p(MODULES_DIR, 'flint-js', 'dist')));
+    // INTERNAL files
+    // packages.js
+    server.use('/__', express.static('.flint/deps'));
+    // tools.js
+    server.use('/__', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
+    // flint.js & react.js
+    server.use('/__', express.static(p(MODULES_DIR, 'flint-js', 'dist')));
 
-  server.get('*', function(req, res) {
-    afterInitialBuild(function() {
-      makeTemplate(req, function(template) {
-        res.send(template.replace('/static', '/_/static'));
+    server.get('*', function(req, res) {
+      runAfterFirstBuildComplete(function() {
+        makeTemplate(req, function(template) {
+          res.send(template.replace('/static', '/_/static'));
+        })
       })
-    })
 
-    setTimeout(bridge.message.bind(this, 'view:locations', APP_VIEWS), 200)
-  });
+      setTimeout(bridge.message.bind(this, 'view:locations', APP_VIEWS), 200)
+    });
 
-  function afterInitialBuild(cb) {
-    if (HAS_RUN_INITIAL_BUILD) cb();
-    else setTimeout(afterInitialBuild.bind(null, cb), 150);
-  }
+    function runAfterFirstBuildComplete(cb) {
+      if (HAS_RUN_INITIAL_BUILD) cb();
+      else setTimeout(runAfterFirstBuildComplete.bind(null, cb), 150);
+    }
 
-  function serverListen(port) {
-    process.stdout.write("\nFlint app running on ".white)
-    console.log(
-      "http://%s".bold + newLine,
-      host + (port && port !== 80 ? ':' + port : '')
-    );
+    function serverListen(port) {
+      process.stdout.write("\nFlint app running on ".white)
+      console.log(
+        "http://%s".bold + newLine,
+        host + (port && port !== 80 ? ':' + port : '')
+      );
 
-    ACTIVE_PORT = port
-    if (cb) cb();
-    server.listen(port, host);
-  }
+      ACTIVE_PORT = port
+      res();
+      server.listen(port, host);
+    }
 
-  var host = 'localhost'
-  var useFriendly = CONFIG.useFriendly || false
+    var host = 'localhost'
+    var useFriendly = CONFIG.useFriendly || false
 
-  // friendly = site.dev
-  if (!useFriendly) {
-    var port = OPTS.port || OPTS.defaultPort;
+    // friendly = site.dev
+    if (!useFriendly) {
+      var port = OPTS.port || OPTS.defaultPort;
 
-    // if no specified port, find open one
-    if (!OPTS.port) {
-      portfinder.basePort = port;
-      portfinder.getPort({ host: 'localhost' }, handleError(serverListen) );
+      // if no specified port, find open one
+      if (!OPTS.port) {
+        portfinder.basePort = port;
+        portfinder.getPort({ host: 'localhost' }, handleError(serverListen) );
+      }
+      else {
+        serverListen(port);
+      }
     }
     else {
-      serverListen(port);
+      serverListen(80);
     }
-  }
-  else {
-    serverListen(80);
-  }
+  })
 }
 
+let template
 function makeTemplate(req, cb) {
-  if (!TEMPLATE)
-    TEMPLATE = fs.readFileSync(OPTS.dir + '/' + OPTS.template).toString();
+  if (!template)
+    template = fs.readFileSync(OPTS.dir + '/' + OPTS.template).toString();
 
   var files = []
 
@@ -609,10 +576,10 @@ function makeTemplate(req, cb) {
 
       if (!files) {
         console.log('no flint files');
-        cb(TEMPLATE);
+        cb(template);
       }
       else
-        cb(TEMPLATE.replace('<!-- SCRIPTS -->',
+        cb(template.replace('<!-- SCRIPTS -->',
           '<div id="_flintdevtools"></div>'
           + newLine
           + getScriptTags(files, req)
@@ -631,14 +598,6 @@ function unicodeToChar(text) {
   });
 }
 
-function writeFlowFile() {
-  return
-  mkdirp(path.join(TYPED_OUT_DIR), function() {
-    fs.writeFileSync(path.join(TYPED_OUT_DIR, '.flowconfig'), '');
-  });
-}
-
-
 function debounce(fn, delay) {
   var timeout;
   return function() {
@@ -646,39 +605,6 @@ function debounce(fn, delay) {
     clearTimeout(timeout);
     timeout = setTimeout(function() { fn.apply(null, args) }, timeout ? delay : 0)
   }
-}
-
-var flow = {
-  check: debounce(flowCheck, 400)
-}
-
-function flowCheck(cb) {
-  return
-  console.log("running flow check")
-  var flowCmd = 'flow check --json ' + path.normalize(APP_DIR) + '/.flint/typed';
-  exec(flowCmd, function() {
-    if (arguments[1]) {
-      //console.log(arguments);
-      var response = JSON.parse(arguments[1])
-      var passed = response.passed
-      var toFlint = {}
-      if (!passed) {
-        var msg = response.errors[0].message
-
-        toFlint = {
-          message: msg
-                .map(function(m) { return m.descr })
-                .join(" "),
-          fileName: msg[0].path,
-          loc: { col: msg[0].start, line: msg[0].line}
-        }
-      }
-      cb(response.passed, toFlint)
-    }
-    else {
-      cb(true, null)
-    }
-  })
 }
 
 function makeDependencyBundle(cb, doInstall) {
@@ -739,4 +665,33 @@ function done(which) {
 
 function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
+}
+
+export async function run(opts, isBuild) {
+  setOptions(opts, isBuild)
+
+  await readConfig()
+  await firstRunPreferences()
+
+  // building...
+  if (OPTS.build) {
+    await clearBuildDir()
+    await makeDependencyBundle(build, true);
+    await afterFirstBuild()
+    console.log("\nBuild Complete! Check your .flint/build directory\n".green.bold)
+
+    if (OPTS.watch)
+      gulp.watch(SCRIPTS_GLOB, ['build'])
+  }
+  // running...
+  else {
+    await clearOutDir()
+    await runServer()
+    bridge.start(wport())
+    await initCompiler()
+    buildScripts()
+    await afterFirstBuild()
+    openInBrowser()
+    watchingMessage()
+  }
 }

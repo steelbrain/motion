@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/flint-lang/runner",
   "dependencies": {
+    "bluebird": "^2.10.2",
     "chokidar": "^1.0.1",
     "colors": "^1.0.3",
     "cors": "^2.6.0",
@@ -39,6 +40,7 @@
     "keypress": "^0.2.1",
     "mkdirp": "^0.5.0",
     "multipipe": "^0.1.2",
+    "nodejs-websocket": "^1.4.0",
     "object-assign": "^4.0.1",
     "open": "0.0.5",
     "portfinder": "^0.4.0",
@@ -52,8 +54,7 @@
     "sudo": "^1.0.3",
     "through2": "^0.6.5",
     "vinyl-sourcemaps-apply": "^0.1.4",
-    "webpack": "^1.12.2",
-    "nodejs-websocket": "^1.4.0"
+    "webpack": "^1.12.2"
   },
   "devDependencies": {
     "gulp-load-plugins": "^1.0.0-rc.1"
