@@ -6,7 +6,7 @@ if [ $# -eq 0 ]; then
 fi
 
 release_package() {
-  cd packages/$1
+  cd $1
   npm version patch
   npm publish
   cd ../..
@@ -37,7 +37,7 @@ if [ $1 = "all" ]; then
 elif [ $1 = "tools" ]; then
   relase_tools
 else
-  release_package $1
+  release_package packages/$1
 fi
 
 # git commit -am 'vbump'
