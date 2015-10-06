@@ -517,8 +517,8 @@ function runServer(cb) {
   // USER files
   // user js files at '/_/filename.js'
   server.use('/_', express.static('.flint/out'));
-  // user non-js files at '/_/image.jpg'
-  server.use('/_', express.static('.'));
+  // user non-js files
+  server.use('/', express.static('.'));
   // user static files...
   server.use('/static', express.static('.flint/static'));
 
