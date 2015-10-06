@@ -32,8 +32,9 @@ const replaceStyles = line => line
   .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
   .replace('__STYLE__', '$')
 
-const filePrefix = file => `(function() { Flint.hotload('${file}', function(exports) { \n`
-const fileSuffix = ';return exports }) })();'
+const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
+const fileSuffix = ';return exports }) }()'
 
 const readPackageJsonDeps = (dir, cb) => {
   try {
@@ -119,7 +120,9 @@ var Parser = {
   post(file, source, opts) {
     OPTS = opts
     source = filePrefix(file) + source + fileSuffix
-    source = source.replace('["default"]', '.default')
+    source = source
+      .replace('["default"]', '.default')
+      .replace('"use strict";', "\"use strict\";\n")
 
     checkDependencies(source, opts)
 

@@ -83,24 +83,35 @@ export function run(opts, isBuild) {
             bridge.start(wport())
           });
 
+          let hasRun = false
+
           flint('init', {
             dir: APP_FLINT_DIR,
-            after: buildScripts
+            after: () => {
+              buildScripts().pipe(pipefn(() => {
+                if (hasRun) return
+                hasRun = true
+                openInBrowser()
+              }))
+            }
           })
 
           // watchEditor()
-          makeDependencyBundle(openInBrowser, true);
         })
       }
     });
   });
 }
 
-function cat(msg) {
+function pipefn(fn) {
   return through.obj(function(file, enc, next) {
-    if (msg) console.log(msg);
+    fn(file)
     next(null, file);
   })
+}
+
+function cat(msg) {
+  return pipefn(() => msg && console.log(msg))
 }
 
 function clearOutDir(cb) {
@@ -369,8 +380,13 @@ function setGlobals(opts, build) {
   }
 }
 
+function writeConfig(config) {
+  jf.writeFile(CONFIG_DIR, config);
+}
+
 function readConfig(cb) {
   jf.readFile(CONFIG_DIR, function(err, confObj) {
+    if (err) return console.log(err)
     CONFIG = confObj;
     log('got config', CONFIG)
     cb();
@@ -438,7 +454,7 @@ function firstRun(cb) {
   askForUrlPreference(function(useFriendly) {
     CONFIG = { friendlyUrl: DEV_URL, useFriendly: useFriendly };
     openInBrowser();
-    jf.writeFile(CONFIG_DIR, CONFIG);
+    writeConfig(CONFIG)
     cb();
   });
 }

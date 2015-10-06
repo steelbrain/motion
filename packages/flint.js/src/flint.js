@@ -148,7 +148,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // current file that is running
     currentHotFile: null,
 
-    hotload(file, run) {
+    file(file, run) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
       let fileExports
@@ -278,20 +278,18 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (root[name])
         return root[name];
 
-      // const subName = `${view}.${name}`
-      //
-      // // subview
-      // if (Flint.views[subName])
-      //   return Flint.views[subName].component
+      // View.SubView
+      const subName = `${view}.${name}`
+      if (Flint.views[subName])
+        return Flint.views[subName].component
 
-      // no view
-
+      // regular view
       if (Flint.views[name]) {
         return Flint.views[name].component;
       }
 
+      // "global" views
       const namespaceView = opts.namespace[name] || root[name];
-
       if (namespaceView)
         return namespaceView;
 

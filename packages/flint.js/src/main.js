@@ -13,7 +13,6 @@ else {
   window.$ = null
 }
 
-window.fetch = fetch
 window.React = React
 window.runFlint = runFlint
 window.require = browserRequire
