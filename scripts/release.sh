@@ -33,7 +33,7 @@ commit_update() {
 }
 
 if [ $1 = "all" ]; then
-  relase_all
+  release_all
 elif [ $1 = "tools" ]; then
   relase_tools
 else
