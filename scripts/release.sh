@@ -22,7 +22,7 @@ release_tools() {
 release_all() {
   for pkg in packages/*; do
     [ -d "${pkg}" ] || continue # if not a directory, skip
-    release_package pkg
+    release_package ${pkg}
   done
   release_tools
 }
