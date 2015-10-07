@@ -164,6 +164,7 @@ var Parser = {
       .join("\n")
 
     checkDependencies(source, opts)
+    // console.log("final source", source)
     return { file: source }
   },
 
@@ -262,7 +263,6 @@ var Parser = {
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 
-    // console.log("final source", transformedSource)
     return {
       file: transformedSource,
       views: viewLines
