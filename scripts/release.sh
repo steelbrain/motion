@@ -25,11 +25,7 @@ release_all() {
     release_package ${pkg}
   done
   release_tools
-}
-
-commit_update() {
-  git commit -am "npm publish"
-
+  git commit -am 'vbump all'
 }
 
 if [ $1 = "all" ]; then
