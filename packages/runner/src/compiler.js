@@ -132,6 +132,7 @@ var Parser = {
         // every line:
         let result = line
           .replace('["default"]', '.default')
+          .replace("['default']", '.default')
           .replace('"use strict";', "\"use strict\";\n")
 
         // find if in view

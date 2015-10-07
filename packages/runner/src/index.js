@@ -94,6 +94,7 @@ const clearOutDir = () =>
 
 const initCompiler = () =>
   new Promise((res, rej) => {
+    log('init compiler')
     flint('init', {
       dir: APP_FLINT_DIR,
       after: res
@@ -216,7 +217,7 @@ function buildAssets() {
 
 function buildScripts(cb, stream) {
   log('build scripts')
-  let gulpErr, gulpScript;
+  let gulpErr, gulpScript, curFile
   let gulpStartTime = Date.now();
   let gulpDest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.';
   let buildingTimeout
@@ -227,40 +228,43 @@ function buildScripts(cb, stream) {
     ))
     .pipe(pipefn(file => {
       // reset
-      gulpErr = false;
-      gulpScript = null;
+      curFile = file
+      gulpErr = false
+      gulpScript = null
       // time build
       gulpStartTime = Date.now()
       file.startTime = gulpStartTime
     }))
     .pipe(debug({ title: 'build:', minimal: true }))
-    .pipe(plumber({
-      errorHandler: function(err) {
-        gulpErr = true;
+    .pipe(plumber(err => {
+      gulpErr = true
 
-        if (err.stack || err.codeFrame)
-          err.stack = stripAnsi(unicodeToChar(err.stack || err.codeFrame));
+      if (err.stack || err.codeFrame)
+        err.stack = stripAnsi(unicodeToChar(err.stack || err.codeFrame));
 
-        if (err.plugin == 'gulp-babel') {
-          console.log('JS error: %s: ', err.message.replace(APP_DIR, ''));
-          if (err.name != 'TypeError' && err.loc)
-            console.log('  > line: %s, col: %s', err.loc.line, err.loc.column);
-          console.log(' Stack:', newLine, err.stack)
-        }
-        else
-          console.log('ERROR', err);
-
-        var path = err.fileName
-
-        bridge.message('compile:error', { error: err });
+      if (err.plugin == 'gulp-babel') {
+        console.log('JS error: %s: ', err.message.replace(APP_DIR, ''));
+        if (err.name != 'TypeError' && err.loc)
+          console.log('  > line: %s, col: %s', err.loc.line, err.loc.column);
+        console.log(' Stack:', newLine, err.stack)
       }
+      else {
+        console.log('ERROR', "\n", err)
+        console.log('FILE', "\n", curFile.contents.toString())
+      }
+
+      var path = err.fileName
+
+      bridge.message('compile:error', { error: err });
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
       let name = file.path.replace(APP_DIR, '')
       gulpScript = { name, compiledAt: gulpStartTime }
     }))
+    .pipe(pipefn(file => { curFile = file }))
     .pipe(flint('pre'))
+    .pipe(pipefn(file => { curFile = file }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],
@@ -268,7 +272,7 @@ function buildScripts(cb, stream) {
       comments: true,
       optional: ['bluebirdCoroutines']
     }))
-    // .pipe(pipefn(file => console.log(file.contents.toString())))
+    .pipe(pipefn(file => { curFile = file }))
     .pipe(flint('post', {
       dir: APP_FLINT_DIR,
       onPackageStart: (name) => {
@@ -286,6 +290,7 @@ function buildScripts(cb, stream) {
         });
       }
     }))
+    .pipe(pipefn(file => { curFile = file }))
     // .pipe(pipefn(file => console.log(file.contents.toString())))
     .pipe(gulpif(!stream, rename({ extname: '.js' })))
     .pipe(react({
@@ -565,7 +570,8 @@ function makeTemplate(req, cb) {
 }
 
 function log(...args) {
-  if (OPTS.debug || OPTS.verbose) console.log(...args)
+  if (OPTS.debug || OPTS.verbose)
+    console.log(...args)
 }
 
 function unicodeToChar(text) {
@@ -645,10 +651,12 @@ export async function run(opts, isBuild) {
   setOptions(opts, isBuild)
 
   CONFIG = await readJSONFile(OPTS.configFile)
+  log('got config', CONFIG)
   await firstRunPreferences()
+  log('got first run prefs')
 
-  // building...
   if (OPTS.build) {
+    log('building...')
     await clearBuildDir()
     build()
     await* [
@@ -663,8 +671,8 @@ export async function run(opts, isBuild) {
     else
       process.exit()
   }
-  // running...
   else {
+    log('running...')
     await clearOutDir()
     await runServer()
     bridge.start(wport())
