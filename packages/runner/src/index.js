@@ -5,7 +5,7 @@ import bridge from './bridge/message'
 import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
-import npm from './lib/npm'
+import npm from './npm'
 
 import keypress from 'keypress'
 import fs from 'fs'
@@ -267,7 +267,7 @@ function buildScripts(cb, stream) {
     }))
     .pipe(pipefn(file => { curFile = file }))
     .pipe(flint('pre'))
-    .pipe(pipefn(file => { curFile = file }))
+    .pipe(pipefn(file => { curFile = file; console.log(file.contents.toString()) }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],

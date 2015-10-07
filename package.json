@@ -5,6 +5,16 @@
     "babel": "5.8.21",
     "shelljs": "^0.5.1"
   },
+  "babel": {
+    "stage": 0,
+    "loose": ["all"],
+    "blacklist": [
+      "es6.tailCall"
+    ],
+    "optional": [
+      "runtime"
+    ]
+  },
   "dependencies": {
     "json-loader": "^0.5.3",
     "webpack": "^1.12.2"

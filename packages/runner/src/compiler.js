@@ -48,7 +48,7 @@ var Parser = {
     const viewEnd = '/* end view:'
     const viewUpdateStart = 'view.update('
     const viewUpdateEnd = ') /*_end_view_update_*/'
-    const isViewStyleUpdate = line => line.indexOf('view.update(view.styles["') >= 0
+    const isViewStyleUpdate = line => line.indexOf('view.update(view.styles[') >= 0
     const isOutOfViewUpdate = line => !inView && line.indexOf(viewUpdateStart) >= 0
     const removeUpdate = line => line.replace(viewUpdateStart, '')
 
@@ -58,7 +58,6 @@ var Parser = {
         let result = line
           .replace('["default"]', '.default')
           .replace("['default']", '.default')
-          .replace('"use strict";', "\"use strict\";\n")
 
         // find if in view
         if (result.indexOf(viewStart) >= 0)
