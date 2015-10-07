@@ -35,28 +35,24 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
     // add new ones to queue
     newDeps = newDeps.concat(fresh)
 
-    // console.log('newdeps', newDeps, installing)
-
     // we've queued and may already be installing, hold off
     if (installing) return
 
     // install deps one by one
-    const installNextDep = () => {
+    const installNextDep = async () => {
       const dep = newDeps.shift()
-      // console.log('new dep is', dep)
-
       onPackageStart(dep)
-      npm.save(dep, dir)
-      .then(() => {
+
+      try {
+        await save(dep, dir)
         log('package installed', dep)
         installedDeps.push(dep)
         onPackageFinish(dep)
         next()
-      })
-      .catch(err => {
+      } catch(e) {
         onPackageError(err)
         next()
-      })
+      }
     }
 
     // continue installing
