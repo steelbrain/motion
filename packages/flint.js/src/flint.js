@@ -54,7 +54,9 @@ const safeRun = fn => {
     try {
       fn()
     }
-    catch({ name, message, stack }) {
+    catch(e) {
+      const { name, message, stack } = e
+      console.error(e)
       reportError({ name, message, stack })
     }
   }
@@ -170,6 +172,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.viewCache[file] = Flint.viewsInFile[file]
       raf(() => {
         Flint.activeViews.Main &&
+        Flint.activeViews.Main.isMounted() &&
         Flint.activeViews.Main.forceUpdate()
       })
     },
@@ -273,7 +276,21 @@ function run(browserNode, userOpts, afterRenderCb) {
         // },
 
         render() {
-          const els = this._render();
+          let els
+
+          if (process.env.production)
+            els = this._render()
+          else {
+            try {
+              els = this._render()
+            }
+            catch({ name, message, stack }) {
+              reportError({ name, message, stack })
+              console.error(e)
+              return null
+            }
+          }
+
           const wrapperStyle = this.style && this.style['$']
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });

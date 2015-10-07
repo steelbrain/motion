@@ -1,6 +1,7 @@
 import exec from '../lib/exec'
 import handleError from '../lib/handleError'
 import fs from 'fs'
+import log from '../lib/log'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces(true)
@@ -26,8 +27,8 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
   try {
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
     const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
-    // console.log('Found packages in file:', found)
-    // console.log('New packages in file:', fresh)
+    log('Found packages in file:', found)
+    log('New packages:', fresh)
 
     // no new ones found
     if (!fresh.length) return
@@ -69,14 +70,16 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
   catch (e) {
     console.log('Error installing dependencies!')
     console.log(e)
+    console.log(e.message.join("\n"))
   }
 }
 
 export function getPackageDeps(dir) {
-  console.log('get', dir)
+  log('getPackageDeps', dir)
   return readFile(dir + '/package.json')
     .then(data => {
       const deps = Object.keys(JSON.parse(data).dependencies)
+      log('getPackageDeps:', deps)
       installedDeps = deps
       return deps
     })

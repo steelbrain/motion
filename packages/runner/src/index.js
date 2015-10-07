@@ -6,6 +6,7 @@ import handleError from './lib/handleError'
 import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
 import npm from './npm'
+import log from './lib/log'
 
 import keypress from 'keypress'
 import fs from 'fs'
@@ -387,6 +388,7 @@ function listenForKeys() {
         break
       case 'v': // verbose logging
         OPTS.verbose = !OPTS.verbose
+        setLogging(OPTS)
         console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine)
         break
     }
@@ -568,11 +570,6 @@ function makeTemplate(req, cb) {
     });
 }
 
-function log(...args) {
-  if (OPTS.debug || OPTS.verbose)
-    console.log(...args)
-}
-
 function unicodeToChar(text) {
   return !text ? '' : text.replace(/\\u[\dABCDEFabcdef][\dABCDEFabcdef][\dABCDEFabcdef][\dABCDEFabcdef]/g,
     function (match) {
@@ -646,8 +643,13 @@ function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
 }
 
+function setLogging(opts) {
+  log.debug = opts.debug || opts.verbose
+}
+
 export async function run(opts, isBuild) {
   setOptions(opts, isBuild)
+  setLogging(OPTS)
 
   CONFIG = await readJSONFile(OPTS.configFile)
   log('got config', CONFIG)
