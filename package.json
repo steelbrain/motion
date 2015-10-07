@@ -2,18 +2,8 @@
   "private": true,
   "license": "MIT",
   "devDependencies": {
-    "babel": "5.8.21",
+    "babel": "5.8.23",
     "shelljs": "^0.5.1"
-  },
-  "babel": {
-    "stage": 0,
-    "loose": ["all"],
-    "blacklist": [
-      "es6.tailCall"
-    ],
-    "optional": [
-      "runtime"
-    ]
   },
   "dependencies": {
     "json-loader": "^0.5.3",

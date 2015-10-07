@@ -267,7 +267,7 @@ function buildScripts(cb, stream) {
     }))
     .pipe(pipefn(file => { curFile = file }))
     .pipe(flint('pre'))
-    .pipe(pipefn(file => { curFile = file; console.log(file.contents.toString()) }))
+    .pipe(pipefn(file => { curFile = file }))
     .pipe(babel({
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],

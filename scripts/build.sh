@@ -11,16 +11,11 @@ for f in packages/*; do
     cd ../..
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" --copy-files $1 &
+    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" --stage 0 --blacklist es6.tailCall --optional runtime --copy-files $1 &
   fi
 done
 
 if [ $1="--watch" ]; then
-  # Run babel build
-  cd vendor/babel
-  make watch &
-  cd ../..
-
   # Relink CLI watcher
   echo "Watching CLI for relink"
   chsum1=""
