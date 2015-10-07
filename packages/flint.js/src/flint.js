@@ -188,9 +188,6 @@ function run(browserNode, userOpts, afterRenderCb) {
             this.forceUpdate()
         },
 
-        pause() { this.isPaused = true },
-        resume() { this.isPaused = false },
-
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
 
@@ -248,6 +245,25 @@ function run(browserNode, userOpts, afterRenderCb) {
           Flint.isUpdating = true
           runEvents(this.events, 'update')
           Flint.isUpdating = false
+        },
+
+        // FLINT HELPERS
+
+        // helpers for controlling re-renders
+        pause() { this.isPaused = true },
+        resume() { this.isPaused = false },
+
+        // helpers for context
+        childContextTypes: {},
+        childContext(obj) {
+          if (!obj) return
+
+          Object.keys(obj).forEach(key => {
+            this.constructor.childContextTypes[key] =
+              React.PropTypes[typeof obj[key]]
+          })
+
+          this.getChildContext = () => obj
         },
 
         render() {
