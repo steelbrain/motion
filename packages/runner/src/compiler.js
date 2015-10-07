@@ -14,17 +14,12 @@ const isNotIn = (x,y) => x.indexOf(y) == -1
 const id = x => x
 const props = id('view.props.')
 const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
-const viewEnd = '})'
+const viewEnd = name => `}) /* end view: ${name} */`
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
 const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
-const jsxEnd = view => `
-  return () =>
-    <${getWrapper(view)} view={view}>
-      ${viewTemplates[view].join('\n')}
-    </${getWrapper(view)}>
-})`
+const jsxEnd = view => `return () => <${getWrapper(view)} view={view}>${viewTemplates[view].join('\n')}</${getWrapper(view)}> })`
 
 // allow style syntax
 const replaceStyles = line => line
@@ -120,14 +115,54 @@ var Parser = {
   post(file, source, opts) {
     OPTS = opts || {}
     source = filePrefix(file) + source + fileSuffix
-    source = source
-      .replace('["default"]', '.default')
-      .replace('"use strict";', "\"use strict\";\n")
+
+    let inView = false
+    let removeNextUpdateEnd = 0
+
+    const viewStart = 'Flint.view("'
+    const viewEnd = '}) /* end view:'
+    const viewUpdateStart = 'view.update('
+    const viewUpdateEnd = ') /*_end_view_update_*/'
+    const isViewStyleUpdate = line => line.indexOf('view.update(view.styles["') >= 0
+    const isOutOfViewUpdate = line => !inView && line.indexOf(viewUpdateStart) >= 0
+    const removeUpdate = line => line.replace(viewUpdateStart, '')
+
+    source = source.split("\n")
+      .map(line => {
+        // every line:
+        let result = line
+          .replace('["default"]', '.default')
+          .replace('"use strict";', "\"use strict\";\n")
+
+        // find if in view
+        if (result.indexOf(viewStart) >= 0)
+          inView = true
+        else if (inView && result.indexOf(viewEnd) >= 0)
+          inView = false
+
+        // if not in view, remove view.update
+        if (isViewStyleUpdate(result) || isOutOfViewUpdate(result)) {
+          result = removeUpdate(result)
+          removeNextUpdateEnd++
+        }
+
+        // remove update end
+        if (removeNextUpdateEnd) {
+          if (result.indexOf(viewUpdateEnd) >= 0) {
+            result = result.replace(viewUpdateEnd, '')
+            removeNextUpdateEnd--
+          }
+        }
+        else {
+          // remove update end comment
+          result = result.replace('/*_end_view_update_*/', '')
+        }
+
+        return result
+      })
+      .join("\n")
 
     checkDependencies(source, opts)
-
-    // source = addFlow(source)
-    //flow.check()
     return { file: source }
   },
 
@@ -143,7 +178,6 @@ var Parser = {
     }
 
     const transformedSource = source
-      .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
       .replace(/\^/g, props)
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
@@ -155,7 +189,7 @@ var Parser = {
         var result = line
         var view = result.match(viewMatcher);
         if (view && view.length) {
-          inView = true;
+          inView = view[0];
           currentView.name = result.split(" ")[1];
 
           // set line of view start based on name
@@ -203,9 +237,10 @@ var Parser = {
         // end view
         if (inView && line.charAt(0) == "}") {
           if (result.trim() == '}')
-            result = viewEnd;
+            result = viewEnd(inView)
           else
-            result += ' ' + viewEnd;
+            result += ' ' + viewEnd(inView)
+
           inJSX = false;
           inView = false;
           views[currentView.name] = currentView;
@@ -218,7 +253,7 @@ var Parser = {
         return result;
       })
       // remove invalid lines
-      .filter(l => l != null)
+      .filter(l => l !== null)
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 

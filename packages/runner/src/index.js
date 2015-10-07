@@ -265,8 +265,10 @@ function buildScripts(cb, stream) {
       stage: 2,
       blacklist: ['flow', 'react', 'es6.tailCall'],
       retainLines: true,
+      comments: true,
       optional: ['bluebirdCoroutines']
     }))
+    // .pipe(pipefn(file => console.log(file.contents.toString())))
     .pipe(flint('post', {
       dir: APP_FLINT_DIR,
       onPackageStart: (name) => {
@@ -284,6 +286,7 @@ function buildScripts(cb, stream) {
         });
       }
     }))
+    // .pipe(pipefn(file => console.log(file.contents.toString())))
     .pipe(gulpif(!stream, rename({ extname: '.js' })))
     .pipe(react({
       stripTypes: true,
