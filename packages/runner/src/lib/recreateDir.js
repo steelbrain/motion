@@ -1,13 +1,17 @@
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var handleError = require('./handleError');
+import { Promise } from 'bluebird'
 
-module.exports = function(dir, cb) {
-  rimraf(dir, createDir);
+const recreateDir = (dir) =>
+  new Promise((res, rej) => {
+    rimraf(dir, err => {
+      if (err) return rej(err)
+      mkdirp(dir, err => {
+        if (err) return rej(err)
+        res(dir)
+      });
+    })
+  })
 
-  function createDir() {
-    mkdirp(dir, cb || function() {});
-  }
-
-  return dir;
-}
+export default recreateDir

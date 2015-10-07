@@ -2,11 +2,11 @@ import ws from 'nodejs-websocket'
 
 let wsServer
 let connected = false
+let connections = []
 let queue = []
 
 function broadcast(data) {
-  wsServer.connections.forEach(conn => {
-    // console.log('send', data)
+  connections.forEach(conn => {
     conn.sendText(data)
   })
 }
@@ -36,7 +36,7 @@ export function message(type, obj) {
 export function once(type, cb) {
   let recieved = false
 
-  wsServer.connections.forEach(conn => {
+  connections.forEach(conn => {
     conn.on('data', message => {
       if (message.type != type) return
       if (recieved) return
@@ -48,9 +48,9 @@ export function once(type, cb) {
 
 export function start(port) {
   wsServer = ws.createServer(conn => {
-    conn.on('error', err => {
-      // console.log(err)
-    })
+    connections.push(conn)
+
+    conn.on('error', err => {})
 
     if (connected) return
     connected = true

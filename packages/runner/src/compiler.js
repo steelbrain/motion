@@ -14,17 +14,12 @@ const isNotIn = (x,y) => x.indexOf(y) == -1
 const id = x => x
 const props = id('view.props.')
 const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
-const viewEnd = '})'
+const viewEnd = name => `}) /* end view: ${name} */`
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
 const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
-const jsxEnd = view => `
-  return () =>
-    <${getWrapper(view)} view={view}>
-      ${viewTemplates[view].join('\n')}
-    </${getWrapper(view)}>
-})`
+const jsxEnd = view => `return () => <${getWrapper(view)} view={view}>${viewTemplates[view].join('\n')}</${getWrapper(view)}> })`
 
 // allow style syntax
 const replaceStyles = line => line
@@ -32,8 +27,9 @@ const replaceStyles = line => line
   .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
   .replace('__STYLE__', '$')
 
-const filePrefix = file => `(function() { Flint.hotload('${file}', function(exports) { \n`
-const fileSuffix = ';return exports }) })();'
+const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
+const fileSuffix = ';return exports }) }()'
 
 const readPackageJsonDeps = (dir, cb) => {
   try {
@@ -108,7 +104,7 @@ const checkDependencies = (source, { dir, onPackageStart, onPackageFinish, onPac
 
 var Parser = {
   init(opts) {
-    OPTS = opts
+    OPTS = opts || {}
     // set initial local cache of installedDeps
     readPackageJsonDeps(opts.dir, installed => {
       installedDeps = installed
@@ -117,14 +113,56 @@ var Parser = {
   },
 
   post(file, source, opts) {
-    OPTS = opts
+    OPTS = opts || {}
     source = filePrefix(file) + source + fileSuffix
-    source = source.replace('["default"]', '.default')
+
+    let inView = false
+    let removeNextUpdateEnd = 0
+
+    const viewStart = 'Flint.view("'
+    const viewEnd = '/* end view:'
+    const viewUpdateStart = 'view.update('
+    const viewUpdateEnd = ') /*_end_view_update_*/'
+    const isViewStyleUpdate = line => line.indexOf('view.update(view.styles["') >= 0
+    const isOutOfViewUpdate = line => !inView && line.indexOf(viewUpdateStart) >= 0
+    const removeUpdate = line => line.replace(viewUpdateStart, '')
+
+    source = source.split("\n")
+      .map(line => {
+        // every line:
+        let result = line
+          .replace('["default"]', '.default')
+          .replace('"use strict";', "\"use strict\";\n")
+
+        // find if in view
+        if (result.indexOf(viewStart) >= 0)
+          inView = true
+        else if (inView && result.indexOf(viewEnd) >= 0)
+          inView = false
+
+        // if not in view, remove view.update
+        if (isViewStyleUpdate(result) || isOutOfViewUpdate(result)) {
+          result = removeUpdate(result)
+          removeNextUpdateEnd++
+        }
+
+        // remove update end
+        if (removeNextUpdateEnd) {
+          if (result.indexOf(viewUpdateEnd) >= 0) {
+            result = result.replace(viewUpdateEnd, '')
+            removeNextUpdateEnd--
+          }
+        }
+        else {
+          // remove update end comment
+          result = result.replace('/*_end_view_update_*/', '')
+        }
+
+        return result
+      })
+      .join("\n")
 
     checkDependencies(source, opts)
-
-    // source = addFlow(source)
-    //flow.check()
     return { file: source }
   },
 
@@ -140,7 +178,6 @@ var Parser = {
     }
 
     const transformedSource = source
-      .replace(/observe\([\@\^]([a-z]*)/g, "Flint.observe(_view.entityId, '$1'")
       .replace(/\^/g, props)
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
@@ -201,10 +238,13 @@ var Parser = {
 
         // end view
         if (inView && line.charAt(0) == "}") {
+          const end = viewEnd(currentView.name)
+
           if (result.trim() == '}')
-            result = viewEnd;
+            result = end
           else
-            result += ' ' + viewEnd;
+            result += ' ' + end
+
           inJSX = false;
           inView = false;
           views[currentView.name] = currentView;
@@ -217,7 +257,7 @@ var Parser = {
         return result;
       })
       // remove invalid lines
-      .filter(l => l != null)
+      .filter(l => l !== null)
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 
@@ -229,7 +269,7 @@ var Parser = {
   }
 }
 
-function compile(type, opts) {
+function compile(type, opts = {}) {
   if (type == 'init')
     return Parser.init(opts)
 
@@ -292,4 +332,4 @@ function log(...args) {
   if (OPTS.debug || OPTS.verbose) console.log(...args)
 }
 
-module.exports = compile;
+export default compile

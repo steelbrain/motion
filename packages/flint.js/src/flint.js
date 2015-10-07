@@ -20,11 +20,12 @@ import mainComponent from './lib/mainComponent'
 const inBrowser = typeof window != 'undefined'
 const root = inBrowser ? window : global
 
+// set root variable
 if (inBrowser) window.root = window
 else global.root = global
 
 // GLOBALS
-root._bluebird = Bluebird
+root._bluebird = Bluebird // for imported modules to use
 root.on = on
 root.Promise = Promise
 root.module = {}
@@ -148,7 +149,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // current file that is running
     currentHotFile: null,
 
-    hotload(file, run) {
+    file(file, run) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
       let fileExports
@@ -186,9 +187,6 @@ function run(browserNode, userOpts, afterRenderCb) {
           if (!Flint.isUpdating && this.hasRun && this.isMounted && !this.isPaused)
             this.forceUpdate()
         },
-
-        pause() { this.isPaused = true },
-        resume() { this.isPaused = false },
 
         getInitialState() {
           id = (name == 'Main') ? 'Main' : uuid();
@@ -249,6 +247,31 @@ function run(browserNode, userOpts, afterRenderCb) {
           Flint.isUpdating = false
         },
 
+        // FLINT HELPERS
+
+        // helpers for controlling re-renders
+        pause() { this.isPaused = true },
+        resume() { this.isPaused = false },
+
+        // helpers for context
+        childContextTypes: {},
+        childContext(obj) {
+          if (!obj) return
+
+          Object.keys(obj).forEach(key => {
+            this.constructor.childContextTypes[key] =
+              React.PropTypes[typeof obj[key]]
+          })
+
+          this.getChildContext = () => obj
+        },
+
+        // propTypes(obj) {
+        //   if (!obj) return
+        //
+        //   this.constructor.propTypes = obj
+        // },
+
         render() {
           const els = this._render();
           const wrapperStyle = this.style && this.style['$']
@@ -278,20 +301,18 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (root[name])
         return root[name];
 
-      // const subName = `${view}.${name}`
-      //
-      // // subview
-      // if (Flint.views[subName])
-      //   return Flint.views[subName].component
+      // View.SubView
+      const subName = `${view}.${name}`
+      if (Flint.views[subName])
+        return Flint.views[subName].component
 
-      // no view
-
+      // regular view
       if (Flint.views[name]) {
         return Flint.views[name].component;
       }
 
+      // "global" views
       const namespaceView = opts.namespace[name] || root[name];
-
       if (namespaceView)
         return namespaceView;
 

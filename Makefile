@@ -17,16 +17,20 @@ link:
 
 # release (npm patch)
 
-cli:
+ready:
+	git pull --rebase
+
+cli: ready
 	scripts/release.sh cli
 
-flint.js:
+flint.js: ready
 	scripts/release.sh flint.js
 
-runner:
+runner: ready
 	scripts/release.sh runner
 
-tools:
+tools: ready
 	scripts/release.sh tools
 
-all: cli flint.js runner tools
+all: ready
+	scripts/release.sh all
