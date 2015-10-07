@@ -144,6 +144,8 @@ var Parser = {
       .replace(/\^/g, props)
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
+      .replace(/\-\-/g, '-= 1')
+      .replace(/([a-zA-Z_1-9]*)([\ ]*):=/, 'const $1 =')
       .split("\n")
       .map((line, index) => {
         if (line.charAt(0) == "\t")
