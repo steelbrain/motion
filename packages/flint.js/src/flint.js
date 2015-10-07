@@ -316,7 +316,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (namespaceView)
         return namespaceView;
 
-      return class NotFound {
+      return class NotFound extends React.Component {
         render() {
           const message = `Flint: view "${name}" not found`
           return <div style={{ display: 'block' }}>{message}</div>
