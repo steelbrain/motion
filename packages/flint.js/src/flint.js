@@ -172,7 +172,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.viewCache[file] = Flint.viewsInFile[file]
       raf(() => {
         Flint.activeViews.Main &&
-        Flint.activeViews.Main.isMounted() &&
+        Flint.activeViews.Main.isMounted &&
         Flint.activeViews.Main.forceUpdate()
       })
     },
@@ -284,7 +284,8 @@ function run(browserNode, userOpts, afterRenderCb) {
             try {
               els = this._render()
             }
-            catch({ name, message, stack }) {
+            catch(e) {
+              const { name, message, stack } = e
               reportError({ name, message, stack })
               console.error(e)
               return null
