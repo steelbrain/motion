@@ -241,7 +241,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           delete Flint.activeViews[id];
         },
 
-        componentDidUpdate() {
+        componentWillUpdate() {
           Flint.isUpdating = true
           runEvents(this.events, 'update')
           Flint.isUpdating = false
