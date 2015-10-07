@@ -328,4 +328,4 @@ function log(...args) {
   if (OPTS.debug || OPTS.verbose) console.log(...args)
 }
 
-module.exports = compile;
+export default compile
