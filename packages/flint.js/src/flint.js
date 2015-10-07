@@ -266,6 +266,12 @@ function run(browserNode, userOpts, afterRenderCb) {
           this.getChildContext = () => obj
         },
 
+        // propTypes(obj) {
+        //   if (!obj) return
+        //
+        //   this.constructor.propTypes = obj
+        // },
+
         render() {
           const els = this._render();
           const wrapperStyle = this.style && this.style['$']

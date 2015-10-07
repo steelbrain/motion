@@ -189,7 +189,7 @@ var Parser = {
         var result = line
         var view = result.match(viewMatcher);
         if (view && view.length) {
-          inView = view[0];
+          inView = true;
           currentView.name = result.split(" ")[1];
 
           // set line of view start based on name
@@ -236,10 +236,12 @@ var Parser = {
 
         // end view
         if (inView && line.charAt(0) == "}") {
+          const end = viewEnd(currentView.name)
+
           if (result.trim() == '}')
-            result = viewEnd(inView)
+            result = end
           else
-            result += ' ' + viewEnd(inView)
+            result += ' ' + end
 
           inJSX = false;
           inView = false;

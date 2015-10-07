@@ -6,7 +6,6 @@ let queue = []
 
 function broadcast(data) {
   wsServer.connections.forEach(conn => {
-    // console.log('send', data)
     conn.sendText(data)
   })
 }
