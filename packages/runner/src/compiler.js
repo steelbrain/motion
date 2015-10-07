@@ -120,7 +120,7 @@ var Parser = {
     let removeNextUpdateEnd = 0
 
     const viewStart = 'Flint.view("'
-    const viewEnd = '}) /* end view:'
+    const viewEnd = '/* end view:'
     const viewUpdateStart = 'view.update('
     const viewUpdateEnd = ') /*_end_view_update_*/'
     const isViewStyleUpdate = line => line.indexOf('view.update(view.styles["') >= 0
