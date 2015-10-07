@@ -434,7 +434,7 @@ function getScriptTags(files, req) {
       '<script src="/__/flint.dev.js"></script>',
       '<script src="/__/packages.js" id="__flintPackages"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
-      '<script src="/__/devtools.js"></script>',
+      '<script src="/__/devtools.dev.js"></script>',
       // devtools
       devToolsDisabled(req) ? '' : [
         '<script src="/__/tools.js"></script>',
