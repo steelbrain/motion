@@ -35,6 +35,3 @@ elif [ $1 = "tools" ]; then
 else
   release_package packages/$1
 fi
-
-# git commit -am 'vbump'
-# git push origin head
