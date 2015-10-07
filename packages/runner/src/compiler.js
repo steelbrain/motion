@@ -1,9 +1,8 @@
 import handleError from './lib/handleError'
-import npm from './lib/npm'
+import npm from './npm'
 import gutil from 'gulp-util'
 import through from 'through2'
 import fs from 'fs'
-// import flow from 'gulp-flowtype'
 
 let views = []
 let VIEW_LOCATIONS = {}
@@ -31,85 +30,11 @@ const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
 const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
 const fileSuffix = ';return exports }) }()'
 
-const readPackageJsonDeps = (dir, cb) => {
-  try {
-    fs.readFile(dir + '/package.json', handleError(data => {
-      cb(Object.keys(JSON.parse(data).dependencies))
-    }))
-  }
-  catch(e) {
-    console.log('Error reading app package.json')
-    console.log(e)
-  }
-}
-
-// deps cache
-let installing = false
-let newDeps = []
-let installedDeps = []
-
-const checkDependencies = (source, { dir, onPackageStart, onPackageFinish, onPackageError }) => {
-  try {
-    const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-    const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
-    // console.log('Found packages in file:', found)
-    // console.log('New packages in file:', fresh)
-
-    // no new ones found
-    if (!fresh.length) return
-
-    // add new ones to queue
-    newDeps = newDeps.concat(fresh)
-
-    // console.log('newdeps', newDeps, installing)
-
-    // we've queued and may already be installing, hold off
-    if (installing) return
-
-    // install deps one by one
-    const installNextDep = () => {
-      const dep = newDeps.shift()
-      // console.log('new dep is', dep)
-
-      onPackageStart(dep)
-      npm.save(dep, dir)
-      .then(() => {
-        log('package installed', dep)
-        installedDeps.push(dep)
-        onPackageFinish(dep)
-        next()
-      })
-      .catch(err => {
-        onPackageError(err)
-        next()
-      })
-    }
-
-    // continue installing
-    const next = () => {
-      if (newDeps.length)
-        installNextDep()
-      else
-        installing = false
-    }
-
-    installing = true
-    installNextDep()
-  }
-  catch (e) {
-    console.log('Error installing dependencies!')
-    console.log(e)
-  }
-}
-
 var Parser = {
   init(opts) {
     OPTS = opts || {}
-    // set initial local cache of installedDeps
-    readPackageJsonDeps(opts.dir, installed => {
-      installedDeps = installed
-      opts.after()
-    })
+    console.log('init')
+    npm.getPackageDeps(opts.dir).then(opts.after)
   },
 
   post(file, source, opts) {
@@ -163,7 +88,7 @@ var Parser = {
       })
       .join("\n")
 
-    checkDependencies(source, opts)
+    npm.checkDependencies(source, opts)
     return { file: source }
   },
 
@@ -182,8 +107,6 @@ var Parser = {
       .replace(/\^/g, props)
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
-      .replace(/\-\-/g, '-= 1')
-      .replace(/([a-zA-Z_1-9]*)([\ ]*):=/, 'const $1 =')
       .split("\n")
       .map((line, index) => {
         if (line.charAt(0) == "\t")
@@ -318,16 +241,6 @@ const viewReplacer = (match, name, params) => {
 
 const viewOpen = (name, hash, params) =>
   'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
-
-const getMatches = (string, regex, index) => {
-  index || (index = 1); // default to the first capturing group
-  var matches = [];
-  var match;
-  while (match = regex.exec(string)) {
-    matches.push(match[index]);
-  }
-  return matches;
-}
 
 function log(...args) {
   if (OPTS.debug || OPTS.verbose) console.log(...args)

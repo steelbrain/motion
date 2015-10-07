@@ -7,6 +7,7 @@ import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
 import npm from './lib/npm'
 
+import keypress from 'keypress'
 import fs from 'fs'
 import path from 'path'
 import express from 'express'
@@ -34,7 +35,9 @@ import open from 'open'
 import readdirp from 'readdirp'
 import webpack from 'webpack'
 import editor from 'editor'
+
 import { Promise } from 'bluebird'
+Promise.longStackTraces(true)
 
 const exec = cp.exec
 const spawn = cp.spawn
@@ -366,37 +369,34 @@ function writeConfig(config) {
 }
 
 function listenForKeys() {
-  var keypress = require('keypress');
-  keypress(proc.stdin);
+  keypress(proc.stdin)
 
   // listen for the "keypress" event
   proc.stdin.on('keypress', function (ch, key) {
-    if (!key) return;
+    if (!key) return
 
-    // open browser
-    if (key.name == 'o')
-      openInBrowser();
-
-    // open editor
-    if (key.name == 'e')
-      editor('.')
-
-    // install npm
-    if (key.name == 'i')
-      makeDependencyBundle(true)
-
-    // verbose logging
-    if (key.name == 'v') {
-      OPTS.verbose = !OPTS.verbose;
-      console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine);
+    switch(key.name) {
+      case 'o': // open browser
+        openInBrowser()
+        break
+      case 'e': // open editor
+        editor('.')
+        break
+      case 'i': // install npm
+        makeDependencyBundle(true)
+        break
+      case 'v': // verbose logging
+        OPTS.verbose = !OPTS.verbose
+        console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine)
+        break
     }
 
     // exit
     if (key.ctrl && key.name == 'c')
-      process.exit();
+      process.exit()
   });
 
-  resumeListenForKeys();
+  resumeListenForKeys()
 }
 
 function openInBrowser() {
@@ -424,7 +424,6 @@ function askForUrlPreference(cb) {
     cb(useFriendly)
   // });
 }
-
 
 function getScriptTags(files, req) {
   return newLine +
