@@ -1,0 +1,9 @@
+{
+  "stage": 0,
+  "blacklist": [
+    "es6.tailCall"
+  ],
+  "optional": [
+    "runtime"
+  ]
+}

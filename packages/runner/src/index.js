@@ -221,7 +221,7 @@ function buildScripts(cb, stream) {
   let gulpDest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.';
   let buildingTimeout
 
-  return (stream ? stream : gulp.src(SCRIPTS_GLOB))
+  return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe(gulpif(!OPTS.build,
       watch(SCRIPTS_GLOB)
     ))
