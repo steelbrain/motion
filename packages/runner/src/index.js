@@ -8,6 +8,7 @@ import recreateDir from './lib/recreateDir'
 import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
+import { mkdir, readdir, readJSONFile, readFile, writeFile } from './lib/fns'
 
 import keypress from 'keypress'
 import fs from 'fs'
@@ -48,18 +49,9 @@ const proc = process
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 
-// promisify
-const mkdir = Promise.promisify(mkdirp)
-const readdir = Promise.promisify(readdirp)
-const readJSONFile = Promise.promisify(jf.readFile)
-const readFile = Promise.promisify(fs.readFile)
-const writeFile = Promise.promisify(fs.writeFile)
-
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', 'node_modules');
 const APP_FLINT_DIR = p(APP_DIR, '.flint');
-const DEPS_DIR = p(APP_FLINT_DIR, 'deps')
-const DEPS_FILE = p(DEPS_DIR, 'deps.js')
 
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
@@ -297,13 +289,12 @@ function buildScripts(cb, stream) {
       onPackageError: (error) => {
         bridge.message('package:error', { error })
       },
-      onPackageFinish: (name) => {
+      onPackageFinish: async (name) => {
         if (OPTS.build) return
         log('finish package, make new bundle', name)
-        makeDependencyBundle().then(() => {
-          bridge.message('package:installed', { name })
-          bridge.message('packages:reload', {})
-        });
+        await npm.bundle()
+        bridge.message('package:installed', { name })
+        bridge.message('packages:reload', {})
       }
     }))
     .pipe(pipefn(file => { curFile = file }))
@@ -385,7 +376,7 @@ function listenForKeys() {
   keypress(proc.stdin)
 
   // listen for the "keypress" event
-  proc.stdin.on('keypress', function (ch, key) {
+  proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
 
     switch(key.name) {
@@ -396,7 +387,8 @@ function listenForKeys() {
         editor('.')
         break
       case 'i': // install npm
-        makeDependencyBundle(true)
+        await npm.install()
+        npm.bundle()
         break
       case 'v': // verbose logging
         OPTS.verbose = !OPTS.verbose
@@ -600,60 +592,7 @@ function logInstalled(deps) {
   console.log()
 }
 
-function ensurePackagesFile(file, contents) {
-  return new Promise(async (res, rej) => {
-    log('ensurePackagesFile make dir', DEPS_DIR)
-    await mkdir(DEPS_DIR)
-    log('ensurePackagesFile write')
-    await writeFile(DEPS_FILE, contents || '')
-    log('ensurePackagesFile success')
-    res()
-  })
-}
 
-function makeDependencyBundle(doInstall) {
-  log('makeDependencyBundle')
-
-  const bundleDeps = () =>
-    new Promise((res, rej) => {
-      webpack({
-        entry: DEPS_FILE,
-        externals: { react: 'React', bluebird: '_bluebird' },
-        output: { filename: p(DEPS_DIR, 'packages.js') }
-      }, err => {
-        if (err) return rej(err)
-        res()
-      })
-    })
-
-  const run = async () => {
-    console.log("Installing npm packages...\n".bold.blue)
-
-    if (doInstall)
-      await npm.install(p(APP_FLINT_DIR))
-
-    const file = await readFile(p(APP_FLINT_DIR, 'package.json'))
-    const depsObject = JSON.parse(file).dependencies
-    const deps = Object.keys(depsObject)
-      .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-    const requireString = deps
-      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine) || ''
-
-    // make dep dir
-    log('makeDependencyBundle run ensurePackagesFile()')
-    await ensurePackagesFile()
-    log('makeDependencyBundle run bundleDeps()')
-    await bundleDeps()
-    logInstalled(deps)
-  }
-
-  return new Promise(async (res, rej) => {
-    log('running makeDependencyBundle')
-    await run()
-    res()
-  })
-}
 
 function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
@@ -667,16 +606,14 @@ export async function run(opts, isBuild) {
   setOptions(opts, isBuild)
   setLogging(OPTS)
 
+  npm.init({
+    dir: APP_FLINT_DIR
+  })
+
   CONFIG = await readJSONFile(OPTS.configFile)
   log('got config', CONFIG)
+
   const isFirstRun = await firstRun()
-  log('got first run prefs')
-
-  // generate initial package.js
-  if (isFirstRun)
-    await makeDependencyBundle()
-
-  await ensurePackagesFile()
   await initCompiler()
 
   if (OPTS.build) {
@@ -684,7 +621,8 @@ export async function run(opts, isBuild) {
     await clearBuildDir()
     build()
     await* [
-      makeDependencyBundle(true),
+      npm.install(),
+      npm.bundle(),
       afterFirstBuild()
     ]
 
@@ -696,6 +634,10 @@ export async function run(opts, isBuild) {
       process.exit()
   }
   else {
+    // generate initial package.js
+    if (isFirstRun)
+      await npm.bundle()
+
     log('running...')
     await clearOutDir()
     await runServer()

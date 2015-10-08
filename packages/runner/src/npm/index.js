@@ -1,21 +1,62 @@
+import { Promise } from 'bluebird'
+import fs from 'fs'
+
 import cache from '../cache'
 import exec from '../lib/exec'
 import handleError from '../lib/handleError'
-import fs from 'fs'
 import log from '../lib/log'
+import { mkdir, readFile } from '../lib/fns'
 
-import { Promise } from 'bluebird'
-Promise.longStackTraces(true)
+let opts
 
-const readFile = Promise.promisify(fs.readFile)
-const getMatches = (string, regex, index) => {
-  index || (index = 1); // default to the first capturing group
-  var matches = [];
-  var match;
-  while (match = regex.exec(string)) {
-    matches.push(match[index]);
+export function init(_opts) {
+  opts = _opts
+  opts.outDir = p(opts.dir, 'deps')
+  opts.entry = p(opts.outDir, 'deps.js')
+  opts.outFile = p(opts.outDir, 'packages.js')
+}
+
+export function bundle() {
+  const run = async () => {
+    console.log("Installing npm packages...\n".bold.blue)
+
+    const file = await readFile(p(opts.dir, 'package.json'))
+    const deps = Object.keys(JSON.parse(file).dependencies)
+      .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
+    const requireString = deps
+      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
+      .join(newLine) || ''
+
+    // make dep dir
+    await pack()
+    logInstalled(deps)
   }
-  return matches;
+
+  return new Promise(async (res, rej) => {
+    await run()
+    res()
+  })
+}
+
+function ensurePackagesDir(file, contents) {
+  return new Promise(async (res, rej) => {
+    await mkdir(opts.outDir)
+    res()
+  })
+}
+
+async function pack(file, out) {
+  await ensurePackagesDir()
+  return new Promise((res, rej) => {
+    webpack({
+      entry: opts.entry,
+      externals: { react: 'React', bluebird: '_bluebird' },
+      output: { filename: opts.outFile }
+    }, err => {
+      if (err) return rej(err)
+      res()
+    })
+  })
 }
 
 // deps cache
@@ -135,13 +176,23 @@ export function versions(name) {
 // npm install
 export function install(dir) {
   return new Promise((res, rej) => {
-    exec('npm install', dir, err => {
+    exec('npm install', dir || opts.dir, err => {
       if (err) rej(err)
       else res()
     })
   })
 }
 
+const getMatches = (string, regex, index) => {
+  index || (index = 1); // default to the first capturing group
+  var matches = [];
+  var match;
+  while (match = regex.exec(string)) {
+    matches.push(match[index]);
+  }
+  return matches;
+}
+
 export default {
-  save, versions, install, getPackageDeps, checkDependencies
+  init, pack, save, versions, install, getPackageDeps, checkDependencies
 }
