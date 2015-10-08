@@ -5,7 +5,7 @@ import webpack from 'webpack'
 import cache from '../cache'
 import exec from '../lib/exec'
 import log from '../lib/log'
-import { p, mkdir, readFile } from '../lib/fns'
+import { p, mkdir, readFile, writeFile } from '../lib/fns'
 
 let OPTS
 
@@ -27,17 +27,18 @@ const depRequireString =
 export function bundle() {
   log('npm: bundle')
   return new Promise(async (res, rej) => {
-    const file = await readFile(OPTS.packageJSON)
-    const deps = Object.keys(JSON.parse(file).dependencies)
-    const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-    const requireString = depNames.map(depRequireString).join(newLine)
-
-    log('npm: bundle: write deps')
-    await writeFile(requireString, OPTS.entry)
-    await pack()
-
-    logInstalled(deps)
-    res()
+    try {
+      const file = await readFile(OPTS.packageJSON)
+      const deps = Object.keys(JSON.parse(file).dependencies)
+      const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
+      log('npm: bundle: depNames:', depNames)
+      const requireString = depNames.map(depRequireString).join("\n")
+      log('npm: bundle: write deps')
+      await writeFile(OPTS.entry, requireString)
+      await pack()
+      res()
+    }
+    catch(e) { console.error(e) }
   })
 }
 
@@ -86,6 +87,7 @@ export function scanFile(file, source, opts) {
         await save(dep)
         log('scanFile: package installed', dep)
         installed.push(dep)
+        await bundle()
         opts.onPackageFinish(dep)
         next()
       } catch(e) {
@@ -104,6 +106,7 @@ export function scanFile(file, source, opts) {
     const done = () => {
       // cache newly installed + already
       cache.setImports(file, installed.concat(already))
+      logInstalled(installed)
     }
 
     installNext()
@@ -168,5 +171,5 @@ function logInstalled(deps) {
 }
 
 export default {
-  init, bundle, save, install, readPackageJSON, scanFile
+  init, save, install, readPackageJSON, scanFile
 }

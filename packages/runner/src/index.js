@@ -267,7 +267,6 @@ function buildScripts(cb, stream) {
       onPackageFinish: async (name) => {
         if (OPTS.build) return
         log('runner: onPackageFinish: ', name)
-        await npm.bundle()
         bridge.message('package:installed', { name })
         bridge.message('packages:reload', {})
       }
@@ -356,7 +355,7 @@ function listenForKeys() {
   keypress(proc.stdin)
 
   // listen for the "keypress" event
-  proc.stdin.on('keypress', async function (ch, key) {
+  proc.stdin.on('keypress', function (ch, key) {
     if (!key) return
 
     switch(key.name) {
@@ -367,8 +366,7 @@ function listenForKeys() {
         editor('.')
         break
       case 'i': // install npm
-        await npm.install()
-        npm.bundle()
+        npm.install()
         break
       case 'v': // verbose logging
         OPTS.verbose = !OPTS.verbose
@@ -573,7 +571,6 @@ export async function run(opts, isBuild) {
       build()
       await* [
         npm.install(),
-        npm.bundle(),
         afterFirstBuild()
       ]
 
@@ -585,10 +582,6 @@ export async function run(opts, isBuild) {
         process.exit()
     }
     else {
-      // generate initial package.js
-      if (isFirstRun)
-        await npm.bundle()
-
       log('running...')
       await clearOutDir()
       await runServer()
