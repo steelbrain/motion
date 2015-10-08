@@ -1,5 +1,6 @@
 import handleError from './lib/handleError'
 import npm from './npm'
+import log from './lib/log'
 import gutil from 'gulp-util'
 import through from 'through2'
 import fs from 'fs'
@@ -33,7 +34,7 @@ const fileSuffix = ';return exports }) }()'
 var Parser = {
   init(opts) {
     OPTS = opts || {}
-    console.log('init')
+    log('init')
     npm.getPackageDeps(opts.dir).then(opts.after)
   },
 
@@ -240,9 +241,5 @@ const viewReplacer = (match, name, params) => {
 
 const viewOpen = (name, hash, params) =>
   'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
-
-function log(...args) {
-  if (OPTS.debug || OPTS.verbose) console.log(...args)
-}
 
 export default compile

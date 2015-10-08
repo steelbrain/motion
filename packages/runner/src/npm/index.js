@@ -1,6 +1,7 @@
 import exec from '../lib/exec'
 import handleError from '../lib/handleError'
 import fs from 'fs'
+import log from '../lib/log'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces(true)
@@ -26,8 +27,8 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
   try {
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
     const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
-    // console.log('Found packages in file:', found)
-    // console.log('New packages in file:', fresh)
+    log('Found packages in file:', found)
+    log('New packages:', fresh)
 
     // no new ones found
     if (!fresh.length) return
@@ -35,28 +36,24 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
     // add new ones to queue
     newDeps = newDeps.concat(fresh)
 
-    // console.log('newdeps', newDeps, installing)
-
     // we've queued and may already be installing, hold off
     if (installing) return
 
     // install deps one by one
-    const installNextDep = () => {
+    const installNextDep = async () => {
       const dep = newDeps.shift()
-      // console.log('new dep is', dep)
-
       onPackageStart(dep)
-      npm.save(dep, dir)
-      .then(() => {
+
+      try {
+        await save(dep, dir)
         log('package installed', dep)
         installedDeps.push(dep)
         onPackageFinish(dep)
         next()
-      })
-      .catch(err => {
+      } catch(e) {
         onPackageError(err)
         next()
-      })
+      }
     }
 
     // continue installing
@@ -73,14 +70,16 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
   catch (e) {
     console.log('Error installing dependencies!')
     console.log(e)
+    console.log(e.message.join("\n"))
   }
 }
 
 export function getPackageDeps(dir) {
-  console.log('get', dir)
+  log('getPackageDeps', dir)
   return readFile(dir + '/package.json')
     .then(data => {
       const deps = Object.keys(JSON.parse(data).dependencies)
+      log('getPackageDeps:', deps)
       installedDeps = deps
       return deps
     })

@@ -15,7 +15,7 @@ for f in packages/*; do
   fi
 done
 
-if [ $1="--watch" ]; then
+if [ $1="--watch" ]; then  
   # Relink CLI watcher
   echo "Watching CLI for relink"
   chsum1=""

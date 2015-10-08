@@ -89,6 +89,7 @@ view Errors {
   })
 
   tools.on('runtime:error', () => {
+    if (runtimeError) return // prefer first error
     compileError = null
     runtimeError = tools.data
     setError()
@@ -137,7 +138,7 @@ view ErrorMessage {
   <inner if={^error}>
     <where>
       {fileName(^error.file || ^error.fileName)}
-      {line && ` line ${line}`}
+      {line ? ` line ${line}` : ''}
     </where>
     {' '}
     <errorTitle>
