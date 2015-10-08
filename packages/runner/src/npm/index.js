@@ -5,26 +5,34 @@ import webpack from 'webpack'
 import cache from '../cache'
 import exec from '../lib/exec'
 import log from '../lib/log'
-import { p, mkdir, readFile, writeFile } from '../lib/fns'
+import {
+  p,
+  mkdir,
+  readFile,
+  writeFile,
+  writeJSON,
+  readJSON } from '../lib/fns'
 
 let OPTS
 
-export async function init(_opts) {
+async function init(_opts) {
   OPTS = _opts
   OPTS.outDir = p(OPTS.dir, 'deps')
-  OPTS.entry = p(OPTS.outDir, 'deps.js')
+  OPTS.entryFile = p(OPTS.outDir, 'deps.js')
+  OPTS.cacheFile = p(OPTS.outDir, 'deps.json')
   OPTS.outFile = p(OPTS.outDir, 'packages.js')
   OPTS.packageJSON = p(OPTS.dir, 'package.json')
   log('npm: init opts: ', OPTS)
-  await readPackageJSON()
-  await mkdir(OPTS.outDir)
+
+  try {
+    await readDeps()
+    await mkdir(OPTS.outDir)
+  }
+  catch(e) { console.error(e) }
 }
 
-const depRequireString =
-  name => `window.__flintPackages["${name}"] = require("${name}");`
-
-// read package json and write to .flint/deps/packages.js
-export function bundle() {
+// package.json => packages.js
+function bundle() {
   log('npm: bundle')
   return new Promise(async (res, rej) => {
     try {
@@ -32,9 +40,7 @@ export function bundle() {
       const deps = Object.keys(JSON.parse(file).dependencies)
       const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
       log('npm: bundle: depNames:', depNames)
-      const requireString = depNames.map(depRequireString).join("\n")
-      log('npm: bundle: write deps')
-      await writeFile(OPTS.entry, requireString)
+      await writeDeps(depNames)
       await pack()
       res()
     }
@@ -42,11 +48,38 @@ export function bundle() {
   })
 }
 
+// => deps.json
+// => deps.js
+const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
+async function writeDeps(deps) {
+  return new Promise((resolve) => {
+    const requireString = deps.map(depRequireString).join("\n")
+    await writeFile(OPTS.entryFile, requireString)
+    await writeJSON(OPTS.cacheFile, `{ "deps": ${JSON.stringify(deps)} }`)
+    resolve()
+  })
+}
+
+// <= deps.json
+// <= package.json
+function readPackageJSON() {
+  log('readPackageJSON')
+  return readFile(OPTS.dir + '/package.json')
+    .then(data => {
+      const deps = Object.keys(JSON.parse(data).dependencies)
+      log('readPackageJSON:', deps)
+      cache.setInPackage(deps)
+      return deps
+    })
+}
+
+// webpack
+// deps.js => packages.js
 async function pack(file, out) {
   log('npm: pack')
   return new Promise((res, rej) => {
     webpack({
-      entry: OPTS.entry,
+      entry: OPTS.entryFile,
       externals: { react: 'React', bluebird: '_bluebird' },
       output: { filename: OPTS.outFile }
     }, err => {
@@ -56,11 +89,13 @@ async function pack(file, out) {
   })
 }
 
-const findRequires = source => getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
+const findRequires = source =>
+  getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
-// scan a file and install new deps
-// then update cache
-export function scanFile(file, source, opts) {
+// <= file, source
+//  > install new deps
+// => update cache
+function scanFile(file, source, opts) {
   try {
     const all = cache.getImports()
     const found = findRequires(source)
@@ -118,19 +153,8 @@ export function scanFile(file, source, opts) {
   }
 }
 
-export function readPackageJSON() {
-  log('readPackageJSON')
-  return readFile(OPTS.dir + '/package.json')
-    .then(data => {
-      const deps = Object.keys(JSON.parse(data).dependencies)
-      log('readPackageJSON:', deps)
-      cache.setInPackage(deps)
-      return deps
-    })
-}
-
 // npm install --save 'name'
-export function save(name) {
+function save(name) {
   log('npm: save:', name)
   return new Promise((res, rej) => {
     exec('npm install --save ' + name, OPTS.dir, err => {
@@ -141,7 +165,7 @@ export function save(name) {
 }
 
 // npm install
-export function install(dir) {
+function install(dir) {
   return new Promise((res, rej) => {
     exec('npm install', dir || OPTS.dir, err => {
       if (err) rej(err)
@@ -171,5 +195,5 @@ function logInstalled(deps) {
 }
 
 export default {
-  init, save, install, readPackageJSON, scanFile
+  init, save, install, scanFile
 }

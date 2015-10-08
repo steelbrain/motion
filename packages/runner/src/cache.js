@@ -12,10 +12,7 @@ type File = {
 }
 
 let files: { name: File } = {}
-
 let baseDir
-let inPackageJSON = []
-let installed = []
 
 export default {
   setBaseDir(dir : string) {
@@ -41,22 +38,6 @@ export default {
     if (!file) return
     files[name(file)].views = views
     log('setViews', files)
-  },
-
-  setInPackage(_in: array) {
-    inPackageJSON = _in
-  },
-
-  getInPackage(_in: array) {
-    return inPackageJSON
-  },
-
-  setInstalled(_installed: array) {
-    installed = _installed
-  },
-
-  getInstalled() {
-    return installed
   },
 
   setImports(file: string, imports: ImportArray) {
