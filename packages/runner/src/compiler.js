@@ -14,7 +14,10 @@ var Parser = {
   init(opts) {
     OPTS = opts || {}
     log('init')
-    cache.setBaseDir(opts.dir)
+
+    if (!opts.build)
+      cache.setBaseDir(opts.dir)
+
     npm.getPackageDeps(opts.dir).then(opts.after)
   },
 
