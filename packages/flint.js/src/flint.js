@@ -155,9 +155,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.currentHotFile = file
       let fileExports
 
-      safeRun(() => {
-        fileExports = run({})
-      })
+      fileExports = run({})
 
       Flint.setExports(fileExports)
       const cached = Flint.viewCache[file] || []
@@ -343,7 +341,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, hash, component) {
-      console.log("defining view", name, Math.random())
       Flint.viewsInFile[Flint.currentHotFile].push(name)
 
       // if new view

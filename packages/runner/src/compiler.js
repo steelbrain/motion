@@ -38,26 +38,28 @@ var Parser = {
 
     source = source.split("\n")
       .map(line => {
+        // fix for jsx imports: <imported.default />
         let result = line
           .replace('["default"]', '.default')
           .replace("['default']", '.default')
 
-        // remove unnecessary view updates
+        // detect views
         const viewStartsAt = result.indexOf(post.viewStart)
+        const viewEndsAt = result.indexOf(post.viewEnd)
 
         if (viewStartsAt >= 0)
           inView = true
-
-        const viewEndsAt = result.indexOf(post.viewEnd)
-        if (inView && viewEndsAt >= viewStartsAt) {
+        if (inView && viewEndsAt > 0)
           inView = false
-          // result.replace(post.viewEnd, '')
-        }
 
+        // remove non-view updates
         if (!inView)
           result = result
             .replace(post.viewUpdateStart, '')
             .replace(post.viewUpdateEnd, '')
+
+        // strip extra view.update comments
+        result = result.replace(/\/\*_end_view_update_\*\//g, '')
 
         return result
       })

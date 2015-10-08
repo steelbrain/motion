@@ -45,6 +45,8 @@ module.exports = function(opts) {
   return {
     target: opts.target || 'web',
     entry: opts.entry || entry,
+    devtool: 'source-map',
+
     module: {
       loaders: [
         {
