@@ -1,11 +1,41 @@
+import readdirp from 'readdirp'
+import mkdirp from 'mkdirp'
+import jf from 'jsonfile'
+import fs from 'fs'
+import rimraf from 'rimraf'
+import copyFile from './copyFile'
+
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
 // promisify
+const rmdir = Promise.promisify(rimraf)
 const mkdir = Promise.promisify(mkdirp)
 const readdir = Promise.promisify(readdirp)
-const readJSONFile = Promise.promisify(jf.readFile)
+const readJSON = Promise.promisify(jf.readFile)
+const writeJSON = Promise.promisify(jf.writeFile)
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
 
-export default { mkdir, readdir, readJSONFile, readFile, writeFile }
+const recreateDir = (dir) =>
+  new Promise((res, rej) => {
+    rimraf(dir, err => {
+      if (err) return rej(err)
+      mkdirp(dir, err => {
+        if (err) return rej(err)
+        res(dir)
+      });
+    })
+  })
+
+export default {
+  mkdir,
+  rmdir,
+  recreateDir,
+  readdir,
+  readJSON,
+  writeJSON,
+  readFile,
+  writeFile,
+  copyFile
+}

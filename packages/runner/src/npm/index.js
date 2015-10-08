@@ -1,5 +1,6 @@
 import { Promise } from 'bluebird'
 import fs from 'fs'
+import webpack from 'webpack'
 
 import cache from '../cache'
 import exec from '../lib/exec'

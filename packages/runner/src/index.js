@@ -1,24 +1,26 @@
-import flint from './compiler'
+import compiler from './compiler'
 import react from './gulp/react'
 import babel from './gulp/babel'
 import bridge from './bridge/message'
 import handleError from './lib/handleError'
-import copyFile from './lib/copyFile'
-import recreateDir from './lib/recreateDir'
 import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
-import { mkdir, readdir, readJSONFile, readFile, writeFile } from './lib/fns'
+import {
+  mkdir,
+  readdir,
+  readJSON,
+  writeJSON,
+  readFile,
+  writeFile,
+  recreateDir,
+  copyFile } from './lib/fns'
 
 import keypress from 'keypress'
-import fs from 'fs'
 import path from 'path'
 import express from 'express'
 import cors from 'cors'
-import del from 'del'
-import mkdirp from 'mkdirp'
-import jf from 'jsonfile'
 import hostile from 'hostile'
 import through from 'through2'
 import gulp from 'gulp'
@@ -32,19 +34,13 @@ import concat from 'gulp-concat'
 import wrap from 'gulp-wrap'
 import multipipe from 'multipipe'
 import gulpif from 'gulp-if'
-import stripAnsi from 'strip-ansi'
 import portfinder from 'portfinder'
-import cp from 'child_process'
 import open from 'open'
-import readdirp from 'readdirp'
-import webpack from 'webpack'
 import editor from 'editor'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
-const exec = cp.exec
-const spawn = cp.spawn
 const p = path.join
 const proc = process
 const newLine = "\n"
@@ -70,7 +66,9 @@ const firstRun = () =>
   new Promise((res, rej) => {
     const hasRunBefore = OPTS.build || CONFIG
     log('first run hasRunBefore:', hasRunBefore)
-    if (hasRunBefore) return res(false)
+
+    if (hasRunBefore)
+      return res(false)
 
     askForUrlPreference(useFriendly => {
       CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
@@ -84,11 +82,8 @@ const clearBuildDir = () =>
   new Promise((res, rej) =>
     recreateDir(p(APP_FLINT_DIR, 'build'))
       .catch(rej)
-      .then(() => {
-        mkdirp(p(APP_FLINT_DIR, 'build', '_'), err => {
-          if (err) return rej(err)
-          res()
-        })
+      .then(async () => {
+        await mkdir(p(APP_FLINT_DIR, 'build', '_'))
       })
     )
 
@@ -98,7 +93,7 @@ const clearOutDir = () =>
 const initCompiler = () =>
   new Promise((res, rej) => {
     log('init compiler')
-    flint('init', {
+    compiler('init', {
       dir: APP_FLINT_DIR,
       after: res
     })
@@ -152,43 +147,36 @@ async function build() {
   buildTemplate()
 }
 
-function mkBuildDir(cb) {
-  mkdirp(p(OPTS.buildDir, '_'), handleError(cb));
-}
+async function buildTemplate() {
+  const out = p(OPTS.buildDir, 'index.html')
+  const data = await readFile(p(APP_FLINT_DIR, 'index.html'), 'utf8')
+  let template = data
+    .replace('/static', '/_/static')
+    .replace('<!-- SCRIPTS -->', [
+      '<script src="/_/react.js"></script>',
+      '  <script src="/_/flint.js"></script>',
+      '  <script src="/_/packages.js"></script>',
+      '  <script src="/_/'+OPTS.name+'.js"></script>',
+      '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
+    ].join(newLine))
 
-function buildTemplate() {
-  var template = p(APP_FLINT_DIR, 'index.html');
-  var out = p(OPTS.buildDir, 'index.html');
+  // TODO: flint build --isomorphic
+  if (OPTS.isomorphic) {
+    var Flint = require('flint-js/dist/flint.node');
+    var app = require(p(OPTS.buildDir, '_', OPTS.name));
 
-  fs.readFile(template, 'utf8', handleError(function(data) {
-    data = data
-      .replace('/static', '/_/static')
-      .replace('<!-- SCRIPTS -->', [
-        '<script src="/_/react.js"></script>',
-        '  <script src="/_/flint.js"></script>',
-        '  <script src="/_/packages.js"></script>',
-        '  <script src="/_/'+OPTS.name+'.js"></script>',
-        '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
-      ].join(newLine))
+    var FlintApp = app(false, { Flint }, async function(output) {
+      template = template.replace(
+        '<div id="_flintapp"></div>',
+        '<div id="_flintapp">' + output + '</div>'
+      )
 
-    // TODO: try running flint build --isomorphic
-    if (OPTS.isomorphic) {
-      var Flint = require('flint-js/dist/flint.node');
-      var app = require(p(OPTS.buildDir, '_', OPTS.name));
+      await writeFile(out, template)
+    })
+    return
+  }
 
-      var FlintApp = app(false, { Flint }, function(output) {
-        data = data.replace(
-          '<div id="_flintapp"></div>',
-          '<div id="_flintapp">' + output + '</div>'
-        )
-
-        fs.writeFile(out, data, handleError);
-      })
-    }
-    else {
-      fs.writeFile(out, data, handleError);
-    }
-  }));
+  await writeFile(out, template)
 }
 
 function buildFlint(cb) {
@@ -249,7 +237,7 @@ function buildScripts(cb, stream) {
       gulpErr = true
 
       if (err.stack || err.codeFrame)
-        err.stack = stripAnsi(unicodeToChar(err.stack || err.codeFrame));
+        err.stack = unicodeToChar(err.stack || err.codeFrame);
 
       if (err.plugin == 'gulp-babel') {
         console.log('JS error: %s: ', err.message.replace(APP_DIR, ''));
@@ -272,7 +260,7 @@ function buildScripts(cb, stream) {
       gulpScript = { name, compiledAt: gulpStartTime }
     }))
     .pipe(pipefn(file => { curFile = file }))
-    .pipe(flint('pre'))
+    .pipe(compiler('pre'))
     .pipe(pipefn(file => { curFile = file }))
     .pipe(babel({
       stage: 2,
@@ -282,7 +270,7 @@ function buildScripts(cb, stream) {
       optional: ['bluebirdCoroutines']
     }))
     .pipe(pipefn(file => { curFile = file }))
-    .pipe(flint('post', {
+    .pipe(compiler('post', {
       dir: APP_FLINT_DIR,
       onPackageStart: (name) => {
         bridge.message('package:install', { name })
@@ -370,7 +358,7 @@ function setOptions(opts, build) {
 }
 
 function writeConfig(config) {
-  jf.writeFile(OPTS.configFile, config);
+  writeJSON(OPTS.configFile, config)
 }
 
 function listenForKeys() {
@@ -579,7 +567,7 @@ export async function run(opts, isBuild) {
 
   npm.init({ dir: APP_FLINT_DIR })
 
-  CONFIG = await readJSONFile(OPTS.configFile)
+  CONFIG = await readJSON(OPTS.configFile)
   log('got config', CONFIG)
 
   const isFirstRun = await firstRun()
