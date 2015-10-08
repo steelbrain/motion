@@ -1,3 +1,4 @@
+import cache from '../cache'
 import exec from '../lib/exec'
 import handleError from '../lib/handleError'
 import fs from 'fs'
@@ -17,16 +18,20 @@ const getMatches = (string, regex, index) => {
   return matches;
 }
 
-
 // deps cache
 let installing = false
 let newDeps = []
 let installedDeps = []
 
-export function checkDependencies(source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
+export function checkDependencies(file, source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
   try {
+    const all = cache.getImports()
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-    const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
+
+    cache.setImports(file, found)
+
+    const fresh = found.filter(f => all.indexOf(f) < 0)
+
     log('Found packages in file:', found)
     log('New packages:', fresh)
 
@@ -70,7 +75,7 @@ export function checkDependencies(source, { dir, onPackageStart, onPackageFinish
   catch (e) {
     console.log('Error installing dependencies!')
     console.log(e)
-    console.log(e.message.join("\n"))
+    console.log(e.message)
   }
 }
 

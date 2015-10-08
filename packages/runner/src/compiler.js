@@ -1,40 +1,23 @@
 import handleError from './lib/handleError'
 import npm from './npm'
 import log from './lib/log'
+import cache from './cache'
 import gutil from 'gulp-util'
 import through from 'through2'
 import fs from 'fs'
 
 let views = []
-let VIEW_LOCATIONS = {}
 let emit
 let OPTS
-
-const isNotIn = (x,y) => x.indexOf(y) == -1
-const id = x => x
-const props = id('view.props.')
-const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
-const viewEnd = name => `}) /* end view: ${name} */`
-const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
-const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
-const viewTemplates = {}
-const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
-const jsxEnd = view => `return () => <${getWrapper(view)} view={view}>${viewTemplates[view].join('\n')}</${getWrapper(view)}> })`
-
-// allow style syntax
-const replaceStyles = line => line
-  .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
-  .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
-  .replace('__STYLE__', '$')
-
-const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
-const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
-const fileSuffix = ';return exports }) }()'
 
 var Parser = {
   init(opts) {
     OPTS = opts || {}
     log('init')
+
+    if (!opts.build)
+      cache.setBaseDir(opts.dir)
+
     npm.getPackageDeps(opts.dir).then(opts.after)
   },
 
@@ -52,6 +35,8 @@ var Parser = {
     const isViewStyleUpdate = line => line.indexOf('view.update(view.styles[') >= 0
     const isOutOfViewUpdate = line => !inView && line.indexOf(viewUpdateStart) >= 0
     const removeUpdate = line => line.replace(viewUpdateStart, '')
+
+    npm.checkDependencies(file, source, opts)
 
     source = source.split("\n")
       .map(line => {
@@ -88,23 +73,16 @@ var Parser = {
       })
       .join("\n")
 
-    npm.checkDependencies(source, opts)
-    // console.log("final source", source)
-    return { file: source }
+    return { source }
   },
 
   pre(file, source) {
     let currentView = { name: null, contents: [] }
     let inJSX = false
     let inView = false
-    let viewLines = [];
+    let fileViews = []
 
-    VIEW_LOCATIONS[file] = {
-      locations: [],
-      views: {}
-    }
-
-    const transformedSource = source
+    source = source
       .replace(/\^/g, props)
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
@@ -119,9 +97,8 @@ var Parser = {
           inView = true;
           currentView.name = result.split(" ")[1];
 
-          // set line of view start based on name
-          VIEW_LOCATIONS[file].locations.push(index)
-          VIEW_LOCATIONS[file].views[index] = currentView.name;
+          // track view in file
+          fileViews.push(currentView.name)
         }
 
         // enter jsx
@@ -186,10 +163,12 @@ var Parser = {
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 
-    return {
-      file: transformedSource,
-      views: viewLines
-    };
+    if (!OPTS.build) {
+      cache.add(file)
+      cache.setViews(file, fileViews)
+    }
+
+    return { source }
   }
 }
 
@@ -210,12 +189,7 @@ function compile(type, opts = {}) {
 
     try {
       var res = Parser[type](file.path, file.contents.toString(), opts);
-      file.contents = new Buffer(res.file);
-
-      // pass view locations
-      if (opts.setViewLocations)
-        opts.setViewLocations(VIEW_LOCATIONS)
-
+      file.contents = new Buffer(res.source);
       this.push(file);
     } catch (err) {
       this.emit('error', new gutil.PluginError('gulp-babel', err, {fileName: file.path, showProperties: false}));
@@ -224,6 +198,27 @@ function compile(type, opts = {}) {
     cb();
   })
 }
+
+const isNotIn = (x,y) => x.indexOf(y) == -1
+const id = x => x
+const props = id('view.props.')
+const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
+const viewEnd = name => `}) /* end view: ${name} */`
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
+const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
+const viewTemplates = {}
+const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
+const jsxEnd = view => `return () => <${getWrapper(view)} view={view}>${viewTemplates[view].join('\n')}</${getWrapper(view)}> })`
+
+// allow style syntax
+const replaceStyles = line => line
+  .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
+  .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
+  .replace('__STYLE__', '$')
+
+const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
+const fileSuffix = ';return exports }) }()'
 
 const replaceSync = (match, inner) =>
   ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')

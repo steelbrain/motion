@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "0.2.76",
+  "version": "0.2.80",
   "description": "Run flint apps",
   "main": "lib/index.js",
   "scripts": {},
@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/flint-lang/runner",
   "dependencies": {
+    "babel-runtime": "^5.8.25",
     "bluebird": "^2.10.2",
     "chokidar": "^1.0.1",
     "colors": "^1.0.3",

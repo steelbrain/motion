@@ -7,6 +7,7 @@ import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
 import npm from './npm'
 import log from './lib/log'
+import cache from './cache'
 
 import keypress from 'keypress'
 import fs from 'fs'
@@ -53,10 +54,13 @@ const readJSONFile = Promise.promisify(jf.readFile)
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
 
+const APP_DIR = path.normalize(process.cwd());
+const MODULES_DIR = p(__dirname, '..', 'node_modules');
+const APP_FLINT_DIR = p(APP_DIR, '.flint');
+const DEPS_DIR = p(APP_FLINT_DIR, 'deps')
+const DEPS_FILE = p(DEPS_DIR, 'deps.js')
+
 let lastSavedTimestamp = {}
-let APP_DIR = path.normalize(process.cwd());
-let MODULES_DIR = p(__dirname, '..', 'node_modules');
-let APP_FLINT_DIR = p(APP_DIR, '.flint');
 let APP_VIEWS = {}
 let HAS_RUN_INITIAL_BUILD = false
 let OPTS, CONFIG, ACTIVE_PORT
@@ -68,16 +72,17 @@ Array.prototype.move = function(from, to) {
 gulp.task('build', buildScripts)
 
 // prompts for domain they want to use
-const firstRunPreferences = () =>
+const firstRun = () =>
   new Promise((res, rej) => {
     const hasRunBefore = OPTS.build || CONFIG
-    if (hasRunBefore) return res()
+    log('first run hasRunBefore:', hasRunBefore)
+    if (hasRunBefore) return res(false)
 
     askForUrlPreference(useFriendly => {
       CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
       openInBrowser()
       writeConfig(CONFIG)
-      res()
+      res(true)
     })
   })
 
@@ -219,6 +224,12 @@ function buildAssets() {
     .pipe(gulp.dest(p(OPTS.buildDir)));
 }
 
+const watchDeletes = vinyl => {
+  if (vinyl.event == 'unlink') {
+    cache.remove(vinyl.path)
+  }
+}
+
 function buildScripts(cb, stream) {
   log('build scripts')
   let gulpErr, gulpScript, curFile
@@ -228,7 +239,7 @@ function buildScripts(cb, stream) {
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe(gulpif(!OPTS.build,
-      watch(SCRIPTS_GLOB)
+      watch(SCRIPTS_GLOB, null, watchDeletes)
     ))
     .pipe(pipefn(file => {
       // reset
@@ -402,6 +413,7 @@ function listenForKeys() {
 }
 
 function openInBrowser() {
+  if (OPTS.debug) return
   if (CONFIG.useFriendly) {
     open('http://' + CONFIG.friendlyUrl);
   } else {
@@ -596,16 +608,26 @@ function logInstalled(deps) {
   console.log()
 }
 
-async function makeDependencyBundle(doInstall) {
-  const outDir = p(APP_FLINT_DIR, 'deps')
-  const outFile = p(outDir, 'deps.js')
+function ensurePackagesFile(file, contents) {
+  return new Promise(async (res, rej) => {
+    log('ensurePackagesFile make dir', DEPS_DIR)
+    await mkdir(DEPS_DIR)
+    log('ensurePackagesFile write')
+    await writeFile(DEPS_FILE, contents || '')
+    log('ensurePackagesFile success')
+    res()
+  })
+}
+
+function makeDependencyBundle(doInstall) {
+  log('makeDependencyBundle')
 
   const bundleDeps = () =>
     new Promise((res, rej) => {
       webpack({
-        entry: outFile,
+        entry: DEPS_FILE,
         externals: { react: 'React', bluebird: '_bluebird' },
-        output: { filename: p(outDir, 'packages.js') }
+        output: { filename: p(DEPS_DIR, 'packages.js') }
       }, err => {
         if (err) return rej(err)
         res()
@@ -624,16 +646,18 @@ async function makeDependencyBundle(doInstall) {
       .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
     const requireString = deps
       .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine)
+      .join(newLine) || ''
 
     // make dep dir
-    await mkdir(outDir)
-    await writeFile(outFile, requireString)
+    log('makeDependencyBundle run ensurePackagesFile()')
+    await ensurePackagesFile()
+    log('makeDependencyBundle run bundleDeps()')
     await bundleDeps()
     logInstalled(deps)
   }
 
   return new Promise(async (res, rej) => {
+    log('running makeDependencyBundle')
     await run()
     res()
   })
@@ -653,8 +677,15 @@ export async function run(opts, isBuild) {
 
   CONFIG = await readJSONFile(OPTS.configFile)
   log('got config', CONFIG)
-  await firstRunPreferences()
+  const isFirstRun = await firstRun()
   log('got first run prefs')
+
+  // generate initial package.js
+  if (isFirstRun)
+    await makeDependencyBundle()
+
+  await ensurePackagesFile()
+  await initCompiler()
 
   if (OPTS.build) {
     log('building...')
@@ -677,7 +708,6 @@ export async function run(opts, isBuild) {
     await clearOutDir()
     await runServer()
     bridge.start(wport())
-    await initCompiler()
     buildScripts()
     await afterFirstBuild()
     openInBrowser()
