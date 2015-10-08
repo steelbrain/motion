@@ -18,15 +18,15 @@ let OPTS
 async function init(_opts) {
   OPTS = _opts
   OPTS.outDir = p(OPTS.dir, 'deps')
-  OPTS.entryFile = p(OPTS.outDir, 'deps.js')
-  OPTS.cacheFile = p(OPTS.outDir, 'deps.json')
-  OPTS.outFile = p(OPTS.outDir, 'packages.js')
+  OPTS.depsJS = p(OPTS.outDir, 'deps.js')
+  OPTS.depsJSON = p(OPTS.outDir, 'deps.json')
+  OPTS.packagesJS = p(OPTS.outDir, 'packages.js')
   OPTS.packageJSON = p(OPTS.dir, 'package.json')
   log('npm: init opts: ', OPTS)
 
   try {
-    await readDeps()
     await mkdir(OPTS.outDir)
+    await readDeps()
   }
   catch(e) { console.error(e) }
 }
@@ -54,23 +54,32 @@ const depRequireString = name => `window.__flintPackages["${name}"] = require("$
 async function writeDeps(deps) {
   return new Promise((resolve) => {
     const requireString = deps.map(depRequireString).join("\n")
-    await writeFile(OPTS.entryFile, requireString)
-    await writeJSON(OPTS.cacheFile, `{ "deps": ${JSON.stringify(deps)} }`)
+    await writeFile(OPTS.depsJS, requireString)
+    await writeJSON(OPTS.depsJSON, `{ "deps": ${JSON.stringify(deps)} }`)
     resolve()
   })
 }
 
 // <= deps.json
 // <= package.json
-function readPackageJSON() {
-  log('readPackageJSON')
-  return readFile(OPTS.dir + '/package.json')
-    .then(data => {
-      const deps = Object.keys(JSON.parse(data).dependencies)
-      log('readPackageJSON:', deps)
-      cache.setInPackage(deps)
-      return deps
-    })
+let CACHE
+async function readDeps() {
+  log('readDeps')
+  return new Promise((resolve, reject) => {
+    try {
+      const pkg = await readJSON(OPTS.packageJSON)
+      const packages = Object.keys(pkg.dependencies)
+
+      const installed = await readJSON(OPTS.depsJSON)
+      const deps = installed.deps
+
+      CACHE = { packages, deps }
+      resolve(CACHE)
+    } catch(e) {
+      console.log('readDeps', e)
+      reject(e)
+    }
+  })
 }
 
 // webpack
@@ -79,9 +88,9 @@ async function pack(file, out) {
   log('npm: pack')
   return new Promise((res, rej) => {
     webpack({
-      entry: OPTS.entryFile,
+      entry: OPTS.depsJS,
       externals: { react: 'React', bluebird: '_bluebird' },
-      output: { filename: OPTS.outFile }
+      output: { filename: OPTS.packagesJS }
     }, err => {
       if (err) return rej(err)
       res()
