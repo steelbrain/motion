@@ -3,19 +3,20 @@ import fs from 'fs'
 
 import cache from '../cache'
 import exec from '../lib/exec'
-import handleError from '../lib/handleError'
 import log from '../lib/log'
 import { mkdir, readFile } from '../lib/fns'
 
 let opts
 
-export function init(_opts) {
+export async function init(_opts) {
   opts = _opts
   opts.outDir = p(opts.dir, 'deps')
   opts.entry = p(opts.outDir, 'deps.js')
   opts.outFile = p(opts.outDir, 'packages.js')
+  await readDeps()
 }
 
+// read package json and write to .flint/deps/packages.js
 export function bundle() {
   const run = async () => {
     console.log("Installing npm packages...\n".bold.blue)
@@ -120,12 +121,12 @@ export function checkDependencies(file, source, { dir, onPackageStart, onPackage
   }
 }
 
-export function getPackageDeps(dir) {
-  log('getPackageDeps', dir)
+export function readDeps(dir) {
+  log('readDeps', dir)
   return readFile(dir + '/package.json')
     .then(data => {
       const deps = Object.keys(JSON.parse(data).dependencies)
-      log('getPackageDeps:', deps)
+      log('readDeps:', deps)
       installedDeps = deps
       return deps
     })
@@ -183,16 +184,26 @@ export function install(dir) {
   })
 }
 
-const getMatches = (string, regex, index) => {
-  index || (index = 1); // default to the first capturing group
-  var matches = [];
-  var match;
+function getMatches(string, regex, index) {
+  index || (index = 1) // default to the first capturing group
+  var matches = []
+  var match
   while (match = regex.exec(string)) {
-    matches.push(match[index]);
+    matches.push(match[index])
   }
-  return matches;
+  return matches
+}
+
+function logInstalled(deps) {
+  if (!deps.length) return
+  console.log()
+  console.log(`Installed ${deps.length} packages`.blue.bold)
+  deps.forEach(dep => {
+    console.log(` - ${dep}`)
+  })
+  console.log()
 }
 
 export default {
-  init, pack, save, versions, install, getPackageDeps, checkDependencies
+  init, bundle, save, versions, install, readDeps, checkDependencies
 }

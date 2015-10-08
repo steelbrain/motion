@@ -8,6 +8,7 @@ import recreateDir from './lib/recreateDir'
 import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
+import unicodeToChar from './lib/unicodeToChar'
 import { mkdir, readdir, readJSONFile, readFile, writeFile } from './lib/fns'
 
 import keypress from 'keypress'
@@ -464,16 +465,14 @@ function devToolsDisabled(req) {
   return CONFIG.tools === 'false' || req && req.query && req.query['!dev'];
 }
 
-function allowCrossDomain(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  next();
-}
-
 function runServer() {
   return new Promise((res, rej) => {
     var server = express();
     server.use(cors());
-    server.use(allowCrossDomain)
+    server.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      next();
+    })
 
     // USER files
     // user js files at '/_/filename.js'
@@ -566,34 +565,6 @@ async function makeTemplate(req, cb) {
   cb(fullTemplate)
 }
 
-function unicodeToChar(text) {
-  return !text ? '' : text.replace(/\\u[\dABCDEFabcdef][\dABCDEFabcdef][\dABCDEFabcdef][\dABCDEFabcdef]/g,
-    function (match) {
-      return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
-  });
-}
-
-function debounce(fn, delay) {
-  var timeout;
-  return function() {
-    var args = arguments
-    clearTimeout(timeout);
-    timeout = setTimeout(function() { fn.apply(null, args) }, timeout ? delay : 0)
-  }
-}
-
-function logInstalled(deps) {
-  if (!deps.length) return
-  console.log()
-  console.log(`Installed ${deps.length} packages`.blue.bold)
-  deps.forEach(dep => {
-    console.log(` - ${dep}`)
-  })
-  console.log()
-}
-
-
-
 function wport() {
   return 2283 + parseInt(ACTIVE_PORT, 10)
 }
@@ -606,9 +577,7 @@ export async function run(opts, isBuild) {
   setOptions(opts, isBuild)
   setLogging(OPTS)
 
-  npm.init({
-    dir: APP_FLINT_DIR
-  })
+  npm.init({ dir: APP_FLINT_DIR })
 
   CONFIG = await readJSONFile(OPTS.configFile)
   log('got config', CONFIG)
