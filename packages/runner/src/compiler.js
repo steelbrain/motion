@@ -13,8 +13,8 @@ let OPTS
 const post = {
   viewStart: 'Flint.view("',
   viewEnd: '/* end view:',
-  viewUpdateStart: 'view.update(',
-  viewUpdateEnd: ') /*_end_view_update_*/'
+  viewUpdateStart: /view.update\(/g,
+  viewUpdateEnd: /\) \/\*_end_view_update_\*\//g
 }
 
 var Parser = {
@@ -75,10 +75,10 @@ var Parser = {
 
     const startRender = () => `view._render = () => { return (${startWrapper()}`
     const startWrapper = () => `<${getWrapper(currentView.name)} view={view}>`
-    const endRender = () => `</${getWrapper(currentView.name)}>); }`
+    const endRender = () => `</${getWrapper(currentView.name)}>); }; \n`
 
     source = source
-      .replace(/\^/g, props)
+      .replace(/\^/g, 'view.props.')
       .replace(/\+\+/g, '+= 1')
       .replace(/\-\-/g, '-= 1')
       .split("\n")
@@ -118,14 +118,13 @@ var Parser = {
             .replace(/\sclass=([\"\{\'])/g, ' className=$1')
             .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
         }
-        // NON JSX transforms
-        else {
-          result = replaceStyles(result)
-        }
 
         // store view contents for hashing
-        if (inView)
+        if (inView) {
+          result = result.replace(/\$\.([A-Za-z0-9]+\s*\=)/, '$_class_$1')
+
           currentView.contents.push(result)
+        }
 
         // end jsx
         if (shouldLeaveJSX) {
@@ -184,24 +183,16 @@ function compile(type, opts = {}) {
 }
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
-const id = x => x
-const props = id('view.props.')
 
 // this is missing the first brace ")" instead of "})"
 // because this is being *added* to the line, which is previously }
-const viewEnd = name => `) /* end view: ${name} */`
+const viewEnd = name => `); /* end view: ${name} */; \n`
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
-// allow style syntax
-const replaceStyles = line => line
-  .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
-  .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
-  .replace('__STYLE__', '$')
-
 const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
 const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
-const fileSuffix = ';return exports }) }()'
+const fileSuffix = ';return exports }) }();'
 
 const replaceSync = (match, inner) =>
   ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')

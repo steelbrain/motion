@@ -334,7 +334,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (namespaceView)
         return namespaceView;
 
-      return class NotFound {
+      return class NotFound extends React.Component {
         render() {
           const message = `Flint: view "${name}" not found`
           return <div style={{ display: 'block' }}>{message}</div>
@@ -343,6 +343,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, hash, component) {
+      console.log("defining view", name, Math.random())
       Flint.viewsInFile[Flint.currentHotFile].push(name)
 
       // if new view
@@ -359,7 +360,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       // if view was defined twice
       // (in codebase twice during first run)
       if (firstRun) {
-        debugger
         console.error('Defined a view twice!', name, hash)
         setComponent(name, ErrorDefinedTwice(name))
         return

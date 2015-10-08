@@ -64,7 +64,7 @@ export default function elementStyles(key, view, name, tag, props) {
       // add class styles
       if (props.className) {
         props.className.split(' ').forEach(className => {
-          const classSelector = `${prefix}.${className}`;
+          const classSelector = `${prefix}_class_${className}`;
           const tagWithClassSelector = prefix + name + classSelector;
 
           if (viewStyles[tagWithClassSelector])
