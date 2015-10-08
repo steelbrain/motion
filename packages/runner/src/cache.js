@@ -10,6 +10,7 @@ type File = {
 }
 
 let baseDir
+let installed = []
 let files: { name: File } = {}
 let name = f => path.relative(baseDir, f)
 
@@ -20,7 +21,7 @@ export default {
   },
 
   add(file: string) {
-    files[name(file)] = {}
+    files[name(file)] = files[name(file)] || {}
   },
 
   get(file: string) {
@@ -29,19 +30,25 @@ export default {
 
   remove(file: string) {
     delete files[name(file)]
-    log(files)
+    log('remove', files)
   },
 
   setViews(file: string, views: ViewArray) {
     files[name(file)].views = views
-    log(files)
+    log('setViews', files)
+  },
 
+  setInstalled(_installed: array) {
+    installed = _installed
+  },
+
+  getInstalled() {
+    return installed
   },
 
   setImports(file: string, imports: ImportArray) {
     files[name(file)].imports = imports
-    log(files)
-
+    log('setImports', file, imports)
   },
 
   getViews(file?: string) {
@@ -49,6 +56,14 @@ export default {
   },
 
   getImports(file?: string) {
+    if (!file) {
+      let allImports = []
+      Object.keys(files).forEach(file => {
+        allImports = allImports.concat(files[file].imports)
+      })
+      return allImports
+    }
+
     return files[name(file)].imports
   }
 }

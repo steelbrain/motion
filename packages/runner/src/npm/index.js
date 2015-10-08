@@ -18,7 +18,6 @@ const getMatches = (string, regex, index) => {
   return matches;
 }
 
-
 // deps cache
 let installing = false
 let newDeps = []
@@ -26,11 +25,13 @@ let installedDeps = []
 
 export function checkDependencies(file, source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
   try {
+    const all = cache.getImports()
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
     cache.setImports(file, found)
 
-    const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
+    const fresh = found.filter(f => all.indexOf(f) < 0)
+
     log('Found packages in file:', found)
     log('New packages:', fresh)
 
