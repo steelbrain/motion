@@ -9,20 +9,18 @@ import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
 
+import './lib/setRoot'
 import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
+import assignToGlobal from './lib/assignToGlobal'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import mainComponent from './lib/mainComponent'
+import reportError from './lib/reportError'
 
-const inBrowser = typeof window != 'undefined'
-const root = inBrowser ? window : global
-
-// set root variable
-if (inBrowser) window.root = window
-else global.root = global
+Promise.longStackTraces()
 
 // GLOBALS
 root._bluebird = Bluebird // for imported modules to use
@@ -31,21 +29,13 @@ root.Promise = Promise
 root.module = {}
 root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 root.onerror = reportError
+// shim view
+root.view = { update: () => {} }
 
-const reportError = (...args) => {
-  if (process.env.production) return
-  if (!root.flintRuntimeError) return
+const uuid = () => Math.floor(Math.random() * 1000000)
 
-  let err = args
-
-  // if coming from catch
-  if (typeof args[0] == 'object') {
-    const lines = args[0].stack.split("\n")
-    err = [args[0].message, lines[1], 0, 0, args[0].stack]
-  }
-
-  root.flintRuntimeError(...err)
-}
+const runEvents = (queue, name) =>
+  queue && queue[name].length && queue[name].forEach(e => e())
 
 const safeRun = fn => {
   if (process.env.production)
@@ -60,30 +50,6 @@ const safeRun = fn => {
       reportError({ name, message, stack })
     }
   }
-}
-
-const uuid = () => Math.floor(Math.random() * 1000000)
-const runEvents = (queue, name) =>
-  queue && queue[name].length && queue[name].forEach(e => e())
-const assignToGlobal = (name, val) => {
-  // TODO reenable after solving the saving issue
-  /*
-  if (typeof root[name] != 'undefined')
-    throw `You're attempting to define a global that is already defined:
-        ${name} = ${JSON.stringify(root[name])}`
-  */
-
-  root[name] = val
-}
-
-root.inView = false
-
-// shim view
-root.view = { update: () => {} }
-
-if (!inBrowser) {
-  // for isomorphic help
-  root.document = {}
 }
 
 function run(browserNode, userOpts, afterRenderCb) {
@@ -101,11 +67,9 @@ function run(browserNode, userOpts, afterRenderCb) {
   let firstRun = false
 
   const render = () => {
-    root.onerror = reportError
-    const MainComponent = getComponent('Main') || mainComponent;
-    const preloaders = Flint.preloaders.map(loader => loader())
+    const run = () => {
+      const MainComponent = getComponent('Main') || mainComponent;
 
-    Promise.all(preloaders).then(() => {
       if (!browserNode) {
         Flint.renderedToString = React.renderToString(<MainComponent />)
         afterRenderCb && afterRenderCb(Flint.renderedToString)
@@ -116,7 +80,15 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       firstRun = false
       emitter.emit('afterRender')
-    })
+    }
+
+    if (Flint.preloaders.length) {
+      const preloaders = Flint.preloaders.map(loader => loader())
+      Promise.all(preloaders).then(run)
+    }
+    else {
+      run()
+    }
   }
 
   const removeComponent = key => {

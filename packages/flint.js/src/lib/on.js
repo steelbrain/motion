@@ -1,6 +1,3 @@
-const inBrowser = typeof window != 'undefined'
-const root = inBrowser ? window : global
-
 const listeners = {};
 const events = {};
 
@@ -12,35 +9,41 @@ function addListener(name, target, cb) {
   }
 }
 
+const onCb = (scope, name, cb) => {
+  const finish = () => cb && cb()
+
+  if (scope.events && scope.events[name]) {
+    scope.events[name].push(finish)
+  }
+  else
+    return scope.addEventListener(name, finish);
+}
+
 const on = (scope, name, cb) => {
-  return new Promise((resolve) => {
-    // callback with no scope
-    if (typeof name == 'function') {
-      cb = name
-      name = scope
-      scope = root
-    }
+  // dynamic arguments
 
-    // no scope
-    if (!name) {
-      name = scope
-      scope = root
-    }
+  // callback with no scope
+  if (typeof name == 'function') {
+    cb = name
+    name = scope
+    scope = root
+  }
 
-    if (typeof name != 'string')
-      throw "Needs name of event string"
+  // no scope
+  if (!name) {
+    name = scope
+    scope = root
+  }
 
-    const finish = () => {
-      if (cb) cb();
-      else resolve()
-    }
+  if (typeof name != 'string')
+    throw "Needs name of event string"
 
-    if (scope.events && scope.events[name]) {
-      scope.events[name].push(finish)
-    }
-    else
-      return scope.addEventListener(name, finish);
-  })
+  if (cb)
+    return onCb(scope, name, cb)
+  else
+    return new Promise((resolve) => {
+      onCb(scope, name, resolve)
+    })
 }
 
 export default on

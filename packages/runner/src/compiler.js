@@ -59,7 +59,7 @@ var Parser = {
             .replace(post.viewUpdateEnd, '')
 
         // strip extra view.update comments
-        result = result.replace(/\/\*_end_view_update_\*\//g, '')
+        result = result.replace(/\s*\/\*_end_view_update_\*\/\s*/g, '')
 
         return result
       })
