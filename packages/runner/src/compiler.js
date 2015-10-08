@@ -73,6 +73,7 @@ var Parser = {
       })
       .join("\n")
 
+    // console.log("transformed source", source)
     return { source }
   },
 
@@ -127,10 +128,6 @@ var Parser = {
             .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           viewTemplates[currentView.name].push(result)
-        }
-        // in view (NOT JSX)
-        else {
-          result = replaceStyles(result)
         }
 
         // in view (ALL)
@@ -209,12 +206,6 @@ const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 const viewTemplates = {}
 const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
 const jsxEnd = view => `return () => <${getWrapper(view)} view={view}>${viewTemplates[view].join('\n')}</${getWrapper(view)}> })`
-
-// allow style syntax
-const replaceStyles = line => line
-  .replace(/^\s*\$([a-zA-Z0-9\.\-\_]*)\s*\=/, 'view.styles["__STYLE__$1"] = (_index) => false || ')
-  .replace(/\$([a-zA-Z0-9\.\-\_]+)/g, 'view.styles["__STYLE__$1"]')
-  .replace('__STYLE__', '$')
 
 const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
 const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
