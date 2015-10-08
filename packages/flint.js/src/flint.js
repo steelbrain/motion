@@ -98,6 +98,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     root[opts.app] = opts.namespace
 
   const isTools = opts.app == 'devTools'
+  let firstRun = false
 
   const render = () => {
     root.onerror = reportError
@@ -106,15 +107,14 @@ function run(browserNode, userOpts, afterRenderCb) {
 
     Promise.all(preloaders).then(() => {
       if (!browserNode) {
-        Flint.renderedToString = React.renderToString(<MainComponent />);
-        if (afterRenderCb)
-          afterRenderCb(Flint.renderedToString);
+        Flint.renderedToString = React.renderToString(<MainComponent />)
+        afterRenderCb && afterRenderCb(Flint.renderedToString)
       }
       else {
         ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
       }
 
-      Flint.firstRender = false
+      firstRun = false
       emitter.emit('afterRender')
     })
   }
@@ -134,7 +134,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     isUpdating: false,
     views: {},
     lastWorkingView: {},
-    firstRender: true,
     // async functions needed before loading app
     preloaders: [],
     routes: null,
@@ -283,12 +282,13 @@ function run(browserNode, userOpts, afterRenderCb) {
           else {
             try {
               els = this._render()
+              this.goodRastRender = els // cache
             }
             catch(e) {
               const { name, message, stack } = e
               reportError({ name, message, stack })
-              console.error(e)
-              return null
+              console.error('Error rendering JSX for view:', name, e)
+              els = this.goodRastRender || null
             }
           }
 
@@ -353,9 +353,13 @@ function run(browserNode, userOpts, afterRenderCb) {
         setComponent(name, fComponent) // puts on namespace
         return
       }
-      // if first render & view is defined twice
-      // we have a bug!
-      else if (Flint.firstRender) {
+
+      // not new view
+
+      // if view was defined twice
+      // (in codebase twice during first run)
+      if (firstRun) {
+        debugger
         console.error('Defined a view twice!', name, hash)
         setComponent(name, ErrorDefinedTwice(name))
         return
@@ -372,7 +376,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       const setView = (name, flintComponent) => {
         Flint.views[name] = Flint.makeView(hash, flintComponent)
         setComponent(name, flintComponent) // puts on namespace
-        if (Flint.firstRender) return
+        if (firstRun) return
       }
 
       let viewRanSuccessfully = true

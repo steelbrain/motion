@@ -1,4 +1,5 @@
 import ws from 'nodejs-websocket'
+import log from '../lib/log'
 
 let wsServer
 let connected = false
@@ -25,9 +26,10 @@ export function message(type, obj) {
 
   let msg = JSON.stringify(obj)
 
-  if (connected && wsServer) {
+  log('---[websocket message]---', 'isConnected:' + connected, msg)
+
+  if (connected)
     broadcast(msg)
-  }
   else
     queue.push(msg)
 }
