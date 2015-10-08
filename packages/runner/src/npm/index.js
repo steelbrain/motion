@@ -1,3 +1,4 @@
+import cache from '../cache'
 import exec from '../lib/exec'
 import handleError from '../lib/handleError'
 import fs from 'fs'
@@ -73,7 +74,7 @@ export function checkDependencies(file, source, { dir, onPackageStart, onPackage
   catch (e) {
     console.log('Error installing dependencies!')
     console.log(e)
-    console.log(e.message.join("\n"))
+    console.log(e.message)
   }
 }
 

@@ -222,7 +222,7 @@ function buildAssets() {
 
 const watchDeletes = vinyl => {
   if (vinyl.event == 'unlink') {
-    cache.remove(path.basename(vinyl.path))
+    cache.remove(vinyl.path)
   }
 }
 
