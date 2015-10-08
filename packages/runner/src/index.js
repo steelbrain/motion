@@ -603,7 +603,8 @@ function logInstalled(deps) {
   console.log()
 }
 
-async function makeDependencyBundle(doInstall) {
+function makeDependencyBundle(doInstall) {
+  log('makeDependencyBundle')
   const outDir = p(APP_FLINT_DIR, 'deps')
   const outFile = p(outDir, 'deps.js')
 
@@ -641,6 +642,7 @@ async function makeDependencyBundle(doInstall) {
   }
 
   return new Promise(async (res, rej) => {
+    log('running makeDependencyBundle')
     await run()
     res()
   })
