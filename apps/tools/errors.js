@@ -121,9 +121,7 @@ view Errors {
 view ErrorMessage {
   const last = arr => arr[arr.length - 1]
   const fileName = url => url && last(url.split('/'))
-  const getLine = err => err && (err.line || err.loc && err.loc.line) + (
-    ^runtime ? -1 : 0
-  )
+  const getLine = err => err && (err.line || err.loc && err.loc.line)
   const devHeight = 0 // 34 with bar
   const closedHeight = 55
   const openHeight = 200
