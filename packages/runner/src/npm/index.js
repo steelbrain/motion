@@ -31,35 +31,6 @@ async function init(_opts) {
   catch(e) { console.error(e) }
 }
 
-// package.json => packages.js
-function bundle() {
-  log('npm: bundle')
-  return new Promise(async (res, rej) => {
-    try {
-      const file = await readFile(OPTS.packageJSON)
-      const deps = Object.keys(JSON.parse(file).dependencies)
-      const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-      log('npm: bundle: depNames:', depNames)
-      await writeDeps(depNames)
-      await pack()
-      res()
-    }
-    catch(e) { console.error(e) }
-  })
-}
-
-// => deps.json
-// => deps.js
-const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
-async function writeDeps(deps) {
-  return new Promise((resolve) => {
-    const requireString = deps.map(depRequireString).join("\n")
-    await writeFile(OPTS.depsJS, requireString)
-    await writeJSON(OPTS.depsJSON, `{ "deps": ${JSON.stringify(deps)} }`)
-    resolve()
-  })
-}
-
 // <= deps.json
 // <= package.json
 let CACHE
@@ -79,6 +50,35 @@ async function readDeps() {
       console.log('readDeps', e)
       reject(e)
     }
+  })
+}
+
+// => deps.json
+// => deps.js
+const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
+async function writeDeps(deps) {
+  return new Promise((resolve) => {
+    const requireString = deps.map(depRequireString).join("\n")
+    await writeFile(OPTS.depsJS, requireString)
+    await writeJSON(OPTS.depsJSON, `{ "deps": ${JSON.stringify(deps)} }`)
+    resolve()
+  })
+}
+
+// package.json => packages.js
+function bundle() {
+  log('npm: bundle')
+  return new Promise(async (res, rej) => {
+    try {
+      const file = await readFile(OPTS.packageJSON)
+      const deps = Object.keys(JSON.parse(file).dependencies)
+      const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
+      log('npm: bundle: depNames:', depNames)
+      await writeDeps(depNames)
+      await pack()
+      res()
+    }
+    catch(e) { console.error(e) }
   })
 }
 
