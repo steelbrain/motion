@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "0.2.34",
+  "version": "0.2.35",
   "description": "a server, build system, and helpers for react apps",
   "main": "bin/flint",
   "repository": {
