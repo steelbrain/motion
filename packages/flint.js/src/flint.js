@@ -214,7 +214,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           let ran = false;
 
           safeRun(() => {
-            this._render = component.call(void 0, this, viewOn)
+            component.call(void 0, this, viewOn)
             ran = true
           })
 

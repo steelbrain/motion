@@ -1,3 +1,5 @@
+// const addFlow = src => '/* @flow */ declare var Flint: any; declare var _require:any; ' + src
+
 // .pipe(flint('pre', {
 //   setViewLocations: function(views) {
 //     return
