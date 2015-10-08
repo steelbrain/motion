@@ -1,6 +1,8 @@
 import path from 'path'
 import log from './lib/log'
 
+const name = f => path.relative(baseDir, f)
+
 type ViewArray = Array<string>
 type ImportArray = Array<string>
 
@@ -9,10 +11,11 @@ type File = {
   imports?: ImportArray
 }
 
-let baseDir
-let installed = []
 let files: { name: File } = {}
-let name = f => path.relative(baseDir, f)
+
+let baseDir
+let inPackageJSON = []
+let installed = []
 
 export default {
   setBaseDir(dir : string) {
@@ -38,6 +41,14 @@ export default {
     if (!file) return
     files[name(file)].views = views
     log('setViews', files)
+  },
+
+  setInPackage(_in: array) {
+    inPackageJSON = _in
+  },
+
+  getInPackage(_in: array) {
+    return inPackageJSON
   },
 
   setInstalled(_installed: array) {

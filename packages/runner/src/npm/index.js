@@ -7,54 +7,47 @@ import exec from '../lib/exec'
 import log from '../lib/log'
 import { p, mkdir, readFile } from '../lib/fns'
 
-let opts
+let OPTS
 
 export async function init(_opts) {
-  opts = _opts
-  opts.outDir = p(opts.dir, 'deps')
-  opts.entry = p(opts.outDir, 'deps.js')
-  opts.outFile = p(opts.outDir, 'packages.js')
-  log('npm: init opts: ', opts)
-  await readDeps()
+  OPTS = _opts
+  OPTS.outDir = p(OPTS.dir, 'deps')
+  OPTS.entry = p(OPTS.outDir, 'deps.js')
+  OPTS.outFile = p(OPTS.outDir, 'packages.js')
+  OPTS.packageJSON = p(OPTS.dir, 'package.json')
+  log('npm: init opts: ', OPTS)
+  await readPackageJSON()
+  await mkdir(OPTS.outDir)
 }
+
+const depRequireString =
+  name => `window.__flintPackages["${name}"] = require("${name}");`
 
 // read package json and write to .flint/deps/packages.js
 export function bundle() {
-  const run = async () => {
-    console.log("Installing npm packages...\n".bold.blue)
-
-    const file = await readFile(p(opts.dir, 'package.json'))
+  log('npm: bundle')
+  return new Promise(async (res, rej) => {
+    const file = await readFile(OPTS.packageJSON)
     const deps = Object.keys(JSON.parse(file).dependencies)
-      .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-    const requireString = deps
-      .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine) || ''
+    const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
+    const requireString = depNames.map(depRequireString).join(newLine)
 
-    // make dep dir
+    log('npm: bundle: write deps')
+    await writeFile(requireString, OPTS.entry)
     await pack()
+
     logInstalled(deps)
-  }
-
-  return new Promise(async (res, rej) => {
-    await run()
-    res()
-  })
-}
-
-function ensurePackagesDir(file, contents) {
-  return new Promise(async (res, rej) => {
-    await mkdir(opts.outDir)
     res()
   })
 }
 
 async function pack(file, out) {
-  await ensurePackagesDir()
+  log('npm: pack')
   return new Promise((res, rej) => {
     webpack({
-      entry: opts.entry,
+      entry: OPTS.entry,
       externals: { react: 'React', bluebird: '_bluebird' },
-      output: { filename: opts.outFile }
+      output: { filename: OPTS.outFile }
     }, err => {
       if (err) return rej(err)
       res()
@@ -62,116 +55,84 @@ async function pack(file, out) {
   })
 }
 
-// deps cache
-let installing = false
-let newDeps = []
-let installedDeps = []
+const findRequires = source => getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
-export function checkDependencies(file, source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
+// scan a file and install new deps
+// then update cache
+export function scanFile(file, source, opts) {
   try {
     const all = cache.getImports()
-    const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-
-    cache.setImports(file, found)
-
+    const found = findRequires(source)
     const fresh = found.filter(f => all.indexOf(f) < 0)
 
-    log('Found packages in file:', found)
-    log('New packages:', fresh)
+    log('scanFile: Found packages in file:', found)
+    log('scanFile: New packages:', fresh)
 
     // no new ones found
     if (!fresh.length) return
 
-    // add new ones to queue
-    newDeps = newDeps.concat(fresh)
+    const already = found.filter(f => all.indexOf(f) >= 0)
 
-    // we've queued and may already be installing, hold off
-    if (installing) return
+    let installed = []
+    let installing = fresh
 
     // install deps one by one
-    const installNextDep = async () => {
-      const dep = newDeps.shift()
-      onPackageStart(dep)
+    const installNext = async () => {
+      const dep = installing.shift()
+      log('scanFile: Start install:', dep)
+      opts.onPackageStart(dep)
 
       try {
-        await save(dep, dir)
-        log('package installed', dep)
-        installedDeps.push(dep)
-        onPackageFinish(dep)
+        await save(dep)
+        log('scanFile: package installed', dep)
+        installed.push(dep)
+        opts.onPackageFinish(dep)
         next()
       } catch(e) {
-        onPackageError(err)
+        log('scanFile: package install failed', dep)
+        opts.onPackageError(dep, error)
         next()
       }
     }
 
-    // continue installing
+    // loop
     const next = () => {
-      if (newDeps.length)
-        installNextDep()
-      else
-        installing = false
+      if (installing.length) return installNext()
+      done()
     }
 
-    installing = true
-    installNextDep()
+    const done = () => {
+      // cache newly installed + already
+      cache.setImports(file, installed.concat(already))
+    }
+
+    installNext()
   }
   catch (e) {
-    console.log('Error installing dependencies!')
+    console.log('Error installing dependency!')
     console.log(e)
     console.log(e.message)
   }
 }
 
-export function readDeps() {
-  log('readDeps')
-  return readFile(opts.dir + '/package.json')
+export function readPackageJSON() {
+  log('readPackageJSON')
+  return readFile(OPTS.dir + '/package.json')
     .then(data => {
       const deps = Object.keys(JSON.parse(data).dependencies)
-      log('readDeps:', deps)
-      installedDeps = deps
+      log('readPackageJSON:', deps)
+      cache.setInPackage(deps)
       return deps
     })
 }
 
 // npm install --save 'name'
-export function save(name, dir) {
+export function save(name) {
+  log('npm: save:', name)
   return new Promise((res, rej) => {
-    exec('npm install --save ' + name, dir, err => {
+    exec('npm install --save ' + name, OPTS.dir, err => {
       if (err) rej('Install failed for package ' + name)
       else res(name)
-    })
-  })
-}
-
-// npm view => [versions]
-// import npmview from 'npmview'
-export function versions(name) {
-  return new Promise((res, rej) => {
-    npmview(name, (err, version, info) => {
-      if (err) rej(err)
-      else {
-        let versions = info.versions.reverse().slice(10)
-        const total = versions.length
-
-        if (!total) return res(null)
-
-        // get detailed info for last three
-        Promise.all(
-          versions.slice(3).map(v => new Promise((res, rej) =>
-            npmview(`${name}@${v}`, (err, v, { description, homepage }) => {
-              if (err) return rej(err)
-              res({ description, homepage })
-            })
-          ))
-        ).then(infos => {
-          // add info onto versions
-          versions = versions
-            .map((v, i) => ({ version: v, ...(infos[i] || {}) }))
-
-          res(versions)
-        })
-      }
     })
   })
 }
@@ -179,7 +140,7 @@ export function versions(name) {
 // npm install
 export function install(dir) {
   return new Promise((res, rej) => {
-    exec('npm install', dir || opts.dir, err => {
+    exec('npm install', dir || OPTS.dir, err => {
       if (err) rej(err)
       else res()
     })
@@ -207,5 +168,5 @@ function logInstalled(deps) {
 }
 
 export default {
-  init, bundle, save, versions, install, readDeps, checkDependencies
+  init, bundle, save, install, readPackageJSON, scanFile
 }

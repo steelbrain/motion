@@ -18,8 +18,8 @@ view Installer {
   })
 
   tools.on('package:error', () => {
-    debugger
     state = 3
+    name = tools.data.name
     error = tools.data.error
   })
 
@@ -41,8 +41,8 @@ view Installer {
   const title = state => {
     switch(state) {
       case 1: return `Installing ${name}${version ? ' ' + version : ''}...`; break
-      case 2: return `Installed!`; break
-      case 3: return `Error`; break
+      case 2: return `Installed ${name}!`; break
+      case 3: return `Error: ${name}`; break
       case 4: return `Select version`; break
     }
   }

@@ -261,12 +261,12 @@ function buildScripts(cb, stream) {
       onPackageStart: (name) => {
         bridge.message('package:install', { name })
       },
-      onPackageError: (error) => {
-        bridge.message('package:error', { error })
+      onPackageError: (name, error) => {
+        bridge.message('package:error', { name, error })
       },
       onPackageFinish: async (name) => {
         if (OPTS.build) return
-        log('finish package, make new bundle', name)
+        log('runner: onPackageFinish: ', name)
         await npm.bundle()
         bridge.message('package:installed', { name })
         bridge.message('packages:reload', {})

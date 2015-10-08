@@ -27,7 +27,7 @@ var Parser = {
 
   post(file, source, opts) {
     OPTS = opts || {}
-    npm.checkDependencies(file, source, opts)
+    npm.scanFile(file, source, opts)
 
     let inView = false
 
