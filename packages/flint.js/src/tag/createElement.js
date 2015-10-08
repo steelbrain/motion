@@ -37,8 +37,10 @@ export default function createElement(key, fullname, props, ...args) {
     tag = fullname;
   }
   else {
-    const isHTMLElement = fullname[0].toLowerCase() == fullname[0]
-      && fullname.indexOf('.') == -1
+    const isHTMLElement = (
+      fullname[0].toLowerCase() == fullname[0]
+      && fullname.indexOf('.') < 0
+    )
 
     // get tag type and name of tag
     if (isHTMLElement) {

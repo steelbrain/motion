@@ -25,87 +25,86 @@ const mergeStyles = (obj, ...styles)  => {
 const prefix = '$'
 
 export default function elementStyles(key, view, name, tag, props) {
-  if (typeof name !== 'string') {
+  // <name-tag>hello</name-tag>
+  // console.log('name', name, 'tag', tag)
+
+  if (typeof name !== 'string')
     return
-  }
 
   // if its the root element (name === view or Wrapper)
-  const isViewBaseElement = name.indexOf('Flint.') == 0 || view.name.toLowerCase() == name
+  const isRoot = name.indexOf('Flint.') == 0 || view.name.toLowerCase() == name
 
   if (view.styles) {
-    const viewStyles = view.styles;
-    // allows for $ to access everything
-
     /*
       if <foobar> is root, then apply both the base($) and ($foobar)
     */
 
-    const viewStyle = viewStyles[prefix]
-    const nameStyle = viewStyles[prefix + name]
-    const tagStyle = viewStyles[prefix + tag]
+    const hasTag = typeof tag == 'string'
+    const tagStyle = hasTag && view.styles[prefix + tag]
 
-    const index = props.repeat ? key()[0] : void 0;
-    const uniqueTagId = view.entityId + name + tag;
+    const viewStyle = view.styles[prefix]
+    const nameStyle = view.styles[prefix + name]
 
-    let tagStyles;
-    let ran = false;
+    const index = props.repeat ? key()[0] : void 0
+    const uniqueTagId = view.entityId + name + tag
 
-    // TODO: only try catch in dev mode
+    let result
+    let ran = false
+
+    // TODO: only try/catch in dev mode
     try {
-      tagStyles = Object.assign(
+      result = Object.assign(
         // tag style
         tagStyle ? tagStyle(index) : {},
         // base style
-        isViewBaseElement && viewStyle && viewStyle(index),
+        isRoot && viewStyle && viewStyle(index),
         // name styles
         nameStyle && name !== tag && nameStyle(index)
-      );
+      )
 
       // add class styles
       if (props.className) {
         props.className.split(' ').forEach(className => {
-          const classSelector = `${prefix}_class_${className}`;
-          const tagWithClassSelector = prefix + name + classSelector;
+          const classSelector = `_class_${className}`
+          const justClass = prefix + classSelector
+          const nameAndClass = prefix + name + classSelector
 
-          if (viewStyles[tagWithClassSelector])
-            tagStyles = mergeStyles(null, tagStyles, viewStyles[tagWithClassSelector](index))
+          // $.class = {}
+          if (view.styles[justClass])
+            result = mergeStyles(null, result, view.styles[justClass](index))
 
-          if (viewStyles[classSelector]) {
-            tagStyles = mergeStyles(null, tagStyles, viewStyles[classSelector](index))
-          }
-        });
+          // $name.class = {}
+          if (view.styles[nameAndClass])
+            result = mergeStyles(null, result, view.styles[nameAndClass](index))
+        })
       }
 
-      ran = true;
+      ran = true
     }
     catch (e) {
-      console.error(
-        'error running style for', name, e.message,
-        'using last good style', cachedStyles[uniqueTagId]
-      );
-
+      console.error('Error running style for ', view.name+':'+name, e.message)
       props.style = cachedStyles[uniqueTagId];
     }
 
     if (ran) {
       // merge styles [] into {}
-      if (Array.isArray(tagStyles))
-        tagStyles = mergeStyles(null, ...tagStyles);
+      if (Array.isArray(result))
+        result = mergeStyles(null, ...result);
 
       // add style="" prop styles
       if (props.style)
-        tagStyles = mergeStyles(null, tagStyles, props.style);
+        result = mergeStyles(null, result, props.style);
 
       // put styles back into props.style
-      if (tagStyles)
-        props.style = tagStyles;
+      if (result)
+        props.style = result;
 
       // apply view styles if this is wrapper
-      if (viewStyles.view && name.indexOf('Flint.') == 0)
-        Object.assign(props.style, viewStyles.view);
+      if (view.styles.view && name.indexOf('Flint.') == 0)
+        Object.assign(props.style, view.styles.view);
 
       // cache styles
-      cachedStyles[uniqueTagId] = tagStyles;
+      cachedStyles[uniqueTagId] = result;
     }
   }
 
@@ -150,7 +149,7 @@ export default function elementStyles(key, view, name, tag, props) {
   }
 
   // add view external (prop) styles
-  if (isViewBaseElement && view.props.style && name !== 'Flint.Wrapper') {
+  if (isRoot && view.props.style && name !== 'Flint.Wrapper') {
     props.style = Object.assign(props.style || {}, view.props.style)
   }
 
