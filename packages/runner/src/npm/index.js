@@ -36,7 +36,7 @@ async function init(_opts) {
 let CACHE
 async function readDeps() {
   log('readDeps')
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const pkg = await readJSON(OPTS.packageJSON)
       const packages = Object.keys(pkg.dependencies)
@@ -57,7 +57,7 @@ async function readDeps() {
 // => deps.js
 const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
 async function writeDeps(deps) {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const requireString = deps.map(depRequireString).join("\n")
     await writeFile(OPTS.depsJS, requireString)
     await writeJSON(OPTS.depsJSON, `{ "deps": ${JSON.stringify(deps)} }`)
