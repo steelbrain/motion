@@ -9,12 +9,9 @@ import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import {
   p,
-  mkdir,
-  readdir,
-  readJSON,
-  writeJSON,
-  readFile,
-  writeFile,
+  mkdir, readdir,
+  readJSON, writeJSON,
+  readFile, writeFile,
   recreateDir,
   copyFile } from './lib/fns'
 
@@ -73,14 +70,21 @@ const firstRun = () =>
     })
   })
 
-const clearBuildDir = () =>
-  new Promise((res, rej) =>
+const clearBuildDir = () => {
+  return new Promise((res) => {
+    log('clearBuildDir')
     recreateDir(p(APP_FLINT_DIR, 'build'))
-      .catch(rej)
-      .then(async () => {
+    .then(async () => {
+      log('clearBuildDir: make _ dir')
+      try {
         await mkdir(p(APP_FLINT_DIR, 'build', '_'))
-      })
-    )
+        res()
+      } catch(e) {
+        console.error(e)
+      }
+    })
+  })
+}
 
 const clearOutDir = () =>
   recreateDir(p(APP_FLINT_DIR, 'out'))
@@ -121,16 +125,6 @@ function pipefn(fn) {
 
 function cat(msg) {
   return pipefn(() => msg && console.log(msg))
-}
-
-async function build() {
-  buildFlint()
-  buildReact()
-  buildPackages()
-  buildAssets()
-  buildScripts()
-  await afterFirstBuild()
-  buildTemplate()
 }
 
 async function buildTemplate() {
@@ -322,9 +316,10 @@ function buildScripts(cb, stream) {
 function setOptions(opts, build) {
   // from cli
   OPTS = {}
-  OPTS.debug = opts.debug
+  OPTS.debug = opts.debug || opts.verbose
   OPTS.port = opts.port
   OPTS.host = opts.host
+  OPTS.watch = opts.watch
 
   OPTS.build = build
 
@@ -343,7 +338,6 @@ function setOptions(opts, build) {
 
   if (OPTS.build) {
     OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(APP_FLINT_DIR, 'build')
-    console.log("\nBuilding %s to %s\n".bold.white, OPTS.name + '.js', path.normalize(OPTS.buildDir))
   }
 }
 
@@ -554,6 +548,23 @@ function setLogging(opts) {
   log.debug = opts.debug || opts.verbose
 }
 
+async function build() {
+  log('0')
+  buildFlint()
+  log('0')
+  buildReact()
+  log('0')
+  buildPackages()
+  log('0')
+  buildAssets()
+  log('0')
+  buildScripts()
+  log('0')
+  await afterFirstBuild()
+  log('0')
+  buildTemplate()
+}
+
 export async function run(opts, isBuild) {
   try {
     setOptions(opts, isBuild)
@@ -566,6 +577,12 @@ export async function run(opts, isBuild) {
     const isFirstRun = await firstRun()
 
     if (OPTS.build) {
+      console.log(
+        "\nBuilding %s to %s\n".bold.white,
+        OPTS.name + '.js',
+        path.normalize(OPTS.buildDir)
+      )
+
       log('building...')
       await clearBuildDir()
       build()
@@ -574,7 +591,9 @@ export async function run(opts, isBuild) {
         afterFirstBuild()
       ]
 
-      console.log("\nBuild Complete! Check your .flint/build directory\n".green.bold)
+      console.log(
+        "\nBuild Complete! Check your .flint/build directory\n".green.bold
+      )
 
       if (OPTS.watch)
         gulp.watch(SCRIPTS_GLOB, ['build'])
