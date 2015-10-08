@@ -39,7 +39,7 @@ import webpack from 'webpack'
 import editor from 'editor'
 
 import { Promise } from 'bluebird'
-Promise.longStackTraces(true)
+Promise.longStackTraces()
 
 const exec = cp.exec
 const spawn = cp.spawn
@@ -50,6 +50,7 @@ const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 
 // promisify
 const mkdir = Promise.promisify(mkdirp)
+const readdir = Promise.promisify(readdirp)
 const readJSONFile = Promise.promisify(jf.readFile)
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
@@ -547,39 +548,30 @@ function runServer() {
   })
 }
 
-let template
-function makeTemplate(req, cb) {
-  if (!template)
-    template = fs.readFileSync(OPTS.dir + '/' + OPTS.template).toString();
+async function makeTemplate(req, cb) {
+  const templatePath = p(OPTS.dir, OPTS.template)
+  const template = await readFile(templatePath)
+  const dir = await readdir({ root: p(APP_FLINT_DIR, 'out') })
+  const files = dir.files
 
-  var files = []
+  if (!files.length) {
+    console.log('no flint files')
+    return cb(template.toString())
+  }
 
-  readdirp({ root: p(APP_FLINT_DIR, 'out') },
-    function(err, res) {
-      var mainIndex = -1;
+  let paths = files.map(file => file.path)
+  const mainIndex = paths.indexOf('main.js')
 
-      files = res.files.map(function(file, i) {
-        if (file.path == 'main.js')
-          mainIndex = i;
+  if (mainIndex !== -1)
+    paths.move(mainIndex, 0)
 
-        return file.path;
-      });
+  const fullTemplate = template.toString().replace('<!-- SCRIPTS -->',
+    '<div id="_flintdevtools"></div>'
+    + newLine
+    + getScriptTags(paths, req)
+  )
 
-      if (mainIndex !== -1) {
-        files.move(mainIndex, 0);
-      }
-
-      if (!files) {
-        console.log('no flint files');
-        cb(template);
-      }
-      else
-        cb(template.replace('<!-- SCRIPTS -->',
-          '<div id="_flintdevtools"></div>'
-          + newLine
-          + getScriptTags(files, req)
-        ));
-    });
+  cb(fullTemplate)
 }
 
 function unicodeToChar(text) {
