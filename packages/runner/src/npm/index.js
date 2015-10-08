@@ -1,6 +1,7 @@
 import { Promise } from 'bluebird'
 import fs from 'fs'
 import webpack from 'webpack'
+import _ from 'lodash'
 
 import cache from '../cache'
 import exec from '../lib/exec'
@@ -26,7 +27,6 @@ async function init(_opts) {
   log('npm: init opts: ', OPTS)
 
   try {
-    await mkdir(OPTS.outDir)
     await readDeps()
   }
   catch(e) { console.error(e) }
@@ -37,21 +37,41 @@ const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
 
 // <= deps.json
 // <= package.json
-let CACHE
 async function readDeps() {
   log('npm: readDeps')
   return new Promise(async (resolve, reject) => {
     try {
+      // ensure setup
+      await mkdir(OPTS.outDir)
+      await touch(OPTS.depsJSON)
+
+      // package.json
       const pkg = await readJSON(OPTS.packageJSON)
       const packages = rmExternals(Object.keys(pkg.dependencies))
 
-      await touch(OPTS.depsJSON)
-      log('npm: readDeps: reading deps json', OPTS.depsJSON)
-      const installed = await readJSON(OPTS.depsJSON)
-      const deps = rmExternals(installed.deps)
+      // deps.json
+      let deps = []
+      try {
+        const installed = await readJSON(OPTS.depsJSON)
+        deps = rmExternals(installed.deps)
+      }
+      catch(e) { log('no deps installed') }
 
-      CACHE = { packages, deps }
-      resolve(CACHE)
+      // install as necessary
+      const uninstalled = _.difference(packages, deps)
+      log('uninstalled: ', uninstalled)
+      if (uninstalled.length) {
+        uninstalled.forEach(async dep => {
+          await save(dep)
+        })
+
+        await writeDeps(packages)
+        await pack()
+      }
+
+      const allDeps = _.union(deps, packages)
+      cache.setImports(allDeps)
+      resolve(allDeps)
     } catch(e) {
       console.log('readDeps', e)
       reject(e)
@@ -79,7 +99,7 @@ function bundle() {
   return new Promise(async (res, rej) => {
     try {
       const deps = await readDeps()
-      await writeDeps(deps.packages)
+      await writeDeps(deps)
       await pack()
       res()
     }
@@ -154,7 +174,7 @@ function scanFile(file, source, opts) {
 
     const done = () => {
       // cache newly installed + already
-      cache.setImports(file, installed.concat(already))
+      cache.setFileImports(file, installed.concat(already))
       logInstalled(installed)
     }
 

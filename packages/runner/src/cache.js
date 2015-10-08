@@ -12,6 +12,7 @@ type File = {
 }
 
 let files: { name: File } = {}
+let imports: ImportArray = []
 let baseDir
 
 export default {
@@ -40,7 +41,12 @@ export default {
     log('setViews', files)
   },
 
-  setImports(file: string, imports: ImportArray) {
+  setImports(_imports: ImportArray) {
+    log('setImports', _imports)
+    imports = _imports
+  },
+
+  setFileImports(file: string, imports: ImportArray) {
     files[name(file)].imports = imports
     log('setImports', file, imports)
   },
@@ -51,10 +57,11 @@ export default {
 
   getImports(file?: string) {
     if (!file) {
-      let allImports = []
+      let allImports = [].concat(imports)
       Object.keys(files).forEach(file => {
         allImports = allImports.concat(files[file].imports)
       })
+      log('getImports', allImports)
       return allImports
     }
 
