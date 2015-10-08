@@ -163,8 +163,11 @@ var Parser = {
       .join("\n")
       .replace(viewMatcher, viewReplacer)
 
-    cache.add(file)
-    cache.setViews(file, fileViews)
+    if (!OPTS.build) {
+      cache.add(file)
+      cache.setViews(file, fileViews)
+    }
+
     return { source }
   }
 }

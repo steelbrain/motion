@@ -685,6 +685,7 @@ export async function run(opts, isBuild) {
     await makeDependencyBundle()
 
   await ensurePackagesFile()
+  await initCompiler()
 
   if (OPTS.build) {
     log('building...')
@@ -707,7 +708,6 @@ export async function run(opts, isBuild) {
     await clearOutDir()
     await runServer()
     bridge.start(wport())
-    await initCompiler()
     buildScripts()
     await afterFirstBuild()
     openInBrowser()

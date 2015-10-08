@@ -21,6 +21,7 @@ export default {
   },
 
   add(file: string) {
+    if (!file) return
     files[name(file)] = files[name(file)] || {}
   },
 
@@ -34,6 +35,7 @@ export default {
   },
 
   setViews(file: string, views: ViewArray) {
+    if (!file) return
     files[name(file)].views = views
     log('setViews', files)
   },
