@@ -69,16 +69,17 @@ Array.prototype.move = function(from, to) {
 gulp.task('build', buildScripts)
 
 // prompts for domain they want to use
-const firstRunPreferences = () =>
+const firstRun = () =>
   new Promise((res, rej) => {
     const hasRunBefore = OPTS.build || CONFIG
-    if (hasRunBefore) return res()
+    log('first run hasRunBefore:', hasRunBefore)
+    if (hasRunBefore) return res(false)
 
     askForUrlPreference(useFriendly => {
       CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
       openInBrowser()
       writeConfig(CONFIG)
-      res()
+      res(true)
     })
   })
 
@@ -632,7 +633,7 @@ function makeDependencyBundle(doInstall) {
       .filter(p => ['flint-js', 'react'].indexOf(p) < 0)
     const requireString = deps
       .map(name => `window.__flintPackages["${name}"] = require("${name}");`)
-      .join(newLine)
+      .join(newLine) || ''
 
     // make dep dir
     await mkdir(outDir)
@@ -662,8 +663,12 @@ export async function run(opts, isBuild) {
 
   CONFIG = await readJSONFile(OPTS.configFile)
   log('got config', CONFIG)
-  await firstRunPreferences()
+  const isFirstRun = await firstRun()
   log('got first run prefs')
+
+  // generate initial package.js
+  if (isFirstRun)
+    makeDependencyBundle()
 
   if (OPTS.build) {
     log('building...')
