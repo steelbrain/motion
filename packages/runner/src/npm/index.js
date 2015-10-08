@@ -11,7 +11,8 @@ import {
   readFile,
   writeFile,
   writeJSON,
-  readJSON } from '../lib/fns'
+  readJSON,
+  touch } from '../lib/fns'
 
 let OPTS
 
@@ -31,18 +32,23 @@ async function init(_opts) {
   catch(e) { console.error(e) }
 }
 
+const externals = ['flint-js', 'react']
+const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+
 // <= deps.json
 // <= package.json
 let CACHE
 async function readDeps() {
-  log('readDeps')
+  log('npm: readDeps')
   return new Promise(async (resolve, reject) => {
     try {
       const pkg = await readJSON(OPTS.packageJSON)
-      const packages = Object.keys(pkg.dependencies)
+      const packages = rmExternals(Object.keys(pkg.dependencies))
 
+      await touch(OPTS.depsJSON)
+      log('npm: readDeps: reading deps json', OPTS.depsJSON)
       const installed = await readJSON(OPTS.depsJSON)
-      const deps = installed.deps
+      const deps = rmExternals(installed.deps)
 
       CACHE = { packages, deps }
       resolve(CACHE)
@@ -56,11 +62,13 @@ async function readDeps() {
 // => deps.json
 // => deps.js
 const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
-async function writeDeps(deps) {
+async function writeDeps(deps = []) {
+  log('npm: writeDeps')
   return new Promise(async (resolve) => {
     const requireString = deps.map(depRequireString).join("\n")
+    log('npm: writeDeps:', deps)
     await writeFile(OPTS.depsJS, requireString)
-    await writeJSON(OPTS.depsJSON, `{ "deps": ${JSON.stringify(deps)} }`)
+    await writeJSON(OPTS.depsJSON, { deps })
     resolve()
   })
 }
@@ -70,11 +78,8 @@ function bundle() {
   log('npm: bundle')
   return new Promise(async (res, rej) => {
     try {
-      const file = await readFile(OPTS.packageJSON)
-      const deps = Object.keys(JSON.parse(file).dependencies)
-      const depNames = deps.filter(p => ['flint-js', 'react'].indexOf(p) < 0)
-      log('npm: bundle: depNames:', depNames)
-      await writeDeps(depNames)
+      const deps = await readDeps()
+      await writeDeps(deps.packages)
       await pack()
       res()
     }

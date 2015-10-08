@@ -5,6 +5,7 @@ import fs from 'fs'
 import rimraf from 'rimraf'
 import copyFile from './copyFile'
 import path from 'path'
+import _touch from 'touch'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
@@ -17,6 +18,7 @@ const readJSON = Promise.promisify(jf.readFile)
 const writeJSON = Promise.promisify(jf.writeFile)
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
+const touch = Promise.promisify(_touch)
 
 const p = path.join
 const recreateDir = (dir) =>
@@ -40,5 +42,6 @@ export default {
   writeJSON,
   readFile,
   writeFile,
-  copyFile
+  copyFile,
+  touch
 }
