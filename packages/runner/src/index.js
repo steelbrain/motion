@@ -17,6 +17,7 @@ import {
   recreateDir,
   copyFile } from './lib/fns'
 
+import { Promise } from 'bluebird'
 import keypress from 'keypress'
 import path from 'path'
 import express from 'express'
@@ -38,14 +39,12 @@ import portfinder from 'portfinder'
 import open from 'open'
 import editor from 'editor'
 
-import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
 const p = path.join
-const proc = process
+const proc = process // cache for keypress
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
-
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', 'node_modules');
 const APP_FLINT_DIR = p(APP_DIR, '.flint');
@@ -54,10 +53,6 @@ let lastSavedTimestamp = {}
 let APP_VIEWS = {}
 let HAS_RUN_INITIAL_BUILD = false
 let OPTS, CONFIG, ACTIVE_PORT
-
-Array.prototype.move = function(from, to) {
-  this.splice(to, 0, this.splice(from, 1)[0]);
-}
 
 gulp.task('build', buildScripts)
 
@@ -525,6 +520,10 @@ function runServer() {
       serverListen(80);
     }
   })
+}
+
+Array.prototype.move = function(from, to) {
+  this.splice(to, 0, this.splice(from, 1)[0]);
 }
 
 async function makeTemplate(req, cb) {
