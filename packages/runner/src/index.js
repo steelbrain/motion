@@ -7,6 +7,7 @@ import copyFile from './lib/copyFile'
 import recreateDir from './lib/recreateDir'
 import npm from './npm'
 import log from './lib/log'
+import cache from './cache'
 
 import keypress from 'keypress'
 import fs from 'fs'
@@ -219,6 +220,12 @@ function buildAssets() {
     .pipe(gulp.dest(p(OPTS.buildDir)));
 }
 
+const watchDeletes = vinyl => {
+  if (vinyl.event == 'unlink') {
+    cache.remove(path.basename(vinyl.path))
+  }
+}
+
 function buildScripts(cb, stream) {
   log('build scripts')
   let gulpErr, gulpScript, curFile
@@ -228,7 +235,7 @@ function buildScripts(cb, stream) {
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe(gulpif(!OPTS.build,
-      watch(SCRIPTS_GLOB)
+      watch(SCRIPTS_GLOB, null, watchDeletes)
     ))
     .pipe(pipefn(file => {
       // reset

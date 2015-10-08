@@ -23,9 +23,12 @@ let installing = false
 let newDeps = []
 let installedDeps = []
 
-export function checkDependencies(source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
+export function checkDependencies(file, source, { dir, onPackageStart, onPackageFinish, onPackageError }) {
   try {
     const found = getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
+
+    cache.setImports(file, found)
+
     const fresh = found.filter(x => installedDeps.indexOf(x) < 0)
     log('Found packages in file:', found)
     log('New packages:', fresh)
