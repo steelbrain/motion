@@ -155,8 +155,8 @@ view ErrorMessage {
 
   $ = {
     background: '#fff',
-    borderTop: '1px solid #ddd',
-    borderLeft: '4px solid ' + red,
+    borderTop: '1px solid #ccc',
+    borderBottom: '4px solid ' + red,
     position: 'fixed',
     left: 0,
     height: open ? openHeight : 'auto',
@@ -169,7 +169,8 @@ view ErrorMessage {
     padding: 8,
     pointerEvents: 'all',
     overflow: 'scroll',
-    zIndex: 2147483647
+    zIndex: 2147483647,
+    boxShadow: '0 -6px 12px rgba(0,0,0,0.06)'
   }
 
   $inner = {
