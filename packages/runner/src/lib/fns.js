@@ -4,6 +4,7 @@ import jf from 'jsonfile'
 import fs from 'fs'
 import rimraf from 'rimraf'
 import copyFile from './copyFile'
+import path from 'path'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
@@ -17,6 +18,7 @@ const writeJSON = Promise.promisify(jf.writeFile)
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
 
+const p = path.join
 const recreateDir = (dir) =>
   new Promise((res, rej) => {
     rimraf(dir, err => {
@@ -29,6 +31,7 @@ const recreateDir = (dir) =>
   })
 
 export default {
+  p,
   mkdir,
   rmdir,
   recreateDir,

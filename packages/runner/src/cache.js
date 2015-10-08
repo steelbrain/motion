@@ -17,7 +17,7 @@ let name = f => path.relative(baseDir, f)
 export default {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir, '..')
-    log('baseDir', baseDir)
+    log('cache: baseDir', baseDir)
   },
 
   add(file: string) {

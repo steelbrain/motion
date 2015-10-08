@@ -8,6 +8,7 @@ import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import {
+  p,
   mkdir,
   readdir,
   readJSON,
@@ -41,7 +42,6 @@ import editor from 'editor'
 
 Promise.longStackTraces()
 
-const p = path.join
 const proc = process // cache for keypress
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
@@ -84,15 +84,6 @@ const clearBuildDir = () =>
 
 const clearOutDir = () =>
   recreateDir(p(APP_FLINT_DIR, 'out'))
-
-const initCompiler = () =>
-  new Promise((res, rej) => {
-    log('init compiler')
-    compiler('init', {
-      dir: APP_FLINT_DIR,
-      after: res
-    })
-  })
 
 /* FIRST BUILD STUFF */
 
@@ -330,7 +321,12 @@ function buildScripts(cb, stream) {
 }
 
 function setOptions(opts, build) {
-  OPTS = opts || {}
+  // from cli
+  OPTS = {}
+  OPTS.debug = opts.debug
+  OPTS.port = opts.port
+  OPTS.host = opts.host
+
   OPTS.build = build
 
   OPTS.defaultPort = 4000
@@ -365,7 +361,7 @@ function listenForKeys() {
 
     switch(key.name) {
       case 'o': // open browser
-        openInBrowser()
+        openInBrowser(true)
         break
       case 'e': // open editor
         editor('.')
@@ -389,8 +385,8 @@ function listenForKeys() {
   resumeListenForKeys()
 }
 
-function openInBrowser() {
-  if (OPTS.debug) return
+function openInBrowser(force) {
+  if (OPTS.debug && !force) return
   if (CONFIG.useFriendly) {
     open('http://' + CONFIG.friendlyUrl);
   } else {
@@ -561,46 +557,49 @@ function setLogging(opts) {
 }
 
 export async function run(opts, isBuild) {
-  setOptions(opts, isBuild)
-  setLogging(OPTS)
+  try {
+    setOptions(opts, isBuild)
+    setLogging(OPTS)
+    log('run', OPTS)
+    compiler('init', { dir: APP_FLINT_DIR })
+    await npm.init({ dir: APP_FLINT_DIR })
+    CONFIG = await readJSON(OPTS.configFile)
+    log('got config', CONFIG)
+    const isFirstRun = await firstRun()
 
-  npm.init({ dir: APP_FLINT_DIR })
+    if (OPTS.build) {
+      log('building...')
+      await clearBuildDir()
+      build()
+      await* [
+        npm.install(),
+        npm.bundle(),
+        afterFirstBuild()
+      ]
 
-  CONFIG = await readJSON(OPTS.configFile)
-  log('got config', CONFIG)
+      console.log("\nBuild Complete! Check your .flint/build directory\n".green.bold)
 
-  const isFirstRun = await firstRun()
-  await initCompiler()
+      if (OPTS.watch)
+        gulp.watch(SCRIPTS_GLOB, ['build'])
+      else
+        process.exit()
+    }
+    else {
+      // generate initial package.js
+      if (isFirstRun)
+        await npm.bundle()
 
-  if (OPTS.build) {
-    log('building...')
-    await clearBuildDir()
-    build()
-    await* [
-      npm.install(),
-      npm.bundle(),
-      afterFirstBuild()
-    ]
-
-    console.log("\nBuild Complete! Check your .flint/build directory\n".green.bold)
-
-    if (OPTS.watch)
-      gulp.watch(SCRIPTS_GLOB, ['build'])
-    else
-      process.exit()
+      log('running...')
+      await clearOutDir()
+      await runServer()
+      bridge.start(wport())
+      buildScripts()
+      await afterFirstBuild()
+      openInBrowser()
+      watchingMessage()
+    }
   }
-  else {
-    // generate initial package.js
-    if (isFirstRun)
-      await npm.bundle()
-
-    log('running...')
-    await clearOutDir()
-    await runServer()
-    bridge.start(wport())
-    buildScripts()
-    await afterFirstBuild()
-    openInBrowser()
-    watchingMessage()
+  catch(e) {
+    console.error(e)
   }
 }

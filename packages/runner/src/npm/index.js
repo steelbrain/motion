@@ -5,7 +5,7 @@ import webpack from 'webpack'
 import cache from '../cache'
 import exec from '../lib/exec'
 import log from '../lib/log'
-import { mkdir, readFile } from '../lib/fns'
+import { p, mkdir, readFile } from '../lib/fns'
 
 let opts
 
@@ -14,6 +14,7 @@ export async function init(_opts) {
   opts.outDir = p(opts.dir, 'deps')
   opts.entry = p(opts.outDir, 'deps.js')
   opts.outFile = p(opts.outDir, 'packages.js')
+  log('npm: init opts: ', opts)
   await readDeps()
 }
 
@@ -122,9 +123,9 @@ export function checkDependencies(file, source, { dir, onPackageStart, onPackage
   }
 }
 
-export function readDeps(dir) {
-  log('readDeps', dir)
-  return readFile(dir + '/package.json')
+export function readDeps() {
+  log('readDeps')
+  return readFile(opts.dir + '/package.json')
     .then(data => {
       const deps = Object.keys(JSON.parse(data).dependencies)
       log('readDeps:', deps)
