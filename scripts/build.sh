@@ -1,5 +1,7 @@
 #!/bin/sh
+
 set -e
+trap 'kill $(jobs -p)' EXIT
 
 for f in packages/*; do
   if [ -f "$f/webpack.config.js" ]; then
@@ -20,13 +22,15 @@ for f in packages/*; do
   fi
 done
 
+# watch also runs the builds above
 if [ $1="--watch" ]; then
   # Relink CLI watcher
-  echo "Watching CLI for relink"
+  echo "Watch CLI for relink"
   chsum1=""
   cd packages/cli
 
   sleep 2
+  hasLinkedOnce='false'
   while [[ true ]]
   do
     if [ -d 'lib' ]; then
@@ -34,9 +38,20 @@ if [ $1="--watch" ]; then
       if [[ $chsum1 != $chsum2 ]] ; then
         npm link
         chsum1=$chsum2
+
+        # build tools after first build
+        if [ $hasLinkedOnce == 'false' ]; then
+          cd ../..
+          cd apps/tools
+          flint build --watch &
+          cd ../..
+          cd packages/cli
+        fi
+
+        hasLinkedOnce='true'
       fi
     fi
-    sleep 2
+    sleep 1
   done
 fi
 
