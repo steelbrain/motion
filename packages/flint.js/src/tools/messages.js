@@ -33,7 +33,7 @@ export default function run(browser, opts) {
       const el = document.getElementById('__flintPackages');
       const src = el.src;
       removeEl(el);
-      const tag = addScript({ src }, Flint.refresh);
+      const tag = addScript({ src }, Flint.render);
       tag.setAttribute('id', '__flintPackages')
     }
   }

@@ -8,41 +8,45 @@ const getFirstChild = children => {
   return child;
 }
 
-const Wrapper = ({ children, style, onClick, __disableWrapper, view }) => {
-  let viewProps;
+class Wrapper extends React.Component {
+  render() {
+    const { children, style, onClick, __disableWrapper, view } = this.props;
 
-  if (style || onClick)
-    viewProps = {};
+    let viewProps
 
-  if (onClick)
-    viewProps.onClick = onClick;
+    if (style || onClick)
+      viewProps = {}
 
-  if (style)
-    viewProps.style = style;
+    if (onClick)
+      viewProps.onClick = onClick
 
-  // Check if a user manually disabled the wrapper with `$ = false`
-  if (__disableWrapper)
-    return children;
+    if (style)
+      viewProps.style = style
 
-  // Check if we have our only element === viewname, for not wrapping
-  if (React.Children.count(children) == 1) {
-    let first = getFirstChild(children)
-    let type = first && first.type
+    // Check if a user manually disabled the wrapper with `$ = false`
+    if (__disableWrapper)
+      return children
 
-    // if tagname === viewname
-    if (type && type.toLowerCase && type.toLowerCase() == view.name.toLowerCase())
-      return first
-    else
-      return wrapped(view.name, viewProps, children);
-  }
-  else {
-    return wrapped(view.name, viewProps, children);
+    // Check if we have our only element === viewname, for not wrapping
+    if (React.Children.count(children) == 1) {
+      let first = getFirstChild(children)
+      let type = first && first.type
+
+      // if tagname === viewname
+      if (type && type.toLowerCase && type.toLowerCase() == view.name.toLowerCase())
+        return first
+      else
+        return wrapped(view.name, viewProps, children)
+    }
+    else {
+      return wrapped(view.name, viewProps, children)
+    }
   }
 }
 
 function wrapped(name, props, children) {
   return (
-    <div className={name && name.toLowerCase()} {...props}>
+    <div className={name && name.toLowerCase()} {...props} ref="view">
       {children}
     </div>
   )

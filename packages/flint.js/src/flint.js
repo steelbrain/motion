@@ -105,12 +105,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     element: createElement,
 
     render,
-    refresh() {
-      render()
-      // Flint.mainView &&
-      // Flint.mainView.isMounted &&
-      // Flint.mainView.forceUpdate()
-    },
 
     on(name, cb) { emitter.on(name, cb) },
 
@@ -141,7 +135,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       raf(() => {
         Flint.isLoadingFile = true
-        Flint.refresh()
+        render()
         Flint.isLoadingFile = false
 
         // its been updated
@@ -168,17 +162,16 @@ function run(browserNode, userOpts, afterRenderCb) {
             this.isMounted &&
             !this.isPaused
           )
-            this.forceUpdate()
+            this.setState({
+              __flintRender: ++this.state.__flintRender
+            })
         },
 
         getInitialState() {
-          const id = uuid()
-
           if (name == 'Main')
             Flint.mainView = this
 
-          this.styles = {};
-          this.entityId = id;
+          this.styles = {}
           this.events = {
             mount: [],
             unmount: [],
@@ -197,23 +190,22 @@ function run(browserNode, userOpts, afterRenderCb) {
            // watch for errors with ran
           let ran = false
 
+          // TODO: comments out part was attempt to save child
+          // state when parent is reloaded
           // needsUpdate if hash changed
-          if (Flint.views[name].needsUpdate) {
+          // if (Flint.views[name].needsUpdate) {
             safeRun(() => {
               component.call(void 0, this, viewOn)
-              Flint.cachedRenders[name] = this._render
+              // Flint.cachedRenders[name] = this._render
               ran = true
             })
-          }
-          else {
-            this._render = Flint.cachedRenders[name]
-          }
+          // }
+          // else {
+          //   this._render = Flint.cachedRenders[name]
+          // }
 
-          if (!ran)
-            return null
-
-          this.hasRun = true
-          return null
+          this.hasRun = ran
+          return { __flintRender: 0 }
         },
 
         componentWillReceiveProps(nextProps) {
