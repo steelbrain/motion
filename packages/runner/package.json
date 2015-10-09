@@ -29,6 +29,7 @@
     "gulp-filter": "^2.0.2",
     "gulp-flatten": "0.0.4",
     "gulp-if": "^1.2.5",
+    "gulp-load-plugins": "^0.10.0",
     "gulp-plumber": "^1.0.0",
     "gulp-remember": "^0.3.0",
     "gulp-rename": "^1.2.2",

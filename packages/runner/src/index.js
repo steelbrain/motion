@@ -8,14 +8,14 @@ import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import {
-  p,
-  mkdir, readdir,
-  readJSON, writeJSON,
-  readFile, writeFile,
-  recreateDir,
-  copyFile } from './lib/fns'
-
+  p, mkdir, readdir, readJSON, writeJSON,
+  readFile, writeFile, recreateDir, copyFile
+} from './lib/fns'
 import { Promise } from 'bluebird'
+import multipipe from 'multipipe'
+import portfinder from 'portfinder'
+import open from 'open'
+import editor from 'editor'
 import keypress from 'keypress'
 import path from 'path'
 import express from 'express'
@@ -23,19 +23,8 @@ import cors from 'cors'
 import hostile from 'hostile'
 import through from 'through2'
 import gulp from 'gulp'
-import rename from 'gulp-rename'
-import watch from 'gulp-watch'
-import filter from 'gulp-filter'
-import plumber from 'gulp-plumber'
-import debug from 'gulp-debug'
-import changed from 'gulp-changed'
-import concat from 'gulp-concat'
-import wrap from 'gulp-wrap'
-import multipipe from 'multipipe'
-import gulpif from 'gulp-if'
-import portfinder from 'portfinder'
-import open from 'open'
-import editor from 'editor'
+import loadPlugins from 'gulp-load-plugins'
+const $ = loadPlugins()
 
 Promise.longStackTraces()
 
@@ -200,8 +189,8 @@ function buildScripts(cb, stream) {
   let buildingTimeout
 
   return (stream || gulp.src(SCRIPTS_GLOB))
-    .pipe(gulpif(!OPTS.build,
-      watch(SCRIPTS_GLOB, null, watchDeletes)
+    .pipe($.if(!OPTS.build,
+      $.watch(SCRIPTS_GLOB, null, watchDeletes)
     ))
     .pipe(pipefn(file => {
       // reset
@@ -212,8 +201,8 @@ function buildScripts(cb, stream) {
       gulpStartTime = Date.now()
       file.startTime = gulpStartTime
     }))
-    .pipe(debug({ title: 'build:', minimal: true }))
-    .pipe(plumber(err => {
+    .pipe($.debug({ title: 'build:', minimal: true }))
+    .pipe($.plumber(err => {
       gulpErr = true
 
       if (err.stack || err.codeFrame)
@@ -267,18 +256,20 @@ function buildScripts(cb, stream) {
     }))
     .pipe(pipefn(file => { curFile = file }))
     // .pipe(pipefn(file => console.log(file.contents.toString())))
-    .pipe(gulpif(!stream, rename({ extname: '.js' })))
+    .pipe($.if(!stream,
+      $.rename({ extname: '.js' })
+    ))
     .pipe(react({
       stripTypes: true,
       es6module: true
     }))
-    .pipe(gulpif(OPTS.build,
+    .pipe($.if(OPTS.build,
       multipipe(
-        concat(OPTS.name + '.js'),
-        wrap({ src: __dirname + '/../templates/build.template.js' }, { name: OPTS.name } , { variable: 'data' })
+        $.concat(OPTS.name + '.js'),
+        $.wrap({ src: __dirname + '/../templates/build.template.js' }, { name: OPTS.name } , { variable: 'data' })
       )
     ))
-    .pipe(gulpif(function(file) {
+    .pipe($.if(function(file) {
       if (stream) return false
       if (gulpErr) return false
 
@@ -319,6 +310,8 @@ function buildScripts(cb, stream) {
         }, 450)
       }
     }))
+    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
