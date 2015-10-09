@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 
 # Welcome to the Flint install script!
 # To run this, open your terminal and type:
 #
-#    curl https://flint.love/sh | bash
+#    curl -L https://flint.love/sh | sh
 
 
 # (wrapped with function to execute only if fully downloaded)
