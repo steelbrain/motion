@@ -4,7 +4,7 @@
 # Welcome to the Flint install script!
 # To run this, open your terminal and type:
 #
-#    curl -L https://flint.love/sh | sh
+#    sh <(curl -L https://flint.love)
 
 
 # (wrapped with function to execute only if fully downloaded)
