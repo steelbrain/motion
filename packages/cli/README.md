@@ -1,10 +1,14 @@
-### What is it?
-
-Flint is all you need ever.
-
 ### Installation
 
-Installation is done through npm:
+See http://flintjs.com for full docs!
+
+Installation is done through npm script or npm:
+
+```
+sh <(curl -sL https://flint.love)
+```
+
+or
 
 ```
 npm install -g flint
