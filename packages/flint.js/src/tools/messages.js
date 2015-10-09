@@ -14,7 +14,7 @@ export default function run(browser, opts) {
 
     'script:add': msg => {
       browser.emitter.emit('runtime:success')
-      addScript(msg, Flint.render);
+      addScript(msg)
     },
 
     'script:del': msg => {
@@ -33,7 +33,7 @@ export default function run(browser, opts) {
       const el = document.getElementById('__flintPackages');
       const src = el.src;
       removeEl(el);
-      const tag = addScript({ src }, Flint.render);
+      const tag = addScript({ src }, Flint.refresh);
       tag.setAttribute('id', '__flintPackages')
     }
   }
