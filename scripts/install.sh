@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 
 # Welcome to the Flint install script!
 # To run this, open your terminal and type:
 #
-#    curl https://flint.love/sh | sh
+#    curl https://flint.love/sh | bash
 
 
 # (wrapped with function to execute only if fully downloaded)
@@ -100,11 +100,11 @@ cat <<"EOF"
 
 EOF
   echo
-  read -p "Would you like us to try and fix npm permissions [y/n]? " REPLY
+  read -p "Would you like us to try and fix npm permissions [y/n]? " reply
   echo
 
   # if wanted to fix
-  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+  if [[ "$reply" =~ ^[Yy]$ ]]; then
     sudo chown -R $USER ~/.npm
     sudo chown -R $USER $NODE_MODULES
     sudo chmod ug+w $NODE_MODULES
@@ -160,12 +160,12 @@ if hash flint 2>/dev/null; then
 
   # enter editor
   echo "Example editor commands: atom, subl, vim"
-  read -p "Enter new editor command (or just press enter to skip): " REPLY
+  read -p "Enter new editor command (or just press enter to skip): " reply
   echo
 
   # if wanted to fix
-  if [[ "$REPLY" =~ ^[a-z]+$ ]]; then
-    EDITOR=$REPLY; export EDITOR
+  if [[ "$reply" =~ ^[a-z]+$ ]]; then
+    EDITOR=$reply; export EDITOR
     echo "Editor changed to $EDITOR!"
   fi
 
