@@ -118,7 +118,7 @@ function watchingMessage() {
 
 function pipefn(fn) {
   return through.obj(function(file, enc, next) {
-    fn(file)
+    fn && fn(file)
     next(null, file);
   })
 }
@@ -319,6 +319,8 @@ function buildScripts(cb, stream) {
         }, 450)
       }
     }))
+    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
 
 function setOptions(opts, build) {
