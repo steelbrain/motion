@@ -282,11 +282,16 @@ function buildScripts(cb, stream) {
       if (stream) return false
       if (gulpErr) return false
 
-      let endTime = Date.now() - gulpStartTime;
+      const endTime = Date.now() - gulpStartTime;
       log('build took ', endTime, 'ms')
-      log('new file time', file.startTime, lastSavedTimestamp[file.path])
 
-      if (!lastSavedTimestamp[file.path] || file.startTime > lastSavedTimestamp[file.path]) {
+      const isNew = (
+        !lastSavedTimestamp[file.path] ||
+        file.startTime > lastSavedTimestamp[file.path]
+      )
+      log('is new file', isNew)
+
+      if (isNew) {
         lastSavedTimestamp[file.path] = file.startTime
         return true
       }
@@ -295,14 +300,17 @@ function buildScripts(cb, stream) {
       gulp.dest(gulpDest))
     )
     .pipe(pipefn(file => {
-      // *ONLY AFTER* initial build
+      log('HAS_RUN_INITIAL_BUILD', HAS_RUN_INITIAL_BUILD)
+      log('gulpErr', gulpErr)
+
+      // after initial build
       if (HAS_RUN_INITIAL_BUILD) {
         if (!gulpErr) {
           bridge.message('script:add', gulpScript);
           bridge.message('compile:success', gulpScript);
         }
       }
-      // *ONLY BEFORE* initial build
+      // before initial build
       else {
         if (buildingTimeout) clearTimeout(buildingTimeout)
         buildingTimeout = setTimeout(() => {
