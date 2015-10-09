@@ -100,7 +100,7 @@ cat <<"EOF"
 
 EOF
   echo
-  read -p "Would you like us to try and fix npm permissions [y/n]? " reply
+  read -p "Would you like us to try and fix npm permissions [y/n]? " reply < /dev/tty
   echo
 
   # if wanted to fix
@@ -160,7 +160,7 @@ if hash flint 2>/dev/null; then
 
   # enter editor
   echo "Example editor commands: atom, subl, vim"
-  read -p "Enter new editor command (or just press enter to skip): " reply
+  read -p "Enter new editor command (or just press enter to skip): " reply < /dev/tty
   echo
 
   # if wanted to fix
