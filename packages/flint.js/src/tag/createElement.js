@@ -30,7 +30,7 @@ export default function createElement(key, fullname, props, ...args) {
   const view = this;
 
   let name = fullname;
-  let tag;
+  let tag, originalTag;
 
   // find element
   if (typeof fullname != 'string') {
@@ -49,6 +49,7 @@ export default function createElement(key, fullname, props, ...args) {
         : [fullname, fullname]
 
       if (divWhitelist.indexOf(tag) !== -1) {
+        originalTag = tag
         tag = 'div'
       }
 
@@ -69,7 +70,7 @@ export default function createElement(key, fullname, props, ...args) {
     props.className = classnames(props.className)
 
   // TRANSFORMATIONS:
-  elementStyles(key, view, name, tag, props);
+  elementStyles(key, view, name, originalTag || tag, props);
 
   if (!props.key && !props.nokey) {
     props.key = props.repeat ? key() : key
