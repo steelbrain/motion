@@ -79,4 +79,5 @@ packages.forEach(function (pkg) {
   cd("../..");
 });
 
-exec("make build");
+exec("make build")
+console.log("Done bootstrapping!")
