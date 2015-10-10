@@ -115,7 +115,8 @@ async function pack(file, out) {
     webpack({
       entry: OPTS.depsJS,
       externals: { react: 'React', bluebird: '_bluebird' },
-      output: { filename: OPTS.packagesJS }
+      output: { filename: OPTS.packagesJS },
+      devtool: 'source-map'
     }, err => {
       if (err) return rej(err)
       res()
@@ -229,5 +230,5 @@ function logInstalled(deps) {
 }
 
 export default {
-  init, save, install, scanFile
+  init, save, bundle, install, scanFile
 }

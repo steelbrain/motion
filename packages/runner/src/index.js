@@ -251,7 +251,7 @@ function buildScripts(cb, stream) {
         if (OPTS.build) return
         log('runner: onPackageFinish: ', name)
         bridge.message('package:installed', { name })
-        bridge.message('packages:reload', {})
+        updatePackages()
       }
     }))
     .pipe(pipefn(file => { curFile = file }))
@@ -316,6 +316,10 @@ function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
 
+function updatePackages() {
+  bridge.message('packages:reload', {})
+}
+
 function setOptions(opts, build) {
   // from cli
   OPTS = {}
@@ -352,7 +356,7 @@ function listenForKeys() {
   keypress(proc.stdin)
 
   // listen for the "keypress" event
-  proc.stdin.on('keypress', function (ch, key) {
+  proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
 
     switch(key.name) {
@@ -363,7 +367,10 @@ function listenForKeys() {
         editor('.')
         break
       case 'i': // install npm
-        npm.install()
+        console.log("Installing npm packages...".white.bold)
+        await npm.bundle()
+        updatePackages()
+        console.log('Packages updated!'.green.bold)
         break
       case 'v': // verbose logging
         OPTS.verbose = !OPTS.verbose
