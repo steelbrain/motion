@@ -14,6 +14,7 @@
   },
   "homepage": "https://github.com/flint-lang/flint",
   "dependencies": {
+    "babel-runtime": "^5.8.25",
     "cli-color": "^1.0.0",
     "clui": "^0.3.1",
     "colors": "^1.0.3",
@@ -28,9 +29,9 @@
     "rimraf": "^2.2.8"
   },
   "bin": {
-    "flint": "./lib/bin/flint",
-    "flint-new": "./lib/bin/flint-new",
-    "flint-run": "./lib/bin/flint-run",
-    "flint-build": "./lib/bin/flint-build"
+    "flint": "./lib/bin/flint.js",
+    "flint-new": "./lib/bin/flint-new.js",
+    "flint-run": "./lib/bin/flint-run.js",
+    "flint-build": "./lib/bin/flint-build.js"
   }
 }
