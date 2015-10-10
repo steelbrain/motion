@@ -48,16 +48,13 @@ function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
     namespace: {},
     entry: 'Main'
-  }, userOpts);
+  }, userOpts)
 
-  // put Flint instance on root given app name
-  // tools uses this (root.devTools)
+  // either on window or namespace
   if (opts.namespace !== root && opts.app)
     root[opts.app] = opts.namespace
 
-  const isTools = opts.app == 'devTools'
   let firstRun = false
-
   const render = () => {
     const run = () => {
       const MainComponent = getComponent('Main') || mainComponent;
@@ -95,8 +92,8 @@ function run(browserNode, userOpts, afterRenderCb) {
   }
 
   const removeComponent = key => {
-    Flint.views[key] = undefined
-    root[key] = undefined
+    delete Flint.views[key]
+    delete opts.namespace[key]
   }
 
   const setComponent = (key, val) => (opts.namespace[key] = val)
@@ -104,20 +101,14 @@ function run(browserNode, userOpts, afterRenderCb) {
   const emitter = ee({})
 
   let Flint = {
-    id: uuid(),
     isUpdating: false,
     views: {},
     lastWorkingView: {},
     // async functions needed before loading app
     preloaders: [],
-    routes: null,
-
     element: createElement,
-
     render,
-
     on(name, cb) { emitter.on(name, cb) },
-
     // map of views in various files
     viewCache: {},
     // current build up of running hot insertion
@@ -135,9 +126,9 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.setExports(fileExports)
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
-      const removed = arrayDiff(cached, views)
 
       // remove views that werent made
+      const removed = arrayDiff(cached, views)
       removed.map(removeComponent)
 
       Flint.currentHotFile = null
@@ -154,9 +145,6 @@ function run(browserNode, userOpts, afterRenderCb) {
         })
       })
     },
-
-
-    cachedRenders: {},
 
     makeReactComponent(name, component, options = {}) {
       const spec = {
@@ -199,7 +187,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           let ran = false
 
           // TODO: comments out part was attempt to save child
-          // state when parent is reloaded
+          // state when parent is reloaded, but wed need path key
           // needsUpdate if hash changed
           // if (Flint.views[name].needsUpdate) {
             safeRun(() => {
@@ -299,7 +287,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       // TODO: this fixes importing a react element, but its sloppy
       // import Element from 'some-element'; can be used <Element>
       if (root[name])
-        return root[name];
+        return root[name]
 
       // View.SubView
       const subName = `${view}.${name}`
@@ -307,14 +295,12 @@ function run(browserNode, userOpts, afterRenderCb) {
         return Flint.views[subName].component
 
       // regular view
-      if (Flint.views[name]) {
+      if (Flint.views[name])
         return Flint.views[name].component;
-      }
 
       // "global" views
-      const namespaceView = opts.namespace[name] || root[name];
-      if (namespaceView)
-        return namespaceView;
+      if (opts.namespace[name] || root[name])
+        return namespaceView
 
       return class NotFound extends React.Component {
         render() {
@@ -396,24 +382,12 @@ function run(browserNode, userOpts, afterRenderCb) {
       window.onViewLoaded()
     },
 
-    // make all array methods non-mutative
-    shimProperties(id, name, val) {
-      if (Array.isArray(val)) {
-        // add ref to array
-        val.__flintRef = { id, name };
-      }
-    },
-
     makeView(hash, component) {
       return { hash, component, needsUpdate: true };
     },
 
     getStyle(id, name) {
       return Flint.styles && Flint.styles[id][name]
-    },
-
-    addRoutes(routes) {
-      Flint.routes = routes
     },
 
     // export globals
@@ -433,21 +407,19 @@ function run(browserNode, userOpts, afterRenderCb) {
         })
       }
     }
-  };
+  }
 
   // make mutative array methods trigger updates in views
-  ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort'].map(method => {
-    const vanilla = Array.prototype[method];
+  const mutators = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
+  mutators.map(method => {
+    const vanilla = Array.prototype[method]
 
     Array.prototype[method] = function(...args) {
-      const result = vanilla.apply(this, args);
+      const result = vanilla.apply(this, args)
 
-      if (this.__flintRef) {
-        Flint.set(this.__flintRef.id, this.__flintRef.name, this)
-        Flint.setViews();
-      }
+      // do view update
 
-      return result;
+      return result
     }
   })
 

@@ -24,7 +24,6 @@ view Installer {
   })
 
   tools.on('package:select', () => {
-    debugger
     state = 4
     versions = tools.data.versions
   })

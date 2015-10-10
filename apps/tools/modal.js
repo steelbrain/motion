@@ -8,7 +8,7 @@ view Modal {
   $ = {
     position: 'absolute',
     top: ^open ? 20 : -100,
-    right: 20,
+    left: 20,
     padding: [10, 10],
     background: '#f9f9f9',
     border: '1px solid #ddd',

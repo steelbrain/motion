@@ -15,7 +15,7 @@ const mapObj = (fn, o) => {
   return newO
 }
 
-const divWhitelist = [ 'title', 'meta', 'head', 'circle' ]
+const divWhitelist = [ 'title', 'meta', 'head', 'circle', 'col' ]
 const flatToCamel = {
   novalidate: 'noValidate',
   tabindex: 'tabIndex',
