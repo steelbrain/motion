@@ -11,7 +11,6 @@ import Bluebird, { Promise } from 'bluebird'
 import './lib/setRoot'
 import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
-import assignToGlobal from './lib/assignToGlobal'
 import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
@@ -82,6 +81,17 @@ function run(browserNode, userOpts, afterRenderCb) {
     else {
       run()
     }
+  }
+
+  // exported tracks previous exports so we can overwrite
+  let exported = {}
+  const assignToGlobal = (name, val) => {
+    if (!exported[name] && typeof root[name] != 'undefined')
+      throw `You're attempting to define a global that is already defined:
+          ${name} = ${JSON.stringify(root[name])}`
+
+    exported[name] = true
+    root[name] = val
   }
 
   const removeComponent = key => {
@@ -162,9 +172,7 @@ function run(browserNode, userOpts, afterRenderCb) {
             this.isMounted &&
             !this.isPaused
           )
-            this.setState({
-              __flintRender: ++this.state.__flintRender
-            })
+            this.forceUpdate()
         },
 
         getInitialState() {
@@ -205,7 +213,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           // }
 
           this.hasRun = ran
-          return { __flintRender: 0 }
+          return null
         },
 
         componentWillReceiveProps(nextProps) {
@@ -411,7 +419,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // export globals
     setExports(_exports) {
       if (!_exports) return
-      const names = Object.keys(_exports);
+      const names = Object.keys(_exports)
 
       if (names.length) {
         names.forEach(name => {
