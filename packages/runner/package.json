@@ -23,7 +23,6 @@
     "flint-tools": "^1.0.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
-    "gulp-debug": "^2.0.1",
     "gulp-if": "^1.2.5",
     "gulp-load-plugins": "^0.10.0",
     "gulp-plumber": "^1.0.0",
