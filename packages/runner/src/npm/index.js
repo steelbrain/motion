@@ -158,6 +158,7 @@ async function pack(file, out) {
         return rej(err)
       }
 
+      log('npm: pack: finished')
       res()
     })
   })

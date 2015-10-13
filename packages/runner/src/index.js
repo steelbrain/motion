@@ -361,9 +361,8 @@ function listenForKeys() {
         editor('.')
         break
       case 'i': // install npm
-        console.log("Installing npm packages...".white.bold)
+        console.log('Installing npm packages...'.white.bold)
         await npm.bundle()
-        updatePackages()
         console.log('Packages updated!'.green.bold)
         break
       case 'v': // verbose logging
