@@ -85,6 +85,7 @@ function start() {
 
 function makeFolder() {
   return new Promise(function(resolve, reject) {
+    log('makeFolder', FLINT.dest)
     mkdirp(FLINT.dest, function(err) {
       if (err) reject(err)
       else resolve()
@@ -103,8 +104,7 @@ function getScaffold() {
 }
 
 function updateScaffoldCache() {
-  if (Program.debug)
-    console.log('Looking for updated scaffold in %s', FLINT.scaffoldRepo)
+  log('Looking for updated scaffold in %s', FLINT.scaffoldRepo)
 
   return new Promise(function(resolve, reject) {
     // check if online
@@ -125,15 +125,21 @@ function updateScaffoldCache() {
 }
 
 function checkNewScaffold(cb) {
+  log('Check for new scaffold SHA in...', FLINT.scaffoldSHA)
   fs.readFile(FLINT.scaffoldSHA, function(err, data) {
-    if (err) return cb(true)
+    if (err) {
+      log('Error reading scaffold file', err)
+      return cb(true)
+    }
 
     var local = data.toString().trim()
+    log('Got ', local)
 
     fetch('https://api.github.com/repos/flintjs/scaffold/commits')
       .then(function(res) { return res.json() })
       .then(function(commits) {
         var remote = commits[0].sha.trim()
+        log('Latest is', remote)
 
         if (local != remote) {
           message('Fetching latest scaffold...')
@@ -151,6 +157,7 @@ function checkNewScaffold(cb) {
 function deleteGitFolder(dir) {
   return function() {
     return new Promise(function(resolve, reject) {
+      log('Remove .git folder')
       // delete git dir
       rimraf(p(dir, '/.git'), function(err, data) {
         if (err) return reject(err)
@@ -164,6 +171,7 @@ function copyLatestSHA(dir) {
   return new Promise(function(res, rej) {
     // copy latest SHA into folder
     var head = p(dir, '.git', 'refs', 'heads', 'master')
+    log('Copy new SHA', head, FLINT.scaffoldSHA)
     ncp(head, FLINT.scaffoldSHA, function(err) {
       if (err) return rej(err)
       else res()
@@ -172,6 +180,7 @@ function copyLatestSHA(dir) {
 }
 
 function copyScaffold() {
+  log('Copy new scaffold', FLINT.scaffoldDir, FLINT.dest)
   return ncp(FLINT.scaffoldDir, FLINT.dest, function(err) {
     if (err) {
       console.log("Error, couldn't copy scaffold folder".red)
@@ -187,17 +196,20 @@ function gitClone(dest) {
 
 // clone right into target new folder
 function cloneDirectly() {
+  log('Cloning directly', gitClone(FLINT.dest))
   return promiseProcess(gitClone(FLINT.dest), { msg: false })
     .then(deleteGitFolder(FLINT.dest))
 }
 
 function initGit() {
+  log('Init new git')
   return promiseProcess('git init', { msg: false })
 }
 
 function replaceGivenNameInApp() {
   message('Setting app name...')
   return new Promise(function(resolve, reject) {
+    log('Updating app name')
     replace({
       regex: 'flint-scaffold',
       replacement: name,
@@ -211,6 +223,7 @@ function replaceGivenNameInApp() {
 }
 
 function npmInstall() {
+  log('Running npm install')
   return promiseProcess('npm install', {
     msg: 'Running npm install...',
     dir: FLINT.dest + '/.flint'
@@ -218,6 +231,7 @@ function npmInstall() {
 }
 
 function tryLinkFlint() {
+  log('Try to link local flint')
   return promiseProcess('npm link flintjs', {
     msg: false,
     dir: FLINT.dest + '/.flint'
@@ -240,11 +254,11 @@ function promiseProcess(cmd, opts) {
 }
 
 function handleChildProcess(resolve, reject, error, stdout, stderr) {
-  if (error)
+  if (error) {
+    console.log('Error', error)
+    log(stderr)
     return reject(error)
-
-  if (Program.debug)
-    message(stderr)
+  }
 
   resolve()
 }
@@ -272,4 +286,9 @@ function wait() {
       resolve()
     }, fps)
   })
+}
+
+function log(...args) {
+  if (Program.debug)
+    console.log(...args)
 }
