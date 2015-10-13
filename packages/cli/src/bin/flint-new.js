@@ -17,6 +17,7 @@ const p = path.join
 Program
   .option('-n, --nocache', 'dont use local cache of latest flint scaffold')
   .option('-d, --debug', 'output extra information for debugging')
+  .option('-u, --use [scaffold]', 'start with a scaffold')
   .parse(process.argv)
 
 const args = Program.args
@@ -26,14 +27,9 @@ if (!args.length) {
   process.exit(1)
 }
 
-if (args.length > 2) {
-  console.log('Too many arguments'.red)
-  process.exit(1)
-}
-
 // scaffolds as second argument
 // flint new app from/repo
-const where = args[1]
+const where = Program.use || args[1]
 const scaffoldRepo = 'scaffold'
 let org = 'flintjs'
 let repo = scaffoldRepo
