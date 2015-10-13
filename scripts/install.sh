@@ -174,8 +174,8 @@ if hash flint 2>/dev/null; then
     fi
 
     echo "Editor changed to $EDITOR!"
-    echo "Run exec \$SHELL to save this change"
-    exec $SHELL
+    echo "Run `exec \$SHELL` to load this change"
+    echo
   fi
 
   echo
