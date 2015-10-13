@@ -1,35 +1,54 @@
 import { Promise } from 'bluebird'
+import { Spinner } from '../lib/console'
 import fs from 'fs'
 import webpack from 'webpack'
 import _ from 'lodash'
-
+import bridge from '../bridge'
 import cache from '../cache'
 import exec from '../lib/exec'
 import log from '../lib/log'
 import {
-  p,
-  mkdir,
-  readFile,
-  writeFile,
-  writeJSON,
-  readJSON,
-  touch } from '../lib/fns'
+  touch, p, mkdir,
+  readFile, writeFile,
+  writeJSON, readJSON } from '../lib/fns'
 
+let WHERE = {}
 let OPTS
 
 async function init(_opts) {
   OPTS = _opts
-  OPTS.outDir = p(OPTS.dir, 'deps')
-  OPTS.depsJS = p(OPTS.outDir, 'deps.js')
-  OPTS.depsJSON = p(OPTS.outDir, 'deps.json')
-  OPTS.packagesJS = p(OPTS.outDir, 'packages.js')
-  OPTS.packageJSON = p(OPTS.dir, 'package.json')
-  log('npm: init opts: ', OPTS)
+
+  WHERE.outDir = p(OPTS.flintDir, 'deps')
+  WHERE.depsJS = p(WHERE.outDir, 'deps.js')
+  WHERE.depsJSON = p(WHERE.outDir, 'deps.json')
+  WHERE.packagesJS = p(WHERE.outDir, 'packages.js')
+  WHERE.packageJSON = p(OPTS.flintDir, 'package.json')
 
   try {
     await readDeps()
   }
   catch(e) { console.error(e) }
+}
+
+const onPackageStart = (name) => {
+  if (OPTS.build) return
+  bridge.message('package:install', { name })
+}
+
+const onPackageError = (name, error) => {
+  if (OPTS.build) return
+  bridge.message('package:error', { name, error })
+}
+
+const onPackageFinish = (name) => {
+  if (OPTS.build) return
+  log('runner: onPackageFinish: ', name)
+  bridge.message('package:installed', { name })
+}
+
+const onPackagesInstalled = () => {
+  if (OPTS.build) return
+  bridge.message('packages:reload', {})
 }
 
 const externals = ['flint-js', 'react']
@@ -42,36 +61,47 @@ async function readDeps() {
   return new Promise(async (resolve, reject) => {
     try {
       // ensure setup
-      await mkdir(OPTS.outDir)
-      await touch(OPTS.depsJSON)
+      await mkdir(WHERE.outDir)
+      await touch(WHERE.depsJSON)
 
       // package.json
-      const pkg = await readJSON(OPTS.packageJSON)
-      const packages = rmExternals(Object.keys(pkg.dependencies))
+      const _package = await readJSON(WHERE.packageJSON)
+      const packages = rmExternals(Object.keys(_package.dependencies))
 
-      // deps.json
+      // read deps.json
       let deps = []
       try {
-        const installed = await readJSON(OPTS.depsJSON)
+        const installed = await readJSON(WHERE.depsJSON)
         deps = rmExternals(installed.deps)
       }
-      catch(e) { log('no deps installed') }
+      catch(e) {
+        log('npm: readDeps: no deps installed')
+      }
 
-      // install as necessary
-      const uninstalled = _.difference(packages, deps)
-      log('uninstalled: ', uninstalled)
-      if (uninstalled.length) {
-        uninstalled.forEach(async dep => {
-          await save(dep)
-        })
+      // install uninstalled
+      const un = _.difference(packages, deps)
+      log('npm: readDeps: un: ', un)
+      if (un.length) {
+        console.log("Installing packages...".white.bold)
+
+        for (let dep of un) {
+          try {
+            await save(dep)
+          }
+          catch(e) {
+            console.log('Failed to install', dep)
+          }
+        }
 
         await writeDeps(packages)
         await pack()
       }
 
       const allDeps = _.union(deps, packages)
+      log('npm: readDeps: allDeps', allDeps)
       cache.setImports(allDeps)
       resolve(allDeps)
+      onPackagesInstalled()
     } catch(e) {
       console.log('readDeps', e)
       reject(e)
@@ -87,8 +117,8 @@ async function writeDeps(deps = []) {
   return new Promise(async (resolve) => {
     const requireString = deps.map(depRequireString).join("\n")
     log('npm: writeDeps:', deps)
-    await writeFile(OPTS.depsJS, requireString)
-    await writeJSON(OPTS.depsJSON, { deps })
+    await writeFile(WHERE.depsJS, requireString)
+    await writeJSON(WHERE.depsJSON, { deps })
     resolve()
   })
 }
@@ -113,12 +143,16 @@ async function pack(file, out) {
   log('npm: pack')
   return new Promise((res, rej) => {
     webpack({
-      entry: OPTS.depsJS,
+      entry: WHERE.depsJS,
       externals: { react: 'React', bluebird: '_bluebird' },
-      output: { filename: OPTS.packagesJS },
+      output: { filename: WHERE.packagesJS },
       devtool: 'source-map'
     }, err => {
-      if (err) return rej(err)
+      if (err) {
+        console.log("Error bundling your packages:", err)
+        return rej(err)
+      }
+
       res()
     })
   })
@@ -130,7 +164,7 @@ const findRequires = source =>
 // <= file, source
 //  > install new deps
 // => update cache
-function scanFile(file, source, opts) {
+function scanFile(file, source) {
   try {
     const all = cache.getImports()
     const found = findRequires(source)
@@ -151,18 +185,19 @@ function scanFile(file, source, opts) {
     const installNext = async () => {
       const dep = installing.shift()
       log('scanFile: Start install:', dep)
-      opts.onPackageStart(dep)
+      onPackageStart(dep)
 
       try {
         await save(dep)
         log('scanFile: package installed', dep)
         installed.push(dep)
         await bundle()
-        opts.onPackageFinish(dep)
+        onPackageFinish(dep)
+        onPackagesInstalled()
         next()
       } catch(e) {
         log('scanFile: package install failed', dep)
-        opts.onPackageError(dep, error)
+        onPackageError(dep, error)
         next()
       }
     }
@@ -190,9 +225,13 @@ function scanFile(file, source, opts) {
 
 // npm install --save 'name'
 function save(name) {
+  const spinner = new Spinner(`${name}`)
+  spinner.start({ fps: 30 })
+
   log('npm: save:', name)
   return new Promise((res, rej) => {
-    exec('npm install --save ' + name, OPTS.dir, err => {
+    exec('npm install --save ' + name, OPTS.flintDir, err => {
+      spinner.stop()
       if (err) rej('Install failed for package ' + name)
       else res(name)
     })
@@ -202,7 +241,7 @@ function save(name) {
 // npm install
 function install(dir) {
   return new Promise((res, rej) => {
-    exec('npm install', dir || OPTS.dir, err => {
+    exec('npm install', dir || OPTS.flintDir, err => {
       if (err) rej(err)
       else res()
     })

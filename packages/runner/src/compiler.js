@@ -25,9 +25,8 @@ var Parser = {
       cache.setBaseDir(opts.dir)
   },
 
-  post(file, source, opts) {
-    OPTS = opts || {}
-    npm.scanFile(file, source, opts)
+  post(file, source) {
+    npm.scanFile(file, source)
 
     let inView = false
 

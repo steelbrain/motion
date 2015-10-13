@@ -1,7 +1,7 @@
 import compiler from './compiler'
 import react from './gulp/react'
 import babel from './gulp/babel'
-import bridge from './bridge/message'
+import bridge from './bridge'
 import handleError from './lib/handleError'
 import npm from './npm'
 import log from './lib/log'
@@ -31,7 +31,6 @@ const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', 'node_modules');
-const APP_FLINT_DIR = p(APP_DIR, '.flint');
 
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
@@ -60,11 +59,11 @@ const firstRun = () =>
 const clearBuildDir = () => {
   return new Promise((res) => {
     log('clearBuildDir')
-    recreateDir(p(APP_FLINT_DIR, 'build'))
+    recreateDir(p(OPTS.flintDir, 'build'))
     .then(async () => {
       log('clearBuildDir: make _ dir')
       try {
-        await mkdir(p(APP_FLINT_DIR, 'build', '_'))
+        await mkdir(p(OPTS.flintDir, 'build', '_'))
         res()
       } catch(e) {
         console.error(e)
@@ -74,7 +73,7 @@ const clearBuildDir = () => {
 }
 
 const clearOutDir = () =>
-  recreateDir(p(APP_FLINT_DIR, 'out'))
+  recreateDir(p(OPTS.flintDir, 'out'))
 
 /* FIRST BUILD STUFF */
 
@@ -117,7 +116,7 @@ function cat(msg) {
 
 async function buildTemplate() {
   const out = p(OPTS.buildDir, 'index.html')
-  const data = await readFile(p(APP_FLINT_DIR, 'index.html'), 'utf8')
+  const data = await readFile(p(OPTS.flintDir, 'index.html'), 'utf8')
   let template = data
     .replace('/static', '/_/static')
     .replace('<!-- SCRIPTS -->', [
@@ -160,7 +159,7 @@ function buildReact(cb) {
 }
 
 function buildPackages(cb) {
-  var read = p(APP_FLINT_DIR, 'deps', 'packages.js')
+  var read = p(OPTS.flintDir, 'deps', 'packages.js')
   var write = p(OPTS.buildDir, '_', 'packages.js')
   copyFile(read, write, cb);
 }
@@ -221,21 +220,7 @@ function buildScripts(cb, stream) {
       comments: true,
       optional: ['bluebirdCoroutines']
     }))
-    .pipe(compiler('post', {
-      dir: APP_FLINT_DIR,
-      onPackageStart: (name) => {
-        bridge.message('package:install', { name })
-      },
-      onPackageError: (name, error) => {
-        bridge.message('package:error', { name, error })
-      },
-      onPackageFinish: async (name) => {
-        if (OPTS.build) return
-        log('runner: onPackageFinish: ', name)
-        bridge.message('package:installed', { name })
-        updatePackages()
-      }
-    }))
+    .pipe(compiler('post'))
     .pipe($.if(!stream,
       $.rename({ extname: '.js' })
     ))
@@ -312,10 +297,6 @@ function logError(error, file) {
   }
 }
 
-function updatePackages() {
-  bridge.message('packages:reload', {})
-}
-
 function setOptions(opts, build) {
   // from cli
   OPTS = {}
@@ -328,10 +309,11 @@ function setOptions(opts, build) {
 
   OPTS.defaultPort = 4000
   OPTS.dir = OPTS.dir || APP_DIR
+  OPTS.flintDir = p(OPTS.dir || APP_DIR, '.flint')
   OPTS.template = OPTS.template || '.flint/index.html'
 
-  OPTS.configFile = p(APP_FLINT_DIR, 'config')
-  OPTS.outDir = p(APP_FLINT_DIR, 'out')
+  OPTS.configFile = p(OPTS.flintDir, 'config')
+  OPTS.outDir = p(OPTS.flintDir, 'out')
 
   OPTS.name = path.basename(process.cwd())
 
@@ -340,7 +322,7 @@ function setOptions(opts, build) {
   OPTS.url = OPTS.name + '.dev'
 
   if (OPTS.build) {
-    OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(APP_FLINT_DIR, 'build')
+    OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
   }
 }
 
@@ -523,7 +505,7 @@ Array.prototype.move = function(from, to) {
 async function makeTemplate(req, cb) {
   const templatePath = p(OPTS.dir, OPTS.template)
   const template = await readFile(templatePath)
-  const dir = await readdir({ root: p(APP_FLINT_DIR, 'out') })
+  const dir = await readdir({ root: p(OPTS.flintDir, 'out') })
   const files = dir.files
 
   if (!files.length) {
@@ -576,10 +558,12 @@ export async function run(opts, isBuild) {
     setOptions(opts, isBuild)
     setLogging(OPTS)
     log('run', OPTS)
-    compiler('init', { dir: APP_FLINT_DIR })
-    await npm.init({ dir: APP_FLINT_DIR })
+
+    compiler('init', OPTS)
+    await npm.init(OPTS)
     CONFIG = await readJSON(OPTS.configFile)
     log('got config', CONFIG)
+
     const isFirstRun = await firstRun()
 
     if (OPTS.build) {
