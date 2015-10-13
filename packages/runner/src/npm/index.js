@@ -116,11 +116,20 @@ async function readDeps() {
 
 // => deps.json
 // => deps.js
-const depRequireString = name => `window.__flintPackages["${name}"] = require("${name}");`
+const depRequireString = name => `
+  try {
+    window.__flintPackages["${name}"] = require("${name}")
+  }
+  catch(e) {
+    console.log('Error running package!')
+    console.error(e)
+  };
+`
+
 async function writeDeps(deps = []) {
   log('npm: writeDeps')
   return new Promise(async (resolve) => {
-    const requireString = deps.map(depRequireString).join("\n")
+    const requireString = deps.map(depRequireString).join('')
     log('npm: writeDeps:', deps)
     await writeFile(WHERE.depsJS, requireString)
     await writeJSON(WHERE.depsJSON, { deps })
