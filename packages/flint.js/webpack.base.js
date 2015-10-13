@@ -38,8 +38,10 @@ module.exports = function(opts) {
     plugins.push(new webpack.optimize.DedupePlugin())
 
   function splitReact(name) {
-    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js'))
-    entry.react = ['react']
+    plugins.push(
+      new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js')
+    )
+    entry.react = ['react', 'react-dom']
   }
 
   return {

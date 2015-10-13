@@ -51,7 +51,12 @@ const onPackagesInstalled = () => {
   bridge.message('packages:reload', {})
 }
 
-const externals = ['flint-js', 'react']
+const externals = [
+  'flint-js',
+  'react',
+  'react-dom'
+]
+
 const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
 
 // <= deps.json
