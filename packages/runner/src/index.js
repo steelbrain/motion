@@ -353,23 +353,28 @@ function listenForKeys() {
   proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
 
-    switch(key.name) {
-      case 'o': // open browser
-        openInBrowser(true)
-        break
-      case 'e': // open editor
-        editor('.')
-        break
-      case 'i': // install npm
-        console.log('Installing npm packages...'.white.bold)
-        await npm.bundle()
-        console.log('Packages updated!'.green.bold)
-        break
-      case 'v': // verbose logging
-        OPTS.verbose = !OPTS.verbose
-        setLogging(OPTS)
-        console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine)
-        break
+    try {
+      switch(key.name) {
+        case 'o': // open browser
+          openInBrowser(true)
+          break
+        case 'e': // open editor
+          editor('.')
+          break
+        case 'i': // install npm
+          console.log('Installing npm packages...'.white.bold)
+          await npm.bundle()
+          console.log('Packages updated!'.green.bold)
+          break
+        case 'v': // verbose logging
+          OPTS.verbose = !OPTS.verbose
+          setLogging(OPTS)
+          console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine)
+          break
+      }
+    }
+    catch(e) {
+      console.error('erorr in listenForKeys()', e)
     }
 
     // exit
