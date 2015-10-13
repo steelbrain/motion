@@ -188,7 +188,7 @@ function buildScripts(cb, stream) {
   const relative = file => path.relative(APP_DIR, file.path)
   const out = {
     file: file => process.stdout.write(` ⇢ ${relative(file)}\r`),
-    badFile: (file, err) => console.log(` ◆ ${relative(file)} ${err}\n`.red),
+    badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
     goodFile: (file, ms) => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold)
   }
 
@@ -209,9 +209,9 @@ function buildScripts(cb, stream) {
     }))
     .pipe($.plumber(error => {
       lastError = true
+      out.badFile(curFile)
       logError(error, curFile)
       bridge.message('compile:error', { error })
-      out.badFile(file, error)
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
