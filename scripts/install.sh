@@ -165,16 +165,17 @@ if hash flint 2>/dev/null; then
 
   # if wanted to fix
   if [[ "$reply" =~ ^[a-z]+$ ]]; then
-    if [ -e ~/.bashrc ]
+    if [ -e ~/.bashrc ]; then
       echo "export EDITOR=$reply" >> ~/.bashrc
     fi
 
-    if [ -e ~/.zshrc ]
+    if [ -e ~/.zshrc ]; then
       echo "export EDITOR=$reply" >> ~/.zshrc
     fi
 
     echo "Editor changed to $EDITOR!"
     echo "Run exec \$SHELL to save this change"
+    exec $SHELL
   fi
 
   echo
