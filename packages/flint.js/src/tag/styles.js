@@ -118,7 +118,7 @@ export default function elementStyles(key, view, name, tag, props) {
     const ps = props.style
 
     // position
-    if (Array.isArray(ps.position)) {
+    if (ps.position && Array.isArray(ps.position)) {
       ps.top = ps.position[0]
       ps.right = ps.position[1]
       ps.bottom = ps.position[2]

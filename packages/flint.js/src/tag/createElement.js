@@ -45,10 +45,12 @@ export default function createElement(key, fullname, props, ...args) {
 
     // get tag type and name of tag
     if (isHTMLElement) {
-      if (fullname.indexOf('-') > 0)
-        [name, tag] = fullname.indexOf('-') !== -1
-      else
+      if (fullname.indexOf('-') > 0) {
+        [name, tag] = fullname.split('-')
+      }
+      else {
         tag = fullname
+      }
 
       if (divWhitelist.indexOf(tag) !== -1) {
         originalTag = tag
