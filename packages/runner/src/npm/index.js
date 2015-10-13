@@ -82,11 +82,11 @@ async function readDeps() {
       const un = _.difference(packages, deps)
       log('npm: readDeps: un: ', un)
       if (un.length) {
-        console.log("Installing packages...".white.bold)
+        console.log(`Installing Packages...`.white.bold)
 
         for (let dep of un) {
           try {
-            await save(dep)
+            await save(dep, un.indexOf(dep), un.length)
           }
           catch(e) {
             console.log('Failed to install', dep)
@@ -224,8 +224,8 @@ function scanFile(file, source) {
 }
 
 // npm install --save 'name'
-function save(name) {
-  const spinner = new Spinner(`${name}`)
+function save(name, index, total) {
+  const spinner = new Spinner(` ${index} of ${total}: ${name}`)
   spinner.start({ fps: 30 })
 
   log('npm: save:', name)
