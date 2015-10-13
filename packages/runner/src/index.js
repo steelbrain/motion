@@ -182,9 +182,15 @@ const watchDeletes = vinyl => {
 function buildScripts(cb, stream) {
   console.log("Building...".bold.white)
   log('build scripts')
-  let lastError, lastScript, curFile, buildingTimeout
-  let startTime = Date.now()
+  let startTime, lastError, lastScript, curFile, buildingTimeout
   let dest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+
+  const relative = file => path.relative(APP_DIR, file.path)
+  const out = {
+    file: file => process.stdout.write(` ⇢ ${relative(file)}\r`),
+    badFile: (file, err) => console.log(` ◆ ${relative(file)} ${err}\n`.red),
+    goodFile: (file, ms) => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold)
+  }
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe($.if(!OPTS.build,
@@ -199,12 +205,13 @@ function buildScripts(cb, stream) {
       startTime = Date.now()
       file.startTime = startTime
       // log
-      console.log(' ⇢ ', path.relative(APP_DIR, file.path))
+      out.file(file)
     }))
     .pipe($.plumber(error => {
       lastError = true
       logError(error, curFile)
       bridge.message('compile:error', { error })
+      out.badFile(file, error)
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
@@ -235,10 +242,20 @@ function buildScripts(cb, stream) {
       )
     ))
     .pipe($.if(function(file) {
+      // before initial build
+      if (!HAS_RUN_INITIAL_BUILD) {
+        if (buildingTimeout) clearTimeout(buildingTimeout)
+        buildingTimeout = setTimeout(() => {
+          HAS_RUN_INITIAL_BUILD = true
+          runAfterFirstBuilds()
+        }, 450)
+      }
+
       if (stream) return false
       if (lastError) return false
 
-      const endTime = Date.now() - startTime;
+      const endTime = Date.now() - startTime
+      out.goodFile(file, endTime)
       log('build took ', endTime, 'ms')
 
       const isNew = (
@@ -265,14 +282,6 @@ function buildScripts(cb, stream) {
           bridge.message('script:add', lastScript);
           bridge.message('compile:success', lastScript);
         }
-      }
-      // before initial build
-      else {
-        if (buildingTimeout) clearTimeout(buildingTimeout)
-        buildingTimeout = setTimeout(() => {
-          HAS_RUN_INITIAL_BUILD = true
-          runAfterFirstBuilds()
-        }, 450)
       }
     }))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
