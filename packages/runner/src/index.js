@@ -235,13 +235,21 @@ function buildScripts(cb, stream) {
       stripTypes: true,
       es6module: true
     }))
+    .pipe(pipefn(() => {
+      // for spaces when outputting
+      if (OPTS.build) console.log()
+    }))
     .pipe($.if(OPTS.build,
       multipipe(
-        $.concat(OPTS.name + '.js'),
-        $.wrap({ src: __dirname + '/../templates/build.template.js' }, { name: OPTS.name } , { variable: 'data' })
+        $.concat(`${OPTS.name}.js`),
+        $.wrap(
+          { src: `${__dirname}/../templates/build.template.js` },
+          { name: OPTS.name },
+          { variable: 'data' }
+        )
       )
     ))
-    .pipe($.if(function(file) {
+    .pipe($.if(file => {
       // before initial build
       if (!HAS_RUN_INITIAL_BUILD) {
         if (buildingTimeout) clearTimeout(buildingTimeout)
@@ -251,8 +259,7 @@ function buildScripts(cb, stream) {
         }, 450)
       }
 
-      if (stream) return false
-      if (lastError) return false
+      if (stream || lastError) return false
 
       const endTime = Date.now() - startTime
       out.goodFile(file, endTime)

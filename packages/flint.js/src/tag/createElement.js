@@ -29,6 +29,7 @@ export default function createElement(key, fullname, props, ...args) {
   props = props || {}
   const view = this
 
+  let isHTMLElement = false
   let name = fullname
   let tag, originalTag
 
@@ -37,16 +38,17 @@ export default function createElement(key, fullname, props, ...args) {
     tag = fullname
   }
   else {
-    const isHTMLElement = (
+    isHTMLElement = (
       fullname[0].toLowerCase() == fullname[0]
       && fullname.indexOf('.') < 0
     )
 
     // get tag type and name of tag
     if (isHTMLElement) {
-      [name, tag] = fullname.indexOf('-') !== -1
-        ? fullname.split('-')
-        : [fullname, fullname]
+      if (fullname.indexOf('-') > 0)
+        [name, tag] = fullname.indexOf('-') !== -1
+      else
+        tag = fullname
 
       if (divWhitelist.indexOf(tag) !== -1) {
         originalTag = tag
@@ -119,6 +121,10 @@ export default function createElement(key, fullname, props, ...args) {
       }
     }
   }
+
+  // write all tags to div in production
+  if (process.env.production)
+    tag = 'div'
 
   return React.createElement(tag, props, ...args)
 }
