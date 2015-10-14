@@ -275,6 +275,11 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     getView(parentName, name) {
+      // View.SubView
+      const subName = `${parentName}.${name}`
+      if (Flint.views[subName])
+        return Flint.views[subName].component
+
       // regular view
       if (Flint.views[name])
         return Flint.views[name].component;
@@ -282,11 +287,6 @@ function run(browserNode, userOpts, afterRenderCb) {
       // wrapper
       if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
         return Wrapper
-
-      // View.SubView
-      const subName = `${parentName}.${name}`
-      if (Flint.views[subName])
-        return Flint.views[subName].component
 
       // global views
       if (opts.namespace[name])
