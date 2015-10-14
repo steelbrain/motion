@@ -25,108 +25,110 @@ const flatToCamel = {
   allowfullscreen: 'allowFullScreen'
 }
 
-export default function createElement(key, fullname, props, ...args) {
-  props = props || {}
-  const view = this
+export default function createElement(viewName) {
+  return function el(key, fullname, props, ...args) {
+    props = props || {}
+    const view = this
 
-  let isHTMLElement = false
-  let name = fullname
-  let tag, originalTag
+    let isHTMLElement = false
+    let name = fullname
+    let tag, originalTag
 
-  // find element
-  if (typeof fullname != 'string') {
-    tag = fullname
-  }
-  else {
-    isHTMLElement = (
-      fullname[0].toLowerCase() == fullname[0]
-      && fullname.indexOf('.') < 0
-    )
+    // find element
+    if (typeof fullname != 'string') {
+      tag = fullname
+    }
+    else {
+      isHTMLElement = (
+        fullname[0].toLowerCase() == fullname[0]
+        && fullname.indexOf('.') < 0
+      )
 
-    // get tag type and name of tag
-    if (isHTMLElement) {
-      if (fullname.indexOf('-') > 0) {
-        [name, tag] = fullname.split('-')
-      }
-      else {
-        tag = fullname
-      }
-
-      if (divWhitelist.indexOf(tag) !== -1) {
-        originalTag = tag
-        tag = 'div'
-      }
-
-      // lowercase => camelcase, autoplay => autoPlay, to please React
-      Object.keys(flatToCamel).forEach(prop => {
-        if (props[prop]) {
-          props[flatToCamel[prop]] = props[prop] || true
-          delete props[prop]
+      // get tag type and name of tag
+      if (isHTMLElement) {
+        if (fullname.indexOf('-') > 0) {
+          [name, tag] = fullname.split('-')
         }
-      })
-    }
-    else {
-      tag = view.Flint.getView(name)
-    }
-  }
+        else {
+          tag = fullname
+        }
 
-  if (props && props.className)
-    props.className = classnames(props.className)
+        if (divWhitelist.indexOf(tag) !== -1) {
+          originalTag = tag
+          tag = 'div'
+        }
 
-  // TRANSFORMATIONS:
-  elementStyles(key, view, name, originalTag || tag, props)
-
-  if (!props.key && !props.nokey) {
-    props.key = props.repeat ? key() : key
-  }
-
-  // map shorthand events to onEvent
-  props = mapObj((k, v) => {
-    let key = contains(k, eventShorthands) ? ('on' + capital(k)) : k
-    return [key, v]
-  }, props)
-
-  // onEnter
-  if (props.onEnter) {
-    let originalKeyDown = props.onKeyDown
-
-    props.onKeyDown = function(e) {
-      if (e.keyCode === 13)
-        props.onEnter(e.target.value)
-
-      if (originalKeyDown)
-        originalKeyDown(e)
-    }
-  }
-
-  if (props.yield)
-    props = Object.assign(props, view.props, { style: props.style });
-
-  if (props.lazy) {
-    if (view.updatedProps === false) {
-      view.cachedChildren[props.lazyId] = args
-    }
-    else {
-      let shouldUpdate = false
-      props.lazy.forEach(lazy => {
-        view.updatedProps.forEach(prop => {
-          if (lazy == prop) {
-            shouldUpdate = true
+        // lowercase => camelcase, autoplay => autoPlay, to please React
+        Object.keys(flatToCamel).forEach(prop => {
+          if (props[prop]) {
+            props[flatToCamel[prop]] = props[prop] || true
+            delete props[prop]
           }
         })
-      })
-      if (!shouldUpdate) {
-        args = view.cachedChildren[props.lazyId]
       }
       else {
-        view.cachedChildren[props.lazyId] = args
+        tag = view.Flint.getView(viewName, name)
       }
     }
+
+    if (props && props.className)
+      props.className = classnames(props.className)
+
+    // TRANSFORMATIONS:
+    elementStyles(key, view, name, originalTag || tag, props)
+
+    if (!props.key && !props.nokey) {
+      props.key = props.repeat ? key() : key
+    }
+
+    // map shorthand events to onEvent
+    props = mapObj((k, v) => {
+      let key = contains(k, eventShorthands) ? ('on' + capital(k)) : k
+      return [key, v]
+    }, props)
+
+    // onEnter
+    if (props.onEnter) {
+      let originalKeyDown = props.onKeyDown
+
+      props.onKeyDown = function(e) {
+        if (e.keyCode === 13)
+          props.onEnter(e.target.value)
+
+        if (originalKeyDown)
+          originalKeyDown(e)
+      }
+    }
+
+    if (props.yield)
+      props = Object.assign(props, view.props, { style: props.style });
+
+    if (props.lazy) {
+      if (view.updatedProps === false) {
+        view.cachedChildren[props.lazyId] = args
+      }
+      else {
+        let shouldUpdate = false
+        props.lazy.forEach(lazy => {
+          view.updatedProps.forEach(prop => {
+            if (lazy == prop) {
+              shouldUpdate = true
+            }
+          })
+        })
+        if (!shouldUpdate) {
+          args = view.cachedChildren[props.lazyId]
+        }
+        else {
+          view.cachedChildren[props.lazyId] = args
+        }
+      }
+    }
+
+    // write all tags to div in production
+    if (process.env.production)
+      tag = 'div'
+
+    return React.createElement(tag, props, ...args)
   }
-
-  // write all tags to div in production
-  if (process.env.production)
-    tag = 'div'
-
-  return React.createElement(tag, props, ...args)
 }
