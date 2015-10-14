@@ -174,7 +174,6 @@ if hash flint 2>/dev/null; then
     fi
 
     echo "Editor changed to $reply!"
-    echo "Run `exec \$SHELL` to load this change"
     echo
   fi
 
