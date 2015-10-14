@@ -7,7 +7,7 @@ import bridge from '../bridge'
 import cache from '../cache'
 import exec from '../lib/exec'
 import log from '../lib/log'
-import { touch, p, mkdir,
+import { touch, p, mkdir, rmdir,
         readFile, writeFile,
         writeJSON, readJSON } from '../lib/fns'
 
@@ -41,9 +41,13 @@ function init(_opts) {
   WHERE.packageJSON = p(OPTS.flintDir, 'package.json')
 }
 
-function mkDir() {
+function mkDir(redo) {
   return new Promise(async (res, rej) => {
     try {
+      if (redo) {
+        await rmdir(WHERE.depsJSON)
+      }
+
       await mkdir(WHERE.outDir)
       await* [
         touch(WHERE.depsJSON),
@@ -95,15 +99,16 @@ const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
   are written out to the bundled js file
 
 */
-async function install() {
+async function install(force) {
   log('npm: install')
   return new Promise(async (resolve, reject) => {
     try {
       // ensure deps dir
-      await mkDir()
+      await mkDir(force)
 
       // write out to package.installed
       const allInstalled = await setInstalled()
+      log('npm: install: allInstalled:', allInstalled)
 
       // remove externals
       const installed = rmExternals(allInstalled)
@@ -117,6 +122,8 @@ async function install() {
       catch(e) {
         log('npm: install: no deps installed')
       }
+      log('npm: install: written:', written)
+
 
       // install unwritten
       const un = _.difference(installed, written)
@@ -236,8 +243,10 @@ async function pack(file, out) {
       externals: { react: 'React', bluebird: '_bluebird' },
       output: { filename: WHERE.packagesJS },
       devtool: 'source-map'
-    }, err => {
+    }, async err => {
       if (err) {
+        // undo written packages
+        await rmdir(WHERE.depsJSON)
         console.log("Error bundling your packages:", err)
         return reject(err)
       }
@@ -306,11 +315,11 @@ async function scanFile(file, source) {
         logInstalled(installed)
         afterScansClear()
 
-        // if (!FIRST_RUN) {
-        //   log('npm: scanFile', '!firstrun, bundle()')
-        //   await bundle()
-        //   onPackagesInstalled()
-        // }
+        if (!FIRST_RUN) {
+          log('npm: scanFile', '!firstrun, bundle()')
+          await bundle()
+          onPackagesInstalled()
+        }
       }
       catch(e) {
         console.error('scanFile: error: done():', e)
