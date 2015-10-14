@@ -9,6 +9,7 @@ import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import { p, mkdir, readdir, readJSON, writeJSON,
   readFile, writeFile, recreateDir, copyFile } from './lib/fns'
+
 import { Promise } from 'bluebird'
 import multipipe from 'multipipe'
 import portfinder from 'portfinder'
