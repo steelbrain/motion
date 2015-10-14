@@ -152,29 +152,9 @@ if hash flint 2>/dev/null; then
   echo
   if [ -z "$EDITOR" ]; then
     echo_bold "No EDITOR set in your shell"
-    echo "Flint helps open your editor"
+    echo "Flint helps open your editor if you set your EDITOR shell variable"
   else
     echo_bold "Your default editor is set to $EDITOR"
-    echo "Change your default editor?"
-  fi
-
-  # enter editor
-  echo "Examples: atom, subl, vim"
-  read -p "New editor command? (enter to skip): " reply
-  echo
-
-  # if wanted to fix
-  if [[ "$reply" =~ ^[a-z]+$ ]]; then
-    if [ -e ~/.bashrc ]; then
-      echo "export EDITOR=$reply" >> ~/.bashrc
-    fi
-
-    if [ -e ~/.zshrc ]; then
-      echo "export EDITOR=$reply" >> ~/.zshrc
-    fi
-
-    echo "Editor changed to $reply!"
-    echo
   fi
 
   echo
