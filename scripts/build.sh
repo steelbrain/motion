@@ -54,7 +54,7 @@ if [ $1="--watch" ]; then
 
         # watch tools after first build
         if [ $hasLinkedOnce == 'false' ]; then
-          sleep 10 # todo: wait for webpack finish
+          sleep 15 # todo: wait for webpack finish
           cd ../..
           cd apps/tools
           flint build --watch &
