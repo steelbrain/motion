@@ -573,7 +573,9 @@ export async function run(opts, isBuild) {
     log('run', OPTS)
 
     npm.init(OPTS)
+    cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
+
     CONFIG = await readJSON(OPTS.configFile)
     log('got config', CONFIG)
 

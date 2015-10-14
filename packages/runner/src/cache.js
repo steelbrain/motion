@@ -13,12 +13,12 @@ type File = {
 
 let files: { name: File } = {}
 let imports: ImportArray = []
-let baseDir
+let baseDir = ''
 
 export default {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir, '..')
-    log('cache: cache: baseDir', baseDir)
+    log('cache: baseDir', baseDir)
   },
 
   add(file: string) {
@@ -47,8 +47,9 @@ export default {
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    files[name(file)].imports = imports
-    log('cache: setImports', file, imports)
+    log('cache: setFileImports', file, imports);
+    const cacheFile = files[name(file)]
+    if (cacheFile) cacheFile.imports = imports
   },
 
   getViews(file?: string) {

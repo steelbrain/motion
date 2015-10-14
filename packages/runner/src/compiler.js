@@ -20,9 +20,6 @@ const post = {
 var Parser = {
   init(opts) {
     OPTS = opts || {}
-
-    if (!opts.build)
-      cache.setBaseDir(opts.dir)
   },
 
   post(file, source) {

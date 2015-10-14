@@ -174,7 +174,9 @@ function bundle() {
       await pack()
       res()
     }
-    catch(e) { console.error(e) }
+    catch(e) {
+      console.error('bundle()', e)
+    }
   })
 }
 
@@ -287,20 +289,26 @@ async function scanFile(file, source) {
 
     // loop
     const next = () => {
+      log('scanFile: installing.length', installing.length)
       if (installing.length) return installNext()
       done()
     }
 
     const done = async () => {
-      // cache newly installed + already
-      cache.setFileImports(file, installed.concat(already))
-      logInstalled(installed)
-      afterScansClear()
+      try {
+        // cache newly installed + already
+        cache.setFileImports(file, installed.concat(already))
+        logInstalled(installed)
+        afterScansClear()
 
-      if (!FIRST_RUN) {
-        log('npm: scanFile: !firstrun, bundle()')
-        await bundle()
-        onPackagesInstalled()
+        // if (!FIRST_RUN) {
+        //   log('npm: scanFile', '!firstrun, bundle()')
+        //   await bundle()
+        //   onPackagesInstalled()
+        // }
+      }
+      catch(e) {
+        console.error('scanFile: error: done():', e)
       }
     }
 
