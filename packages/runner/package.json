@@ -2,7 +2,7 @@
   "name": "flint-runner",
   "version": "0.2.109",
   "description": "Run flint apps",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {},
   "author": "Flint",
   "license": "MIT",
@@ -35,6 +35,7 @@
     "lodash": "^3.10.1",
     "mkdirp": "^0.5.0",
     "multipipe": "^0.1.2",
+    "node-generator-detector": "^0.2.1",
     "nodejs-websocket": "^1.4.0",
     "object-assign": "^4.0.1",
     "open": "0.0.5",
@@ -50,5 +51,9 @@
     "touch": "^1.0.0",
     "vinyl-sourcemaps-apply": "^0.1.4",
     "webpack": "^1.12.2"
+  },
+  "devDependencies": {
+    "babel-core": "^5.8.25",
+    "babel-loader": "^5.3.2"
   }
 }

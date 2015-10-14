@@ -12,17 +12,25 @@ for f in packages/*; do
     cd $f
     for file in webpack.config*; do
       node node_modules/webpack/bin/webpack --config $file $1 &
-      echo "running webpack for config $file"
+      echo "running $f webpack for $file"
     done
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" \
+
+    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib/compat" \
       --stage 0 \
       --loose all \
       --blacklist es6.tailCall \
       --optional runtime \
+      --copy-files $1 &
+
+    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib/modern" \
+      --stage 0 \
+      --loose all \
+      --optional asyncToGenerator \
+      --blacklist es6.tailCall \
       --copy-files $1 &
   fi
 done
@@ -46,6 +54,7 @@ if [ $1="--watch" ]; then
 
         # watch tools after first build
         if [ $hasLinkedOnce == 'false' ]; then
+          sleep 10 # todo: wait for webpack finish
           cd ../..
           cd apps/tools
           flint build --watch &

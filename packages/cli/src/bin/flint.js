@@ -17,7 +17,7 @@ if (flintCmdIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === 
 }
 
 Program
-  .version(require('../../package.json').version)
+  .version(require('../../../package.json').version)
   .command('new [name] [template]', 'start a new Flint app')
   .command('run', 'run your flint app')
   .command('build', 'run your flint app');

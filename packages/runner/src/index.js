@@ -30,7 +30,7 @@ const proc = process // cache for keypress
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
-const MODULES_DIR = p(__dirname, '..', 'node_modules');
+const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
@@ -65,9 +65,8 @@ const clearBuildDir = () => {
       try {
         await mkdir(p(OPTS.flintDir, 'build', '_'))
         res()
-      } catch(e) {
-        console.error(e)
       }
+      catch(e) { handleError(e) }
     })
   })
 }
@@ -182,7 +181,7 @@ const watchDeletes = vinyl => {
 function buildScripts(cb, stream) {
   console.log("Building...".bold.white)
   log('build scripts')
-  let startTime, lastError, lastScript, curFile, buildingTimeout
+  let startTime, lastError, lastScript, curFile
   let dest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   const relative = file => path.relative(APP_DIR, file.path)
@@ -212,6 +211,7 @@ function buildScripts(cb, stream) {
       out.badFile(curFile)
       logError(error, curFile)
       bridge.message('compile:error', { error })
+      buildChecker(lastScript)
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
@@ -243,22 +243,14 @@ function buildScripts(cb, stream) {
       multipipe(
         $.concat(`${OPTS.name}.js`),
         $.wrap(
-          { src: `${__dirname}/../templates/build.template.js` },
+          { src: `${__dirname}/../../templates/build.template.js` },
           { name: OPTS.name },
           { variable: 'data' }
         )
       )
     ))
     .pipe($.if(file => {
-      // before initial build
-      if (!HAS_RUN_INITIAL_BUILD) {
-        if (buildingTimeout) clearTimeout(buildingTimeout)
-        buildingTimeout = setTimeout(() => {
-          HAS_RUN_INITIAL_BUILD = true
-          bridge.message('compile:success', lastScript)
-          runAfterFirstBuilds()
-        }, 450)
-      }
+      buildChecker(lastScript)
 
       if (stream || lastError) return false
 
@@ -296,6 +288,18 @@ function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+}
+
+let buildingTimeout
+function buildChecker(lastScript) {
+  if (!HAS_RUN_INITIAL_BUILD) {
+    if (buildingTimeout) clearTimeout(buildingTimeout)
+    buildingTimeout = setTimeout(() => {
+      HAS_RUN_INITIAL_BUILD = true
+      bridge.message('compile:success', lastScript)
+      runAfterFirstBuilds()
+    }, 450)
+  }
 }
 
 function logError(error, file) {
@@ -374,9 +378,7 @@ function listenForKeys() {
           break
       }
     }
-    catch(e) {
-      console.error('error in listenForKeys()', e)
-    }
+    catch(e) { handleError(e) }
 
     // exit
     if (key.ctrl && key.name == 'c')
@@ -507,7 +509,9 @@ function runServer() {
       // if no specified port, find open one
       if (!OPTS.port) {
         portfinder.basePort = port;
-        portfinder.getPort({ host: 'localhost' }, handleError(serverListen) );
+        portfinder.getPort({ host: 'localhost' },
+          handleError(serverListen)
+        );
       }
       else {
         serverListen(port);
@@ -530,7 +534,6 @@ async function makeTemplate(req, cb) {
   const files = dir.files
 
   if (!files.length) {
-    console.log('no flint files')
     return cb(template.toString())
   }
 
@@ -616,7 +619,5 @@ export async function run(opts, isBuild) {
       watchingMessage()
     }
   }
-  catch(e) {
-    console.error(e)
-  }
+  catch(e) { handleError(e) }
 }

@@ -5,6 +5,7 @@ import webpack from 'webpack'
 import _ from 'lodash'
 import bridge from '../bridge'
 import cache from '../cache'
+import handleError from '../lib/handleError'
 import exec from '../lib/exec'
 import log from '../lib/log'
 import { touch, p, mkdir, rmdir,
@@ -43,24 +44,18 @@ function init(_opts) {
 
 function mkDir(redo) {
   return new Promise(async (res, rej) => {
-    try {
-      if (redo) {
-        await rmdir(WHERE.depsJSON)
-      }
-
-      await mkdir(WHERE.outDir)
-      await* [
-        touch(WHERE.depsJSON),
-        touch(WHERE.depsJS),
-        touch(WHERE.packagesJS)
-      ]
-
-      res()
+    if (redo) {
+      await rmdir(WHERE.depsJSON)
     }
-    catch(e) {
-      console.error(e)
-      rej(e)
-    }
+
+    await mkdir(WHERE.outDir)
+    await* [
+      touch(WHERE.depsJSON),
+      touch(WHERE.depsJS),
+      touch(WHERE.packagesJS)
+    ]
+
+    res()
   })
 }
 
@@ -147,7 +142,7 @@ async function install(force) {
       onPackagesInstalled()
       FIRST_RUN = false
     } catch(e) {
-      console.error('install', e)
+      handleError(e)
       reject(e)
     }
   })

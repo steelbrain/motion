@@ -29,9 +29,9 @@
     "rimraf": "^2.2.8"
   },
   "bin": {
-    "flint": "./lib/bin/flint.js",
-    "flint-new": "./lib/bin/flint-new.js",
-    "flint-run": "./lib/bin/flint-run.js",
-    "flint-build": "./lib/bin/flint-build.js"
+    "flint": "./lib/compat/bin/flint.js",
+    "flint-new": "./lib/compat/bin/flint-new.js",
+    "flint-run": "./lib/compat/bin/flint-run.js",
+    "flint-build": "./lib/compat/bin/flint-build.js"
   }
 }
