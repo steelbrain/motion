@@ -255,6 +255,7 @@ function buildScripts(cb, stream) {
         if (buildingTimeout) clearTimeout(buildingTimeout)
         buildingTimeout = setTimeout(() => {
           HAS_RUN_INITIAL_BUILD = true
+          bridge.message('compile:success', lastScript)
           runAfterFirstBuilds()
         }, 450)
       }
@@ -286,8 +287,8 @@ function buildScripts(cb, stream) {
       // after initial build
       if (HAS_RUN_INITIAL_BUILD) {
         if (!lastError) {
-          bridge.message('script:add', lastScript);
-          bridge.message('compile:success', lastScript);
+          bridge.message('script:add', lastScript)
+          bridge.message('compile:success', lastScript)
         }
       }
     }))
@@ -302,10 +303,10 @@ function logError(error, file) {
     error.stack = unicodeToChar(error.stack || error.codeFrame);
 
   if (error.plugin == 'gulp-babel') {
-    console.log('JS error: %s: ', error.message.replace(APP_DIR, ''));
+    console.log(error.message.replace(APP_DIR, ''));
     if (error.name != 'TypeError' && error.loc)
-      console.log('  > line: %s, col: %s', error.loc.line, error.loc.column);
-    console.log(' Stack:', newLine, error.stack)
+      console.log('line: %s, col: %s', error.loc.line, error.loc.column);
+    console.log(newLine, error.stack.split("\n").splice(0, 7).join("\n"))
   }
   else {
     console.log('ERROR', "\n", error)
