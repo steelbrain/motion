@@ -18,7 +18,7 @@ let baseDir
 export default {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir, '..')
-    log('cache: baseDir', baseDir)
+    log('cache: cache: baseDir', baseDir)
   },
 
   add(file: string) {
@@ -32,23 +32,23 @@ export default {
 
   remove(file: string) {
     delete files[name(file)]
-    log('remove', files)
+    log('cache: remove', files)
   },
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
     files[name(file)].views = views
-    log('setViews', files)
+    log('cache: setViews', files)
   },
 
   setImports(_imports: ImportArray) {
-    log('setImports', _imports)
+    log('cache: setImports', _imports)
     imports = _imports
   },
 
   setFileImports(file: string, imports: ImportArray) {
     files[name(file)].imports = imports
-    log('setImports', file, imports)
+    log('cache: setImports', file, imports)
   },
 
   getViews(file?: string) {
@@ -58,10 +58,11 @@ export default {
   getImports(file?: string) {
     if (!file) {
       let allImports = [].concat(imports)
+      console.log('FILES', files)
       Object.keys(files).forEach(file => {
         allImports = allImports.concat(files[file].imports)
       })
-      log('getImports', allImports)
+      log('cache: getImports: ', allImports)
       return allImports
     }
 

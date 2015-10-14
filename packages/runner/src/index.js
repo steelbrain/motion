@@ -363,7 +363,7 @@ function listenForKeys() {
           break
         case 'i': // install npm
           console.log('Installing npm packages...'.white.bold)
-          await npm.bundle()
+          await npm.install()
           console.log('Packages updated!'.green.bold)
           break
         case 'v': // verbose logging
@@ -374,7 +374,7 @@ function listenForKeys() {
       }
     }
     catch(e) {
-      console.error('erorr in listenForKeys()', e)
+      console.error('error in listenForKeys()', e)
     }
 
     // exit
@@ -557,19 +557,12 @@ function setLogging(opts) {
 }
 
 async function build() {
-  log('0')
   buildFlint()
-  log('0')
   buildReact()
-  log('0')
   buildPackages()
-  log('0')
   buildAssets()
-  log('0')
   buildScripts()
-  log('0')
   await afterFirstBuild()
-  log('0')
   buildTemplate()
 }
 
@@ -579,8 +572,8 @@ export async function run(opts, isBuild) {
     setLogging(OPTS)
     log('run', OPTS)
 
+    npm.init(OPTS)
     compiler('init', OPTS)
-    await npm.init(OPTS)
     CONFIG = await readJSON(OPTS.configFile)
     log('got config', CONFIG)
 
@@ -596,10 +589,8 @@ export async function run(opts, isBuild) {
       log('building...')
       await clearBuildDir()
       build()
-      await* [
-        npm.install(),
-        afterFirstBuild()
-      ]
+      await afterFirstBuild()
+      await npm.install()
 
       console.log(
         "\nBuild Complete! Check your .flint/build directory\n".green.bold
@@ -617,6 +608,7 @@ export async function run(opts, isBuild) {
       bridge.start(wport())
       buildScripts()
       await afterFirstBuild()
+      await npm.install()
       openInBrowser()
       watchingMessage()
     }
