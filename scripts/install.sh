@@ -160,7 +160,7 @@ if hash flint 2>/dev/null; then
 
   # enter editor
   echo "Examples: atom, subl, vim"
-  read -p "Enter new editor command (or just press enter to skip): " reply
+  read -p "New editor command? (enter to skip): " reply
   echo
 
   # if wanted to fix
