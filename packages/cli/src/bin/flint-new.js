@@ -11,6 +11,11 @@ import mkdirp from 'mkdirp'
 import ncp from 'ncp'
 import { Spinner } from '../ui'
 import fetch from 'node-fetch'
+import raven from 'raven'
+
+const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
+
+try {
 
 const p = path.join
 
@@ -291,4 +296,10 @@ function wait() {
 function log(...args) {
   if (Program.debug)
     console.log(...args)
+}
+
+
+} catch(e) {
+  console.log(e.stack)
+  errorClient.captureException(e)
 }
