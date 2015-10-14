@@ -122,6 +122,8 @@ function updateScaffoldCache() {
 
       // remove old scaffold
       rimraf(FLINT.scaffoldDir, function(err) {
+        if (err) return reject(err)
+
         // clone new scaffold
         promiseProcess(gitClone(FLINT.scaffoldDir), { msg: false })
           .then(copyLatestSHA(FLINT.scaffoldDir))
