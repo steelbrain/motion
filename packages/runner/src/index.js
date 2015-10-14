@@ -90,12 +90,14 @@ const runAfterFirstBuilds = () =>
 
 /* END FIRST BUILD STUFF */
 
+const userEditor = (process.env.VISUAL || process.env.EDITOR)
+
 function watchingMessage() {
   listenForKeys()
   console.log(
     newLine +
     ' • O'.green.bold + 'pen browser'.green + newLine +
-    ' • E'.green.bold + 'ditor'.green + newLine +
+    (userEditor ? (' • E'.green.bold + 'ditor'.green + newLine) : '') +
     ' • I'.green.bold + 'nstall packages'.green + newLine +
     ' • V'.green.bold + 'erbose logging'.green + newLine
   )
