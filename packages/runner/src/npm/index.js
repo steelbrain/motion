@@ -127,9 +127,10 @@ async function install() {
             console.log('Failed to install', dep)
           }
         }
+
+        await bundle()
       }
 
-      await bundle()
       resolve(installed)
       onPackagesInstalled()
       FIRST_RUN = false
@@ -297,6 +298,7 @@ async function scanFile(file, source) {
       afterScansClear()
 
       if (!FIRST_RUN) {
+        log('npm: scanFile: !firstrun, bundle()')
         await bundle()
         onPackagesInstalled()
       }
