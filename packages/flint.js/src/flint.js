@@ -15,6 +15,7 @@ import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
+import NotFound from './views/NotFound'
 import mainComponent from './lib/mainComponent'
 import reportError from './lib/reportError'
 
@@ -149,7 +150,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     makeReactComponent(name, component, options = {}) {
       const spec = {
         displayName: name,
-        el: createElement,
+        el: createElement(name),
         name,
         Flint,
 
@@ -273,24 +274,9 @@ function run(browserNode, userOpts, afterRenderCb) {
       return React.createClass(spec);
     },
 
-    getView(name) {
-      if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
-        return Wrapper;
-
-      // When importing something, babel may put it into __reactMotion.Spring,
-      // which comes in as a string, so we need to lookup on root
-      if (name.indexOf('.') !== -1) {
-        const appView = name.split('.').reduce((acc, cur) => (acc || {})[cur], root);
-        if (appView) return appView
-      }
-
-      // TODO: this fixes importing a react element, but its sloppy
-      // import Element from 'some-element'; can be used <Element>
-      if (root[name])
-        return root[name]
-
+    getView(parentName, name) {
       // View.SubView
-      const subName = `${view}.${name}`
+      const subName = `${parentName}.${name}`
       if (Flint.views[subName])
         return Flint.views[subName].component
 
@@ -298,16 +284,15 @@ function run(browserNode, userOpts, afterRenderCb) {
       if (Flint.views[name])
         return Flint.views[name].component;
 
-      // "global" views
-      if (opts.namespace[name] || root[name])
+      // wrapper
+      if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
+        return Wrapper
+
+      // global views
+      if (opts.namespace[name])
         return namespaceView
 
-      return class NotFound extends React.Component {
-        render() {
-          const message = `Flint: view "${name}" not found`
-          return <div style={{ display: 'block' }}>{message}</div>
-        }
-      }
+      return NotFound(name)
     },
 
     /*

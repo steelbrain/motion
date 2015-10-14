@@ -9,11 +9,12 @@ import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import { p, mkdir, readdir, readJSON, writeJSON,
   readFile, writeFile, recreateDir, copyFile } from './lib/fns'
+
 import { Promise } from 'bluebird'
 import multipipe from 'multipipe'
 import portfinder from 'portfinder'
 import open from 'open'
-import editor from 'editor'
+import editor from './lib/editor'
 import keypress from 'keypress'
 import path from 'path'
 import express from 'express'
@@ -30,7 +31,7 @@ const proc = process // cache for keypress
 const newLine = "\n"
 const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
-const MODULES_DIR = p(__dirname, '..', 'node_modules');
+const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
@@ -65,9 +66,8 @@ const clearBuildDir = () => {
       try {
         await mkdir(p(OPTS.flintDir, 'build', '_'))
         res()
-      } catch(e) {
-        console.error(e)
       }
+      catch(e) { handleError(e) }
     })
   })
 }
@@ -90,12 +90,14 @@ const runAfterFirstBuilds = () =>
 
 /* END FIRST BUILD STUFF */
 
+const userEditor = (process.env.VISUAL || process.env.EDITOR)
+
 function watchingMessage() {
   listenForKeys()
   console.log(
     newLine +
     ' • O'.green.bold + 'pen browser'.green + newLine +
-    ' • E'.green.bold + 'ditor'.green + newLine +
+    (userEditor ? (' • E'.green.bold + 'ditor'.green + newLine) : '') +
     ' • I'.green.bold + 'nstall packages'.green + newLine +
     ' • V'.green.bold + 'erbose logging'.green + newLine
   )
@@ -182,7 +184,7 @@ const watchDeletes = vinyl => {
 function buildScripts(cb, stream) {
   console.log("Building...".bold.white)
   log('build scripts')
-  let startTime, lastError, lastScript, curFile, buildingTimeout
+  let startTime, lastError, lastScript, curFile
   let dest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   const relative = file => path.relative(APP_DIR, file.path)
@@ -212,6 +214,7 @@ function buildScripts(cb, stream) {
       out.badFile(curFile)
       logError(error, curFile)
       bridge.message('compile:error', { error })
+      buildChecker(lastScript)
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
@@ -243,21 +246,14 @@ function buildScripts(cb, stream) {
       multipipe(
         $.concat(`${OPTS.name}.js`),
         $.wrap(
-          { src: `${__dirname}/../templates/build.template.js` },
+          { src: `${__dirname}/../../templates/build.template.js` },
           { name: OPTS.name },
           { variable: 'data' }
         )
       )
     ))
     .pipe($.if(file => {
-      // before initial build
-      if (!HAS_RUN_INITIAL_BUILD) {
-        if (buildingTimeout) clearTimeout(buildingTimeout)
-        buildingTimeout = setTimeout(() => {
-          HAS_RUN_INITIAL_BUILD = true
-          runAfterFirstBuilds()
-        }, 450)
-      }
+      buildChecker(lastScript)
 
       if (stream || lastError) return false
 
@@ -286,8 +282,8 @@ function buildScripts(cb, stream) {
       // after initial build
       if (HAS_RUN_INITIAL_BUILD) {
         if (!lastError) {
-          bridge.message('script:add', lastScript);
-          bridge.message('compile:success', lastScript);
+          bridge.message('script:add', lastScript)
+          bridge.message('compile:success', lastScript)
         }
       }
     }))
@@ -297,15 +293,27 @@ function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
 
+let buildingTimeout
+function buildChecker(lastScript) {
+  if (!HAS_RUN_INITIAL_BUILD) {
+    if (buildingTimeout) clearTimeout(buildingTimeout)
+    buildingTimeout = setTimeout(() => {
+      HAS_RUN_INITIAL_BUILD = true
+      bridge.message('compile:success', lastScript)
+      runAfterFirstBuilds()
+    }, 450)
+  }
+}
+
 function logError(error, file) {
   if (error.stack || error.codeFrame)
     error.stack = unicodeToChar(error.stack || error.codeFrame);
 
   if (error.plugin == 'gulp-babel') {
-    console.log('JS error: %s: ', error.message.replace(APP_DIR, ''));
+    console.log(error.message.replace(APP_DIR, ''));
     if (error.name != 'TypeError' && error.loc)
-      console.log('  > line: %s, col: %s', error.loc.line, error.loc.column);
-    console.log(' Stack:', newLine, error.stack)
+      console.log('line: %s, col: %s', error.loc.line, error.loc.column);
+    console.log(newLine, error.stack.split("\n").splice(0, 7).join("\n"))
   }
   else {
     console.log('ERROR', "\n", error)
@@ -363,7 +371,7 @@ function listenForKeys() {
           break
         case 'i': // install npm
           console.log('Installing npm packages...'.white.bold)
-          await npm.install()
+          await npm.install(true)
           console.log('Packages updated!'.green.bold)
           break
         case 'v': // verbose logging
@@ -373,9 +381,7 @@ function listenForKeys() {
           break
       }
     }
-    catch(e) {
-      console.error('error in listenForKeys()', e)
-    }
+    catch(e) { handleError(e) }
 
     // exit
     if (key.ctrl && key.name == 'c')
@@ -506,7 +512,9 @@ function runServer() {
       // if no specified port, find open one
       if (!OPTS.port) {
         portfinder.basePort = port;
-        portfinder.getPort({ host: 'localhost' }, handleError(serverListen) );
+        portfinder.getPort({ host: 'localhost' },
+          handleError(serverListen)
+        );
       }
       else {
         serverListen(port);
@@ -529,7 +537,6 @@ async function makeTemplate(req, cb) {
   const files = dir.files
 
   if (!files.length) {
-    console.log('no flint files')
     return cb(template.toString())
   }
 
@@ -615,7 +622,5 @@ export async function run(opts, isBuild) {
       watchingMessage()
     }
   }
-  catch(e) {
-    console.error(e)
-  }
+  catch(e) { handleError(e) }
 }

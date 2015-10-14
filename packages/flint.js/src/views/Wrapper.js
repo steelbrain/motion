@@ -12,10 +12,7 @@ class Wrapper extends React.Component {
   render() {
     const { children, style, onClick, __disableWrapper, view } = this.props;
 
-    let viewProps
-
-    if (style || onClick)
-      viewProps = {}
+    let viewProps = { view }
 
     if (onClick)
       viewProps.onClick = onClick

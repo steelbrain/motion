@@ -11,6 +11,11 @@ import mkdirp from 'mkdirp'
 import ncp from 'ncp'
 import { Spinner } from '../ui'
 import fetch from 'node-fetch'
+import raven from 'raven'
+
+const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
+
+try {
 
 const p = path.join
 
@@ -94,13 +99,16 @@ function makeFolder() {
 }
 
 function getScaffold() {
-  // if cloning example
-  if (repo != scaffoldRepo)
-    return cloneDirectly()
+  checkPermission(FLINT.scaffoldDir, 2, err => {
+    const isCloningExample = repo != scaffoldRepo
 
-  return updateScaffoldCache()
-    .then(copyScaffold)
-    .catch(cloneDirectly)
+    if (err || isCloningExample)
+      return cloneDirectly()
+
+    return updateScaffoldCache()
+      .then(copyScaffold)
+      .catch(cloneDirectly)
+  })
 }
 
 function updateScaffoldCache() {
@@ -114,6 +122,8 @@ function updateScaffoldCache() {
 
       // remove old scaffold
       rimraf(FLINT.scaffoldDir, function(err) {
+        if (err) return reject(err)
+
         // clone new scaffold
         promiseProcess(gitClone(FLINT.scaffoldDir), { msg: false })
           .then(copyLatestSHA(FLINT.scaffoldDir))
@@ -291,4 +301,21 @@ function wait() {
 function log(...args) {
   if (Program.debug)
     console.log(...args)
+}
+
+// mask (1 = execute, 4 = read, 2 = write)
+function checkPermission(file, mask, cb){
+  fs.stat(file, function (error, stats){
+    if (error){
+      cb (error, false);
+    }else{
+      cb (null, !!(mask & parseInt ((stats.mode & parseInt ("777", 8)).toString (8)[0])));
+    }
+  });
+};
+
+
+} catch(e) {
+  console.log(e.stack)
+  errorClient.captureException(e)
 }
