@@ -14,6 +14,7 @@ import { touch, p, mkdir,
 let WHERE = {}
 let OPTS
 let INSTALLING = false
+let FIRST_RUN = true
 
 /*
 
@@ -131,6 +132,7 @@ async function install() {
       await bundle()
       resolve(installed)
       onPackagesInstalled()
+      FIRST_RUN = false
     } catch(e) {
       console.error('install', e)
       reject(e)
@@ -154,6 +156,7 @@ const depRequireString = name => `
 async function writeDeps(deps = []) {
   return new Promise(async (resolve) => {
     log('npm: writeDeps:', deps)
+    await writeJSON(WHERE.depsJSON, { deps })
     const requireString = deps.map(depRequireString).join('')
     await writeFile(WHERE.depsJS, requireString)
     resolve()
@@ -243,9 +246,9 @@ const findRequires = source =>
 // <= file, source
 //  > install new deps
 // => update cache
-function scanFile(file, source) {
+async function scanFile(file, source) {
   try {
-    const all = cache.getImports()
+    const all = await getInstalled()
     const found = findRequires(source)
     const fresh = found.filter(f => all.indexOf(f) < 0)
 
@@ -272,9 +275,7 @@ function scanFile(file, source) {
         await save(dep)
         log('scanFile: package installed', dep)
         installed.push(dep)
-        await bundle()
         onPackageFinish(dep)
-        onPackagesInstalled()
         next()
       } catch(e) {
         log('scanFile: package install failed', dep)
@@ -289,11 +290,16 @@ function scanFile(file, source) {
       done()
     }
 
-    const done = () => {
+    const done = async () => {
       // cache newly installed + already
       cache.setFileImports(file, installed.concat(already))
       logInstalled(installed)
       afterScansClear()
+
+      if (!FIRST_RUN) {
+        await bundle()
+        onPackagesInstalled()
+      }
     }
 
     installNext()
@@ -307,7 +313,11 @@ function scanFile(file, source) {
 
 // npm install --save 'name'
 function save(name, index, total) {
-  const spinner = new Spinner(` ${index} of ${total}: ${name}`)
+  const spinner = new Spinner(total ?
+    ` ${index} of ${total}: ${name}` :
+    `Installing: ${name}`
+  )
+
   spinner.start({ fps: 30 })
 
   log('npm: save:', name)

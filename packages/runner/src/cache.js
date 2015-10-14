@@ -58,7 +58,6 @@ export default {
   getImports(file?: string) {
     if (!file) {
       let allImports = [].concat(imports)
-      console.log('FILES', files)
       Object.keys(files).forEach(file => {
         allImports = allImports.concat(files[file].imports)
       })
