@@ -579,7 +579,7 @@ export async function run(opts, isBuild) {
     CONFIG = await readJSON(OPTS.configFile)
     log('got config', CONFIG)
 
-    const isFirstRun = await firstRun()
+    await firstRun()
 
     if (OPTS.build) {
       console.log(

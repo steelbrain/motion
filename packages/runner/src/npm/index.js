@@ -45,7 +45,12 @@ function mkDir() {
   return new Promise(async (res, rej) => {
     try {
       await mkdir(WHERE.outDir)
-      await touch(WHERE.depsJSON)
+      await* [
+        touch(WHERE.depsJSON),
+        touch(WHERE.depsJS),
+        touch(WHERE.packagesJS)
+      ]
+
       res()
     }
     catch(e) {
@@ -117,11 +122,11 @@ async function install() {
       const un = _.difference(installed, written)
       log('npm: install: un: ', un)
       if (un.length) {
-        console.log('Installing Packages...'.white.bold)
+        console.log("\n",'Installing Packages...'.white.bold)
 
         for (let dep of un) {
           try {
-            await save(dep, un.indexOf(dep), un.length - 1)
+            await save(dep, un.indexOf(dep), un.length)
           }
           catch(e) {
             console.log('Failed to install', dep)
@@ -323,17 +328,22 @@ async function scanFile(file, source) {
 
 // npm install --save 'name'
 function save(name, index, total) {
-  const spinner = new Spinner(total ?
-    ` ${index} of ${total}: ${name}` :
+  let spinner
+  const out = total ?
+    ` ${index+1} of ${total}: ${name}` :
     `Installing: ${name}`
-  )
 
-  spinner.start({ fps: 30 })
+  if (OPTS.build)
+    console.log(out)
+  else {
+    spinner = new Spinner(out)
+    spinner.start({ fps: 30 })
+  }
 
   log('npm: save:', name)
   return new Promise((res, rej) => {
     exec('npm install --save ' + name, OPTS.flintDir, err => {
-      spinner.stop()
+      if (spinner) spinner.stop()
       if (err) rej('Install failed for package ' + name)
       else res(name)
     })

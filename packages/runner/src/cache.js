@@ -15,7 +15,7 @@ let files: { name: File } = {}
 let imports: ImportArray = []
 let baseDir = ''
 
-export default {
+const Cache = {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir, '..')
     log('cache: baseDir', baseDir)
@@ -23,7 +23,9 @@ export default {
 
   add(file: string) {
     if (!file) return
-    files[name(file)] = files[name(file)] || {}
+    const n = name(file)
+    files[n] = files[n] || {}
+    return files[n]
   },
 
   get(file: string) {
@@ -48,8 +50,12 @@ export default {
 
   setFileImports(file: string, imports: ImportArray) {
     log('cache: setFileImports', file, imports);
-    const cacheFile = files[name(file)]
-    if (cacheFile) cacheFile.imports = imports
+    let cacheFile = Cache.get(file)
+
+    if (!cacheFile)
+      cacheFile = Cache.add(file)
+
+    cacheFile.imports = imports
   },
 
   getViews(file?: string) {
@@ -69,3 +75,5 @@ export default {
     return files[name(file)].imports
   }
 }
+
+export default Cache
