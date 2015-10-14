@@ -99,6 +99,7 @@ var Parser = {
 
         // ENTER jsx
         const hasJSX = line.trim().charAt(0) == '<'
+        const isComment = l => l.trim().substr(0,2) == '//'
 
         // if entering jsx
         if (inView && !inJSX && hasJSX) {
@@ -112,6 +113,10 @@ var Parser = {
           result = result
             .replace(/\sclass=([\"\{\'])/g, ' className=$1')
             .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
+
+          // allow for starting comments
+          console.log('result.substr', result.trim().substr(0, 2))
+          if (isComment(result)) result = ''
         }
 
         // store view contents for hashing
