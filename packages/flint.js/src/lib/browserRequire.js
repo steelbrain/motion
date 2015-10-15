@@ -1,5 +1,8 @@
 export default function(name) {
-  let pkg = window.__flintPackages[name];
+  if (name == 'bluebird')
+    return window._bluebird
+
+  let pkg = window.__flintPackages[name]
 
   // we may be waiting for packages reload
   if (!pkg)
@@ -9,5 +12,5 @@ export default function(name) {
   if (!pkg.default)
     pkg.default = pkg
 
-  return pkg;
+  return pkg
 }
