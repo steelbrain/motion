@@ -101,7 +101,6 @@ function run(browserNode, userOpts, afterRenderCb) {
   const emitter = ee({})
 
   let Flint = {
-    isUpdating: false,
     views: {},
     lastWorkingView: {},
     // async functions needed before loading app
@@ -152,15 +151,23 @@ function run(browserNode, userOpts, afterRenderCb) {
         name,
         Flint,
 
-        update() {
-          if (
-            !Flint.isUpdating &&
-            this.hasRun &&
-            this.isMounted &&
+        shouldUpdate() {
+          return (
+            this.didMount &&
+            this.noErrors &&
+            !this.isUpdating &&
             !this.isPaused
           )
+        },
+
+        update() {
+          // if (this.isUpdating)
+            // raf(() => this.update())
+          if (this.shouldUpdate())
             this.forceUpdate()
         },
+
+        // LIFECYCLES
 
         getInitialState() {
           if (name == 'Main')
@@ -190,7 +197,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           // needsUpdate if hash changed
           // if (Flint.views[name].needsUpdate) {
             safeRun(() => {
-              component.call(void 0, this, viewOn)
+              component(this, viewOn)
               // Flint.cachedRenders[name] = this._render
               ran = true
             })
@@ -199,7 +206,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           //   this._render = Flint.cachedRenders[name]
           // }
 
-          this.hasRun = ran
+          this.noErrors = ran
           return null
         },
 
@@ -209,19 +216,22 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentDidMount() {
-          this.isMounted = true
+          this.didMount = true
           runEvents(this.events, 'mount')
         },
 
         componentWillUnmount() {
-          this.isMounted = false
+          this.didMount = false
           runEvents(this.events, 'unmount')
         },
 
         componentWillUpdate() {
-          Flint.isUpdating = true
+          this.isUpdating = true
           runEvents(this.events, 'update')
-          Flint.isUpdating = false
+        },
+
+        componentDidUpdate() {
+          this.isUpdating = false
         },
 
         // FLINT HELPERS

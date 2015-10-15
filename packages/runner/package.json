@@ -2,7 +2,7 @@
   "name": "flint-runner",
   "version": "0.2.120",
   "description": "Run flint apps",
-  "main": "index.js",
+  "main": "entry.js",
   "scripts": {},
   "author": "Flint",
   "license": "MIT",

@@ -83,7 +83,8 @@ const onPackagesInstalled = () => {
 const externals = [
   'flint-js',
   'react',
-  'react-dom'
+  'react-dom',
+  'bluebird'
 ]
 
 const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
