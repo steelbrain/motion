@@ -54,13 +54,12 @@ if (where) {
 
 var name = args[0]
 var spinner, fps = 60
-var FLINT = {
-  dir: __dirname,
-  scaffoldDir: p(__dirname, 'scaffold'),
-  scaffoldRepo: `https://github.com/${org}/${repo}`,
-  scaffoldSHA: p(__dirname, 'scaffoldSHA'),
-  dest: process.cwd() + '/' + name,
-}
+let FLINT = {}
+FLINT.dir = __dirname
+FLINT.scaffoldDir = p(getUserHome(), '/.flint/scaffold')
+FLINT.scaffoldRepo = `https://github.com/${org}/${repo}`
+FLINT.scaffoldSHA = p(getUserHome(), '/.flint/scaffoldSHA')
+FLINT.dest = process.cwd() + '/' + name
 
 if (fs.existsSync(FLINT.dest)) {
   console.log("Error! Directory %s already exists\n".red, FLINT.dest)
@@ -74,7 +73,6 @@ else {
 function start() {
   makeFolder()
     .then(Program.nocache ? cloneDirectly : getScaffold)
-    .then(wait)
     .then(initGit)
     .then(replaceGivenNameInApp)
     .then(finish)
@@ -91,23 +89,39 @@ function start() {
 function makeFolder() {
   return new Promise(function(resolve, reject) {
     log('makeFolder', FLINT.dest)
-    mkdirp(FLINT.dest, function(err) {
-      if (err) reject(err)
-      else resolve()
+    mkdirp(FLINT.scaffoldDir, function(err) {
+      mkdirp(FLINT.dest, function(err) {
+        if (err) reject(err)
+        else resolve()
+      })
     })
   })
 }
 
 function getScaffold() {
-  checkPermission(FLINT.scaffoldDir, 2, err => {
-    const isCloningExample = repo != scaffoldRepo
+  return new Promise((res, rej) => {
+    mkdirp(FLINT.scaffoldDir, err => {
+      log('mkdirp err', err)
+      const isCloningExample = repo != scaffoldRepo
 
-    if (err || isCloningExample)
-      return cloneDirectly()
+      if (err || isCloningExample)
+        return cloneDirectly()
 
-    return updateScaffoldCache()
-      .then(copyScaffold)
-      .catch(cloneDirectly)
+      return updateScaffoldCache()
+        .catch(cloneDirectly)
+        .then(doCopy => {
+          log('doCopy?', doCopy)
+          if (doCopy)
+            return copyScaffold()
+          else
+            return cloneDirectly()
+        })
+        .then(() => {
+          // continue
+          log('CONTINUE FROM getScaffold')
+          res()
+        })
+    })
   })
 }
 
@@ -117,18 +131,19 @@ function updateScaffoldCache() {
   return new Promise(function(resolve, reject) {
     // check if online
     checkNewScaffold(function(needsNew) {
-      if (!needsNew)
-        return resolve()
+      log('checkNewScaffold needsNew?', needsNew)
+      if (!needsNew) return resolve(true)
 
       // remove old scaffold
       rimraf(FLINT.scaffoldDir, function(err) {
-        if (err) return reject(err)
+        log('rimraf err?', err)
+        if (err) return resolve(false)
 
         // clone new scaffold
         promiseProcess(gitClone(FLINT.scaffoldDir), { msg: false })
-          .then(copyLatestSHA(FLINT.scaffoldDir))
-          .then(deleteGitFolder(FLINT.scaffoldDir))
-          .then(resolve)
+          .then(() => copyLatestSHA(FLINT.scaffoldDir))
+          .then(() => deleteGitFolder(FLINT.scaffoldDir))
+          .then(() => resolve(true))
       })
     })
   })
@@ -138,7 +153,7 @@ function checkNewScaffold(cb) {
   log('Check for new scaffold SHA in...', FLINT.scaffoldSHA)
   fs.readFile(FLINT.scaffoldSHA, function(err, data) {
     if (err) {
-      log('Error reading scaffold file', err)
+      log('Error reading scaffold file')
       return cb(true)
     }
 
@@ -165,27 +180,32 @@ function checkNewScaffold(cb) {
 }
 
 function deleteGitFolder(dir) {
-  return function() {
-    return new Promise(function(resolve, reject) {
-      log('Remove .git folder')
-      // delete git dir
-      rimraf(p(dir, '/.git'), function(err, data) {
-        if (err) return reject(err)
-        resolve(data)
-      })
+  return new Promise(function(resolve, reject) {
+    log('Remove .git folder')
+    // delete git dir
+    rimraf(p(dir, '/.git'), function(err, data) {
+      if (err) return reject(err)
+      resolve(data)
     })
-  }
+  })
 }
 
 function copyLatestSHA(dir) {
   return new Promise(function(res, rej) {
+    log('copyLatestSHA')
     // copy latest SHA into folder
     var head = p(dir, '.git', 'refs', 'heads', 'master')
     log('Copy new SHA', head, FLINT.scaffoldSHA)
-    ncp(head, FLINT.scaffoldSHA, function(err) {
-      if (err) return rej(err)
-      else res()
-    })
+
+    try {
+      var sha = fs.readFileSync(head)
+      fs.writeFileSync(FLINT.scaffoldSHA, sha)
+      res()
+    }
+    catch(e) {
+      log('error with copyLatestSHA', e.stack)
+      rej()
+    }
   })
 }
 
@@ -208,7 +228,7 @@ function gitClone(dest) {
 function cloneDirectly() {
   log('Cloning directly', gitClone(FLINT.dest))
   return promiseProcess(gitClone(FLINT.dest), { msg: false })
-    .then(deleteGitFolder(FLINT.dest))
+    .then(() => deleteGitFolder(FLINT.dest))
 }
 
 function initGit() {
@@ -219,7 +239,7 @@ function initGit() {
 function replaceGivenNameInApp() {
   message('Setting app name...')
   return new Promise(function(resolve, reject) {
-    log('Updating app name')
+    log('Updating app name to', name, 'in', FLINT.dest)
     replace({
       regex: 'flint-scaffold',
       replacement: name,
@@ -248,6 +268,9 @@ function tryLinkFlint() {
   })
 }
 
+
+const exec = require('child_process').exec
+
 function promiseProcess(cmd, opts) {
   opts = opts || {}
 
@@ -256,10 +279,10 @@ function promiseProcess(cmd, opts) {
 
   return new Promise(function(resolve, reject) {
     process.chdir(opts.dir || FLINT.dest)
-    var exec = require('child_process').exec, child
-    child = exec(cmd, {
-      uid: process.getuid()
-    }, handleChildProcess.bind(this, resolve, reject))
+    log(' $ ', cmd)
+    exec(cmd, { uid: process.getuid() }, (...args) => {
+      handleChildProcess(resolve, reject, ...args)
+    })
   })
 }
 
@@ -270,6 +293,7 @@ function handleChildProcess(resolve, reject, error, stdout, stderr) {
     return reject(error)
   }
 
+  log(stdout)
   resolve()
 }
 
@@ -287,7 +311,6 @@ function finish() {
 
 function message(str) {
   spinner.message(str)
-  console.log()
 }
 
 function wait() {
@@ -318,4 +341,8 @@ function checkPermission(file, mask, cb){
 } catch(e) {
   console.log(e.stack)
   errorClient.captureException(e)
+}
+
+function getUserHome() {
+  return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 }
