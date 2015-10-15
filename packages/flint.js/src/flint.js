@@ -37,9 +37,9 @@ const safeRun = fn => {
   else {
     try { fn() }
     catch(e) {
-      console.error(e)
       const { name, message, stack } = e
       reportError({ name, message, stack })
+      throw e
     }
   }
 }
@@ -196,11 +196,11 @@ function run(browserNode, userOpts, afterRenderCb) {
           // state when parent is reloaded, but wed need path key
           // needsUpdate if hash changed
           // if (Flint.views[name].needsUpdate) {
-            safeRun(() => {
+            // safeRun(() => {
               component(this, viewOn)
               // Flint.cachedRenders[name] = this._render
               ran = true
-            })
+            // })
           // }
           // else {
           //   this._render = Flint.cachedRenders[name]
@@ -266,8 +266,11 @@ function run(browserNode, userOpts, afterRenderCb) {
             catch(e) {
               const { name, message, stack } = e
               reportError({ name, message, stack })
-              console.error('Error rendering JSX for view:', name, e)
               els = this.goodRastRender || null
+
+              setTimeout(() => {
+                throw e
+              })
             }
           }
 

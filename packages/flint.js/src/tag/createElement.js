@@ -121,28 +121,6 @@ export default function createElement(viewName) {
     if (props.yield)
       props = Object.assign(props, view.props, { style: props.style });
 
-    if (props.lazy) {
-      if (view.updatedProps === false) {
-        view.cachedChildren[props.lazyId] = args
-      }
-      else {
-        let shouldUpdate = false
-        props.lazy.forEach(lazy => {
-          view.updatedProps.forEach(prop => {
-            if (lazy == prop) {
-              shouldUpdate = true
-            }
-          })
-        })
-        if (!shouldUpdate) {
-          args = view.cachedChildren[props.lazyId]
-        }
-        else {
-          view.cachedChildren[props.lazyId] = args
-        }
-      }
-    }
-
     // write all tags to div in production
     if (process.env.production)
       tag = 'div'

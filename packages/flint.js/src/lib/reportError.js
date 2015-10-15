@@ -1,5 +1,4 @@
 export default function reportError(...args) {
-  console.log('reporting error', args)
   if (process.env.production) return
   if (!root.flintRuntimeError) return
 
