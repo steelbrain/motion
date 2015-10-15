@@ -28,7 +28,6 @@ root.Promise = Promise
 root.module = {}
 root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 root.onerror = reportError
-root.view = { update: () => {} } // shim view
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
@@ -107,7 +106,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     lastWorkingView: {},
     // async functions needed before loading app
     preloaders: [],
-    element: createElement,
     render,
     on(name, cb) { emitter.on(name, cb) },
     // map of views in various files
@@ -274,25 +272,30 @@ function run(browserNode, userOpts, afterRenderCb) {
       return React.createClass(spec);
     },
 
-    getView(parentName, name) {
+    getView(name, parentName) {
+      let result
+
       // View.SubView
       const subName = `${parentName}.${name}`
       if (Flint.views[subName])
-        return Flint.views[subName].component
+        result = Flint.views[subName].component
 
       // regular view
-      if (Flint.views[name])
-        return Flint.views[name].component;
+      else if (Flint.views[name])
+        result = Flint.views[name].component;
 
       // wrapper
-      if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
-        return Wrapper
+      else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
+        result = Wrapper
 
       // global views
-      if (opts.namespace[name])
-        return namespaceView
+      else if (opts.namespace[name])
+        result = namespaceView
 
-      return NotFound(name)
+      else
+        result = NotFound(name)
+
+       return result
     },
 
     /*
@@ -392,6 +395,13 @@ function run(browserNode, userOpts, afterRenderCb) {
         })
       }
     }
+  }
+
+  // shim root view
+  opts.namespace.view = {
+    update: () => {},
+    el: createElement('_'),
+    Flint
   }
 
   // make mutative array methods trigger updates in views

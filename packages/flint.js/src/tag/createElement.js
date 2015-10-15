@@ -15,7 +15,15 @@ const mapObj = (fn, o) => {
   return newO
 }
 
-const divWhitelist = [ 'title', 'meta', 'head', 'circle', 'col' ]
+const divWhitelist = [
+  'title',
+  'meta',
+  'head',
+  'circle',
+  'col',
+  'body'
+]
+
 const flatToCamel = {
   novalidate: 'noValidate',
   tabindex: 'tabIndex',
@@ -27,6 +35,16 @@ const flatToCamel = {
 
 export default function createElement(viewName) {
   return function el(key, fullname, props, ...args) {
+    // allow no key
+    if (typeof key === 'string') {
+      args.unshift(props)
+      props = fullname
+      fullname = key
+    }
+
+    if (!fullname)
+      return React.createElement('div', null, 'No name given!')
+
     props = props || {}
     const view = this
 
@@ -67,7 +85,7 @@ export default function createElement(viewName) {
         })
       }
       else {
-        tag = view.Flint.getView(viewName, name)
+        tag = view.Flint.getView(name, viewName)
       }
     }
 

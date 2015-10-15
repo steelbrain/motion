@@ -39,7 +39,7 @@ export default function elementStyles(key, view, name, tag, props) {
   // if its the root element (name === view or Wrapper)
   const isRoot = (
     name.indexOf('Flint.') == 0 ||
-    view.name.toLowerCase() == name
+    view.name && view.name.toLowerCase() == name
   )
 
   if (view.styles) {
