@@ -115,7 +115,6 @@ var Parser = {
             .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           // allow for starting comments
-          console.log('result.substr', result.trim().substr(0, 2))
           if (isComment(result)) result = ''
         }
 
