@@ -20,6 +20,7 @@ import path from 'path'
 import express from 'express'
 import cors from 'cors'
 import hostile from 'hostile'
+// import surge from 'surge/lib/surge'
 import through from 'through2'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
@@ -91,18 +92,6 @@ const runAfterFirstBuilds = () =>
 /* END FIRST BUILD STUFF */
 
 const userEditor = (process.env.VISUAL || process.env.EDITOR)
-
-function watchingMessage() {
-  listenForKeys()
-  console.log(
-    newLine +
-    ' • O'.green.bold + 'pen browser'.green + newLine +
-    (userEditor ? (' • E'.green.bold + 'ditor'.green + newLine) : '') +
-    ' • I'.green.bold + 'nstall packages'.green + newLine +
-    ' • V'.green.bold + 'erbose logging'.green + newLine
-  )
-  resumeListenForKeys()
-}
 
 function pipefn(fn) {
   return through.obj(function(file, enc, next) {
@@ -181,18 +170,44 @@ const watchDeletes = vinyl => {
   }
 }
 
+const relative = file => path.relative(APP_DIR, file.path)
+const out = {
+  file: file => process.stdout.write(` ⇢ ${relative(file)}\r`),
+  badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
+  goodFile: (file, ms) => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold)
+}
+
+const $p = {
+  flint: {
+    pre: compiler('pre'),
+    post: compiler('post')
+  },
+  babel: babel({
+    stage: 2,
+    blacklist: ['flow', 'react', 'es6.tailCall'],
+    retainLines: true,
+    comments: true,
+    optional: ['bluebirdCoroutines']
+  }),
+  react: react({
+    stripTypes: true,
+    es6module: true
+  }),
+  buildWrap: () => multipipe(
+    $.concat(`${OPTS.name}.js`),
+    $.wrap(
+      { src: `${__dirname}/../../templates/build.template.js` },
+      { name: OPTS.name },
+      { variable: 'data' }
+    )
+  )
+}
+
 function buildScripts(cb, stream) {
   console.log("Building...".bold.white)
   log('build scripts')
   let startTime, lastError, lastScript, curFile
-  let dest = OPTS.buildDir ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
-
-  const relative = file => path.relative(APP_DIR, file.path)
-  const out = {
-    file: file => process.stdout.write(` ⇢ ${relative(file)}\r`),
-    badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-    goodFile: (file, ms) => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold)
-  }
+  let dest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe($.if(!OPTS.build,
@@ -222,36 +237,18 @@ function buildScripts(cb, stream) {
       lastScript = { name, compiledAt: startTime }
       curFile = file
     }))
-    .pipe(compiler('pre'))
-    .pipe(babel({
-      stage: 2,
-      blacklist: ['flow', 'react', 'es6.tailCall'],
-      retainLines: true,
-      comments: true,
-      optional: ['bluebirdCoroutines']
-    }))
-    .pipe(compiler('post'))
+    .pipe($p.flint.pre)
+    .pipe($p.babel)
+    .pipe($p.flint.post)
     .pipe($.if(!stream,
       $.rename({ extname: '.js' })
     ))
-    .pipe(react({
-      stripTypes: true,
-      es6module: true
-    }))
+    .pipe($p.react)
     .pipe(pipefn(() => {
       // for spaces when outputting
       if (OPTS.build) console.log()
     }))
-    .pipe($.if(OPTS.build,
-      multipipe(
-        $.concat(`${OPTS.name}.js`),
-        $.wrap(
-          { src: `${__dirname}/../../templates/build.template.js` },
-          { name: OPTS.name },
-          { variable: 'data' }
-        )
-      )
-    ))
+    .pipe($.if(OPTS.build, $p.buildWrap()))
     .pipe($.if(file => {
       buildChecker(lastScript)
 
@@ -265,8 +262,8 @@ function buildScripts(cb, stream) {
         !lastSavedTimestamp[file.path] ||
         file.startTime > lastSavedTimestamp[file.path]
       )
-      log('is new file', isNew)
 
+      log('is new file', isNew)
       if (isNew) {
         lastSavedTimestamp[file.path] = file.startTime
         return true
@@ -293,13 +290,30 @@ function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
 
+function buildWhileRunning() {
+  console.log("Building...")
+  return new Promise((res, rej) => {
+    gulp.src(['.flint/out/**/*.js'])
+      .pipe($.plumber(err => {
+        logError(err)
+        rej(err)
+      }))
+      .pipe($p.buildWrap())
+      .pipe(gulp.dest(p(OPTS.buildDir, '_')))
+      .pipe(pipefn(res))
+  });
+}
+
 let buildingTimeout
 function buildChecker(lastScript) {
   if (!HAS_RUN_INITIAL_BUILD) {
     if (buildingTimeout) clearTimeout(buildingTimeout)
     buildingTimeout = setTimeout(() => {
       HAS_RUN_INITIAL_BUILD = true
-      bridge.message('compile:success', lastScript)
+
+      if (!OPTS.build)
+        bridge.message('compile:success', lastScript)
+
       runAfterFirstBuilds()
     }, 450)
   }
@@ -335,6 +349,7 @@ function setOptions(opts, build) {
   OPTS.dir = OPTS.dir || APP_DIR
   OPTS.flintDir = p(OPTS.dir || APP_DIR, '.flint')
   OPTS.template = OPTS.template || '.flint/index.html'
+  OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
 
   OPTS.configFile = p(OPTS.flintDir, 'config')
   OPTS.outDir = p(OPTS.flintDir, 'out')
@@ -344,22 +359,37 @@ function setOptions(opts, build) {
   var folders = OPTS.dir.split('/')
   OPTS.name = folders[folders.length - 1]
   OPTS.url = OPTS.name + '.dev'
-
-  if (OPTS.build) {
-    OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
-  }
 }
 
 function writeConfig(config) {
   writeJSON(OPTS.configFile, config)
 }
 
+function watchingMessage() {
+  listenForKeys()
+  console.log(
+    newLine +
+    ' • O'.blue.bold + 'pen        '.blue +
+      ' • V'.blue.bold + 'erbose'.blue + newLine +
+    (userEditor
+      ? (' • E'.blue.bold + 'dit        '.blue)
+      : '            ') +
+        ' • I'.blue.bold + 'nstall (npm)'.blue + newLine
+    // ' • U'.blue.bold + 'pload'.blue + newLine
+  )
+  resumeListenForKeys()
+}
+
+let IS_IN_SURGE = false
 function listenForKeys() {
+  if (!process.stdin.isTTY)
+    return
+
   keypress(proc.stdin)
 
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
-    if (!key) return
+    if (!key || IS_IN_SURGE) return
 
     try {
       switch(key.name) {
@@ -377,7 +407,10 @@ function listenForKeys() {
         case 'v': // verbose logging
           OPTS.verbose = !OPTS.verbose
           setLogging(OPTS)
-          console.log(OPTS.verbose ? 'Set to log verbosely'.yellow : 'Set to log quietly'.yellow, newLine)
+          console.log(OPTS.verbose ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, newLine)
+          break
+        case 'u': // upload
+          // build(true)
           break
       }
     }
@@ -404,6 +437,11 @@ function resumeListenForKeys() {
   // listen for keys
   proc.stdin.setRawMode(true);
   proc.stdin.resume();
+}
+
+function stopListenForKeys() {
+  proc.stdin.setRawMode(false);
+  proc.stdin.pause()
 }
 
 // ask for preferred url and set /etc/hosts
@@ -563,14 +601,26 @@ function setLogging(opts) {
   log.debug = opts.debug || opts.verbose
 }
 
-async function build() {
+const Surge = surge({})
+
+async function build(running) {
   buildFlint()
   buildReact()
   buildPackages()
   buildAssets()
-  buildScripts()
-  await afterFirstBuild()
-  buildTemplate()
+  if (running) {
+    await buildWhileRunning()
+    buildTemplate()
+    stopListenForKeys()
+    IS_IN_SURGE = true
+    Surge('./.flint/build')
+    // resumeListenForKeys()
+  }
+  else {
+    buildScripts()
+    await afterFirstBuild()
+    buildTemplate()
+  }
 }
 
 export async function run(opts, isBuild) {
