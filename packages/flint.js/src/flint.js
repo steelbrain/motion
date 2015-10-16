@@ -15,13 +15,13 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 
+import reportError from './lib/reportError'
 import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
-import mainComponent from './lib/mainComponent'
-import reportError from './lib/reportError'
+import Main from './views/Main'
 
 Promise.longStackTraces()
 
@@ -61,7 +61,7 @@ function run(browserNode, userOpts, afterRenderCb) {
   let firstRun = false
   const render = () => {
     const run = () => {
-      const MainComponent = getComponent('Main') || mainComponent;
+      const MainComponent = getComponent('Main') || Main;
 
       if (!browserNode) {
         Flint.renderedToString = React.renderToString(<MainComponent />)
