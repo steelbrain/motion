@@ -35,6 +35,10 @@ export default function run(browser, opts) {
       removeEl(el);
       const tag = addScript({ src }, Flint.render);
       tag.setAttribute('id', '__flintPackages')
+    },
+
+    'file:delete': file => {
+      Flint.deleteFile(file.name)
     }
   }
 

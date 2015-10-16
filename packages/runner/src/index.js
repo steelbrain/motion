@@ -7,7 +7,7 @@ import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
-import { p, mkdir, readdir, readJSON, writeJSON,
+import { p, mkdir, rmdir, readdir, readJSON, writeJSON,
   readFile, writeFile, recreateDir, copyFile } from './lib/fns'
 
 import { Promise } from 'bluebird'
@@ -164,10 +164,16 @@ function buildAssets() {
     .pipe(gulp.dest(p(OPTS.buildDir)));
 }
 
-const watchDeletes = vinyl => {
-  if (vinyl.event == 'unlink') {
-    cache.remove(vinyl.path)
+const watchDeletes = async vinyl => {
+  try {
+    if (vinyl.event == 'unlink') {
+      cache.remove(vinyl.path)
+      const name = path.relative(OPTS.outDir, vinyl.path)
+      await rmdir(p(OPTS.outDir, name))
+      bridge.message('file:delete', { name })
+    }
   }
+  catch(e) { handleError(e) }
 }
 
 const relative = file => path.relative(APP_DIR, file.path)

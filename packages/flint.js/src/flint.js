@@ -110,6 +110,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // async functions needed before loading app
     preloaders: [],
     render,
+    // internal events
     on(name, cb) { emitter.on(name, cb) },
     // map of views in various files
     viewCache: {},
@@ -151,6 +152,15 @@ function run(browserNode, userOpts, afterRenderCb) {
           Flint.views[key].needsUpdate = false
         })
       })
+    },
+
+    deleteFile(name) {
+      const weirdName = `/${name}`
+      Flint.viewsInFile[weirdName].map(removeComponent)
+      delete Flint.viewsInFile[weirdName]
+      delete Flint.viewCache[weirdName]
+      render()
+      debugger
     },
 
     makeReactComponent(name, component, options = {}) {
@@ -336,7 +346,8 @@ function run(browserNode, userOpts, afterRenderCb) {
         return
 
       // start with a success and an error will fire before next frame
-      root._DT.emitter.emit('runtime:success')
+      if (root._DT)
+        root._DT.emitter.emit('runtime:success')
 
       // if changed
 

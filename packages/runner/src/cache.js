@@ -21,6 +21,10 @@ const Cache = {
     log('cache: baseDir', baseDir)
   },
 
+  name(file : string) {
+    return name(file)
+  },
+
   add(file: string) {
     if (!file) return
     const n = name(file)
