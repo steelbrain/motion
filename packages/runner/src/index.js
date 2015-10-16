@@ -601,7 +601,7 @@ function setLogging(opts) {
   log.debug = opts.debug || opts.verbose
 }
 
-const Surge = surge({})
+// const Surge = surge({})
 
 async function build(running) {
   buildFlint()
@@ -613,7 +613,7 @@ async function build(running) {
     buildTemplate()
     stopListenForKeys()
     IS_IN_SURGE = true
-    Surge('./.flint/build')
+    // Surge('./.flint/build')
     // resumeListenForKeys()
   }
   else {
