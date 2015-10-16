@@ -1,4 +1,3 @@
-import 'reapp-object-assign'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
@@ -9,10 +8,14 @@ import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
 
 import './lib/bluebirdErrorHandle'
-import './lib/setRoot'
-import './lib/shimFlintMap'
+
+import 'reapp-object-assign'
+import './shim/root'
+import './shim/flintMap'
+import './shim/on'
+import './shim/partial'
+
 import arrayDiff from './lib/arrayDiff'
-import on from './lib/on'
 import createElement from './tag/createElement'
 import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'

@@ -1,10 +1,10 @@
 // this file is only used by browser
 
-import fetch from 'whatwg-fetch'
+import 'whatwg-fetch'
 import React from 'react'
 import rafBatch from './lib/reactRaf'
 import runFlint from './flint'
-import browserRequire from './lib/browserRequire'
+import './shim/require'
 
 if (process.env.production)
   rafBatch.inject();
@@ -15,6 +15,5 @@ else {
 
 window.React = React
 window.runFlint = runFlint
-window.require = browserRequire
 window.__flintPackages = {}
 window.exports = {}

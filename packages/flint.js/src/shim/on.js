@@ -46,4 +46,6 @@ const on = (scope, name, cb) => {
     })
 }
 
+root.on = on
+
 export default on

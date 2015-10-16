@@ -1,4 +1,4 @@
-export default function(name) {
+function browserRequire(name) {
   if (name == 'bluebird')
     return window._bluebird
 
@@ -14,3 +14,5 @@ export default function(name) {
 
   return pkg
 }
+
+window.require = browserRequire
