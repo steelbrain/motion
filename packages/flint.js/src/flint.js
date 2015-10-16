@@ -59,7 +59,6 @@ function run(browserNode, userOpts, afterRenderCb) {
   if (opts.namespace !== root && opts.app)
     root[opts.app] = opts.namespace
 
-  let firstRun = false
   const render = () => {
     const run = () => {
       const MainComponent = getComponent('Main') || Main;
@@ -72,7 +71,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
       }
 
-      firstRun = false
+      Flint.firstRender = false
       emitter.emit('afterRender')
     }
 
@@ -118,6 +117,8 @@ function run(browserNode, userOpts, afterRenderCb) {
     viewsInFile: {},
     // current file that is running
     currentHotFile: null,
+    // track first render
+    firstRender: true,
 
     file(file, run) {
       Flint.viewsInFile[file] = []
@@ -136,6 +137,9 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       Flint.currentHotFile = null
       Flint.viewCache[file] = Flint.viewsInFile[file]
+
+      if (Flint.firstRender)
+        return
 
       raf(() => {
         Flint.isLoadingFile = true
@@ -193,8 +197,11 @@ function run(browserNode, userOpts, afterRenderCb) {
               return on(this, scope, name)
           }
 
+          // cache original render
           const flintRender = this.render
           component(this, viewOn)
+
+          // reset original render, cache view render
           this.viewRender = this.render
           this.render = flintRender
 
