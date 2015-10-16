@@ -1,7 +1,7 @@
 const NotFound = (name) => (
   () => (
     <div style={{ display: 'block' }}>
-      Flint: View "${name}" not found
+      Flint: View "{name}" not found
     </div>
   )
 )
