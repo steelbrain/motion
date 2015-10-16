@@ -324,7 +324,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       // not new
 
       // if defined twice during first run
-      if (firstRun) {
+      if (Flint.firstRun) {
         console.error('Defined a view twice!', name, hash)
         setComponent(name, ErrorDefinedTwice(name))
         return
@@ -342,7 +342,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       const setView = (name, flintComponent) => {
         Flint.views[name] = Flint.makeView(hash, flintComponent)
         setComponent(name, flintComponent) // puts on namespace
-        if (firstRun) return
+        if (Flint.firstRun) return
       }
 
       let viewRanSuccessfully = true
