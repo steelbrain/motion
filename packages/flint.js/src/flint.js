@@ -8,6 +8,7 @@ import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
 
+import './lib/bluebirdErrorHandle'
 import './lib/setRoot'
 import './lib/shimFlintMap'
 import arrayDiff from './lib/arrayDiff'
