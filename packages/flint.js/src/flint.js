@@ -36,7 +36,8 @@ root.onerror = reportError
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
-const safeRun = fn => {
+
+function safeRun(fn) {
   if (process.env.production) fn()
   else {
     try { fn() }
@@ -149,16 +150,17 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     makeReactComponent(name, component, options = {}) {
+      const el = createElement(name)
+
       const spec = {
         displayName: name,
-        el: createElement(name),
         name,
+        el,
         Flint,
 
         shouldUpdate() {
           return (
             this.didMount &&
-            this.noErrors &&
             !this.isUpdating &&
             !this.isPaused
           )
@@ -191,24 +193,11 @@ function run(browserNode, userOpts, afterRenderCb) {
               return on(this, scope, name)
           }
 
-           // watch for errors with ran
-          let ran = false
+          const flintRender = this.render
+          component(this, viewOn)
+          this.viewRender = this.render
+          this.render = flintRender
 
-          // TODO: comments out part was attempt to save child
-          // state when parent is reloaded, but wed need path key
-          // needsUpdate if hash changed
-          // if (Flint.views[name].needsUpdate) {
-            // safeRun(() => {
-              component(this, viewOn)
-              // Flint.cachedRenders[name] = this._render
-              ran = true
-            // })
-          // }
-          // else {
-          //   this._render = Flint.cachedRenders[name]
-          // }
-
-          this.noErrors = ran
           return null
         },
 
@@ -262,22 +251,13 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
+          const render = this.viewRender
 
-          if (process.env.production)
-            els = this._render()
-          else {
-            try {
-              els = this._render()
-              this.goodRastRender = els // cache
-            }
-            catch(e) {
-              const { name, message, stack } = e
-              reportError({ name, message, stack })
-              throw e
-            }
-          }
+          safeRun(() => {
+            els = render()
+          })
 
-          const wrapperStyle = this.style && this.style['$']
+          const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
