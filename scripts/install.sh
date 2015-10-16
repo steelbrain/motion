@@ -88,7 +88,7 @@ if [ -w "$NODE_MODULES" ] && [ -w "$NODE_MODULES_BIN" ]; then
   echo
   echo "Installing Flint..."
   echo
-  npm install -g flint
+  npm install -g flint --loglevel=error
 else
   #
 cat <<"EOF"
@@ -116,7 +116,7 @@ EOF
       echo
       echo "Installing flint..."
       echo
-      npm install -g flint
+      npm install -g flint --loglevel=error
     else
       echo
       echo_bad "Uh oh! Couldn't fix permissions!"
@@ -144,7 +144,7 @@ EOF
     echo
     echo "Installing flint with sudo..."
     echo
-    sudo npm install -g flint
+    sudo npm install -g flint --loglevel=error
   fi
 fi
 
