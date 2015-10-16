@@ -68,7 +68,7 @@ var Parser = {
     let inView = false
     let fileViews = []
 
-    const startRender = () => `view._render = () => { return (${startWrapper()}`
+    const startRender = () => `view.render = () => { return (${startWrapper()}`
     const startWrapper = () => `<${getWrapper(currentView.name)} view={view}>`
     const endRender = () => `</${getWrapper(currentView.name)}>); }; \n`
 

@@ -36,7 +36,8 @@ root.onerror = reportError
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
-const safeRun = fn => {
+
+function safeRun(fn) {
   if (process.env.production) fn()
   else {
     try { fn() }
@@ -58,7 +59,6 @@ function run(browserNode, userOpts, afterRenderCb) {
   if (opts.namespace !== root && opts.app)
     root[opts.app] = opts.namespace
 
-  let firstRun = false
   const render = () => {
     const run = () => {
       const MainComponent = getComponent('Main') || Main;
@@ -71,7 +71,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
       }
 
-      firstRun = false
+      Flint.firstRender = false
       emitter.emit('afterRender')
     }
 
@@ -117,6 +117,8 @@ function run(browserNode, userOpts, afterRenderCb) {
     viewsInFile: {},
     // current file that is running
     currentHotFile: null,
+    // track first render
+    firstRender: true,
 
     file(file, run) {
       Flint.viewsInFile[file] = []
@@ -136,6 +138,9 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.currentHotFile = null
       Flint.viewCache[file] = Flint.viewsInFile[file]
 
+      if (Flint.firstRender)
+        return
+
       raf(() => {
         Flint.isLoadingFile = true
         render()
@@ -149,16 +154,17 @@ function run(browserNode, userOpts, afterRenderCb) {
     },
 
     makeReactComponent(name, component, options = {}) {
+      const el = createElement(name)
+
       const spec = {
         displayName: name,
-        el: createElement(name),
         name,
+        el,
         Flint,
 
         shouldUpdate() {
           return (
             this.didMount &&
-            this.noErrors &&
             !this.isUpdating &&
             !this.isPaused
           )
@@ -192,24 +198,14 @@ function run(browserNode, userOpts, afterRenderCb) {
               return on(this, scope, name)
           }
 
-           // watch for errors with ran
-          let ran = false
+          // cache original render
+          const flintRender = this.render
+          component(this, viewOn)
 
-          // TODO: comments out part was attempt to save child
-          // state when parent is reloaded, but wed need path key
-          // needsUpdate if hash changed
-          // if (Flint.views[name].needsUpdate) {
-            // safeRun(() => {
-              component(this, viewOn)
-              // Flint.cachedRenders[name] = this._render
-              ran = true
-            // })
-          // }
-          // else {
-          //   this._render = Flint.cachedRenders[name]
-          // }
+          // reset original render, cache view render
+          this.viewRender = this.render
+          this.render = flintRender
 
-          this.noErrors = ran
           return null
         },
 
@@ -263,22 +259,13 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
+          const render = this.viewRender
 
-          if (process.env.production)
-            els = this._render()
-          else {
-            try {
-              els = this._render()
-              this.goodRastRender = els // cache
-            }
-            catch(e) {
-              const { name, message, stack } = e
-              reportError({ name, message, stack })
-              throw e
-            }
-          }
+          safeRun(() => {
+            els = render()
+          })
 
-          const wrapperStyle = this.style && this.style['$']
+          const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
@@ -338,7 +325,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       // not new
 
       // if defined twice during first run
-      if (firstRun) {
+      if (Flint.firstRun) {
         console.error('Defined a view twice!', name, hash)
         setComponent(name, ErrorDefinedTwice(name))
         return
@@ -356,7 +343,7 @@ function run(browserNode, userOpts, afterRenderCb) {
       const setView = (name, flintComponent) => {
         Flint.views[name] = Flint.makeView(hash, flintComponent)
         setComponent(name, flintComponent) // puts on namespace
-        if (firstRun) return
+        if (Flint.firstRun) return
       }
 
       let viewRanSuccessfully = true
