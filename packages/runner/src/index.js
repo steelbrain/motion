@@ -478,7 +478,7 @@ function runServer() {
     server.get('*', function(req, res) {
       runAfterFirstBuildComplete(function() {
         makeTemplate(req, function(template) {
-          res.send(template.replace('/static', '/_/static'));
+          res.send(template.replace(/\/static/g, '/_/static'));
         })
       })
 
