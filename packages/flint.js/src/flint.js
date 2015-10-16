@@ -266,11 +266,7 @@ function run(browserNode, userOpts, afterRenderCb) {
             catch(e) {
               const { name, message, stack } = e
               reportError({ name, message, stack })
-              els = this.goodRastRender || null
-
-              setTimeout(() => {
-                throw e
-              })
+              throw e
             }
           }
 
