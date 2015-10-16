@@ -35,7 +35,7 @@ root.onerror = reportError
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
-  queue && queue[name].length && queue[name].forEach(e => e())
+  queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
 const safeRun = fn => {
   if (process.env.production) fn()
   else {
@@ -179,11 +179,9 @@ function run(browserNode, userOpts, afterRenderCb) {
 
           this.styles = {}
           this.events = {
-            mount: [],
-            unmount: [],
-            update: [],
-            props: []
-          };
+            mount: null, unmount: null,
+            update: null, props: null
+          }
 
           const viewOn = (scope, name, cb) => {
             // check if they defined their own scope
@@ -227,6 +225,11 @@ function run(browserNode, userOpts, afterRenderCb) {
         componentWillUnmount() {
           this.didMount = false
           runEvents(this.events, 'unmount')
+        },
+
+        componentWillMount() {
+          // componentWillUpdate only runs after first render
+          runEvents(this.events, 'update')
         },
 
         componentWillUpdate() {

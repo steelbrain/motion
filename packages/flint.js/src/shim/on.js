@@ -12,7 +12,10 @@ function addListener(name, target, cb) {
 const onCb = (scope, name, cb) => {
   const finish = () => cb && cb()
 
-  if (scope.events && scope.events[name]) {
+  if (scope.events && scope.events[name] != 'undefined') {
+    if (!scope.events[name])
+      scope.events[name] = []
+
     scope.events[name].push(finish)
   }
   else
