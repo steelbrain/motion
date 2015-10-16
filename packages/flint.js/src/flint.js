@@ -177,6 +177,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           if (name == 'Main')
             Flint.mainView = this
 
+          this.firstRender = true
           this.styles = {}
           this.events = {
             mount: null, unmount: null,
@@ -229,12 +230,12 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         componentWillMount() {
           // componentWillUpdate only runs after first render
+          this.isUpdating = true
           runEvents(this.events, 'update')
         },
 
+        // we don't actually need this because we call forceupdate
         componentWillUpdate() {
-          this.isUpdating = true
-          runEvents(this.events, 'update')
         },
 
         componentDidUpdate() {
