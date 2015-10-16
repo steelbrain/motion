@@ -176,7 +176,8 @@ function run(browserNode, userOpts, afterRenderCb) {
           return (
             this.didMount &&
             !this.isUpdating &&
-            !this.isPaused
+            !this.isPaused &&
+            !this.firstRender
           )
         },
 
@@ -236,12 +237,12 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         componentWillMount() {
           // componentWillUpdate only runs after first render
-          this.isUpdating = true
           runEvents(this.events, 'update')
         },
 
-        // we don't actually need this because we call forceupdate
         componentWillUpdate() {
+          this.isUpdating = true
+          runEvents(this.events, 'update')
         },
 
         componentDidUpdate() {
@@ -270,6 +271,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         render() {
           let els
           const render = this.viewRender
+          this.firstRender = false
 
           safeRun(() => {
             els = render()
