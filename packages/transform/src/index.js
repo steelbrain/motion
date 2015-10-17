@@ -41,6 +41,7 @@ function niceJSXAttributes(name, obj) {
 export default function ({ Plugin, types: t }) {
   return new Plugin("flint-transform", {
     visitor: {
+      // TODO: finish rest of jsx stuff here
       JSXAttribute: {
         exit(node, parent, scope) {
           node.name.name = niceJSXAttributes(node.name.name, {

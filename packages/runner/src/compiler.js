@@ -18,10 +18,6 @@ var Parser = {
   post(file, source) {
     npm.scanFile(file, source)
 
-    let inView = false
-
-    // console.log(source)
-
     source = source.split("\n")
       .map(line => {
         // fix for jsx imports: <imported.default />
@@ -95,7 +91,6 @@ var Parser = {
         // store view contents for hashing
         if (inView) {
           result = result.replace(/\$\.([A-Za-z0-9]+\s*\=)/, '$_class_$1')
-
           currentView.contents.push(result)
         }
 
