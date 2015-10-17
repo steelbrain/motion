@@ -199,6 +199,10 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         getChildContext() {
+          // no need for paths/cache in production
+          if (process.env.production)
+            return {}
+
           let propsPath
 
           // get the props hash, but lets cache it so its not a ton of work
