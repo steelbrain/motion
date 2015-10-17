@@ -18,14 +18,20 @@ export default function ({ Plugin, types: t }) {
         exit(node, parent, scope, file) {
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
 
-          const isStyle = node.left && node.left.name && node.left.name == '$'
+          const isStyle = hasObjWithProp(node, '$')
           const skipUpdate = (
             hasObjWithProp(node, 'view', 'render') ||
-            hasObjWithProp(node, '$')
+            isStyle
           )
 
           if (isStyle)
-            return t.assignmentExpression(node.operator, `view.styles["${node.left.name}"]`, node.right)
+            return t.assignmentExpression(node.operator, node.left,
+              t.functionExpression(null, [t.identifier('_index')],
+                t.blockStatement([
+                  t.returnStatement(node.right)
+                ])
+              )
+            )
 
           const inView = scope.hasBinding("view")
 
