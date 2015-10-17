@@ -107,7 +107,7 @@ export default function ({ Plugin, types: t }) {
             }
 
             // if just object
-            if (t.isObjectExpression(node.right)) {
+            else if (t.isObjectExpression(node.right)) {
               let { statics, dynamics } = extractStatics(node.right)
 
               if (statics.length) {
@@ -124,6 +124,10 @@ export default function ({ Plugin, types: t }) {
               else {
                 return viewStyle(node, t.objectExpression(dynamics))
               }
+            }
+
+            else {
+              return viewStyle(node)
             }
           }
 

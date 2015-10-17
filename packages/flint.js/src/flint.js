@@ -37,12 +37,13 @@ const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
 
-function safeRun(fn) {
+function safeRun(prefix, fn) {
   if (process.env.production) fn()
   else {
     try { fn() }
     catch(e) {
       const { name, message, stack } = e
+      console.log('Error in', prefix)
       reportError({ name, message, stack })
       throw e
     }
@@ -285,7 +286,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           const render = this.viewRender
           this.firstRender = false
 
-          safeRun(() => {
+          safeRun(`${name}.render()`, () => {
             els = render()
           })
 

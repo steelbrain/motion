@@ -44,12 +44,19 @@ export default function elementStyles(key, view, name, tag, props) {
 
   if (view.styles) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
+    const diffName = name !== tag
     const hasTag = typeof tag == 'string'
     const tagStyle = hasTag && view.styles[prefix + tag]
 
     const viewStyle = view.styles[prefix]
+    const viewStaticStyle = view.styles._static[prefix]
     const nameStyle = view.styles[prefix + name]
-    const nameStaticStyle = view.styles._static[prefix + name]
+
+    let nameStaticStyle
+    const tagStaticStyle = view.styles._static[prefix + tag]
+
+    if (diffName)
+      nameStaticStyle = view.styles._static[prefix + name]
 
     const index = props.repeat ? key()[0] : void 0
     const uniqueTagId = view.entityId + name + tag
@@ -59,15 +66,18 @@ export default function elementStyles(key, view, name, tag, props) {
 
     // TODO: only try/catch in dev mode
     try {
-      result = Object.assign(
+      result = mergeStyles({},
         // tag style
         tagStyle ? tagStyle(index) : {},
         // base style
         isRoot && viewStyle && viewStyle(index),
+        isRoot && viewStaticStyle,
         // name dynamic styles
-        nameStyle && name !== tag && nameStyle(index),
+        nameStyle && diffName && nameStyle(index),
+        // tag static
+        tagStaticStyle,
         // name static
-        nameStaticStyle
+        nameStaticStyle,
       )
 
       // add class styles
@@ -103,13 +113,17 @@ export default function elementStyles(key, view, name, tag, props) {
       if (props.style)
         result = mergeStyles(null, result, props.style)
 
+      // apply view internal $ styles
+      if (name.indexOf('Flint.') == 0)
+        result = mergeStyles(null, result, view.styles._static.$, view.styles.$)
+
+      // add view external props.style
+      if (isRoot && view.props.style)
+        result = mergeStyles(null, result, view.props.style)
+
       // put styles back into props.style
       if (result)
         props.style = result
-
-      // apply view styles if this is wrapper
-      if (view.styles.view && name.indexOf('Flint.') == 0)
-        Object.assign(props.style, view.styles._static.view || {}, view.styles.view)
 
       // cache styles
       cachedStyles[uniqueTagId] = result
@@ -158,11 +172,6 @@ export default function elementStyles(key, view, name, tag, props) {
       else
         ps.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
     }
-  }
-
-  // add view external (prop) styles
-  if (isRoot && view.props.style && name !== 'Flint.Wrapper') {
-    props.style = Object.assign(props.style || {}, view.props.style)
   }
 
   // set body bg to Main view bg
