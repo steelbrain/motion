@@ -20,7 +20,7 @@ const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
 const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
 const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
-const fileSuffix = ';return exports }) }();'
+const fileSuffix = ' }) }();'
 
 const replaceSync = (match, inner) =>
   ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')

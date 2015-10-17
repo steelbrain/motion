@@ -133,7 +133,8 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.currentHotFile = file
 
       // run view, get exports
-      let fileExports = run({})
+      let fileExports = {}
+      run(fileExports)
       Flint.setExports(fileExports)
 
       const cached = Flint.viewCache[file] || []
