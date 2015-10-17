@@ -31,7 +31,7 @@ release_all() {
 if [ $1 = "all" ]; then
   release_all
 elif [ $1 = "tools" ]; then
-  relase_tools
+  release_tools
 else
   release_package packages/$1
 fi
