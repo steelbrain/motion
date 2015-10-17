@@ -200,7 +200,9 @@ function run(browserNode, userOpts, afterRenderCb) {
         getChildContext() {
           let propsPath
 
-          if (options.changed === true) {
+          if (!this.propsPath)
+            this.propsPath = propsHash(this.props)
+          else if (options.changed === true) {
             // get the props hash, but lets cache it so its not a ton of work
             this.propsPath = propsHash(this.props)
             // 2 == no need to recalc props hash again
