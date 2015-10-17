@@ -45,8 +45,8 @@ export default function ({ Plugin, types: t }) {
           // const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           // if (!isBasicAssign) return
 
+          // styles
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
-
           if (isStyle)
             return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
               t.functionExpression(null, [t.identifier('_index')],
@@ -56,11 +56,11 @@ export default function ({ Plugin, types: t }) {
               )
             )
 
+          // view.update
           const inView = isInView(scope)
           const skipUpdate = (
             hasObjWithProp(node, 'view', 'render')
           )
-
           if (inView && !skipUpdate)
             return viewUpdateExpression(t, node)
         }
