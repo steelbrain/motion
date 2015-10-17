@@ -79,23 +79,68 @@ export default function ({ Plugin, types: t }) {
       },
 
       AssignmentExpression: {
-        exit(node, parent, scope) {
-          const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
-          if (!isBasicAssign) return
-
-          const inView = isInView(scope)
-          const skipUpdate = hasObjWithProp(node, 'view', 'render')
+        enter(node) {
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // styles
           if (isStyle)
+            return styleAssignment(node)
+
+          // splits styles into static/dynamic pieces
+          function styleAssignment(node) {
+            if (t.isObjectExpression(node.right)) {
+              let staticProps = []
+              let dynamicProps = []
+
+              // TODO: check isLiteral for key as well?
+              for (let prop of node.right.properties) {
+                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key))
+                  staticProps.push(prop)
+                else
+                  dynamicProps.push(prop)
+              }
+
+              if (staticProps.length) {
+                const staticStatement = t.expressionStatement(t.assignmentExpression(node.operator,
+                  t.identifier(`view.styles.static["${node.left.name}"]`),
+                  t.objectExpression(staticProps)
+                ))
+
+                if (dynamicProps.length)
+                  return [
+                    staticStatement,
+                    t.expressionStatement(viewStyle(node, t.objectExpression(dynamicProps)))
+                  ]
+                else
+                  return staticStatement
+              }
+              else {
+                return viewStyle(node, t.objectExpression(dynamicProps))
+              }
+            }
+          }
+
+          function viewStyle(node, right) {
             return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
               t.functionExpression(null, [t.identifier('_index')],
                 t.blockStatement([
-                  t.returnStatement(node.right)
+                  t.returnStatement(right || node.right)
                 ])
               )
             )
+          }
+        },
+
+        exit(node, parent, scope) {
+          const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
+          if (!isBasicAssign) return
+
+          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('view.styles') == 0
+          if (isAlreadyStyle) return
+
+          const inView = isInView(scope)
+          const skipUpdate = hasObjWithProp(node, 'view', 'render')
+          const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // add getter
           if (scope.hasOwnBinding('view') && !skipUpdate && node.operator === "=") {
