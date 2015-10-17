@@ -19,7 +19,7 @@ const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
 const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
-const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) { "use strict";`
 const fileSuffix = ' }) }();'
 
 const replaceSync = (match, inner) =>
