@@ -21,7 +21,7 @@ export default function run(b, opts) {
 }
 
 export function compileError(error) {
-  console.log('compile error', unflint(error.stack))
+  console.log('compile error', unflint(error.stack).split("\n").splice(0, 10).join("\n"))
   if (error.loc) {
     const { message, fileName, loc, stack } = error;
     browserData({ message, stack, file: fileName, line: loc.line, col: loc.column });

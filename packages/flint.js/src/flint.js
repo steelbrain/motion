@@ -118,17 +118,24 @@ function run(browserNode, userOpts, afterRenderCb) {
     viewsInFile: {},
     // current file that is running
     currentHotFile: null,
+    // if a file updates but view doesnt change,
+    // we update its render to pick up changed variables in the file
+    currentRender: {},
     // track first render
     firstRender: true,
+    // for use in jsx
+    debug: () => {
+      debugger
+    },
 
     file(file, run) {
       Flint.viewsInFile[file] = []
       Flint.currentHotFile = file
-      let fileExports
 
-      fileExports = run({})
-
+      // run view, get exports
+      let fileExports = run({})
       Flint.setExports(fileExports)
+
       const cached = Flint.viewCache[file] || []
       const views = Flint.viewsInFile[file]
 
@@ -139,8 +146,8 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.currentHotFile = null
       Flint.viewCache[file] = Flint.viewsInFile[file]
 
-      if (Flint.firstRender)
-        return
+      // avoid tons of renders on start
+      if (Flint.firstRender) return
 
       raf(() => {
         Flint.isLoadingFile = true
@@ -323,14 +330,10 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       // if new
       if (Flint.views[name] == undefined) {
-        let fComponent = Flint.makeReactComponent(name, component, {
-          isNew: true,
-          hash
-        });
-
-        Flint.views[name] = Flint.makeView(hash, fComponent);
+        let Component = Flint.makeReactComponent(name, component, { hash });
+        Flint.views[name] = Flint.makeView(hash, Component);
         Flint.lastWorkingView[name] = Flint.views[name].component;
-        setComponent(name, fComponent) // puts on namespace
+        setComponent(name, Component) // puts on namespace
         return
       }
 
@@ -344,8 +347,13 @@ function run(browserNode, userOpts, afterRenderCb) {
       }
 
       // if unchanged
-      if (Flint.views[name].hash == hash)
+      if (Flint.views[name].hash == hash) {
+        // whats this? see: https://github.com/flintjs/flint/issues/7
+        // let Component = Flint.makeReactComponent(name, component, { hash })
+        // let hide = document.createElement('div')
+        // ReactDOM.render(<Component />, hide)
         return
+      }
 
       // start with a success and an error will fire before next frame
       if (root._DT)
@@ -380,10 +388,10 @@ function run(browserNode, userOpts, afterRenderCb) {
           Flint.lastWorkingView[name] = Flint.views[name].component
       })
 
-      let flintComponent = Flint.makeReactComponent(name, component, { isChanged: true })
+      let flintComponent = Flint.makeReactComponent(name, component)
       setView(name, flintComponent)
 
-      // tools errors todo
+      // this resets tool errors
       window.onViewLoaded()
     },
 

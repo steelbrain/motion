@@ -20,6 +20,7 @@
     "flint-js": "^1.1.0",
     "flint-react-tools": "^0.13.0",
     "flint-tools": "^1.0.0",
+    "flint-transform": "^1.0.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-if": "^1.2.5",

@@ -57,6 +57,7 @@ packages.forEach(function (pkg) {
   var nodeModulesLoc = "packages/" + pkg.folder + "/node_modules";
   mkdir("-p", nodeModulesLoc);
 
+  // link them out
   packages.forEach(function (sub) {
     if (!pkg.pkg.dependencies || !pkg.pkg.dependencies[sub.name]) return;
 
@@ -69,6 +70,7 @@ packages.forEach(function (pkg) {
   cd("packages/" + pkg.folder)
   exec("npm install")
 
+  // link them in
   pkg.links.forEach(function(link) {
     console.log('LINKING IN ', link)
     exec("npm link " + link)

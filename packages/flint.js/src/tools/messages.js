@@ -56,17 +56,17 @@ export default function run(browser, opts) {
   }
 }
 
-let lastLoadedScript = {};
+let lastLoadedAt = {};
 
 function addScript(message, cb) {
   const { name, timestamp, src } = message;
 
-  if (!lastLoadedScript[name] || lastLoadedScript[name] < timestamp) {
-    lastLoadedScript[name] = timestamp;
+  if (!lastLoadedAt[name] || lastLoadedAt[name] < timestamp) {
+    lastLoadedAt[name] = timestamp;
 
     const body = document.getElementsByTagName('body')[0];
     const script = document.createElement('script');
-    script.src = src || '/_' + name;
+    script.src = (src || '/_' + name) + "?" + timestamp;
     body.appendChild(script);
 
     script.onload = cb;
