@@ -36,8 +36,8 @@ function niceJSXAttributes(name, obj) {
 
 export default function ({ Plugin, types: t }) {
 
-  function viewUpdateExpression(node) {
-    return t.callExpression(t.identifier('view.update'), [node])
+  function viewUpdateExpression(name, node) {
+    return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
   }
 
   function viewGetter(name, val) {
@@ -61,7 +61,7 @@ export default function ({ Plugin, types: t }) {
         exit(node, parent, scope) {
           // mutative array methods
           if (isInView(scope) && isMutativeArrayFunc(node))
-            return viewUpdateExpression(node)
+            return viewUpdateExpression(node.callee.property.name, node)
         }
       },
 
@@ -183,19 +183,19 @@ export default function ({ Plugin, types: t }) {
 
           // add getter
           if (scope.hasOwnBinding('view') && !skipUpdate && node.operator === "=") {
-            node.right = t.callExpression(t.identifier('view.get'), [node.right])
+            node.right = t.callExpression(t.identifier('view.get'), [t.literal(node.left.name), node.right])
           }
 
-          // view.update
+          // view.set
           if (inView && !skipUpdate)
-            return viewUpdateExpression(node)
+            return viewUpdateExpression(node.left.name, node)
         }
       },
 
       UpdateExpression: {
         exit(node) {
           if (node.operator == '++' || node.operator == '--')
-            return viewUpdateExpression(node)
+            return viewUpdateExpression(node.argument.name, node)
         }
       }
     }

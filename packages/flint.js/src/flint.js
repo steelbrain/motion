@@ -172,6 +172,9 @@ function run(browserNode, userOpts, afterRenderCb) {
       debugger
     },
 
+    // stores { path: { name: val } } for use in view.get()
+    getCache: {},
+
     makeReactComponent(name, component, options = {}) {
       const el = createElement(name)
 
@@ -181,24 +184,48 @@ function run(browserNode, userOpts, afterRenderCb) {
         el,
         Flint,
 
+        childContextTypes: {
+          path: React.PropTypes.string
+        },
+
+        contextTypes: {
+          path: React.PropTypes.string
+        },
+
+        getChildContext() {
+          return {
+            path: (this.context.path || '') + name + '$'
+          }
+        },
+
         shouldUpdate() {
           return (
-            this.didMount &&
-            !this.isUpdating &&
-            !this.isPaused &&
-            !this.firstRender
+            this.didMount && !this.isUpdating &&
+            !this.isPaused && !this.firstRender
           )
         },
 
-        update() {
-          // if (this.isUpdating)
-            // raf(() => this.update())
+        set(name, val) {
+          Flint.getCache[this.path] = Flint.getCache[this.path] || {}
+          Flint.getCache[this.path][name] = val
+
           if (this.shouldUpdate())
             this.forceUpdate()
         },
 
         get(name, val) {
-          return val
+          // if hot reloaded but not changed
+          if (options.unchanged) {
+            return Flint.getCache[this.path][name]
+          }
+          else {
+            // on first get, we may not have even set
+            if (!Flint.getCache[this.path]) Flint.getCache[this.path] = {}
+            if (typeof Flint.getCache[this.path][name] == 'undefined')
+              Flint.getCache[this.path][name] = val
+
+            return val
+          }
         },
 
         // LIFECYCLES
@@ -206,6 +233,11 @@ function run(browserNode, userOpts, afterRenderCb) {
         getInitialState() {
           if (name == 'Main')
             Flint.mainView = this
+
+          this.path = (this.context.path || '') + name
+
+          if (!options.unchanged)
+            delete Flint.getCache[this.path]
 
           this.firstRender = true
           this.styles = { _static: {} }
@@ -269,7 +301,6 @@ function run(browserNode, userOpts, afterRenderCb) {
         resume() { this.isPaused = false },
 
         // helpers for context
-        childContextTypes: {},
         childContext(obj) {
           if (!obj) return
 
@@ -334,12 +365,17 @@ function run(browserNode, userOpts, afterRenderCb) {
     view(name, hash, component) {
       Flint.viewsInFile[Flint.currentHotFile].push(name)
 
+      function setView(name, Component) {
+        Flint.views[name] = Flint.makeView(hash, Component)
+        setComponent(name, Component)
+        if (Flint.firstRun) return
+      }
+
       // if new
       if (Flint.views[name] == undefined) {
         let Component = Flint.makeReactComponent(name, component, { hash });
-        Flint.views[name] = Flint.makeView(hash, Component);
-        Flint.lastWorkingView[name] = Flint.views[name].component;
-        setComponent(name, Component) // puts on namespace
+        setView(name, Component)
+        Flint.lastWorkingView[name] = Flint.views[name].component
         return
       }
 
@@ -354,24 +390,14 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       // if unchanged
       if (Flint.views[name].hash == hash) {
-        // whats this? see: https://github.com/flintjs/flint/issues/7
-        // let Component = Flint.makeReactComponent(name, component, { hash })
-        // let hide = document.createElement('div')
-        // ReactDOM.render(<Component />, hide)
+        let Component = Flint.makeReactComponent(name, component, { hash, unchanged: true });
+        setView(name, Component)
         return
       }
 
       // start with a success and an error will fire before next frame
       if (root._DT)
         root._DT.emitter.emit('runtime:success')
-
-      // if changed
-
-      const setView = (name, flintComponent) => {
-        Flint.views[name] = Flint.makeView(hash, flintComponent)
-        setComponent(name, flintComponent) // puts on namespace
-        if (Flint.firstRun) return
-      }
 
       let viewRanSuccessfully = true
 
