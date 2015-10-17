@@ -10,6 +10,34 @@ let views = []
 let emit
 let OPTS
 
+const isNotIn = (x,y) => x.indexOf(y) == -1
+
+// this is missing the first brace ")" instead of "})"
+// because this is being *added* to the line, which is previously }
+const viewEnd = name => `)`
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
+const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
+
+const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
+const fileSuffix = ';return exports }) }();'
+
+const replaceSync = (match, inner) =>
+  ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
+
+const makeHash = (str) =>
+  str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+
+const viewOpen = (name, hash, params) =>
+  'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
+
+const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*\{/g
+
+const viewReplacer = (match, name, params) => {
+  const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
+  return viewOpen(name, hash, params);
+}
+
 var Parser = {
   init(opts) {
     OPTS = opts || {}
@@ -44,8 +72,6 @@ var Parser = {
 
     source = source
       .replace(/\^/g, 'view.props.')
-      .replace(/\+\+/g, '+= 1')
-      .replace(/\-\-/g, '-= 1')
       .split("\n")
       .map((line, index) => {
         if (line.charAt(0) == "\t")
@@ -148,34 +174,6 @@ function compile(type, opts = {}) {
 
     cb();
   })
-}
-
-const isNotIn = (x,y) => x.indexOf(y) == -1
-
-// this is missing the first brace ")" instead of "})"
-// because this is being *added* to the line, which is previously }
-const viewEnd = name => `)`
-const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
-const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
-
-const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
-const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) {`
-const fileSuffix = ';return exports }) }();'
-
-const replaceSync = (match, inner) =>
-  ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
-
-const makeHash = (str) =>
-  str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
-
-const viewOpen = (name, hash, params) =>
-  'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
-
-const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*\{/g
-
-const viewReplacer = (match, name, params) => {
-  const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
-  return viewOpen(name, hash, params);
 }
 
 export default compile

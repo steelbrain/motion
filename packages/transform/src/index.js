@@ -25,10 +25,6 @@ function isMutativeArrayFunc(node) {
   return (name && mutativeFuncs.indexOf(name) >= 0)
 }
 
-function viewUpdateExpression(t, node) {
-  return t.callExpression(t.identifier('view.update'), [node])
-}
-
 function niceJSXAttributes(name, obj) {
   for (let key in obj) {
     if (name == obj[key]) {
@@ -39,6 +35,11 @@ function niceJSXAttributes(name, obj) {
 }
 
 export default function ({ Plugin, types: t }) {
+
+  function viewUpdateExpression(node) {
+    return t.callExpression(t.identifier('view.update'), [node])
+  }
+
   return new Plugin("flint-transform", {
     visitor: {
       // TODO: finish rest of jsx stuff here
@@ -56,7 +57,7 @@ export default function ({ Plugin, types: t }) {
         exit(node, parent, scope) {
           // mutative array methods
           if (isInView(scope) && isMutativeArrayFunc(node))
-            return viewUpdateExpression(t, node)
+            return viewUpdateExpression(node)
         }
       },
 
@@ -82,7 +83,14 @@ export default function ({ Plugin, types: t }) {
             hasObjWithProp(node, 'view', 'render')
           )
           if (inView && !skipUpdate)
-            return viewUpdateExpression(t, node)
+            return viewUpdateExpression(node)
+        }
+      },
+
+      UpdateExpression: {
+        exit(node) {
+          if (node.operator == '++' || node.operator == '--')
+            return viewUpdateExpression(node)
         }
       }
     }
