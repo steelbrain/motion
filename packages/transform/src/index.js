@@ -40,6 +40,10 @@ export default function ({ Plugin, types: t }) {
     return t.callExpression(t.identifier('view.update'), [node])
   }
 
+  function viewGetter(name, val) {
+    return t.callExpression(t.identifier('view.get'), [t.literal(name), val])
+  }
+
   return new Plugin("flint-transform", {
     visitor: {
       // TODO: finish rest of jsx stuff here
@@ -61,13 +65,29 @@ export default function ({ Plugin, types: t }) {
         }
       },
 
+      VariableDeclaration: {
+        exit(node, parent, scope) {
+          // add getter
+          if (scope.hasOwnBinding('view') && node.kind != 'const') {
+            node.declarations.map(dec => {
+              if (!dec.init) return dec
+              dec.init = viewGetter(dec.id.name, dec.init)
+              return dec
+            })
+          }
+        }
+      },
+
       AssignmentExpression: {
         exit(node, parent, scope) {
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
 
-          // styles
+          const inView = isInView(scope)
+          const skipUpdate = hasObjWithProp(node, 'view', 'render')
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
+
+          // styles
           if (isStyle)
             return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
               t.functionExpression(null, [t.identifier('_index')],
@@ -77,11 +97,12 @@ export default function ({ Plugin, types: t }) {
               )
             )
 
+          // add getter
+          if (scope.hasOwnBinding('view') && !skipUpdate && node.operator === "=") {
+            node.right = t.callExpression(t.identifier('view.get'), [node.right])
+          }
+
           // view.update
-          const inView = isInView(scope)
-          const skipUpdate = (
-            hasObjWithProp(node, 'view', 'render')
-          )
           if (inView && !skipUpdate)
             return viewUpdateExpression(node)
         }

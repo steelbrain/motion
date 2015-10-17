@@ -196,6 +196,10 @@ function run(browserNode, userOpts, afterRenderCb) {
             this.forceUpdate()
         },
 
+        get(name, val) {
+          return val
+        },
+
         // LIFECYCLES
 
         getInitialState() {
