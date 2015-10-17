@@ -10,13 +10,6 @@ let views = []
 let emit
 let OPTS
 
-const post = {
-  viewStart: 'Flint.view("',
-  viewEnd: '/* end view:',
-  viewUpdateStart: /view.update\(/g,
-  viewUpdateEnd: /\) \/\*_end_view_update_\*\//g
-}
-
 var Parser = {
   init(opts) {
     OPTS = opts || {}
@@ -36,24 +29,6 @@ var Parser = {
           .replace('["default"]', '.default')
           .replace("['default']", '.default')
 
-        // detect views
-        const viewStartsAt = result.indexOf(post.viewStart)
-        const viewEndsAt = result.indexOf(post.viewEnd)
-
-        if (viewStartsAt >= 0)
-          inView = true
-        if (inView && viewEndsAt > 0)
-          inView = false
-
-        // remove non-view updates
-        if (!inView)
-          result = result
-            .replace(post.viewUpdateStart, '')
-            .replace(post.viewUpdateEnd, '')
-
-        // strip extra view.update comments
-        result = result.replace(/\s*\/\*_end_view_update_\*\/\s*/g, '')
-
         return result
       })
       .join("\n")
@@ -68,9 +43,8 @@ var Parser = {
     let inView = false
     let fileViews = []
 
-    const startRender = () => `view.render = () => { return (${startWrapper()}`
-    const startWrapper = () => `<${getWrapper(currentView.name)} view={view}>`
-    const endRender = () => `</${getWrapper(currentView.name)}>); }; \n`
+    const startRender = () => `view.render = () => <${getWrapper(currentView.name)} view={view}>`
+    const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
     source = source
       .replace(/\^/g, 'view.props.')
@@ -185,7 +159,7 @@ const isNotIn = (x,y) => x.indexOf(y) == -1
 
 // this is missing the first brace ")" instead of "})"
 // because this is being *added* to the line, which is previously }
-const viewEnd = name => `); /* end view: ${name} */; \n`
+const viewEnd = name => `)`
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
@@ -196,15 +170,14 @@ const fileSuffix = ';return exports }) }();'
 const replaceSync = (match, inner) =>
   ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
 
-const storeReplacer = (match, name) =>
-  ['_stores.', name, ' = function _flintStore() { '].join('')
-
 const makeHash = (str) =>
   str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
 
 const viewOpen = (name, hash, params) =>
   'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
+
 const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
+
 const viewReplacer = (match, name, params) => {
   const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
   return viewOpen(name, hash, params);

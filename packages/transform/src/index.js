@@ -18,14 +18,10 @@ export default function ({ Plugin, types: t }) {
         exit(node, parent, scope, file) {
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
 
-          const isStyle = hasObjWithProp(node, '$')
-          const skipUpdate = (
-            hasObjWithProp(node, 'view', 'render') ||
-            isStyle
-          )
+          const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           if (isStyle)
-            return t.assignmentExpression(node.operator, node.left,
+            return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
               t.functionExpression(null, [t.identifier('_index')],
                 t.blockStatement([
                   t.returnStatement(node.right)
@@ -34,6 +30,9 @@ export default function ({ Plugin, types: t }) {
             )
 
           const inView = scope.hasBinding("view")
+          const skipUpdate = (
+            hasObjWithProp(node, 'view', 'render')
+          )
 
           if (inView && !skipUpdate)
             return t.callExpression(t.identifier('view.update'), [node])
@@ -42,27 +41,3 @@ export default function ({ Plugin, types: t }) {
     }
   });
 }
-
-
-
-        // return t.callExpression(t.identifier('view.update'), [t.literal('hello')])
-
-        // // styles not wrapped
-        // if (isBasicAssign)
-        //   if (isStyle)
-        //     this.insertBefore('view.styles.')
-        //   else
-        //     if (!skipUpdate)
-        //       this.insertBefore("view.update(");
-        //
-        // if (isStyle)
-        //   this.insertBefore('function(_index) { return ')
-        //
-        // if (isStyle)
-        //   this.insertAfter('}')
-        //
-        // if (isBasicAssign && !isStyle && !skipUpdate)
-        //   this.insertAfter(") /*_end_view_update_*/")
-
-        //   console.log(result.join(''))
-        // return t.expressionStatement(result.join(''))

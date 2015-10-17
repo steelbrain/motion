@@ -190,10 +190,11 @@ const $p = {
   },
   babel: babel({
     stage: 2,
-    blacklist: ['flow', 'react', 'es6.tailCall'],
+    blacklist: ['flow', 'react', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
-    optional: ['bluebirdCoroutines']
+    optional: ['bluebirdCoroutines'],
+    plugins: [require('flint-transform')]
   }),
   react: react({
     stripTypes: true,
