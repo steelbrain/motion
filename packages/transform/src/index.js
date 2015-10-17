@@ -29,9 +29,28 @@ function viewUpdateExpression(t, node) {
   return t.callExpression(t.identifier('view.update'), [node])
 }
 
+function niceJSXAttributes(name, obj) {
+  for (let key in obj) {
+    if (name == obj[key]) {
+      return key
+    }
+  }
+  return name
+}
+
 export default function ({ Plugin, types: t }) {
   return new Plugin("flint-transform", {
     visitor: {
+      JSXAttribute: {
+        exit(node, parent, scope) {
+          node.name.name = niceJSXAttributes(node.name.name, {
+            className: 'class',
+            htmlFor: 'for',
+            srcSet: 'srcset'
+          })
+        }
+      },
+
       CallExpression: {
         exit(node, parent, scope) {
           // mutative array methods
