@@ -1,3 +1,4 @@
+const flintAddedLines = 1
 const tools = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 const propsMatch = /view\.props\./g
@@ -136,7 +137,7 @@ view ErrorMessage {
   <inner if={^error}>
     <where>
       {fileName(^error.file || ^error.fileName)}
-      {line ? ` line ${line}` : ''}
+      {line ? ` line ${line - flintAddedLines}` : ''}
     </where>
     {' '}
     <errorTitle>
