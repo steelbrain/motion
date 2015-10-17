@@ -49,6 +49,7 @@ export default function elementStyles(key, view, name, tag, props) {
 
     const viewStyle = view.styles[prefix]
     const nameStyle = view.styles[prefix + name]
+    const nameStaticStyle = view.styles._static[prefix + name]
 
     const index = props.repeat ? key()[0] : void 0
     const uniqueTagId = view.entityId + name + tag
@@ -63,8 +64,10 @@ export default function elementStyles(key, view, name, tag, props) {
         tagStyle ? tagStyle(index) : {},
         // base style
         isRoot && viewStyle && viewStyle(index),
-        // name styles
-        nameStyle && name !== tag && nameStyle(index)
+        // name dynamic styles
+        nameStyle && name !== tag && nameStyle(index),
+        // name static
+        nameStaticStyle
       )
 
       // add class styles
@@ -76,11 +79,11 @@ export default function elementStyles(key, view, name, tag, props) {
 
           // $.class = {}
           if (view.styles[justClass])
-            result = mergeStyles(null, result, view.styles[justClass](index))
+            result = mergeStyles(null, result, view.styles[justClass](index), view.styles._static[justClass])
 
           // $name.class = {}
           if (view.styles[nameAndClass])
-            result = mergeStyles(null, result, view.styles[nameAndClass](index))
+            result = mergeStyles(null, result, view.styles[nameAndClass](index), view.styles._static[nameAndClass])
         })
       }
 
@@ -106,7 +109,7 @@ export default function elementStyles(key, view, name, tag, props) {
 
       // apply view styles if this is wrapper
       if (view.styles.view && name.indexOf('Flint.') == 0)
-        Object.assign(props.style, view.styles.view)
+        Object.assign(props.style, view.styles._static.view || {}, view.styles.view)
 
       // cache styles
       cachedStyles[uniqueTagId] = result

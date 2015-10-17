@@ -207,7 +207,7 @@ function run(browserNode, userOpts, afterRenderCb) {
             Flint.mainView = this
 
           this.firstRender = true
-          this.styles = {}
+          this.styles = { _static: {} }
           this.events = {
             mount: null, unmount: null,
             update: null, props: null
