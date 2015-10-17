@@ -220,14 +220,19 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         set(name, val) {
-          Flint.getCache[this.path] = Flint.getCache[this.path] || {}
-          Flint.getCache[this.path][name] = val
+          if (!process.env.production) {
+            Flint.getCache[this.path] = Flint.getCache[this.path] || {}
+            Flint.getCache[this.path][name] = val
+          }
 
           if (this.shouldUpdate())
             this.forceUpdate()
         },
 
         get(name, val) {
+          if (process.env.production)
+            return val
+
           // if hot reloaded but not changed
           if (options.unchanged) {
             if (Flint.getCache[this.path])
