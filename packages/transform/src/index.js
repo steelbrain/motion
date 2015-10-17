@@ -44,6 +44,13 @@ export default function ({ Plugin, types: t }) {
     return t.callExpression(t.identifier('view.get'), [t.literal(name), val])
   }
 
+  function addGetter(node, scope) {
+    if (scope.hasOwnBinding('view')) {
+      node.right = viewGetter(node.left.name, node.right)
+    }
+    return node
+  }
+
   return new Plugin("flint-transform", {
     visitor: {
       // TODO: finish rest of jsx stuff here
@@ -70,7 +77,10 @@ export default function ({ Plugin, types: t }) {
           // add getter
           if (scope.hasOwnBinding('view') && node.kind != 'const') {
             node.declarations.map(dec => {
-              if (!dec.init) return dec
+              if (!dec.init) {
+                dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
+                return dec
+              }
               dec.init = viewGetter(dec.id.name, dec.init)
               return dec
             })
@@ -178,16 +188,15 @@ export default function ({ Plugin, types: t }) {
           if (isAlreadyStyle) return
 
           const inView = isInView(scope)
-          const skipUpdate = hasObjWithProp(node, 'view', 'render')
+          const isRender = hasObjWithProp(node, 'view', 'render')
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // add getter
-          if (scope.hasOwnBinding('view') && !skipUpdate && node.operator === "=") {
-            node.right = t.callExpression(t.identifier('view.get'), [t.literal(node.left.name), node.right])
-          }
+          if (!isRender)
+            node = addGetter(node, scope)
 
           // view.set
-          if (inView && !skipUpdate)
+          if (inView && !isRender)
             return viewUpdateExpression(node.left.name, node)
         }
       },
