@@ -179,6 +179,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
     // stores { path: { name: val } } for use in view.get()
     getCache: {},
+    propsHashes: {},
 
     makeReactComponent(name, component, options = {}) {
       const el = createElement(name)
@@ -200,13 +201,17 @@ function run(browserNode, userOpts, afterRenderCb) {
         getChildContext() {
           let propsPath
 
-          if (!this.propsPath)
+          // get the props hash, but lets cache it so its not a ton of work
+          if (options.changed === true) {
             this.propsPath = propsHash(this.props)
-          else if (options.changed === true) {
-            // get the props hash, but lets cache it so its not a ton of work
-            this.propsPath = propsHash(this.props)
-            // 2 == no need to recalc props hash again
+            Flint.propsHashes[this.context.path] = this.propsPath
             options.changed = 2
+          }
+          else if (!this.propsPath) {
+            this.propsPath = (
+              Flint.propsHashes[this.context.path] ||
+              propsHash(this.props)
+            )
           }
 
           return {
