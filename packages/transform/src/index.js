@@ -42,8 +42,8 @@ export default function ({ Plugin, types: t }) {
 
       AssignmentExpression: {
         exit(node, parent, scope) {
-          // const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
-          // if (!isBasicAssign) return
+          const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
+          if (!isBasicAssign) return
 
           // styles
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
