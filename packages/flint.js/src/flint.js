@@ -1,3 +1,4 @@
+import hash from 'hash-sum'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
@@ -105,6 +106,10 @@ function run(browserNode, userOpts, afterRenderCb) {
   const getComponent = (key) => opts.namespace[key]
   const emitter = ee({})
 
+  function propsHash(obj) {
+    return hash(obj)
+  }
+
   let Flint = {
     views: {},
     lastWorkingView: {},
@@ -193,8 +198,17 @@ function run(browserNode, userOpts, afterRenderCb) {
         },
 
         getChildContext() {
+          let propsPath
+
+          if (options.changed === true) {
+            // get the props hash, but lets cache it so its not a ton of work
+            this.propsPath = propsHash(this.props)
+            // 2 == no need to recalc props hash again
+            options.changed = 2
+          }
+
           return {
-            path: (this.context.path || '') + name + '$'
+            path: (this.context.path || '') + name + '$' + this.propsPath
           }
         },
 
@@ -216,7 +230,10 @@ function run(browserNode, userOpts, afterRenderCb) {
         get(name, val) {
           // if hot reloaded but not changed
           if (options.unchanged) {
-            return Flint.getCache[this.path][name]
+            if (Flint.getCache[this.path])
+              return Flint.getCache[this.path][name]
+            else
+              return val
           }
           else {
             // on first get, we may not have even set
@@ -373,7 +390,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       // if new
       if (Flint.views[name] == undefined) {
-        let Component = Flint.makeReactComponent(name, component, { hash });
+        let Component = Flint.makeReactComponent(name, component, { hash, changed: true });
         setView(name, Component)
         Flint.lastWorkingView[name] = Flint.views[name].component
         return
@@ -420,7 +437,7 @@ function run(browserNode, userOpts, afterRenderCb) {
           Flint.lastWorkingView[name] = Flint.views[name].component
       })
 
-      let flintComponent = Flint.makeReactComponent(name, component)
+      let flintComponent = Flint.makeReactComponent(name, component, { changed: true })
       setView(name, flintComponent)
 
       // this resets tool errors
