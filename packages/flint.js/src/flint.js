@@ -429,20 +429,6 @@ function run(browserNode, userOpts, afterRenderCb) {
     Flint
   }
 
-  // make mutative array methods trigger updates in views
-  const mutators = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
-  mutators.map(method => {
-    const vanilla = Array.prototype[method]
-
-    Array.prototype[method] = function(...args) {
-      const result = vanilla.apply(this, args)
-
-      // do view update
-
-      return result
-    }
-  })
-
   // set flint onto namespace
   opts.namespace.Flint = Flint;
 
