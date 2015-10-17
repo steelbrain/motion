@@ -176,7 +176,7 @@ const makeHash = (str) =>
 const viewOpen = (name, hash, params) =>
   'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
 
-const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*(\([a-zA-Z0-9,\{\}\:\; ]+\))?\s*\{/g
+const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*\{/g
 
 const viewReplacer = (match, name, params) => {
   const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
