@@ -88,58 +88,71 @@ export default function ({ Plugin, types: t }) {
 
           // splits styles into static/dynamic pieces
           function styleAssignment(node) {
+            // if array of objects
             if (t.isArrayExpression(node.right)) {
               let staticProps = []
-              let dynamicProps = []
 
-              node.right.elements.map(el => {
-                if (t.isObjectExpression(el)) {
-                  let { static, dynamic } = extractStatics(el)
-                  if (static.length) staticProps.push(static)
-                  if (dynamic.length) dynamicProps.push(dynamic)
-                }
-              })
+              node.right.elements = node.right.elements.map(el => {
+                if (!t.isObjectExpression(el)) return el
+                let { statics, dynamics } = extractStatics(el)
+                if (statics.length) staticProps = staticProps.concat(statics)
+                if (dynamics.length) return t.objectExpression(dynamics)
+                else return null
+              }).filter(x => x !== null)
 
-              return t.expressionStatement(
-                t.arrayExpression(node.right.elements)
-              )
+              return [
+                staticStyleStatement(node, t.objectExpression(staticProps)),
+                dynamicStyleStatement(node, node.right)
+              ]
             }
 
+            // if just object
             if (t.isObjectExpression(node.right)) {
-              let { static, dynamic } = extractStatics(node.right)
+              let { statics, dynamics } = extractStatics(node.right)
 
-              if (static.length) {
-                const staticStatement = t.expressionStatement(t.assignmentExpression(node.operator,
-                  t.identifier(`view.styles._static["${node.left.name}"]`),
-                  t.objectExpression(static)
-                ))
+              if (statics.length) {
+                const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
 
-                if (dynamic.length)
+                if (dynamics.length)
                   return [
                     staticStatement,
-                    t.expressionStatement(viewStyle(node, t.objectExpression(dynamic)))
+                    dynamicStyleStatement(node, t.objectExpression(dynamics))
                   ]
                 else
                   return staticStatement
               }
               else {
-                return viewStyle(node, t.objectExpression(dynamic))
+                return viewStyle(node, t.objectExpression(dynamics))
               }
             }
           }
 
+          // find statics/dynamics in object
           function extractStatics(node) {
-            let static = []
-            let dynamic = []
+            let statics = []
+            let dynamics = []
 
-            for (let prop of node.right.properties) {
+            for (let prop of node.properties) {
               if (t.isLiteral(prop.value) && t.isIdentifier(prop.key))
-                static.push(prop)
+                statics.push(prop)
               else
-                dynamic.push(prop)
+                dynamics.push(prop)
             }
 
-            return { static, dynamic }
+            return { statics, dynamics }
+          }
+
+          // view.styles._static["name"] = ...
+          function staticStyleStatement(node, statics) {
+            return t.expressionStatement(t.assignmentExpression(node.operator,
+              t.identifier(`view.styles._static["${node.left.name}"]`),
+              statics
+            ))
+          }
+
+          // view.styles["name"] = ...
+          function dynamicStyleStatement(node, dynamics) {
+            return t.expressionStatement(viewStyle(node, dynamics))
           }
 
           function viewStyle(node, right) {
