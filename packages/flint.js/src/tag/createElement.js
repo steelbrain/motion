@@ -35,9 +35,7 @@ const flatToCamel = {
 
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
-    if (!Array.isArray(identifier))
-      console.log(identifier)
-
+    // destructure array identifier
     const [fullname, key, index] = identifier
 
     if (!fullname)
