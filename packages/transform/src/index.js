@@ -96,7 +96,7 @@ export default function ({ Plugin, types: t }) {
 
             let rpt, iff
 
-            el.attributes.forEach(attr => {
+            for (let attr of el.attributes) {
               const name = attr.name && attr.name.name
               const expr = attr.value && attr.value.expression
 
@@ -116,7 +116,7 @@ export default function ({ Plugin, types: t }) {
                   ]))]
                 )
               }
-            })
+            }
 
             if (iff && rpt)
               return iff(rpt(node))
@@ -128,7 +128,6 @@ export default function ({ Plugin, types: t }) {
         }
       },
 
-      // TODO: finish rest of jsx stuff here
       JSXAttribute: {
         exit(node, parent, scope) {
           node.name.name = niceJSXAttributes(node.name.name, {
