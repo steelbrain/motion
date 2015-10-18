@@ -70,7 +70,7 @@ var Parser = {
     const startRender = () => `view.render = () => <${getWrapper(currentView.name)} view={view}>`
     const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
-    source = source
+    source = `/** @jsx view.el */` + source
       .replace(/\^/g, 'view.props.')
       .split("\n")
       .map((line, index) => {
@@ -108,7 +108,7 @@ var Parser = {
         if (inJSX) {
           result = result
             .replace(/\sclass=([\"\{\'])/g, ' className=$1')
-            .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
+            // .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           // allow for starting comments
           if (isComment(result)) result = ''

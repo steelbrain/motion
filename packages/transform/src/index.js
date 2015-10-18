@@ -51,20 +51,48 @@ export default function ({ Plugin, types: t }) {
     return node
   }
 
+  function nodeToNameString(node) {
+    if (typeof node.name.name == 'string') return node.name.name
+
+    if (t.isJSXMemberExpression(node.name)) {
+      return `${node.name.object.name}.${node.name.property.name}`
+    }
+  }
+
   return new Plugin("flint-transform", {
     visitor: {
       JSXElement: {
         exit(node, parent, scope) {
+          if (node.processedByFlint) return
+          node.processedByFlint = true
+
           const el = node.openingElement
-          if (el.processedByFlint) return
-          el.processedByFlint = true
+          const name = nodeToNameString(el)
+          console.log('name is', name)
+          const isCapitalized = name.charAt(0).toUpperCase() == name.charAt(0)
+
+          // process name (if view not in scope)
+          if (isCapitalized && !scope.hasBinding(name)) {
+            el.name = t.literal(name)
+
+            // t.objectExpression([t.property('init',
+
+            // )])
+          }
+
+          // process attributes
+
           if (!el.attributes) return
 
           let rpt, iff
 
           el.attributes.forEach(attr => {
-            const name = attr.name.name
-            const expr = attr.value.expression
+            const name = attr.name && attr.name.name
+            const expr = attr.value && attr.value.expression
+
+            if ((name == 'if' || name == 'repeat') && (!expr || !name)) {
+              throw new Error(`Invalid value provided for ${name} JSX tag`)
+            }
 
             if (name == 'if') {
               iff = _node => t.logicalExpression('&&', expr, _node)
@@ -82,9 +110,9 @@ export default function ({ Plugin, types: t }) {
 
           if (iff && rpt)
             return iff(rpt(node))
-          else if (iff)
+          if (iff)
             return iff(node)
-          else if (rpt)
+          if (rpt)
             return rpt(node)
         }
       },

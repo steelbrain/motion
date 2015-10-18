@@ -190,15 +190,11 @@ const $p = {
   },
   babel: babel({
     stage: 2,
-    blacklist: ['flow', 'react', 'es6.tailCall', 'strict'],
+    blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
     optional: ['bluebirdCoroutines'],
     plugins: [require('flint-transform')]
-  }),
-  react: react({
-    stripTypes: true,
-    es6module: true
   }),
   buildWrap: () => multipipe(
     $.concat(`${OPTS.name}.js`),
@@ -250,7 +246,6 @@ function buildScripts(cb, stream) {
     .pipe($.if(!stream,
       $.rename({ extname: '.js' })
     ))
-    .pipe($p.react)
     .pipe(pipefn(() => {
       // for spaces when outputting
       if (OPTS.build) console.log()
