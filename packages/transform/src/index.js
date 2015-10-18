@@ -57,10 +57,12 @@ export default function ({ Plugin, types: t }) {
   }
 
   function nodeToNameString(node) {
-    if (typeof node.name.name == 'string') return node.name.name
+    if (typeof node.name == 'string') return node.name
 
-    if (t.isJSXMemberExpression(node.name)) {
-      return `${node.name.object.name}.${node.name.property.name}`
+    if (t.isJSXMemberExpression(node)) {
+      const isNested = t.isJSXMemberExpression(node.object)
+      return (isNested ? nodeToNameString(node.object) : '')
+        + `${node.object.name || ''}.${node.property.name}`
     }
   }
 
@@ -82,7 +84,7 @@ export default function ({ Plugin, types: t }) {
             }
 
             node.processedByFlint = 1
-            const name = nodeToNameString(el)
+            const name = nodeToNameString(el.name)
 
             // ['quotedname', key]
             if (!scope.hasBinding(name)) {

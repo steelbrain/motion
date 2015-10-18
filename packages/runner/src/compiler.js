@@ -106,8 +106,8 @@ var Parser = {
 
         // ONLY JSX transforms
         if (inJSX) {
-          result = result
-            .replace(/\sclass=([\"\{\'])/g, ' className=$1')
+          // result = result
+            // .replace(/\sclass=([\"\{\'])/g, ' className=$1')
             // .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
 
           // allow for starting comments
