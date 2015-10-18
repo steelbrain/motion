@@ -58,7 +58,7 @@ export default function elementStyles(key, view, name, tag, props) {
     if (diffName)
       nameStaticStyle = view.styles._static[prefix + name]
 
-    const index = props.repeat ? key()[0] : void 0
+    const index = props.repeat ? key[1] : void 0
     const uniqueTagId = view.entityId + name + tag
 
     let result

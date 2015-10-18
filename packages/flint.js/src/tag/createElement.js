@@ -34,13 +34,11 @@ const flatToCamel = {
 }
 
 export default function createElement(viewName) {
-  return function el(key, fullname, props, ...args) {
-    // allow no key
-    if (typeof key === 'string') {
-      args.unshift(props)
-      props = fullname
-      fullname = key
-    }
+  return function el(identifier, props, ...args) {
+    if (!Array.isArray(identifier))
+      console.log(identifier)
+
+    const [fullname, key, index] = identifier
 
     if (!fullname)
       return React.createElement('div', null, 'No name given!')
@@ -93,10 +91,10 @@ export default function createElement(viewName) {
       props.className = classnames(props.className)
 
     // TRANSFORMATIONS:
-    elementStyles(key, view, name, originalTag || tag, props)
+    elementStyles([key, index], view, name, originalTag || tag, props)
 
     if (!props.key && !props.nokey) {
-      props.key = props.repeat ? key() : key
+      props.key = key + (index || '')
     }
 
     // map shorthand events to onEvent
