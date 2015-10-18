@@ -34,6 +34,11 @@ function niceJSXAttributes(name, obj) {
   return name
 }
 
+let i = 0
+function inc() {
+  return i++
+}
+
 export default function ({ Plugin, types: t }) {
 
   function viewUpdateExpression(name, node) {
@@ -63,57 +68,61 @@ export default function ({ Plugin, types: t }) {
     visitor: {
       JSXElement: {
         exit(node, parent, scope) {
-          if (node.processedByFlint) return
-          node.processedByFlint = true
-
           const el = node.openingElement
-          const name = nodeToNameString(el)
-          console.log('name is', name)
-          const isCapitalized = name.charAt(0).toUpperCase() == name.charAt(0)
+          // avoid reprocessing
+          if (node.processedByFlint != 2) {
+            // add index keys for repeat elements
+            if (node.processedByFlint == 1) {
+              if (scope.hasBinding('_index')) {
+                el.name.elements.push(t.identifier('_index'))
+              }
 
-          // process name (if view not in scope)
-          if (isCapitalized && !scope.hasBinding(name)) {
-            el.name = t.literal(name)
+              node.processedByFlint = 2
+              return
+            }
 
-            // t.objectExpression([t.property('init',
+            node.processedByFlint = 1
+            const name = nodeToNameString(el)
 
-            // )])
+            // ['quotedname', key]
+            if (!scope.hasBinding(name)) {
+              el.name = t.arrayExpression([t.literal(name), t.literal(inc())])
+            }
+
+            // process attributes
+            if (!el.attributes) return
+
+            let rpt, iff
+
+            el.attributes.forEach(attr => {
+              const name = attr.name && attr.name.name
+              const expr = attr.value && attr.value.expression
+
+              if ((name == 'if' || name == 'repeat') && (!expr || !name)) {
+                throw new Error(`Invalid value provided for ${name} JSX tag`)
+              }
+
+              if (name == 'if') {
+                iff = _node => t.logicalExpression('&&', expr, _node)
+              }
+
+              if (name == 'repeat') {
+                rpt = _node => t.callExpression(
+                  t.memberExpression(expr, t.identifier('map')),
+                  [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
+                    t.returnStatement(_node)
+                  ]))]
+                )
+              }
+            })
+
+            if (iff && rpt)
+              return iff(rpt(node))
+            if (iff)
+              return iff(node)
+            if (rpt)
+              return rpt(node)
           }
-
-          // process attributes
-
-          if (!el.attributes) return
-
-          let rpt, iff
-
-          el.attributes.forEach(attr => {
-            const name = attr.name && attr.name.name
-            const expr = attr.value && attr.value.expression
-
-            if ((name == 'if' || name == 'repeat') && (!expr || !name)) {
-              throw new Error(`Invalid value provided for ${name} JSX tag`)
-            }
-
-            if (name == 'if') {
-              iff = _node => t.logicalExpression('&&', expr, _node)
-            }
-
-            if (name == 'repeat') {
-              rpt = _node => t.callExpression(
-                t.memberExpression(expr, t.identifier('map')),
-                [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
-                  t.returnStatement(_node)
-                ]))]
-              )
-            }
-          })
-
-          if (iff && rpt)
-            return iff(rpt(node))
-          if (iff)
-            return iff(node)
-          if (rpt)
-            return rpt(node)
         }
       },
 
