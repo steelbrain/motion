@@ -53,6 +53,26 @@ export default function ({ Plugin, types: t }) {
 
   return new Plugin("flint-transform", {
     visitor: {
+      JSXElement: {
+        exit(node, parent, scope) {
+          if (node.openingElement.attributes) {
+            for (let attr of node.openingElement.attributes) {
+              const name = attr.name.name
+              const val = attr.value.value || attr.value.expression
+              console.log(attr)
+
+              if (name == 'if') {
+                return t.logicalExpression(
+                  '&&',
+                  val,
+                  node
+                )
+              }
+            }
+          }
+        }
+      },
+
       // TODO: finish rest of jsx stuff here
       JSXAttribute: {
         exit(node, parent, scope) {
