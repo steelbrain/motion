@@ -55,21 +55,37 @@ export default function ({ Plugin, types: t }) {
     visitor: {
       JSXElement: {
         exit(node, parent, scope) {
-          if (node.openingElement.attributes) {
-            for (let attr of node.openingElement.attributes) {
-              const name = attr.name.name
-              const val = attr.value.value || attr.value.expression
-              console.log(attr)
+          const el = node.openingElement
+          if (el.processedByFlint) return
+          el.processedByFlint = true
+          if (!el.attributes) return
 
-              if (name == 'if') {
-                return t.logicalExpression(
-                  '&&',
-                  val,
-                  node
-                )
-              }
+          let rpt, iff
+
+          el.attributes.forEach(attr => {
+            const name = attr.name.name
+            const expr = attr.value.expression
+
+            if (name == 'if') {
+              iff = _node => t.logicalExpression('&&', expr, _node)
             }
-          }
+
+            if (name == 'repeat') {
+              rpt = _node => t.callExpression(
+                t.memberExpression(expr, t.identifier('map')),
+                [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
+                  t.returnStatement(_node)
+                ]))]
+              )
+            }
+          })
+
+          if (iff && rpt)
+            return iff(rpt(node))
+          else if (iff)
+            return iff(node)
+          else if (rpt)
+            return rpt(node)
         }
       },
 
