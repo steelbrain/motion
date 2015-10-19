@@ -22,9 +22,6 @@ const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
 const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) { "use strict";\n`
 const fileSuffix = ' }) }();'
 
-const replaceSync = (match, inner) =>
-  ['value={', inner, '} onChange={e => {', inner, '=e.target.value}}'].join('')
-
 const makeHash = (str) =>
   str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
 
@@ -38,14 +35,17 @@ const viewReplacer = (match, name, params) => {
   return viewOpen(name, hash, params);
 }
 
+const jsxPragma = '/** @jsx view.el */'
+
 var Parser = {
   init(opts) {
     OPTS = opts || {}
   },
 
   post(file, source) {
-    npm.scanFile(file, source)
-    source = filePrefix(file) + source + fileSuffix
+    npm.scanFile(file, source) // scan for imports
+    source = source.replace(jsxPragma, '') // remove pragma
+    source = filePrefix(file) + source + fileSuffix // add file
     return { source }
   },
 
@@ -58,13 +58,10 @@ var Parser = {
     const startRender = () => `view.render = () => <${getWrapper(currentView.name)} view={view}>`
     const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
-    source = `/** @jsx view.el */` + source
+    source = jsxPragma + source
       .replace(/\^/g, 'view.props.')
       .split("\n")
       .map((line, index) => {
-        if (line.charAt(0) == "\t")
-          console.log('Flint uses spaces over tabs')
-
         let result = line
         let view = result.match(viewMatcher);
         if (view && view.length) {
@@ -94,8 +91,6 @@ var Parser = {
 
         // ONLY JSX transforms
         if (inJSX) {
-          result = result.replace(/sync\s*=\s*{([^}]*)}/g, replaceSync)
-
           // allow for starting comments
           if (isComment(result)) result = ''
         }
@@ -141,24 +136,19 @@ function compile(type, opts = {}) {
 
   return through.obj(function(file, enc, cb) {
     if (file.isNull()) {
-      cb(null, file);
+      cb(null, file)
       return;
     }
 
-    if (file.isStream()) {
-      cb(new gutil.PluginError('gulp-babel', 'Streaming not supported'))
-      return
-    }
-
     try {
-      var res = Parser[type](file.path, file.contents.toString(), opts);
+      var res = Parser[type](file.path, file.contents.toString(), opts)
       file.contents = new Buffer(res.source);
-      this.push(file);
+      this.push(file)
     } catch (err) {
-      this.emit('error', new gutil.PluginError('gulp-babel', err, {fileName: file.path, showProperties: false}));
+      this.emit('error', new gutil.PluginError('flint', err, {fileName: file.path, showProperties: false}))
     }
 
-    cb();
+    cb()
   })
 }
 

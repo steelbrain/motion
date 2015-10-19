@@ -396,7 +396,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         used for detecting changed views
     */
     view(name, hash, component) {
-      Flint.viewsInFile[Flint.currentHotFile].push(name)
+      // Flint.viewsInFile[Flint.currentHotFile].push(name)
 
       function setView(name, Component) {
         Flint.views[name] = Flint.makeView(hash, Component)

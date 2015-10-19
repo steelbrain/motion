@@ -1,4 +1,3 @@
-const flintAddedLines = 1
 const tools = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 const propsMatch = /view\.props\./g
@@ -119,6 +118,8 @@ view Errors {
   }
 }
 
+const flintAddedLines = 0
+
 view ErrorMessage {
   const last = arr => arr[arr.length - 1]
   const fileName = url => url && last(url.split('/'))
@@ -152,12 +153,10 @@ view ErrorMessage {
     </errorTitle>
   </inner>
 
-  const red = '#C51E19'
+  const red = '#cd423e'
 
   $ = {
-    background: '#fff',
-    borderTop: '1px solid #ccc',
-    borderBottom: '4px solid ' + red,
+    background: red,
     position: 'fixed',
     left: 0,
     height: open ? openHeight : 'auto',
@@ -165,7 +164,7 @@ view ErrorMessage {
     transition: 'all 300ms ease-in',
     right: 0,
     fontFamily: 'helvetica',
-    color: '#222',
+    color: '#fff',
     fontSize: 15,
     padding: 8,
     pointerEvents: 'all',
@@ -183,18 +182,11 @@ view ErrorMessage {
     fontSize: 15,
     pointerEvents: 'all',
     fontWeight: 'bold',
-    color: red
+    color: '#fff'
   }
 
   $errorTitle = {
     display: 'inline'
-  }
-
-  $msg = {
-    display: 'inline-block',
-    fontSize: 16,
-    fontWeight: 'bold',
-    pointerEvents: 'all',
   }
 
   $niceStack = {
@@ -207,8 +199,8 @@ view ErrorMessage {
 
   $errCol = {
     display: 'inline',
-    background: 'red',
-    borderBottom: '2px solid red',
+    background: 'yellow',
+    borderBottom: '2px solid yellow',
     marginBottom: -2,
     color: 'white'
   }

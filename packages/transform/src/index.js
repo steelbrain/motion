@@ -137,6 +137,17 @@ export default function ({ Plugin, types: t }) {
 
       JSXAttribute: {
         exit(node, parent, scope) {
+          if (node.name.name == 'sync') {
+            return [
+              t.JSXAttribute(t.literal('value'), node.value),
+              t.JSXAttribute(t.literal('onChange'), t.functionExpression(null, [t.identifier('e')],
+                t.blockStatement([
+                  t.assignmentExpression('=', node.value, t.identifier('e.target.value'))
+                ])
+              )),
+            ]
+          }
+
           node.name.name = niceJSXAttributes(node.name.name, {
             className: 'class',
             htmlFor: 'for',
@@ -144,7 +155,8 @@ export default function ({ Plugin, types: t }) {
             noValidate: 'novalidate',
             autoPlay: 'autoplay',
             frameBorder: 'frameborder',
-            allowFullScreen: 'allowfullscreen'
+            allowFullScreen: 'allowfullscreen',
+            tabindex: 'tabIndex'
           })
         }
       },

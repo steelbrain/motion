@@ -9,6 +9,7 @@ import unicodeToChar from './lib/unicodeToChar'
 import { p, mkdir, rmdir, readdir, readJSON, writeJSON,
   readFile, writeFile, recreateDir, copyFile } from './lib/fns'
 
+import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
 import multipipe from 'multipipe'
 import portfinder from 'portfinder'
@@ -193,7 +194,7 @@ const $p = {
     retainLines: true,
     comments: true,
     optional: ['bluebirdCoroutines'],
-    plugins: [require('flint-transform')]
+    plugins: [flintTransform]
   }),
   buildWrap: () => multipipe(
     $.concat(`${OPTS.name}.js`),
@@ -573,7 +574,7 @@ async function makeTemplate(req, cb) {
   const templatePath = p(OPTS.dir, OPTS.template)
   const template = await readFile(templatePath)
   const dir = await readdir({ root: p(OPTS.flintDir, 'out') })
-  const files = dir.files
+  const files = dir.files.filter(f => /\.js$/.test(f.name)) // filter sourcemaps
 
   if (!files.length) {
     return cb(template.toString())
