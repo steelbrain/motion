@@ -21,7 +21,8 @@ const divWhitelist = [
   'head',
   'circle',
   'col',
-  'body'
+  'body',
+  'link'
 ]
 
 export default function createElement(viewName) {

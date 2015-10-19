@@ -88,12 +88,12 @@ export default function elementStyles(key, view, name, tag, props) {
           const nameAndClass = prefix + name + classSelector
 
           // $.class = {}
-          if (view.styles[justClass])
-            result = mergeStyles(null, result, view.styles[justClass](index), view.styles._static[justClass])
+          if (view.styles[justClass] || view.styles._static[justClass])
+            result = mergeStyles(null, result, view.styles[justClass] && view.styles[justClass](index), view.styles._static[justClass])
 
           // $name.class = {}
-          if (view.styles[nameAndClass])
-            result = mergeStyles(null, result, view.styles[nameAndClass](index), view.styles._static[nameAndClass])
+          if (view.styles[nameAndClass] || view.styles._static[nameAndClass])
+            result = mergeStyles(null, result, view.styles[nameAndClass] && view.styles[nameAndClass](index), view.styles._static[nameAndClass])
         })
       }
 
