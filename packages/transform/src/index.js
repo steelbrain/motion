@@ -43,6 +43,8 @@ function inc() {
   return i++
 }
 
+const idFn = x => x
+
 export default function ({ Plugin, types: t }) {
 
   function viewUpdateExpression(name, node) {
@@ -101,14 +103,20 @@ export default function ({ Plugin, types: t }) {
             // process attributes
             if (!el.attributes) return
 
-            let rpt, iff
+            let rpt = idFn
+            let iff = idFn
+            let route = idFn
 
             for (let attr of el.attributes) {
               const name = attr.name && attr.name.name
               const expr = attr.value && attr.value.expression
 
-              if ((name == 'if' || name == 'repeat') && (!expr || !name)) {
+              if ((name == 'if' || name == 'repeat' || name == 'route') && (!expr || !name)) {
                 throw new Error(`Invalid value provided for ${name} JSX tag`)
+              }
+
+              if (name == 'route') {
+                route = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.matchRoute'), [expr]), _node)
               }
 
               if (name == 'if') {
@@ -125,18 +133,13 @@ export default function ({ Plugin, types: t }) {
               }
             }
 
-            if (iff && rpt)
-              return iff(rpt(node))
-            if (iff)
-              return iff(node)
-            if (rpt)
-              return rpt(node)
+            return iff(route(rpt(node)))
           }
         }
       },
 
       JSXAttribute: {
-        exit(node, parent, scope) {
+        enter(node, parent, scope) {
           if (node.name.name == 'sync') {
             return [
               t.JSXAttribute(t.literal('value'), node.value),
