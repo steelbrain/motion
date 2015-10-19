@@ -1,3 +1,5 @@
+import reportError from '../lib/reportError'
+
 let cachedStyles = {}
 
 const upper = s => s.toUpperCase()
@@ -102,6 +104,9 @@ export default function elementStyles(key, view, name, tag, props) {
     catch (e) {
       console.error('Error running style for ', view.name+':'+name, e.message)
       props.style = cachedStyles[uniqueTagId]
+
+      const { name, message, stack } = e
+      reportError({ name, message, stack })
     }
 
     if (ran) {
