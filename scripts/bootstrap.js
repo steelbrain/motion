@@ -55,7 +55,7 @@ packages.forEach(function (pkg) {
   });
 
   cd("packages/" + pkg.folder)
-  exec("npm install")
+  exec("npm install --loglevel=error")
 
   // link them in
   pkg.links.forEach(function(link) {
