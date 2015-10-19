@@ -2,7 +2,6 @@
   "name": "flint",
   "version": "0.2.100",
   "description": "An amazing way to build apps with React",
-  "main": "bin/flint",
   "repository": {
     "type": "git",
     "url": "git://github.com/flint-lang/flint.git"
@@ -30,9 +29,9 @@
     "rimraf": "^2.2.8"
   },
   "bin": {
-    "flint": "./lib/compat/bin/flint.js",
-    "flint-new": "./lib/compat/bin/flint-new.js",
-    "flint-run": "./lib/compat/bin/flint-run.js",
-    "flint-build": "./lib/compat/bin/flint-build.js"
+    "flint": "./entry/flint",
+    "flint-new": "./entry/flint-new",
+    "flint-run": "./entry/flint-run",
+    "flint-build": "./entry/flint-build"
   }
 }
