@@ -375,15 +375,11 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       // regular view
       else if (Flint.views[name])
-        result = Flint.views[name].component;
+        result = Flint.views[name].component
 
       // wrapper
       else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
         result = Wrapper
-
-      // global views
-      else if (opts.namespace[name])
-        result = namespaceView
 
       else
         result = NotFound(name)
