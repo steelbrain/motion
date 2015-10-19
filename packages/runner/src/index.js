@@ -1,5 +1,4 @@
 import compiler from './compiler'
-import react from './gulp/react'
 import babel from 'gulp-babel'
 import bridge from './bridge'
 import handleError from './lib/handleError'

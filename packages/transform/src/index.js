@@ -73,21 +73,21 @@ export default function ({ Plugin, types: t }) {
   return new Plugin("flint-transform", {
     visitor: {
       JSXElement: {
-        exit(node, parent, scope) {
+        enter(node, parent, scope) {
           const el = node.openingElement
           // avoid reprocessing
-          if (node.processedByFlint != 2) {
+          if (node.flintJSXVisits != 2) {
             // add index keys for repeat elements
-            if (node.processedByFlint == 1) {
+            if (node.flintJSXVisits == 1) {
               if (scope.hasBinding('_index')) {
                 el.name.elements.push(t.identifier('_index'))
               }
 
-              node.processedByFlint = 2
+              node.flintJSXVisits = 2
               return
             }
 
-            node.processedByFlint = 1
+            node.flintJSXVisits = 1
             const name = nodeToNameString(el.name)
 
             // ['quotedname', key]
@@ -266,6 +266,8 @@ export default function ({ Plugin, types: t }) {
         },
 
         exit(node, parent, scope) {
+          if (node.flintAssignState) return
+
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
 
@@ -277,12 +279,16 @@ export default function ({ Plugin, types: t }) {
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // add getter
-          if (!isRender)
+          if (!isRender) {
+            node.flintAssignState = 1
             node = addGetter(node, scope)
+          }
 
           // view.set
-          if (inView && !isRender)
+          if (inView && !isRender) {
+            node.flintAssignState = 1
             return viewUpdateExpression(node.left.name, node)
+          }
         }
       },
 

@@ -94,16 +94,7 @@ var Parser = {
 
         // ONLY JSX transforms
         if (inJSX) {
-          const stycLine = result.match(/sync[\s]*=[\s]*{([^}]*)}/g)
-          if (stycLine) {
-            console.log(result)
-          }
-
           result = result.replace(/sync\s*=\s*{([^}]*)}/g, replaceSync)
-
-          if (stycLine) {
-            console.log(result)
-          }
 
           // allow for starting comments
           if (isComment(result)) result = ''

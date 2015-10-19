@@ -22,15 +22,19 @@ ready:
 
 cli: ready
 	scripts/release.sh cli
+	git commit -am 'vbump cli'
 
 flint.js: ready
 	scripts/release.sh flint.js
+	git commit -am 'vbump flint.js'
 
 runner: ready
 	scripts/release.sh runner
+	git commit -am 'vbump runner'
 
 tools: ready
 	scripts/release.sh tools
+	git commit -am 'vbump tools'
 
 all: ready
 	scripts/release.sh all

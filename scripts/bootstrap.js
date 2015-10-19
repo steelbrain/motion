@@ -3,24 +3,11 @@ require("shelljs/global");
 var path = require("path");
 var fs   = require("fs");
 
-exec('git submodule update --init')
-
-// setup flint-babel
-cd('vendor/babel');
-exec('make bootstrap')
-cd('../..')
-
-// setup flint-react-tools
-cd('vendor/react-tools')
-exec('npm install')
-exec('npm link')
-cd('../..')
-
 // get packages
 var packages = [];
 
 // order important so they are linkable to each other
-var packageNames = ['flint.js', 'runner', 'cli'];
+var packageNames = ['transform', 'flint.js', 'runner', 'cli'];
 
 packageNames.forEach(function (loc) {
   var name = path.basename(loc);
