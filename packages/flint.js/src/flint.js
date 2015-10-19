@@ -350,9 +350,9 @@ function run(browserNode, userOpts, afterRenderCb) {
           const render = this.viewRender
           this.firstRender = false
 
-          safeRun(`${name}.render()`, () => {
+          // safeRun(`${name}.render()`, () => {
             els = render()
-          })
+          // })
 
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false

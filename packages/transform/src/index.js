@@ -1,3 +1,7 @@
+function isUpperCase(str) {
+  return str.charAt(0) == str.charAt(0).toUpperCase()
+}
+
 function hasObjWithProp(node, base, prop) {
   return node.left
     && node.left.object
@@ -87,9 +91,12 @@ export default function ({ Plugin, types: t }) {
             const name = nodeToNameString(el.name)
 
             // ['quotedname', key]
-            if (!scope.hasBinding(name)) {
-              el.name = t.arrayExpression([t.literal(name), t.literal(inc())])
-            }
+            let arr = [t.literal(name), t.literal(inc())]
+
+            if (scope.hasBinding(name) && isUpperCase(name))
+              arr = [t.identifier(name)].concat(arr)
+
+            el.name = t.arrayExpression(arr)
 
             // process attributes
             if (!el.attributes) return
@@ -133,7 +140,11 @@ export default function ({ Plugin, types: t }) {
           node.name.name = niceJSXAttributes(node.name.name, {
             className: 'class',
             htmlFor: 'for',
-            srcSet: 'srcset'
+            srcSet: 'srcset',
+            noValidate: 'novalidate',
+            autoPlay: 'autoplay',
+            frameBorder: 'frameborder',
+            allowFullScreen: 'allowfullscreen'
           })
         }
       },

@@ -23,7 +23,7 @@ const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}'
 const fileSuffix = ' }) }();'
 
 const replaceSync = (match, inner) =>
-  ['value = {', inner, '} onChange = {(e) => {', inner, ' = e.target.value;}}'].join('')
+  ['value={', inner, '} onChange={e => {', inner, '=e.target.value}}'].join('')
 
 const makeHash = (str) =>
   str.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
@@ -45,18 +45,6 @@ var Parser = {
 
   post(file, source) {
     npm.scanFile(file, source)
-
-    source = source.split("\n")
-      .map(line => {
-        // fix for jsx imports: <imported.default />
-        let result = line
-          .replace('["default"]', '.default')
-          .replace("['default']", '.default')
-
-        return result
-      })
-      .join("\n")
-
     source = filePrefix(file) + source + fileSuffix
     return { source }
   },
@@ -106,9 +94,16 @@ var Parser = {
 
         // ONLY JSX transforms
         if (inJSX) {
-          // result = result
-            // .replace(/\sclass=([\"\{\'])/g, ' className=$1')
-            // .replace(/sync[\s]*=[\s]*{([^}]*)}/g, replaceSync)
+          const stycLine = result.match(/sync[\s]*=[\s]*{([^}]*)}/g)
+          if (stycLine) {
+            console.log(result)
+          }
+
+          result = result.replace(/sync\s*=\s*{([^}]*)}/g, replaceSync)
+
+          if (stycLine) {
+            console.log(result)
+          }
 
           // allow for starting comments
           if (isComment(result)) result = ''

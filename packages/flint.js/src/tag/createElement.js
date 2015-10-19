@@ -24,19 +24,18 @@ const divWhitelist = [
   'body'
 ]
 
-const flatToCamel = {
-  novalidate: 'noValidate',
-  tabindex: 'tabIndex',
-  autoplay: 'autoPlay',
-  srcset: 'srcSet',
-  frameborder: 'frameBorder',
-  allowfullscreen: 'allowFullScreen'
-}
-
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
-    // destructure array identifier
-    const [fullname, key, index] = identifier
+    let fullname, key, index, tag
+
+    // passing in a variable as the view
+    if (typeof identifier[0] !== 'string') {
+      [tag, fullname, key, index] = identifier
+    }
+    // passing in string ref as view
+    else {
+      [fullname, key, index] = identifier
+    }
 
     if (!fullname)
       return React.createElement('div', null, 'No name given!')
@@ -46,7 +45,7 @@ export default function createElement(viewName) {
 
     let isHTMLElement = false
     let name = fullname
-    let tag, originalTag
+    let originalTag
 
     // find element
     if (typeof fullname != 'string') {
@@ -71,16 +70,8 @@ export default function createElement(viewName) {
           originalTag = tag
           tag = 'div'
         }
-
-        // lowercase => camelcase, autoplay => autoPlay, to please React
-        Object.keys(flatToCamel).forEach(prop => {
-          if (props[prop]) {
-            props[flatToCamel[prop]] = props[prop] || true
-            delete props[prop]
-          }
-        })
       }
-      else {
+      else if (!tag) {
         tag = view.Flint.getView(name, viewName)
       }
     }
@@ -92,7 +83,8 @@ export default function createElement(viewName) {
     elementStyles([key, index], view, name, originalTag || tag, props)
 
     if (!props.key && !props.nokey) {
-      props.key = key + (index || '')
+      props.key = '' + key
+      if (index) props.key += index
     }
 
     // map shorthand events to onEvent
