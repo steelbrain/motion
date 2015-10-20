@@ -26,8 +26,7 @@ const makeHash = (str) =>
 const viewOpen = (name, hash, params) =>
   'Flint.view("' + name + '", "' + hash + '", (view, on) => {'
 
-const viewMatcher = /view ([\.A-Za-z_0-9]*)\s*\{/g
-
+const viewMatcher = /^view ([\.A-Za-z_0-9]*)\s*\{/
 const viewReplacer = (match, name, params) => {
   const hash = makeHash(views[name] ? views[name].contents.join("") : ''+Math.random())
   return viewOpen(name, hash, params);
@@ -113,10 +112,10 @@ var Parser = {
           currentView = { name: null, contents: [] }
         }
 
+        result = result.replace(viewMatcher, viewReplacer)
         return result
       })
       .join("\n")
-      .replace(viewMatcher, viewReplacer)
 
     if (!OPTS.build) {
       cache.add(file)
