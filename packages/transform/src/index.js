@@ -29,9 +29,20 @@ function isMutativeArrayFunc(node) {
   return (name && mutativeFuncs.indexOf(name) >= 0)
 }
 
-function niceJSXAttributes(name, obj) {
-  for (let key in obj) {
-    if (name == obj[key]) {
+let niceAttrs = {
+  className: 'class',
+  htmlFor: 'for',
+  srcSet: 'srcset',
+  noValidate: 'novalidate',
+  autoPlay: 'autoplay',
+  frameBorder: 'frameborder',
+  allowFullScreen: 'allowfullscreen',
+  tabIndex: 'tabindex'
+}
+
+function niceJSXAttributes(name) {
+  for (let key in niceAttrs) {
+    if (name == niceAttrs[key]) {
       return key
     }
   }
@@ -147,16 +158,7 @@ export default function ({ Plugin, types: t }) {
             ]
           }
 
-          node.name.name = niceJSXAttributes(node.name.name, {
-            className: 'class',
-            htmlFor: 'for',
-            srcSet: 'srcset',
-            noValidate: 'novalidate',
-            autoPlay: 'autoplay',
-            frameBorder: 'frameborder',
-            allowFullScreen: 'allowfullscreen',
-            tabindex: 'tabIndex'
-          })
+          node.name.name = niceJSXAttributes(node.name.name)
         }
       },
 

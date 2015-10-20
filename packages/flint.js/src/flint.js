@@ -69,31 +69,6 @@ function run(browserNode, userOpts, afterRenderCb) {
   if (opts.namespace !== root && opts.app)
     root[opts.app] = opts.namespace
 
-  const render = () => {
-    const run = () => {
-      const MainComponent = getComponent('Main') || Main;
-
-      if (!browserNode) {
-        Flint.renderedToString = React.renderToString(<MainComponent />)
-        afterRenderCb && afterRenderCb(Flint.renderedToString)
-      }
-      else {
-        ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
-      }
-
-      Flint.firstRender = false
-      emitter.emit('afterRender')
-    }
-
-    if (Flint.preloaders.length) {
-      const preloaders = Flint.preloaders.map(loader => loader())
-      Promise.all(preloaders).then(run)
-    }
-    else {
-      run()
-    }
-  }
-
   // exported tracks previous exports so we can overwrite
   let exported = {}
   const assignToGlobal = (name, val) => {
@@ -105,8 +80,18 @@ function run(browserNode, userOpts, afterRenderCb) {
     root[name] = val
   }
 
+  let firstRender = true
+  let views = {}
+  let lastWorkingView = {}
+  let preloaders = [] // async functions needed before loading app
+  let viewCache = {} // map of views in various files
+  let viewsInFile = {} // current build up of running hot insertion
+  let currentHotFile // current file that is running
+  let getCache = {} // stores { path: { name: val } } for use in view.get()
+  let propsHashes = {}
+
   const removeComponent = key => {
-    delete Flint.views[key]
+    delete views[key]
     delete opts.namespace[key]
   }
 
@@ -119,75 +104,76 @@ function run(browserNode, userOpts, afterRenderCb) {
   }
 
   let Flint = {
-    views: {},
-    lastWorkingView: {},
-    // async functions needed before loading app
-    preloaders: [],
-    render,
-    // internal events
-    on(name, cb) { emitter.on(name, cb) },
-    // map of views in various files
-    viewCache: {},
-    // current build up of running hot insertion
-    viewsInFile: {},
-    // current file that is running
-    currentHotFile: null,
-    // if a file updates but view doesnt change,
-    // we update its render to pick up changed variables in the file
-    currentRender: {},
-    // track first render
-    firstRender: true,
-    // for use in jsx
-    debug: () => {
-      debugger
+    render() {
+      const run = () => {
+        const MainComponent = getComponent('Main') || Main;
+
+        if (!browserNode) {
+          Flint.renderedToString = React.renderToString(<MainComponent />)
+          afterRenderCb && afterRenderCb(Flint.renderedToString)
+        }
+        else {
+          ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
+        }
+
+        firstRender = false
+        emitter.emit('afterRender')
+      }
+
+      if (preloaders.length) {
+        Promise.all(preloaders.map(loader => loader())).then(run)
+      }
+      else {
+        run()
+      }
     },
 
+    // internal events
+    on(name, cb) { emitter.on(name, cb) },
+
+    // for use in jsx
+    debug: () => { debugger },
+
     file(file, run) {
-      Flint.viewsInFile[file] = []
-      Flint.currentHotFile = file
+      viewsInFile[file] = []
+      currentHotFile = file
 
       // run view, get exports
       let fileExports = {}
       run(fileExports)
       Flint.setExports(fileExports)
 
-      const cached = Flint.viewCache[file] || []
-      const views = Flint.viewsInFile[file]
+      const cached = viewCache[file] || []
+      const views = viewsInFile[file]
 
       // remove views that werent made
       const removed = arrayDiff(cached, views)
       removed.map(removeComponent)
 
-      Flint.currentHotFile = null
-      Flint.viewCache[file] = Flint.viewsInFile[file]
+      currentHotFile = null
+      viewCache[file] = viewsInFile[file]
 
       // avoid tons of renders on start
-      if (Flint.firstRender) return
+      if (firstRender) return
 
       raf(() => {
-        Flint.isLoadingFile = true
-        render()
-        Flint.isLoadingFile = false
+        Flint.render()
 
         // its been updated
-        Object.keys(Flint.views).forEach(key => {
-          Flint.views[key].needsUpdate = false
+        Object.keys(views).forEach(key => {
+          views[key].needsUpdate = false
         })
       })
     },
 
     deleteFile(name) {
       const weirdName = `/${name}`
-      Flint.viewsInFile[weirdName].map(removeComponent)
-      delete Flint.viewsInFile[weirdName]
-      delete Flint.viewCache[weirdName]
-      render()
+      viewsInFile[weirdName].map(removeComponent)
+      delete viewsInFile[weirdName]
+      delete viewCache[weirdName]
+      Flint.render()
       debugger
     },
-
-    // stores { path: { name: val } } for use in view.get()
-    getCache: {},
-    propsHashes: {},
 
     makeReactComponent(name, component, options = {}) {
       const el = createElement(name)
@@ -216,12 +202,12 @@ function run(browserNode, userOpts, afterRenderCb) {
           // get the props hash, but lets cache it so its not a ton of work
           if (options.changed === true) {
             this.propsPath = propsHash(this.props)
-            Flint.propsHashes[this.context.path] = this.propsPath
+            propsHashes[this.context.path] = this.propsPath
             options.changed = 2
           }
           else if (!this.propsPath) {
             this.propsPath = (
-              Flint.propsHashes[this.context.path] ||
+              propsHashes[this.context.path] ||
               propsHash(this.props)
             )
           }
@@ -242,8 +228,8 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         set(name, val) {
           if (!process.env.production) {
-            Flint.getCache[this.path] = Flint.getCache[this.path] || {}
-            Flint.getCache[this.path][name] = val
+            getCache[this.path] = getCache[this.path] || {}
+            getCache[this.path][name] = val
           }
 
           if (this.shouldUpdate())
@@ -256,16 +242,16 @@ function run(browserNode, userOpts, afterRenderCb) {
 
           // if hot reloaded but not changed
           if (options.unchanged) {
-            if (Flint.getCache[this.path])
-              return Flint.getCache[this.path][name]
+            if (getCache[this.path])
+              return getCache[this.path][name]
             else
               return val
           }
           else {
             // on first get, we may not have even set
-            if (!Flint.getCache[this.path]) Flint.getCache[this.path] = {}
-            if (typeof Flint.getCache[this.path][name] == 'undefined')
-              Flint.getCache[this.path][name] = val
+            if (!getCache[this.path]) getCache[this.path] = {}
+            if (typeof getCache[this.path][name] == 'undefined')
+              getCache[this.path][name] = val
 
             return val
           }
@@ -274,13 +260,10 @@ function run(browserNode, userOpts, afterRenderCb) {
         // LIFECYCLES
 
         getInitialState() {
-          if (name == 'Main')
-            Flint.mainView = this
-
           this.path = (this.context.path || '') + name
 
           if (!options.unchanged)
-            delete Flint.getCache[this.path]
+            delete getCache[this.path]
 
           let u = void 0
           this.firstRender = true
@@ -383,12 +366,12 @@ function run(browserNode, userOpts, afterRenderCb) {
 
       // View.SubView
       const subName = `${parentName}.${name}`
-      if (Flint.views[subName])
-        result = Flint.views[subName].component
+      if (views[subName])
+        result = views[subName].component
 
       // regular view
-      else if (Flint.views[name])
-        result = Flint.views[name].component
+      else if (views[name])
+        result = views[name].component
 
       // wrapper
       else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
@@ -405,33 +388,33 @@ function run(browserNode, userOpts, afterRenderCb) {
         used for detecting changed views
     */
     view(name, hash, component) {
-      // Flint.viewsInFile[Flint.currentHotFile].push(name)
+      viewsInFile[currentHotFile].push(name)
 
       function setView(name, Component) {
-        Flint.views[name] = Flint.makeView(hash, Component)
+        views[name] = Flint.makeView(hash, Component)
         setComponent(name, Component)
-        if (Flint.firstRun) return
+        if (firstRender) return
       }
 
       // if new
-      if (Flint.views[name] == undefined) {
+      if (views[name] == undefined) {
         let Component = Flint.makeReactComponent(name, component, { hash, changed: true });
         setView(name, Component)
-        Flint.lastWorkingView[name] = Flint.views[name].component
+        lastWorkingView[name] = views[name].component
         return
       }
 
       // not new
 
       // if defined twice during first run
-      if (Flint.firstRun) {
+      if (firstRender) {
         console.error('Defined a view twice!', name, hash)
         setComponent(name, ErrorDefinedTwice(name))
         return
       }
 
       // if unchanged
-      if (Flint.views[name].hash == hash) {
+      if (views[name].hash == hash) {
         let Component = Flint.makeReactComponent(name, component, { hash, unchanged: true });
         setView(name, Component)
         return
@@ -447,19 +430,19 @@ function run(browserNode, userOpts, afterRenderCb) {
       window.onerror = (...args) => {
         viewRanSuccessfully = false
 
-        if (Flint.lastWorkingView[name]) {
-          setView(name, Flint.lastWorkingView[name])
-          render()
+        if (lastWorkingView[name]) {
+          setView(name, lastWorkingView[name])
+          Flint.render()
         }
         else {
           setView(name, ErrorDefinedTwice(name))
-          render()
+          Flint.render()
         }
       }
 
       Flint.on('afterRender', () => {
         if (viewRanSuccessfully)
-          Flint.lastWorkingView[name] = Flint.views[name].component
+          lastWorkingView[name] = views[name].component
       })
 
       let flintComponent = Flint.makeReactComponent(name, component, { changed: true })
@@ -489,7 +472,7 @@ function run(browserNode, userOpts, afterRenderCb) {
         if (!dontPush) history.pushState(null, path)
         Flint.router.next()
         Flint.router.recognize()
-        render()
+        Flint.render()
       },
       next() {
         Flint.router.lastMatchId += 1 // on change route, reset matchers
@@ -550,7 +533,9 @@ function run(browserNode, userOpts, afterRenderCb) {
   }
 
   // set flint onto namespace
-  opts.namespace.Flint = Flint;
+  opts.namespace.Flint = Flint
+
+  Object.freeze(Flint)
 
   return Flint;
 }
