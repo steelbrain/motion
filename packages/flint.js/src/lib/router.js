@@ -1,53 +1,68 @@
-import RouteRecognizer from 'route-recognizer'
+import Route from 'route-parser'
+window.R = Route
 import { createHistory } from 'history'
 
-const rr = new RouteRecognizer()
 const history = createHistory()
 
 let render
-let lastMatchId = 1
+let activeID = 1
 let routes = {}
-let numRoutes = 0
+let routesList = []
+let params = {}
 let location = window.location.pathname
 
 const router = {
   init(_render) {
     render = _render
   },
+
   link(...args) {
     return () => router.go(...args)
   },
+
   go(path, dontPush) {
-    if (!numRoutes) return
+    if (!routesList.length) return
     location = path
     if (!dontPush) history.pushState(null, path)
     router.next()
     router.recognize()
     render()
   },
+
   isActive(path) {
-    return routes[path] == lastMatchId
+    return routes[path] == activeID
   },
+
   next() {
-    lastMatchId += 1 // on change route, reset matchers
+    activeID += 1 // on change route, reset matchers
   },
+
   recognize() {
-    const results = rr.recognize(location)
-    if (!results) return
-    // why the f** is this not a normal array
-    for (let i = 0; i < results.length; i++)
-      results[i].handler()
+    routesList.forEach(({ route, path }) => {
+      let routeParams = route.match(location)
+      if (routeParams) {
+        delete routeParams._
+        routes[path] = activeID
+        params[path] = routeParams
+      }
+    })
   },
+
   add(path) {
     if (routes[path]) return
-    numRoutes += 1
-    routes[path] = lastMatchId
-    rr.add([{ path: path, handler: router.handler.bind(void 0, path) }])
+
+    const _path = path + '(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)'
+    const route = new Route(_path)
+
+    routesList.push({ route, path })
+    routes[path] = activeID
+
     router.next()
     router.recognize()
   },
-  handler(path) {
-    routes[path] = lastMatchId
+
+  params(path) {
+    return { params: params[path] }
   }
 }
 

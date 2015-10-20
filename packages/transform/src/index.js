@@ -123,7 +123,15 @@ export default function ({ Plugin, types: t }) {
               const expr = attr.value && (attr.value.expression || t.literal(attr.value.value))
 
               if (name == 'route') {
-                route = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.matchRoute'), [expr]), _node)
+                route = _node => t.logicalExpression('&&',
+                  t.callExpression(t.identifier('Flint.routeMatch'), [expr]),
+                  _node
+                )
+
+                // spread routeprops onto route
+                el.attributes.push(t.JSXSpreadAttribute(
+                  t.callExpression(t.identifier('Flint.routeParams'), [expr])
+                ))
               }
 
               if (name == 'if') {

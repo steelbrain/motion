@@ -281,6 +281,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         componentWillMount() {
           // componentWillUpdate only runs after first render
           runEvents(this.events, 'update')
+          runEvents(this.events, 'props')
         },
 
         componentWillUpdate() {
@@ -420,9 +421,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       return { hash, component, needsUpdate: true };
     },
 
-    matchRoute(path) {
+    routeMatch(path) {
       router.add(path)
       return router.isActive(path)
+    },
+
+    routeParams(path) {
+      return router.params(path)
     },
 
     // export globals
