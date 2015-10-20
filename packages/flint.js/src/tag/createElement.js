@@ -29,8 +29,12 @@ export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
     let fullname, key, index, tag
 
+    // used directly by user
+    if (typeof identifier == 'string') {
+      fullname = identifier
+    }
     // passing in a variable as the view
-    if (typeof identifier[0] !== 'string') {
+    else if (typeof identifier[0] !== 'string') {
       [tag, fullname, key, index] = identifier
     }
     // passing in string ref as view
@@ -44,7 +48,6 @@ export default function createElement(viewName) {
     props = props || {}
     const view = this
 
-    let isHTMLElement = false
     let name = fullname
     let originalTag
 
@@ -53,10 +56,7 @@ export default function createElement(viewName) {
       tag = fullname
     }
     else {
-      isHTMLElement = (
-        fullname[0].toLowerCase() == fullname[0]
-        && fullname.indexOf('.') < 0
-      )
+      let isHTMLElement = fullname[0].toLowerCase() == fullname[0]
 
       // get tag type and name of tag
       if (isHTMLElement) {

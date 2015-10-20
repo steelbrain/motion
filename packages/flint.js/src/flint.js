@@ -329,21 +329,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // View.SubView
       const subName = `${parentName}.${name}`
-      if (views[subName])
+      if (views[subName]) {
         result = views[subName].component
-
+      }
       // regular view
-      else if (views[name])
+      else if (views[name]) {
         result = views[name].component
-
+      }
       // wrapper
-      else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name))
+      else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name)) {
         result = Wrapper
-
-      else
+      }
+      else {
         result = NotFound(name)
+      }
 
-       return result
+      return result
     },
 
     /*
