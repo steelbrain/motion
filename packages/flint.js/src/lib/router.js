@@ -51,6 +51,8 @@ const router = {
   add(path) {
     if (routes[path]) return
 
+    // this is ridiculous (at the moment, but it works)
+    // matches all sub routes, so we can show the whole tree
     const _path = path + '(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)'
     const route = new Route(_path)
 
