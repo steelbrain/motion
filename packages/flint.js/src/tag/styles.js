@@ -12,16 +12,16 @@ const transformKeysMap = {
 }
 
 const mergeStyles = (obj, ...styles)  => {
-  let result = obj || {}
-
   return styles.reduce((acc, style) => {
     if (Array.isArray(style))
-      style.map(s => mergeStyles(acc, s))
-    else if (typeof style === 'object')
+      style.map(s => acc = mergeStyles(acc, s))
+    else if (typeof style === 'object') {
+      if (!acc) acc = {}
       Object.assign(acc, style)
+    }
 
     return acc
-  }, result)
+  }, obj)
 }
 
 const prefix = '$'
@@ -68,9 +68,9 @@ export default function elementStyles(key, view, name, tag, props) {
 
     // TODO: only try/catch in dev mode
     try {
-      result = mergeStyles({},
+      result = mergeStyles(null,
         // tag style
-        tagStyle ? tagStyle(index) : {},
+        tagStyle ? tagStyle(index) : null,
         // base style
         isRoot && viewStyle && viewStyle(index),
         isRoot && viewStaticStyle,
@@ -91,11 +91,11 @@ export default function elementStyles(key, view, name, tag, props) {
 
           // $.class = {}
           if (view.styles[justClass] || view.styles._static[justClass])
-            result = mergeStyles(null, result, view.styles[justClass] && view.styles[justClass](index), view.styles._static[justClass])
+            result = mergeStyles(result, view.styles[justClass] && view.styles[justClass](index), view.styles._static[justClass])
 
           // $name.class = {}
           if (view.styles[nameAndClass] || view.styles._static[nameAndClass])
-            result = mergeStyles(null, result, view.styles[nameAndClass] && view.styles[nameAndClass](index), view.styles._static[nameAndClass])
+            result = mergeStyles(result, view.styles[nameAndClass] && view.styles[nameAndClass](index), view.styles._static[nameAndClass])
         })
       }
 
@@ -112,19 +112,19 @@ export default function elementStyles(key, view, name, tag, props) {
     if (ran) {
       // merge styles [] into {}
       if (Array.isArray(result))
-        result = mergeStyles(null, ...result)
+        result = mergeStyles(...result)
 
       // add style="" prop styles
       if (props.style)
-        result = mergeStyles(null, result, props.style)
+        result = mergeStyles(result, props.style)
 
       // apply view internal $ styles
       if (name.indexOf('Flint.') == 0)
-        result = mergeStyles(null, result, view.styles._static.$, view.styles.$)
+        result = mergeStyles(result, view.styles._static.$, view.styles.$)
 
       // add view external props.style
       if (isRoot && view.props.style)
-        result = mergeStyles(null, result, view.props.style)
+        result = mergeStyles(result, view.props.style)
 
       // put styles back into props.style
       if (result)

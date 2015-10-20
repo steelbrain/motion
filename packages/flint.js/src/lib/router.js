@@ -49,11 +49,24 @@ const router = {
   },
 
   add(path) {
-    if (routes[path]) return
-
     // this is ridiculous (at the moment, but it works)
     // matches all sub routes, so we can show the whole tree
-    const _path = path + '(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)'
+    let lazy = '(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)(/*_)'
+
+    if (typeof path == 'object') {
+      let opts = path
+      path = opts.path
+
+      if (opts.strict)
+        lazy = '/'
+
+    }
+    else {
+      // TODO: babel needs to add unique key to routematch
+      if (routes[path]) return
+    }
+
+    const _path = path + lazy
     const route = new Route(_path)
 
     routesList.push({ route, path })

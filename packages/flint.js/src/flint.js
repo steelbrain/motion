@@ -71,8 +71,21 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   const getComponent = (key) => opts.namespace[key]
   const emitter = ee({})
 
-  function propsHash(obj) {
-    return hash(obj)
+  function propsHash(_props) {
+    const props = Object.keys(_props).reduce((acc, key) => {
+      const prop = _props[key]
+
+      if (React.isValidElement(prop)) {
+        acc[key] = prop.key
+      }
+      else {
+        acc[key] = prop
+      }
+
+      return acc
+    }, {})
+
+    return hash(props)
   }
 
   let Flint = {
@@ -180,10 +193,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             options.changed = 2
           }
           else if (!this.propsPath) {
-            this.propsPath = (
-              propsHashes[this.context.path] ||
-              propsHash(this.props)
-            )
+            this.propsPath = propsHashes[this.context.path]
+
+            if (!this.propsPath) {
+              this.propsPath = propsHash(this.props)
+              propsHashes[this.context.path] = this.propsPath
+            }
           }
 
           return {
