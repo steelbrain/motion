@@ -1,10 +1,8 @@
-import handleError from './lib/handleError'
 import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
 import gutil from 'gulp-util'
 import through from 'through2'
-import fs from 'fs'
 
 let views = []
 let emit
@@ -134,21 +132,27 @@ function compile(type, opts = {}) {
   if (type == 'init')
     return Parser.init(opts)
 
-  return through.obj(function(file, enc, cb) {
+  return through.obj(function(file, enc, next) {
     if (file.isNull()) {
-      cb(null, file)
-      return;
+      next(null, file)
+      return
     }
 
     try {
-      var res = Parser[type](file.path, file.contents.toString(), opts)
-      file.contents = new Buffer(res.source);
+      let res = Parser[type](file.path, file.contents.toString(), opts)
+      file.contents = new Buffer(res.source)
       this.push(file)
-    } catch (err) {
-      this.emit('error', new gutil.PluginError('flint', err, {fileName: file.path, showProperties: false}))
+    }
+    catch (err) {
+      this.emit('error',
+        new gutil.PluginError('flint', err, {
+          fileName: file.path,
+          showProperties: false
+        })
+      )
     }
 
-    cb()
+    next()
   })
 }
 

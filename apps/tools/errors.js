@@ -62,7 +62,7 @@ view Errors {
 
   /* only set error if there is an error,
      giving compile priority */
-  const setError = () => {
+  function setError() {
     clearTimeout(errDelay)
     const noErrors = !compileError && !runtimeError
 
@@ -73,12 +73,10 @@ view Errors {
 
     const delay = compileError ? 200 : 800
     errDelay = setTimeout(() => {
-      if (runtimeError) {
+      if (runtimeError)
         error = niceRuntimeError(runtimeError)
-      }
-      if (compileError) {
+      if (compileError)
         error = niceCompilerError(compileError)
-      }
     }, delay)
   }
 
@@ -99,6 +97,7 @@ view Errors {
     runtimeError = null
     setError()
   })
+
 
   tools.on('compile:success', () => {
     compileError = null

@@ -14,6 +14,9 @@ const router = {
   init(_render) {
     render = _render
   },
+  link(...args) {
+    return () => router.go(...args)
+  },
   go(path, dontPush) {
     if (!numRoutes) return
     location = path

@@ -52,6 +52,7 @@
     "through2": "^0.6.5",
     "touch": "^1.0.0",
     "vinyl-sourcemaps-apply": "^0.1.4",
+    "vinyl-transform": "^1.0.0",
     "webpack": "^1.12.2"
   },
   "devDependencies": {

@@ -183,7 +183,7 @@ function bundle() {
       res()
     }
     catch(e) {
-      console.error('bundle()', e)
+      handleError(e)
     }
   })
 }
@@ -201,7 +201,7 @@ function getInstalled() {
       resolve(all)
     }
     catch(e) {
-      console.error(e)
+      handleError(e)
       reject(e)
     }
   })
@@ -223,7 +223,7 @@ function setInstalled() {
       resolve(pkg.installed)
     }
     catch(e) {
-      console.error(e)
+      handleError(e)
       reject(e)
     }
   })
@@ -318,7 +318,7 @@ async function scanFile(file, source) {
         }
       }
       catch(e) {
-        console.error('scanFile: error: done():', e)
+        handleError(e)
       }
     }
 

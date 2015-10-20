@@ -76,6 +76,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   let Flint = {
+    router,
+
     render() {
       const run = () => {
         const MainComponent = getComponent('Main') || Main;
@@ -308,24 +310,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.getChildContext = () => obj
         },
 
-        // routing
-        go(route) {
-          router.go(route)
-        },
-
         render() {
-          let els
-          const render = this.viewRender
-          this.firstRender = false
-
-          // safeRun(`${name}.render()`, () => {
-            els = render()
-          // })
-
+          let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
+          this.firstRender = false
           return styled
         }
       }
@@ -393,8 +384,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       }
 
       // start with a success and an error will fire before next frame
-      if (root._DT)
-        root._DT.emitter.emit('runtime:success')
+      // if (root._DT)
+      //   root._DT.emitter.emit('runtime:success')
 
       let viewRanSuccessfully = true
 
@@ -465,6 +456,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   // set flint onto namespace
   opts.namespace.Flint = Flint
 
+  // prevent user from overwriting Flint
   Object.freeze(Flint)
 
   return Flint;

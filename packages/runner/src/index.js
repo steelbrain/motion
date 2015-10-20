@@ -185,16 +185,19 @@ const out = {
 
 const $p = {
   flint: {
-    pre: compiler('pre'),
-    post: compiler('post')
+    pre: () => compiler('pre'),
+    post: () => compiler('post')
   },
-  babel: babel({
+  babel: () => babel({
     stage: 2,
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
     optional: ['bluebirdCoroutines'],
-    plugins: [flintTransform]
+    plugins: [flintTransform],
+    extra: {
+      production: process.env.production
+    }
   }),
   buildWrap: () => multipipe(
     $.concat(`${OPTS.name}.js`),
@@ -207,7 +210,7 @@ const $p = {
 }
 
 function buildScripts(cb, stream) {
-  console.log("Building...".bold.white)
+  console.log('Building...'.bold.white)
   log('build scripts')
   let startTime, lastError, lastScript, curFile
   let dest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
@@ -240,9 +243,9 @@ function buildScripts(cb, stream) {
       lastScript = { name, compiledAt: startTime }
       curFile = file
     }))
-    .pipe($p.flint.pre)
-    .pipe($p.babel)
-    .pipe($p.flint.post)
+    .pipe($p.flint.pre())
+    .pipe($p.babel())
+    .pipe($p.flint.post())
     .pipe($.if(!stream,
       $.rename({ extname: '.js' })
     ))
@@ -250,7 +253,9 @@ function buildScripts(cb, stream) {
       // for spaces when outputting
       if (OPTS.build) console.log()
     }))
-    .pipe($.if(OPTS.build, $p.buildWrap()))
+    .pipe($.if(OPTS.build,
+      $p.buildWrap()
+    ))
     .pipe($.if(file => {
       buildChecker(lastScript)
 
@@ -333,7 +338,8 @@ function logError(error, file) {
   }
   else {
     console.log('ERROR', "\n", error)
-    console.log('FILE', "\n", file.contents.toString())
+    console.log(error.stack)
+    log('FILE', "\n", file.contents.toString())
   }
 }
 
