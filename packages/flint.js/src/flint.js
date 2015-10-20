@@ -8,14 +8,12 @@ import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
 
-import './lib/bluebirdErrorHandle'
-
 import 'reapp-object-assign'
 import './shim/root'
 import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
-
+import './lib/bluebirdErrorHandle'
 import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -429,11 +427,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     makeView(hash, component) {
       return { hash, component, needsUpdate: true };
     },
-
-    getStyle(id, name) {
-      return Flint.styles && Flint.styles[id][name]
-    },
-
 
     matchRoute(path) {
       router.add(path)
