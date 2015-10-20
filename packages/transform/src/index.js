@@ -58,6 +58,10 @@ const idFn = x => x
 
 export default function ({ Plugin, types: t }) {
 
+  function frozen(node) {
+    return t.callExpression(t.identifier('Object.freeze'), [node])
+  }
+
   function viewUpdateExpression(name, node) {
     return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
   }
@@ -264,7 +268,7 @@ export default function ({ Plugin, types: t }) {
 
           // view.styles._static["name"] = ...
           function staticStyleStatement(node, statics) {
-            return t.expressionStatement(t.assignmentExpression(node.operator,
+            return viewExpression(t.assignmentExpression(node.operator,
               t.identifier(`view.styles._static["${node.left.name}"]`),
               statics
             ))
@@ -272,7 +276,7 @@ export default function ({ Plugin, types: t }) {
 
           // view.styles["name"] = ...
           function dynamicStyleStatement(node, dynamics) {
-            return t.expressionStatement(viewStyle(node, dynamics))
+            return viewExpression(viewStyle(node, dynamics))
           }
 
           function viewStyle(node, right) {
@@ -284,6 +288,10 @@ export default function ({ Plugin, types: t }) {
               )
             )
           }
+
+          function viewExpression(node) {
+            return t.expressionStatement(node)
+          }
         },
 
         exit(node, parent, scope) {
@@ -293,11 +301,19 @@ export default function ({ Plugin, types: t }) {
           if (!isBasicAssign) return
 
           const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('view.styles') == 0
-          if (isAlreadyStyle) return
+
+          if (isAlreadyStyle) {
+            // double-assign #18
+            // console.log(node.left.name, scope.hasOwnBinding(node.left.name))
+            // if (scope.hasBinding(node.left.name)) {
+            //   throw new Error(`Defined same style twice! ${node.left.name.name}`)
+            // }
+
+            return
+          }
 
           const inView = isInView(scope)
           const isRender = hasObjWithProp(node, 'view', 'render')
-          const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // add getter
           if (!isRender) {
