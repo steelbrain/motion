@@ -7,6 +7,8 @@ import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
+import RouteRecognizer from 'route-recognizer'
+import { createHistory } from 'history'
 
 import './lib/bluebirdErrorHandle'
 
@@ -26,12 +28,18 @@ import Main from './views/Main'
 
 Promise.longStackTraces()
 
+const router = new RouteRecognizer()
+const history = createHistory()
+
 // GLOBALS
+root._history = history // for imported modules to use
 root._bluebird = Bluebird // for imported modules to use
+root.Promise = Promise // for modules to use
 root.on = on
-root.Promise = Promise
 root.module = {}
 root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
+
+// error handling
 root.onerror = reportError
 
 const uuid = () => Math.floor(Math.random() * 1000000)
@@ -223,6 +231,8 @@ function run(browserNode, userOpts, afterRenderCb) {
           }
         },
 
+        // TODO: shouldComponentUpdate based on hot load
+
         shouldUpdate() {
           return (
             this.didMount && !this.isUpdating &&
@@ -272,12 +282,10 @@ function run(browserNode, userOpts, afterRenderCb) {
           if (!options.unchanged)
             delete Flint.getCache[this.path]
 
+          let u = void 0
           this.firstRender = true
           this.styles = { _static: {} }
-          this.events = {
-            mount: null, unmount: null,
-            update: null, props: null
-          }
+          this.events = { mount: u, unmount: u, update: u, props: u }
 
           const viewOn = (scope, name, cb) => {
             // check if they defined their own scope
@@ -345,14 +353,19 @@ function run(browserNode, userOpts, afterRenderCb) {
           this.getChildContext = () => obj
         },
 
+        // routing
+        go(route) {
+          Flint.router.go(route)
+        },
+
         render() {
           let els
           const render = this.viewRender
           this.firstRender = false
 
-          safeRun(`${name}.render()`, () => {
+          // safeRun(`${name}.render()`, () => {
             els = render()
-          })
+          // })
 
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
@@ -464,6 +477,47 @@ function run(browserNode, userOpts, afterRenderCb) {
       return Flint.styles && Flint.styles[id][name]
     },
 
+    // <item route="/path" />
+    router: {
+      lastMatchId: 1,
+      routes: {},
+      numRoutes: 0,
+      location: window.location.pathname,
+      go(path, dontPush) {
+        if (!Flint.router.numRoutes) return
+        Flint.router.location = path
+        if (!dontPush) history.pushState(null, path)
+        Flint.router.next()
+        Flint.router.recognize()
+        render()
+      },
+      next() {
+        Flint.router.lastMatchId += 1 // on change route, reset matchers
+      },
+      recognize() {
+        const results = router.recognize(Flint.router.location)
+        if (!results) return
+        // why the f** is this not a normal array
+        for (let i = 0; i < results.length; i++)
+          results[i].handler()
+      },
+      add(path) {
+        if (Flint.router.routes[path]) return
+        Flint.router.numRoutes += 1
+        Flint.router.routes[path] = Flint.router.lastMatchId
+        router.add([{ path: path, handler: Flint.router.handler.bind(void 0, path) }])
+        Flint.router.next()
+        Flint.router.recognize()
+      },
+      handler(path) {
+        Flint.router.routes[path] = Flint.router.lastMatchId
+      }
+    },
+    matchRoute(path) {
+      Flint.router.add(path)
+      return Flint.router.routes[path] == Flint.router.lastMatchId
+    },
+
     // export globals
     setExports(_exports) {
       if (!_exports) return
@@ -482,6 +536,11 @@ function run(browserNode, userOpts, afterRenderCb) {
       }
     }
   }
+
+  // router updates
+  const unlisten = history.listen(location => {
+    Flint.router.go(location.pathname, true)
+  })
 
   // shim root view
   opts.namespace.view = {

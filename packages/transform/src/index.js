@@ -109,11 +109,7 @@ export default function ({ Plugin, types: t }) {
 
             for (let attr of el.attributes) {
               const name = attr.name && attr.name.name
-              const expr = attr.value && attr.value.expression
-
-              if ((name == 'if' || name == 'repeat' || name == 'route') && (!expr || !name)) {
-                throw new Error(`Invalid value provided for ${name} JSX tag`)
-              }
+              const expr = attr.value && (attr.value.expression || t.literal(attr.value.value))
 
               if (name == 'route') {
                 route = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.matchRoute'), [expr]), _node)
