@@ -7,8 +7,6 @@ import raf from 'raf'
 import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
-import RouteRecognizer from 'route-recognizer'
-import { createHistory } from 'history'
 
 import './lib/bluebirdErrorHandle'
 
@@ -18,7 +16,9 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 
+import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
+import safeRun from './lib/safeRun'
 import reportError from './lib/reportError'
 import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
@@ -28,9 +28,6 @@ import NotFound from './views/NotFound'
 import Main from './views/Main'
 
 Promise.longStackTraces()
-
-const router = new RouteRecognizer()
-const history = createHistory()
 
 // GLOBALS
 root._history = history // for imported modules to use
@@ -47,20 +44,7 @@ const uuid = () => Math.floor(Math.random() * 1000000)
 const runEvents = (queue, name) =>
   queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
 
-function safeRun(prefix, fn) {
-  if (process.env.production) fn()
-  else {
-    try { fn() }
-    catch(e) {
-      const { name, message, stack } = e
-      console.log('Error in', prefix)
-      reportError({ name, message, stack })
-      throw e
-    }
-  }
-}
-
-function run(browserNode, userOpts, afterRenderCb) {
+export default function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
     namespace: {},
     entry: 'Main'
@@ -328,7 +312,7 @@ function run(browserNode, userOpts, afterRenderCb) {
 
         // routing
         go(route) {
-          Flint.router.go(route)
+          router.go(route)
         },
 
         render() {
@@ -450,45 +434,10 @@ function run(browserNode, userOpts, afterRenderCb) {
       return Flint.styles && Flint.styles[id][name]
     },
 
-    // <item route="/path" />
-    router: {
-      lastMatchId: 1,
-      routes: {},
-      numRoutes: 0,
-      location: window.location.pathname,
-      go(path, dontPush) {
-        if (!Flint.router.numRoutes) return
-        Flint.router.location = path
-        if (!dontPush) history.pushState(null, path)
-        Flint.router.next()
-        Flint.router.recognize()
-        Flint.render()
-      },
-      next() {
-        Flint.router.lastMatchId += 1 // on change route, reset matchers
-      },
-      recognize() {
-        const results = router.recognize(Flint.router.location)
-        if (!results) return
-        // why the f** is this not a normal array
-        for (let i = 0; i < results.length; i++)
-          results[i].handler()
-      },
-      add(path) {
-        if (Flint.router.routes[path]) return
-        Flint.router.numRoutes += 1
-        Flint.router.routes[path] = Flint.router.lastMatchId
-        router.add([{ path: path, handler: Flint.router.handler.bind(void 0, path) }])
-        Flint.router.next()
-        Flint.router.recognize()
-      },
-      handler(path) {
-        Flint.router.routes[path] = Flint.router.lastMatchId
-      }
-    },
+
     matchRoute(path) {
-      Flint.router.add(path)
-      return Flint.router.routes[path] == Flint.router.lastMatchId
+      router.add(path)
+      return router.isActive(path)
     },
 
     // export globals
@@ -509,12 +458,9 @@ function run(browserNode, userOpts, afterRenderCb) {
         })
       }
     }
-  }
+  };
 
-  // router updates
-  const unlisten = history.listen(location => {
-    Flint.router.go(location.pathname, true)
-  })
+  router.init(Flint.render)
 
   // shim root view
   opts.namespace.view = {
@@ -530,5 +476,3 @@ function run(browserNode, userOpts, afterRenderCb) {
 
   return Flint;
 }
-
-export default run
