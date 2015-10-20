@@ -18,6 +18,7 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 
+import assignToGlobal from './lib/assignToGlobal'
 import reportError from './lib/reportError'
 import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
@@ -68,17 +69,6 @@ function run(browserNode, userOpts, afterRenderCb) {
   // either on window or namespace
   if (opts.namespace !== root && opts.app)
     root[opts.app] = opts.namespace
-
-  // exported tracks previous exports so we can overwrite
-  let exported = {}
-  const assignToGlobal = (name, val) => {
-    if (!exported[name] && typeof root[name] != 'undefined')
-      throw `You're attempting to define a global that is already defined:
-          ${name} = ${JSON.stringify(root[name])}`
-
-    exported[name] = true
-    root[name] = val
-  }
 
   let firstRender = true
   let views = {}
@@ -144,10 +134,10 @@ function run(browserNode, userOpts, afterRenderCb) {
       Flint.setExports(fileExports)
 
       const cached = viewCache[file] || []
-      const views = viewsInFile[file]
+      const _views = viewsInFile[file]
 
-      // remove views that werent made
-      const removed = arrayDiff(cached, views)
+      // remove viewsInFile that werent made
+      const removed = arrayDiff(cached, _views)
       removed.map(removeComponent)
 
       currentHotFile = null
@@ -504,6 +494,7 @@ function run(browserNode, userOpts, afterRenderCb) {
     // export globals
     setExports(_exports) {
       if (!_exports) return
+      Object.freeze(_exports)
       const names = Object.keys(_exports)
 
       if (names.length) {
