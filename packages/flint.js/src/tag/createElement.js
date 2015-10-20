@@ -111,8 +111,8 @@ export default function createElement(viewName) {
       props = Object.assign(props, view.props, { style: props.style });
 
     // write all tags to div in production
-    if (process.env.production)
-      tag = 'div'
+    // if (process.env.production)
+    //   tag = 'div'
 
     return React.createElement(tag, props, ...args)
   }
