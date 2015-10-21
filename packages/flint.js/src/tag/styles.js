@@ -45,23 +45,23 @@ export default function elementStyles(key, view, name, tag, props) {
   )
 
   if (view.styles) {
+    const index = props.repeat ? key[1] : void 0
+    const uniqueTagId = view.entityId + name + tag
+
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'
     const tagStyle = hasTag && view.styles[prefix + tag]
 
-    const viewStyle = view.styles[prefix]
-    const viewStaticStyle = view.styles._static[prefix]
+    const viewStyle = view.styles[prefix] && view.styles[prefix](index)
+    const viewStyleStatic = view.styles._static[prefix]
     const nameStyle = view.styles[prefix + name]
 
-    let nameStaticStyle
-    const tagStaticStyle = view.styles._static[prefix + tag]
+    let nameStyleStatic
+    const tagStyleStatic = view.styles._static[prefix + tag]
 
     if (diffName)
-      nameStaticStyle = view.styles._static[prefix + name]
-
-    const index = props.repeat ? key[1] : void 0
-    const uniqueTagId = view.entityId + name + tag
+      nameStyleStatic = view.styles._static[prefix + name]
 
     let result
     let ran = false
@@ -69,17 +69,23 @@ export default function elementStyles(key, view, name, tag, props) {
     // TODO: only try/catch in dev mode
     try {
       result = mergeStyles(null,
+        // if set using one big object,
+        viewStyle && viewStyle[tag],
+        viewStyle && viewStyle[name],
+        viewStyleStatic && viewStyleStatic[tag],
+        viewStyleStatic && viewStyleStatic[name],
+
         // tag style
         tagStyle ? tagStyle(index) : null,
         // base style
-        isRoot && viewStyle && viewStyle(index),
-        isRoot && viewStaticStyle,
+        isRoot && viewStyle,
+        isRoot && viewStyleStatic,
         // name dynamic styles
         nameStyle && diffName && nameStyle(index),
         // tag static
-        tagStaticStyle,
+        tagStyleStatic,
         // name static
-        nameStaticStyle,
+        nameStyleStatic,
       )
 
       // add class styles
