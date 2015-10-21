@@ -273,6 +273,9 @@ function buildScripts(cb, stream) {
         out.goodFile(file, endTime)
         log('build took ', endTime, 'ms')
       }
+      else {
+        return true
+      }
 
       const isNew = (
         !lastSavedTimestamp[file.path] ||
@@ -284,6 +287,7 @@ function buildScripts(cb, stream) {
         lastSavedTimestamp[file.path] = file.startTime
         return true
       }
+
       return false
     },
       gulp.dest(dest))
