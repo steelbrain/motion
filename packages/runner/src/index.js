@@ -263,11 +263,16 @@ function buildScripts(cb, stream) {
     .pipe($.if(file => {
       buildChecker(lastScript)
 
-      if (stream || lastError) return false
+      if (stream || lastError)
+        return false
 
       const endTime = Date.now() - startTime
-      out.goodFile(file, endTime)
-      log('build took ', endTime, 'ms')
+      const isMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
+
+      if (!isMap) {
+        out.goodFile(file, endTime)
+        log('build took ', endTime, 'ms')
+      }
 
       const isNew = (
         !lastSavedTimestamp[file.path] ||

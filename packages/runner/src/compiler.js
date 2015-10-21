@@ -17,7 +17,7 @@ const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
 const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
-const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) { "use strict";\n`
+const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) { "use strict";`
 const fileSuffix = ' }) }();'
 
 const makeHash = (str) =>
@@ -42,6 +42,7 @@ var Parser = {
   post(file, source) {
     npm.scanFile(file, source) // scan for imports
     source = source.replace(jsxPragma, '') // remove pragma
+    source = filePrefix(file) + source + fileSuffix // add file
     return { source }
   },
 
@@ -121,7 +122,7 @@ var Parser = {
       cache.setViews(file, fileViews)
     }
 
-    source = jsxPragma + filePrefix(file) + source + fileSuffix // add file
+    source = jsxPragma + source
 
     // console.log('transformed source', source)
     return { source }
