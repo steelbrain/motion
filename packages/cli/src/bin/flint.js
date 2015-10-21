@@ -16,6 +16,7 @@ if (flintCmdIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === 
   process.flintArgs.splice(flintCmdIndex + 1, 0, 'run');
 }
 
+// check flint version
 var path = require('path')
 var exec = require('child_process').exec
 var checkversion = 'npm view flint version'

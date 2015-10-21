@@ -20,7 +20,6 @@ import path from 'path'
 import express from 'express'
 import cors from 'cors'
 import hostile from 'hostile'
-// import surge from 'surge/lib/surge'
 import through from 'through2'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
@@ -401,7 +400,6 @@ function watchingMessage() {
   resumeListenForKeys()
 }
 
-let IS_IN_SURGE = false
 function listenForKeys() {
   if (!process.stdin.isTTY)
     return
@@ -410,7 +408,7 @@ function listenForKeys() {
 
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
-    if (!key || IS_IN_SURGE) return
+    if (!key) return
 
     try {
       switch(key.name) {
@@ -622,8 +620,6 @@ function setLogging(opts) {
   log.debug = opts.debug || opts.verbose
 }
 
-// const Surge = surge({})
-
 async function build(running) {
   buildFlint()
   buildReact()
@@ -633,9 +629,6 @@ async function build(running) {
     await buildWhileRunning()
     buildTemplate()
     stopListenForKeys()
-    IS_IN_SURGE = true
-    // Surge('./.flint/build')
-    // resumeListenForKeys()
   }
   else {
     buildScripts()
