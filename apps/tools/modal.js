@@ -1,6 +1,6 @@
 view Modal {
   <modal>
-    <close onClick={^onClose}>X</close>
+    <close onClick={^onClose}></close>
     <title if={^title}>{^title}</title>
     <message>{^children}</message>
   </modal>
@@ -11,8 +11,7 @@ view Modal {
     left: 20,
     padding: [10, 10],
     background: '#f9f9f9',
-    border: '1px solid #ddd',
-    boxShadow: '0 0 8px rgba(0,0,0,0.05)',
+    boxShadow: '0 0 18px rgba(0,0,0,0.05)',
     borderRadius: 4,
     fontSize: 15,
     transition: 'all ease-in 200ms',
@@ -23,7 +22,7 @@ view Modal {
   $title = {
     color: '#C43D2D',
     fontWeight: 'bold',
-    margin: [-4, 20, 0]
+    margin: [0, 20]
   }
 
   $message = {
@@ -37,8 +36,7 @@ view Modal {
     fontWeight: 'bold',
     fontFamily: 'Helvetica',
     fontSize: 10,
-    background: '#fff',
-    color: '#333',
+    background: '#F5DFDD',
     borderRadius: 20,
     width: 16,
     height: 16,
