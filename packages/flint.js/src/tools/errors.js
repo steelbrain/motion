@@ -8,7 +8,7 @@ const browserData = data => {
 
 // this is for using in runview
 function flintRuntimeError(message, file, line, col, error) {
-  browserData({ message, file, line, col, stack: error.stack });
+  browserData({ message, file, line, col, stack: error && error.stack });
   browser.emitter.emit('runtime:error')
 }
 
