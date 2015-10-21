@@ -24,8 +24,12 @@ exec(checkversion, (err, version) => {
   if (version) {
     var pkg = require(path.join('..', '..', '..', 'package.json'))
 
-    if (pkg.version && parseInt(pkg.version) != parseInt(version) || true) {
-      console.log('Flint is out of date! `npm install -g flint` to update')
+    const getversion = v => parseFloat((''+v).replace('.', ''))
+    let curVersion = getversion(version)
+    let pkgVersion = getversion(pkg.version)
+
+    if (curVersion != pkgVersion) {
+      console.log('Flint is out of date! `npm install -g flint` to update', pkgVersion, 'to', curVersion)
     }
   }
 })
