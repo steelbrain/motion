@@ -27,6 +27,7 @@ const router = {
     router.next()
     router.recognize()
     render()
+    return new Promise((res) => setTimeout(res))
   },
 
   isActive(path) {
