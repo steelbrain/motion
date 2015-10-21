@@ -72,6 +72,7 @@ export default function createElement(viewName) {
           tag = 'div'
         }
       }
+      // find a view
       else if (!tag) {
         tag = view.Flint.getView(name, viewName)
       }

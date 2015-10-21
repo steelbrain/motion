@@ -16,6 +16,19 @@ if (flintCmdIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === 
   process.flintArgs.splice(flintCmdIndex + 1, 0, 'run');
 }
 
+var path = require('path')
+var exec = require('child_process').exec
+var checkversion = 'npm view flint version'
+exec(checkversion, (err, version) => {
+  if (version) {
+    var pkg = require(path.join('..', '..', '..', 'package.json'))
+
+    if (pkg.version && parseInt(pkg.version) != parseInt(version) || true) {
+      console.log('Flint is out of date! `npm install -g flint` to update')
+    }
+  }
+})
+
 Program
   .version(require('../../../package.json').version)
   .command('new [name] [template]', 'start a new Flint app')
