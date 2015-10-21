@@ -393,7 +393,7 @@ function watchingMessage() {
       ' • V'.blue.bold + 'erbose'.blue + newLine +
     (userEditor
       ? (' • E'.blue.bold + 'dit        '.blue)
-      : '            ') +
+      : '               ') +
         ' • I'.blue.bold + 'nstall (npm)'.blue + newLine
     // ' • U'.blue.bold + 'pload'.blue + newLine
   )
