@@ -106,6 +106,7 @@ function getScaffold() {
 
       if (err || isCloningExample)
         return cloneDirectly()
+          .then(() => res())
 
       return updateScaffoldCache()
         .catch(cloneDirectly)
@@ -183,9 +184,10 @@ function deleteGitFolder(dir) {
   return new Promise(function(resolve, reject) {
     log('Remove .git folder')
     // delete git dir
-    rimraf(p(dir, '/.git'), function(err, data) {
+    rimraf(p(dir, '/.git'), function(err) {
+      log('after remove .git err?:', err)
       if (err) return reject(err)
-      resolve(data)
+      resolve()
     })
   })
 }

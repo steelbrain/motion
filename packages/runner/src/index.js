@@ -389,12 +389,12 @@ function watchingMessage() {
   listenForKeys()
   console.log(
     newLine +
-    ' • O'.blue.bold + 'pen        '.blue +
-      ' • V'.blue.bold + 'erbose'.blue + newLine +
+    ' • O'.cyan.bold + 'pen        '.cyan +
+      ' • V'.cyan.bold + 'erbose'.cyan + newLine +
     (userEditor
-      ? (' • E'.blue.bold + 'dit        '.blue)
+      ? (' • E'.cyan.bold + 'dit        '.cyan)
       : '               ') +
-        ' • I'.blue.bold + 'nstall (npm)'.blue + newLine
+        ' • I'.cyan.bold + 'nstall (npm)'.cyan + newLine
     // ' • U'.blue.bold + 'pload'.blue + newLine
   )
   resumeListenForKeys()
