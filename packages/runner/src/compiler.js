@@ -42,7 +42,6 @@ var Parser = {
   post(file, source) {
     npm.scanFile(file, source) // scan for imports
     source = source.replace(jsxPragma, '') // remove pragma
-    source = filePrefix(file) + source + fileSuffix // add file
     return { source }
   },
 
@@ -55,7 +54,7 @@ var Parser = {
     const startRender = () => `view.render = () => <${getWrapper(currentView.name)} view={view}>`
     const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
-    source = jsxPragma + source
+    source = source
       .replace(/\^/g, 'view.props.')
       .split("\n")
       .map((line, index) => {
@@ -121,6 +120,8 @@ var Parser = {
       cache.add(file)
       cache.setViews(file, fileViews)
     }
+
+    source = jsxPragma + filePrefix(file) + source + fileSuffix // add file
 
     // console.log('transformed source', source)
     return { source }

@@ -76,6 +76,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       const prop = _props[key]
 
       if (React.isValidElement(prop)) {
+        // TODO: traverse children
         acc[key] = prop.key
       }
       else {

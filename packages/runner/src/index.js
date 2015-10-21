@@ -244,6 +244,7 @@ function buildScripts(cb, stream) {
       curFile = file
     }))
     .pipe($p.flint.pre())
+    .pipe($.sourcemaps.init())
     .pipe($p.babel())
     .pipe($p.flint.post())
     .pipe($.if(!stream,
@@ -253,6 +254,9 @@ function buildScripts(cb, stream) {
       // for spaces when outputting
       if (OPTS.build) console.log()
     }))
+    .pipe($.if(!OPTS.build,
+      $.sourcemaps.write('.')
+    ))
     .pipe($.if(OPTS.build,
       $p.buildWrap()
     ))
