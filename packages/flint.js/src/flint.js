@@ -91,6 +91,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   let Flint = {
     router,
+    getCache,
 
     render() {
       const run = () => {
@@ -101,6 +102,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           afterRenderCb && afterRenderCb(Flint.renderedToString)
         }
         else {
+          if (window.__isDevingDevTools)
+            browserNode = '_flintdevtools'
+
           ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
         }
 
@@ -203,7 +207,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           return {
-            path: (this.context.path || '') + name + '$' + this.propsPath
+            path: (this.context.path || '') + name + '.' + this.propsPath
           }
         },
 
@@ -247,7 +251,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // LIFECYCLES
 
         getInitialState() {
-          this.path = (this.context.path || '') + name
+          this.path = (this.context.path || '') + ',' + name
 
           // TODO: document this
           if (!options.unchanged)
@@ -329,7 +333,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          const withProps = React.cloneElement(els, { __disableWrapper });
+          const withProps = React.cloneElement(els, {
+            __disableWrapper,
+            path: this.path
+          });
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
           return styled

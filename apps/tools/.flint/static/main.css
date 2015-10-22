@@ -4,14 +4,14 @@ body {
   padding: 0;
   color: #333;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.6rem;
   background: #fff;
 
-  -webkit-text-size-adjust: 100%;
   -webkit-overflow-scrolling: touch;
+  -webkit-text-size-adjust: 100%;
 }
 
-body * {
+body, body * {
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
@@ -27,8 +27,20 @@ body * {
   -webkit-flex-wrap: wrap;
 }
 
-#_flintapp > .main {
-  display: block;
+/* get the main to take up full screen by default */
+html, body, #_flintapp {
+  height: 100%;
+}
+
+body, #_flintapp {
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+/* both needed to match <main> or <other> in Main */
+#_flintapp > .main, #_flintapp > main {
+  flex: 1;
+  -webkit-flex: 1;
 }
 
 a, button, input, textarea {
@@ -52,6 +64,15 @@ p, h1, h2, h3, h4, h5, h6, br {
   display: block;
 }
 
+p, h1, h2, h3, h4, h5, h6, code, pre {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+pre code {
+  margin: 0;
+}
+
 img {
   display: block;
   flex-shrink: 0;
@@ -61,6 +82,20 @@ img {
   max-width: 100%;
 
   -webkit-flex-shrink: 0;
+}
+
+li {
+  display: list-item;
+}
+
+code {
+  background: #eee;
+  padding: 1rem 1.25rem;
+}
+
+p code {
+  display: inline-block;
+  padding: 0;
 }
 
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
@@ -168,16 +203,16 @@ dfn {
  */
 
 h1 {
-  font-size: 2.4em;
-  margin: 0.6em 0;
+  font-size: 2.4rem;
+  margin: 0.6rem 0;
 }
 
 h2 {
-  font-size: 2.2em;
+  font-size: 2.2rem;
 }
 
 h3 {
-  font-size: 1.6em;
+  font-size: 1.6rem;
 }
 
 h1 + h2, h2 + h3, h3 + h4, h4 + h5, h5 + h6,
@@ -215,11 +250,11 @@ sup {
 }
 
 sup {
-  top: -0.5em;
+  top: -0.5rem;
 }
 
 sub {
-  bottom: -0.25em;
+  bottom: -0.25rem;
 }
 
 /* Embedded content
@@ -249,7 +284,7 @@ svg:not(:root) {
  */
 
 figure {
-  margin: 1em 40px;
+  margin: 1rem 40px;
 }
 
 /**
@@ -279,7 +314,7 @@ kbd,
 pre,
 samp {
   font-family: monospace, monospace;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 /* Forms
@@ -427,7 +462,7 @@ input[type="search"]::-webkit-search-decoration {
 fieldset {
   border: 1px solid #c0c0c0;
   margin: 0 2px;
-  padding: 0.35em 0.625em 0.75em;
+  padding: 0.35rem 0.625rem 0.75rem;
 }
 
 /**

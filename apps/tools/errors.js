@@ -104,7 +104,6 @@ view Errors {
     setError()
   })
 
-
   tools.on('compile:success', () => {
     compileError = null
     setError()

@@ -6,6 +6,9 @@
   "version": "1.0.118",
   "main": "",
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+    "react": "^0.14.0",
+    "react-json-tree": "^0.2.0"
+  },
   "installed": []
 }

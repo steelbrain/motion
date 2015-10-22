@@ -615,6 +615,7 @@ async function makeTemplate(req, cb) {
     + getScriptTags(paths, req)
   )
 
+
   cb(fullTemplate)
 }
 

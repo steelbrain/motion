@@ -1,6 +1,9 @@
 view Main {
+  <link rel="stylesheet" property="stylesheet" href="__/static/tools.css" />
+
   <Errors />
   <Installer />
+  <State />
 
   $ = {
     position: 'fixed',

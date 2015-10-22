@@ -10,7 +10,7 @@ const getFirstChild = children => {
 
 class Wrapper extends React.Component {
   render() {
-    const { children, style, onClick, __disableWrapper, view } = this.props;
+    const { children, style, onClick, __disableWrapper, view, path } = this.props;
 
     let viewProps = { view }
 
@@ -31,21 +31,21 @@ class Wrapper extends React.Component {
 
       // if tagname === viewname
       if (type && type.toLowerCase && type.toLowerCase() == view.name.toLowerCase())
-        return first
+        return React.cloneElement(first, { 'data-flintid': path })
       else
-        return wrapped(view.name, viewProps, children)
+        return wrapped(view.name, viewProps, children, path)
     }
     else {
-      return wrapped(view.name, viewProps, children)
+      return wrapped(view.name, viewProps, children, path)
     }
   }
 }
 
-function wrapped(name, props, children) {
-  return (
-    <div className={name && name.toLowerCase()} {...props} ref="view">
-      {children}
-    </div>
+function wrapped(name, props, children, path) {
+  return React.createElement(
+    name && name.toLowerCase(),
+    Object.assign(props, { 'data-flintid': path }),
+    children
   )
 }
 
