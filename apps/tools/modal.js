@@ -10,8 +10,8 @@ view Modal {
     top: ^open ? 20 : -100,
     left: 20,
     padding: [10, 10],
-    background: '#f9f9f9',
-    boxShadow: '0 0 18px rgba(0,0,0,0.05)',
+    background: '#fff',
+    boxShadow: '0 0 18px rgba(0,0,0,0.1)',
     borderRadius: 4,
     fontSize: 15,
     transition: 'all ease-in 200ms',
@@ -26,16 +26,13 @@ view Modal {
   }
 
   $message = {
-    fontFamily: "Helvetica Nueue, Helvetica, Arial, sans-serif",
+    fontFamily: "-apple-system, 'Helvetica Nueue', Helvetica, Arial, sans-serif",
   }
 
   $close = {
     position: 'absolute',
     top: 3,
     right: 3,
-    fontWeight: 'bold',
-    fontFamily: 'Helvetica',
-    fontSize: 10,
     background: '#F5DFDD',
     borderRadius: 20,
     width: 16,

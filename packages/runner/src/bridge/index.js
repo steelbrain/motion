@@ -5,6 +5,7 @@ let wsServer
 let connected = false
 let connections = []
 let queue = []
+let curError = null
 
 function broadcast(data) {
   connections.forEach(conn => {
@@ -26,7 +27,12 @@ export function message(type, obj) {
 
   let msg = JSON.stringify(obj)
 
-  log('---[websocket message]---', 'isConnected:' + connected, msg)
+  // store last error or success
+  if (type.indexOf(':error') > 0 || type.indexOf(':success') > 0) {
+    curError = msg
+  }
+
+  log('-[socket msg]-', msg)
 
   if (connected)
     broadcast(msg)
@@ -51,6 +57,10 @@ export function once(type, cb) {
 export function start(port) {
   wsServer = ws.createServer(conn => {
     connections.push(conn)
+
+    if (curError) {
+      conn.sendText(curError)
+    }
 
     conn.on('error', err => {})
 

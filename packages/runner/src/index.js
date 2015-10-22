@@ -330,9 +330,6 @@ function buildChecker(lastScript) {
     buildingTimeout = setTimeout(() => {
       HAS_RUN_INITIAL_BUILD = true
 
-      if (!OPTS.build)
-        bridge.message('compile:success', lastScript)
-
       runAfterFirstBuilds()
     }, 450)
   }

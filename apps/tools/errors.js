@@ -150,6 +150,7 @@ view ErrorMessage {
         </niceStack>
       }
     </errorTitle>
+    <close><center>x</center></close>
   </inner>
 
   const red = '#cd423e'
@@ -221,6 +222,17 @@ view ErrorMessage {
     whiteSpace: 'pre',
     pointerEvents: 'all',
     fontWeight: 'bold'
+  }
+
+  $close = {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 50,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 }
 
