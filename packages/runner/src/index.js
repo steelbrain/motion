@@ -7,7 +7,7 @@ import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import { p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, recreateDir, copyFile } from './lib/fns'
+  readFile, writeFile, recreateDir, copy } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
@@ -29,7 +29,7 @@ Promise.longStackTraces()
 
 const proc = process // cache for keypress
 const newLine = "\n"
-const SCRIPTS_GLOB = [ '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
+const SCRIPTS_GLOB = [ 'main.js', '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 
@@ -110,8 +110,8 @@ async function buildTemplate() {
   let template = data
     .replace('/static', '/_/static')
     .replace('<!-- SCRIPTS -->', [
-      '<script src="/_/react.js"></script>',
-      '  <script src="/_/flint.js"></script>',
+      '<script src="/_/react.prod.js"></script>',
+      '  <script src="/_/flint.prod.js"></script>',
       '  <script src="/_/packages.js"></script>',
       '  <script src="/_/'+OPTS.name+'.js"></script>',
       '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
@@ -136,22 +136,29 @@ async function buildTemplate() {
   await writeFile(out, template)
 }
 
-function buildFlint(cb) {
+function copyWithMap(file, dest) {
+  return Promise.all([
+    copy(file, dest),
+    copy(file + '.map', dest + '.map')
+  ])
+}
+
+function buildFlint() {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'flint.prod.js');
-  var write = p(OPTS.buildDir, '_', 'flint.js');
-  copyFile(read, write, cb)
+  var write = p(OPTS.buildDir, '_', 'flint.prod.js');
+  return copyWithMap(read, write)
 }
 
-function buildReact(cb) {
+function buildReact() {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.prod.js');
-  var write = p(OPTS.buildDir, '_', 'react.js');
-  copyFile(read, write, cb)
+  var write = p(OPTS.buildDir, '_', 'react.prod.js');
+  return copyWithMap(read, write)
 }
 
-function buildPackages(cb) {
+function buildPackages() {
   var read = p(OPTS.flintDir, 'deps', 'packages.js')
   var write = p(OPTS.buildDir, '_', 'packages.js')
-  copyFile(read, write, cb);
+  copyWithMap(read, write);
 }
 
 function buildAssets() {
@@ -620,10 +627,14 @@ function setLogging(opts) {
 }
 
 async function build(running) {
-  buildFlint()
-  buildReact()
-  buildPackages()
   buildAssets()
+
+  await *[
+    buildFlint(),
+    buildReact(),
+    buildPackages()
+  ]
+
   if (running) {
     await buildWhileRunning()
     buildTemplate()
