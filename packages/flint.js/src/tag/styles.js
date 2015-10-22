@@ -189,11 +189,13 @@ export default function elementStyles(key, view, name, tag, props) {
   if (
     view.name == 'Main' &&
     name == 'Flint.MainWrapper' &&
-    props.style &&
     typeof document != 'undefined'
   ) {
-    const bg = props.style.background || props.style.backgroundColor
     const body = document.body
+    const bg = props.style && (props.style.background || props.style.backgroundColor)
+
+    if (!bg)
+      body.style.background = ''
 
     // if body already has bg, ignore
     if (bg && body && !body.style.background && !body.style.backgroundColor) {
