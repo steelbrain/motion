@@ -1,5 +1,7 @@
+import path from 'path'
 import ws from 'nodejs-websocket'
 import log from '../lib/log'
+import cache from '../cache'
 
 let wsServer
 let connected = false
@@ -20,12 +22,35 @@ function runQueue() {
   }
 }
 
-export function message(type, obj) {
+function sendInitialMessages(conn) {
+  conn.sendText(curError)
+  // conn.sendText(makeMessage('flint:baseDir', { dir: cache.baseDir() }))
+}
+
+function cleanError(obj) {
+  obj.error.file = path.relative(cache.baseDir(), obj.error.fileName)
+  return obj
+}
+
+function makeMessage(type, obj) {
   obj = obj || {}
   obj._type = type
   obj.timestamp = Date.now()
 
+  // formatting
+  switch(type) {
+    case 'compile:error':
+      obj = cleanError(obj)
+      break
+  }
+
   let msg = JSON.stringify(obj)
+
+  return msg
+}
+
+export function message(type, obj) {
+  let msg = makeMessage(type, obj)
 
   // store last error or success
   if (type.indexOf(':error') > 0 || type.indexOf(':success') > 0) {
@@ -59,7 +84,7 @@ export function start(port) {
     connections.push(conn)
 
     if (curError) {
-      conn.sendText(curError)
+      sendInitialMessages(conn)
     }
 
     conn.on('error', err => {})

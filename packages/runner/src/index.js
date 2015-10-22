@@ -218,7 +218,7 @@ const $p = {
 function buildScripts(cb, stream) {
   console.log('Building...'.bold.white)
   log('build scripts')
-  let startTime, lastError, lastScript, curFile
+  let startTime, lastScript, curFile, lastError
   let dest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   return (stream || gulp.src(SCRIPTS_GLOB))
@@ -238,10 +238,16 @@ function buildScripts(cb, stream) {
     }))
     .pipe($.plumber(error => {
       lastError = true
+      // add time
+      error.timestamp = Date.now()
+      // log
       out.badFile(curFile)
       logError(error, curFile)
+      // send bridge
+      cache.addError(error.fileName, error)
       bridge.message('compile:error', { error })
-      buildChecker(lastScript)
+      // reset finished check
+      buildFinishedCheck(lastScript)
     }))
     .pipe(pipefn(file => {
       if (OPTS.build) return
@@ -269,7 +275,7 @@ function buildScripts(cb, stream) {
     .pipe($.if(file => {
       file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
 
-      buildChecker(lastScript)
+      buildFinishedCheck(lastScript)
 
       if (file.isSourceMap)
         return true
@@ -306,8 +312,14 @@ function buildScripts(cb, stream) {
       // after initial build
       if (HAS_RUN_INITIAL_BUILD) {
         if (!lastError) {
+          cache.removeError(file.path)
           bridge.message('script:add', lastScript)
           bridge.message('compile:success', lastScript)
+
+          // fixed one error but have others
+          const prevError = cache.getLastError()
+          if (prevError)
+            bridge.message('compile:error', { error: prevError })
         }
       }
     }))
@@ -332,7 +344,7 @@ function buildWhileRunning() {
 }
 
 let buildingTimeout
-function buildChecker(lastScript) {
+function buildFinishedCheck(lastScript) {
   if (!HAS_RUN_INITIAL_BUILD) {
     if (buildingTimeout) clearTimeout(buildingTimeout)
     buildingTimeout = setTimeout(() => {

@@ -1,14 +1,15 @@
 import path from 'path'
 import log from './lib/log'
 
-const name = f => path.relative(baseDir, f)
+const name = f => path.relative(baseDir, f).replace('.flint/out/', '')
 
 type ViewArray = Array<string>
 type ImportArray = Array<string>
 
 type File = {
   views?: ViewArray,
-  imports?: ImportArray
+  imports?: ImportArray,
+  error?: object
 }
 
 let files: { name: File } = {}
@@ -19,6 +20,10 @@ const Cache = {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir, '..')
     log('cache: baseDir', baseDir)
+  },
+
+  baseDir() {
+    return baseDir
   },
 
   name(file : string) {
@@ -77,7 +82,35 @@ const Cache = {
     }
 
     return files[name(file)].imports
-  }
+  },
+
+  addError(file : string, error : object) {
+    files[name(file)].error = error
+  },
+
+  removeError(file : string) {
+    files[name(file)].error = null
+  },
+
+  getLastError() {
+    let paths = Object.keys(files)
+    let errors = paths.map(p => files[p].error)
+    errors = errors.filter(e => !!e)
+
+    if (errors.length) {
+      let latest = errors[0]
+
+      errors.forEach(err => {
+        if (err.timestamp > latest.timestamp)
+          latest = err
+      })
+
+      return latest
+    }
+
+    return null
+  },
+
 }
 
 export default Cache

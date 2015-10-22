@@ -124,12 +124,11 @@ view Errors {
 }
 
 const flintAddedLines = 0
+const last = arr => arr[arr.length - 1]
+const fileName = url => url && url.replace(/[\?\)].*/, '')
+const getLine = err => err && (err.line || err.loc && err.loc.line)
 
 view ErrorMessage {
-  const last = arr => arr[arr.length - 1]
-  const fileName = url => url && last(url.split('/'))
-  const getLine = err => err && (err.line || err.loc && err.loc.line)
-
   let line = getLine(^error)
 
   on('props', () => {
@@ -138,7 +137,7 @@ view ErrorMessage {
 
   <inner if={^error}>
     <where>
-      {fileName(^error.file || ^error.fileName)}
+      {fileName(^error.file)}
       {line ? ` line ${line - flintAddedLines}` : ''}
     </where>
     {' '}
