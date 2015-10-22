@@ -9,9 +9,11 @@ import rimraf from 'rimraf'
 import replace from 'replace'
 import mkdirp from 'mkdirp'
 import ncp from 'ncp'
-import { Spinner } from '../ui'
 import fetch from 'node-fetch'
 import raven from 'raven'
+
+import { Spinner } from '../ui'
+import randomColor from '../colors'
 
 const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
 
@@ -250,6 +252,15 @@ function replaceGivenNameInApp() {
       silent: true
     })
 
+    // random color :)
+    replace({
+      regex: 'lightsalmon',
+      replacement: randomColor(),
+      paths: [p(FLINT.dest, 'main.js')],
+      recursive: false,
+      silent: true
+    })
+
     resolve()
   })
 }
@@ -307,7 +318,7 @@ function finish() {
     console.log()
     console.log('Your new Flint app is ready in ./%s'.green.bold, name)
     console.log()
-    process.exit(1)
+    process.exit()
   })
 }
 
