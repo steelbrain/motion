@@ -333,10 +333,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          const withProps = React.cloneElement(els, {
-            __disableWrapper,
-            path: hash(this.path)
-          });
+          const withProps = React.cloneElement(els, { __disableWrapper });
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
           return styled

@@ -43,8 +43,11 @@ class Wrapper extends React.Component {
 
 function wrapped(name, props, children, path) {
   return React.createElement(
-    name && name.toLowerCase(),
-    Object.assign(props, { 'data-flintid': path }),
+    'div', // why not name? because view Circle needs to be whitelisted (svg element)
+    Object.assign(props, {
+      'data-flintid': path,
+      className: name && name.toLowerCase()
+    }),
     children
   )
 }
