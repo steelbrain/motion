@@ -67,7 +67,7 @@ export default function createElement(viewName) {
           tag = fullname
         }
 
-        if (divWhitelist.indexOf(tag) !== -1) {
+        if (divWhitelist.indexOf(tag) >= 0) {
           originalTag = tag
           tag = 'div'
         }
