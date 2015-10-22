@@ -228,7 +228,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         get(name, val) {
           // dont cache in prod / undefined
-          if (process.env.production || typeof val == 'undefined')
+          if (process.env.production)
             return val
 
           if (options.changed || !getCache[this.path])
