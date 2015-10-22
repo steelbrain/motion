@@ -63,7 +63,6 @@ var colors = [
     "lavender",
     "lavenderblush",
     "lawngreen",
-    "lemonchiffon",
     "lightblue",
     "lightcoral",
     "lightcyan",
@@ -132,7 +131,6 @@ var colors = [
     "turquoise",
     "violet",
     "wheat",
-    "whitesmoke",
     "yellow",
     "yellowgreen"
 ]

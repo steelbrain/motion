@@ -260,21 +260,20 @@ function buildScripts(cb, stream) {
       $p.buildWrap()
     ))
     .pipe($.if(file => {
+      file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
+
       buildChecker(lastScript)
+
+      if (file.isSourceMap)
+        return true
 
       if (stream || lastError)
         return false
 
       const endTime = Date.now() - startTime
-      const isMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
 
-      if (!isMap) {
-        out.goodFile(file, endTime)
-        log('build took ', endTime, 'ms')
-      }
-      else {
-        return true
-      }
+      out.goodFile(file, endTime)
+      log('build took ', endTime, 'ms')
 
       const isNew = (
         !lastSavedTimestamp[file.path] ||
@@ -292,6 +291,8 @@ function buildScripts(cb, stream) {
       gulp.dest(dest))
     )
     .pipe(pipefn(file => {
+      if (file.isSourceMap) return
+
       log('HAS_RUN_INITIAL_BUILD', HAS_RUN_INITIAL_BUILD)
       log('lastError', lastError)
 

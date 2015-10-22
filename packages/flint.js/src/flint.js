@@ -227,24 +227,21 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         get(name, val) {
-          if (process.env.production)
+          // dont cache in prod / undefined
+          if (process.env.production || typeof val == 'undefined')
             return val
 
-          // if hot reloaded but not changed
-          if (options.unchanged) {
-            if (getCache[this.path])
-              return getCache[this.path][name]
-            else
-              return val
-          }
-          else {
-            // on first get, we may not have even set
-            if (!getCache[this.path]) getCache[this.path] = {}
-            if (typeof getCache[this.path][name] == 'undefined')
-              getCache[this.path][name] = val
+          if (options.changed || !getCache[this.path])
+            getCache[this.path] = {}
 
-            return val
-          }
+          // we don't wrap view.set() on (var x = 1)
+          if (typeof getCache[this.path][name] == 'undefined')
+            getCache[this.path][name] = val
+
+          if (options.unchanged && getCache[this.path])
+            return getCache[this.path][name]
+
+          return val
         },
 
         // LIFECYCLES
@@ -252,6 +249,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         getInitialState() {
           this.path = (this.context.path || '') + name
 
+          // TODO: document this
           if (!options.unchanged)
             delete getCache[this.path]
 
@@ -413,12 +411,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         if (lastWorkingView[name]) {
           setView(name, lastWorkingView[name])
-          Flint.render()
         }
-        else {
-          setView(name, ErrorDefinedTwice(name))
-          Flint.render()
-        }
+
+        Flint.render()
       }
 
       Flint.on('afterRender', () => {
@@ -428,6 +423,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       let flintComponent = Flint.makeReactComponent(name, component, { changed: true })
       setView(name, flintComponent)
+      Flint.render()
 
       // this resets tool errors
       window.onViewLoaded()
