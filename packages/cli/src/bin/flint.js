@@ -19,8 +19,9 @@ if (flintCmdIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === 
 // check flint version
 var path = require('path')
 var exec = require('child_process').exec
-var checkversion = 'npm view flint version'
+var checkversion = 'npm view flint version -loglevel silent'
 exec(checkversion, (err, version) => {
+  if (err) return
   if (version) {
     var pkg = require(path.join('..', '..', '..', 'package.json'))
 
