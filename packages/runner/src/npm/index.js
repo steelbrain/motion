@@ -128,6 +128,7 @@ async function install(force) {
         console.log("\n",'Installing Packages...'.white.bold)
 
         for (let dep of un) {
+          console.log(dep)
           try {
             await save(dep, un.indexOf(dep), un.length)
           }

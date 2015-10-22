@@ -1,16 +1,19 @@
 view Modal {
-  let message
+  let children, title
 
   on('props', setMessage)
 
   function setMessage() {
-    message = ^children || message
+    // cache last children when empty
+    if (!^title && !^children) return
+    title = ^title
+    children = ^children
   }
 
   <modal>
     <close onClick={^onClose}>X</close>
-    <title if={^title}>{^title}</title>
-    <message>{message}</message>
+    <title if={^title}>{title}</title>
+    <message>{children}</message>
   </modal>
 
   $ = {
