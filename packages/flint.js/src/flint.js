@@ -71,7 +71,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   const getComponent = (key) => opts.namespace[key]
   const emitter = ee({})
 
-  function propsHash(_props) {
+  function phash(_props) {
     const props = Object.keys(_props).reduce((acc, key) => {
       const prop = _props[key]
 
@@ -186,29 +186,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         getChildContext() {
           // no need for paths/cache in production
-          if (process.env.production)
-            return {}
-
-          let propsPath
-
-          // get the props hash, but lets cache it so its not a ton of work
-          if (options.changed === true) {
-            this.propsPath = propsHash(this.props)
-            propsHashes[this.context.path] = this.propsPath
-            options.changed = 2
-          }
-          else if (!this.propsPath) {
-            this.propsPath = propsHashes[this.context.path]
-
-            if (!this.propsPath) {
-              this.propsPath = propsHash(this.props)
-              propsHashes[this.context.path] = this.propsPath
-            }
-          }
-
-          return {
-            path: (this.context.path || '') + name + '.' + this.propsPath + ','
-          }
+          if (process.env.production) return {}
+          this.setPath()
+          return { path: this.path }
         },
 
         // TODO: shouldComponentUpdate based on hot load
@@ -251,7 +231,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // LIFECYCLES
 
         getInitialState() {
-          this.path = (this.context.path || '') + name
+          this.setPath()
 
           // TODO: document this
           if (!options.unchanged)
@@ -279,6 +259,27 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.render = flintRender
 
           return null
+        },
+
+        setPath() {
+          let propsHash
+
+          // get the props hash, but lets cache it so its not a ton of work
+          if (options.changed === true) {
+            propsHash = phash(this.props)
+            propsHashes[this.context.path] = propsHash
+            options.changed = 2
+          }
+          else if (!propsHash) {
+            propsHash = propsHashes[this.context.path]
+
+            if (!propsHash) {
+              propsHash = phash(this.props)
+              propsHashes[this.context.path] = propsHash
+            }
+          }
+
+          this.path = (this.context.path || '') + ',' + name + '.' + propsHash
         },
 
         componentWillReceiveProps(nextProps) {
@@ -333,7 +334,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          const withProps = React.cloneElement(els, { __disableWrapper });
+          const withProps = React.cloneElement(els, { __disableWrapper, path: this.path });
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
           return styled

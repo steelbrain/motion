@@ -1,7 +1,8 @@
 import JSONTree from 'react-json-tree'
 
 view State {
-  let inspecting, name, state
+  let inspecting, name
+  let state = {}
   let keys = {}
   let show = false
 

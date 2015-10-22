@@ -129,11 +129,7 @@ view ErrorMessage {
   const last = arr => arr[arr.length - 1]
   const fileName = url => url && last(url.split('/'))
   const getLine = err => err && (err.line || err.loc && err.loc.line)
-  const devHeight = 0
-  const closedHeight = 40
-  const openHeight = 200
 
-  let open = false
   let line = getLine(^error)
 
   on('props', () => {
@@ -165,9 +161,8 @@ view ErrorMessage {
     background: red,
     position: 'fixed',
     left: 0,
-    height: open ? openHeight : 'auto',
-    minHeight: closedHeight,
-    bottom: (^error) ? devHeight : (devHeight - closedHeight),
+    minHeight: 40,
+    bottom: ^error ? 0 : -100,
     transition: 'all 200ms ease-in',
     right: 0,
     fontFamily: 'helvetica',
