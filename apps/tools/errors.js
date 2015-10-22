@@ -80,6 +80,12 @@ view Errors {
     }, delay)
   }
 
+  function close() {
+    error = null
+    compileError = null
+    runtimeError = null
+  }
+
   tools.on('compile:error', () => {
     runtimeError = null
     compileError = tools.data.error
@@ -106,6 +112,7 @@ view Errors {
 
   <ErrorMessage
     error={error}
+    close={close}
     runtime={runtimeError}
     compile={compileError}
   />
@@ -124,7 +131,7 @@ view ErrorMessage {
   const fileName = url => url && last(url.split('/'))
   const getLine = err => err && (err.line || err.loc && err.loc.line)
   const devHeight = 0 // 34 with bar
-  const closedHeight = 55
+  const closedHeight = 40
   const openHeight = 200
 
   let open = false
@@ -150,7 +157,7 @@ view ErrorMessage {
         </niceStack>
       }
     </errorTitle>
-    <close><center>x</center></close>
+    <close onClick={^close}><center>x</center></close>
   </inner>
 
   const red = '#cd423e'
@@ -160,8 +167,9 @@ view ErrorMessage {
     position: 'fixed',
     left: 0,
     height: open ? openHeight : 'auto',
+    minHeight: closedHeight,
     bottom: (^error) ? devHeight : (devHeight - closedHeight),
-    transition: 'all 300ms ease-in',
+    transition: 'all 200ms ease-in',
     right: 0,
     fontFamily: 'helvetica',
     color: '#fff',
@@ -170,11 +178,11 @@ view ErrorMessage {
     pointerEvents: 'all',
     overflow: 'scroll',
     zIndex: 2147483647,
-    boxShadow: '0 -6px 12px rgba(0,0,0,0.06)'
+    boxShadow: '0 -6px 12px rgba(0,0,0,0.06)',
   }
 
   $inner = {
-    display: 'block',
+    display: 'block'
   }
 
   $where = {
@@ -232,7 +240,15 @@ view ErrorMessage {
     width: 50,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    lineHeight: 1,
+    fontSize: 16,
+    opacity: 0.4,
+    cursor: 'pointer',
+
+    ':hover': {
+      opacity: 1
+    }
   }
 }
 

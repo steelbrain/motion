@@ -589,16 +589,17 @@ async function makeTemplate(req, cb) {
   const template = await readFile(templatePath)
   const dir = await readdir({ root: p(OPTS.flintDir, 'out') })
   const files = dir.files.filter(f => /\.js$/.test(f.name)) // filter sourcemaps
+  const hasFiles = files.length
 
-  if (!files.length) {
-    return cb(template.toString())
+  let paths = []
+
+  if (hasFiles) {
+    paths = files.map(file => file.path)
+    const mainIndex = paths.indexOf('main.js')
+
+    if (mainIndex !== -1)
+      paths.move(mainIndex, 0)
   }
-
-  let paths = files.map(file => file.path)
-  const mainIndex = paths.indexOf('main.js')
-
-  if (mainIndex !== -1)
-    paths.move(mainIndex, 0)
 
   const fullTemplate = template.toString().replace('<!-- SCRIPTS -->',
     '<div id="_flintdevtools"></div>'
