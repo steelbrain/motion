@@ -8,7 +8,7 @@ view State {
   function setView(path) {
     let views = path.split(',')
     name = views[views.length - 1]
-    state = Flint.getCache[path]
+    state = window.Flint.getCache[path]
     inspecting = true
   }
 

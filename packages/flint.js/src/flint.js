@@ -207,7 +207,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           return {
-            path: (this.context.path || '') + name + '.' + this.propsPath
+            path: (this.context.path || '') + name + '.' + this.propsPath + ','
           }
         },
 
@@ -251,7 +251,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // LIFECYCLES
 
         getInitialState() {
-          this.path = (this.context.path || '') + ',' + name
+          this.path = (this.context.path || '') + name
 
           // TODO: document this
           if (!options.unchanged)
@@ -335,7 +335,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, {
             __disableWrapper,
-            path: this.path
+            path: hash(this.path)
           });
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false

@@ -491,7 +491,8 @@ function getScriptTags(files, req) {
       '<script src="/__/devtools.dev.js"></script>',
       // devtools
       devToolsDisabled(req) ? '' : [
-        '<script src="/__/tools.js"></script>',
+        '<script src="/__/tools/packages.js"></script>',
+        '<script src="/__/tools/tools.js"></script>',
         '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
       ].join(newLine),
       // user files
@@ -533,7 +534,7 @@ function runServer() {
     // packages.js
     server.use('/__', express.static('.flint/deps'));
     // tools.js
-    server.use('/__', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
+    server.use('/__/tools', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
     // flint.js & react.js
     server.use('/__', express.static(p(MODULES_DIR, 'flint-js', 'dist')));
 
