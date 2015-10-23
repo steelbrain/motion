@@ -5,9 +5,10 @@ const sum = (a, b) => a + b
 
 view Debounce {
   const memory = 10
+  const autoSaveDelay = 6000 // longer during autosave
 
   let isAutoSaving = false
-  let min
+  let delay, curDelay
   let lastTime = Date.now()
   let avgDiff, lastFew = []
 
@@ -15,7 +16,8 @@ view Debounce {
   view.pause()
 
   on('props', () => {
-    min = ^min || 2000
+    delay = ^delay || 2000
+    curDelay = curDelay || delay
 
     // find diff
     const now = Date.now()
@@ -38,6 +40,8 @@ view Debounce {
         avgDiff = lastFew.reduce(sum, 0) / lastFew.length
         // set autosaving
         isAutoSaving = avgDiff < 2000
+
+        delay = isAutoSaving ? autoSaveDelay : delay
       }
     }
 
@@ -46,13 +50,11 @@ view Debounce {
       return view.update()
 
     // debounce
-    if (diff > min)
+    if (diff > delay)
       view.update()
     else
-      setTimeout(view.update, min)
+      setTimeout(view.update, delay)
   })
 
-  <test>
-    <debounce yield />
-  </test>
+  <debounce yield />
 }
