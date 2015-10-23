@@ -141,7 +141,7 @@ view ErrorMessage {
     line = getLine(^error)
   })
 
-  <Debounce>
+  <Debounce force={!^error}>
     <bar>
       <inner if={^error}>
         <where>
