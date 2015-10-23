@@ -56,6 +56,8 @@ const niceStack = err => {
 }
 
 view Errors {
+  view.pause()
+
   let error = null
   let compileError = null
   let runtimeError = null
@@ -69,6 +71,7 @@ view Errors {
 
     if (noErrors) {
       error = null
+      view.update()
       return
     }
 
@@ -78,6 +81,7 @@ view Errors {
         error = niceRuntimeError(runtimeError)
       if (compileError)
         error = niceCompilerError(compileError)
+      view.update()
     }, delay)
   }
 
@@ -85,6 +89,7 @@ view Errors {
     error = null
     compileError = null
     runtimeError = null
+    view.update()
   }
 
   tools.on('compile:error', () => {
@@ -136,28 +141,32 @@ view ErrorMessage {
     line = getLine(^error)
   })
 
-  <inner if={^error}>
-    <where>
-      {fileName(^error.file)}
-      {line ? ` line ${line - flintAddedLines}` : ''}
-    </where>
-    {' '}
-    <errorTitle>
-      {^error.niceMessage || ^error.message}
-      {^error.niceStack &&
-        <niceStack>
-          {^error.niceStack[0]}
-          <errCol>{^error.niceStack[1]}</errCol>
-          {^error.niceStack[2]}
-        </niceStack>
-      }
-    </errorTitle>
-    <close onClick={^close}><center>x</center></close>
-  </inner>
+  <Debounce>
+    <bar>
+      <inner if={^error}>
+        <where>
+          {fileName(^error.file)}
+          {line ? ` line ${line - flintAddedLines}` : ''}
+        </where>
+        {' '}
+        <errorTitle>
+          {^error.niceMessage || ^error.message}
+          {^error.niceStack &&
+            <niceStack>
+              {^error.niceStack[0]}
+              <errCol>{^error.niceStack[1]}</errCol>
+              {^error.niceStack[2]}
+            </niceStack>
+          }
+        </errorTitle>
+        <close onClick={^close}><center>x</center></close>
+      </inner>
+    </bar>
+  </Debounce>
 
   const red = '#cd423e'
 
-  $ = {
+  $bar = {
     background: red,
     position: 'fixed',
     left: 0,

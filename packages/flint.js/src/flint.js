@@ -191,7 +191,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           return { path: this.getPath() }
         },
 
-        // TODO: shouldComponentUpdate based on hot load
+        // TODO: shouldComponentUpdate based on hot load for perf
+        shouldComponentUpdate() {
+          return !this.isPaused
+        },
 
         shouldUpdate() {
           return (
@@ -346,6 +349,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // helpers for controlling re-renders
         pause() { this.isPaused = true },
         resume() { this.isPaused = false },
+        update() { this.forceUpdate() },
 
         // helpers for context
         childContext(obj) {

@@ -85,7 +85,8 @@ const Cache = {
   },
 
   addError(file : string, error : object) {
-    files[name(file)].error = error
+    if (files[name(file)])
+      files[name(file)].error = error
   },
 
   removeError(file : string) {
