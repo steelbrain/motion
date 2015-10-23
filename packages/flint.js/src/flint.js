@@ -48,10 +48,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
-  // either on window or namespace
-  if (opts.namespace !== root && opts.app)
-    root[opts.app] = opts.namespace
-
   let firstRender = true
   let views = {}
   let lastWorkingView = {}
@@ -63,13 +59,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   let getCacheInit = {} // stores the vars after a view is first run
   let propsHashes = {}
 
-  const removeComponent = key => {
-    delete views[key]
-    delete opts.namespace[key]
-  }
-
-  const setComponent = (key, val) => (opts.namespace[key] = val)
-  const getComponent = (key) => opts.namespace[key]
+  const removeView = key => delete views[key]
   const emitter = ee({})
 
   function phash(_props) {
@@ -97,7 +87,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     render() {
       const run = () => {
-        const MainComponent = getComponent('Main') || Main;
+        firstRender = false
+        const MainComponent = views.Main.component;
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<MainComponent />)
@@ -110,7 +101,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
         }
 
-        firstRender = false
         emitter.emit('afterRender')
       }
 
@@ -142,7 +132,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // remove viewsInFile that werent made
       const removed = arrayDiff(cached, _views)
-      removed.map(removeComponent)
+      removed.map(removeView)
 
       currentHotFile = null
       viewCache[file] = viewsInFile[file]
@@ -162,7 +152,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     deleteFile(name) {
       const weirdName = `/${name}`
-      viewsInFile[weirdName].map(removeComponent)
+      viewsInFile[weirdName].map(removeView)
       delete viewsInFile[weirdName]
       delete viewCache[weirdName]
       Flint.render()
@@ -322,6 +312,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         componentDidMount() {
           this.didMount = true
           runEvents(this.events, 'mount')
+          
+          // set last working view for this hash
+          if (!lastWorkingView[hash])
+            lastWorkingView[hash] = this
         },
 
         componentWillUnmount() {
@@ -364,7 +358,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          let els = this.viewRender()
+          let els
+          
+          try {
+            els = this.viewRender()
+          } catch(e) {
+            reportError(e)
+            
+            // restore last working view
+            if (lastWorkingView[hash]) {
+              console.log('restoring last working for', name, hash)
+              views[name] = lastWorkingView[hash]
+              setTimeout(Flint.render)
+              throw(e) // keep stack
+            }
+          }
+
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() });
@@ -404,63 +413,39 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       hash is the build systems hash of the view contents
         used for detecting changed views
     */
-    view(name, hash, component) {
+    view(name, hash, body) {
       viewsInFile[currentHotFile].push(name)
 
-      function setView(name, Component) {
-        views[name] = Flint.makeView(hash, Component)
-        setComponent(name, Component)
+      function setView(name, component) {
+        views[name] = Flint.makeView(hash, component)
         if (firstRender) return
       }
 
       // if new
       if (views[name] == undefined) {
-        let Component = Flint.makeReactComponent(name, component, { hash, changed: true });
-        setView(name, Component)
-        lastWorkingView[name] = views[name].component
+        let component = Flint.makeReactComponent(name, body, { hash, changed: true })
+        setView(name, component)
+        lastWorkingView[hash] = component
         return
       }
 
       // not new
-
       // if defined twice during first run
       if (firstRender) {
         console.error('Defined a view twice!', name, hash)
-        setComponent(name, ErrorDefinedTwice(name))
+        views[name] = ErrorDefinedTwice(name)
         return
       }
 
       // if unchanged
       if (views[name].hash == hash) {
-        let Component = Flint.makeReactComponent(name, component, { hash, unchanged: true });
-        setView(name, Component)
+        let component = Flint.makeReactComponent(name, body, { hash, unchanged: true });
+        setView(name, component)
         return
       }
 
-      // start with a success and an error will fire before next frame
-      // if (root._DT)
-      //   root._DT.emitter.emit('runtime:success')
-
-      let viewRanSuccessfully = true
-
-      // recover from bad views
-      window.onerror = (...args) => {
-        viewRanSuccessfully = false
-
-        if (lastWorkingView[name]) {
-          setView(name, lastWorkingView[name])
-        }
-
-        Flint.render()
-      }
-
-      Flint.on('afterRender', () => {
-        if (viewRanSuccessfully)
-          lastWorkingView[name] = views[name].component
-      })
-
-      let flintComponent = Flint.makeReactComponent(name, component, { changed: true })
-      setView(name, flintComponent)
+      let component = Flint.makeReactComponent(name, body, { hash, changed: true })
+      setView(name, component)
       Flint.render()
 
       // this resets tool errors
@@ -508,11 +493,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     el: createElement('_'),
     Flint
   }
-
-  // set flint onto namespace
   opts.namespace.Flint = Flint
 
-  // prevent user from overwriting Flint
+  // prevent overwriting
   Object.freeze(Flint)
 
   return Flint;

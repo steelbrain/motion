@@ -4,6 +4,7 @@ const propsMatch = /view\.props\./g
 const propsReplace = String.fromCharCode('94')
 
 const niceRuntimeError = err => {
+  err.file = err.file.replace(window.location.origin + '/_', '')
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
     .replace(propsMatch, propsReplace)
@@ -21,6 +22,7 @@ const replaceCompilerMsg = (msg, filename = '') =>
     .replace(/Line [0-9]+\:\s*/, '')
     .replace(/Flint.([A-Za-z1-9_]*)Wrapper/, '$' + '1')
     .replace('view.render = () => ', '')
+    .replace(' view={view}', '')
 
 const niceCompilerMessage = err => {
   err.niceMessage = replaceCompilerMsg(err.message, err.fileName)
@@ -145,19 +147,19 @@ view ErrorMessage {
     <bar>
       <inner if={^error}>
         <where>
-          {fileName(^error.file)}
-          {line ? ` line ${line - flintAddedLines}` : ''}
+          In <b>{fileName(^error.file)}</b>
+          <line if={line}>
+            <span>&nbsp;line</span> <b>{line - flintAddedLines}</b>
+          </line>
         </where>
         {' '}
         <errorTitle>
-          {^error.niceMessage || ^error.message}
-          {^error.niceStack &&
-            <niceStack>
-              {^error.niceStack[0]}
-              <errCol>{^error.niceStack[1]}</errCol>
-              {^error.niceStack[2]}
-            </niceStack>
-          }
+          {(^error.niceMessage || ^error.message).trim()}
+          <niceStack if={^error.niceStack}>
+            {^error.niceStack[0]}
+            <errCol>{^error.niceStack[1]}</errCol>
+            {^error.niceStack[2]}
+          </niceStack>
         </errorTitle>
         <close onClick={^close}><center>x</center></close>
       </inner>
@@ -170,14 +172,14 @@ view ErrorMessage {
     background: red,
     position: 'fixed',
     left: 0,
-    minHeight: 40,
     bottom: ^error ? 0 : -100,
     transition: 'all 200ms ease-in',
     right: 0,
-    fontFamily: 'helvetica',
+    fontFamily: '-apple-system, "San Francisco", Roboto, "Segou UI", "Helvetica Neue", Helvetica, Arial, sans-serif',
+    fontWeight: 300,
     color: '#fff',
-    fontSize: 15,
-    padding: 8,
+    fontSize: '4vh',
+    padding: 10,
     pointerEvents: 'all',
     overflow: 'scroll',
     zIndex: 2147483647,
@@ -190,43 +192,46 @@ view ErrorMessage {
 
   $where = {
     display: 'inline-block',
-    fontSize: 15,
     pointerEvents: 'all',
-    fontWeight: 'bold',
+    fontWeight: 300,
+    color: 'rgba(255,255,255,0.8)',
+  }
+  
+  $line = {
+    display: 'inline-block',
+    whiteSpace: 'pre',
+    pointerEvents: 'all'
+  }
+  
+  $b = {
     color: '#fff'
   }
 
   $errorTitle = {
-    display: 'inline'
+    display: 'inline',
+    color: 'rgba(255,255,255,0.7)'
   }
 
   $niceStack = {
-    color: 'rgba(255,255,255,0.65)',
+    color: 'rgba(255,255,255,0.85)',
     display: 'inline',
     fontFamily: 'Meslo, Menlo, Monaco, monospace',
-    fontSize: 14,
     padding: [0, 5]
   }
 
   $errCol = {
     display: 'inline',
     borderBottom: '2px solid #f5d64c',
-    margin: -5,
-    padding: 5,
+    margin: -3,
+    padding: 3,
     color: '#fff'
   }
 
   $stack = {
     fontFamily: 'monospace',
-    fontSize: 14,
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     maxHeight: 200
-  }
-
-  $line = {
-    whiteSpace: 'pre',
-    pointerEvents: 'all'
   }
 
   $boldline = {
@@ -245,8 +250,7 @@ view ErrorMessage {
     justifyContent: 'center',
     alignItems: 'center',
     lineHeight: 1,
-    fontSize: 16,
-    opacity: 0.4,
+    opacity: 0.5,
     cursor: 'pointer',
 
     ':hover': {

@@ -114,7 +114,7 @@ async function buildTemplate() {
       '  <script src="/_/flint.prod.js"></script>',
       '  <script src="/_/packages.js"></script>',
       '  <script src="/_/'+OPTS.name+'.js"></script>',
-      '  <script>window.Flint = flintRun_'+OPTS.name+'("_flintapp", { namespace:window, app:"userMain" });</script>'
+      `  <script>window.Flint = flintRun_${OPTS.name}("_flintapp", { app: ${OPTS.name} });</script>`
     ].join(newLine))
 
   // TODO: flint build --isomorphic
@@ -508,7 +508,7 @@ function getScriptTags(files, req) {
         '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
       ].join(newLine),
       // user files
-      '<script>window.Flint = runFlint(window.renderToID || "_flintapp", { namespace: window, app: "userMain" });</script>',
+      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
       assetScriptTags(files),
       '<script>Flint.render()</script>',
       '<!-- END FLINT JS -->'
