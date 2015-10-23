@@ -215,7 +215,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // dont cache in prod / undefined
           if (process.env.production)
             return val
-            
+
           const path = this.getPath()
           console.log('get', path, clone(getCache))
 
@@ -223,11 +223,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             getCache[path] = {}
             getCacheInit[path] = {}
           }
-          
+
           let restoredValue = getCache[path][name]
           let restore = false
-          
-          if (options.changed) { 
+
+          if (options.changed) {
             // is this initial value different than the last initial value
             if (getCacheInit[path][name] != val) {
               getCacheInit[path][name] = val
@@ -242,7 +242,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           if (options.unchanged && getCache[path])
             return getCache[path][name]
-            
+
           // if ending init, live inject old value for hotloading, or return actual value
           return restore ? restoredValue : val
         },
@@ -279,7 +279,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           return null
         },
-        
+
         getPath() {
           return `${this.path}-${this.props.__key || ''}`
         },
