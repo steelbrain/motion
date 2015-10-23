@@ -111,7 +111,6 @@ export default function createElement(viewName) {
     if (props.yield)
       props = Object.assign(props, view.props, { style: props.style });
 
-
     props.__key = key
 
       // TODO: whitelist actual html tags

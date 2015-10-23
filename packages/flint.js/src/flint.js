@@ -233,8 +233,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             if (getCacheInit[path][name]===undefined) {
               restore = false
             } else {
-              restore = typeof val == 'object'
-                     || getCacheInit[path][name] === val
+              restore = typeof val == 'object' || getCacheInit[path][name] === val
               originalValue = getCache[path][name]
             }
             // console.log('new value', val, 'before hot', getCache[path][name])
@@ -242,7 +241,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
             getCacheInit[path][name] = val
           }
-
 
           // we don't wrap view.set() on (var x = 1)
           if (typeof getCache[path][name] == 'undefined')
