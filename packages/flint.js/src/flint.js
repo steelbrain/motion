@@ -187,7 +187,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         getChildContext() {
           // no need for paths/cache in production
           if (process.env.production) return {}
-          this.setPath()
           return { path: this.path }
         },
 
