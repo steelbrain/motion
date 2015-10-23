@@ -50,6 +50,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   let firstRender = true
   let views = {}
+  let mainHash
   let lastWorkingView = {}
   let preloaders = [] // async functions needed before loading app
   let viewCache = {} // map of views in various files
@@ -88,7 +89,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     render() {
       const run = () => {
         firstRender = false
-        const MainComponent = views.Main.component;
+        const MainComponent = views.Main.component || lastWorkingView.Main;
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<MainComponent />)
@@ -158,10 +159,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.render()
     },
 
-    makeReactComponent(name, component, options = {}) {
+    makeReactComponent(name, view, options = {}) {
       const el = createElement(name)
 
-      const spec = {
+      let component = React.createClass({
         displayName: name,
         name,
         el,
@@ -270,7 +271,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           // cache original render
           const flintRender = this.render
-          component(this, viewOn)
+          view(this, viewOn)
 
           // reset original render, cache view render
           this.viewRender = this.render
@@ -314,8 +315,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           runEvents(this.events, 'mount')
           
           // set last working view for this hash
-          if (!lastWorkingView[hash])
-            lastWorkingView[hash] = this
+          if (!process.env.production) {
+            if (!lastWorkingView[name] || options.changed || options.new)
+              lastWorkingView[name] = component
+          }
         },
 
         componentWillUnmount() {
@@ -366,11 +369,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             reportError(e)
             
             // restore last working view
-            if (lastWorkingView[hash]) {
-              console.log('restoring last working for', name, hash)
-              views[name] = lastWorkingView[hash]
+            if (lastWorkingView[name]) {
+              console.log('restoring last working for', name)
+              views[name] = lastWorkingView[name]
               setTimeout(Flint.render)
-              throw(e) // keep stack
+              throw e // keep stack
             }
           }
 
@@ -381,9 +384,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.firstRender = false
           return styled
         }
-      }
+      })
 
-      return React.createClass(spec);
+      return component
     },
 
     getView(name, parentName) {
@@ -425,7 +428,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       if (views[name] == undefined) {
         let component = Flint.makeReactComponent(name, body, { hash, changed: true })
         setView(name, component)
-        lastWorkingView[hash] = component
+        // lastWorkingView[name] = component
         return
       }
 

@@ -14,9 +14,9 @@ const niceRuntimeError = err => {
 const niceCompilerError = err =>
   niceCompilerMessage(niceStack(err))
 
-const replaceCompilerMsg = (msg, filename = '') =>
+const replaceCompilerMsg = (msg) =>
   msg
-    .replace(filename + ': ', '')
+    .replace(/.*\.js\:/, '')
     .replace(/identifier ([a-z]*)\s*Unknown global name/, '$' + '1 is not defined')
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
@@ -43,12 +43,13 @@ const niceStack = err => {
           replacedChars += (matches.length * 10) // * len of replacement
         }
 
+        // remove the babel " > |" before the line
         result = result
-          .replace(/\>\s*[0-9]+\s*\|\s*/g, '')
+          .replace(/\>\s*[0-9]+\s*\|\s*/, '')
 
         result = replaceCompilerMsg(result)
 
-        const colIndex = err.loc.column - 2
+        const colIndex = err.loc.column - 4 // 4 because we remove babel prefix
         const afterUnflintIndex = colIndex - replacedChars
         err.niceStack = split(result, afterUnflintIndex)
       }
@@ -178,7 +179,7 @@ view ErrorMessage {
     fontFamily: '-apple-system, "San Francisco", Roboto, "Segou UI", "Helvetica Neue", Helvetica, Arial, sans-serif',
     fontWeight: 300,
     color: '#fff',
-    fontSize: '4vh',
+    fontSize: '14px',
     padding: 10,
     pointerEvents: 'all',
     overflow: 'scroll',
