@@ -114,7 +114,7 @@ async function buildTemplate() {
       '  <script src="/_/flint.prod.js"></script>',
       '  <script src="/_/packages.js"></script>',
       '  <script src="/_/'+OPTS.name+'.js"></script>',
-      `  <script>window.Flint = flintRun_${OPTS.name}("_flintapp", { app: ${OPTS.name} });</script>`
+      `  <script>window.Flint = flintRun_${OPTS.name}("_flintapp", { app: "${OPTS.name}" });</script>`
     ].join(newLine))
 
   // TODO: flint build --isomorphic
