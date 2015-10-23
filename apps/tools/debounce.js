@@ -45,12 +45,10 @@ view Debounce {
     }
 
     // override
-    console.log('force', ^force)
     if (^force)
       return view.update()
 
     // debounce
-    console.log('set timeout', curDelay)
     clearTimeout(timeout)
     timeout = setTimeout(view.update, curDelay)
   })
