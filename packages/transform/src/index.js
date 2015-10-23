@@ -199,7 +199,6 @@ export default function ({ Plugin, types: t }) {
             return viewUpdateExpression(node.callee.property.name, node)
 
           if (isViewDefinition(node)) {
-            console.log('reset keybase')
             keyBase = {}
           }
         }
