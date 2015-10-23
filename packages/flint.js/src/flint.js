@@ -60,6 +60,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   let viewsInFile = {} // current build up of running hot insertion
   let currentHotFile // current file that is running
   let getCache = {} // stores { path: { name: val } } for use in view.get()
+  let getCacheInit = {} // stores the vars after a view is first run
   let propsHashes = {}
 
   const removeComponent = key => {
@@ -92,6 +93,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   let Flint = {
     router,
     getCache,
+    getCacheInit,
 
     render() {
       const run = () => {
@@ -164,7 +166,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       delete viewsInFile[weirdName]
       delete viewCache[weirdName]
       Flint.render()
-      debugger
     },
 
     makeReactComponent(name, component, options = {}) {
@@ -187,8 +188,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         getChildContext() {
           // no need for paths/cache in production
           if (process.env.production) return {}
-          this.setPath()
-          return { path: this.path }
+          return { path: this.getPath() }
         },
 
         // TODO: shouldComponentUpdate based on hot load
@@ -202,8 +202,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         set(name, val) {
           if (!process.env.production) {
-            getCache[this.path] = getCache[this.path] || {}
-            getCache[this.path][name] = val
+            const path = this.getPath()
+            getCache[path] = getCache[path] || {}
+            getCache[path][name] = val
           }
 
           if (this.shouldUpdate())
@@ -214,18 +215,36 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // dont cache in prod / undefined
           if (process.env.production)
             return val
+            
+          const path = this.getPath()
+          console.log('get', path, clone(getCache))
 
-          if (options.changed || !getCache[this.path])
-            getCache[this.path] = {}
+          if (options.changed && !getCache[path]) {
+            getCache[path] = {}
+            getCacheInit[path] = {}
+          }
+          
+          let restoredValue = getCache[path][name]
+          let restore = false
+          
+          if (options.changed) { 
+            // is this initial value different than the last initial value
+            if (getCacheInit[path][name] != val) {
+              getCacheInit[path][name] = val
+            } else {
+              restore = true
+            }
+          }
 
           // we don't wrap view.set() on (var x = 1)
-          if (typeof getCache[this.path][name] == 'undefined')
-            getCache[this.path][name] = val
+          if (typeof getCache[path][name] == 'undefined')
+            getCache[path][name] = val
 
-          if (options.unchanged && getCache[this.path])
-            return getCache[this.path][name]
-
-          return val
+          if (options.unchanged && getCache[path])
+            return getCache[path][name]
+            
+          // if ending init, live inject old value for hotloading, or return actual value
+          return restore ? restoredValue : val
         },
 
         // LIFECYCLES
@@ -234,8 +253,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.setPath()
 
           // TODO: document this
-          if (!options.unchanged)
-            delete getCache[this.path]
+          // if (!options.unchanged)
+            // delete getCache[this.path]
 
           let u = void 0
           this.firstRender = true
@@ -259,6 +278,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.render = flintRender
 
           return null
+        },
+        
+        getPath() {
+          return `${this.path}-${this.props.__key || ''}`
         },
 
         setPath() {
@@ -334,7 +357,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          const withProps = React.cloneElement(els, { __disableWrapper, path: this.path });
+          const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() });
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
           return styled
