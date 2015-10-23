@@ -215,6 +215,11 @@ const $p = {
   )
 }
 
+let writeWPort = socketPort =>
+  readConfig().then(config =>
+    writeConfig(Object.assign(config, { socketPort }))
+  )
+
 function buildScripts(cb, stream) {
   console.log('Building...'.bold.white)
   log('build scripts')
@@ -397,6 +402,8 @@ function setOptions(opts, build) {
   OPTS.name = folders[folders.length - 1]
   OPTS.url = OPTS.name + '.dev'
 }
+
+let readConfig = () => readJSON(OPTS.configFile)
 
 function writeConfig(config) {
   writeJSON(OPTS.configFile, config)
@@ -703,6 +710,7 @@ export async function run(opts, isBuild) {
       await clearOutDir()
       await runServer()
       bridge.start(wport())
+      writeWPort(wport())
       buildScripts()
       await afterFirstBuild()
       await npm.install()
