@@ -217,7 +217,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             return val
             
           const path = this.getPath()
-          console.log('get', path, clone(getCache))
 
           if (options.changed && !getCache[path]) {
             getCache[path] = {}
@@ -229,7 +228,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           
           if (options.changed) { 
             // is this initial value different than the last initial value
-            if (getCacheInit[path][name] != val) {
+            if (getCacheInit[path][name] !== val) {
               getCacheInit[path][name] = val
             } else {
               restore = true
@@ -237,7 +236,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // we don't wrap view.set() on (var x = 1)
-          if (typeof getCache[path][name] == 'undefined')
+          if (typeof getCache[path][name] === 'undefined')
             getCache[path][name] = val
 
           if (options.unchanged && getCache[path])
