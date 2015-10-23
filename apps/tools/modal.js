@@ -13,7 +13,7 @@ view Modal {
   <modal>
     <close onClick={^onClose}>X</close>
     <title if={^title}>{title}</title>
-    <message>{children}</message>
+    <message if={children}>{children}</message>
   </modal>
 
   $ = {
@@ -21,7 +21,6 @@ view Modal {
     top: ^open ? 0 : -140,
     left: 0,
     minWidth: 80,
-    minHeight: 40,
     padding: [10, 10],
     margin: 20,
     background: '#fff',
