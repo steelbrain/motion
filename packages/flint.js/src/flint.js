@@ -218,38 +218,41 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           const path = this.getPath()
 
-          if (options.changed || !getCache[path]) {
+          if (!getCache[path])
             getCache[path] = {}
+
+          if (!getCacheInit[path])
             getCacheInit[path] = {}
-          }
 
-          let restoredValue, restore
-
-          if (getCache[path]) {
-            restoredValue = getCache[path][name]
-          }
+          let originalValue, restore
 
           // if edited
           if (options.changed) {
             // initial value changed from last initial value
-            if (getCacheInit[path][name] != val) {
-              getCacheInit[path][name] = val
+            // or an object (avoid work for now) TODO: compare objects(?)
+            if (getCacheInit[path][name]===undefined) {
               restore = false
+            } else {
+              restore = typeof val == 'object'
+                     || getCacheInit[path][name] === val
+              originalValue = getCache[path][name]
             }
-            else {
-              restore = true
-            }
+            // console.log('new value', val, 'before hot', getCache[path][name])
+            // console.log('last init', getCacheInit[path][name], 'restore', restore)
+
+            getCacheInit[path][name] = val
           }
+
 
           // we don't wrap view.set() on (var x = 1)
           if (typeof getCache[path][name] == 'undefined')
             getCache[path][name] = val
 
-          if (options.unchanged && getCache[path])
+          if (options.unchanged && typeof getCache[path] != 'undefined')
             return getCache[path][name]
 
           // if ending init, live inject old value for hotloading, or return actual value
-          return restore ? restoredValue : val
+          return restore ? originalValue : val
         },
 
         // LIFECYCLES
@@ -421,7 +424,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // if defined twice during first run
       if (firstRender) {
         console.error('Defined a view twice!', name, hash)
-        // setComponent(name, ErrorDefinedTwice(name))
+        setComponent(name, ErrorDefinedTwice(name))
         return
       }
 
