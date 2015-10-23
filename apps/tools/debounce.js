@@ -49,7 +49,6 @@ view Debounce {
       return view.update()
 
     // debounce
-    console.log('debounce', curDelay)
     clearTimeout(timeout)
     timeout = setTimeout(view.update, curDelay)
   })
