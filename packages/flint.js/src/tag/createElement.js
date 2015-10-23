@@ -85,7 +85,7 @@ export default function createElement(viewName) {
     elementStyles([key, index], view, name, originalTag || tag, props)
 
     if (!props.key && !props.nokey) {
-      props.key = '' + key
+      props.key = name + key
       if (index) props.key += index
     }
 
@@ -110,6 +110,9 @@ export default function createElement(viewName) {
 
     if (props.yield)
       props = Object.assign(props, view.props, { style: props.style });
+
+
+    props.__key = key
 
       // TODO: whitelist actual html tags
     // write all tags to div in production
