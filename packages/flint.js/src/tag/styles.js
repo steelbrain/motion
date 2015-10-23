@@ -197,8 +197,7 @@ export default function elementStyles(key, view, name, tag, props) {
     if (!bg)
       body.style.background = ''
 
-    // if body already has bg, ignore
-    if (bg && body && !body.style.background && !body.style.backgroundColor) {
+    if (bg && body) {
       body.style.background = bg
     }
   }

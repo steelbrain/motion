@@ -393,7 +393,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // if defined twice during first run
       if (firstRender) {
         console.error('Defined a view twice!', name, hash)
-        setComponent(name, ErrorDefinedTwice(name))
+        // setComponent(name, ErrorDefinedTwice(name))
         return
       }
 

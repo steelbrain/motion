@@ -89,7 +89,8 @@ const Cache = {
   },
 
   removeError(file : string) {
-    files[name(file)].error = null
+    if (files[name(file)])
+      files[name(file)].error = null
   },
 
   getLastError() {
