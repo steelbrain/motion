@@ -20,6 +20,7 @@ const replaceCompilerMsg = (msg, filename = '') =>
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
     .replace(/Flint.([A-Za-z1-9_]*)Wrapper/, '$' + '1')
+    .replace('view.render = () => ', '')
 
 const niceCompilerMessage = err => {
   err.niceMessage = replaceCompilerMsg(err.message, err.fileName)
