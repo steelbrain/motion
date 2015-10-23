@@ -108,7 +108,7 @@ async function buildTemplate() {
   const out = p(OPTS.buildDir, 'index.html')
   const data = await readFile(p(OPTS.flintDir, 'index.html'), 'utf8')
   let template = data
-    .replace('/static', '/_/static')
+    .replace(/\/static/g, '/_/static')
     .replace('<!-- SCRIPTS -->', [
       '<script src="/_/react.prod.js"></script>',
       '  <script src="/_/flint.prod.js"></script>',

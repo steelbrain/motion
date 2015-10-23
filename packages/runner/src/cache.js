@@ -18,7 +18,7 @@ let baseDir = ''
 
 const Cache = {
   setBaseDir(dir : string) {
-    baseDir = path.resolve(dir, '..')
+    baseDir = path.resolve(dir)
     log('cache: baseDir', baseDir)
   },
 

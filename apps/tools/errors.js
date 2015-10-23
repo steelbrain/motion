@@ -46,7 +46,7 @@ const niceStack = err => {
 
         result = replaceCompilerMsg(result)
 
-        const colIndex = err.loc.column - 1
+        const colIndex = err.loc.column - 2
         const afterUnflintIndex = colIndex - replacedChars
         err.niceStack = split(result, afterUnflintIndex)
       }
@@ -201,7 +201,7 @@ view ErrorMessage {
   }
 
   $niceStack = {
-    opacity: 0.65,
+    color: 'rgba(255,255,255,0.65)',
     display: 'inline',
     fontFamily: 'Meslo, Menlo, Monaco, monospace',
     fontSize: 14,
@@ -210,10 +210,10 @@ view ErrorMessage {
 
   $errCol = {
     display: 'inline',
-    background: 'yellow',
-    borderBottom: '2px solid yellow',
-    marginBottom: -2,
-    color: 'white'
+    borderBottom: '2px solid #f5d64c',
+    margin: -5,
+    padding: 5,
+    color: '#fff'
   }
 
   $stack = {
