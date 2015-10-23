@@ -223,17 +223,20 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             getCacheInit[path] = {}
           }
 
-          let restoredValue, restore = false
+          let restoredValue, restore
 
           if (getCache[path]) {
             restoredValue = getCache[path][name]
           }
 
+          // if edited
           if (options.changed) {
-            // is this initial value different than the last initial value
+            // initial value changed from last initial value
             if (getCacheInit[path][name] != val) {
               getCacheInit[path][name] = val
-            } else {
+              restore = false
+            }
+            else {
               restore = true
             }
           }
