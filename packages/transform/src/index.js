@@ -51,7 +51,7 @@ function niceJSXAttributes(name) {
 
 let i = 0
 function inc() {
-  return i++
+  return i++ % Number.MAX_VALUE
 }
 
 const idFn = x => x
@@ -87,6 +87,16 @@ export default function ({ Plugin, types: t }) {
     }
   }
 
+  function isViewDefinition(node) {
+    const callee = node.callee && node.callee
+    return (
+      callee.object && callee.object.name == 'Flint' &&
+      callee.property && callee.property.name == 'view'
+    )
+  }
+
+  let keyBase = {}
+
   return new Plugin("flint-transform", {
     visitor: {
       JSXElement: {
@@ -104,11 +114,19 @@ export default function ({ Plugin, types: t }) {
               return
             }
 
+
             node.flintJSXVisits = 1
             const name = nodeToNameString(el.name)
 
             // ['quotedname', key]
-            let arr = [t.literal(name), t.literal(inc())]
+            let key
+
+            if (keyBase[name])
+              key = ++keyBase[name]
+            else
+              key = keyBase[name] = 1
+
+            let arr = [t.literal(name), t.literal(key)]
 
             if (scope.hasBinding(name) && isUpperCase(name))
               arr = [t.identifier(name)].concat(arr)
@@ -179,6 +197,11 @@ export default function ({ Plugin, types: t }) {
           // mutative array methods
           if (isInView(scope) && isMutativeArrayFunc(node))
             return viewUpdateExpression(node.callee.property.name, node)
+
+          if (isViewDefinition(node)) {
+            console.log('reset keybase')
+            keyBase = {}
+          }
         }
       },
 
