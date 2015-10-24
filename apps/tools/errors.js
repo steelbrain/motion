@@ -200,13 +200,13 @@ view ErrorMessage {
     fontWeight: 300,
     color: 'rgba(255,255,255,0.8)',
   }
-  
+
   $line = {
     display: 'inline-block',
     whiteSpace: 'pre',
     pointerEvents: 'all'
   }
-  
+
   $b = {
     color: '#fff'
   }
