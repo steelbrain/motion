@@ -31,7 +31,10 @@ const router = {
   },
 
   isActive(path) {
-    return routes[path] == activeID
+    return (
+      routes[path] == activeID // /article/:id
+      || window.location.pathname == path // /article/123
+    )
   },
 
   next() {
