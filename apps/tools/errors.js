@@ -134,7 +134,7 @@ view Errors {
   }
 }
 
-const flintAddedLines = 0
+const flintAddedLines = 1
 const last = arr => arr[arr.length - 1]
 const fileName = url => url && url.replace(/[\?\)].*/, '')
 const getLine = err => err && (err.line || err.loc && err.loc.line)

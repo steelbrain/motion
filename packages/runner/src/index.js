@@ -6,8 +6,9 @@ import npm from './npm'
 import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
-import { p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, recreateDir, copy } from './lib/fns'
+import {
+  p, mkdir, rmdir, readdir, readJSON, writeJSON,
+  readFile, writeFile, recreateDir, copy, touch } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
@@ -393,7 +394,7 @@ function setOptions(opts, build) {
   OPTS.template = OPTS.template || '.flint/index.html'
   OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
 
-  OPTS.configFile = p(OPTS.flintDir, 'config')
+  OPTS.configFile = p(OPTS.flintDir, 'flint.json')
   OPTS.outDir = p(OPTS.flintDir, 'out')
 
   OPTS.name = path.basename(process.cwd())
@@ -406,7 +407,7 @@ function setOptions(opts, build) {
 let readConfig = () => readJSON(OPTS.configFile)
 
 function writeConfig(config) {
-  writeJSON(OPTS.configFile, config)
+  writeJSON(OPTS.configFile, config, { spaces: 2 })
 }
 
 function watchingMessage() {
@@ -678,10 +679,15 @@ export async function run(opts, isBuild) {
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
 
-    CONFIG = await readJSON(OPTS.configFile)
-    log('got config', CONFIG)
+    await touch(OPTS.configFile)
 
-    await firstRun()
+    try {
+      CONFIG = await readJSON(OPTS.configFile)
+      log('got config', CONFIG)
+    }
+    catch(e) {
+      await firstRun()
+    }
 
     if (OPTS.build) {
       console.log(

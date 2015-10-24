@@ -3,25 +3,27 @@
 
 const sum = (a, b) => a + b
 
-view Debounce {
-  const autoSaveDelay = 1200 // longer during autosave
+const Delay = 400
+const Avg = 5000
+const Clear = 1000 * 10
+const AutoDetectAvgDiff = 1000
+const AutoDelay = 1200
 
-  let timeout
+view Debounce {
+  let timeout, lastTime, delay, curDelay, avgDiff
   let isAutoSaving = false
-  let delay, curDelay
-  let lastTime
-  let avgDiff, lastFew = []
+  let lastFew = []
 
   // dont update unless we want to
   view.pause()
 
   on('props', () => {
-    delay = ^delay || 500
+    delay = ^delay || Delay
     curDelay = curDelay || delay
 
     // find diff
     const now = Date.now()
-    const diff = lastTime ? now - lastTime : 5000 // or init to 5s
+    const diff = lastTime ? now - lastTime : Avg // or init to 5s
     lastTime = now
 
     // update queue
@@ -29,8 +31,8 @@ view Debounce {
     if (lastFew.length > 3)
       lastFew.pop()
 
-    // if its been a while, clear it
-    if (diff > 1000 * 10) {
+    // if its been a while, clear running avg
+    if (diff > Clear) {
       lastFew = []
     }
     // otherwise update avg
@@ -39,8 +41,8 @@ view Debounce {
         // find avg of last few
         avgDiff = lastFew.reduce(sum, 0) / lastFew.length
         // set autosaving
-        isAutoSaving = avgDiff < 1000
-        curDelay = isAutoSaving ? autoSaveDelay : delay
+        isAutoSaving = avgDiff < AutoDetectAvgDiff
+        curDelay = isAutoSaving ? AutoDelay : delay
       }
     }
 
