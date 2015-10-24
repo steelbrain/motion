@@ -71,7 +71,7 @@ var Parser = {
         const shouldLeaveJSX = (
           inJSX && (
             line.charAt(0) == '}' ||
-            isNotIn(['}', ' ', '<', '', ']', '/'], line.charAt(2))
+            isNotIn(['}', ' ', '<', '', ']', '/', '`'], line.charAt(2))
           )
         )
 

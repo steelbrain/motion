@@ -7,7 +7,6 @@ const niceRuntimeError = err => {
   err.file = err.file
     .replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
 
-  console.log(err.file, err)
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
     .replace(propsMatch, propsReplace)
