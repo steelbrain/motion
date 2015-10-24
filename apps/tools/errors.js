@@ -126,12 +126,6 @@ view Errors {
     runtime={runtimeError}
     compile={compileError}
   />
-
-  $div = {
-    position: 'absolute',
-    top: 0, left: 0,
-    width: '100%'
-  }
 }
 
 const flintAddedLines = 1
