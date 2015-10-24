@@ -43,7 +43,13 @@ gulp.task('build', buildScripts)
 
 // prompts for domain they want to use
 const firstRun = () =>
-  new Promise((res, rej) => {
+  new Promise(async (res, rej) => {
+    try {
+      CONFIG = await readJSON(OPTS.configFile)
+      log('got config', CONFIG)
+    }
+    catch(e) {}
+
     const hasRunBefore = OPTS.build || CONFIG
     log('first run hasRunBefore:', hasRunBefore)
 
@@ -52,7 +58,6 @@ const firstRun = () =>
 
     askForUrlPreference(useFriendly => {
       CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
-      openInBrowser()
       writeConfig(CONFIG)
       res(true)
     })
@@ -679,13 +684,7 @@ export async function run(opts, isBuild) {
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
 
-    try {
-      CONFIG = await readJSON(OPTS.configFile)
-      log('got config', CONFIG)
-    }
-    catch(e) {
-      await firstRun()
-    }
+    await firstRun()
 
     if (OPTS.build) {
       console.log(
