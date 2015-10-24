@@ -679,8 +679,6 @@ export async function run(opts, isBuild) {
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
 
-    await touch(OPTS.configFile)
-
     try {
       CONFIG = await readJSON(OPTS.configFile)
       log('got config', CONFIG)
