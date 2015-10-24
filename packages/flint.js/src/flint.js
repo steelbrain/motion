@@ -285,6 +285,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         setPath() {
+          if (process.env.production)
+            return
+
           let propsHash
 
           // get the props hash, but lets cache it so its not a ton of work
@@ -313,7 +316,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         componentDidMount() {
           this.didMount = true
           runEvents(this.events, 'mount')
-          
+
           // set last working view for this hash
           if (!process.env.production) {
             if (!lastWorkingView[name] || options.changed || options.new)
@@ -362,12 +365,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
-          
+
           try {
             els = this.viewRender()
           } catch(e) {
             reportError(e)
-            
+
             // restore last working view
             if (lastWorkingView[name]) {
               console.log('restoring last working for', name)
@@ -502,4 +505,4 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   Object.freeze(Flint)
 
   return Flint;
-}
+}}}
