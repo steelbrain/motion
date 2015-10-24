@@ -505,4 +505,4 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   Object.freeze(Flint)
 
   return Flint;
-}}}
+}
