@@ -72,6 +72,11 @@ export default function createElement(viewName) {
           tag = 'div'
         }
       }
+      else if (tag) {
+        if (!React.isValidElement(tag)) {
+          console.log(fullname, 'is not a valid React element: ', tag, 'looking for view instead')
+        }
+      }
       // find a view
       else if (!tag) {
         tag = view.Flint.getView(name, viewName)

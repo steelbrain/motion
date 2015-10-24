@@ -100,7 +100,7 @@ export default function ({ Plugin, types: t }) {
   return new Plugin("flint-transform", {
     visitor: {
       JSXElement: {
-        enter(node, parent, scope) {
+        enter(node, parent, scope, file) {
           const el = node.openingElement
           // avoid reprocessing
           if (node.flintJSXVisits != 2) {
@@ -128,7 +128,8 @@ export default function ({ Plugin, types: t }) {
 
             let arr = [t.literal(name), t.literal(key)]
 
-            if (scope.hasBinding(name) && isUpperCase(name))
+            // safer, checks for file scope or view scope only
+            if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
               arr = [t.identifier(name)].concat(arr)
 
             el.name = t.arrayExpression(arr)

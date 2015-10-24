@@ -252,10 +252,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         getInitialState() {
           this.setPath()
 
-          // TODO: document this
-          // if (!options.unchanged)
-            // delete getCache[this.path]
-
           let u = void 0
           this.firstRender = true
           this.styles = { _static: {} }
@@ -366,17 +362,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         render() {
           let els
 
-          try {
+          if (process.env.production)
             els = this.viewRender()
-          } catch(e) {
-            reportError(e)
+          else {
+            // catch errors in dev
+            try {
+              els = this.viewRender()
+            } catch(e) {
+              reportError(e)
 
-            // restore last working view
-            if (lastWorkingView[name]) {
-              console.log('restoring last working for', name)
-              views[name] = lastWorkingView[name]
-              setTimeout(Flint.render)
-              throw e // keep stack
+              // restore last working view
+              if (lastWorkingView[name]) {
+                console.log('restoring last working for', name)
+                views[name] = lastWorkingView[name]
+                setTimeout(Flint.render)
+                throw e // keep stack
+              }
             }
           }
 
