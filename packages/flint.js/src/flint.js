@@ -504,5 +504,5 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   // prevent overwriting
   Object.freeze(Flint)
 
-  return Flint;
+  return Flint
 }
