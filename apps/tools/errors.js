@@ -13,6 +13,17 @@ const niceRuntimeError = err => {
   return err
 }
 
+const niceNpmError = ({ msg, name }) => {
+  msg = msg
+    .replace(/(npm WARN.*\n|ERR\!)/g, '')
+    .replace(/npm  argv.*\n/g, '')
+    .replace(/npm  node v.*\n/g, '')
+    .replace(/npm  npm.*\n/g, '')
+    .replace(/npm  code.*\n/g, '')
+    .replace(/npm  peerinvalid /g, '')
+  return { msg, name }
+}
+
 const niceCompilerError = err =>
   niceCompilerMessage(niceStack(err))
 
@@ -66,22 +77,18 @@ view Errors {
   let error = null
   let compileError = null
   let runtimeError = null
+  let npmError = null
 
   /* only set error if there is an error,
      giving compile priority */
   function setError() {
-    const noErrors = !compileError && !runtimeError
-
-    if (noErrors) {
-      error = null
-      view.update()
-      return
-    }
-
-    if (runtimeError)
-      error = niceRuntimeError(runtimeError)
     if (compileError)
       error = niceCompilerError(compileError)
+    else if (runtimeError)
+      error = niceRuntimeError(runtimeError)
+    else {
+      error = null
+    }
 
     view.update()
   }
@@ -90,20 +97,24 @@ view Errors {
     error = null
     compileError = null
     runtimeError = null
+    npmError = null
     view.update()
   }
 
   tools.on('compile:error', () => {
-    runtimeError = null
     compileError = tools.data.error
     setError()
   })
 
   tools.on('runtime:error', () => {
     if (runtimeError) return // prefer first error
-    compileError = null
     runtimeError = tools.data
     setError()
+  })
+
+  tools.on('npm:error', () => {
+    npmError = niceNpmError(tools.data.error)
+    view.update()
   })
 
   tools.on('runtime:success', () => {
@@ -118,9 +129,8 @@ view Errors {
 
   <ErrorMessage
     error={error}
+    npmError={npmError}
     close={close}
-    runtime={runtimeError}
-    compile={compileError}
   />
 }
 
@@ -138,7 +148,11 @@ view ErrorMessage {
 
   <Debounce force={!^error}>
     <bar>
-      <inner if={^error}>
+      <close onClick={^close}><center>x</center></close>
+      <inner if={^npmError}>
+        <where><b>{^npmError.name}</b></where> {^npmError.msg}
+      </inner>
+      <inner if={^error && !^npmError}>
         <where>
           In <b>{fileName(^error.file)}</b>
           <line if={line}>
@@ -154,7 +168,6 @@ view ErrorMessage {
             {^error.niceStack[2]}
           </niceStack>
         </errorTitle>
-        <close onClick={^close}><center>x</center></close>
       </inner>
     </bar>
   </Debounce>
@@ -237,8 +250,8 @@ view ErrorMessage {
     position: 'absolute',
     right: 0,
     top: 0,
-    bottom: 0,
     width: 50,
+    height: 50,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

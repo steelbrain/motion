@@ -67,6 +67,7 @@ const onPackageStart = (name) => {
 const onPackageError = (name, error) => {
   if (OPTS.build) return
   bridge.message('package:error', { name, error })
+  bridge.message('npm:error', { error })
 }
 
 const onPackageFinish = (name) => {
@@ -293,7 +294,7 @@ async function scanFile(file, source) {
         next()
       } catch(e) {
         log('scanFile: package install failed', dep)
-        onPackageError(dep, error)
+        onPackageError(dep, e)
         next()
       }
     }
@@ -348,9 +349,9 @@ function save(name, index, total) {
 
   log('npm: save:', name)
   return new Promise((res, rej) => {
-    exec('npm install --save ' + name, OPTS.flintDir, err => {
+    exec('npm install --save ' + name, OPTS.flintDir, (err, stdout, stderr) => {
       if (spinner) spinner.stop()
-      if (err) rej('Install failed for package ' + name)
+      if (err) rej({ msg: stderr, name })
       else res(name)
     })
   })

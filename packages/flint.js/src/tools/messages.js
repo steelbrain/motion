@@ -17,10 +17,6 @@ export default function run(browser, opts) {
       addScript(msg)
     },
 
-    'script:del': msg => {
-      // TODO
-    },
-
     'compile:error': msg => {
       compileError(msg.error);
     },
