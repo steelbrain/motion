@@ -238,8 +238,14 @@ async function pack(file, out) {
   return new Promise((resolve, reject) => {
     webpack({
       entry: WHERE.depsJS,
-      externals: { react: 'React', bluebird: '_bluebird' },
-      output: { filename: WHERE.packagesJS },
+      externals: {
+        react: 'React',
+        bluebird: '_bluebird',
+        // 'react-dom': 'ReactDOM'
+      },
+      output: {
+        filename: WHERE.packagesJS
+      },
       devtool: 'source-map'
     }, async err => {
       if (err) {
