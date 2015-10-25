@@ -29,6 +29,15 @@ function isMutativeArrayFunc(node) {
   return (name && mutativeFuncs.indexOf(name) >= 0)
 }
 
+function isObjectAssign(node) {
+  if (!node.callee) return
+
+  const propName = node.callee.property && node.callee.property.name
+  const objName = node.callee.object && node.callee.object.name
+
+  return objName == 'Object' && propName == 'assign'
+}
+
 let niceAttrs = {
   className: 'class',
   htmlFor: 'for',
@@ -199,8 +208,18 @@ export default function ({ Plugin, types: t }) {
       CallExpression: {
         exit(node, parent, scope) {
           // mutative array methods
-          if (isInView(scope) && isMutativeArrayFunc(node))
-            return addSetter(node.callee.property.name, node, scope)
+          if (isInView(scope)) {
+            if (isMutativeArrayFunc(node)) {
+              return addSetter(node.callee.property.name, node, scope)
+            }
+
+            if (isObjectAssign(node)) {
+              // if mutating an object in the view
+              if (scope.hasOwnBinding(node.arguments[0].name)) {
+                return addSetter(node.arguments[0].name, node, scope)
+              }
+            }
+          }
 
           if (isViewDefinition(node)) {
             keyBase = {}
@@ -340,17 +359,23 @@ export default function ({ Plugin, types: t }) {
 
           const isRender = hasObjWithProp(node, 'view', 'render')
 
+          let id = x => x
+          let sett = id
+          let gett = id
+
           // view.set
           if (!isRender) {
             node.flintAssignState = 1
-            return addSetter(node.left.name, node, scope)
+            sett = node => addSetter(node.left.name, node, scope)
           }
 
           // add getter
-          if (!isRender && !node.flintAssignState) {
+          if (!isRender) {
             node.flintAssignState = 1
-            node = addGetter(node, scope)
+            gett = node => addGetter(node, scope)
           }
+
+          return sett(gett(node))
         }
       },
 
