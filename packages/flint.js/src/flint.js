@@ -238,7 +238,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (options.changed) {
             // initial value changed from last initial value
             // or an object (avoid work for now) TODO: compare objects(?)
-            if (Internal.getCacheInit[path][name]===undefined) {
+            if (typeof Internal.getCacheInit[path][name] == 'undefined') {
               restore = false
             } else {
               restore = typeof val == 'object' || Internal.getCacheInit[path][name] === val
@@ -251,10 +251,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // we don't wrap view.set() on (var x = 1)
-          if (typeof Internal.getCache[path][name] == 'undefined')
+          const isUndef = typeof Internal.getCache[path][name] == 'undefined'
+
+          if (isUndef)
             Internal.getCache[path][name] = val
 
-          if (options.unchanged && typeof Internal.getCache[path] != 'undefined')
+          if (options.unchanged && isUndef)
             return Internal.getCache[path][name]
 
           // if ending init, live inject old value for hotloading, or return actual value

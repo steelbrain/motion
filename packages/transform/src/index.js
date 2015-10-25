@@ -338,16 +338,16 @@ export default function ({ Plugin, types: t }) {
           const inView = isInView(scope)
           const isRender = hasObjWithProp(node, 'view', 'render')
 
-          // add getter
-          if (!isRender) {
-            node.flintAssignState = 1
-            node = addGetter(node, scope)
-          }
-
           // view.set
           if (inView && !isRender) {
             node.flintAssignState = 1
             return viewUpdateExpression(node.left.name, node)
+          }
+
+          // add getter
+          if (!isRender && !node.flintAssignState) {
+            node.flintAssignState = 1
+            node = addGetter(node, scope)
           }
         }
       },
