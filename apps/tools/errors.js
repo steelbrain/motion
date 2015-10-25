@@ -21,6 +21,7 @@ const niceNpmError = ({ msg, name }) => {
     .replace(/npm  npm.*\n/g, '')
     .replace(/npm  code.*\n/g, '')
     .replace(/npm  peerinvalid /g, '')
+    .replace(/npm  404 /g, '')
   return { msg, name }
 }
 

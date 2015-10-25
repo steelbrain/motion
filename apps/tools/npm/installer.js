@@ -21,6 +21,7 @@ view Installer {
     state = 3
     name = tools.data.name
     error = tools.data.error
+    setTimeout(() => state = 0, 2000)
   })
 
   tools.on('package:select', () => {

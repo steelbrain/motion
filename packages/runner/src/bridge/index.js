@@ -53,7 +53,7 @@ export function message(type, obj) {
   let msg = makeMessage(type, obj)
 
   // store last error or success
-  if (type.indexOf(':error') > 0 || type.indexOf(':success') > 0) {
+  if (type.indexOf('compile:error') > 0 || type.indexOf(':success') > 0) {
     curError = msg
   }
 

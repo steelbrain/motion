@@ -1,42 +1,53 @@
 view Modal {
-  let children, title
+  view.pause()
+
+  let children, title, open
 
   on('props', setMessage)
 
   function setMessage() {
+    open = ^open
+
     // cache last children when empty
-    if (!^title && !^children) return
+    if (title && !^title)
+      return view.update()
+
     title = ^title
     children = ^children
+    view.update()
   }
 
   <modal>
     <close onClick={^onClose}>X</close>
-    <title if={^title}>{title}</title>
+    <title if={title}>{title}</title>
     <message if={children}>{children}</message>
   </modal>
 
   $ = {
     position: 'fixed',
-    top: ^open ? 0 : -140,
+    top: open ? 0 : -140,
+    transform: {
+      rotateX: open ? '0deg' : '-70deg'
+    },
     left: 0,
     minWidth: 80,
     padding: [10, 10],
     margin: 20,
     background: '#fff',
-    boxShadow: '0 0 20px rgba(0,0,0,0.03)',
+    boxShadow: '0 0 20px rgba(0,0,0,0.05)',
     border: '1px solid #dfdfdf',
-    fontSize: 15,
+    borderTop: '2px solid crimson',
+    fontSize: 13,
     transition: 'all ease-in 200ms',
     textAlign: 'center',
-    borderRadius: 2,
+    borderRadius: 6,
     pointerEvents: 'auto'
   }
 
   $title = {
     color: '#222',
     fontWeight: 500,
-    fontSize: 16,
+    fontSize: 15,
     margin: [0, 20]
   }
 
