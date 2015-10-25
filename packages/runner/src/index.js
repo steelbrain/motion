@@ -8,7 +8,8 @@ import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import {
   p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, recreateDir, copy, touch } from './lib/fns'
+  readFile, writeFile, recreateDir, copy, touch,
+  exists } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
@@ -142,11 +143,13 @@ async function buildTemplate() {
   await writeFile(out, template)
 }
 
-function copyWithMap(file, dest) {
-  return Promise.all([
-    copy(file, dest),
-    copy(file + '.map', dest + '.map')
-  ])
+async function copyWithMap(file, dest) {
+  await copy(file, dest)
+
+  try {
+    await copy(file + '.map', dest + '.map')
+  }
+  catch(e) {}
 }
 
 function buildFlint() {
@@ -721,5 +724,8 @@ export async function run(opts, isBuild) {
       watchingMessage()
     }
   }
-  catch(e) { handleError(e) }
+  catch(e) {
+    if (!e.silent)
+      handleError(e)
+  }
 }
