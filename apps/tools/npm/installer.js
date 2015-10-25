@@ -58,15 +58,13 @@ view Installer {
     }
   }
 
-  <Debounce>
-    <Modal
-      open={state > 0}
-      onClose={closeModal}
-      title={title(state)}>
-      <InstallerLoading if={false && state < 2} />
-      {body(state)}
-    </Modal>
-  </Debounce>
+  <Modal
+    open={state > 0}
+    onClose={closeModal}
+    title={title(state)}>
+    <InstallerLoading if={false && state < 2} />
+    {body(state)}
+  </Modal>
 }
 
 view InstallerLoading {

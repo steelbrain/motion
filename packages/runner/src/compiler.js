@@ -34,13 +34,21 @@ const viewReplacer = (match, name, params) => {
 
 const jsxPragma = '/** @jsx view.el */'
 
+let debouncers = {}
+function debounce(key, cb, time) {
+  if (debouncers[key])
+    clearTimeout(debouncers[key])
+
+  debouncers[key] = setTimeout(cb, time)
+}
+
 var Parser = {
   init(opts) {
     OPTS = opts || {}
   },
 
   post(file, source) {
-    npm.scanFile(file, source) // scan for imports
+    debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
     source = source.replace(jsxPragma, '') // remove pragma
     source = filePrefix(file) + source + fileSuffix // add file
     return { source }
