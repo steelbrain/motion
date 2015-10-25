@@ -244,15 +244,18 @@ export default function ({ Plugin, types: t }) {
       },
 
       AssignmentExpression: {
-        enter(node) {
+        exit(node, parent, scope) {
+
+          // styles
+
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // styles
           if (isStyle)
-            return styleAssignment(node)
+            return extractAndAssign(node)
 
           // splits styles into static/dynamic pieces
-          function styleAssignment(node) {
+          function extractAndAssign(node) {
             // if array of objects
             if (t.isArrayExpression(node.right)) {
               let staticProps = []
@@ -287,12 +290,12 @@ export default function ({ Plugin, types: t }) {
                   return staticStatement
               }
               else {
-                return viewStyle(node, t.objectExpression(dynamics))
+                return styleAssign(node, t.objectExpression(dynamics))
               }
             }
 
             else {
-              return viewStyle(node)
+              return styleAssign(node)
             }
           }
 
@@ -321,25 +324,41 @@ export default function ({ Plugin, types: t }) {
 
           // view.styles["name"] = ...
           function dynamicStyleStatement(node, dynamics) {
-            return viewExpression(viewStyle(node, dynamics))
+            return viewExpression(styleAssign(node, dynamics))
           }
 
-          function viewStyle(node, right) {
-            return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
-              t.functionExpression(null, [t.identifier('_index')],
-                t.blockStatement([
-                  t.returnStatement(right || node.right)
-                ])
-              )
+          function styleAssign(node, right) {
+            // TODO: check if already set in view
+            // parent.scope.hasBinding()
+
+            const name = node.left.name
+
+            return styleFlintAssignment(name,
+              styleFunction(right || node.right)
             )
+
+            // view.styles.$h1 = ...
+            function styleFlintAssignment(name, right) {
+              const ident = `view.styles["${name}"]`
+
+              return t.assignmentExpression('=', t.identifier(ident), right)
+            }
+
+            // (_index) => {}
+            function styleFunction(inner) {
+              return t.functionExpression(null, [t.identifier('_index')],
+                t.blockStatement([ t.returnStatement(inner) ])
+              )
+            }
           }
 
           function viewExpression(node) {
             return t.expressionStatement(node)
           }
-        },
 
-        exit(node, parent, scope) {
+          // non-styles
+
+
           if (node.flintAssignState) return
 
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
