@@ -1,7 +1,5 @@
 import reportError from '../lib/reportError'
 
-let cachedStyles = {}
-
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
 
@@ -46,7 +44,6 @@ export default function elementStyles(key, view, name, tag, props) {
 
   if (view.styles) {
     const index = props.repeat ? key[1] : void 0
-    const uniqueTagId = view.entityId + name + tag
 
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
@@ -125,9 +122,6 @@ export default function elementStyles(key, view, name, tag, props) {
       // put styles back into props.style
       if (result)
         props.style = result
-
-      // cache styles
-      cachedStyles[uniqueTagId] = result
     }
   }
 
