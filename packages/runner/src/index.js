@@ -525,9 +525,11 @@ function getScriptTags(files, req) {
       ].join(newLine),
       // user files
       `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
+      newLine,
+      '<!-- APP -->',
       assetScriptTags(files),
       '<script>Flint.render()</script>',
-      '<!-- END FLINT JS -->'
+      '<!-- END APP -->'
     ].join(newLine)
 }
 

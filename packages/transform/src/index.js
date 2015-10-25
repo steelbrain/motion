@@ -62,8 +62,11 @@ export default function ({ Plugin, types: t }) {
     return t.callExpression(t.identifier('Object.freeze'), [node])
   }
 
-  function viewUpdateExpression(name, node) {
-    return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
+  function addSetter(name, node, scope) {
+    if (scope.hasBinding('view'))
+      return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
+
+    return node
   }
 
   function viewGetter(name, val) {
@@ -197,7 +200,7 @@ export default function ({ Plugin, types: t }) {
         exit(node, parent, scope) {
           // mutative array methods
           if (isInView(scope) && isMutativeArrayFunc(node))
-            return viewUpdateExpression(node.callee.property.name, node)
+            return addSetter(node.callee.property.name, node, scope)
 
           if (isViewDefinition(node)) {
             keyBase = {}
@@ -335,13 +338,12 @@ export default function ({ Plugin, types: t }) {
             return
           }
 
-          const inView = isInView(scope)
           const isRender = hasObjWithProp(node, 'view', 'render')
 
           // view.set
-          if (inView && !isRender) {
+          if (!isRender) {
             node.flintAssignState = 1
-            return viewUpdateExpression(node.left.name, node)
+            return addSetter(node.left.name, node, scope)
           }
 
           // add getter
@@ -353,9 +355,9 @@ export default function ({ Plugin, types: t }) {
       },
 
       UpdateExpression: {
-        exit(node) {
+        exit(node, _, scope) {
           if (node.operator == '++' || node.operator == '--')
-            return viewUpdateExpression(node.argument.name, node)
+            return addSetter(node.argument.name, node, scope)
         }
       }
     }
