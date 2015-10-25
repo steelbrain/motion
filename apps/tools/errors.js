@@ -66,12 +66,10 @@ view Errors {
   let error = null
   let compileError = null
   let runtimeError = null
-  let errDelay = null
 
   /* only set error if there is an error,
      giving compile priority */
   function setError() {
-    clearTimeout(errDelay)
     const noErrors = !compileError && !runtimeError
 
     if (noErrors) {
@@ -80,14 +78,12 @@ view Errors {
       return
     }
 
-    const delay = compileError ? 200 : 800
-    errDelay = setTimeout(() => {
-      if (runtimeError)
-        error = niceRuntimeError(runtimeError)
-      if (compileError)
-        error = niceCompilerError(compileError)
-      view.update()
-    }, delay)
+    if (runtimeError)
+      error = niceRuntimeError(runtimeError)
+    if (compileError)
+      error = niceCompilerError(compileError)
+
+    view.update()
   }
 
   function close() {

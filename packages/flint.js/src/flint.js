@@ -98,8 +98,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         isRendering++
 
         // prevent too many re-render tries on react errors
-        if (isRendering > 1)
-          return isRendering > 3 ? null : setTimeout(Flint.render)
+        if (isRendering > 4) return
 
         firstRender = false
         const MainComponent = Flint.views.Main.component || lastWorkingView.Main;
@@ -480,9 +479,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // check errors and restore last good view
       root.onerror = (...args) => {
-        flintOnError(...args)
         Flint.views[name] = makeView(hash, lastWorkingView[name])
         Flint.render()
+        flintOnError(...args)
       }
 
       // then check for no errors and reset onerror

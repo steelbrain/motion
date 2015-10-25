@@ -3,11 +3,12 @@
 
 const sum = (a, b) => a + b
 
-const Delay = 400
+const Delay = 300
+const AutoDelay = 800
+
 const Avg = 5000
 const Clear = 1000 * 10
 const AutoDetectAvgDiff = 1000
-const AutoDelay = 1200
 
 view Debounce {
   let timeout, lastTime, delay, curDelay, avgDiff
