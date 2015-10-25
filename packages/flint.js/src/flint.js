@@ -14,6 +14,7 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 import './lib/bluebirdErrorHandle'
+import range from './lib/range'
 import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -90,6 +91,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   let Flint = {
     router,
+    range,
+
     views: {},
     removeView(key) { delete Flint.views[key] },
 

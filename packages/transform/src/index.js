@@ -163,7 +163,7 @@ export default function ({ Plugin, types: t }) {
 
               if (name == 'repeat') {
                 rpt = _node => t.callExpression(
-                  t.memberExpression(expr, t.identifier('map')),
+                  t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),
                   [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
                     t.returnStatement(_node)
                   ]))]
