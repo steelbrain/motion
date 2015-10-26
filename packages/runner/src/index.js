@@ -1,5 +1,5 @@
 import compiler from './compiler'
-import babel from 'gulp-babel'
+import babel from './lib/gulp-babel'
 import bridge from './bridge'
 import handleError from './lib/handleError'
 import npm from './npm'

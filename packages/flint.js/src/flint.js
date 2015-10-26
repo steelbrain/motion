@@ -388,35 +388,23 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          let els
+          this.firstRender = false
 
-          let run = () =>
-            this.el(
-              [`view.${name}`, 0],
-              { style: Object.assign({}, this.props.style, this.styles.$, this.styles._static && this.styles._static.$) },
-              ...this.renders.map(r => r.call(this))
-            )
-
-          if (process.env.production)
-            els = run()
-          else {
-            // catch errors in dev
-            try {
-              els = run()
-            } catch(e) {
-              reportError(e)
-
-              // restore last working view
-              if (lastWorkingView[name]) {
-                Flint.views[name] = lastWorkingView[name]
-                setTimeout(Flint.render)
-                throw e // keep stack
-              }
-            }
-          }
+          console.log('waht')
+          let els = this.el(`view.${name}`,
+            // props
+            {
+              style: Object.assign(
+                {},
+                this.props.style,
+                this.styles.$,
+                this.styles._static && this.styles._static.$
+              )
+            },
+            ...this.renders.map(r => r.call(this))
+          )
 
           const styled = els && resolveStyles(this, els)
-          this.firstRender = false
           return styled
         }
       })
