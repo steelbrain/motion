@@ -21,7 +21,6 @@ import safeRun from './lib/safeRun'
 import reportError from './lib/reportError'
 import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
-import Wrapper from './views/Wrapper'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
 import Main from './views/Main'
@@ -390,7 +389,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         render() {
           this.firstRender = false
 
-          let els = this.el(`view.${name}`,
+          const singleTopEl = this.renders.length == 1
+          let tags
+          let wrap = true
+
+          if (singleTopEl) {
+            tags = [this.renders[0].call(this)]
+
+            // if child tag name == view name, no wrapper
+            if (tags[0].type == name.toLowerCase())
+              wrap = false
+          }
+          else {
+            tags = this.renders.map(r => r.call(this))
+          }
+
+          let els = !wrap ? tags[0] : this.el(`view.${name}`,
             // props
             {
               style: Object.assign(
@@ -400,7 +414,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
                 this.styles._static && this.styles._static.$
               )
             },
-            ...this.renders.map(r => r.call(this))
+            ...tags
           )
 
           const styled = els && resolveStyles(this, els)
@@ -422,10 +436,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // regular view
       else if (Flint.views[name]) {
         result = Flint.views[name].component
-      }
-      // wrapper
-      else if (/Flint\.[\.a-zA-Z0-9]*Wrapper/.test(name)) {
-        result = Wrapper
       }
       else {
         result = NotFound(name)
