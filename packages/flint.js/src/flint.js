@@ -1,4 +1,4 @@
-import hash from 'hash-sum'
+import hashsum from 'hash-sum'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
@@ -86,7 +86,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       return acc
     }, {})
 
-    return hash(props)
+    return hashsum(props)
   }
 
   let Flint = {
@@ -438,11 +438,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       hash is the build systems hash of the view contents
         used for detecting changed views
     */
-    view(name, hash, body) {
-      if (typeof hash == 'function') {
-        body = hash
-        hash = null
-      }
+    view(name, body) {
+      const comp = Flint.makeReactComponent.partial(name, body)
+
+      if (process.env.production)
+        setView(name, comp())
+
+      const hash = hashsum(body)
 
       Internal.viewsInFile[Internal.currentHotFile].push(name)
 
@@ -457,8 +459,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if new
       if (Flint.views[name] == undefined) {
-        let component = Flint.makeReactComponent(name, body, { hash, changed: true })
-        setView(name, component)
+        setView(name, comp({ hash, changed: true }))
         return
       }
 
@@ -472,15 +473,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if unchanged
       if (Flint.views[name].hash == hash) {
-        let component = Flint.makeReactComponent(name, body, { hash, unchanged: true });
-        setView(name, component)
+        setView(name, comp({ hash, unchanged: true }))
         return
       }
 
-      let component = Flint.makeReactComponent(name, body, { hash, changed: true })
-      setView(name, component)
-
-      // check for react-level errors and recover
+      setView(name, comp({ hash, changed: true }))
 
       // check errors and restore last good view
       root.onerror = (...args) => {
