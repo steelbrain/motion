@@ -389,10 +389,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
+
           let run = () =>
-            <div>
-              {this.renders.map(r => r.call(this))}
-            </div>
+            this.el(`Flint.${name}Wrapper`, null,
+              <div>{this.renders.map(r => r.call(this))}</div>
+            )
 
           if (process.env.production)
             els = run()
@@ -407,7 +408,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
               if (lastWorkingView[name]) {
                 Flint.views[name] = lastWorkingView[name]
                 setTimeout(Flint.render)
-                throw e // keep stack here
+                throw e // keep stack
               }
             }
           }
@@ -420,8 +421,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           const styled = els && resolveStyles(this, els)
           this.firstRender = false
           return styled
-
-          // return els
         }
       })
 

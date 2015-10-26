@@ -16,7 +16,7 @@ function hasObjWithProp(node, base, prop) {
 }
 
 function isInView(scope) {
-  return scope.hasBinding("view")
+  return scope.hasBinding("__")
 }
 
 const mutativeFuncs = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
@@ -72,18 +72,21 @@ export default function ({ Plugin, types: t }) {
   }
 
   function addSetter(name, node, scope) {
-    if (scope.hasBinding('view'))
-      return t.callExpression(t.identifier('this.set'), [t.literal(name), node])
+    if (node.hasSetter) return
+    if (scope.hasBinding('__')) {
+      node.hasSetter = true
+      return t.callExpression(t.identifier('__.set'), [t.literal(name), node])
+    }
 
     return node
   }
 
   function viewGetter(name, val) {
-    return t.callExpression(t.identifier('this.get'), [t.literal(name), val])
+    return t.callExpression(t.identifier('__.get'), [t.literal(name), val])
   }
 
   function addGetter(node, scope) {
-    if (scope.hasOwnBinding('view')) {
+    if (scope.hasOwnBinding('__')) {
       node.right = viewGetter(node.left.name, node.right)
     }
     return node
@@ -196,9 +199,9 @@ export default function ({ Plugin, types: t }) {
 
             // wrap outermost JSX elements (in views) in this.render()
             let wrap = idFn
-            const parentIsView = !t.isJSXElement(parent)
+            const isDirectChildOfView = scope.hasOwnBinding('__')
 
-            if (parentIsView)
+            if (isDirectChildOfView)
               wrap = node => t.callExpression(t.identifier('__.render'), [
                 t.functionExpression(null, [], t.blockStatement([
                   t.returnStatement(node)
@@ -252,7 +255,7 @@ export default function ({ Plugin, types: t }) {
       VariableDeclaration: {
         exit(node, parent, scope) {
           // add getter
-          if (scope.hasOwnBinding('view') && node.kind != 'const') {
+          if (scope.hasOwnBinding('__') && node.kind != 'const') {
             node.declarations.map(dec => {
               if (!dec.init) {
                 dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
@@ -398,7 +401,7 @@ export default function ({ Plugin, types: t }) {
             return
           }
 
-          const isRender = hasObjWithProp(node, 'view', 'render')
+          const isRender = hasObjWithProp(node, '__', 'render')
 
           let id = x => x
           let sett = id
