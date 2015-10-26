@@ -390,14 +390,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         render() {
           this.firstRender = false
 
-          console.log('waht')
           let els = this.el(`view.${name}`,
             // props
             {
               style: Object.assign(
                 {},
                 this.props.style,
-                this.styles.$,
+                this.styles.$ && this.styles.$(),
                 this.styles._static && this.styles._static.$
               )
             },
