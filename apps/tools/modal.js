@@ -26,9 +26,6 @@ view Modal {
   $ = {
     position: 'fixed',
     top: open ? 0 : -140,
-    transform: {
-      rotateX: open ? '0deg' : '-70deg'
-    },
     left: 0,
     minWidth: 80,
     padding: [10, 10],
