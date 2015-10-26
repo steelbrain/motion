@@ -58,11 +58,6 @@ function niceJSXAttributes(name) {
   return name
 }
 
-let i = 0
-function inc() {
-  return i++ % Number.MAX_VALUE
-}
-
 const idFn = x => x
 
 export default function ({ Plugin, types: t }) {
@@ -102,19 +97,13 @@ export default function ({ Plugin, types: t }) {
     }
   }
 
-  function isViewDefinition(node) {
-    const callee = node.callee && node.callee
-    return (
-      callee.object && callee.object.name == 'Flint' &&
-      callee.property && callee.property.name == 'view'
-    )
-  }
-
   let keyBase = {}
 
   return new Plugin("flint-transform", {
     visitor: {
       ViewStatement(node) {
+        keyBase = {}
+
         const name = node.name.name
         const subName = node.subName && node.subName.name
         const fullName = name + (subName ? `.${subName}` : '')
@@ -139,7 +128,6 @@ export default function ({ Plugin, types: t }) {
               node.flintJSXVisits = 2
               return
             }
-
 
             node.flintJSXVisits = 1
             const name = nodeToNameString(el.name)
@@ -244,10 +232,6 @@ export default function ({ Plugin, types: t }) {
                 return addSetter(node.arguments[0].name, node, scope)
               }
             }
-          }
-
-          if (isViewDefinition(node)) {
-            keyBase = {}
           }
         }
       },
