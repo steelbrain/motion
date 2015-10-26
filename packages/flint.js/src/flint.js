@@ -295,7 +295,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // call view
-          view.call(this, viewOn)
+          view.call(null, this, viewOn)
 
           // reset original render
           this.render = flintRender
@@ -389,13 +389,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
-          console.log(this.renders, this.renders.map(r => r.call(this)))
           let run = () =>
             <div>
               {this.renders.map(r => r.call(this))}
             </div>
 
-          console.log(this.viewRender)
           if (process.env.production)
             els = run()
           else {

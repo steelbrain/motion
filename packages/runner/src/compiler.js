@@ -59,11 +59,11 @@ var Parser = {
     let inView = false
     let fileViews = []
 
-    const startRender = () => `this.render = () => <${getWrapper(currentView.name)} view={this}>`
+    const startRender = () => `__.render = () => <${getWrapper(currentView.name)} view={this}>`
     const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
     source = source
-      .replace(/\^/g, 'this.props.')
+      .replace(/\^/g, '__.props.')
       .split("\n")
       .map((line, index) => {
         let result = line
@@ -78,7 +78,7 @@ var Parser = {
         const JSXstart = line.charAt(2) == '<' && line.charAt(3) != '/'
 
         if (JSXstart)
-          result = ';' + result
+          result = ';' + result.substr(1)
 
         // store view contents for hashing
         if (inView) {

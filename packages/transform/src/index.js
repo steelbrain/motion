@@ -117,7 +117,7 @@ export default function ({ Plugin, types: t }) {
         const fullName = name + (subName ? `.${subName}` : '')
 
         return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
-          t.functionExpression(null, [t.identifier('on')], node.block)]
+          t.functionExpression(null, [t.identifier('__'), t.identifier('on')], node.block)]
         )
       },
 
@@ -199,7 +199,7 @@ export default function ({ Plugin, types: t }) {
             const parentIsView = !t.isJSXElement(parent)
 
             if (parentIsView)
-              wrap = node => t.callExpression(t.identifier('this.render'), [
+              wrap = node => t.callExpression(t.identifier('__.render'), [
                 t.functionExpression(null, [], t.blockStatement([
                   t.returnStatement(node)
                 ]))
@@ -339,7 +339,7 @@ export default function ({ Plugin, types: t }) {
           // view.styles._static["name"] = ...
           function staticStyleStatement(node, statics) {
             return viewExpression(t.assignmentExpression(node.operator,
-              t.identifier(`this.styles._static["${node.left.name}"]`),
+              t.identifier(`__.styles._static["${node.left.name}"]`),
               statics
             ))
           }
@@ -361,7 +361,7 @@ export default function ({ Plugin, types: t }) {
 
             // view.styles.$h1 = ...
             function styleFlintAssignment(name, right) {
-              const ident = `this.styles["${name}"]`
+              const ident = `__.styles["${name}"]`
 
               return t.assignmentExpression('=', t.identifier(ident), right)
             }
@@ -386,7 +386,7 @@ export default function ({ Plugin, types: t }) {
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
 
-          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('this.styles') == 0
+          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('__.styles') == 0
 
           if (isAlreadyStyle) {
             // double-assign #18
