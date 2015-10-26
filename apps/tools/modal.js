@@ -19,7 +19,7 @@ view Modal {
   $ = {
     position: 'fixed',
     top: ^open ? 0 : -140,
-    left: 0,
+    right: 0,
     minWidth: 80,
     padding: [10, 10],
     margin: 20,

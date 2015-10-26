@@ -375,27 +375,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          let els
-          let run = () => this.viewRender()
-
-          if (process.env.production)
-            els = run()
-          else {
-            // catch errors in dev
-            try {
-              els = run()
-            } catch(e) {
-              reportError(e)
-
-              // restore last working view
-              if (lastWorkingView[name]) {
-                Flint.views[name] = lastWorkingView[name]
-                setTimeout(Flint.render)
-                throw e // keep stack here
-              }
-            }
-          }
-
+          let els = this.viewRender()
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           // TODO: check if they returned something valid here
