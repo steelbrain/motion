@@ -12,7 +12,6 @@ const isNotIn = (x,y) => x.indexOf(y) == -1
 
 // this is missing the first brace ")" instead of "})"
 // because this is being *added* to the line, which is previously }
-const viewEnd = name => `)`
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 const getWrapper = view => 'Flint.' + capitalize(view) + 'Wrapper'
 
@@ -32,7 +31,8 @@ const viewReplacer = (match, name, params) => {
   return viewOpen(name, hash, params);
 }
 
-const jsxPragma = '/** @jsx view.el */'
+const tagMatcher = /^tag\s+([a-z\-\*]+)/
+const tagReplacer = (_, name) => `Flint.tag["${name}"] = `
 
 let debouncers = {}
 function debounce(key, cb, time) {
@@ -49,7 +49,6 @@ var Parser = {
 
   post(file, source) {
     debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
-    source = source.replace(jsxPragma, '') // remove pragma
     source = filePrefix(file) + source + fileSuffix // add file
     return { source }
   },
@@ -60,11 +59,11 @@ var Parser = {
     let inView = false
     let fileViews = []
 
-    const startRender = () => `view.render = () => <${getWrapper(currentView.name)} view={view}>`
+    const startRender = () => `this.render = () => <${getWrapper(currentView.name)} view={this}>`
     const endRender = () => `</${getWrapper(currentView.name)}>\n`
 
     source = source
-      .replace(/\^/g, 'view.props.')
+      .replace(/\^/g, 'this.props.')
       .split("\n")
       .map((line, index) => {
         let result = line
@@ -76,29 +75,10 @@ var Parser = {
           fileViews.push(currentView.name)
         }
 
-        const shouldLeaveJSX = (
-          inJSX && (
-            line.charAt(0) == '}' ||
-            isNotIn(['}', ' ', '<', '', ']', '/', '`'], line.charAt(2))
-          )
-        )
+        const JSXstart = line.trim().charAt(0) == '<'
 
-        // ENTER jsx
-        const hasJSX = line.trim().charAt(0) == '<'
-        const isComment = l => l.trim().substr(0,2) == '//'
-
-        // if entering jsx
-        if (inView && !inJSX && hasJSX) {
-          inJSX = true
-          result = line.trim()
-          result = startRender() + result
-        }
-
-        // ONLY JSX transforms
-        if (inJSX) {
-          // allow for starting comments
-          if (isComment(result)) result = ''
-        }
+        if (JSXstart)
+          line = ';' + line
 
         // store view contents for hashing
         if (inView) {
@@ -106,15 +86,8 @@ var Parser = {
           currentView.contents.push(result)
         }
 
-        // end jsx
-        if (shouldLeaveJSX) {
-          result = endRender() + result
-          inJSX = false
-        }
-
         // end view
         if (inView && line.charAt(0) == '}') {
-          result = result + viewEnd(currentView.name)
           inView = false
           views[currentView.name] = currentView
           currentView = { name: null, contents: [] }
@@ -122,20 +95,19 @@ var Parser = {
 
         return result
       })
-      .map(line => {
+      // .map(line => {
         // we have to do this after the first run because
         // we only have the replacer hash of the view *after*
         // we've already looped over it
-        return line.replace(viewMatcher, viewReplacer)
-      })
+        // return line.replace(viewMatcher, viewReplacer)
+        //   .replace(tagMatcher, tagReplacer) // test
+      // })
       .join("\n")
 
     if (!OPTS.build) {
       cache.add(file)
       cache.setViews(file, fileViews)
     }
-
-    source = jsxPragma + source
 
     // console.log('transformed source', source)
     return { source }

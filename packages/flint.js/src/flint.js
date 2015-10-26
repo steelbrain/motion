@@ -182,7 +182,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let component = React.createClass({
         displayName: name,
         name,
-        el,
         Flint,
 
         childContextTypes: {
@@ -286,10 +285,14 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           // cache original render
           const flintRender = this.render
-          view(this, viewOn)
 
-          // reset original render, cache view render
-          this.viewRender = this.render
+          // setter to capture view render
+          this.render = (els) => this.viewRender = els
+
+          // call view
+          view.call(this, viewOn)
+
+          // reset original render
           this.render = flintRender
 
           return null
@@ -381,8 +384,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
-          let run = () => this.viewRender()
+          let run = () => this.viewRender.call(this)
 
+          console.log(this.viewRender)
           if (process.env.production)
             els = run()
           else {
@@ -404,6 +408,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           const wrapperStyle = this.styles && this.styles.$
           const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           // TODO: check if they returned something valid here
+          console.log(els)
           const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() })
           const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
@@ -444,6 +449,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         used for detecting changed views
     */
     view(name, hash, body) {
+      if (typeof hash == 'function') {
+        body = hash
+        hash = null
+      }
+
       Internal.viewsInFile[Internal.currentHotFile].push(name)
 
       function  makeView(hash, component) {

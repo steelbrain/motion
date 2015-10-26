@@ -73,13 +73,13 @@ export default function ({ Plugin, types: t }) {
 
   function addSetter(name, node, scope) {
     if (scope.hasBinding('view'))
-      return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
+      return t.callExpression(t.identifier('this.set'), [t.literal(name), node])
 
     return node
   }
 
   function viewGetter(name, val) {
-    return t.callExpression(t.identifier('view.get'), [t.literal(name), val])
+    return t.callExpression(t.identifier('this.get'), [t.literal(name), val])
   }
 
   function addGetter(node, scope) {
@@ -111,9 +111,16 @@ export default function ({ Plugin, types: t }) {
 
   return new Plugin("flint-transform", {
     visitor: {
+      ViewStatement(node) {
+        return t.callExpression(t.identifier('Flint.view'), [t.literal(node.declarations[0].id.name),
+          t.functionExpression(null, [t.identifier('on')], node.block)]
+        )
+      },
+
       JSXElement: {
         enter(node, parent, scope, file) {
           const el = node.openingElement
+
           // avoid reprocessing
           if (node.flintJSXVisits != 2) {
             // add index keys for repeat elements
@@ -183,7 +190,14 @@ export default function ({ Plugin, types: t }) {
               }
             }
 
-            return iff(route(rpt(node)))
+
+            let wrap = idFn
+            const parentIsView = !t.isJSXElement(parent)
+
+            if (parentIsView)
+              wrap = node => t.callExpression(t.identifier('this.render'), [node])
+
+            return wrap(iff(route(rpt(node))))
           }
         }
       },
@@ -317,7 +331,7 @@ export default function ({ Plugin, types: t }) {
           // view.styles._static["name"] = ...
           function staticStyleStatement(node, statics) {
             return viewExpression(t.assignmentExpression(node.operator,
-              t.identifier(`view.styles._static["${node.left.name}"]`),
+              t.identifier(`this.styles._static["${node.left.name}"]`),
               statics
             ))
           }
@@ -339,7 +353,7 @@ export default function ({ Plugin, types: t }) {
 
             // view.styles.$h1 = ...
             function styleFlintAssignment(name, right) {
-              const ident = `view.styles["${name}"]`
+              const ident = `this.styles["${name}"]`
 
               return t.assignmentExpression('=', t.identifier(ident), right)
             }
@@ -364,7 +378,7 @@ export default function ({ Plugin, types: t }) {
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
 
-          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('view.styles') == 0
+          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('this.styles') == 0
 
           if (isAlreadyStyle) {
             // double-assign #18
