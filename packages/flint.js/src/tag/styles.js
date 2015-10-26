@@ -112,8 +112,9 @@ export default function elementStyles(key, view, name, tag, props) {
         result = mergeStyles(result, props.style)
 
       // apply view internal $ styles
-      if (name.indexOf('Flint.') == 0)
-        result = mergeStyles(result, view.styles._static.$, view.styles.$)
+      if (name.indexOf('Flint.') == 0) {
+        result = mergeStyles(result, )
+      }
 
       // add view external props.style
       if (isRoot && view.props.style)
@@ -170,9 +171,10 @@ export default function elementStyles(key, view, name, tag, props) {
   }
 
   // set body bg to Main view bg
+
   if (
     view.name == 'Main' &&
-    name == 'Flint.MainWrapper' &&
+    name == 'view.Main' &&
     typeof document != 'undefined'
   ) {
     const body = document.body

@@ -391,8 +391,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           let els
 
           let run = () =>
-            this.el(`Flint.${name}Wrapper`, null,
-              <div>{this.renders.map(r => r.call(this))}</div>
+            this.el(
+              [`view.${name}`, 0],
+              { style: Object.assign({}, this.props.style, this.styles.$, this.styles._static && this.styles._static.$) },
+              ...this.renders.map(r => r.call(this))
             )
 
           if (process.env.production)
@@ -413,11 +415,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             }
           }
 
-          // const wrapperStyle = this.styles && this.styles.$
-          // const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          // TODO: check if they returned something valid here
-          console.log('els', els)
-          // const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() })
           const styled = els && resolveStyles(this, els)
           this.firstRender = false
           return styled

@@ -148,7 +148,6 @@ export default function createElement(viewName) {
     // if (process.env.production)
     //   tag = 'div'
 
-    console.log('returning', tag, props, ...args)
     return React.createElement(tag, props, ...args)
   }
 }
