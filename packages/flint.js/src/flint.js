@@ -1,4 +1,4 @@
-import hash from 'hash-sum'
+import hashsum from 'hash-sum'
 import ee from 'event-emitter'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
@@ -14,6 +14,7 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 import './lib/bluebirdErrorHandle'
+import range from './lib/range'
 import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -85,11 +86,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       return acc
     }, {})
 
-    return hash(props)
+    return hashsum(props)
   }
 
   let Flint = {
     router,
+    range,
+
     views: {},
     removeView(key) { delete Flint.views[key] },
 
@@ -179,8 +182,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let component = React.createClass({
         displayName: name,
         name,
-        el,
         Flint,
+        el,
 
         childContextTypes: {
           path: React.PropTypes.string
@@ -238,7 +241,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (options.changed) {
             // initial value changed from last initial value
             // or an object (avoid work for now) TODO: compare objects(?)
-            if (Internal.getCacheInit[path][name]===undefined) {
+            if (typeof Internal.getCacheInit[path][name] == 'undefined') {
               restore = false
             } else {
               restore = typeof val == 'object' || Internal.getCacheInit[path][name] === val
@@ -251,10 +254,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // we don't wrap view.set() on (var x = 1)
-          if (typeof Internal.getCache[path][name] == 'undefined')
+          const isUndef = typeof Internal.getCache[path][name] == 'undefined'
+
+          if (isUndef)
             Internal.getCache[path][name] = val
 
-          if (options.unchanged && typeof Internal.getCache[path] != 'undefined')
+          if (options.unchanged && isUndef)
             return Internal.getCache[path][name]
 
           // if ending init, live inject old value for hotloading, or return actual value
@@ -281,10 +286,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           // cache original render
           const flintRender = this.render
-          view(this, viewOn)
 
-          // reset original render, cache view render
-          this.viewRender = this.render
+          this.renders = []
+
+          // setter to capture view render
+          this.render = renderFn => {
+            this.renders.push(renderFn)
+          }
+
+          // call view
+          view.call(null, this, viewOn)
+
+          // reset original render
           this.render = flintRender
 
           return null
@@ -375,16 +388,23 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         render() {
-          let els = this.viewRender()
-          const wrapperStyle = this.styles && this.styles.$
-          const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
-          // TODO: check if they returned something valid here
-          const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() })
-          const styled = els && resolveStyles(this, withProps)
           this.firstRender = false
-          return styled
 
-          // return els
+          let els = this.el(`view.${name}`,
+            // props
+            {
+              style: Object.assign(
+                {},
+                this.props.style,
+                this.styles.$ && this.styles.$(),
+                this.styles._static && this.styles._static.$
+              )
+            },
+            ...this.renders.map(r => r.call(this))
+          )
+
+          const styled = els && resolveStyles(this, els)
+          return styled
         }
       })
 
@@ -418,7 +438,14 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       hash is the build systems hash of the view contents
         used for detecting changed views
     */
-    view(name, hash, body) {
+    view(name, body) {
+      const comp = Flint.makeReactComponent.partial(name, body)
+
+      if (process.env.production)
+        setView(name, comp())
+
+      const hash = hashsum(body)
+
       Internal.viewsInFile[Internal.currentHotFile].push(name)
 
       function  makeView(hash, component) {
@@ -432,8 +459,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if new
       if (Flint.views[name] == undefined) {
-        let component = Flint.makeReactComponent(name, body, { hash, changed: true })
-        setView(name, component)
+        setView(name, comp({ hash, changed: true }))
         return
       }
 
@@ -447,15 +473,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if unchanged
       if (Flint.views[name].hash == hash) {
-        let component = Flint.makeReactComponent(name, body, { hash, unchanged: true });
-        setView(name, component)
+        setView(name, comp({ hash, unchanged: true }))
         return
       }
 
-      let component = Flint.makeReactComponent(name, body, { hash, changed: true })
-      setView(name, component)
-
-      // check for react-level errors and recover
+      setView(name, comp({ hash, changed: true }))
 
       // check errors and restore last good view
       root.onerror = (...args) => {

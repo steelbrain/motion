@@ -1,5 +1,5 @@
 import compiler from './compiler'
-import babel from 'gulp-babel'
+import babel from './lib/gulp-babel'
 import bridge from './bridge'
 import handleError from './lib/handleError'
 import npm from './npm'
@@ -8,7 +8,8 @@ import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import {
   p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, recreateDir, copy, touch } from './lib/fns'
+  readFile, writeFile, recreateDir, copy, touch,
+  exists } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
@@ -142,11 +143,13 @@ async function buildTemplate() {
   await writeFile(out, template)
 }
 
-function copyWithMap(file, dest) {
-  return Promise.all([
-    copy(file, dest),
-    copy(file + '.map', dest + '.map')
-  ])
+async function copyWithMap(file, dest) {
+  await copy(file, dest)
+
+  try {
+    await copy(file + '.map', dest + '.map')
+  }
+  catch(e) {}
 }
 
 function buildFlint() {
@@ -201,6 +204,7 @@ const $p = {
     post: () => compiler('post')
   },
   babel: () => babel({
+    jsxPragma: '__.el',
     stage: 2,
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
@@ -522,9 +526,11 @@ function getScriptTags(files, req) {
       ].join(newLine),
       // user files
       `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
+      newLine,
+      '<!-- APP -->',
       assetScriptTags(files),
       '<script>Flint.render()</script>',
-      '<!-- END FLINT JS -->'
+      '<!-- END APP -->'
     ].join(newLine)
 }
 
@@ -721,5 +727,8 @@ export async function run(opts, isBuild) {
       watchingMessage()
     }
   }
-  catch(e) { handleError(e) }
+  catch(e) {
+    if (!e.silent)
+      handleError(e)
+  }
 }

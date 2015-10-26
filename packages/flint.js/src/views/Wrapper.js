@@ -10,6 +10,8 @@ const getFirstChild = children => {
 
 class Wrapper extends React.Component {
   render() {
+    return this.props.children
+
     const { children, style, onClick, __disableWrapper, view, path } = this.props;
 
     let viewProps = { view }

@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "0.2.129",
+  "version": "0.2.133",
   "description": "An amazing way to build apps with React",
   "repository": {
     "type": "git",
@@ -18,10 +18,10 @@
     "clui": "^0.3.1",
     "colors": "^1.0.3",
     "commander": "^2.6.0",
-    "es6-promise": "^2.0.1",
+    "es6-promise": "^3.0.2",
     "flint-runner": "^0.2.0",
     "mkdirp": "^0.5.0",
-    "ncp": "^1.0.1",
+    "ncp": "^2.0.0",
     "node-fetch": "^1.3.2",
     "raven": "^0.8.1",
     "reapp-object-assign": "^1.0.0",

@@ -25,6 +25,27 @@ const divWhitelist = [
   'link'
 ]
 
+let niceAttrs = {
+  class: 'className',
+  for: 'htmlFor',
+  srcset: 'srcSet',
+  novalidate: 'noValidate',
+  autoplay: 'autoPlay',
+  frameborder: 'frameBorder',
+  allowfullscreen: 'allowFullScreen',
+  tabindex: 'tabIndex',
+}
+
+function niceProps(props) {
+  Object.keys(props).forEach(key => {
+    if (niceAttrs[key]) {
+      props[niceAttrs[key]] = props[key]
+      delete props[key]
+    }
+  })
+  return props
+}
+
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
     let fullname, key, index, tag
@@ -44,6 +65,10 @@ export default function createElement(viewName) {
 
     if (!fullname)
       return React.createElement('div', null, 'No name given!')
+
+    if (props) {
+      props = niceProps(props)
+    }
 
     props = props || {}
     const view = this

@@ -16,7 +16,7 @@ function hasObjWithProp(node, base, prop) {
 }
 
 function isInView(scope) {
-  return scope.hasBinding("view")
+  return scope.hasBinding("__")
 }
 
 const mutativeFuncs = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
@@ -27,6 +27,15 @@ function isMutativeArrayFunc(node) {
     node.callee.property.name
 
   return (name && mutativeFuncs.indexOf(name) >= 0)
+}
+
+function isObjectAssign(node) {
+  if (!node.callee) return
+
+  const propName = node.callee.property && node.callee.property.name
+  const objName = node.callee.object && node.callee.object.name
+
+  return objName == 'Object' && propName == 'assign'
 }
 
 let niceAttrs = {
@@ -49,11 +58,6 @@ function niceJSXAttributes(name) {
   return name
 }
 
-let i = 0
-function inc() {
-  return i++ % Number.MAX_VALUE
-}
-
 const idFn = x => x
 
 export default function ({ Plugin, types: t }) {
@@ -62,16 +66,22 @@ export default function ({ Plugin, types: t }) {
     return t.callExpression(t.identifier('Object.freeze'), [node])
   }
 
-  function viewUpdateExpression(name, node) {
-    return t.callExpression(t.identifier('view.set'), [t.literal(name), node])
+  function addSetter(name, node, scope) {
+    if (node.hasSetter) return
+    if (scope.hasBinding('__')) {
+      node.hasSetter = true
+      return t.callExpression(t.identifier('__.set'), [t.literal(name), node])
+    }
+
+    return node
   }
 
   function viewGetter(name, val) {
-    return t.callExpression(t.identifier('view.get'), [t.literal(name), val])
+    return t.callExpression(t.identifier('__.get'), [t.literal(name), val])
   }
 
   function addGetter(node, scope) {
-    if (scope.hasOwnBinding('view')) {
+    if (scope.hasOwnBinding('__')) {
       node.right = viewGetter(node.left.name, node.right)
     }
     return node
@@ -87,21 +97,26 @@ export default function ({ Plugin, types: t }) {
     }
   }
 
-  function isViewDefinition(node) {
-    const callee = node.callee && node.callee
-    return (
-      callee.object && callee.object.name == 'Flint' &&
-      callee.property && callee.property.name == 'view'
-    )
-  }
-
   let keyBase = {}
 
   return new Plugin("flint-transform", {
     visitor: {
+      ViewStatement(node) {
+        keyBase = {}
+
+        const name = node.name.name
+        const subName = node.subName && node.subName.name
+        const fullName = name + (subName ? `.${subName}` : '')
+
+        return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
+          t.functionExpression(null, [t.identifier('__'), t.identifier('on')], node.block)]
+        )
+      },
+
       JSXElement: {
         enter(node, parent, scope, file) {
           const el = node.openingElement
+
           // avoid reprocessing
           if (node.flintJSXVisits != 2) {
             // add index keys for repeat elements
@@ -113,7 +128,6 @@ export default function ({ Plugin, types: t }) {
               node.flintJSXVisits = 2
               return
             }
-
 
             node.flintJSXVisits = 1
             const name = nodeToNameString(el.name)
@@ -163,7 +177,7 @@ export default function ({ Plugin, types: t }) {
 
               if (name == 'repeat') {
                 rpt = _node => t.callExpression(
-                  t.memberExpression(expr, t.identifier('map')),
+                  t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),
                   [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
                     t.returnStatement(_node)
                   ]))]
@@ -171,7 +185,18 @@ export default function ({ Plugin, types: t }) {
               }
             }
 
-            return iff(route(rpt(node)))
+            // wrap outermost JSX elements (in views) in this.render()
+            let wrap = idFn
+            const isDirectChildOfView = scope.hasOwnBinding('__')
+
+            if (isDirectChildOfView)
+              wrap = node => t.callExpression(t.identifier('__.render'), [
+                t.functionExpression(null, [], t.blockStatement([
+                  t.returnStatement(node)
+                ]))
+              ])
+
+            return wrap(iff(route(rpt(node))))
           }
         }
       },
@@ -196,11 +221,17 @@ export default function ({ Plugin, types: t }) {
       CallExpression: {
         exit(node, parent, scope) {
           // mutative array methods
-          if (isInView(scope) && isMutativeArrayFunc(node))
-            return viewUpdateExpression(node.callee.property.name, node)
+          if (isInView(scope)) {
+            if (isMutativeArrayFunc(node)) {
+              return addSetter(node.callee.property.name, node, scope)
+            }
 
-          if (isViewDefinition(node)) {
-            keyBase = {}
+            if (isObjectAssign(node)) {
+              // if mutating an object in the view
+              if (scope.hasOwnBinding(node.arguments[0].name)) {
+                return addSetter(node.arguments[0].name, node, scope)
+              }
+            }
           }
         }
       },
@@ -208,7 +239,7 @@ export default function ({ Plugin, types: t }) {
       VariableDeclaration: {
         exit(node, parent, scope) {
           // add getter
-          if (scope.hasOwnBinding('view') && node.kind != 'const') {
+          if (scope.hasOwnBinding('__') && node.kind != 'const') {
             node.declarations.map(dec => {
               if (!dec.init) {
                 dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
@@ -222,15 +253,18 @@ export default function ({ Plugin, types: t }) {
       },
 
       AssignmentExpression: {
-        enter(node) {
+        exit(node, parent, scope) {
+
+          // styles
+
           const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
 
           // styles
           if (isStyle)
-            return styleAssignment(node)
+            return extractAndAssign(node)
 
           // splits styles into static/dynamic pieces
-          function styleAssignment(node) {
+          function extractAndAssign(node) {
             // if array of objects
             if (t.isArrayExpression(node.right)) {
               let staticProps = []
@@ -265,12 +299,12 @@ export default function ({ Plugin, types: t }) {
                   return staticStatement
               }
               else {
-                return viewStyle(node, t.objectExpression(dynamics))
+                return styleAssign(node, t.objectExpression(dynamics))
               }
             }
 
             else {
-              return viewStyle(node)
+              return styleAssign(node)
             }
           }
 
@@ -292,38 +326,54 @@ export default function ({ Plugin, types: t }) {
           // view.styles._static["name"] = ...
           function staticStyleStatement(node, statics) {
             return viewExpression(t.assignmentExpression(node.operator,
-              t.identifier(`view.styles._static["${node.left.name}"]`),
+              t.identifier(`__.styles._static["${node.left.name}"]`),
               statics
             ))
           }
 
           // view.styles["name"] = ...
           function dynamicStyleStatement(node, dynamics) {
-            return viewExpression(viewStyle(node, dynamics))
+            return viewExpression(styleAssign(node, dynamics))
           }
 
-          function viewStyle(node, right) {
-            return t.assignmentExpression(node.operator, t.identifier(`view.styles["${node.left.name}"]`),
-              t.functionExpression(null, [t.identifier('_index')],
-                t.blockStatement([
-                  t.returnStatement(right || node.right)
-                ])
-              )
+          function styleAssign(node, right) {
+            // TODO: check if already set in view
+            // parent.scope.hasBinding()
+
+            const name = node.left.name
+
+            return styleFlintAssignment(name,
+              styleFunction(right || node.right)
             )
+
+            // view.styles.$h1 = ...
+            function styleFlintAssignment(name, right) {
+              const ident = `__.styles["${name}"]`
+
+              return t.assignmentExpression('=', t.identifier(ident), right)
+            }
+
+            // (_index) => {}
+            function styleFunction(inner) {
+              return t.functionExpression(null, [t.identifier('_index')],
+                t.blockStatement([ t.returnStatement(inner) ])
+              )
+            }
           }
 
           function viewExpression(node) {
             return t.expressionStatement(node)
           }
-        },
 
-        exit(node, parent, scope) {
+          // non-styles
+
+
           if (node.flintAssignState) return
 
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
 
-          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('view.styles') == 0
+          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('__.styles') == 0
 
           if (isAlreadyStyle) {
             // double-assign #18
@@ -335,27 +385,32 @@ export default function ({ Plugin, types: t }) {
             return
           }
 
-          const inView = isInView(scope)
-          const isRender = hasObjWithProp(node, 'view', 'render')
+          const isRender = hasObjWithProp(node, '__', 'render')
+
+          let id = x => x
+          let sett = id
+          let gett = id
+
+          // view.set
+          if (!isRender) {
+            node.flintAssignState = 1
+            sett = node => addSetter(node.left.name, node, scope)
+          }
 
           // add getter
           if (!isRender) {
             node.flintAssignState = 1
-            node = addGetter(node, scope)
+            gett = node => addGetter(node, scope)
           }
 
-          // view.set
-          if (inView && !isRender) {
-            node.flintAssignState = 1
-            return viewUpdateExpression(node.left.name, node)
-          }
+          return sett(gett(node))
         }
       },
 
       UpdateExpression: {
-        exit(node) {
+        exit(node, _, scope) {
           if (node.operator == '++' || node.operator == '--')
-            return viewUpdateExpression(node.argument.name, node)
+            return addSetter(node.argument.name, node, scope)
         }
       }
     }

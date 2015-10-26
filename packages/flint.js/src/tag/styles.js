@@ -1,7 +1,5 @@
 import reportError from '../lib/reportError'
 
-let cachedStyles = {}
-
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
 
@@ -46,7 +44,6 @@ export default function elementStyles(key, view, name, tag, props) {
 
   if (view.styles) {
     const index = props.repeat ? key[1] : void 0
-    const uniqueTagId = view.entityId + name + tag
 
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
@@ -66,54 +63,44 @@ export default function elementStyles(key, view, name, tag, props) {
     let result
     let ran = false
 
-    // TODO: only try/catch in dev mode
-    try {
-      result = mergeStyles(null,
-        // if set using one big object,
-        viewStyle && viewStyle[tag],
-        viewStyle && viewStyle[name],
-        viewStyleStatic && viewStyleStatic[tag],
-        viewStyleStatic && viewStyleStatic[name],
+    result = mergeStyles(null,
+      // if set using one big object,
+      viewStyle && viewStyle[tag],
+      viewStyle && viewStyle[name],
+      viewStyleStatic && viewStyleStatic[tag],
+      viewStyleStatic && viewStyleStatic[name],
 
-        // tag style
-        tagStyle ? tagStyle(index) : null,
-        // base style
-        isRoot && viewStyle,
-        isRoot && viewStyleStatic,
-        // name dynamic styles
-        nameStyle && diffName && nameStyle(index),
-        // tag static
-        tagStyleStatic,
-        // name static
-        nameStyleStatic,
-      )
+      // tag style
+      tagStyle ? tagStyle(index) : null,
+      // base style
+      isRoot && viewStyle,
+      isRoot && viewStyleStatic,
+      // name dynamic styles
+      nameStyle && diffName && nameStyle(index),
+      // tag static
+      tagStyleStatic,
+      // name static
+      nameStyleStatic,
+    )
 
-      // add class styles
-      if (props.className) {
-        props.className.split(' ').forEach(className => {
-          const classSelector = `_class_${className}`
-          const justClass = prefix + classSelector
-          const nameAndClass = prefix + name + classSelector
+    // add class styles
+    if (props.className) {
+      props.className.split(' ').forEach(className => {
+        const classSelector = `_class_${className}`
+        const justClass = prefix + classSelector
+        const nameAndClass = prefix + name + classSelector
 
-          // $.class = {}
-          if (view.styles[justClass] || view.styles._static[justClass])
-            result = mergeStyles(result, view.styles[justClass] && view.styles[justClass](index), view.styles._static[justClass])
+        // $.class = {}
+        if (view.styles[justClass] || view.styles._static[justClass])
+          result = mergeStyles(result, view.styles[justClass] && view.styles[justClass](index), view.styles._static[justClass])
 
-          // $name.class = {}
-          if (view.styles[nameAndClass] || view.styles._static[nameAndClass])
-            result = mergeStyles(result, view.styles[nameAndClass] && view.styles[nameAndClass](index), view.styles._static[nameAndClass])
-        })
-      }
-
-      ran = true
+        // $name.class = {}
+        if (view.styles[nameAndClass] || view.styles._static[nameAndClass])
+          result = mergeStyles(result, view.styles[nameAndClass] && view.styles[nameAndClass](index), view.styles._static[nameAndClass])
+      })
     }
-    catch (e) {
-      console.error('Error running style for ', view.name+':'+name, e.message)
-      props.style = cachedStyles[uniqueTagId]
 
-      const { name, message, stack } = e
-      reportError({ name, message, stack })
-    }
+    ran = true
 
     if (ran) {
       // merge styles [] into {}
@@ -125,8 +112,9 @@ export default function elementStyles(key, view, name, tag, props) {
         result = mergeStyles(result, props.style)
 
       // apply view internal $ styles
-      if (name.indexOf('Flint.') == 0)
-        result = mergeStyles(result, view.styles._static.$, view.styles.$)
+      if (name.indexOf('Flint.') == 0) {
+        result = mergeStyles(result, )
+      }
 
       // add view external props.style
       if (isRoot && view.props.style)
@@ -135,9 +123,6 @@ export default function elementStyles(key, view, name, tag, props) {
       // put styles back into props.style
       if (result)
         props.style = result
-
-      // cache styles
-      cachedStyles[uniqueTagId] = result
     }
   }
 
@@ -186,9 +171,10 @@ export default function elementStyles(key, view, name, tag, props) {
   }
 
   // set body bg to Main view bg
+
   if (
     view.name == 'Main' &&
-    name == 'Flint.MainWrapper' &&
+    name == 'view.Main' &&
     typeof document != 'undefined'
   ) {
     const body = document.body
