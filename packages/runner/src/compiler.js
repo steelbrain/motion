@@ -75,10 +75,10 @@ var Parser = {
           fileViews.push(currentView.name)
         }
 
-        const JSXstart = line.trim().charAt(0) == '<'
+        const JSXstart = line.charAt(2) == '<' && line.charAt(3) != '/'
 
         if (JSXstart)
-          line = ';' + line
+          result = ';' + result
 
         // store view contents for hashing
         if (inView) {

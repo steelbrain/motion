@@ -183,6 +183,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         displayName: name,
         name,
         Flint,
+        el,
 
         childContextTypes: {
           path: React.PropTypes.string
@@ -286,8 +287,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // cache original render
           const flintRender = this.render
 
+          this.renders = []
+
           // setter to capture view render
-          this.render = (els) => this.viewRender = els
+          this.render = renderFn => {
+            this.renders.push(renderFn)
+          }
 
           // call view
           view.call(this, viewOn)
@@ -384,7 +389,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         render() {
           let els
-          let run = () => this.viewRender.call(this)
+          console.log(this.renders, this.renders.map(r => r.call(this)))
+          let run = () =>
+            <div>
+              {this.renders.map(r => r.call(this))}
+            </div>
 
           console.log(this.viewRender)
           if (process.env.production)
@@ -405,12 +414,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             }
           }
 
-          const wrapperStyle = this.styles && this.styles.$
-          const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
+          // const wrapperStyle = this.styles && this.styles.$
+          // const __disableWrapper = wrapperStyle ? wrapperStyle() === false : false
           // TODO: check if they returned something valid here
-          console.log(els)
-          const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() })
-          const styled = els && resolveStyles(this, withProps)
+          console.log('els', els)
+          // const withProps = React.cloneElement(els, { __disableWrapper, path: this.getPath() })
+          const styled = els && resolveStyles(this, els)
           this.firstRender = false
           return styled
 

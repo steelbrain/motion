@@ -112,7 +112,11 @@ export default function ({ Plugin, types: t }) {
   return new Plugin("flint-transform", {
     visitor: {
       ViewStatement(node) {
-        return t.callExpression(t.identifier('Flint.view'), [t.literal(node.declarations[0].id.name),
+        const name = node.name.name
+        const subName = node.subName && node.subName.name
+        const fullName = name + (subName ? `.${subName}` : '')
+
+        return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
           t.functionExpression(null, [t.identifier('on')], node.block)]
         )
       },
@@ -190,12 +194,16 @@ export default function ({ Plugin, types: t }) {
               }
             }
 
-
+            // wrap outermost JSX elements (in views) in this.render()
             let wrap = idFn
             const parentIsView = !t.isJSXElement(parent)
 
             if (parentIsView)
-              wrap = node => t.callExpression(t.identifier('this.render'), [node])
+              wrap = node => t.callExpression(t.identifier('this.render'), [
+                t.functionExpression(null, [], t.blockStatement([
+                  t.returnStatement(node)
+                ]))
+              ])
 
             return wrap(iff(route(rpt(node))))
           }
