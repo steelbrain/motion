@@ -3,7 +3,7 @@ var through = require('through2');
 var applySourceMap = require('vinyl-sourcemaps-apply');
 var objectAssign = require('object-assign');
 var replaceExt = require('replace-ext');
-var babel = require('babel-core');
+var babel = require('flint-babel-core');
 
 module.exports = function (opts) {
 	opts = opts || {};
