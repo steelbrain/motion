@@ -316,7 +316,7 @@ function finish() {
   spinner.stop()
 
   wait().then(function() {
-    console.log('Your new Flint app is ready in ./%s'.green.bold, name)
+    console.log('Your Flint app is in ./%s'.green.bold, name)
     console.log()
     process.exit()
   })

@@ -31,7 +31,7 @@ Promise.longStackTraces()
 
 const proc = process // cache for keypress
 const newLine = "\n"
-const SCRIPTS_GLOB = [ 'main.js', '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
+const SCRIPTS_GLOB = [ '[Mm]ain.js', '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 
@@ -635,7 +635,13 @@ async function makeTemplate(req, cb) {
 
   if (hasFiles) {
     paths = files.map(file => file.path)
-    const mainIndex = paths.indexOf('main.js')
+
+    let mainIndex = 0
+
+    paths.forEach((p, i) => {
+      if (/[Mm]ain\.js$/.test(p))
+        mainIndex = i
+    })
 
     if (mainIndex !== -1)
       paths.move(mainIndex, 0)
