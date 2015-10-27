@@ -194,7 +194,9 @@ view ErrorMessage {
   }
 
   $inner = {
-    display: 'block'
+    display: 'block',
+    // leave space for close button
+    width: '98%',
   }
 
   $where = {

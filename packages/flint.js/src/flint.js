@@ -483,7 +483,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if unchanged
       if (Flint.views[name].hash == hash) {
-        setView(name, comp({ hash, unchanged: true }))
+        //setView(name, comp({ hash, unchanged: true }))
         return
       }
 
