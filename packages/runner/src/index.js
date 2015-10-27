@@ -300,7 +300,6 @@ function buildScripts(cb, stream) {
 
       const endTime = Date.now() - startTime
 
-      console.log('good file', file.path)
       out.goodFile(file, endTime)
       log('build took ', endTime, 'ms')
 
