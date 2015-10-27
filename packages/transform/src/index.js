@@ -109,7 +109,7 @@ export default function ({ Plugin, types: t }) {
         const fullName = name + (subName ? `.${subName}` : '')
 
         return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
-          t.functionExpression(null, [t.identifier('__'), t.identifier('on')], node.block)]
+          t.functionExpression(null, [t.identifier('__'), t.identifier('on'), t.identifier('$')], node.block)]
         )
       },
 
@@ -254,10 +254,16 @@ export default function ({ Plugin, types: t }) {
 
       AssignmentExpression: {
         exit(node, parent, scope) {
+          if (node.isStyle) return
 
           // styles
-
-          const isStyle = node.left && node.left.name && node.left.name.indexOf('$') == 0
+          console.log(node.left)
+          const isStyle = (
+            // $variable = {}
+            node.left.name && node.left.name.indexOf('$') == 0 ||
+            // $.variable = {}
+            node.left.object && node.left.object.name == '$'
+          )
 
           // styles
           if (isStyle)
@@ -323,35 +329,28 @@ export default function ({ Plugin, types: t }) {
             return { statics, dynamics }
           }
 
-          // view.styles._static["name"] = ...
+          // $._static["name"] = ...
           function staticStyleStatement(node, statics) {
-            return viewExpression(t.assignmentExpression(node.operator,
-              t.identifier(`__.styles._static["${node.left.name}"]`),
-              statics
-            ))
+            let result = exprStatement(t.assignmentExpression(node.operator, styleLeft(node, true), statics))
+            result.expression.isStyle = true
+            return result
           }
 
-          // view.styles["name"] = ...
+          // $["name"] = ...
           function dynamicStyleStatement(node, dynamics) {
-            return viewExpression(styleAssign(node, dynamics))
+            return exprStatement(styleAssign(node, dynamics))
+          }
+
+          function styleLeft(node, isStatic) {
+            const prefix = isStatic ? '$._static' : '$'
+            const name = node.left.name.slice(1) || '$'
+            return t.identifier(`${prefix}["${name}"]`)
           }
 
           function styleAssign(node, right) {
-            // TODO: check if already set in view
-            // parent.scope.hasBinding()
-
-            const name = node.left.name
-
-            return styleFlintAssignment(name,
-              styleFunction(right || node.right)
-            )
-
-            // view.styles.$h1 = ...
-            function styleFlintAssignment(name, right) {
-              const ident = `__.styles["${name}"]`
-
-              return t.assignmentExpression('=', t.identifier(ident), right)
-            }
+            let result = t.assignmentExpression('=', styleLeft(node), styleFunction(right || node.right))
+            result.isStyle = true
+            return result
 
             // (_index) => {}
             function styleFunction(inner) {
@@ -361,7 +360,7 @@ export default function ({ Plugin, types: t }) {
             }
           }
 
-          function viewExpression(node) {
+          function exprStatement(node) {
             return t.expressionStatement(node)
           }
 
@@ -372,18 +371,6 @@ export default function ({ Plugin, types: t }) {
 
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
-
-          const isAlreadyStyle = node.left.type == 'Identifier' && node.left.name.indexOf('__.styles') == 0
-
-          if (isAlreadyStyle) {
-            // double-assign #18
-            // console.log(node.left.name, scope.hasOwnBinding(node.left.name))
-            // if (scope.hasBinding(node.left.name)) {
-            //   throw new Error(`Defined same style twice! ${node.left.name.name}`)
-            // }
-
-            return
-          }
 
           const isRender = hasObjWithProp(node, '__', 'render')
 

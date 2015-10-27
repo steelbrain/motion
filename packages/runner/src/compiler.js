@@ -57,9 +57,6 @@ var Parser = {
         if (JSXstart)
           result = ';' + result.substr(1)
 
-        if (inView)
-          result = result.replace(/\$\.([A-Za-z0-9]+\s*\=)/, '$_class_$1')
-
         if (inView && line.charAt(0) == '}')
           inView = false
 
