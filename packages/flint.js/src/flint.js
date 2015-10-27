@@ -168,7 +168,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     deleteFile(name) {
       const weirdName = `/${name}`
-      Internal.viewsInFile[weirdName].map(removeView)
+      Internal.viewsInFile[weirdName].map(Flint.removeView)
       delete Internal.viewsInFile[weirdName]
       delete Internal.viewCache[weirdName]
       Flint.render()

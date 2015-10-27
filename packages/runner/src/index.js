@@ -175,7 +175,7 @@ function buildAssets() {
     .pipe(gulp.dest(p(OPTS.buildDir, '_', 'static')))
 
   var stream = gulp
-    .src(['*', '**/*', '!**/*.js', ], { dot: false })
+    .src(['*', '**/*', '!**/*.jsf?', ], { dot: false })
     .pipe(gulp.dest(p(OPTS.buildDir)));
 }
 
@@ -628,7 +628,7 @@ async function makeTemplate(req, cb) {
   const templatePath = p(OPTS.dir, OPTS.template)
   const template = await readFile(templatePath)
   const dir = await readdir({ root: p(OPTS.flintDir, 'out') })
-  const files = dir.files.filter(f => /\.js$/.test(f.name)) // filter sourcemaps
+  const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
   const hasFiles = files.length
 
   let paths = []
@@ -639,7 +639,7 @@ async function makeTemplate(req, cb) {
     let mainIndex = 0
 
     paths.forEach((p, i) => {
-      if (/[Mm]ain\.js$/.test(p))
+      if (/[Mm]ain\.jsf?$/.test(p))
         mainIndex = i
     })
 
