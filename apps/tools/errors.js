@@ -73,7 +73,7 @@ const niceStack = err => {
 }
 
 view Errors {
-  view.pause()
+  __.pause()
 
   let error = null
   let compileError = null
@@ -91,7 +91,7 @@ view Errors {
       error = null
     }
 
-    view.update()
+    __.update()
   }
 
   function close() {
@@ -99,7 +99,7 @@ view Errors {
     compileError = null
     runtimeError = null
     npmError = null
-    view.update()
+    __.update()
   }
 
   tools.on('compile:error', () => {
@@ -115,7 +115,7 @@ view Errors {
 
   tools.on('npm:error', () => {
     npmError = niceNpmError(tools.data.error)
-    view.update()
+    __.update()
   })
 
   tools.on('runtime:success', () => {

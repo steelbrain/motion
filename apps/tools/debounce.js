@@ -16,7 +16,7 @@ view Debounce {
   let lastFew = []
 
   // dont update unless we want to
-  view.pause()
+  __.pause()
 
   on('props', () => {
     delay = ^delay || Delay
@@ -49,11 +49,11 @@ view Debounce {
 
     // override
     if (^force)
-      return view.update()
+      return __.update()
 
     // debounce
     clearTimeout(timeout)
-    timeout = setTimeout(view.update, curDelay)
+    timeout = setTimeout(__.update, curDelay)
   })
 
   <debounce yield />
