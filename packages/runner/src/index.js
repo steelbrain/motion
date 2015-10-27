@@ -31,7 +31,7 @@ Promise.longStackTraces()
 
 const proc = process // cache for keypress
 const newLine = "\n"
-const SCRIPTS_GLOB = [ '[Mm]ain.js', '**/*.js', '!node_modules{,/**}', '!.flint{,/**}' ]
+const SCRIPTS_GLOB = [ '[Mm]ain.js', '**/*.jsf?', '!node_modules{,/**}', '!.flint{,/**}' ]
 const APP_DIR = path.normalize(process.cwd());
 const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 
