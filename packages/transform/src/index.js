@@ -99,14 +99,16 @@ export default function createPlugin(options) {
       return node
     }
 
-    function viewGetter(name, val) {
+    function viewGetter(name, val, scope, file) {
+      console.log(file.scope.hasOwnBinding(val.name))
+
       return t.callExpression(t.identifier('__.get'), [t.literal(name), val])
       return expr
     }
 
-    function addGetter(node, scope) {
+    function addGetter(node, scope, file) {
       if (scope.hasOwnBinding('__')) {
-        node.right = viewGetter(node.left.name, node.right)
+        node.right = viewGetter(node.left.name, node.right, scope, file)
         node.hasGetter = true
       }
       return node
@@ -273,17 +275,17 @@ export default function createPlugin(options) {
         },
 
         VariableDeclaration: {
-          exit(node, parent, scope) {
+          exit(node, parent, scope, file) {
             // add getter
             if (scope.hasOwnBinding('__') && node.kind != 'const' && !node.flintTracked) {
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
                 if (!dec.init) {
-                  dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
+                  dec.init = viewGetter(dec.id.name, t.identifier('undefined'), scope, file)
                   dec.flintTracked = true
                   return dec
                 }
-                dec.init = viewGetter(dec.id.name, dec.init)
+                dec.init = viewGetter(dec.id.name, dec.init, scope, file)
                 node.flintTracked = true
                 return dec
               })
@@ -292,7 +294,7 @@ export default function createPlugin(options) {
         },
 
         AssignmentExpression: {
-          exit(node, parent, scope) {
+          exit(node, parent, scope, file) {
             if (node.isStyle) return
 
             // styles
@@ -434,7 +436,7 @@ export default function createPlugin(options) {
 
             // add getter
             if (!isRender) {
-              gett = node => addGetter(node, scope)
+              gett = node => addGetter(node, scope, file)
               added = true
             }
 

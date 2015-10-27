@@ -95,14 +95,19 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     removeView(key) { delete Flint.views[key] },
 
     render() {
-      const run = () => {
+      if (preloaders.length)
+        Promise.all(preloaders.map(loader => loader())).then(run)
+      else
+        run()
+
+      function run() {
         isRendering++
 
         // prevent too many re-render tries on react errors
-        if (isRendering > 4) return
+        if (isRendering > 1) return
 
         firstRender = false
-        const MainComponent = Flint.views.Main.component || lastWorkingView.Main;
+        const MainComponent = Flint.views.Main.component || lastWorkingView.Main
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<MainComponent />)
@@ -118,13 +123,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         emitter.emit('afterRender')
         isRendering = 0
       }
-
-      if (preloaders.length) {
-        Promise.all(preloaders.map(loader => loader())).then(run)
-      }
-      else {
-        run()
-      }
     },
 
     // internal events
@@ -134,7 +132,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     debug: () => { debugger },
 
     file(file, run) {
+      // prevent infinite loop of re-renders on errors
       isRendering = 0
+
       Internal.viewsInFile[file] = []
       Internal.currentHotFile = file
 
@@ -156,14 +156,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // avoid tons of renders on start
       if (firstRender) return
 
-      raf(() => {
-        Flint.render()
-
-        // its been updated
-        Object.keys(Flint.views).forEach(key => {
-          Flint.views[key].needsUpdate = false
-        })
-      })
+      setTimeout(Flint.render)
     },
 
     deleteFile(name) {
@@ -214,6 +207,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             const path = this.getPath()
             Internal.getCache[path] = Internal.getCache[path] || {}
             Internal.getCache[path][name] = val
+            console.log('set', name, val)
           }
 
           if (this.shouldUpdate())
@@ -227,44 +221,47 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           const path = this.getPath()
 
+          // setup caches
           if (!Internal.getCache[path])
             Internal.getCache[path] = {}
-
           if (!Internal.getCacheInit[path])
             Internal.getCacheInit[path] = {}
+
+          const isComparable = typeof val == 'number' || typeof val == 'string'
+          const lastInitialValue = Internal.getCacheInit[path][name]
 
           let originalValue, restore
 
           // if edited
           if (options.changed) {
-            // initial value changed from last initial value
-            // or an object (avoid work for now)
-            if (typeof Internal.getCacheInit[path][name] == 'undefined') {
-              restore = false
-            } else {
-              restore = false
-              const initVal = Internal.getCacheInit[path][name]
+            // initial value undefined
+            if (typeof Internal.getCacheInit[path][name] != 'undefined') {
 
-              if (typeof val == 'number' || typeof val == 'string') {
-                restore = initVal === val
+              // only hot update changed variables
+              if (isComparable && lastInitialValue === val) {
+                restore = true
+                originalValue = Internal.getCache[path][name]
               }
-
-              originalValue = Internal.getCache[path][name]
             }
-            // console.log('new value', val, 'before hot', Internal.getCache[path][name])
-            // console.log('last init', Internal.getCacheInit[path][name], 'restore', restore)
 
             Internal.getCacheInit[path][name] = val
           }
 
-          // we don't wrap view.set() on (var x = 1)
-          const isUndef = typeof Internal.getCache[path][name] == 'undefined'
-
-          if (isUndef)
+          // update
+          if (!isComparable)
             Internal.getCache[path][name] = val
+          else {
+            if (options.unchanged && val !== lastInitialValue)
+              return lastInitialValue
+          }
 
-          if (options.unchanged && isUndef)
-            return Internal.getCache[path][name]
+          // change a variable in file scope thats passed into view, view should update init
+          // if (options.unchanged && Internal.getCacheInit[path][name] != val) {
+          //   Internal.getCacheInit[path][name] = val
+          //   return val
+          // }
+
+          console.log(name, val, 'cache', Internal.getCache[path][name], 'init', Internal.getCacheInit[path][name])
 
           // if ending init, live inject old value for hotloading, or return actual value
           return restore ? originalValue : val
@@ -280,7 +277,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.styles = { _static: {} }
           this.events = { mount: u, unmount: u, update: u, props: u }
 
-          const viewOn = (scope, name, cb) => {
+          this.viewOn = (scope, name, cb) => {
             // check if they defined their own scope
             if (name && typeof name == 'string')
               return on(scope, name, cb)
@@ -299,7 +296,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // call view
-          view.call(this, this, viewOn, this.styles)
+          view.call(this, this, this.viewOn, this.styles)
 
           // reset original render
           this.render = flintRender
@@ -357,6 +354,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentWillUnmount() {
+          // fixes unmount errors #60
+          if (!process.env.production) {
+            this.render()
+          }
+
           this.didMount = false
           runEvents(this.events, 'unmount')
         },
@@ -467,8 +469,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       Internal.viewsInFile[Internal.currentHotFile].push(name)
 
-      function  makeView(hash, component) {
-        return { hash, component, needsUpdate: true }
+      function makeView(hash, component) {
+        return { hash, component }
       }
 
       function setView(name, component) {
@@ -492,7 +494,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // if unchanged
       if (Flint.views[name].hash == hash) {
-        //setView(name, comp({ hash, unchanged: true }))
+        setView(name, comp({ hash, unchanged: true }))
         return
       }
 
@@ -501,15 +503,14 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // check errors and restore last good view
       root.onerror = (...args) => {
         Flint.views[name] = makeView(hash, lastWorkingView[name])
-        Flint.render()
         flintOnError(...args)
+        setTimeout(Flint.render)
       }
 
       // then check for no errors and reset onerror
       emitter.on('afterRender', () => {
         root.onerror = flintOnError
       })
-
 
       Flint.render()
 
