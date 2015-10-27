@@ -67,6 +67,7 @@ if (fs.existsSync(FLINT.dest)) {
   console.log("Error! Directory %s already exists\n".red, FLINT.dest)
 }
 else {
+  console.log()
   spinner = new Spinner('Creating app...  ')
   spinner.start({ fps })
   start()
@@ -315,7 +316,6 @@ function finish() {
   spinner.stop()
 
   wait().then(function() {
-    console.log()
     console.log('Your new Flint app is ready in ./%s'.green.bold, name)
     console.log()
     process.exit()

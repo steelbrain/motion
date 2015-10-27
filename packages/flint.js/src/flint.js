@@ -4,7 +4,6 @@ import resolveStyles from 'flint-radium/lib/resolve-styles'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
-import equal from 'deep-equal'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
 
@@ -239,11 +238,17 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // if edited
           if (options.changed) {
             // initial value changed from last initial value
-            // or an object (avoid work for now) TODO: compare objects(?)
+            // or an object (avoid work for now)
             if (typeof Internal.getCacheInit[path][name] == 'undefined') {
               restore = false
             } else {
-              restore = typeof val == 'object' || Internal.getCacheInit[path][name] === val
+              restore = false
+              const initVal = Internal.getCacheInit[path][name]
+
+              if (typeof val == 'number' || typeof val == 'string') {
+                restore = initVal === val
+              }
+
               originalValue = Internal.getCache[path][name]
             }
             // console.log('new value', val, 'before hot', Internal.getCache[path][name])

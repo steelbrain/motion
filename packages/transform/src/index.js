@@ -239,13 +239,14 @@ export default function ({ Plugin, types: t }) {
       VariableDeclaration: {
         exit(node, parent, scope) {
           // add getter
-          if (scope.hasOwnBinding('__') && node.kind != 'const') {
+          if (scope.hasOwnBinding('__') && node.kind != 'const' && !node.flintAssignState) {
             node.declarations.map(dec => {
               if (!dec.init) {
                 dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
                 return dec
               }
               dec.init = viewGetter(dec.id.name, dec.init)
+              node.flintAssignState = true
               return dec
             })
           }
@@ -376,7 +377,6 @@ export default function ({ Plugin, types: t }) {
 
           // non-styles
 
-
           if (node.flintAssignState) return
 
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
@@ -390,17 +390,18 @@ export default function ({ Plugin, types: t }) {
 
           // view.set
           if (!isRender) {
-            node.flintAssignState = 1
             sett = node => addSetter(node.left.name, node, scope)
           }
 
           // add getter
           if (!isRender) {
-            node.flintAssignState = 1
             gett = node => addGetter(node, scope)
           }
 
-          return sett(gett(node))
+          node = sett(gett(node))
+          node.flintAssignState = 1
+
+          return node
         }
       },
 
