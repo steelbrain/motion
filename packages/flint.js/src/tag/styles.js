@@ -52,7 +52,7 @@ export default function elementStyles(key, view, name, tag, props) {
 
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
     const viewStyleStatic = view.styles._static[prefix]
-    const nameStyle = view.styles[prefix + name]
+    const nameStyle = view.styles[name]
 
     let nameStyleStatic
     const tagStyleStatic = view.styles._static[tag]
@@ -98,6 +98,10 @@ export default function elementStyles(key, view, name, tag, props) {
       // merge styles [] into {}
       if (Array.isArray(result))
         result = mergeStyles(...result)
+
+      // add view external props.style
+      if (isRoot && view.props.style)
+        result = mergeStyles(result, view.props.style)
 
       // add style="" prop styles
       if (props.style)
