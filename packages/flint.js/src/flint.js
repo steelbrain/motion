@@ -299,7 +299,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           // call view
-          view.call(null, this, viewOn, this.styles)
+          view.call(this, this, viewOn, this.styles)
 
           // reset original render
           this.render = flintRender

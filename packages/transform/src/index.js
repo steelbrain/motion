@@ -69,8 +69,9 @@ export default function ({ Plugin, types: t }) {
   function addSetter(name, node, scope) {
     if (node.hasSetter) return
     if (scope.hasBinding('__')) {
+      const expr = t.callExpression(t.identifier('__.set'), [t.literal(name), node])
       node.hasSetter = true
-      return t.callExpression(t.identifier('__.set'), [t.literal(name), node])
+      return expr
     }
 
     return node
@@ -78,11 +79,13 @@ export default function ({ Plugin, types: t }) {
 
   function viewGetter(name, val) {
     return t.callExpression(t.identifier('__.get'), [t.literal(name), val])
+    return expr
   }
 
   function addGetter(node, scope) {
     if (scope.hasOwnBinding('__')) {
       node.right = viewGetter(node.left.name, node.right)
+      node.hasGetter = true
     }
     return node
   }
@@ -239,14 +242,16 @@ export default function ({ Plugin, types: t }) {
       VariableDeclaration: {
         exit(node, parent, scope) {
           // add getter
-          if (scope.hasOwnBinding('__') && node.kind != 'const' && !node.flintAssignState) {
+          if (scope.hasOwnBinding('__') && node.kind != 'const' && !node.flintTracked) {
             node.declarations.map(dec => {
+              if (dec.flintTracked) return dec
               if (!dec.init) {
                 dec.init = viewGetter(dec.id.name, t.identifier('undefined'))
+                dec.flintTracked = true
                 return dec
               }
               dec.init = viewGetter(dec.id.name, dec.init)
-              node.flintAssignState = true
+              node.flintTracked = true
               return dec
             })
           }
@@ -376,8 +381,7 @@ export default function ({ Plugin, types: t }) {
           }
 
           // non-styles
-
-          if (node.flintAssignState) return
+          if (node.flintTracked || node.hasSetter || node.hasGetter) return
 
           const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+=";
           if (!isBasicAssign) return
@@ -404,7 +408,7 @@ export default function ({ Plugin, types: t }) {
           node = sett(gett(node))
 
           if (added && node)
-            node.flintAssignState = 1
+            node.flintTracked = 1
 
           return node
         }
@@ -414,6 +418,27 @@ export default function ({ Plugin, types: t }) {
         exit(node, _, scope) {
           if (node.operator == '++' || node.operator == '--')
             return addSetter(node.argument.name, node, scope)
+        }
+      },
+
+      FunctionDeclaration: {
+        exit(node, parent, scope) {
+          if (!scope.hasBinding('__')) return
+
+          // turn normal function into var funcName = function(){}.bind(this)
+          const expr = t.VariableDeclaration('let',
+            [t.variableDeclarator(node.id,
+              t.memberExpression(
+                t.functionExpression(null, node.params,
+                  node.body
+                ),
+                t.callExpression(t.identifier('bind'), [t.identifier('this')])
+              )
+            )]
+          )
+
+          expr.flintTracked = 1
+          return expr
         }
       }
     }
