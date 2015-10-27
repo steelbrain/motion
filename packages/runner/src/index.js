@@ -210,7 +210,7 @@ const $p = {
     retainLines: true,
     comments: true,
     optional: ['bluebirdCoroutines'],
-    plugins: [flintTransform],
+    plugins: [flintTransform({ basePath: OPTS.dir })],
     extra: {
       production: process.env.production
     }
@@ -300,6 +300,7 @@ function buildScripts(cb, stream) {
 
       const endTime = Date.now() - startTime
 
+      console.log('good file', file.path)
       out.goodFile(file, endTime)
       log('build took ', endTime, 'ms')
 

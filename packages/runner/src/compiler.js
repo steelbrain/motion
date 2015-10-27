@@ -8,9 +8,6 @@ let views = []
 let OPTS
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
-const shortFile = file => file.replace(OPTS.dir.replace('.flint', ''), '')
-const filePrefix = file => `!function() { return Flint.file('${shortFile(file)}', function(exports) { "use strict";`
-const fileSuffix = ' }) }();'
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
 let debouncers = {}
@@ -28,7 +25,6 @@ var Parser = {
 
   post(file, source) {
     debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
-    source = filePrefix(file) + source + fileSuffix // add file
     return { source }
   },
 
