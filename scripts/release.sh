@@ -7,6 +7,7 @@ fi
 
 release_package() {
   cd $1
+  echo $1
   npm version patch
   npm publish
   cd ../..
