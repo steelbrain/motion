@@ -13,7 +13,7 @@ const mergeStyles = (obj, ...styles)  => {
   return styles.reduce((acc, style) => {
     if (Array.isArray(style))
       style.map(s => acc = mergeStyles(acc, s))
-    else if (typeof style === 'object') {
+    else if (typeof style === 'object' && style !== null) {
       if (!acc) acc = {}
       Object.assign(acc, style)
     }

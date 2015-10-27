@@ -304,6 +304,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // reset original render
           this.render = flintRender
 
+          // ensure something renders
+          if (!this.renders.length)
+            this.renders.push(() => this.el([name.toLowerCase(), 0], { yield: true }))
+
           return null
         },
 
