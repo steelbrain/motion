@@ -387,19 +387,24 @@ export default function ({ Plugin, types: t }) {
           let id = x => x
           let sett = id
           let gett = id
+          let added = false
 
           // view.set
           if (!isRender) {
             sett = node => addSetter(node.left.name, node, scope)
+            added = true
           }
 
           // add getter
           if (!isRender) {
             gett = node => addGetter(node, scope)
+            added = true
           }
 
           node = sett(gett(node))
-          node.flintAssignState = 1
+
+          if (added && node)
+            node.flintAssignState = 1
 
           return node
         }
