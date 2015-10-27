@@ -257,7 +257,6 @@ export default function ({ Plugin, types: t }) {
           if (node.isStyle) return
 
           // styles
-          console.log(node.left)
           const isStyle = (
             // $variable = {}
             node.left.name && node.left.name.indexOf('$') == 0 ||
@@ -343,6 +342,17 @@ export default function ({ Plugin, types: t }) {
 
           function styleLeft(node, isStatic) {
             const prefix = isStatic ? '$._static' : '$'
+
+            if (node.left.object) {
+              if (isStatic) {
+                const object = t.identifier(prefix)
+                const props = node.left.properties || [node.left.property]
+                return t.memberExpression(object, ...props)
+              }
+
+              return node.left
+            }
+
             const name = node.left.name.slice(1) || '$'
             return t.identifier(`${prefix}["${name}"]`)
           }
