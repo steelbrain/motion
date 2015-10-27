@@ -100,10 +100,15 @@ export default function createPlugin(options) {
     }
 
     function viewGetter(name, val, scope, file) {
-      console.log(file.scope.hasOwnBinding(val.name))
+      let getter = (name, val, ...args) => t.callExpression(t.identifier('__.get'), [t.literal(name), val, ...args])
+      let isInView = scope.hasOwnBinding('__')
+      let comesFromFile = file.scope.hasOwnBinding(val.name)
 
-      return t.callExpression(t.identifier('__.get'), [t.literal(name), val])
-      return expr
+      if (comesFromFile)
+        return getter(name, val, t.literal('fromFile'))
+
+      if (isInView)
+        return getter(name, val)
     }
 
     function addGetter(node, scope, file) {
@@ -126,7 +131,7 @@ export default function createPlugin(options) {
 
     let keyBase = {}
 
-    const filePrefix = path => `!function() { return Flint.file('${path}', function(exports) { "use strict"`
+    const filePrefix = path => `!function() { return Flint.file('${path}', function(__, exports) { "use strict"`
     const fileSuffix = ' }) }()'
 
     return new Plugin("flint-transform", {
@@ -456,26 +461,29 @@ export default function createPlugin(options) {
           }
         },
 
-        FunctionDeclaration: {
-          exit(node, parent, scope) {
-            if (!scope.hasBinding('__')) return
-
-            // turn normal function into var funcName = function(){}.bind(this)
-            const expr = t.VariableDeclaration('let',
-              [t.variableDeclarator(node.id,
-                t.memberExpression(
-                  t.functionExpression(null, node.params,
-                    node.body
-                  ),
-                  t.callExpression(t.identifier('bind'), [t.identifier('this')])
-                )
-              )]
-            )
-
-            expr.flintTracked = 1
-            return expr
-          }
-        }
+        // FunctionDeclaration: {
+        //   exit(node, parent, scope) {
+        //     if (!scope.hasBinding('__') || node.flintBound) return
+        //
+        //     this.ensureBlock()
+        //
+        //     let expr = t.variableDeclaration('let', [
+        //       t.variableDeclarator(node.id,
+        //         t.callExpression(
+        //           t.memberExpression(node, t.identifier('bind')),
+        //           [t.identifier('this')]
+        //         )
+        //       )
+        //     ])
+        //
+        //     node.flintBound = true
+        //     expr.flintTracked = 1
+        //
+        //
+        //
+        //     return expr
+        //   }
+        // }
       }
     });
   }

@@ -13,6 +13,7 @@ import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 import './lib/bluebirdErrorHandle'
+import runEvents from './lib/runEvents'
 import range from './lib/range'
 import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
@@ -35,8 +36,6 @@ root.module = {}
 root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
 
 const uuid = () => Math.floor(Math.random() * 1000000)
-const runEvents = (queue, name) =>
-  queue && queue[name] && queue[name].length && queue[name].forEach(e => e())
 
 export default function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
@@ -138,9 +137,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Internal.viewsInFile[file] = []
       Internal.currentHotFile = file
 
-      // run view, get exports
+      // capture exports
       let fileExports = {}
+
+      // run file
       run(fileExports)
+
       Flint.setExports(fileExports)
 
       const cached = Internal.viewCache[file] || []
@@ -207,16 +209,19 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             const path = this.getPath()
             Internal.getCache[path] = Internal.getCache[path] || {}
             Internal.getCache[path][name] = val
-            console.log('set', name, val)
           }
 
           if (this.shouldUpdate())
             this.forceUpdate()
         },
 
-        get(name, val) {
+        get(name, val, where) {
           // dont cache in prod / undefined
           if (process.env.production)
+            return val
+
+          // file scoped stuff always updates
+          if (options.unchanged && where == 'fromFile')
             return val
 
           const path = this.getPath()
@@ -227,16 +232,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (!Internal.getCacheInit[path])
             Internal.getCacheInit[path] = {}
 
-          const isComparable = typeof val == 'number' || typeof val == 'string'
+          const isComparable = (
+            typeof val == 'number' ||
+            typeof val == 'string' ||
+            typeof val == 'boolean' ||
+            typeof val == 'undefined'
+          )
+
+          const lastValue = Internal.getCache[path][name]
           const lastInitialValue = Internal.getCacheInit[path][name]
 
           let originalValue, restore
 
           // if edited
           if (options.changed) {
-            // initial value undefined
-            if (typeof Internal.getCacheInit[path][name] != 'undefined') {
-
+            // initial value not undefined
+            if (typeof lastInitialValue != 'undefined') {
               // only hot update changed variables
               if (isComparable && lastInitialValue === val) {
                 restore = true
@@ -247,23 +258,17 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             Internal.getCacheInit[path][name] = val
           }
 
-          // update
-          if (!isComparable)
-            Internal.getCache[path][name] = val
-          else {
-            if (options.unchanged && val !== lastInitialValue)
-              return lastInitialValue
+          if (name == 'hard') {
+            console.log(isComparable, name, val, 'cache', Internal.getCache[path][name], 'init', Internal.getCacheInit[path][name], path)
+            console.log(options.unchanged, lastInitialValue)
           }
 
-          // change a variable in file scope thats passed into view, view should update init
-          // if (options.unchanged && Internal.getCacheInit[path][name] != val) {
-          //   Internal.getCacheInit[path][name] = val
-          //   return val
-          // }
+          // return cached
+          if (isComparable)
+            if (options.unchanged && lastValue !== lastInitialValue)
+              return lastValue
 
-          console.log(name, val, 'cache', Internal.getCache[path][name], 'init', Internal.getCacheInit[path][name])
-
-          // if ending init, live inject old value for hotloading, or return actual value
+          // if restore, restore
           return restore ? originalValue : val
         },
 
@@ -336,14 +341,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.path = (this.context.path || '') + ',' + name + '.' + propsHash
         },
 
+        run(name) {
+          runEvents(this.events, name)
+        },
+
         componentWillReceiveProps(nextProps) {
           this.props = nextProps
-          runEvents(this.events, 'props')
+          this.run('props')
         },
 
         componentDidMount() {
           this.didMount = true
-          runEvents(this.events, 'mount')
+          this.run('mount')
 
           // set last working view for this hash
           if (!process.env.production) {
@@ -360,18 +369,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           this.didMount = false
-          runEvents(this.events, 'unmount')
+          this.run('unmount')
         },
 
         componentWillMount() {
           // componentWillUpdate only runs after first render
-          runEvents(this.events, 'update')
-          runEvents(this.events, 'props')
+          this.run('update')
+          this.run('props')
         },
 
         componentWillUpdate() {
           this.isUpdating = true
-          runEvents(this.events, 'update')
+          this.run('update')
         },
 
         componentDidUpdate() {

@@ -40,22 +40,19 @@ view Installer {
 
   const title = state => {
     switch(state) {
-      case 1: return `Installing ${name}${version ? ' ' + version : ''}...`; break
-      case 2: return `Installed ${name}!`; break
-      case 3: return `Error: ${name}`; break
-      case 4: return `Select version`; break
+      case 1: return `Installing ${name}${version ? ' ' + version : ''}...`
+      case 2: return `Installed ${name}!`
+      case 3: return `Error: ${name}`
+      case 4: return `Select version`
     }
   }
 
   const body = state => {
     switch(state) {
-      case 1: return null; break
-      case 2: return null; break
-      case 3: return error; break
-      case 4: return <Versions
-        versions={versions}
-        onSelect={selectVersion}
-      />; break
+      case 1: return null
+      case 2: return null
+      case 3: return error
+      case 4: return <Versions versions={versions} onSelect={selectVersion} />
     }
   }
 
