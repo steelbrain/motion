@@ -86,7 +86,6 @@ export default function elementStyles(key, view, name, tag, props) {
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (className == 'loaded')
         if (view.styles[className] || view.styles._static[className])
           result = mergeStyles(result, view.styles[className] && view.styles[className](index), view.styles._static[className])
       })
