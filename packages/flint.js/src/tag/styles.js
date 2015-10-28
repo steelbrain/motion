@@ -63,16 +63,9 @@ export default function elementStyles(key, view, name, tag, props) {
     if (diffName)
       nameStyleStatic = view.styles._static[name]
 
-    let result
     let ran = false
 
-    result = mergeStyles(null,
-      // if set using one big object,
-      viewStyle && viewStyle[tag],
-      viewStyle && viewStyle[name],
-      viewStyleStatic && viewStyleStatic[tag],
-      viewStyleStatic && viewStyleStatic[name],
-
+    let result = mergeStyles(null,
       // tag style
       tagStyle ? tagStyle(index) : null,
       // base style
