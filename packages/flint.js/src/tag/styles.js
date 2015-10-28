@@ -143,15 +143,16 @@ export default function elementStyles(key, view, name, tag, props) {
       }
     }
 
-    // array to string
+    // final maps
     Object.keys(ps).forEach(key => {
-      // @media queries
+      // array to string transforms
+        // @media queries
       if (key[0] == '@')
         Object.keys(ps[key]).forEach(subKey => {
           if (Array.isArray(ps[key][subKey]))
             ps[key][subKey] = arrayToString(ps[key][subKey])
         })
-      // regular
+        // regular
       else if (Array.isArray(ps[key]))
         ps[key] = arrayToString(ps[key])
     })

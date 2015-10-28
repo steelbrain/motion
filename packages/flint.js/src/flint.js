@@ -1,6 +1,6 @@
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'
-import Radium from 'radium'
+import Radium from 'flint-radium'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
