@@ -357,18 +357,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.path = (this.context.path || '') + ',' + name + '.' + propsHash
         },
 
-        run(name) {
+        runEvents(name) {
           runEvents(this.events, name)
         },
 
         componentWillReceiveProps(nextProps) {
           this.props = nextProps
-          this.run('props')
+          this.runEvents('props')
         },
 
         componentDidMount() {
           this.didMount = true
-          this.run('mount')
+          this.runEvents('mount')
 
           if (!process.env.production) {
             // set last working view for this hash
@@ -385,18 +385,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           this.didMount = false
-          this.run('unmount')
+          this.runEvents('unmount')
         },
 
         componentWillMount() {
-          // componentWillUpdate only runs after first render
-          this.run('update')
-          this.run('props')
+          // componentWillUpdate only run after first render
+          this.runEvents('update')
+          this.runEvents('props')
         },
 
         componentWillUpdate() {
           this.isUpdating = true
-          this.run('update')
+          this.runEvents('update')
         },
 
         componentDidUpdate() {

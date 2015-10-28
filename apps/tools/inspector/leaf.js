@@ -77,9 +77,9 @@ view Leaf {
     </label>
     <children>
       <Leaf
-        key={getLeafKey()}
         if={expanded && !isPrimitive(data)}
         repeat={Object.keys(data)}
+        key={getLeafKey(_, data[_])}
         data={data[_]}
         label={_}
         prefix={rootPath}
