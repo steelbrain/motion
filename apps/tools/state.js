@@ -1,14 +1,18 @@
+const setLocal = (k,v) =>
+  localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
+const getLocal = (k,d) =>
+  JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
+
 view State {
-  let inspecting, name
+  let name
   let state = {}
   let props = {}
   let keys = {}
-  let show = false
+  let show = getLocal('show', false)
 
   function setView(path) {
     let views = path.split(',')
     name = views[views.length - 1]
-    inspecting = true
 
     window.Flint.inspect(path, (_name, _props, _state) => {
       name = _name
@@ -44,11 +48,13 @@ view State {
   addEventListener('keyup', e => e.ctrlKey ? keys.ctrl = false : null)
   addEventListener('keydown', e => {
     if (!keys.ctrl) return
-    if (e.keyCode === 83) // S
+    if (e.keyCode === 83) { // S
       show = !show
+      setLocal('show', show)
+    }
   })
 
-  <state if={true || show}>
+  <state if={show}>
     <controls>
       <button onClick={enterInspect}>Inspect View</button>
     </controls>
@@ -58,6 +64,7 @@ view State {
     </search>
 
     <view>
+      <name>{name}</name>
       <section>
         <title>Props</title>
         <Tree data={ props } />
@@ -78,6 +85,11 @@ view State {
     boxShadow: '0 0 20px rgba(0,0,0,0.1)',
     padding: 10,
     pointerEvents: 'auto'
+  }
+
+  $name = {
+    fontWeight: 500,
+    margin: [0, 0, 5]
   }
 
   $controls = {
@@ -121,7 +133,7 @@ view State {
     color: '#ccc',
     textTransform: 'uppercase',
     fontSize: 11,
-    margin: [0, 0, 5]
+    margin: [4, 0]
   }
 
   $section = {

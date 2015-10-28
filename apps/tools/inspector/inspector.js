@@ -24,6 +24,7 @@ view Inspector {
 
   $ = {
     pointerEvents: 'auto',
-    fontFamily: 'Consolas, monospace'
+    fontFamily: 'Consolas, monospace',
+    marginLeft: -10
   }
 }

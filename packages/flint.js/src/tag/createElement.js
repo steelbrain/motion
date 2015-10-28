@@ -21,8 +21,7 @@ const divWhitelist = [
   'head',
   'circle',
   'col',
-  'body',
-  'link'
+  'body'
 ]
 
 let niceAttrs = {

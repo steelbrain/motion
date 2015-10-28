@@ -73,7 +73,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   function sendToInspector(path) {
     if (Internal.inspector.path && Internal.inspector.path == path) {
       const name = pathToName(path)
-      const props = Internal.viewsAtPath[path].props
+      let props = Object.assign({}, Internal.viewsAtPath[path].props)
+      delete props.__key
       const state = Internal.getCache[path]
       Internal.inspector.cb(name, props, state)
     }
