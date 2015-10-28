@@ -28,7 +28,6 @@ view Label {
     right: 0,
     padding: 1,
     background: '#fff',
-    font: 'Consolas, monospace',
     outline: 'none',
     border: 'none',
     opacity: 0,

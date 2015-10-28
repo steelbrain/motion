@@ -9,6 +9,9 @@ const transformKeysMap = {
   z: 'translateZ'
 }
 
+const isNumerical = (obj, key) =>
+  ['x','y','z'].indexOf(key) == 0 && typeof obj[key] == 'number'
+
 const mergeStyles = (obj, ...styles)  => {
   return styles.reduce((acc, style) => {
     if (Array.isArray(style))
@@ -164,7 +167,7 @@ export default function elementStyles(key, view, name, tag, props) {
     // { transform: { x: 10, y: 10, z: 10 } }
     if (typeof ps.transform === 'object') {
       ps.transform = Object.keys(ps.transform).map(key =>
-        `${transformKeysMap[key] || key}(${ps.transform[key]}${typeof ps.transform[key] == 'number' ? 'px' : ''})`
+        `${transformKeysMap[key] || key}(${ps.transform[key]}${isNumerical(ps.transform, key) ? 'px' : ''})`
       ).join(' ')
     }
   }

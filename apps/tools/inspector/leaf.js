@@ -55,7 +55,7 @@ view Leaf {
   )
 
   const label  = (type, val, sets) => (
-    <Label val={val} set={^set && ^set.partial([type, sets])} />
+    <Label val={val} set={() => ^set([type, sets])} />
   )
 
   <leaf class={rootPath}>
@@ -86,6 +86,7 @@ view Leaf {
         if={expanded && !isPrimitive(data)}
         repeat={Object.keys(data)}
         key={getLeafKey(_, data[_])}
+        set={() => ^set(['key', _])}
         data={data[_]}
         label={_}
         prefix={rootPath}

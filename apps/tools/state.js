@@ -7,6 +7,8 @@ view State {
   let name
   let state = {}
   let props = {}
+  let writeBack = null
+
   let keys = {}
   let show = getLocal('show', false)
 
@@ -14,10 +16,11 @@ view State {
     let views = path.split(',')
     name = views[views.length - 1]
 
-    window.Flint.inspect(path, (_name, _props, _state) => {
+    window.Flint.inspect(path, (_name, _props, _state, _wb) => {
       name = _name
       props = _props || {}
       state = _state || {}
+      writeBack = _wb
     })
   }
 

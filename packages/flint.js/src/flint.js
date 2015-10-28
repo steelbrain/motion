@@ -70,20 +70,26 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     return p[p.length - 1].split('.')[0]
   }
 
-  function sendToInspector(path) {
+  // devtools edit
+  function writeBack(key, val) {
+    Internal.getCache[inspector.path][key] = val
+    Internal.viewsAtPath[path].forceUpdate()
+  }
+
+  function setInspector(path) {
     if (Internal.inspector.path && Internal.inspector.path == path) {
       const name = pathToName(path)
       let props = Object.assign({}, Internal.viewsAtPath[path].props)
       delete props.__key
       const state = Internal.getCache[path]
-      Internal.inspector.cb(name, props, state)
+      Internal.inspector.cb(name, props, state, writeBack)
     }
   }
 
   function setCache(path, name, val) {
     Internal.getCache[path][name] = val
     // when devtools inspecting
-    sendToInspector(path)
+    setInspector(path)
   }
 
   let isRendering = 0
@@ -588,7 +594,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     inspect(path, cb) {
       Internal.inspector = { path, cb }
-      sendToInspector(path)
+      setInspector(path)
     }
   };
 

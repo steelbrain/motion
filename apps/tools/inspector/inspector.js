@@ -20,6 +20,9 @@ view Inspector {
     validateQuery={query => query.length >= 2}
     isExpanded={^isExpanded || () => false}
     interactiveLabel={^interactiveLabel}
+    set={(...args) => {
+      debugger
+    }}
   />
 
   $ = {
