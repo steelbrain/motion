@@ -1,12 +1,18 @@
-import md5omatic from 'md5-o-matic'
-
 const PATH_PREFIX = '.root.'
+
 const contains = (string, substring) => string.indexOf(substring) !== -1
+const items = count => count + (count === 1 ? ' item' : ' items')
+const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 
 view Leaf {
   let rootPath, path, data, type, key, original, expanded
   let prefix = ''
   let query = ''
+
+  const isInitiallyExpanded = () =>
+    ^root ||
+    !query && ^isExpanded(path, data) ||
+    !contains(path, query) && (typeof ^getOriginal === 'function')
 
   on('props', () => {
     rootPath = `${^prefix}.${^label}`
@@ -20,11 +26,12 @@ view Leaf {
       expanded = true
     else if (query)
       expanded = !contains(^label, query)
-    else if (^query && !query)
+
+    if (^query && !query)
       expanded = isInitiallyExpanded()
   })
 
-  function showOriginalClick (e) {
+  function showOriginalClick(e) {
     original = ^getOriginal(path)
     e.stopPropagation()
   }
@@ -36,18 +43,6 @@ view Leaf {
     ^onClick && ^onClick(data)
     e.stopPropagation()
   }
-
-  function isInitiallyExpanded() {
-    if (^root) return true
-    if (query === '') return ^isExpanded(path, data)
-    else return !contains(path, query) && (typeof ^getOriginal === 'function')
-  }
-
-  const items = count => count + (count === 1 ? ' item' : ' items')
-  const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
-  const getLeafKey = (key, value) => isPrimitive(value) ?
-    (key + ':' + md5omatic(String(value))) :
-    (key + '[' + getType(value) + ']')
 
   const format =   key => <Highlighter string={key} highlight={query} />
 
@@ -85,7 +80,6 @@ view Leaf {
         id={^id}
         query={query}
         getOriginal={original ? null : ^getOriginal}
-        key={getLeafKey(_, data[_])}
         isExpanded={^isExpanded}
       />
     </children>
