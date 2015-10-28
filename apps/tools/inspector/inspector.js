@@ -21,4 +21,8 @@ view Inspector {
     isExpanded={^isExpanded || () => false}
     interactiveLabel={^interactiveLabel}
   />
+
+  $ = {
+    pointerEvents: 'auto'
+  }
 }
