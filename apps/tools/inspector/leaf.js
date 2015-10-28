@@ -47,7 +47,7 @@ view Leaf {
   const format =   key => <Highlighter string={key} highlight={query} />
 
   <leaf class={rootPath}>
-    <label htmlFor={^id} onClick={toggle}>
+    <label if={!^root} htmlFor={^id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>:
         <Label val={key} />
@@ -112,11 +112,13 @@ view Leaf {
   }
 
   $expand = [row, {
-    color: '#999'
+    opacity: 0.5,
+    fontSize: 13
   }]
 
   $value = [row, {
-    position: 'relative'
+    position: 'relative',
+    margin: [0, 4]
   }]
 
   $children = {

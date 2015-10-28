@@ -116,6 +116,10 @@ export default function elementStyles(key, view, name, tag, props) {
   if (props.style) {
     const ps = props.style
 
+    // zIndex add position:relative
+    if (typeof ps.zIndex != 'undefined' && typeof ps.position == 'undefined')
+      ps.position = 'relative'
+
     // position
     if (ps.position && Array.isArray(ps.position)) {
       ps.top = ps.position[0]
@@ -160,7 +164,7 @@ export default function elementStyles(key, view, name, tag, props) {
     // { transform: { x: 10, y: 10, z: 10 } }
     if (typeof ps.transform === 'object') {
       ps.transform = Object.keys(ps.transform).map(key =>
-        `${transformKeysMap[key] || key}(${ps.transform[key]})`
+        `${transformKeysMap[key] || key}(${ps.transform[key]}${typeof ps.transform[key] == 'number' ? 'px' : ''})`
       ).join(' ')
     }
   }

@@ -42,15 +42,24 @@ view State {
       show = !show
   })
 
-  <state if={show} class="block">
+  <state if={show}>
     <controls>
       <button onClick={enterInspect}>Inspect View</button>
     </controls>
+
+    <search class={{ expanded: Object.keys(state).length }}>
+      <input type="search" />
+    </search>
+
     <view>
-      <title>Home</title>
-      <props>
+      <section>
+        <title>Props</title>
         <Tree data={ state } />
-      </props>
+      </section>
+      <section>
+        <title>State</title>
+        <Tree data={ state } />
+      </section>
     </view>
   </state>
 
@@ -69,7 +78,9 @@ view State {
     borderBottom: '1px solid #ddd',
     padding: 5,
     margin: -10,
-    marginBottom: 10
+    marginBottom: 0,
+    position: 'relative',
+    zIndex: 100
   }
 
   $button = {
@@ -78,6 +89,37 @@ view State {
     background: '#fff',
     border: '1px solid #ddd',
     borderRadius: 4
+  }
+
+  $search = {
+    transition: 'all ease-in 200ms',
+    transform: { y: -100 },
+    padding: [10, 0]
+  }
+
+  $expanded = {
+    transform: { y: 0 }
+  }
+
+  $input = {
+    borderRadius: 100,
+    border: '1px solid #ccc',
+    width: '100%',
+    padding: [2, 12],
+    color: 'rgba(0,0,0,0.5)',
+    fontSize: 14,
+  }
+
+  $title = {
+    fontWeight: 500,
+    color: '#ccc',
+    textTransform: 'uppercase',
+    fontSize: 11,
+    margin: [0, 0, 5]
+  }
+
+  $section = {
+    padding: [0, 0, 10]
   }
 }
 
