@@ -1,3 +1,5 @@
+import md5 from 'md5-o-matic'
+
 const PATH_PREFIX = '.root.'
 
 const contains = (string, substring) => string.indexOf(substring) !== -1
@@ -10,44 +12,48 @@ view Leaf {
   let query = ''
 
   const isInitiallyExpanded = () =>
-    ^root ||
-    !query && ^isExpanded(path, data) ||
-    !contains(path, query) && (typeof ^getOriginal === 'function')
+    view.props.root ||
+    !query && view.props.isExpanded(path, data) ||
+    !contains(path, query) && (typeof view.props.getOriginal === 'function')
 
   on('props', () => {
-    rootPath = `${^prefix}.${^label}`
-    key = ^label.toString()
+    rootPath = `${view.props.prefix}.${view.props.label}`
+    key = view.props.label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
-    data = original || ^data || {}
+    data = original || view.props.data || {}
     type = getType(data)
-    query = ^query || ''
+    query = view.props.query || ''
 
-    if (^root)
+    if (view.props.root)
       expanded = true
     else if (query)
-      expanded = !contains(^label, query)
+      expanded = !contains(view.props.label, query)
 
-    if (^query && !query)
+    if (view.props.query && !query)
       expanded = isInitiallyExpanded()
   })
 
   function showOriginalClick(e) {
-    original = ^getOriginal(path)
+    original = view.props.getOriginal(path)
     e.stopPropagation()
   }
 
   function toggle(e) {
-    if (!^root)
+    if (!view.props.root)
       expanded = !expanded
 
-    ^onClick && ^onClick(data)
+    view.props.onClick && view.props.onClick(data)
     e.stopPropagation()
   }
+
+  const getLeafKey = (key, value) => isPrimitive(value) ?
+    (key + ':' + md5(String(value))) :
+    (key + '[' + getType(value) + ']')
 
   const format =   key => <Highlighter string={key} highlight={query} />
 
   <leaf class={rootPath}>
-    <label if={!^root} htmlFor={^id} onClick={toggle}>
+    <label if={!view.props.root} htmlFor={view.props.id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>:
         <Label val={key} />
@@ -65,22 +71,23 @@ view Leaf {
         </value>
       </title>
       <button
-        if={!(isPrimitive(data) || original || !^getOriginal || !query || contains(path, query))}
+        if={!(isPrimitive(data) || original || !view.props.getOriginal || !query || contains(path, query))}
         onClick={showOriginalClick}
       />
     </label>
     <children>
       <Leaf
+        key={getLeafKey()}
         if={expanded && !isPrimitive(data)}
         repeat={Object.keys(data)}
         data={data[_]}
         label={_}
         prefix={rootPath}
-        onClick={^onClick}
-        id={^id}
+        onClick={view.props.onClick}
+        id={view.props.id}
         query={query}
-        getOriginal={original ? null : ^getOriginal}
-        isExpanded={^isExpanded}
+        getOriginal={original ? null : view.props.getOriginal}
+        isExpanded={view.props.isExpanded}
       />
     </children>
   </leaf>

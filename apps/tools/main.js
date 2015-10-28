@@ -4,7 +4,7 @@ export const uid = () => id++
 export const getType = value => Object.prototype.toString.call(value).slice(8, -1)
 
 view Main {
-  <link rel="stylesheet" property="stylesheet" href="__/static/tools.css" />
+  <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
   <Errors />
   <Installer />
   <State />

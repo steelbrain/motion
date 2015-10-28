@@ -58,7 +58,24 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     currentHotFile: null, // current file that is running
     getCache: {}, // stores { path: { name: val } } for use in view.get()
     getCacheInit: {}, // stores the vars after a view is first run
-    propsHashes: {}
+    propsHashes: {},
+    inspector: {}
+  }
+
+  function pathToName(path) {
+    let p = path.split(',')
+    return p[p.length - 1].split('.')[0]
+  }
+
+  function sendToInspector(path) {
+    if (Internal.inspector.path && Internal.inspector.path == path)
+      Internal.inspector.cb(pathToName(path), Internal.getCache[path])
+  }
+
+  function setCache(path, name, val) {
+    Internal.getCache[path][name] = val
+    // when devtools inspecting
+    sendToInspector(path)
   }
 
   let isRendering = 0
@@ -198,7 +215,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           return !this.isPaused
         },
 
-        shouldUpdate() {
+        shouldReRender() {
           return (
             this.didMount && !this.isUpdating &&
             !this.isPaused && !this.firstRender
@@ -209,10 +226,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (!process.env.production) {
             const path = this.getPath()
             Internal.getCache[path] = Internal.getCache[path] || {}
-            Internal.getCache[path][name] = val
+            setCache(path, name, val)
           }
 
-          if (this.shouldUpdate())
+          if (this.shouldReRender())
             this.forceUpdate()
         },
 
@@ -260,7 +277,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           }
 
           if (options.changed && typeof cacheVal == 'undefined')
-            Internal.getCache[path][name] = val
+            setCache(path, name, val)
 
           // return cached
           if (isComparable)
@@ -557,6 +574,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           assignToGlobal(name, _exports[name])
         })
       }
+    },
+
+    inspect(path, cb) {
+      Internal.inspector = { path, cb }
+      sendToInspector(path)
     }
   };
 

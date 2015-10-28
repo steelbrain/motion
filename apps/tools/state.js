@@ -7,8 +7,11 @@ view State {
   function setView(path) {
     let views = path.split(',')
     name = views[views.length - 1]
-    state = window._Flint.getCache[path]
     inspecting = true
+    window.Flint.inspect(path, (_name, _state) => {
+      name = _name
+      state = _state
+    })
   }
 
   function findFlintView(node) {
@@ -42,7 +45,7 @@ view State {
       show = !show
   })
 
-  <state if={show}>
+  <state if={true || show}>
     <controls>
       <button onClick={enterInspect}>Inspect View</button>
     </controls>
