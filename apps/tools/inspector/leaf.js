@@ -50,7 +50,7 @@ view Leaf {
     (key + ':' + md5(String(value))) :
     (key + '[' + getType(value) + ']')
 
-  const format =   key => (
+  const format = key => (
     <Highlighter string={key} highlight={query} />
   )
 

@@ -21,7 +21,8 @@ const router = {
   },
 
   go(path, dontPush) {
-    if (!routesList.length) return
+    if (!render) return
+
     location = path
     if (!dontPush) history.pushState(null, path)
     router.next()
