@@ -23,6 +23,7 @@ view Inspector {
   />
 
   $ = {
-    pointerEvents: 'auto'
+    pointerEvents: 'auto',
+    fontFamily: 'Consolas, monospace'
   }
 }

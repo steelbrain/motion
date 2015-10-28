@@ -23,14 +23,15 @@ view Label {
   $input = {
     position: 'absolute',
     top: 0,
-    left: -3,
+    left: -1,
     right: 0,
-    padding: [0, 2],
+    padding: 1,
+    background: '#fff',
     font: 'Consolas, monospace',
     outline: 'none',
-    border: '1px solid #ddd',
+    border: 'none',
     opacity: 0,
-    boxShadow: '1px 1px 4px rgba(0,0,0,0.5)'
+    boxShadow: '1px 1px 4px rgba(0,0,0,0.25)'
   }
 
   $focus = {

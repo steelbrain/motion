@@ -49,16 +49,16 @@ view Leaf {
   <leaf class={rootPath}>
     <label htmlFor={^id} onClick={toggle}>
       <key>
-        {format(key)}:
+        <name>{format(key)}</name>:
         <Label val={key} />
       </key>
       <title>
-        <value if={type == 'Array'}>
-          [] ${items(data.length)}
-        </value>
-        <value if={type == 'Object'}>
-          {} ${items(Object.keys(data).length)}
-        </value>
+        <expand if={type == 'Array'}>
+          <type>[]</type> {items(data.length)}
+        </expand>
+        <expand if={type == 'Object'}>
+          <type>{'{}'}</type> {items(Object.keys(data).length)}
+        </expand>
         <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
           {format(String(data))}
           <Label val={data} />
@@ -90,7 +90,11 @@ view Leaf {
   }
 
   $label = [row, {
-    position: 'relative'
+    position: 'relative',
+
+    ':hover': {
+      background: '#ffffb6'
+    }
   }]
 
   $helper = $null = { color: '#b0b0b0' }
@@ -99,7 +103,16 @@ view Leaf {
   $string = { color: '#798953' }
 
   $key = [row, {
-    color: '#555'
+    color: '#555',
+    margin: [0, 2, 0, 0]
+  }]
+
+  $name = {
+    margin: [0, 2, 0, 0]
+  }
+
+  $expand = [row, {
+    color: '#999'
   }]
 
   $value = [row, {
@@ -108,5 +121,10 @@ view Leaf {
 
   $children = {
     paddingLeft: 10
+  }
+
+  $type = {
+    margin: [0, 5],
+    opacity: 0.5
   }
 }
