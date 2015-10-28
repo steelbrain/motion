@@ -533,7 +533,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // not new
       // if defined twice during first run
       if (firstRender) {
-        console.error('Defined a view twice!', name, hash)
+        throw new Error(`Defined a view twice: ${name}`)
         Flint.views[name] = ErrorDefinedTwice(name)
         return
       }
