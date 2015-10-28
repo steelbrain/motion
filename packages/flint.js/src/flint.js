@@ -542,7 +542,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     // export globals
     setExports(_exports) {
-      console.log(_exports)
       if (!_exports) return
       Object.freeze(_exports)
       const names = Object.keys(_exports)

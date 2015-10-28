@@ -278,8 +278,8 @@ view Main {
   <Installer />
   <State />
 
-  <Inspector if={__isDevingDevTools} data={data} isExpanded={true} />
-  <Test if={__isDevingDevTools} />
+  <Inspector if={window.__isDevingDevTools} data={data} isExpanded={true} />
+  <Test if={window.__isDevingDevTools} />
 
   $ = {
     position: 'fixed',

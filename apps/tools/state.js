@@ -82,22 +82,4 @@ view State {
 }
 
 view Tree {
-  <JSONTree
-    getListStyle={listStyle}
-    getLabelStyle={labelStyle}
-    getValueStyle={valueStyle}
-    yield
-  />
-
-  const listStyle = (type, expanded) => ({
-    marginLeft: 0
-  })
-
-  const labelStyle = (type, expanded) => ({
-    margin: 0
-  })
-
-  const valueStyle = (type, expanded) => ({
-    margin: 0
-  })
 }
