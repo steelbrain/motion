@@ -18,7 +18,7 @@ function hasObjWithProp(node, base, prop) {
 }
 
 function isInView(scope) {
-  return scope.hasBinding("__")
+  return scope.hasBinding("view")
 }
 
 const mutativeFuncs = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
@@ -65,7 +65,6 @@ const idFn = x => x
 export default function createPlugin(options) {
   if (options.Transformer) {
     // running directly (no user options)
-
     return FlintPlugin(options)
   }
 
@@ -90,8 +89,8 @@ export default function createPlugin(options) {
 
     function addSetter(name, node, scope) {
       if (node.hasSetter) return
-      if (scope.hasBinding('__')) {
-        const expr = t.callExpression(t.identifier('__.set'), [t.literal(name), node])
+      if (scope.hasBinding('view')) {
+        const expr = t.callExpression(t.identifier('view.set'), [t.literal(name), node])
         node.hasSetter = true
         return expr
       }
@@ -100,8 +99,8 @@ export default function createPlugin(options) {
     }
 
     function viewGetter(name, val, scope, file) {
-      let getter = (name, val, ...args) => t.callExpression(t.identifier('__.get'), [t.literal(name), val, ...args])
-      let isInView = scope.hasOwnBinding('__')
+      let getter = (name, val, ...args) => t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
+      let isInView = scope.hasOwnBinding('view')
       let comesFromFile = file.scope.hasOwnBinding(val.name)
 
       if (comesFromFile)
@@ -112,7 +111,7 @@ export default function createPlugin(options) {
     }
 
     function addGetter(node, scope, file) {
-      if (scope.hasOwnBinding('__')) {
+      if (scope.hasOwnBinding('view')) {
         node.right = viewGetter(node.left.name, node.right, scope, file)
         node.hasGetter = true
       }
@@ -131,17 +130,19 @@ export default function createPlugin(options) {
 
     let keyBase = {}
 
-    const filePrefix = path => `!function() { return Flint.file('${path}', function(__, exports) { "use strict"`
-    const fileSuffix = ' }) }()'
+    const filePrefix = path => `!function() { return Flint.file('${path}', function(exports) { "use strict"`
+    const fileSuffix = ' }) }();'
 
     return new Plugin("flint-transform", {
       visitor: {
-        Program(node, parent, scope, file) {
-          const path = relativePath(file.opts.filename)
+        Program: {
+          exit(node, parent, scope, file) {
+            const path = relativePath(file.opts.filename)
 
-           // add prefix / suffix
-           node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
-           node.body.push(t.identifier(fileSuffix))
+             // add prefix / suffix
+             node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
+             node.body.push(t.identifier(fileSuffix))
+          }
         },
 
         ViewStatement(node) {
@@ -152,7 +153,7 @@ export default function createPlugin(options) {
           const fullName = name + (subName ? `.${subName}` : '')
 
           return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
-            t.functionExpression(null, [t.identifier('__'), t.identifier('on'), t.identifier('$')], node.block)]
+            t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
           )
         },
 
@@ -230,10 +231,10 @@ export default function createPlugin(options) {
 
               // wrap outermost JSX elements (in views) in this.render()
               let wrap = idFn
-              const isDirectChildOfView = scope.hasOwnBinding('__')
+              const isDirectChildOfView = scope.hasOwnBinding('view')
 
               if (isDirectChildOfView)
-                wrap = node => t.callExpression(t.identifier('__.render'), [
+                wrap = node => t.callExpression(t.identifier('view.render'), [
                   t.functionExpression(null, [], t.blockStatement([
                     t.returnStatement(node)
                   ]))
@@ -282,7 +283,7 @@ export default function createPlugin(options) {
         VariableDeclaration: {
           exit(node, parent, scope, file) {
             // add getter
-            if (scope.hasOwnBinding('__') && node.kind != 'const' && !node.flintTracked) {
+            if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
                 if (!dec.init) {
@@ -426,7 +427,7 @@ export default function createPlugin(options) {
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return
 
-            const isRender = hasObjWithProp(node, '__', 'render')
+            const isRender = hasObjWithProp(node, 'view', 'render')
 
             let id = x => x
             let sett = id
@@ -459,31 +460,7 @@ export default function createPlugin(options) {
             if (node.operator == '++' || node.operator == '--')
               return addSetter(node.argument.name, node, scope)
           }
-        },
-
-        // FunctionDeclaration: {
-        //   exit(node, parent, scope) {
-        //     if (!scope.hasBinding('__') || node.flintBound) return
-        //
-        //     this.ensureBlock()
-        //
-        //     let expr = t.variableDeclaration('let', [
-        //       t.variableDeclarator(node.id,
-        //         t.callExpression(
-        //           t.memberExpression(node, t.identifier('bind')),
-        //           [t.identifier('this')]
-        //         )
-        //       )
-        //     ])
-        //
-        //     node.flintBound = true
-        //     expr.flintTracked = 1
-        //
-        //
-        //
-        //     return expr
-        //   }
-        // }
+        }
       }
     });
   }

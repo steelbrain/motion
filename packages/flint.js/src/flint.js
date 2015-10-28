@@ -239,17 +239,17 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             typeof val == 'undefined'
           )
 
-          const lastValue = Internal.getCache[path][name]
-          const lastInitialValue = Internal.getCacheInit[path][name]
+          const cacheVal = Internal.getCache[path][name]
+          const cacheInitVal = Internal.getCacheInit[path][name]
 
           let originalValue, restore
 
           // if edited
           if (options.changed) {
             // initial value not undefined
-            if (typeof lastInitialValue != 'undefined') {
+            if (typeof cacheInitVal != 'undefined') {
               // only hot update changed variables
-              if (isComparable && lastInitialValue === val) {
+              if (isComparable && cacheInitVal === val) {
                 restore = true
                 originalValue = Internal.getCache[path][name]
               }
@@ -258,15 +258,16 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             Internal.getCacheInit[path][name] = val
           }
 
-          if (name == 'hard') {
-            console.log(isComparable, name, val, 'cache', Internal.getCache[path][name], 'init', Internal.getCacheInit[path][name], path)
-            console.log(options.unchanged, lastInitialValue)
-          }
+          if (options.changed && typeof cacheVal == 'undefined')
+            Internal.getCache[path][name] = val
+
+          console.log('isComparable', isComparable, name, '=', val, 'cache', cacheVal, 'init', cacheInitVal, path)
+          console.log(options.unchanged, cacheInitVal)
 
           // return cached
           if (isComparable)
-            if (options.unchanged && lastValue !== lastInitialValue)
-              return lastValue
+            if (options.unchanged && cacheVal !== cacheInitVal)
+              return cacheVal
 
           // if restore, restore
           return restore ? originalValue : val

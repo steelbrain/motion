@@ -1,5 +1,5 @@
 view Modal {
-  __.pause()
+  view.pause()
 
   let children, title, open
 
@@ -10,11 +10,11 @@ view Modal {
 
     // cache last children when empty
     if (title && !^title)
-      return __.update()
+      return view.update()
 
     title = ^title
     children = ^children
-    __.update()
+    view.update()
   }
 
   <modal>

@@ -204,7 +204,7 @@ const $p = {
     post: () => compiler('post')
   },
   babel: () => babel({
-    jsxPragma: '__.el',
+    jsxPragma: 'view.el',
     stage: 2,
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,

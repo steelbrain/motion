@@ -33,7 +33,7 @@ var Parser = {
     let viewNames = []
 
     source = source
-      .replace(/\^/g, '__.props.')
+      .replace(/\^/g, 'view.props.')
       .split("\n")
       .map((line, index) => {
         let result = line
