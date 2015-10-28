@@ -82,4 +82,5 @@ view State {
 }
 
 view Tree {
+  <Inspector data={^data} />
 }

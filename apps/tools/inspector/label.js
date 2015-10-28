@@ -13,24 +13,24 @@ view Label {
   <input
     defaultValue={String(^val)}
     class={{ focus }}
-    key={Math.random()}
     size={Math.max(1, ^val.length)}
     spellCheck={false}
     onClick={e => e.stopPropagation()}
-    // onFocus={onFocus}
-    // onBlur={onBlur}
+    onFocus={onFocus}
+    onBlur={onBlur}
   />
 
   $input = {
     position: 'absolute',
-    top: -1,
+    top: 0,
     left: -3,
     right: 0,
-    padding: [0, 3],
+    padding: [0, 2],
     font: 'Consolas, monospace',
     outline: 'none',
     border: '1px solid #ddd',
-    opacity: 1
+    opacity: 0,
+    boxShadow: '1px 1px 4px rgba(0,0,0,0.5)'
   }
 
   $focus = {
