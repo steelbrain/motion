@@ -7,10 +7,6 @@
   "main": "",
   "scripts": {},
   "dependencies": {
-    "react": "^0.14.0",
-    "react-json-tree": "^0.2.0"
-  },
-  "installed": [
-    "react-json-tree"
-  ]
+    "md5-o-matic": "^0.1.1"
+  }
 }

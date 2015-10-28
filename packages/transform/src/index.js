@@ -130,20 +130,20 @@ export default function createPlugin(options) {
 
     let keyBase = {}
 
-    const filePrefix = path => `!function() { return Flint.file('${path}', function(exports) { "use strict"`
-    const fileSuffix = ' }) }();'
+
 
     return new Plugin("flint-transform", {
       visitor: {
-        Program: {
-          exit(node, parent, scope, file) {
-            const path = relativePath(file.opts.filename)
-
-             // add prefix / suffix
-             node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
-             node.body.push(t.identifier(fileSuffix))
-          }
-        },
+        // Program: {
+        //   exit(node, parent, scope, file) {
+        //     const path = relativePath(file.opts.filename)
+        //
+        //      // add prefix / suffix
+        //      console.log(node)
+        //      node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
+        //      node.body.push(t.identifier(fileSuffix))
+        //   }
+        // },
 
         ViewStatement(node) {
           keyBase = {}

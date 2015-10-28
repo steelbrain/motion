@@ -5,7 +5,7 @@ view Highlighter {
     {^string}
   </span>
   <span>
-    <span repeat={^highlight}>
+    <span repeat={^string.split()}>
       <highlight if={_index > 0}>{^highlight}</highlight>
       {_}
     </span>

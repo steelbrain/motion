@@ -10,6 +10,9 @@ let OPTS
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
+const filePrefix = path => `!function(){Flint.file('${path}',function(exports){`
+const fileSuffix = ' }) }();'
+
 let debouncers = {}
 function debounce(key, cb, time) {
   if (debouncers[key])
@@ -25,6 +28,7 @@ var Parser = {
 
   post(file, source) {
     debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
+    source = filePrefix(file) + source + fileSuffix
     return { source }
   },
 
