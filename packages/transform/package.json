@@ -2,7 +2,5 @@
   "name": "flint-transform",
   "version": "1.3.22",
   "main": "entry.js",
-  "dependencies": {
-    "stilr": "^1.2.1"
-  }
+  "dependencies": {}
 }

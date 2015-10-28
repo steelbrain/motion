@@ -30,7 +30,7 @@ export default function run(browser, opts) {
       const src = el.src;
       removeEl(el);
       // setTimeut avoids bug on startup
-      const tag = addScript({ src }, setTimeout(Flint.render));
+      const tag = addScript({ src }, setTimeout(() => Flint.render()));
       tag.setAttribute('id', '__flintPackages')
     },
 

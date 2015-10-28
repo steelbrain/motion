@@ -139,10 +139,10 @@ async function install(force) {
         }
 
         await bundle()
+        onPackagesInstalled()
       }
 
       resolve(installed)
-      onPackagesInstalled()
       FIRST_RUN = false
     } catch(e) {
       handleError(e)
