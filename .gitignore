@@ -6,5 +6,4 @@ npm-debug.log
 dist
 /packages/*/lib
 .flint/build
-apps/*/.flint/build
-apps/*/.flint/deps
+.flint
