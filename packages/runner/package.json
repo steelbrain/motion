@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.3.21",
+  "version": "1.3.22",
   "description": "Run flint apps",
   "main": "entry.js",
   "scripts": {},
