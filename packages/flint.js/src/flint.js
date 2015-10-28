@@ -33,7 +33,7 @@ root._bluebird = Bluebird // for imported modules to use
 root.Promise = Promise // for modules to use
 root.on = on
 root.module = {}
-root.fetchJSON = (...args) => fetch(...args).then(res => res.json())
+root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
 const uuid = () => Math.floor(Math.random() * 1000000)
 

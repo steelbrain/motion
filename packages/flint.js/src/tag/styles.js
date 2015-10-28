@@ -125,6 +125,24 @@ export default function elementStyles(key, view, name, tag, props) {
       ps.position = 'absolute'
     }
 
+    // background { r, g, b, a }
+    if (ps.background && typeof ps.background == 'object') {
+      const bg = ps.background
+
+      if (Array.isArray(bg)) {
+        if (bg.length == 4)
+          ps.background = `rgba(${bg[0]}, ${bg[1]}, ${bg[2]}, ${bg[3]})`
+        else
+          ps.background = `rgb(${bg[0]}, ${bg[1]}, ${bg[2]})`
+      }
+      else {
+        if (bg.a)
+          ps.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
+        else
+          ps.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+      }
+    }
+
     // array to string
     Object.keys(ps).forEach(key => {
       // @media queries
@@ -143,16 +161,6 @@ export default function elementStyles(key, view, name, tag, props) {
       ps.transform = Object.keys(ps.transform).map(key =>
         `${transformKeysMap[key] || key}(${ps.transform[key]})`
       ).join(' ')
-    }
-
-    // background { r, g, b, a }
-    if (ps.background && typeof ps.background == 'object') {
-      const bg = ps.background
-
-      if (bg.a)
-        ps.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
-      else
-        ps.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
     }
   }
 
