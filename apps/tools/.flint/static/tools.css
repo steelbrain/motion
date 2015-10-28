@@ -27,24 +27,44 @@
   -webkit-flex-wrap: nowrap;
 }
 
-#_flintdevtools a, button, input, textarea {
+#_flintdevtools a,
+#_flintdevtools button,
+#_flintdevtools input,
+#_flintdevtools textarea {
   align-self: flex-start;
 }
 
-#_flintdevtools a, span, em, b, strong, i {
+#_flintdevtools a,
+#_flintdevtools span,
+#_flintdevtools em,
+#_flintdevtools b,
+#_flintdevtools strong,
+#_flintdevtools i {
   white-space: pre-wrap;
   display: inline;
 }
 
-#_flintdevtools script, meta, link {
+#_flintdevtools script,
+#_flintdevtools meta,
+#_flintdevtools link {
   display: none;
 }
 
-#_flintdevtools a, input, textarea, select {
+#_flintdevtools a,
+#_flintdevtools input,
+#_flintdevtools textarea,
+#_flintdevtools select {
   outline: 0;
 }
 
-#_flintdevtools p, h1, h2, h3, h4, h5, h6, br {
+#_flintdevtools p,
+#_flintdevtools h1,
+#_flintdevtools h2,
+#_flintdevtools h3,
+#_flintdevtools h4,
+#_flintdevtools h5,
+#_flintdevtools h6,
+#_flintdevtools br {
   display: block;
 }
 

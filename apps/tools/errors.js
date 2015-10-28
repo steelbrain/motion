@@ -149,11 +149,11 @@ view ErrorMessage {
 
   <Debounce force={!^error}>
     <bar>
-      <Close onClick={^close} />
+      <Close onClick={^close} size={40} />
       <inner if={^npmError}>
         <where><b>{^npmError.name}</b></where> {^npmError.msg}
       </inner>
-      <inner if={^error && !^npmError}>
+      <inner if={^error}>
         <where>
           In <b>{fileName(^error.file)}</b>
           <line if={line}>
@@ -176,6 +176,7 @@ view ErrorMessage {
   const red = '#cd423e'
 
   $bar = {
+    dispay: 'block',
     background: red,
     position: 'fixed',
     left: 0,
