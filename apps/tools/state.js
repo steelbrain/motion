@@ -1,5 +1,3 @@
-import JSONTree from 'react-json-tree'
-
 view State {
   let inspecting, name
   let state = {}
@@ -9,13 +7,13 @@ view State {
   function setView(path) {
     let views = path.split(',')
     name = views[views.length - 1]
-    state = window.Flint.getCache[path]
+    state = window._Flint.getCache[path]
     inspecting = true
   }
 
   function findFlintView(node) {
     if (!node || !node.getAttribute) return null
-    const flintid = node.getAttribute('data-flintid')
+    const flintid = node.__flintID
     if (flintid) return flintid
     else return findFlintView(node.parentNode)
   }

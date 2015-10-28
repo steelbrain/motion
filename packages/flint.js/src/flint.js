@@ -31,6 +31,7 @@ Promise.longStackTraces()
 root._history = history // for imported modules to use
 root._bluebird = Bluebird // for imported modules to use
 root.Promise = Promise // for modules to use
+root.ReactDOM = ReactDOM
 root.on = on
 root.module = {}
 root.fetch.json = (...args) => fetch(...args).then(res => res.json())
@@ -352,8 +353,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.didMount = true
           this.run('mount')
 
-          // set last working view for this hash
           if (!process.env.production) {
+            // set last working view for this hash
             if (!lastWorkingView[name] || options.changed || options.new) {
               lastWorkingView[name] = component
             }
@@ -383,6 +384,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         componentDidUpdate() {
           this.isUpdating = false
+
+          if (!process.env.production) {
+            // set flintID for state inspect
+            const node = ReactDOM.findDOMNode(this)
+            node.__flintID = this.getPath()
+          }
         },
 
         // FLINT HELPERS
