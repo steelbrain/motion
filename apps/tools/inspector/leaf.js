@@ -4,22 +4,23 @@ const PATH_PREFIX = '.root.'
 const contains = (string, substring) => string.indexOf(substring) !== -1
 
 view Leaf {
-  let rootPath, path, data, type, root, key, original, expanded
+  let rootPath, path, data, type, key, original, expanded
   let prefix = ''
   let query = ''
 
   on('props', () => {
     rootPath = `${^prefix}.${^label}`
-    root = ^root
     key = ^label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
     data = original || ^data || {}
     type = getType(data)
     query = ^query || ''
 
-    if (query)
+    if (^root)
+      expanded = true
+    else if (query)
       expanded = !contains(^label, query)
-    if (^query && !query)
+    else if (^query && !query)
       expanded = isInitiallyExpanded()
   })
 
@@ -28,8 +29,10 @@ view Leaf {
     e.stopPropagation()
   }
 
-  function labelClick(e) {
-    toggle()
+  function toggle(e) {
+    if (!^root)
+      expanded = !expanded
+
     ^onClick && ^onClick(data)
     e.stopPropagation()
   }
@@ -41,16 +44,15 @@ view Leaf {
   }
 
   const items = count => count + (count === 1 ? ' item' : ' items')
-  const toggle = () => expanded = !expanded
   const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
   const getLeafKey = (key, value) => isPrimitive(value) ?
     (key + ':' + md5omatic(String(value))) :
     (key + '[' + getType(value) + ']')
 
-  const format = key => <Highlighter string={key} highlight={query} />
+  const format =   key => <Highlighter string={key} highlight={query} />
 
   <leaf class={rootPath}>
-    <label htmlFor={^id} onClick={labelClick}>
+    <label htmlFor={^id} onClick={toggle}>
       <key>
         {format(key)}:
         <Label val={key} />
