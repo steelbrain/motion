@@ -6,7 +6,6 @@ var colors = [
     "aliceblue",
     "aqua",
     "aquamarine",
-    "azure",
     "beige",
     "bisque",
     "black",
