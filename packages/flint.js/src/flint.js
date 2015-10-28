@@ -1,6 +1,6 @@
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'
-import resolveStyles from 'flint-radium/lib/resolve-styles'
+import Radium from 'radium'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import raf from 'raf'
@@ -435,12 +435,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             ...tags
           )
 
-          const styled = els && resolveStyles(this, els)
-          return styled
+          return els
         }
       })
 
-      return component
+      return Radium(component)
     },
 
     getView(name, parentName) {
