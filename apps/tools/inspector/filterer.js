@@ -1,10 +1,10 @@
-var assign = require('object-assign');
+var assign = Object.assign
 var keys = Object.keys;
 
 var type = require('./type');
 var isEmpty = require('./is-empty');
 
-module.exports = function(data, options) {
+function(data, options) {
     options || (options = {});
     var cache = {};
 

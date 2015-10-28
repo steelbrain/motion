@@ -1,3 +1,7 @@
+let id = Math.ceil(Math.random() * 10)
+export const uid = () => id++
+export const type = value => Object.prototype.toString.call(value).slice(8, -1)
+
 view Main {
   <link rel="stylesheet" property="stylesheet" href="__/static/tools.css" />
   <Errors />

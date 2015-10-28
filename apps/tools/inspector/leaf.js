@@ -66,41 +66,20 @@ view Leaf {
     }
   }
 
-  function button() {
-    var p = this.props;
-
-    if () {
-        return null;
-    }
-
-    return D.span({
-        className: 'json-inspector__show-original',
-        onClick: this._onShowOriginalClick
-    });
-  }
-
-  function label() {
-    if (typeof ^interactiveLabel === 'function') {
-        return ^interactiveLabel({
-            // The distinction between `value` and `originalValue` is
-            // provided to have backwards compatibility.
-            value: String(originalValue),
-            originalValue: originalValue,
-            isKey: isKey,
-            keypath: this.keypath()
-        });
-    }
-
-    return null;
-  }
-
   <leaf>
     <input />
     <label>
       <path>{path()}</path>
-      <key>{format(key)}: {label(key, true)}</key>
+      <key>{format(key)}:
+        <label
+          value={String(originalValue)}
+          originalValue={originalValue}
+          isKey={isKey}
+          keypath={this.keypath()}
+        />
+      </key>
       {title()}
-      {button()}
+      <button onClick={showOriginalClick} />
       <key>{format(key)}</key>
     </label>
     <Leaf
@@ -116,6 +95,6 @@ view Leaf {
       key={getLeafKey(_, data()[key])}
       isExpanded={^isExpanded}
       interactiveLabel={^interactiveLabel}
-    / >
+    />
   </leaf>
 }
