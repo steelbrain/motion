@@ -261,9 +261,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (options.changed && typeof cacheVal == 'undefined')
             Internal.getCache[path][name] = val
 
-          console.log('isComparable', isComparable, name, '=', val, 'cache', cacheVal, 'init', cacheInitVal, path)
-          console.log(options.unchanged, cacheInitVal)
-
           // return cached
           if (isComparable)
             if (options.unchanged && cacheVal !== cacheInitVal)
