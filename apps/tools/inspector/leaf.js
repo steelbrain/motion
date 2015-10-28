@@ -98,6 +98,10 @@ view Leaf {
     </children>
   </leaf>
 
+  $leaf = {
+    padding: [1, 0]
+  }
+
   const row = {
     flexFlow: 'row'
   }

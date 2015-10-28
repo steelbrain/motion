@@ -18,7 +18,7 @@ view Modal {
   }
 
   <modal>
-    <close onClick={^onClose}>X</close>
+    <Close size={25} />
     <title if={title}>{title}</title>
     <message if={children}>{children}</message>
   </modal>
@@ -50,28 +50,5 @@ view Modal {
 
   $message = {
     fontFamily: "-apple-system, 'Helvetica Nueue', Helvetica, Arial, sans-serif",
-  }
-
-  $close = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    background: '#eee',
-    color: 'red',
-    fontSize: 11,
-    fontWeight: 100,
-    width: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    borderRadius: 7,
-    border: '3px solid #fff',
-    opacity: 0.2,
-    transition: 'all ease-in 200ms',
-
-    ':hover': {
-      opacity: 1
-    }
   }
 }

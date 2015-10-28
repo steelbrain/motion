@@ -149,7 +149,7 @@ view ErrorMessage {
 
   <Debounce force={!^error}>
     <bar>
-      <close onClick={^close}><center>x</center></close>
+      <Close onClick={^close} />
       <inner if={^npmError}>
         <where><b>{^npmError.name}</b></where> {^npmError.msg}
       </inner>
@@ -247,24 +247,6 @@ view ErrorMessage {
     whiteSpace: 'pre',
     pointerEvents: 'all',
     fontWeight: 'bold'
-  }
-
-  $close = {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: 50,
-    height: 50,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    lineHeight: 1,
-    opacity: 0.5,
-    cursor: 'pointer',
-
-    ':hover': {
-      opacity: 1
-    }
   }
 }
 

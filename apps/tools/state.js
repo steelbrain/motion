@@ -16,7 +16,7 @@ view State {
 
     window.Flint.inspect(path, (_name, _props, _state) => {
       name = _name
-      props = _props
+      props = _props || {}
       state = _state || {}
     })
   }
@@ -30,6 +30,10 @@ view State {
 
   function enterInspect() {
     const listener = e => {
+      // TODO: not working (react synth events)
+      e.preventDefault()
+      e.stopPropagation()
+
       let found = findFlintView(e.target)
 
       if (found)
@@ -43,20 +47,25 @@ view State {
     })
   }
 
+  function toggle() {
+    show = !show
+    setLocal('show', show)
+  }
+
   // toggle
   addEventListener('keydown', e => e.ctrlKey ? keys.ctrl = true : null)
   addEventListener('keyup', e => e.ctrlKey ? keys.ctrl = false : null)
   addEventListener('keydown', e => {
     if (!keys.ctrl) return
     if (e.keyCode === 83) { // S
-      show = !show
-      setLocal('show', show)
+      toggle()
     }
   })
 
   <state if={show}>
     <controls>
       <button onClick={enterInspect}>Inspect View</button>
+      <Close onClick={toggle} size={35} />
     </controls>
 
     <search class={{ expanded: Object.keys(state).length }}>
@@ -106,7 +115,8 @@ view State {
     color: '#f52757',
     background: '#fff',
     border: '1px solid #ddd',
-    borderRadius: 4
+    borderRadius: 4,
+    outline: 'none'
   }
 
   $search = {
