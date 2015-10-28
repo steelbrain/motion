@@ -18,6 +18,7 @@ view Label {
     onClick={e => e.stopPropagation()}
     onFocus={onFocus}
     onBlur={onBlur}
+    onEnter={^set}
   />
 
   $input = {

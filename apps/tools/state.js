@@ -1,6 +1,7 @@
 view State {
   let inspecting, name
   let state = {}
+  let props = {}
   let keys = {}
   let show = false
 
@@ -8,9 +9,11 @@ view State {
     let views = path.split(',')
     name = views[views.length - 1]
     inspecting = true
-    window.Flint.inspect(path, (_name, _state) => {
+
+    window.Flint.inspect(path, (_name, _props, _state) => {
       name = _name
-      state = _state
+      props = _props
+      state = _state || {}
     })
   }
 
@@ -57,7 +60,7 @@ view State {
     <view>
       <section>
         <title>Props</title>
-        <Tree data={ state } />
+        <Tree data={ props } />
       </section>
       <section>
         <title>State</title>

@@ -50,13 +50,19 @@ view Leaf {
     (key + ':' + md5(String(value))) :
     (key + '[' + getType(value) + ']')
 
-  const format =   key => <Highlighter string={key} highlight={query} />
+  const format =   key => (
+    <Highlighter string={key} highlight={query} />
+  )
+
+  const label  = (type, val, sets) => (
+    <Label val={val} set={^set && ^set.partial([type, sets])} />
+  )
 
   <leaf class={rootPath}>
     <label if={!view.props.root} htmlFor={view.props.id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>:
-        <Label val={key} />
+        {label('key', key, key)}
       </key>
       <title>
         <expand if={type == 'Array'}>
@@ -67,7 +73,7 @@ view Leaf {
         </expand>
         <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
           {format(String(data))}
-          <Label val={data} />
+          {label('val', data, key)}
         </value>
       </title>
       <button

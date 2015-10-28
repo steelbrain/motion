@@ -59,7 +59,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     getCache: {}, // stores { path: { name: val } } for use in view.get()
     getCacheInit: {}, // stores the vars after a view is first run
     propsHashes: {},
-    inspector: {}
+
+    // devtools
+    inspector: {},
+    viewsAtPath: {}
   }
 
   function pathToName(path) {
@@ -68,8 +71,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   function sendToInspector(path) {
-    if (Internal.inspector.path && Internal.inspector.path == path)
-      Internal.inspector.cb(pathToName(path), Internal.getCache[path])
+    if (Internal.inspector.path && Internal.inspector.path == path) {
+      const name = pathToName(path)
+      const props = Internal.viewsAtPath[path].props
+      const state = Internal.getCache[path]
+      Internal.inspector.cb(name, props, state)
+    }
   }
 
   function setCache(path, name, val) {
@@ -371,6 +378,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.runEvents('mount')
 
           if (!process.env.production) {
+            Internal.viewsAtPath[this.getPath()] = this
+
             // set last working view for this hash
             if (!lastWorkingView[name] || options.changed || options.new) {
               lastWorkingView[name] = component
