@@ -553,11 +553,15 @@ function runServer() {
       next();
     })
 
+    const staticOpts =  {
+      redirect: false
+    }
+
     // USER files
     // user js files at '/_/filename.js'
     server.use('/_', express.static('.flint/out'));
     // user non-js files
-    server.use('/', express.static('.'));
+    server.use('/', express.static('.', staticOpts));
     // user static files...
     server.use('/_/static', express.static('.flint/static'));
 
