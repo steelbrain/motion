@@ -541,6 +541,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         render() {
           this.isRendering = true
 
+          if (process.env.production)
+            return this.getRender()
+
           try {
             const els = this.getRender()
             this.attemptRender = els
@@ -550,7 +553,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             console.error(e.stack)
             reportError(e)
             return (
-              <div style={{ background: 'rgba(255,0,0,0.04)' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
                 {Internal.lastWorkingRenders[this.pathWithoutProps()] || null}
               </div>
             )
