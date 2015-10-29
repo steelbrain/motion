@@ -559,7 +559,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // check errors and restore last good view
       root.onerror = (...args) => {
-        console.log('error, restore last view', name)
         Flint.views[name] = makeView(hash, Internal.lastWorkingView[name])
         flintOnError(...args)
         setTimeout(Flint.render)
