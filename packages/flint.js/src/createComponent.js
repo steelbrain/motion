@@ -20,7 +20,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
   function createProxyComponent(View) {
     return React.createClass({
 
-      onMount() {
+      onMount(path, component) {
         Internal.mountedViews[name] = this
         Internal.viewsAtPath[path] = this
 
@@ -28,7 +28,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           Internal.lastWorkingRenders[this.pathWithoutProps()] = this.attemptRender
         }
 
-        Internal.lastWorkingViews[name] = { component, hash: null }
+        Internal.lastWorkingViews[name] = { component }
       },
 
       render() {
@@ -235,18 +235,18 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production)
-          this.props._flintOnMount(name, this.getPath())
+          this.props._flintOnMount(this.getPath(), this)
       },
 
       componentWillUnmount() {
         // fixes unmount errors #60
-        if (!process.env.production) {
-          this.render()
-
-          // const path = this.getPath()
-          // delete Internal.lastWorkingRenders[path]
-          // delete Internal.viewsAtPath[path]
-        }
+        // if (!process.env.production) {
+        //   this.render()
+        //
+        //   // const path = this.getPath()
+        //   // delete Internal.lastWorkingRenders[path]
+        //   // delete Internal.viewsAtPath[path]
+        // }
 
         this._isMounted = false
         this.runEvents('unmount')

@@ -8,6 +8,12 @@ fi
 release_package() {
   cd $1
   echo $1
+
+  if [ -f "webpack.config.release.js" ]; then
+    node node_modules/webpack/bin/webpack --config webpack.config.release.js $1 &
+    echo "building webpack"
+  fi
+
   npm version patch
   npm publish
   cd ../..

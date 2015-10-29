@@ -10,10 +10,8 @@ for f in packages/*; do
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
-    for file in webpack.config*; do
-      node node_modules/webpack/bin/webpack --config $file $1 &
-      echo "running $f webpack for $file"
-    done
+    node node_modules/webpack/bin/webpack --config webpack.config.js $1 &
+    echo "running $f webpack for $file"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
@@ -54,7 +52,7 @@ if [ $1="--watch" ]; then
 
         # watch tools after first build
         if [ $hasLinkedOnce == 'false' ]; then
-          sleep 9 # todo: wait for webpack finish
+          sleep 4 # todo: wait for webpack finish
           cd ../..
           cd apps/tools
           flint build --watch &
