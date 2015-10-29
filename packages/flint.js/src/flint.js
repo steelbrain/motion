@@ -1,6 +1,7 @@
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'
 import React from 'react'
+import raf from 'raf'
 import ReactDOM from 'react-dom'
 import clone from 'clone'
 import Bluebird, { Promise } from 'bluebird'
@@ -79,6 +80,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     getCacheInit: {}, // stores the vars after a view is first run
     propsHashes: {},
 
+    changedViews: [],
     mountedViews: {},
     lastWorkingViews: {},
     lastWorkingRenders: {},
@@ -179,7 +181,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     file(file, run) {
       if (!process.env.production) {
         Internal.viewsInFile[file] = []
-        Internal.currentFileViews = []
+        Internal.changedViews = []
         Internal.currentHotFile = file
       }
 
@@ -203,11 +205,25 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.viewCache[file] = Internal.viewsInFile[file]
 
         // refresh updated views
-        if (!Internal.firstRender) {
-          Internal.currentFileViews.forEach(view => {
-            view.component.forceUpdate()
+        // if (!Internal.firstRender) {
+        //   raf(Flint.render)
+        // }
+
+        if (Internal.firstRender)
+          return
+
+        raf(() => {
+          Internal.changedViews.forEach(name => {
+            console.log(name)
+            Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
+              console.log('mounted view', view, view.isMounted())
+              if (view.isMounted()) {
+                view.forceUpdate()
+                return view
+              }
+            }).filter(x => !!x)
           })
-        }
+        })
       }
     },
 
@@ -221,20 +237,20 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       function setView(name, component) {
         Flint.views[name] = { hash, component }
-
-        if (!process.env.production) {
-          Internal.currentFileViews.push(Flint.views[name])
-        }
       }
 
       // if new
       if (Flint.views[name] == undefined) {
         setView(name, comp({ hash, changed: true }))
+        Internal.changedViews.push(name)
         return
       }
 
       // hot reloaded
       if (!process.env.production) {
+        if (!Internal.mountedViews[name])
+          Internal.mountedViews[name] = []
+
         Internal.viewsInFile[Internal.currentHotFile].push(name)
 
         // not new
@@ -252,6 +268,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         // changed
         setView(name, comp({ hash, changed: true }))
+        Internal.changedViews.push(name)
 
         // this resets tool errors
         window.onViewLoaded()

@@ -6,27 +6,29 @@ import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
 import phash from './lib/phash'
 
+function pathWithoutProps(path) {
+  return path.replace(/\.[a-z0-9\-]+$/, '')
+}
+
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
-
 
   if (process.env.production)
     return createViewComponent()
   else
     return createProxyComponent(createViewComponent())
 
-
   // proxy components handle hot reloads
   function createProxyComponent(View) {
     return React.createClass({
 
-      onMount(path, component) {
-        Internal.mountedViews[name] = this
+      onMount(path, component, renderedEls) {
+        Internal.mountedViews[name] = Internal.mountedViews[name] || []
+        Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = this
 
-        if (this.attemptRender) {
-          Internal.lastWorkingRenders[this.pathWithoutProps()] = this.attemptRender
-        }
+        if (renderedEls)
+          Internal.lastWorkingRenders[pathWithoutProps(path)] = renderedEls
 
         Internal.lastWorkingViews[name] = { component }
       },
@@ -225,28 +227,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('props')
       },
 
-      pathWithoutProps() {
-        return this.getPath().replace(/\.[a-z0-9\-]+$/, '')
-      },
-
       componentDidMount() {
         this.isRendering = false
         this._isMounted = true
         this.runEvents('mount')
 
         if (!process.env.production)
-          this.props._flintOnMount(this.getPath(), this)
+          this.props._flintOnMount(this.getPath(), this, this.lastRendered)
       },
 
       componentWillUnmount() {
         // fixes unmount errors #60
-        // if (!process.env.production) {
-        //   this.render()
-        //
-        //   // const path = this.getPath()
-        //   // delete Internal.lastWorkingRenders[path]
-        //   // delete Internal.viewsAtPath[path]
-        // }
+        if (!process.env.production) {
+          this.render()
+        }
 
         this._isMounted = false
         this.runEvents('unmount')
@@ -356,7 +350,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         // try render
         try {
           const els = this.getRender()
-          this.attemptRender = els
+          this.lastRendered = els
           return els
         }
         catch(e) {
@@ -367,7 +361,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           return (
             <div style={{ position: 'relative' }}>
               <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
-              {Internal.lastWorkingRenders[this.pathWithoutProps()] || null}
+              {Internal.lastWorkingRenders[pathWithoutProps(this.getPath())] || null}
             </div>
           )
         }
