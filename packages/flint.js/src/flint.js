@@ -73,8 +73,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     Object.keys(Flint.views).forEach(name => {
       Flint.views[name] = Internal.lastWorkingViews[name]
     })
-
-    setTimeout(Flint.render)
   }
 
   root.onerror = flintOnError
@@ -479,6 +477,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             raf(() => this.forceUpdate())
           }
           else {
+            log(name, 'called update, isRendering still, queued?', this.queuedUpdate)
             if (!this.queuedUpdate)
               raf(() => this.update())
 
@@ -496,10 +495,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           })
 
           this.getChildContext = () => obj
-        },
-
-        getSuccessfulRender() {
-          return this.successfulRender
         },
 
         getRender() {
@@ -544,6 +539,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (process.env.production)
             return this.getRender()
 
+          // try render
           try {
             const els = this.getRender()
             this.attemptRender = els
@@ -552,6 +548,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           catch(e) {
             console.error(e.stack)
             reportError(e)
+
+            // highlight in red and return last working render
             return (
               <div style={{ position: 'relative' }}>
                 <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
@@ -681,4 +679,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   Object.freeze(Flint)
 
   return Flint
+}
+
+function log(...args) {
+  if (window.location.search == '?debug') console.log(...args)
 }
