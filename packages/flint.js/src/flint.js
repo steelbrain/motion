@@ -60,6 +60,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     getCacheInit: {}, // stores the vars after a view is first run
     propsHashes: {},
 
+    lastWorkingView: {},
+    preloaders: [], // async functions needed before loading app
+
     // devtools
     inspector: {},
     viewsAtPath: {}
@@ -95,8 +98,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   let isRendering = 0
   let firstRender = true
   let mainHash
-  let lastWorkingView = {}
-  let preloaders = [] // async functions needed before loading app
 
   const emitter = ee({})
 
@@ -126,8 +127,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     removeView(key) { delete Flint.views[key] },
 
     render() {
-      if (preloaders.length)
-        Promise.all(preloaders.map(loader => loader())).then(run)
+      if (Internal.preloaders.length)
+        Promise.all(Internal.preloaders.map(loader => loader())).then(run)
       else
         run()
 
@@ -135,10 +136,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         isRendering++
 
         // prevent too many re-render tries on react errors
-        if (isRendering > 1) return
+        if (isRendering > 3) return
 
         firstRender = false
-        const MainComponent = Flint.views.Main.component || lastWorkingView.Main
+        const MainComponent = Flint.views.Main.component || Internal.lastWorkingView.Main
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<MainComponent />)
@@ -388,8 +389,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             Internal.viewsAtPath[this.getPath()] = this
 
             // set last working view for this hash
-            if (!lastWorkingView[name] || options.changed || options.new) {
-              lastWorkingView[name] = component
+            if (!Internal.lastWorkingView[name] || options.changed || options.new) {
+              Internal.lastWorkingView[name] = component
             }
           }
         },
@@ -548,7 +549,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // check errors and restore last good view
       root.onerror = (...args) => {
-        Flint.views[name] = makeView(hash, lastWorkingView[name])
+        console.log('error, restore last view', name)
+        Flint.views[name] = makeView(hash, Internal.lastWorkingView[name])
         flintOnError(...args)
         setTimeout(Flint.render)
       }
