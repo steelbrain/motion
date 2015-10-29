@@ -34,7 +34,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
         Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = this
-        lastWorkingViews[name] = this
+        Internal.lastWorkingViews[name] = lastWorkingViews[name] = this
       },
 
       lastWorkingView() {

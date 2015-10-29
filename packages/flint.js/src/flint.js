@@ -210,9 +210,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         raf(() => {
           Internal.changedViews.forEach(name => {
-            console.log(name)
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
-              console.log('mounted view', view, view.isMounted())
               if (view.isMounted()) {
                 view.forceUpdate()
                 return view
