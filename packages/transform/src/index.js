@@ -272,7 +272,7 @@ export default function createPlugin(options) {
 
               if (isObjectAssign(node)) {
                 // if mutating an object in the view
-                if (scope.hasOwnBinding(node.arguments[0].name)) {
+                if (scope.hasBinding('view') && scope.hasBinding(node.arguments[0].name)) {
                   return addSetter(node.arguments[0].name, node, scope)
                 }
               }
