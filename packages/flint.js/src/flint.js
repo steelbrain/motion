@@ -15,6 +15,7 @@ import './shim/partial'
 import './lib/bluebirdErrorHandle'
 import runEvents from './lib/runEvents'
 import range from './lib/range'
+import iff from './lib/iff'
 import router from './lib/router'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -49,7 +50,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   const flintOnError = (...args) => {
     prevOnError && prevOnError(...args)
     reportError(...args)
+
+    // restore last working views
+    Object.keys(Flint.views).forEach(name => {
+      Flint.views[name] = Internal.lastWorkingView[name]
+    })
+
+    Flint.render()
   }
+
   root.onerror = flintOnError
 
   const Internal = root._Flint = {
@@ -132,6 +141,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   let Flint = {
     router,
     range,
+    iff,
 
     views: {},
     removeView(key) { delete Flint.views[key] },
@@ -143,12 +153,14 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         run()
 
       function run() {
-        if (isRendering) return
+        isRendering++
+        if (isRendering > 3) return
 
-        isRendering = true
         firstRender = false
 
-        const MainComponent = Flint.views.Main.component || Internal.lastWorkingView.Main
+        const MainComponent = (
+            Flint.views.Main.component || Internal.lastWorkingView.Main.component
+        )
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<MainComponent />)
@@ -173,9 +185,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     debug: () => { debugger },
 
     file(file, run) {
-      // prevent infinite loop of re-renders on errors
-      isRendering = 0
-
       Internal.viewsInFile[file] = []
       Internal.currentHotFile = file
 
@@ -197,9 +206,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Internal.currentHotFile = null
       Internal.viewCache[file] = Internal.viewsInFile[file]
 
-      if (firstRender) return
-
-      setTimeout(Flint.render)
+      if (!firstRender)
+        setTimeout(Flint.render)
     },
 
     deleteFile(name) {
@@ -397,9 +405,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             Internal.viewsAtPath[this.getPath()] = this
 
             // set last working view for this hash
-            if (!Internal.lastWorkingView[name] || options.changed || options.new) {
-              Internal.lastWorkingView[name] = component
-            }
+            Internal.lastWorkingView[name] = { component, hash: options.hash }
           }
         },
 
@@ -552,19 +558,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         return
       }
 
+      // changed
       setView(name, comp({ hash, changed: true }))
-
-      // check errors and restore last good view
-      root.onerror = (...args) => {
-        Flint.views[name] = makeView(hash, Internal.lastWorkingView[name])
-        flintOnError(...args)
-        setTimeout(Flint.render)
-      }
-
-      // then check for no errors and reset onerror
-      emitter.on('afterRender', () => {
-        root.onerror = flintOnError
-      })
 
       // this resets tool errors
       window.onViewLoaded()

@@ -61,9 +61,14 @@ function addScript(message, cb) {
   if (!lastLoadedAt[name] || lastLoadedAt[name] < timestamp) {
     lastLoadedAt[name] = timestamp;
 
+    const fullSrc = (src || '/_' + name)
+
+    const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
+    oldScript.parentElement.removeChild(oldScript)
+
     const body = document.getElementsByTagName('body')[0];
     const script = document.createElement('script');
-    script.src = (src || '/_' + name) + "?" + timestamp;
+    script.src = fullSrc;
     body.appendChild(script);
 
     script.onload = cb;

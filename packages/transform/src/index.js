@@ -218,7 +218,7 @@ export default function createPlugin(options) {
                 }
 
                 if (name == 'if') {
-                  iff = _node => t.logicalExpression('&&', expr, _node)
+                  iff = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.iff'), [expr]), _node)
                 }
 
                 if (name == 'repeat') {
