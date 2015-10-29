@@ -56,7 +56,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.views[name] = Internal.lastWorkingView[name]
     })
 
-    Flint.render()
+    setTimeout(Flint.render)
   }
 
   root.onerror = flintOnError
