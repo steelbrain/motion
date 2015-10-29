@@ -108,7 +108,7 @@ view Errors {
   })
 
   tools.on('runtime:error', () => {
-    if (runtimeError) return // prefer first error
+    // if (runtimeError) return // prefer first error
     runtimeError = tools.data
     setError()
   })

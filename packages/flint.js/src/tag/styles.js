@@ -39,9 +39,11 @@ export default function elementStyles(key, view, name, tag, props) {
   if (typeof name !== 'string')
     return
 
-  // if its the root element (name === view or Wrapper)
+  // attach view styles from $ to element matching view name lowercase
   const isRoot = (
-    name.indexOf('Flint.') == 0 ||
+    // only if they have one top level element
+    view.renders.length == 1 &&
+    // and that element has the same name as view
     view.name && view.name.toLowerCase() == name
   )
 

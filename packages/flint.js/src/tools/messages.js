@@ -64,8 +64,10 @@ function addScript(message, cb) {
     const fullSrc = (src || '/_' + name)
 
     const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
-    const oldScriptParent = oldScript.parentElement
-    if (oldScriptParent) oldScriptParent.removeChild(oldScript)
+    if (oldScript) {
+      const oldScriptParent = oldScript.parentElement
+      if (oldScriptParent) oldScriptParent.removeChild(oldScript)
+    }
 
     const body = document.getElementsByTagName('body')[0];
     const script = document.createElement('script');
