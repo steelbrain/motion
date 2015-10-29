@@ -418,7 +418,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
             Internal.viewsAtPath[path] = this
 
-            // console.log('last workking', path, this.attemptRender)
             if (this.attemptRender) {
               Internal.lastWorkingRenders[this.pathWithoutProps()] = this.attemptRender
             }
@@ -475,16 +474,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         resume() { this.isPaused = false },
 
         update() {
-          if (name == 'Errors')
-            console.log(firstRender, this.isRendering, this.queuedUpdate)
-
           if (!firstRender && !this.isRendering) {
             this.queuedUpdate = false
-            this.forceUpdate()
+            raf(() => this.forceUpdate())
           }
           else {
             if (!this.queuedUpdate)
-              setTimeout(this.update)
+              raf(() => this.update())
 
             this.queuedUpdate = true
           }
@@ -554,7 +550,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             console.error(e.stack)
             reportError(e)
             return (
-              <div style={{ color: 'red', background: 'rgba(255,0,0,0.1)' }}>
+              <div style={{ background: 'rgba(255,0,0,0.04)' }}>
                 {Internal.lastWorkingRenders[this.pathWithoutProps()] || null}
               </div>
             )
