@@ -37,6 +37,24 @@ root.on = on
 root.module = {}
 root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
+function phash(_props) {
+  const props = Object.keys(_props).reduce((acc, key) => {
+    const prop = _props[key]
+
+    if (React.isValidElement(prop)) {
+      // TODO: traverse children
+      acc[key] = prop.key
+    }
+    else {
+      acc[key] = prop
+    }
+
+    return acc
+  }, {})
+
+  return hashsum(props)
+}
+
 const uuid = () => Math.floor(Math.random() * 1000000)
 
 export default function run(browserNode, userOpts, afterRenderCb) {
@@ -53,7 +71,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     // restore last working views
     Object.keys(Flint.views).forEach(name => {
-      Flint.views[name] = Internal.lastWorkingView[name]
+      Flint.views[name] = Internal.lastWorkingViews[name]
     })
 
     setTimeout(Flint.render)
@@ -69,7 +87,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     getCacheInit: {}, // stores the vars after a view is first run
     propsHashes: {},
 
-    lastWorkingView: {},
+    viewInstances: {},
+    lastWorkingViews: {},
+    lastWorkingRenders: {},
     preloaders: [], // async functions needed before loading app
 
     // devtools
@@ -95,7 +115,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     // update view
     const name = pathToName(path)
-    Flint.views[name] = { hash: null, component: Internal.lastWorkingView[name] }
+    Flint.views[name] = { hash: null, component: Internal.lastWorkingViews[name] }
     Flint.render()
   }
 
@@ -120,24 +140,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const emitter = ee({})
 
-  function phash(_props) {
-    const props = Object.keys(_props).reduce((acc, key) => {
-      const prop = _props[key]
-
-      if (React.isValidElement(prop)) {
-        // TODO: traverse children
-        acc[key] = prop.key
-      }
-      else {
-        acc[key] = prop
-      }
-
-      return acc
-    }, {})
-
-    return hashsum(props)
-  }
-
   let Flint = {
     router,
     range,
@@ -147,6 +149,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     removeView(key) { delete Flint.views[key] },
 
     render() {
+      firstRender = false
+
       if (Internal.preloaders.length)
         Promise.all(Internal.preloaders.map(loader => loader())).then(run)
       else
@@ -156,10 +160,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         isRendering++
         if (isRendering > 3) return
 
-        firstRender = false
-
         const MainComponent = (
-            Flint.views.Main.component || Internal.lastWorkingView.Main.component
+            Flint.views.Main.component || Internal.lastWorkingViews.Main.component
         )
 
         if (!browserNode) {
@@ -248,8 +250,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         shouldReRender() {
           return (
-            this.didMount && !this.isUpdating &&
-            !this.isPaused && !this.firstRender
+            this._isMounted && !this.isUpdating &&
+            !this.isPaused && !this.firstRender &&
+            !this.isRendering
           )
         },
 
@@ -327,6 +330,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.setPath()
 
           let u = void 0
+
+          this.successfulRender = null
           this.firstRender = true
           this.styles = { _static: {} }
           this.events = { mount: u, unmount: u, update: u, props: u }
@@ -399,15 +404,26 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.runEvents('props')
         },
 
+        pathWithoutProps() {
+          return this.getPath().replace(/\.[a-z0-9\-]+$/, '')
+        },
+
         componentDidMount() {
-          this.didMount = true
+          this.isRendering = false
+          this._isMounted = true
           this.runEvents('mount')
 
           if (!process.env.production) {
-            Internal.viewsAtPath[this.getPath()] = this
+            const path = this.getPath()
 
-            // set last working view for this hash
-            Internal.lastWorkingView[name] = { component, hash: options.hash }
+            Internal.viewsAtPath[path] = this
+
+            // console.log('last workking', path, this.attemptRender)
+            if (this.attemptRender) {
+              Internal.lastWorkingRenders[this.pathWithoutProps()] = this.attemptRender
+            }
+
+            Internal.lastWorkingViews[name] = { component, hash: null }
           }
         },
 
@@ -415,9 +431,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           // fixes unmount errors #60
           if (!process.env.production) {
             this.render()
+
+            // const path = this.getPath()
+            // delete Internal.lastWorkingRenders[path]
+            // delete Internal.viewsAtPath[path]
           }
 
-          this.didMount = false
+          this._isMounted = false
           this.runEvents('unmount')
         },
 
@@ -433,12 +453,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         },
 
         componentDidUpdate() {
+          this.isRendering = false
           this.isUpdating = false
 
           if (!process.env.production) {
             // set flintID for state inspect
             const node = ReactDOM.findDOMNode(this)
-            node.__flintID = this.getPath()
+            if (node) node.__flintID = this.getPath()
+
+            if (this.queuedUpdate) {
+              this.isRendering = false
+              this.update()
+            }
           }
         },
 
@@ -447,7 +473,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // helpers for controlling re-renders
         pause() { this.isPaused = true },
         resume() { this.isPaused = false },
-        update() { this.forceUpdate() },
+
+        update() {
+          if (name == 'Errors')
+            console.log(firstRender, this.isRendering, this.queuedUpdate)
+
+          if (!firstRender && !this.isRendering) {
+            this.queuedUpdate = false
+            this.forceUpdate()
+          }
+          else {
+            if (!this.queuedUpdate)
+              setTimeout(this.update)
+
+            this.queuedUpdate = true
+          }
+        },
 
         // helpers for context
         childContext(obj) {
@@ -461,13 +502,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           this.getChildContext = () => obj
         },
 
-        render() {
+        getSuccessfulRender() {
+          return this.successfulRender
+        },
+
+        getRender() {
           this.firstRender = false
 
           const singleTopEl = this.renders.length == 1
           let tags
           let wrap = true
 
+          // grab renders
           if (singleTopEl) {
             tags = [this.renders[0].call(this)]
 
@@ -479,6 +525,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             tags = this.renders.map(r => r.call(this))
           }
 
+          // view.wrapper
           let els = !wrap ? tags[0] : this.el(`view.${name}`,
             // props
             {
@@ -492,7 +539,26 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             ...tags
           )
 
-          return els && resolveStyles(this, els)
+          return els = els && resolveStyles(this, els)
+        },
+
+        render() {
+          this.isRendering = true
+
+          try {
+            const els = this.getRender()
+            this.attemptRender = els
+            return els
+          }
+          catch(e) {
+            console.error(e.stack)
+            reportError(e)
+            return (
+              <div style={{ color: 'red', background: 'rgba(255,0,0,0.1)' }}>
+                {Internal.lastWorkingRenders[this.pathWithoutProps()] || null}
+              </div>
+            )
+          }
         }
       })
 
