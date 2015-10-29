@@ -1,4 +1,5 @@
 import path from 'path'
+import style from './style'
 
 function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
@@ -18,7 +19,7 @@ function hasObjWithProp(node, base, prop) {
 }
 
 function isInView(scope) {
-  return scope.hasBinding("view")
+  return scope.hasBinding('view')
 }
 
 const mutativeFuncs = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
@@ -99,19 +100,22 @@ export default function createPlugin(options) {
     }
 
     function viewGetter(name, val, scope, file) {
-      let getter = (name, val, ...args) => t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
       let isInView = scope.hasOwnBinding('view')
-      let comesFromFile = file.scope.hasOwnBinding(val.name)
+      let comesFromFile = file && file.scope.hasOwnBinding(val.name)
 
       if (comesFromFile)
         return getter(name, val, t.literal('fromFile'))
 
       if (isInView)
         return getter(name, val)
+
+      function getter(name, val, ...args) {
+        return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
+      }
     }
 
     function addGetter(node, scope, file) {
-      if (scope.hasOwnBinding('view')) {
+      if (scope.hasBinding('view')) {
         node.right = viewGetter(node.left.name, node.right, scope, file)
         node.hasGetter = true
       }
@@ -129,7 +133,7 @@ export default function createPlugin(options) {
     }
 
     let keyBase = {}
-
+    let inJSX = false
 
 
     return new Plugin("flint-transform", {
@@ -159,6 +163,7 @@ export default function createPlugin(options) {
 
         JSXElement: {
           enter(node, parent, scope, file) {
+            inJSX = true
             const el = node.openingElement
 
             // avoid reprocessing
@@ -280,6 +285,14 @@ export default function createPlugin(options) {
           }
         },
 
+        // JSXIdentifier: {
+        //   exit(node, parent, scope) {
+        //     console.log(t.isVariable(node), node.name)
+        //     if (node.start && node.end && scope.hasOwnBinding('view') && !node.hasGetter)
+        //       return t.callExpression(t.identifier('view.get'), [t.literal(node.name), node.val])
+        //   }
+        // },
+
         VariableDeclaration: {
           exit(node, parent, scope, file) {
             // add getter
@@ -313,113 +326,7 @@ export default function createPlugin(options) {
 
             // styles
             if (isStyle)
-              return extractAndAssign(node)
-
-            // splits styles into static/dynamic pieces
-            function extractAndAssign(node) {
-              // if array of objects
-              if (t.isArrayExpression(node.right)) {
-                let staticProps = []
-
-                node.right.elements = node.right.elements.map(el => {
-                  if (!t.isObjectExpression(el)) return el
-                  let { statics, dynamics } = extractStatics(el)
-                  if (statics.length) staticProps = staticProps.concat(statics)
-                  if (dynamics.length) return t.objectExpression(dynamics)
-                  else return null
-                }).filter(x => x !== null)
-
-                return [
-                  staticStyleStatement(node, t.objectExpression(staticProps)),
-                  dynamicStyleStatement(node, node.right)
-                ]
-              }
-
-              // if just object
-              else if (t.isObjectExpression(node.right)) {
-                let { statics, dynamics } = extractStatics(node.right)
-
-                if (statics.length) {
-                  const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
-
-                  if (dynamics.length)
-                    return [
-                      staticStatement,
-                      dynamicStyleStatement(node, t.objectExpression(dynamics))
-                    ]
-                  else
-                    return staticStatement
-                }
-                else {
-                  return styleAssign(node, t.objectExpression(dynamics))
-                }
-              }
-
-              else {
-                return styleAssign(node)
-              }
-            }
-
-            // find statics/dynamics in object
-            function extractStatics(node) {
-              let statics = []
-              let dynamics = []
-
-              for (let prop of node.properties) {
-                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key))
-                  statics.push(prop)
-                else
-                  dynamics.push(prop)
-              }
-
-              return { statics, dynamics }
-            }
-
-            // $._static["name"] = ...
-            function staticStyleStatement(node, statics) {
-              let result = exprStatement(t.assignmentExpression(node.operator, styleLeft(node, true), statics))
-              result.expression.isStyle = true
-              return result
-            }
-
-            // $["name"] = ...
-            function dynamicStyleStatement(node, dynamics) {
-              return exprStatement(styleAssign(node, dynamics))
-            }
-
-            function styleLeft(node, isStatic) {
-              const prefix = isStatic ? '$._static' : '$'
-
-              if (node.left.object) {
-                if (isStatic) {
-                  const object = t.identifier(prefix)
-                  const props = node.left.properties || [node.left.property]
-                  return t.memberExpression(object, ...props)
-                }
-
-                return node.left
-              }
-
-              const name = node.left.name.slice(1) || '$'
-              return t.identifier(`${prefix}["${name}"]`)
-            }
-
-            function styleAssign(node, right) {
-              let result = t.assignmentExpression('=', styleLeft(node), styleFunction(right || node.right))
-              result.isStyle = true
-              return result
-
-              // (_index) => {}
-              function styleFunction(inner) {
-                return t.functionExpression(null, [t.identifier('_index')],
-                  t.blockStatement([ t.returnStatement(inner) ])
-                )
-              }
-            }
-
-            function exprStatement(node) {
-              return t.expressionStatement(node)
-            }
+              return style(node)
 
             // non-styles
             if (node.flintTracked || node.hasSetter || node.hasGetter) return

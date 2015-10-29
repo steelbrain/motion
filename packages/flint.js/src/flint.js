@@ -74,16 +74,26 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   // devtools edit
-  function writeBack(key, val) {
-    Internal.getCache[inspector.path][key] = val
-    Internal.viewsAtPath[path].forceUpdate()
+  function writeBack(path, writePath) {
+    // update getCache
+    writePath.reduce((acc, key) => {
+      if (key == 'root') return acc
+      if (Array.isArray(key))
+        acc[key[0]] = key[1] // final index is arr: [key, val]
+      else
+        return acc[key]
+    }, Internal.getCache[path])
+
+    // update view
+    const name = pathToName(path)
+    Flint.views[name] = { hash: null, component: Internal.lastWorkingView[name] }
+    Flint.render()
   }
 
   function setInspector(path) {
     if (Internal.inspector.path && Internal.inspector.path == path) {
       const name = pathToName(path)
-      let props = Object.assign({}, Internal.viewsAtPath[path].props)
-      delete props.__key
+      let props = Internal.viewsAtPath[path].props
       const state = Internal.getCache[path]
       Internal.inspector.cb(name, props, state, writeBack)
     }

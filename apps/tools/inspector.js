@@ -3,8 +3,10 @@ const setLocal = (k,v) =>
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
-view State {
-  let name
+view Inspector {
+  view.pause()
+
+  let name, path
   let state = {}
   let props = {}
   let writeBack = null
@@ -12,7 +14,8 @@ view State {
   let keys = {}
   let show = getLocal('show', false)
 
-  function setView(path) {
+  function setView(_path) {
+    path = _path
     let views = path.split(',')
     name = views[views.length - 1]
 
@@ -21,6 +24,7 @@ view State {
       props = _props || {}
       state = _state || {}
       writeBack = _wb
+      view.update()
     })
   }
 
@@ -53,6 +57,7 @@ view State {
   function toggle() {
     show = !show
     setLocal('show', show)
+    view.update()
   }
 
   // toggle
@@ -79,11 +84,14 @@ view State {
       <name>{name}</name>
       <section>
         <title>Props</title>
-        <Tree data={ props } />
+        <Tree data={props} />
       </section>
       <section>
         <title>State</title>
-        <Tree data={ state } />
+        <Tree
+          onSet={write => writeBack(path, write)}
+          data={state}
+        />
       </section>
     </view>
   </state>
@@ -152,8 +160,4 @@ view State {
   $section = {
     padding: [0, 0, 10]
   }
-}
-
-view Tree {
-  <Inspector data={^data} />
 }

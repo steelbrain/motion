@@ -7,7 +7,7 @@ view Main {
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
   <Errors />
   <Installer />
-  <State />
+  <Inspector />
 
   <Test if={window.__isDevingDevTools} />
 

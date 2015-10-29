@@ -7,6 +7,8 @@ const items = count => count + (count === 1 ? ' item' : ' items')
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 
 view Leaf {
+  view.pause()
+
   let rootPath, path, data, type, key, original, expanded
   let prefix = ''
   let query = ''
@@ -31,6 +33,8 @@ view Leaf {
 
     if (view.props.query && !query)
       expanded = isInitiallyExpanded()
+
+    view.update()
   })
 
   function showOriginalClick(e) {
@@ -42,6 +46,7 @@ view Leaf {
     if (!view.props.root)
       expanded = !expanded
 
+    view.update()
     view.props.onClick && view.props.onClick(data)
     e.stopPropagation()
   }
@@ -55,7 +60,10 @@ view Leaf {
   )
 
   const label  = (type, val, sets) => (
-    <Label val={val} set={() => ^set([type, sets])} />
+    <Label
+      val={val}
+      onSet={_ => view.props.onSet([sets, _])}
+    />
   )
 
   <leaf class={rootPath}>
@@ -86,7 +94,8 @@ view Leaf {
         if={expanded && !isPrimitive(data)}
         repeat={Object.keys(data)}
         key={getLeafKey(_, data[_])}
-        set={() => ^set(['key', _])}
+
+        onSet={(...args) => view.props.onSet(key, ...args)}
         data={data[_]}
         label={_}
         prefix={rootPath}

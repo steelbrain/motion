@@ -1,5 +1,5 @@
 view Label {
-  let focus
+  let focus, newVal
 
   const onFocus = e => {
     focus = true
@@ -11,14 +11,15 @@ view Label {
   }
 
   <input
-    defaultValue={String(^val)}
+    defaultValue={String(view.props.val)}
+    sync={newVal}
     class={{ focus }}
-    size={Math.max(1, ^val.length)}
+    size={Math.max(4, view.props.val.length)}
     spellCheck={false}
     onClick={e => e.stopPropagation()}
     onFocus={onFocus}
     onBlur={onBlur}
-    onEnter={^set}
+    onEnter={view.props.onSet.partial(newVal)}
   />
 
   $input = {

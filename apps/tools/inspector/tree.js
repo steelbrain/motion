@@ -1,13 +1,8 @@
-view Inspector {
-  let filterer
+view Tree {
   let query = ''
 
   const search = q => query === '' || ^validateQuery(query) ? query = q : false
   const getOriginal = path => lens(^data, path)
-
-  on('mount', () => {
-    filterer = createFilterer(^data, ^filterOptions)
-  })
 
   <Leaf
     data={^data}
@@ -20,14 +15,11 @@ view Inspector {
     validateQuery={query => query.length >= 2}
     isExpanded={^isExpanded || () => false}
     interactiveLabel={^interactiveLabel}
-    set={(...args) => {
-      debugger
-    }}
+    onSet={(...args) => view.props.onSet(args)}
   />
 
   $ = {
     pointerEvents: 'auto',
-    fontFamily: 'Consolas, monospace',
     marginLeft: -10
   }
 }
