@@ -253,10 +253,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           )
         },
 
-        set(name, val) {
+        set(name, val, postfix) {
           if (!process.env.production) {
             const path = this.getPath()
             Internal.getCache[path] = Internal.getCache[path] || {}
+            // undo postfix
+            if (postfix) val = val + (postfix == '++' ? 1 : -1)
             setCache(path, name, val)
           }
 

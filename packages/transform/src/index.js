@@ -87,10 +87,12 @@ export default function createPlugin(options) {
       return t.callExpression(t.identifier('Object.freeze'), [node])
     }
 
-    function addSetter(name, node, scope) {
+    function addSetter(name, node, scope, postfix) {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
-        const expr = t.callExpression(t.identifier('view.set'), [t.literal(name), node])
+        let args = [t.literal(name), node]
+        if (postfix) args.push(t.literal(postfix))
+        const expr = t.callExpression(t.identifier('view.set'), args)
         node.hasSetter = true
         return expr
       }
@@ -460,7 +462,7 @@ export default function createPlugin(options) {
         UpdateExpression: {
           exit(node, _, scope) {
             if (node.operator == '++' || node.operator == '--')
-              return addSetter(node.argument.name, node, scope)
+              return addSetter(node.argument.name, node, scope, !node.prefix ? node.operator : false)
           }
         }
       }
