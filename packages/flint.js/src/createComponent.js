@@ -2,6 +2,7 @@ import React from 'react'
 import raf from 'raf'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 
+import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
 import phash from './lib/phash'
@@ -10,16 +11,22 @@ function pathWithoutProps(path) {
   return path.replace(/\.[a-z0-9\-]+$/, '')
 }
 
+let views = {}
+
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
 
   if (process.env.production)
     return createViewComponent()
-  else
-    return createProxyComponent(createViewComponent())
+
+  if (options.changed) {
+    views[name] = createViewComponent()
+  }
+
+  return createProxyComponent()
 
   // proxy components handle hot reloads
-  function createProxyComponent(View) {
+  function createProxyComponent() {
     return React.createClass({
 
       onMount(path, component, renderedEls) {
@@ -34,6 +41,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       render() {
+        const View = views[name]
+
         return (
           <View
             {...this.props}

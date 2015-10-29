@@ -230,17 +230,17 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     view(name, body) {
       const comp = createComponent.partial(Flint, Internal, name, body)
 
+      function setView(name, component) {
+        Flint.views[name] = { hash, component }
+      }
+
       if (process.env.production)
         setView(name, comp())
 
       const hash = hashsum(body)
 
-      function setView(name, component) {
-        Flint.views[name] = { hash, component }
-      }
-
       // if new
-      if (Flint.views[name] == undefined) {
+      if (!Flint.views[name]) {
         setView(name, comp({ hash, changed: true }))
         Internal.changedViews.push(name)
         return
