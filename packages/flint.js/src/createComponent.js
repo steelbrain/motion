@@ -12,6 +12,7 @@ function pathWithoutProps(path) {
 }
 
 let views = {}
+let lastWorkingViews = {}
 
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
@@ -20,7 +21,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
     return createViewComponent()
 
   if (options.changed) {
-    views[name] = createViewComponent()
+    Internal.views[name] = views[name] = createViewComponent()
   }
 
   return createProxyComponent()
@@ -29,26 +30,42 @@ export default function createComponent(Flint, Internal, name, view, options = {
   function createProxyComponent() {
     return React.createClass({
 
-      onMount(path, component, renderedEls) {
+      onMount(path, component) {
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
         Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = this
+        lastWorkingViews[name] = this
+      },
 
-        if (renderedEls)
-          Internal.lastWorkingRenders[pathWithoutProps(path)] = renderedEls
+      lastWorkingView() {
+        const View = lastWorkingViews[name]
+        return <View {...this.props} _flintOnMount={this.onMount} />
+      },
 
-        Internal.lastWorkingViews[name] = { component }
+      curView() {
+        const View = views[name]
+        return <View {...this.props} _flintOnMount={this.onMount} />
       },
 
       render() {
-        const View = views[name]
+        // try render
+        try {
+          const els = this.curView()
+          this.lastRendered = els
+          return els
+        }
+        catch(e) {
+          console.error(e.stack)
+          reportError(e)
 
-        return (
-          <View
-            {...this.props}
-            _flintOnMount={this.onMount}
-          />
-        )
+          // highlight in red and return last working render
+          return (
+            <div style={{ position: 'relative' }}>
+              <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
+              {this.lastWorkingView()}
+            </div>
+          )
+        }
       }
     })
   }
@@ -314,7 +331,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.getChildContext = () => obj
       },
 
-      getRender() {
+      render() {
+        this.isRendering = true
         this.firstRender = false
 
         const singleTopEl = this.renders.length == 1
@@ -348,32 +366,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         )
 
         return els = els && resolveStyles(this, els)
-      },
-
-      render() {
-        this.isRendering = true
-
-        if (process.env.production)
-          return this.getRender()
-
-        // try render
-        try {
-          const els = this.getRender()
-          this.lastRendered = els
-          return els
-        }
-        catch(e) {
-          console.error(e.stack)
-          reportError(e)
-
-          // highlight in red and return last working render
-          return (
-            <div style={{ position: 'relative' }}>
-              <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
-              {Internal.lastWorkingRenders[pathWithoutProps(this.getPath())] || null}
-            </div>
-          )
-        }
       }
     })
 
