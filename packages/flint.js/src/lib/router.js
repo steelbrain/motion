@@ -24,6 +24,11 @@ const router = {
     if (!render) return
 
     location = path
+
+    // ensure prefixed with /
+    if (location[0] !== '/')
+      location = '/' + location
+
     if (!dontPush) history.pushState(null, path)
     router.next()
     router.recognize()
