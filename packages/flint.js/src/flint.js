@@ -143,12 +143,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         run()
 
       function run() {
-        isRendering++
+        if (isRendering) return
 
-        // prevent too many re-render tries on react errors
-        if (isRendering > 3) return
-
+        isRendering = true
         firstRender = false
+
         const MainComponent = Flint.views.Main.component || Internal.lastWorkingView.Main
 
         if (!browserNode) {
@@ -198,7 +197,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Internal.currentHotFile = null
       Internal.viewCache[file] = Internal.viewsInFile[file]
 
-      // avoid tons of renders on start
       if (firstRender) return
 
       setTimeout(Flint.render)
@@ -544,9 +542,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       // not new
       // if defined twice during first run
       if (firstRender) {
-        throw new Error(`Defined a view twice: ${name}`)
         Flint.views[name] = ErrorDefinedTwice(name)
-        return
+        throw new Error(`Defined a view twice: ${name}`)
       }
 
       // if unchanged
@@ -568,8 +565,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       emitter.on('afterRender', () => {
         root.onerror = flintOnError
       })
-
-      Flint.render()
 
       // this resets tool errors
       window.onViewLoaded()
