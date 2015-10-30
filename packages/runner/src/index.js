@@ -197,10 +197,13 @@ const watchDeletes = async vinyl => {
 }
 
 const relative = file => path.relative(APP_DIR, file.path)
+let isWriting = false
+const startWrite = cb => { if (isWriting) return; isWriting = true; cb() }
+const endWrite = cb => { isWriting = false; cb() }
 const out = {
-  file: file => process.stdout.write(` ⇢ ${relative(file)}\r`),
-  badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-  goodFile: (file, ms) => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold)
+  file: file => startWrite(() => process.stdout.write(` ⇢ ${relative(file)}\r`)),
+  badFile: (file, err) => endWrite(() => console.log(` ◆ ${relative(file)}`.red)),
+  goodFile: (file, ms) => endWrite(() => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold))
 }
 
 const $p = {
