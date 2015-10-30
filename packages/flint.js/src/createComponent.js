@@ -21,6 +21,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
     return createViewComponent()
 
   if (options.changed) {
+    console.log('view changed', name)
     views[name] = createViewComponent()
   }
 
@@ -367,11 +368,17 @@ export default function createComponent(Flint, Internal, name, view, options = {
           console.error(e.stack)
           reportError(e)
 
+          const lastRender = Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]
+
+          const inner = lastRender ?
+            <div dangerouslySetInnerHTML={{ __html: ReactDOMServer.renderToString(lastRender) }} /> :
+            <div>Error in view {name}</div>
+
           // highlight in red and return last working render
           return (
             <div style={{ position: 'relative' }}>
               <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
-              <div dangerouslySetInnerHTML={{ __html: ReactDOMServer.renderToString(Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]) }} />
+              {inner}
             </div>
           )
         }

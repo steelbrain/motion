@@ -55,9 +55,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }, userOpts)
 
   // error handling
-  const prevOnError = root.onerror
   const flintOnError = (...args) => {
-    prevOnError && prevOnError(...args)
     reportError(...args)
 
     // restore last working views
@@ -115,7 +113,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     // update view
     const name = pathToName(path)
-    Flint.views[name] = { hash: null, component: Internal.lastWorkingViews[name] }
     Flint.render()
   }
 
@@ -204,19 +201,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.currentHotFile = null
         Internal.viewCache[file] = Internal.viewsInFile[file]
 
-        // refresh updated views
-        // if (!Internal.firstRender) {
-        //   raf(Flint.render)
-        // }
-
         if (Internal.firstRender)
           return
 
         raf(() => {
           Internal.changedViews.forEach(name => {
-            console.log(name)
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
-              console.log('mounted view', view, view.isMounted())
+              console.log('mounted view', name, view.isMounted())
               if (view.isMounted()) {
                 view.forceUpdate()
                 return view
