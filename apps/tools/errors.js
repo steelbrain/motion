@@ -120,6 +120,7 @@ view Errors {
   })
 
   tools.on('runtime:success', () => {
+    compileError = null
     runtimeError = null
     setError()
   })
@@ -148,7 +149,15 @@ view ErrorMessage {
     line = getLine(view.props.error)
   })
 
-  <Debounce force={!view.props.error}>
+  function showFlintErrorDiv() {
+    setTimeout(() => {
+      const errorDiv = document.getElementById('FLINTERROR')
+      if (errorDiv)
+        errorDiv.className = 'active'
+    },1)
+  }
+
+  <Debounce force={!view.props.error} onUpdate={showFlintErrorDiv}>
     <bar>
       <Close onClick={view.props.close} size={40} />
       <inner if={view.props.npmError}>

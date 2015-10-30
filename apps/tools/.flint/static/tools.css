@@ -1,5 +1,21 @@
 /* flex box */
 
+#FLINTERROR {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000000000;
+  opacity: 0;
+  background: rgba(255,0,0,0.03);
+  transition: opacity ease-in 50ms;
+}
+
+#FLINTERROR.active {
+  opacity: 1;
+}
+
 #_flintdevtools {
   font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   margin: 0;

@@ -32,22 +32,20 @@ const arrayToString = val =>
     typeof style == 'number' ? `${style}px` : style
   ).join(' ')
 
+// <name-tag />
 export default function elementStyles(key, view, name, tag, props) {
-  // <name-tag>hello</name-tag>
-  // console.log('name', name, 'tag', tag)
-
   if (typeof name !== 'string')
     return
 
   // attach view styles from $ to element matching view name lowercase
   const isRoot = (
-    // only if they have one top level element
-    view.renders.length == 1 &&
-    // and that element has the same name as view
+    view.renders.length <= 1 &&
     view.name && view.name.toLowerCase() == name
   )
 
   if (view.styles) {
+    // console.log(name, tag)
+
     const index = props.repeat ? key[1] : void 0
 
     // if <foobar> is root, then apply both the base ($) and ($foobar)

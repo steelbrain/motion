@@ -188,14 +188,21 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         // call view
-        view.call(this, this, this.viewOn, this.styles)
+        if (process.env.production)
+          view.call(this, this, this.viewOn, this.styles)
+        else {
+          // catch errors in view loop
+          try {
+            view.call(this, this, this.viewOn, this.styles)
+          }
+          catch(e) {
+            console.error(e)
+            reportError(e)
+          }
+        }
 
         // reset original render
         this.render = flintRender
-
-        // ensure something renders
-        if (!this.renders.length)
-          this.renders.push(() => this.el([name.toLowerCase(), 0], { yield: true }))
 
         return null
       },
@@ -315,44 +322,55 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.getChildContext = () => obj
       },
 
-      getRender() {
-        this.firstRender = false
-
-        const singleTopEl = this.renders.length == 1
-        let tags
-        let wrap = true
-
-        // grab renders
-        if (singleTopEl) {
-          tags = [this.renders[0].call(this)]
-
-          // if child tag name == view name, no wrapper
-          if (tags[0].type == name.toLowerCase())
-            wrap = false
-        }
-        else {
-          tags = this.renders.map(r => r.call(this))
+      getWrapper(tags, props) {
+        const styles = {
+          style: Object.assign({},
+            this.props.style,
+            this.styles.$ && this.styles.$(),
+            this.styles._static && this.styles._static.$
+          )
         }
 
-        // view.wrapper
-        let els = !wrap ? tags[0] : this.el(`view${name}`,
+        return this.el(`${name.toLowerCase()}`,
           // props
-          {
-            style: Object.assign(
-              {},
-              this.props.style,
-              this.styles.$ && this.styles.$(),
-              this.styles._static && this.styles._static.$
-            )
-          },
+          props,
           ...tags
         )
+      },
 
-        return resolveStyles(this, els)
+      getRender() {
+        let tags, props, addWrapper
+        const numRenders = this.renders && this.renders.length
+
+        if (!numRenders) {
+          tags = []
+          props = { yield: true }
+          addWrapper = true
+        }
+
+        if (numRenders == 1) {
+          tags = [this.renders[0].call(this)]
+
+          // tag name != view name
+          if (tags[0].type != name.toLowerCase())
+            addWrapper = true
+        }
+
+        if (numRenders > 1) {
+          tags = this.renders.map(r => r.call(this))
+          addWrapper = true
+        }
+
+        const wrappedTags = addWrapper ?
+          this.getWrapper(tags, props) :
+          tags
+
+        return resolveStyles(this, wrappedTags)
       },
 
       render() {
         this.isRendering = true
+        this.firstRender = false
 
         if (process.env.production)
           return this.getRender()
@@ -364,22 +382,30 @@ export default function createComponent(Flint, Internal, name, view, options = {
           return els
         }
         catch(e) {
-          console.error(e.stack)
+          console.error(e)
           reportError(e)
 
           const lastRender = Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]
 
-          const inner = lastRender ?
-            <div dangerouslySetInnerHTML={{ __html: ReactDOMServer.renderToString(lastRender) }} /> :
-            <div>Error in view {name}</div>
+          try {
+            let inner = <div>Error in view {name}</div>
 
-          // highlight in red and return last working render
-          return (
-            <div style={{ position: 'relative' }}>
-              <div class="_flintError" />
-              {inner}
-            </div>
-          )
+            if (lastRender) {
+              let __html = ReactDOMServer.renderToString(lastRender)
+              inner = <div dangerouslySetInnerHTML={{ __html }} />
+            }
+
+            // highlight in red and return last working render
+            return (
+              <div style={{ position: 'relative' }}>
+                <div id="FLINTERROR" />
+                {inner}
+              </div>
+            )
+          }
+          catch(e) {
+            log("Error rendering last version of view after error")
+          }
         }
       }
     })

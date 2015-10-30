@@ -47,13 +47,18 @@ view Debounce {
       }
     }
 
+    function show() {
+      if (view.props.onUpdate) view.props.onUpdate()
+      view.update()
+    }
+
     // override
     if (view.props.force)
-      return view.update()
+      return show()
 
     // debounce
     clearTimeout(timeout)
-    timeout = setTimeout(view.update, curDelay)
+    timeout = setTimeout(show, curDelay)
   })
 
   <debounce yield />

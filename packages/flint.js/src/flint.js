@@ -55,6 +55,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }, userOpts)
 
   const isDevTools = opts.app == 'devTools'
+  const Tools = root._DT
 
   // error handling
   const flintOnError = (...args) => {
@@ -136,7 +137,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     views: {},
     removeView(key) {
-      console.log('remove view', key)
       delete Flint.views[key]
     },
 
@@ -215,6 +215,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         raf(() => {
           const added = arrayDiff(views, cached)
+
+          // send runtime success before render
+          if (Tools)
+            Tools.emitter.emit('runtime:success')
 
           // if removed, just root
           if (removed.length || added.length)
