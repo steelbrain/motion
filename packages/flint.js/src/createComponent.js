@@ -1,3 +1,4 @@
+import ReactDOMServer from 'react-dom/server'
 import React from 'react'
 import raf from 'raf'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
@@ -12,7 +13,6 @@ function pathWithoutProps(path) {
 }
 
 let views = {}
-let lastWorkingViews = {}
 
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
@@ -21,7 +21,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
     return createViewComponent()
 
   if (options.changed) {
-    Internal.views[name] = views[name] = createViewComponent()
+    views[name] = createViewComponent()
   }
 
   return createProxyComponent()
@@ -30,26 +30,15 @@ export default function createComponent(Flint, Internal, name, view, options = {
   function createProxyComponent() {
     return React.createClass({
 
-      onMount(path, component) {
+      onMount(path, component, renderedEls) {
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
         Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = this
-        Internal.lastWorkingViews[name] = this
-      },
 
-      viewError(e, path) {
-        console.error(e.stack)
-        reportError(e)
+        if (renderedEls)
+          Internal.lastWorkingRenders[pathWithoutProps(path)] = renderedEls
 
-        const View = lastWorkingViews[path]
-
-        // highlight in red and return last working render
-        views[name] = (
-          <div style={{ position: 'relative' }}>
-            <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
-            <View {...this.props} />
-          </div>
-        )
+        Internal.lastWorkingViews[name] = { component }
       },
 
       render() {
@@ -59,7 +48,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           <View
             {...this.props}
             _flintOnMount={this.onMount}
-            _flintOnRenderError={this.viewError}
           />
         )
       }
@@ -255,7 +243,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production)
-          this.props._flintOnMount(this.getPath(), this)
+          this.props._flintOnMount(this.getPath(), this, this.lastRendered)
       },
 
       componentWillUnmount() {
@@ -328,7 +316,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getRender() {
-        this.isRendering = true
         this.firstRender = false
 
         const singleTopEl = this.renders.length == 1
@@ -361,20 +348,32 @@ export default function createComponent(Flint, Internal, name, view, options = {
           ...tags
         )
 
-        return els && resolveStyles(this, els) || ''
+        return els = els && resolveStyles(this, els)
       },
 
       render() {
-        const path = pathWithoutProps(this.getPath())
+        this.isRendering = true
+
+        if (process.env.production)
+          return this.getRender()
 
         // try render
         try {
           const els = this.getRender()
-          lastWorkingViews[path] = this
+          this.lastRendered = els
           return els
         }
         catch(e) {
-          this.props._flintOnRenderError(e, path)
+          console.error(e.stack)
+          reportError(e)
+
+          // highlight in red and return last working render
+          return (
+            <div style={{ position: 'relative' }}>
+              <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
+              <div dangerouslySetInnerHTML={{ __html: ReactDOMServer.renderToString(Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]) }} />
+            </div>
+          )
         }
       }
     })

@@ -25,13 +25,6 @@ import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
 import Main from './views/Main'
 
-
-const uuid = () => Math.floor(Math.random() * 1000000)
-function pathToName(path) {
-  let p = path.split(',')
-  return p[p.length - 1].split('.')[0]
-}
-
 /*
 
   Welcome to Flint!
@@ -53,6 +46,8 @@ root.on = on
 root.module = {}
 root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
+const uuid = () => Math.floor(Math.random() * 1000000)
+
 export default function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
     namespace: {},
@@ -60,27 +55,20 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }, userOpts)
 
   // error handling
+  const prevOnError = root.onerror
   const flintOnError = (...args) => {
+    prevOnError && prevOnError(...args)
     reportError(...args)
 
-    Internal.error = true
-
     // restore last working views
-    Object.keys(Internal.views).forEach(name => {
-      Internal.views[name] = Internal.lastWorkingViews[name]
+    Object.keys(Flint.views).forEach(name => {
+      Flint.views[name] = Internal.lastWorkingViews[name]
     })
-
-    raf(Flint.render)
-    Internal.error = false
   }
 
   root.onerror = flintOnError
 
   const Internal = root._Flint = {
-    views: {},
-    hashes: {},
-    removeView(key) { delete Internal.views[key] },
-
     isRendering: 0,
     firstRender: true,
 
@@ -109,6 +97,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     }
   }
 
+  function pathToName(path) {
+    let p = path.split(',')
+    return p[p.length - 1].split('.')[0]
+  }
+
   // devtools edit
   function writeBack(path, writePath) {
     // update getCache
@@ -122,8 +115,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     // update view
     const name = pathToName(path)
-    // TODO: why is this using lastWorkingViews
-    Internal.views[name] = Internal.lastWorkingViews[name]
+    Flint.views[name] = { hash: null, component: Internal.lastWorkingViews[name] }
     Flint.render()
   }
 
@@ -143,6 +135,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     range,
     iff,
 
+    views: {},
+    removeView(key) { delete Flint.views[key] },
+
     render() {
       Internal.firstRender = false
 
@@ -157,7 +152,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         if (Internal.isRendering > 3) return
 
         const MainComponent = (
-            Internal.views.Main || Internal.lastWorkingViews.Main
+            Flint.views.Main.component || Internal.lastWorkingViews.Main.component
         )
 
         if (!browserNode) {
@@ -199,23 +194,29 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.setExports(fileExports)
 
       if (!process.env.production) {
-        // check for removed
-        if (Internal.viewCache[file]) {
-          const cached = Internal.viewCache[file] || []
-          const views = Internal.viewsInFile[file]
-          const removed = arrayDiff(cached, views)
-          removed.map(Internal.removeView)
-        }
+        const cached = Internal.viewCache[file] || []
+        const _views = Internal.viewsInFile[file]
+
+        // remove Internal.viewsInFile that werent made
+        const removed = arrayDiff(cached, _views)
+        removed.map(Flint.removeView)
 
         Internal.currentHotFile = null
         Internal.viewCache[file] = Internal.viewsInFile[file]
+
+        // refresh updated views
+        // if (!Internal.firstRender) {
+        //   raf(Flint.render)
+        // }
 
         if (Internal.firstRender)
           return
 
         raf(() => {
           Internal.changedViews.forEach(name => {
+            console.log(name)
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
+              console.log('mounted view', view, view.isMounted())
               if (view.isMounted()) {
                 view.forceUpdate()
                 return view
@@ -230,7 +231,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       const comp = createComponent.partial(Flint, Internal, name, body)
 
       function setView(name, component) {
-        Internal.views[name] = component
+        Flint.views[name] = { hash, component }
       }
 
       if (process.env.production)
@@ -239,7 +240,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       const hash = hashsum(body)
 
       // if new
-      if (!Internal.views[name]) {
+      if (!Flint.views[name]) {
         setView(name, comp({ hash, changed: true }))
         Internal.changedViews.push(name)
         return
@@ -252,20 +253,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         Internal.viewsInFile[Internal.currentHotFile].push(name)
 
-        // defined twice
+        // not new
+        // if defined twice during first run
         if (Internal.firstRender) {
-          Internal.views[name] = ErrorDefinedTwice(name)
+          Flint.views[name] = ErrorDefinedTwice(name)
           throw new Error(`Defined a view twice: ${name}`)
         }
 
         // if unchanged
-        if (Internal.hashes[name] == hash) {
+        if (Flint.views[name].hash == hash) {
           setView(name, comp({ hash, unchanged: true }))
           return
         }
-
-        // update hash
-        Internal.hashes[name] = hash
 
         // changed
         setView(name, comp({ hash, changed: true }))
@@ -278,7 +277,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     deleteFile(name) {
       const weirdName = `/${name}`
-      Internal.viewsInFile[weirdName].map(Internal.removeView)
+      Internal.viewsInFile[weirdName].map(Flint.removeView)
       delete Internal.viewsInFile[weirdName]
       delete Internal.viewCache[weirdName]
       Flint.render()
@@ -289,12 +288,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // View.SubView
       const subName = `${parentName}.${name}`
-      if (Internal.views[subName]) {
-        result = Internal.views[subName]
+      if (Flint.views[subName]) {
+        result = Flint.views[subName].component
       }
       // regular view
-      else if (Internal.views[name]) {
-        result = Internal.views[name]
+      else if (Flint.views[name]) {
+        result = Flint.views[name].component
       }
       else {
         result = NotFound(name)
