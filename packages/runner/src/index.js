@@ -144,7 +144,12 @@ async function buildTemplate() {
 }
 
 async function copyWithMap(file, dest) {
-  await copy(file, dest)
+  try {
+    await copy(file, dest)
+  }
+  catch(e) {
+    console.log("Couldn't copy", file)
+  }
 
   try {
     await copy(file + '.map', dest + '.map')
