@@ -48,10 +48,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const View = views[name]
 
         return (
-          <View
-            {...this.props}
-            _flintOnMount={this.onMount}
-          />
+          <View {...this.props} _flintOnMount={this.onMount} />
         )
       }
     })
@@ -379,7 +376,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           // highlight in red and return last working render
           return (
             <div style={{ position: 'relative' }}>
-              <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
+              <div class="_flintError" />
               {inner}
             </div>
           )

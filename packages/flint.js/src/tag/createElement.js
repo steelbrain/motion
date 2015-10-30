@@ -3,6 +3,7 @@ import classnames from 'classnames'
 
 import eventShorthands from './eventShorthands'
 import elementStyles from './styles'
+import tags from './tags'
 
 const add = (a, b) => a + b
 const contains = (i, ls) => ls.indexOf(i) != -1
@@ -137,10 +138,9 @@ export default function createElement(viewName) {
 
     props.__key = key
 
-      // TODO: whitelist actual html tags
-    // write all tags to div in production
-    // if (process.env.production)
-    //   tag = 'div'
+    // whitelist tags
+    if (!tags[tag])
+      tag = 'div'
 
     return React.createElement(tag, props, ...args)
   }
