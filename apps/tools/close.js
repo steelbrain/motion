@@ -1,5 +1,5 @@
 view Close {
-  <close onClick={^onClick}>
+  <close onClick={view.props.onClick}>
     x
   </close>
 
@@ -7,8 +7,8 @@ view Close {
     position: 'absolute',
     right: 0,
     top: 0,
-    width: ^size || 50,
-    height: ^size || 50,
+    width: view.props.size || 50,
+    height: view.props.size || 50,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

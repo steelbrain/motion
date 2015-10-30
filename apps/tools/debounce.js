@@ -19,7 +19,7 @@ view Debounce {
   view.pause()
 
   on('props', () => {
-    delay = ^delay || Delay
+    delay = view.props.delay || Delay
     curDelay = curDelay || delay
 
     // find diff
@@ -48,7 +48,7 @@ view Debounce {
     }
 
     // override
-    if (^force)
+    if (view.props.force)
       return view.update()
 
     // debounce

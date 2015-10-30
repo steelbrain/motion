@@ -142,32 +142,32 @@ const fileName = url => url && url.replace(/[\?\)].*/, '')
 const getLine = err => err && (err.line || err.loc && err.loc.line)
 
 view ErrorMessage {
-  let line = getLine(^error)
+  let line = getLine(view.props.error)
 
   on('props', () => {
-    line = getLine(^error)
+    line = getLine(view.props.error)
   })
 
-  <Debounce force={!^error}>
+  <Debounce force={!view.props.error}>
     <bar>
-      <Close onClick={^close} size={40} />
-      <inner if={^npmError}>
-        <where><b>{^npmError.name}</b></where> {^npmError.msg}
+      <Close onClick={view.props.close} size={40} />
+      <inner if={view.props.npmError}>
+        <where><b>{view.props.npmError.name}</b></where> {view.props.npmError.msg}
       </inner>
-      <inner if={^error}>
+      <inner if={view.props.error}>
         <where>
-          In <b>{fileName(^error.file)}</b>
+          In <b>{fileName(view.props.error.file)}</b>
           <line if={line}>
             <span>&nbsp;line</span> <b>{line - flintAddedLines}</b>
           </line>
         </where>
         {' '}
         <errorTitle>
-          {(^error.niceMessage || ^error.message).trim()}
-          <niceStack if={^error.niceStack}>
-            {^error.niceStack[0]}
-            <errCol>{^error.niceStack[1]}</errCol>
-            {^error.niceStack[2]}
+          {(view.props.error.niceMessage || view.props.error.message).trim()}
+          <niceStack if={view.props.error.niceStack}>
+            {view.props.error.niceStack[0]}
+            <errCol>{view.props.error.niceStack[1]}</errCol>
+            {view.props.error.niceStack[2]}
           </niceStack>
         </errorTitle>
       </inner>
@@ -181,7 +181,7 @@ view ErrorMessage {
     background: red,
     position: 'fixed',
     left: 0,
-    bottom: ^error ? 0 : -100,
+    bottom: view.props.error ? 0 : -100,
     transition: 'all 200ms ease-in',
     right: 0,
     fontFamily: '-apple-system, "San Francisco", Roboto, "Segou UI", "Helvetica Neue", Helvetica, Arial, sans-serif',

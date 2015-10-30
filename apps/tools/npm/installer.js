@@ -66,7 +66,7 @@ view Installer {
 }
 
 view Versions {
-  <version repeat={^versions} onClick={() => ^onSelect(_)}>
+  <version repeat={view.props.versions} onClick={() => view.props.onSelect(_)}>
     <inner>
       <v key={'v' + _index}>{_.version}</v>
       <info>{_.description}</info>

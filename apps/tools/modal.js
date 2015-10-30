@@ -6,14 +6,14 @@ view Modal {
   on('props', setMessage)
 
   function setMessage() {
-    open = ^open
+    open = view.props.open
 
     // cache last children when empty
-    if (title && !^title)
+    if (title && !view.props.title)
       return view.update()
 
-    title = ^title
-    children = ^children
+    title = view.props.title
+    children = view.props.children
     view.update()
   }
 
