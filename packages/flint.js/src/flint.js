@@ -63,10 +63,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   const flintOnError = (...args) => {
     reportError(...args)
 
+    Internal.error = true
+
     // restore last working views
     Object.keys(Internal.views).forEach(name => {
       Internal.views[name] = Internal.lastWorkingViews[name]
     })
+
+    raf(Flint.render)
+    Internal.error = false
   }
 
   root.onerror = flintOnError

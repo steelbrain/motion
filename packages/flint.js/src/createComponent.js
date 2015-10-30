@@ -34,38 +34,34 @@ export default function createComponent(Flint, Internal, name, view, options = {
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
         Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = this
-        Internal.lastWorkingViews[name] = lastWorkingViews[name] = this
+        Internal.lastWorkingViews[name] = this
       },
 
-      lastWorkingView() {
-        const View = lastWorkingViews[name]
-        return <View {...this.props} _flintOnMount={this.onMount} />
-      },
+      viewError(e, path) {
+        console.error(e.stack)
+        reportError(e)
 
-      curView() {
-        const View = views[name]
-        return <View {...this.props} _flintOnMount={this.onMount} />
+        const View = lastWorkingViews[path]
+
+        // highlight in red and return last working render
+        views[name] = (
+          <div style={{ position: 'relative' }}>
+            <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
+            <View {...this.props} />
+          </div>
+        )
       },
 
       render() {
-        // try render
-        try {
-          const els = this.curView()
-          this.lastRendered = els
-          return els
-        }
-        catch(e) {
-          console.error(e.stack)
-          reportError(e)
+        const View = views[name]
 
-          // highlight in red and return last working render
-          return (
-            <div style={{ position: 'relative' }}>
-              <div style={{ background: 'rgba(255,0,0,0.04)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2147483647 }} />
-              {this.lastWorkingView()}
-            </div>
-          )
-        }
+        return (
+          <View
+            {...this.props}
+            _flintOnMount={this.onMount}
+            _flintOnRenderError={this.viewError}
+          />
+        )
       }
     })
   }
@@ -259,7 +255,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production)
-          this.props._flintOnMount(this.getPath(), this, this.lastRendered)
+          this.props._flintOnMount(this.getPath(), this)
       },
 
       componentWillUnmount() {
@@ -331,7 +327,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.getChildContext = () => obj
       },
 
-      render() {
+      getRender() {
         this.isRendering = true
         this.firstRender = false
 
@@ -365,7 +361,21 @@ export default function createComponent(Flint, Internal, name, view, options = {
           ...tags
         )
 
-        return els = els && resolveStyles(this, els)
+        return els && resolveStyles(this, els) || ''
+      },
+
+      render() {
+        const path = pathWithoutProps(this.getPath())
+
+        // try render
+        try {
+          const els = this.getRender()
+          lastWorkingViews[path] = this
+          return els
+        }
+        catch(e) {
+          this.props._flintOnRenderError(e, path)
+        }
       }
     })
 
