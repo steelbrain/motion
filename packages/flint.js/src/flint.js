@@ -135,7 +135,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     iff,
 
     views: {},
-    removeView(key) { delete Flint.views[key] },
+    removeView(key) {
+      console.log('remove view', key)
+      delete Flint.views[key]
+    },
 
     render() {
       if (Internal.preloaders.length)
@@ -197,11 +200,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.setExports(fileExports)
 
       if (!process.env.production) {
-        const cached = Internal.viewCache[file] || []
-        const _views = Internal.viewsInFile[file]
+        const cached = Internal.viewCache[file] || Internal.viewsInFile[file]
+        const views = Internal.viewsInFile[file]
 
         // remove Internal.viewsInFile that werent made
-        const removed = arrayDiff(cached, _views)
+        const removed = arrayDiff(cached, views)
         removed.map(Flint.removeView)
 
         Internal.currentHotFile = null
@@ -211,6 +214,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           return
 
         raf(() => {
+          const added = arrayDiff(views, cached)
+
+          // if removed, just root
+          if (removed.length || added.length)
+            return Flint.render()
+
           Internal.changedViews.forEach(name => {
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
               if (view.isMounted()) {
@@ -226,12 +235,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     view(name, body) {
       const comp = createComponent.partial(Flint, Internal, name, body)
 
+      if (process.env.production)
+        return setView(name, comp())
+
       function setView(name, component) {
         Flint.views[name] = { hash, component }
       }
 
-      if (process.env.production)
-        setView(name, comp())
+      // set view in cache
+      Internal.viewsInFile[Internal.currentHotFile].push(name)
 
       const hash = hashsum(body)
 
@@ -246,8 +258,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       if (!process.env.production) {
         if (!Internal.mountedViews[name])
           Internal.mountedViews[name] = []
-
-        Internal.viewsInFile[Internal.currentHotFile].push(name)
 
         // not new
         // if defined twice during first run
