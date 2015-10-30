@@ -139,7 +139,7 @@ export default function createElement(viewName) {
     props.__key = key
 
     // whitelist tags
-    if (!tags[tag])
+    if (typeof tag == 'string' && !tags[tag])
       tag = 'div'
 
     return React.createElement(tag, props, ...args)
