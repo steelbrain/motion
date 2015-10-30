@@ -47,12 +47,12 @@ if [ $1="--watch" ]; then
     if [ -d 'lib' ]; then
       chsum2=`find lib -type f -exec md5 {} \;`
       if [[ $chsum1 != $chsum2 ]] ; then
-        npm link
+        npm link --loglevel=error
         chsum1=$chsum2
 
         # watch tools after first build
         if [ $hasLinkedOnce == 'false' ]; then
-          sleep 4 # todo: wait for webpack finish
+          sleep 3 # todo: wait for webpack finish
           cd ../..
           cd apps/tools
           flint build --watch &

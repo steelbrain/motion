@@ -3,6 +3,8 @@ require("shelljs/global");
 var path = require("path");
 var fs   = require("fs");
 
+exec("npm install --loglevel=error")
+
 // get packages
 var packages = [];
 
@@ -32,7 +34,7 @@ packageNames.forEach(function (loc) {
 // link in apps first
 ['tools'].forEach(function(app) {
   cd("apps/" + app + "/.flint")
-  exec("npm install")
+  exec("npm install --loglevel=error")
   exec("npm link")
   cd("../../..")
 })
