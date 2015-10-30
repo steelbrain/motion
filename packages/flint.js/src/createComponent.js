@@ -21,7 +21,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
     return createViewComponent()
 
   if (options.changed) {
-    console.log('view changed', name)
     views[name] = createViewComponent()
   }
 
