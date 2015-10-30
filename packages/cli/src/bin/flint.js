@@ -3,17 +3,22 @@
 var Program = require('commander');
 
 // make `flint run` default command
-var flintCmdIndex;
-process.argv.forEach(function(arg, i) {
-  if (arg.match(/flint?$/)) flintCmdIndex = i;
-});
+var flintIndex = getFlintIndex()
+
+ // find where index of flint is
+function getFlintIndex() {
+  for (let [index, arg] of process.argv.entries()) {
+    if (arg.indexOf('flint') > 0)
+      return index
+    }
+}
 
 // make sure flags are still passed to `flint run`
-var firstFlag = process.argv[flintCmdIndex + 1]
+var firstFlag = process.argv[flintIndex + 1]
 
-if (flintCmdIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === '-')) {
+if (flintIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === '-')) {
   process.flintArgs = [].concat(process.argv);
-  process.flintArgs.splice(flintCmdIndex + 1, 0, 'run');
+  process.flintArgs.splice(flintIndex + 1, 0, 'run');
 }
 
 // check flint version
