@@ -10,7 +10,7 @@ release_package() {
   echo $1
 
   if [ -f "webpack.config.release.js" ]; then
-    node node_modules/webpack/bin/webpack --config webpack.config.release.js $1 &
+    node node_modules/webpack/bin/webpack --config webpack.config.release.js
     echo "building webpack"
   fi
 
