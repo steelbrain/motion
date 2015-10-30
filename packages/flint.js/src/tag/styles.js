@@ -38,10 +38,10 @@ export default function elementStyles(key, view, name, tag, props) {
     return
 
   // attach view styles from $ to element matching view name lowercase
-  const isRoot = (
-    view.renders.length <= 1 &&
-    view.name && view.name.toLowerCase() == name
-  )
+  const isRootName = view.name && view.name.toLowerCase() == name
+  const hasOneRender = view.renders.length <= 1
+  const isSingleRoot = isRootName && hasOneRender
+  const isWrapperWithMultipleChildren = props && props.isWrapper && !hasOneRender
 
   if (view.styles) {
     // console.log(name, tag)
@@ -64,20 +64,22 @@ export default function elementStyles(key, view, name, tag, props) {
       nameStyleStatic = view.styles._static[name]
 
     let ran = false
+    let result
 
-    let result = mergeStyles(null,
-      // tag style
-      tagStyle ? tagStyle(index) : null,
-      // base style
-      isRoot && viewStyle,
-      isRoot && viewStyleStatic,
-      // name dynamic styles
-      nameStyle && diffName && nameStyle(index),
-      // tag static
-      tagStyleStatic,
-      // name static
-      nameStyleStatic,
-    )
+    if (!isWrapperWithMultipleChildren)
+      result = mergeStyles(null,
+        // tag style
+        tagStyle ? tagStyle(index) : null,
+        // base style
+        isSingleRoot && viewStyle,
+        isSingleRoot && viewStyleStatic,
+        // name dynamic styles
+        nameStyle && diffName && nameStyle(index),
+        // tag static
+        tagStyleStatic,
+        // name static
+        nameStyleStatic,
+      )
 
     // add class styles
     if (props.className) {
@@ -95,7 +97,7 @@ export default function elementStyles(key, view, name, tag, props) {
         result = mergeStyles(...result)
 
       // add view external props.style
-      if (isRoot && view.props.style)
+      if (isSingleRoot && view.props.style)
         result = mergeStyles(result, view.props.style)
 
       // add style="" prop styles
