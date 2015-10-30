@@ -322,23 +322,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.getChildContext = () => obj
       },
 
-      getWrapper(tags, props) {
-        const styles = {
-          style: Object.assign({},
-            this.props.style,
-            this.styles.$ && this.styles.$(),
-            this.styles._static && this.styles._static.$
-          )
-        }
-
-        return this.el(`${name.toLowerCase()}`,
-          // props
-          props,
-          ...tags
-        )
+      getWrapper(tags, props, numRenders) {
+        const wrapperName = name.toLowerCase()
+        let tagProps = Object.assign({ isWrapper: true }, props)
+        return this.el(`${wrapperName}`, tagProps, ...tags)
       },
 
       getRender() {
+
         let tags, props, addWrapper
         const numRenders = this.renders && this.renders.length
 
@@ -349,11 +340,16 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         if (numRenders == 1) {
-          tags = [this.renders[0].call(this)]
+          tags = this.renders[0].call(this)
+          let first = tags
 
           // tag name != view name
-          if (tags[0].type != name.toLowerCase())
-            addWrapper = true
+          if (tags.length)
+            first = tags[0]
+
+          if (first.props && first.props.__type != name.toLowerCase()) {
+            addWrapper = false
+          }
         }
 
         if (numRenders > 1) {
@@ -362,7 +358,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         const wrappedTags = addWrapper ?
-          this.getWrapper(tags, props) :
+          this.getWrapper(tags, props, numRenders) :
           tags
 
         return resolveStyles(this, wrappedTags)

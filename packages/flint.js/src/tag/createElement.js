@@ -139,6 +139,9 @@ export default function createElement(viewName) {
     props.__key = key
 
     // whitelist tags
+    // remember original
+    props.__tagName = name
+
     if (typeof tag == 'string' && !tags[tag])
       tag = 'div'
 
