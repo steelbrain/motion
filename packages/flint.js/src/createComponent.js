@@ -1,8 +1,8 @@
 import ReactDOMServer from 'react-dom/server'
 import React from 'react'
 import raf from 'raf'
-import Radium from 'radium'
-// import resolveStyles from 'flint-radium/lib/resolve-styles'
+// import Radium from 'radium'
+import resolveStyles from 'flint-radium/lib/resolve-styles'
 
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
@@ -349,7 +349,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           ...tags
         )
 
-        return els // = els && resolveStyles(this, els)
+        return resolveStyles(this, els)
       },
 
       render() {
@@ -385,7 +385,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       }
     })
 
-    return Radium(component)
+    return component
   }
 }
 
