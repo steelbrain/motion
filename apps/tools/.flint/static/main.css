@@ -38,9 +38,10 @@ body, #_flintapp {
 }
 
 /* both needed to match <main> or <other> in Main */
-#_flintapp > .main, #_flintapp > main {
+#_flintapp > .main, #_flintapp > viewmain {
   flex: 1;
   -webkit-flex: 1;
+  height: 100%;
 }
 
 a, button, input, textarea {

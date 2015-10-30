@@ -458,7 +458,13 @@ function listenForKeys() {
           openInBrowser(true)
           break
         case 'e': // open editor
-          editor('.')
+          try {
+            editor('.')
+          }
+          catch(e) {
+            console.log('Error running your editor, make sure your shell EDITOR variable is set')
+          }
+
           break
         case 'i': // install npm
           console.log('Installing npm packages...'.white.bold)

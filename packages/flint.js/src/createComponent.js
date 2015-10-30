@@ -9,9 +9,11 @@ import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
 import phash from './lib/phash'
 
-function pathWithoutProps(path) {
-  return path.replace(/\.[a-z0-9\-]+$/, '')
-}
+const capitalize = str =>
+  str[0].toUpperCase() + str.substring(1)
+
+const pathWithoutProps = path =>
+  path.replace(/\.[a-z0-9\-]+$/, '')
 
 let views = {}
 
@@ -336,7 +338,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         // view.wrapper
-        let els = !wrap ? tags[0] : this.el(`view.${name}`,
+        let els = !wrap ? tags[0] : this.el(`view${name}`,
           // props
           {
             style: Object.assign(

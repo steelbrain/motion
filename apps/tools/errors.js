@@ -4,8 +4,9 @@ const propsMatch = /view\.props\./g
 const propsReplace = String.fromCharCode('94')
 
 const niceRuntimeError = err => {
-  err.file = err.file
-    .replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
+  if (err.file)
+    err.file = err.file
+      .replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
 
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
