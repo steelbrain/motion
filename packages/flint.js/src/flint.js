@@ -54,6 +54,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
+  const isDevTools = opts.app == 'devTools'
+
   // error handling
   const flintOnError = (...args) => {
     reportError(...args)
@@ -163,7 +165,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         // computing internal paths is expensive,
         // lets compute them after first render,
-        if (Internal.firstRender)
+        if (Internal.firstRender && !isDevTools)
           setTimeout(Flint.render, 5)
 
         Internal.firstRender = false
