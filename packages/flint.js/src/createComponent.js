@@ -206,7 +206,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       setPath() {
-        if (process.env.production)
+        console.log('computing hash?', Internal.firstRender)
+        if (process.env.production || Internal.firstRender)
           return
 
         let propsHash

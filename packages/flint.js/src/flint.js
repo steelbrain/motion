@@ -136,8 +136,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     removeView(key) { delete Flint.views[key] },
 
     render() {
-      Internal.firstRender = false
-
       if (Internal.preloaders.length)
         Promise.all(Internal.preloaders.map(loader => loader())).then(run)
       else
@@ -163,6 +161,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
         }
 
+        // computing internal paths is expensive,
+        // lets compute them after first render,
+        if (Internal.firstRender)
+          setTimeout(Flint.render, 5)
+
+        Internal.firstRender = false
         emitter.emit('afterRender')
         Internal.isRendering = 0
       }
@@ -207,7 +211,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         raf(() => {
           Internal.changedViews.forEach(name => {
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
-              console.log('mounted view', name, view.isMounted())
               if (view.isMounted()) {
                 view.forceUpdate()
                 return view

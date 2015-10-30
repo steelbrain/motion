@@ -103,7 +103,18 @@ function makeFolder() {
 
 function getScaffold() {
   return new Promise((res, rej) => {
-    mkdirp(FLINT.scaffoldDir, err => {
+    // check online
+    promiseProcess('curl http://github.com', { msg: false })
+      .then(() => {
+        log('Online')
+        next()
+      })
+      .catch(() => {
+        log('Not online')
+        copyScaffold().then(() => res())
+      })
+
+    var next =  mkdirp.bind(null, FLINT.scaffoldDir, err => {
       log('mkdirp err', err)
       const isCloningExample = repo != scaffoldRepo
 
@@ -133,8 +144,7 @@ function updateScaffoldCache() {
   log('Looking for updated scaffold in %s', FLINT.scaffoldRepo)
 
   return new Promise(function(resolve, reject) {
-    // check if online
-    checkNewScaffold(function(needsNew) {
+    return checkNewScaffold(needsNew => {
       log('checkNewScaffold needsNew?', needsNew)
       if (!needsNew) return resolve(true)
 
@@ -216,12 +226,16 @@ function copyLatestSHA(dir) {
 
 function copyScaffold() {
   log('Copy new scaffold', FLINT.scaffoldDir, FLINT.dest)
-  return ncp(FLINT.scaffoldDir, FLINT.dest, function(err) {
-    if (err) {
-      console.log("Error, couldn't copy scaffold folder".red)
-      console.log(FLINT.scaffoldDir, FLINT.dest)
-      process.exit(1)
-    }
+  return new Promise((res, rej) => {
+    ncp(FLINT.scaffoldDir, FLINT.dest, function(err) {
+      if (err) {
+        console.log("Error, couldn't copy scaffold folder".red)
+        console.log(FLINT.scaffoldDir, FLINT.dest)
+        process.exit(1)
+      }
+
+      res()
+    })
   })
 }
 
@@ -302,7 +316,6 @@ function promiseProcess(cmd, opts) {
 
 function handleChildProcess(resolve, reject, error, stdout, stderr) {
   if (error) {
-    console.log('Error', error)
     log(stderr)
     return reject(error)
   }
