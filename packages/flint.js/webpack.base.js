@@ -29,9 +29,8 @@ module.exports = function(opts) {
 
   if (opts.minify)
     plugins.push(
-      new webpack.optimize.UglifyJsPlugin({
-        compress: { warnings: false }
-      })
+      new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
+      new webpack.optimize.OccurenceOrderPlugin()
     )
 
   if (opts.dedupe)
