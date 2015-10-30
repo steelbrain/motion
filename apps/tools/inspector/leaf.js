@@ -37,11 +37,6 @@ view Leaf {
     view.update()
   })
 
-  function showOriginalClick(e) {
-    original = view.props.getOriginal(path)
-    e.stopPropagation()
-  }
-
   function toggle(e) {
     if (!view.props.root)
       expanded = !expanded
@@ -72,22 +67,16 @@ view Leaf {
         <name>{format(key)}</name>:
         {label('key', key, key)}
       </key>
-      <title>
-        <expand if={type == 'Array'}>
-          <type>[]</type> {items(data.length)}
-        </expand>
-        <expand if={type == 'Object'}>
-          <type>{'{}'}</type> {items(Object.keys(data).length)}
-        </expand>
-        <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
-          {format(String(data))}
-          {label('val', data, key)}
-        </value>
-      </title>
-      <button
-        if={!(isPrimitive(data) || original || !view.props.getOriginal || !query || contains(path, query))}
-        onClick={showOriginalClick}
-      />
+      <expand if={type == 'Array'}>
+        <type>[]</type> {items(data.length)}
+      </expand>
+      <expand if={type == 'Object'}>
+        <type>{'{}'}</type> {items(Object.keys(data).length)}
+      </expand>
+      <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
+        {format(String(data))}
+        {label('val', data, key)}
+      </value>
     </label>
     <children>
       <Leaf
