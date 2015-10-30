@@ -68,7 +68,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   root.onerror = flintOnError
-
+  
   const Internal = root._Flint = {
     isRendering: 0,
     firstRender: true,

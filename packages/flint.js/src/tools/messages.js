@@ -1,4 +1,5 @@
 import { compileError, compileSuccess } from './errors';
+import removeFlintExt from '../lib/flintExt';
 
 export default function run(browser, opts) {
   const ws = new WebSocket('ws://localhost:' + opts.websocketPort + '/')
@@ -58,11 +59,12 @@ let lastLoadedAt = {};
 
 function addScript(message, cb) {
   const { name, timestamp, src } = message;
+  const jsName = removeFlintExt(name)
 
-  if (!lastLoadedAt[name] || lastLoadedAt[name] < timestamp) {
-    lastLoadedAt[name] = timestamp;
+  if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
+    lastLoadedAt[jsName] = timestamp;
 
-    const fullSrc = (src || '/_' + name)
+    const fullSrc = (src || '/_' + jsName)
 
     const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
     if (oldScript) {
