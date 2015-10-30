@@ -329,39 +329,33 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getRender() {
-
-        let tags, props, addWrapper
+        let tags, props
+        let addWrapper = true
         const numRenders = this.renders && this.renders.length
 
         if (!numRenders) {
           tags = []
           props = { yield: true }
-          addWrapper = true
         }
 
         if (numRenders == 1) {
           tags = this.renders[0].call(this)
-          let first = tags
 
-          // tag name != view name
-          if (tags.length)
-            first = tags[0]
-
-          if (first.props && first.props.__type != name.toLowerCase()) {
+          if (!Array.isArray(tags) && tags.props && tags.props.__type != name.toLowerCase())
             addWrapper = false
-          }
         }
 
         if (numRenders > 1) {
           tags = this.renders.map(r => r.call(this))
-          addWrapper = true
         }
 
         const wrappedTags = addWrapper ?
           this.getWrapper(tags, props, numRenders) :
           tags
 
-        return resolveStyles(this, wrappedTags)
+        const styled = resolveStyles(this, wrappedTags)
+
+        return styled
       },
 
       render() {
