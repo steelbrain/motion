@@ -249,8 +249,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this._isMounted = true
         this.runEvents('mount')
 
-        if (!process.env.production)
+        if (!process.env.production) {
+          // re-render after first mount
+          // (triggers calculating props hashes for hot reloads)
+          if (Internal.firstRender && !Internal.isDevTools)
+            Flint.render()
+
           this.props._flintOnMount(this.getPath(), this, this.lastRendered)
+        }
       },
 
       componentWillUnmount() {
@@ -345,9 +351,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
             Array.isArray(tags) ||
             !tags.props
           )
-
-          if (name == 'Example')
-            debugger
 
           if (!Array.isArray(tags) && tags.props && tags.props.__tagName != name.toLowerCase()) {
             addWrapper = true

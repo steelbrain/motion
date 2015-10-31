@@ -543,7 +543,7 @@ function getScriptTags(files, req) {
       newLine,
       '<!-- APP -->',
       assetScriptTags(files),
-      '<script>Flint.render()</script>',
+      '<script>Flint.init()</script>',
       '<!-- END APP -->'
     ].join(newLine)
 }

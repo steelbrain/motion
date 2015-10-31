@@ -12,8 +12,8 @@ let params = {}
 let location = window.location.pathname
 
 const router = {
-  init(_render) {
-    render = _render
+  init({ onChange }) {
+    render = onChange
   },
 
   link(...args) {

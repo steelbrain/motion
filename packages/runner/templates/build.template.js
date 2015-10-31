@@ -5,7 +5,7 @@ function flintRun_<%= data.name %>(node, opts, cb) {
   (function(Flint) {
     <%= data.contents %>
 
-    Flint.render()
+    Flint.init()
   })(Flint);
 }
 

@@ -54,7 +54,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
-  const isDevTools = opts.app == 'devTools'
   const Tools = root._DT
 
   // error handling
@@ -68,10 +67,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   root.onerror = flintOnError
-  
+
   const Internal = root._Flint = {
     isRendering: 0,
     firstRender: true,
+    isDevTools: opts.app == 'devTools',
 
     viewCache: {}, // map of views in various files
     viewsInFile: {}, // current build up of running hot insertion
@@ -131,6 +131,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   const emitter = ee({})
 
   let Flint = {
+    init() {
+      router.init({ onChange: Flint.render })
+      Flint.render()
+    },
+
     router,
     range,
     iff,
@@ -165,11 +170,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
         }
-
-        // computing internal paths is expensive,
-        // lets compute them after first render,
-        if (Internal.firstRender && !isDevTools)
-          setTimeout(Flint.render, 5)
 
         Internal.firstRender = false
         emitter.emit('afterRender')
@@ -344,9 +344,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Internal.inspector = { path, cb }
       setInspector(path)
     }
-  };
-
-  router.init(Flint.render)
+  }
 
   // shim root view
   opts.namespace.view = {
