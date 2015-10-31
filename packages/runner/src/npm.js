@@ -34,6 +34,8 @@ function init(_opts) {
   OPTS = _opts
 
   WHERE.outDir = p(OPTS.flintDir, 'deps')
+  WHERE.internalsInJS = p(WHERE.outDir, 'internals.in.js')
+  WHERE.internalsOutJS = p(WHERE.outDir, 'internals.js')
   WHERE.depsJS = p(WHERE.outDir, 'deps.js')
   WHERE.depsJSON = p(WHERE.outDir, 'deps.json')
   WHERE.packagesJS = p(WHERE.outDir, 'packages.js')
@@ -146,9 +148,9 @@ async function install(force) {
 
 // => deps.json
 // => deps.js
-const depRequireString = name => `
+const depRequireString = (name, onto = '__flintPackages') => `
   try {
-    window.__flintPackages["${name}"] = require("${name}")
+    window.${onto}["${name}"] = require("${name}")
   }
   catch(e) {
     console.log('Error running package!')
@@ -164,12 +166,12 @@ async function writeDeps(deps = []) {
   await writeFile(WHERE.depsJS, requireString)
 }
 
-// allInstalled() => pack()
+// allInstalled() => packExternals()
 async function bundleExternals() {
   log('npm: bundleExternals')
   const installed = await getAllExternals()
   await writeDeps(installed)
-  await pack()
+  await packExternals()
 }
 
 async function getAllExternals() {
@@ -199,7 +201,7 @@ function scanFile(file, source) {
   log('scanFile', file)
   try {
     // install new stuff
-    installExports(file, source)
+    installInternals(file, source)
     installExternals(file, source)
   }
   catch (e) {
@@ -210,11 +212,55 @@ function scanFile(file, source) {
 }
 
 const findExports = source =>
-  getMatches(source, /exports/)
+  getMatches(source, /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/)
 
-async function installExports(file, source) {
-  log('installExports', file)
-  // const fileExports = findExports(source)
+// TODO: check this in babel to be more accurate
+// we bundle any internal file that uses:
+//    exports.xyz, exports['default']
+function installInternals(file, source) {
+  log('installInternals', file)
+
+  // check for newly exported
+  if (!file.isExported(file) && findExports(source)) {
+    cache.setIsExported(file)
+    bundleInternals(cache.getExported())
+  }
+}
+
+async function bundleInternals(files) {
+  log('bundleInternals', files)
+
+  const requireString = deps.map(dep =>
+    depRequireString(dep, '__flintInternals')).join('')
+
+  await writeFile(WHERE.internalsInJS, requireString)
+  await packInternals()
+  bridge.message('internals:reload')
+}
+
+function packInternals() {
+  return new Promise((res, rej) => {
+    webpack({
+      entry: WHERE.internalsInJS,
+      externals: {
+        react: 'React',
+        bluebird: '_bluebird',
+        'react-dom': 'ReactDOM'
+      },
+      output: {
+        filename: WHERE.internalsOutJS
+      },
+      devtool: 'source-map'
+    }, async err => {
+      if (err) {
+        console.log(err)
+        return rej(err)
+      }
+
+      log('npm: pack: finished')
+      res()
+    })
+  })
 }
 
 async function installExternals(file, source) {
@@ -316,7 +362,7 @@ async function setInstalled() {
 
 // webpack
 // deps.js => packages.js
-async function pack(file, out) {
+async function packExternals(file, out) {
   log('npm: pack')
   return new Promise((resolve, reject) => {
     webpack({

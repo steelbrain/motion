@@ -57,6 +57,19 @@ const Cache = {
     imports = _imports
   },
 
+  isExported(file: string) {
+    return files[name(file)].isExported
+  },
+
+  setIsExported(file: string) {
+    const file = files[name(file)]
+    file.isExported = true
+  },
+
+  getExported() {
+    return Object.keys(files).map(f => f.isExported && f).filter(f => !!f)
+  },
+
   setFileImports(file: string, imports: ImportArray) {
     log('cache: setFileImports', file, imports);
     let cacheFile = Cache.get(file)
