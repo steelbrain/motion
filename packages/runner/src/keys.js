@@ -11,7 +11,7 @@ const proc = process // cache for keypress
 export function start() {
   let OPTS = opts.get()
 
-  if (!process.stdin.isTTY)
+  if (!proc.stdin.isTTY || OPTS.isBuild)
     return
 
   keypress(proc.stdin)

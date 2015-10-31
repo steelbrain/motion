@@ -13,7 +13,7 @@ import clear from './fbuild/clear'
 import keys from './keys'
 import {
   p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, copy, touch,
+  readFile, writeFile, touch,
   exists } from './lib/fns'
 
 import flintTransform from 'flint-transform'
@@ -32,8 +32,11 @@ const $ = loadPlugins()
 Promise.longStackTraces()
 
 const newLine = "\n"
-const SCRIPTS_GLOB = [ '[Mm]ain.js', '**/*.{js,jsf}', '!node_modules{,/**}', '!.flint{,/**}' ]
-const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
+const SCRIPTS_GLOB = [
+  '[Mm]ain.js', '**/*.{js,jsf}',
+  '!node_modules{,/**}',
+  '!.flint{,/**}'
+]
 
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
@@ -396,9 +399,9 @@ function runServer() {
     // packages.js
     server.use('/__', express.static('.flint/deps'));
     // tools.js
-    server.use('/__/tools', express.static(p(MODULES_DIR, 'flint-tools', 'build', '_')));
+    server.use('/__/tools', express.static(p(OPTS.modulesDir, 'flint-tools', 'build', '_')));
     // flint.js & react.js
-    server.use('/__', express.static(p(MODULES_DIR, 'flint-js', 'dist')));
+    server.use('/__', express.static(p(OPTS.modulesDir, 'flint-js', 'dist')));
 
     server.get('*', function(req, res) {
       runAfterFirstBuildComplete(function() {
@@ -519,7 +522,7 @@ export async function run(_opts, isBuild) {
 
       log('building...')
       await clear.buildDir()
-      await build(afterFirstBuild)
+      await build(false, afterFirstBuild)
       await npm.install()
 
       console.log(

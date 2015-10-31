@@ -20,6 +20,7 @@ function get(key) {
 function setAll(opts) {
   // from cli
   OPTS = {}
+
   OPTS.debug = opts.debug || opts.verbose
   OPTS.port = opts.port
   OPTS.host = opts.host
@@ -28,6 +29,7 @@ function setAll(opts) {
   OPTS.build = opts.isBuild
 
   OPTS.defaultPort = 4000
+  OPTS.modulesDir = p(__dirname, '..', '..', 'node_modules')
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')

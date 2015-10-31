@@ -247,7 +247,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       }
 
       // set view in cache
-      Internal.viewsInFile[Internal.currentHotFile].push(name)
+      let viewsInCurrentFile = Internal.viewsInFile[Internal.currentHotFile]
+
+      if (!viewsInCurrentFile)
+        debugger
+
+      viewsInCurrentFile.push(name)
 
       const hash = hashsum(body)
 

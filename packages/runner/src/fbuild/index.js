@@ -1,7 +1,7 @@
-import main from '..'
+import { buildWhileRunning } from '../index'
 import { p } from '../lib/fns'
 import { buildScripts } from '../index'
-import { stopListen } from '../keys'
+import keys from '../keys'
 import copy from './copy'
 import makeTemplate from './template'
 
@@ -15,9 +15,9 @@ export default async function build(running, afterFirstBuild) {
   ]
 
   if (running) {
-    await main.buildWhileRunning()
+    await buildWhileRunning()
     makeTemplate()
-    stopListen()
+    keys.stop()
   }
   else {
     buildScripts()

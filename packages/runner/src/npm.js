@@ -221,14 +221,16 @@ const findExports = source =>
 function installInternals(file, source) {
   log('installInternals', file)
 
+  if (OPTS.build) return
+
   const foundExports = findExports(source)
-  const isExportedAlready = cache.isExported(file)
+  const alreadyExported = cache.isExported(file)
 
   log('installInternals: foundExports', foundExports,
-    'already exported?', isExportedAlready)
+    'already exported?', alreadyExported)
 
   // check for newly exported
-  if (!isExportedAlready && foundExports) {
+  if (!alreadyExported && foundExports) {
     log('new internal', file)
     cache.setIsExported(file)
     bundleInternals(cache.getExported())

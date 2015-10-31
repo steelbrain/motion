@@ -1,3 +1,4 @@
+import opts from './opts'
 import path from 'path'
 import log from './lib/log'
 

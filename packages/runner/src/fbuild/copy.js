@@ -1,4 +1,5 @@
-import { p } from '../lib/fns'
+import gulp from 'gulp'
+import { p, copy } from '../lib/fns'
 import opts from '../opts'
 
 async function copyWithSourceMap(file, dest) {
@@ -9,13 +10,13 @@ async function copyWithSourceMap(file, dest) {
 }
 
 export function flint() {
-  var read = p(MODULES_DIR, 'flint-js', 'dist', 'flint.prod.js');
+  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'flint.prod.js');
   var write = p(opts.get('buildDir'), '_', 'flint.prod.js');
   return copyWithSourceMap(read, write)
 }
 
 export function react() {
-  var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.prod.js');
+  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'react.prod.js');
   var write = p(opts.get('buildDir'), '_', 'react.prod.js');
   return copyWithSourceMap(read, write)
 }
@@ -34,3 +35,5 @@ export function assets() {
     .src(['*', '**/*', '!**/*.jsf?', ], { dot: false })
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
+
+export default { flint, react, packages, assets }
