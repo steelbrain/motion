@@ -257,6 +257,20 @@ export function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 }
 
+export function buildWhileRunning() {
+  console.log("Building...")
+  return new Promise((res, rej) => {
+    gulp.src(['.flint/out/**/*.js'])
+      .pipe($.plumber(err => {
+        logError(err)
+        rej(err)
+      }))
+      .pipe($p.buildWrap())
+      .pipe(gulp.dest(p(OPTS.buildDir, '_')))
+      .pipe(pipefn(res))
+  });
+}
+
 let buildingTimeout
 function buildFinishedCheck(lastScript) {
   if (!HAS_RUN_INITIAL_BUILD) {
