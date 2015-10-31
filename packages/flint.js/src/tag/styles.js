@@ -41,10 +41,9 @@ export default function elementStyles(key, view, name, tag, props) {
   const isRootName = view.name && view.name.toLowerCase() == name
   const hasOneRender = view.renders.length <= 1
   const isWrapper = props && props.isWrapper
+  const deservesRootStyles = (isRootName && hasOneRender || isWrapper)
 
   if (view.styles) {
-    // console.log(name, tag)
-
     const index = props.repeat ? key[1] : void 0
 
     // if <foobar> is root, then apply both the base ($) and ($foobar)
@@ -62,15 +61,13 @@ export default function elementStyles(key, view, name, tag, props) {
     if (diffName)
       nameStyleStatic = view.styles._static[name]
 
-    let ran = false
-    let result
-
-    result = mergeStyles(null,
+    // add tag and name styles
+    let result = mergeStyles(null,
       // tag style
       tagStyle ? tagStyle(index) : null,
       // base style
-      (isRootName && hasOneRender || isWrapper) && viewStyle,
-      (isRootName && hasOneRender || isWrapper) && viewStyleStatic,
+      deservesRootStyles && viewStyle,
+      deservesRootStyles && viewStyleStatic,
       // name dynamic styles
       nameStyle && diffName && nameStyle(index),
       // tag static
@@ -87,25 +84,21 @@ export default function elementStyles(key, view, name, tag, props) {
       })
     }
 
-    ran = true
+    // merge styles [] into {}
+    if (Array.isArray(result))
+      result = mergeStyles(...result)
 
-    if (ran) {
-      // merge styles [] into {}
-      if (Array.isArray(result))
-        result = mergeStyles(...result)
+    // add view external props.style
+    if (deservesRootStyles && view.props.style)
+      result = mergeStyles(result, view.props.style)
 
-      // add view external props.style
-      if (isWrapper && view.props.style)
-        result = mergeStyles(result, view.props.style)
+    // add style="" prop styles
+    if (props.style)
+      result = mergeStyles(result, props.style)
 
-      // add style="" prop styles
-      if (props.style)
-        result = mergeStyles(result, props.style)
-
-      // put styles back into props.style
-      if (result)
-        props.style = result
-    }
+    // put styles back into props.style
+    if (result)
+      props.style = result
   }
 
   // HELPERS
