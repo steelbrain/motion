@@ -1,4 +1,7 @@
 function browserRequire(name) {
+  if (name.charAt(0) == '.')
+    return window.__flintInternals[name.replace('./', '')]
+
   if (name == 'bluebird')
     return window._bluebird
 

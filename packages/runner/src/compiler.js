@@ -32,16 +32,13 @@ var Parser = {
   post(file, source) {
     debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
 
-    const hasExports = findExports(source)
+    const isInternal = findExports(source)
 
     // wrap closure if not exports file
-    if (OPTS.build || !hasExports)
+    if (OPTS.build || !isInternal)
       source = filePrefix(file) + source + fileSuffix
 
-    if (hasExports)
-      return { source: false }
-
-    return { source }
+    return { source, isInternal }
   },
 
   pre(file, source) {
@@ -98,8 +95,7 @@ function compile(type, opts = {}) {
       let res = Parser[type](file.path, file.contents.toString(), opts)
       file.contents = new Buffer(res.source || '')
 
-      if (!res.source)
-        file.isInternal = true
+      file.isInternal = res.isInternal
 
       this.push(file)
     }

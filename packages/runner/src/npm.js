@@ -85,7 +85,6 @@ const externals = [
 ]
 
 const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
-const rmInternals = ls => ls.filter(i => i.charAt(0) == '.')
 
 /*
 
@@ -189,12 +188,6 @@ async function getAllExternals() {
 const findRequires = source =>
   getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
-const findExternalRequires = source =>
-  findRequires(source).filter(x => x.charAt(0) != '.')
-
-const findInternalRequires = source =>
-  findRequires(source).filter(x => x.charAt(0) == '.')
-
 // <= file, source
 //  > install new deps
 // => update cache
@@ -273,6 +266,9 @@ function packInternals() {
     })
   })
 }
+
+const findExternalRequires = source =>
+  findRequires(source).filter(x => x.charAt(0) != '.')
 
 async function installExternals(file, source) {
   log('installExternals', file)

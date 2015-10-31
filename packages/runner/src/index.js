@@ -198,11 +198,17 @@ export function buildScripts(cb, stream) {
       // for spaces when outputting
       if (OPTS.build) console.log()
     }))
-    .pipe($.if(!OPTS.build,
+    .pipe($.if(file => !OPTS.build && !file.isInternal,
       $.sourcemaps.write('.')
     ))
     .pipe($.if(OPTS.build,
       $p.buildWrap()
+    ))
+    .pipe($.if(file => file.isInternal,
+      multipipe(
+        gulp.dest(internalDest),
+        $.ignore.exclude(true)
+      )
     ))
     .pipe($.if(file => {
       if (file.isInternal)
@@ -236,9 +242,6 @@ export function buildScripts(cb, stream) {
 
       return false
     }, gulp.dest(outDest)))
-    .pipe($.if(file => {
-      return file.isInternal
-    }, gulp.dest(internalDest)))
     .pipe(pipefn(file => {
       if (file.isSourceMap) return
 
