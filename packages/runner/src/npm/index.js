@@ -42,21 +42,16 @@ function init(_opts) {
   WHERE.packageJSON = p(OPTS.flintDir, 'package.json')
 }
 
-function mkDir(redo) {
-  return new Promise(async (res, rej) => {
-    if (redo) {
-      await rmdir(WHERE.depsJSON)
-    }
+async function mkDir(redo) {
+  if (redo)
+    await rmdir(WHERE.depsJSON)
 
-    await mkdir(WHERE.outDir)
-    await* [
-      touch(WHERE.depsJSON),
-      touch(WHERE.depsJS),
-      touch(WHERE.packagesJS)
-    ]
-
-    res()
-  })
+  await mkdir(WHERE.outDir)
+  await* [
+    touch(WHERE.depsJSON),
+    touch(WHERE.depsJS),
+    touch(WHERE.packagesJS)
+  ]
 }
 
 const onPackageStart = (name) => {
@@ -98,57 +93,55 @@ const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
 */
 async function install(force) {
   log('npm: install')
-  return new Promise(async (resolve, reject) => {
+  try {
+    // ensure deps dir
+    await mkDir(force)
+
+    // write out to package.installed
+    const allInstalled = await setInstalled()
+    log('npm: install: allInstalled:', allInstalled)
+
+    // remove externals
+    const installed = rmExternals(allInstalled)
+
+    // written = packages already written out to js bundle
+    let written = []
     try {
-      // ensure deps dir
-      await mkDir(force)
-
-      // write out to package.installed
-      const allInstalled = await setInstalled()
-      log('npm: install: allInstalled:', allInstalled)
-
-      // remove externals
-      const installed = rmExternals(allInstalled)
-
-      // written = packages already written out to js bundle
-      let written = []
-      try {
-        const installed = await readJSON(WHERE.depsJSON)
-        written = rmExternals(installed.deps)
-      }
-      catch(e) {
-        log('npm: install: no deps installed')
-      }
-      log('npm: install: written:', written)
-
-
-      // install unwritten
-      const un = _.difference(installed, written)
-      log('npm: install: un: ', un)
-      if (un.length) {
-        console.log("\n",'Installing Packages...'.white.bold)
-
-        for (let dep of un) {
-          console.log(dep)
-          try {
-            await save(dep, un.indexOf(dep), un.length)
-          }
-          catch(e) {
-            console.log('Failed to install', dep)
-          }
-        }
-
-        await bundle()
-        onPackagesInstalled()
-      }
-
-      resolve(installed)
-      FIRST_RUN = false
-    } catch(e) {
-      handleError(e)
-      reject(e)
+      const installed = await readJSON(WHERE.depsJSON)
+      written = rmExternals(installed.deps)
     }
-  })
+    catch(e) {
+      log('npm: install: no deps installed')
+    }
+    log('npm: install: written:', written)
+
+
+    // install unwritten
+    const un = _.difference(installed, written)
+    log('npm: install: un: ', un)
+    if (un.length) {
+      console.log("\n",'Installing Packages...'.white.bold)
+
+      for (let dep of un) {
+        console.log(dep)
+        try {
+          await save(dep, un.indexOf(dep), un.length)
+        }
+        catch(e) {
+          console.log('Failed to install', dep)
+        }
+      }
+
+      await bundle()
+      onPackagesInstalled()
+    }
+
+    FIRST_RUN = false
+    return installed
+  } catch(e) {
+    handleError(e)
+    throw new Error(e)
+  }
 }
 
 // => deps.json
@@ -165,70 +158,43 @@ const depRequireString = name => `
 
 // package.json.installed => deps.js
 async function writeDeps(deps = []) {
-  return new Promise(async (resolve) => {
-    log('npm: writeDeps:', deps)
-    await writeJSON(WHERE.depsJSON, { deps })
-    const requireString = deps.map(depRequireString).join('')
-    await writeFile(WHERE.depsJS, requireString)
-    resolve()
-  })
+  log('npm: writeDeps:', deps)
+  await writeJSON(WHERE.depsJSON, { deps })
+  const requireString = deps.map(depRequireString).join('')
+  await writeFile(WHERE.depsJS, requireString)
 }
 
 // allInstalled() => pack()
-function bundle() {
+async function bundle() {
   log('npm: bundle')
-  return new Promise(async (res, rej) => {
-    try {
-      const installed = await getInstalled()
-      await writeDeps(installed)
-      await pack()
-      res()
-    }
-    catch(e) {
-      handleError(e)
-    }
-  })
+  const installed = await getInstalled()
+  await writeDeps(installed)
+  await pack()
 }
 
-function getInstalled() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const fileImports = cache.getImports()
-      const pkg = await readJSON(WHERE.packageJSON)
+async function getInstalled() {
+  const fileImports = cache.getImports()
+  const pkg = await readJSON(WHERE.packageJSON)
 
-      const all = _.union(pkg.installed, fileImports)
-        .filter(x => typeof x == 'string')
+  const all = _.union(pkg.installed, fileImports)
+    .filter(x => typeof x == 'string')
 
-      log('npm: getInstalled: all:', all)
-      resolve(all)
-    }
-    catch(e) {
-      handleError(e)
-      reject(e)
-    }
-  })
+  log('npm: getInstalled: all:', all)
+  return all
 }
 
 // all found installs => package.json.installed
-function setInstalled() {
+async function setInstalled() {
   log('npm: setInstalled')
-  return new Promise(async (resolve, reject) => {
-    try {
-      await afterScans()
+  await afterScans()
 
-      const pkg = await readJSON(WHERE.packageJSON)
-      const all = await getInstalled()
+  const pkg = await readJSON(WHERE.packageJSON)
+  const all = await getInstalled()
 
-      pkg.installed = all
+  pkg.installed = all
 
-      await writeJSON(WHERE.packageJSON, pkg, {spaces: 2})
-      resolve(pkg.installed)
-    }
-    catch(e) {
-      handleError(e)
-      reject(e)
-    }
-  })
+  await writeJSON(WHERE.packageJSON, pkg, {spaces: 2})
+  return pkg.installed
 }
 
 // webpack
@@ -404,6 +370,7 @@ function afterScans() {
       resolve()
   })
 }
+
 function afterScansClear() {
   INSTALLING = false
   log('npm: afterScansClear: awaiting:', awaitingScans.length)
