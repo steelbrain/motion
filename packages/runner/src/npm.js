@@ -1,16 +1,14 @@
 import { Promise } from 'bluebird'
-import { Spinner } from '../lib/console'
+import { Spinner } from './lib/console'
 import fs from 'fs'
 import webpack from 'webpack'
 import _ from 'lodash'
-import bridge from '../bridge'
-import cache from '../cache'
-import handleError from '../lib/handleError'
-import exec from '../lib/exec'
-import log from '../lib/log'
-import { touch, p, mkdir, rmdir,
-        readFile, writeFile,
-        writeJSON, readJSON } from '../lib/fns'
+import bridge from './bridge'
+import cache from './cache'
+import handleError from './lib/handleError'
+import exec from './lib/exec'
+import log from './lib/log'
+import { touch, p, mkdir, rmdir, readFile, writeFile, writeJSON, readJSON } from './lib/fns'
 
 let WHERE = {}
 let OPTS
@@ -174,10 +172,6 @@ async function bundleExternals() {
   await pack()
 }
 
-function getInternals() {
-  return cache.getInternals()
-}
-
 async function getAllExternals() {
   const fileImports = cache.getImports()
   const pkg = await readJSON(WHERE.packageJSON)
@@ -202,6 +196,7 @@ const findInternalRequires = source =>
 //  > install new deps
 // => update cache
 function scanFile(file, source) {
+  log('scanFile', file)
   try {
     // install new stuff
     installExports(file, source)
@@ -214,12 +209,16 @@ function scanFile(file, source) {
   }
 }
 
+const findExports = source =>
+  getMatches(source, /exports/)
+
 async function installExports(file, source) {
-  // const found = findExport(source)
-  // const all = cache.getInternals()
+  log('installExports', file)
+  // const fileExports = findExports(source)
 }
 
 async function installExternals(file, source) {
+  log('installExternals', file)
   const found = findExternalRequires(source)
   const already = await getAllExternals()
   const fresh = found.filter(e => already.indexOf(e) < 0)

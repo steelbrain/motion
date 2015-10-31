@@ -1,6 +1,7 @@
 import open from 'open'
 import keypress from 'keypress'
 
+import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
 import editor from './lib/editor'
 import opts from './opts'
@@ -18,6 +19,7 @@ export function start() {
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
+    log('keypress', key.name)
 
     try {
       switch(key.name) {

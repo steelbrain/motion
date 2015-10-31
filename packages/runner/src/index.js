@@ -9,7 +9,7 @@ import log from './lib/log'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import openInBrowser from './lib/openInBrowser'
-import { clearOutDir, clearBuildDir } from './fbuild/clear'
+import clear from './fbuild/clear'
 import keys from './keys'
 import {
   p, mkdir, rmdir, readdir, readJSON, writeJSON,
@@ -38,7 +38,7 @@ const MODULES_DIR = p(__dirname, '..', '..', 'node_modules');
 let lastSavedTimestamp = {}
 let APP_VIEWS = {}
 let HAS_RUN_INITIAL_BUILD = false
-let OPTS, CONFIG, ACTIVE_PORT
+let OPTS, CONFIG
 
 gulp.task('build', buildScripts)
 
@@ -274,8 +274,10 @@ export function buildWhileRunning() {
 let buildingTimeout
 function buildFinishedCheck(lastScript) {
   if (!HAS_RUN_INITIAL_BUILD) {
+    log('buildFinishedCheck setTimeout')
     if (buildingTimeout) clearTimeout(buildingTimeout)
     buildingTimeout = setTimeout(() => {
+      log('HAS_RUN_INITIAL_BUILD = true')
       HAS_RUN_INITIAL_BUILD = true
 
       runAfterFirstBuilds()
@@ -419,7 +421,7 @@ function runServer() {
         host + (port && port !== 80 ? ':' + port : '')
       );
 
-      ACTIVE_PORT = port
+      opts.set('port', port)
       res();
       server.listen(port, host);
     }
@@ -486,7 +488,7 @@ async function makeTemplate(req, cb) {
 }
 
 function wport() {
-  return 2283 + parseInt(ACTIVE_PORT, 10)
+  return 2283 + parseInt(opts.get('port'), 10)
 }
 
 function setLogging(opts) {
@@ -515,7 +517,7 @@ export async function run(_opts, isBuild) {
       )
 
       log('building...')
-      await clearBuildDir()
+      await clear.buildDir()
       await build(afterFirstBuild)
       await npm.install()
 
@@ -530,7 +532,7 @@ export async function run(_opts, isBuild) {
     }
     else {
       log('running...')
-      await clearOutDir()
+      await clear.outDir()
       await runServer()
       bridge.start(wport())
       writeWPort(wport())

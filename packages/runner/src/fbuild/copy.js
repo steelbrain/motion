@@ -1,7 +1,7 @@
 import { p } from '../lib/fns'
 import opts from '../opts'
 
-async function copyWithMap(file, dest) {
+async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
   catch(e) { console.log("Couldn't copy", file) }
   try { await copy(file + '.map', dest + '.map') }
@@ -11,19 +11,19 @@ async function copyWithMap(file, dest) {
 export function flint() {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'flint.prod.js');
   var write = p(opts.get('buildDir'), '_', 'flint.prod.js');
-  return copyWithMap(read, write)
+  return copyWithSourceMap(read, write)
 }
 
 export function react() {
   var read = p(MODULES_DIR, 'flint-js', 'dist', 'react.prod.js');
   var write = p(opts.get('buildDir'), '_', 'react.prod.js');
-  return copyWithMap(read, write)
+  return copyWithSourceMap(read, write)
 }
 
 export function packages() {
   var read = p(opts.get('flintDir'), 'deps', 'packages.js')
   var write = p(opts.get('buildDir'), '_', 'packages.js')
-  copyWithMap(read, write);
+  copyWithSourceMap(read, write);
 }
 
 export function assets() {
