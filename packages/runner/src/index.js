@@ -150,7 +150,8 @@ export function buildScripts(cb, stream) {
   console.log('Building...'.bold.white)
   log('build scripts')
   let startTime, lastScript, curFile, lastError
-  let dest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+  let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+  let internalDest = p(OPTS.flintDir, 'deps', 'internal')
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe($.if(!OPTS.build,
@@ -204,6 +205,9 @@ export function buildScripts(cb, stream) {
       $p.buildWrap()
     ))
     .pipe($.if(file => {
+      if (file.isInternal)
+        return false
+
       file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
 
       buildFinishedCheck(lastScript)
@@ -231,9 +235,10 @@ export function buildScripts(cb, stream) {
       }
 
       return false
-    },
-      gulp.dest(dest))
-    )
+    }, gulp.dest(outDest)))
+    .pipe($.if(file => {
+      return file.isInternal
+    }, gulp.dest(internalDest)))
     .pipe(pipefn(file => {
       if (file.isSourceMap) return
 
@@ -242,7 +247,7 @@ export function buildScripts(cb, stream) {
 
       // after initial build
       if (HAS_RUN_INITIAL_BUILD) {
-        if (!lastError) {
+        if (!lastError && !file.isInternal) {
           cache.removeError(file.path)
           bridge.message('script:add', lastScript)
           bridge.message('compile:success', lastScript)

@@ -32,7 +32,7 @@ export default function run(browser, opts) {
       removeEl(el);
 
       // avoid bug when starting up and adding script
-      const tag = addScript({ src }, setTimeout(Flint.render,1))
+      const tag = addScript({ src }, setTimeout(Flint.render,10))
       tag.setAttribute('id', '__flintPackages')
     },
 
@@ -42,7 +42,7 @@ export default function run(browser, opts) {
       removeEl(el);
 
       // avoid bug when starting up and adding script
-      const tag = addScript({ src }, setTimeout(Flint.render,1))
+      const tag = addScript({ src }, setTimeout(Flint.render,10))
       tag.setAttribute('id', '__flintInternals')
     },
 

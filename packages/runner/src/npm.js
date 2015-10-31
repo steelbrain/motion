@@ -241,7 +241,7 @@ async function bundleInternals(files) {
   log('bundleInternals', files)
 
   const requireString = files.map(f =>
-    depRequireString(f.replace(/\.js$/, ''), '__flintInternals', '../out/')).join('')
+    depRequireString(f.replace(/\.js$/, ''), '__flintInternals', './internal/')).join('')
 
   await writeFile(WHERE.internalsInJS, requireString)
   await packInternals()
