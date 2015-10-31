@@ -192,10 +192,10 @@ async function getAllExternals() {
 const findRequires = source =>
   getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
-const findExternals = source =>
+const findExternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) != '.')
 
-const findInternals = source =>
+const findInternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) == '.')
 
 // <= file, source
@@ -204,7 +204,7 @@ const findInternals = source =>
 function scanFile(file, source) {
   try {
     // install new stuff
-    installInternals(file, source)
+    installExports(file, source)
     installExternals(file, source)
   }
   catch (e) {
@@ -214,22 +214,21 @@ function scanFile(file, source) {
   }
 }
 
-async function installInternals() {
-
+async function installExports(file, source) {
+  // const found = findExport(source)
+  // const all = cache.getInternals()
 }
 
 async function installExternals(file, source) {
-  const found = findExternals(source)
-  const all = await getAllExternals()
-  const fresh = found.filter(e => all.indexOf(e) < 0)
+  const found = findExternalRequires(source)
+  const already = await getAllExternals()
+  const fresh = found.filter(e => already.indexOf(e) < 0)
 
   log('installExternals: Found packages in file:', found)
   log('installExternals: New external packages:', fresh)
 
   // no new ones found
   if (!fresh.length) return
-
-  const already = found.filter(f => all.indexOf(f) >= 0)
 
   let installed = []
   let installing = fresh
