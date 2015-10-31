@@ -50,7 +50,8 @@ async function mkDir(redo) {
   await* [
     touch(WHERE.depsJSON),
     touch(WHERE.depsJS),
-    touch(WHERE.packagesJS)
+    touch(WHERE.packagesJS),
+    touch(WHERE.internalsOutJS)
   ]
 }
 
@@ -148,9 +149,9 @@ async function install(force) {
 
 // => deps.json
 // => deps.js
-const depRequireString = (name, onto = '__flintPackages') => `
+const depRequireString = (name, onto = '__flintPackages', pathname = '') => `
   try {
-    window.${onto}["${name}"] = require("${name}")
+    window.${onto}["${name}"] = require("${pathname}${name}")
   }
   catch(e) {
     console.log('Error running package!')
@@ -212,7 +213,7 @@ function scanFile(file, source) {
 }
 
 const findExports = source =>
-  getMatches(source, /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/)
+  /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/g.test(source)
 
 // TODO: check this in babel to be more accurate
 // we bundle any internal file that uses:
@@ -220,8 +221,15 @@ const findExports = source =>
 function installInternals(file, source) {
   log('installInternals', file)
 
+  const foundExports = findExports(source)
+  const isExportedAlready = cache.isExported(file)
+
+  log('installInternals: foundExports', foundExports,
+    'already exported?', isExportedAlready)
+
   // check for newly exported
-  if (!file.isExported(file) && findExports(source)) {
+  if (!isExportedAlready && foundExports) {
+    log('new internal', file)
     cache.setIsExported(file)
     bundleInternals(cache.getExported())
   }
@@ -230,8 +238,8 @@ function installInternals(file, source) {
 async function bundleInternals(files) {
   log('bundleInternals', files)
 
-  const requireString = deps.map(dep =>
-    depRequireString(dep, '__flintInternals')).join('')
+  const requireString = files.map(f =>
+    depRequireString(f.replace(/\.js$/, ''), '__flintInternals', '../out/')).join('')
 
   await writeFile(WHERE.internalsInJS, requireString)
   await packInternals()
@@ -239,6 +247,7 @@ async function bundleInternals(files) {
 }
 
 function packInternals() {
+  log('packInternals')
   return new Promise((res, rej) => {
     webpack({
       entry: WHERE.internalsInJS,

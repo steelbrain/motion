@@ -18,7 +18,7 @@ export default function log(...args) {
   ) {
     const args0 = args[0].split(':')
     const ident = args0.shift()
-    console.log((ident + ':' + args0.join(':'))[color(ident)], ...args.splice(2))
+    console.log((ident + ':' + args0.join(':'))[color(ident)], ...args.splice(1))
     return
   }
 

@@ -27,13 +27,23 @@ export default function run(browser, opts) {
     },
 
     'packages:reload': msg => {
-      const el = document.getElementById('__flintPackages');
+      const el = document.getElementById('__flintPackages')
       const src = el.src;
       removeEl(el);
 
       // avoid bug when starting up and adding script
       const tag = addScript({ src }, setTimeout(Flint.render,1))
       tag.setAttribute('id', '__flintPackages')
+    },
+
+    'internals:reload': msg => {
+      const el = document.getElementById('__flintInternals')
+      const src = el.src;
+      removeEl(el);
+
+      // avoid bug when starting up and adding script
+      const tag = addScript({ src }, setTimeout(Flint.render,1))
+      tag.setAttribute('id', '__flintInternals')
     },
 
     'file:delete': file => {

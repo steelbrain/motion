@@ -21,6 +21,9 @@ function debounce(key, cb, time) {
   debouncers[key] = setTimeout(cb, time)
 }
 
+const findExports = source =>
+  /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/g.test(source)
+
 var Parser = {
   init(opts) {
     OPTS = opts || {}
@@ -28,7 +31,11 @@ var Parser = {
 
   post(file, source) {
     debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
-    source = filePrefix(file) + source + fileSuffix
+
+    // wrap closure if not exports file
+    if (!findExports(source))
+      source = filePrefix(file) + source + fileSuffix
+
     return { source }
   },
 

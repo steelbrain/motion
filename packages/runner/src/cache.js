@@ -62,12 +62,13 @@ const Cache = {
   },
 
   setIsExported(file: string) {
-    const file = files[name(file)]
-    file.isExported = true
+    files[name(file)].isExported = true
   },
 
   getExported() {
-    return Object.keys(files).map(f => f.isExported && f).filter(f => !!f)
+    return Object.keys(files)
+      .map(name => files[name].isExported ? name : null)
+      .filter(f => !!f)
   },
 
   setFileImports(file: string, imports: ImportArray) {

@@ -16,6 +16,7 @@ else {
 window.React = React
 window.runFlint = runFlint
 window.__flintPackages = {}
+window.__flintInternals = {}
 window.exports = {}
 
 // console.warn
