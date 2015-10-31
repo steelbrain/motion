@@ -83,7 +83,8 @@ const externals = [
   'bluebird'
 ]
 
-const rmExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+const rmInternals = ls => ls.filter(i => i.charAt(0) == '.')
 
 /*
 
@@ -99,16 +100,17 @@ async function install(force) {
 
     // write out to package.installed
     const allInstalled = await setInstalled()
+
     log('npm: install: allInstalled:', allInstalled)
 
     // remove externals
-    const installed = rmExternals(allInstalled)
+    const installed = rmFlintExternals(allInstalled)
 
     // written = packages already written out to js bundle
     let written = []
     try {
       const installed = await readJSON(WHERE.depsJSON)
-      written = rmExternals(installed.deps)
+      written = rmFlintExternals(installed.deps)
     }
     catch(e) {
       log('npm: install: no deps installed')
@@ -230,6 +232,19 @@ async function pack(file, out) {
 const findRequires = source =>
   getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
+
+function splitExternalInternal(requires) {
+  let internal = []
+  let external = []
+
+  for (let req of requires) {
+    if (req.charAt(0) == '.') internal.push(req)
+    else external.push(req)
+  }
+
+  return { internal, external }
+}
+
 // <= file, source
 //  > install new deps
 // => update cache
@@ -237,18 +252,20 @@ async function scanFile(file, source) {
   try {
     const all = await getInstalled()
     const found = findRequires(source)
-    const fresh = found.filter(f => all.indexOf(f) < 0)
+    const { external, internal } = splitExternalInternal(found)
+
+    const newExternals = external.filter(f => all.indexOf(f) < 0)
 
     log('scanFile: Found packages in file:', found)
-    log('scanFile: New packages:', fresh)
+    log('scanFile: New packages:', newExternals)
 
     // no new ones found
-    if (!fresh.length) return
+    if (!newExternals.length) return
 
     const already = found.filter(f => all.indexOf(f) >= 0)
 
     let installed = []
-    let installing = fresh
+    let installing = newExternals
 
     INSTALLING = true
 
