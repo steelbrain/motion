@@ -25,6 +25,10 @@ const SCRIPTS_GLOB = [
 
 gulp.task('build', buildScripts)
 
+export function watchForBuild() {
+  return gulp.watch(SCRIPTS_GLOB, ['build'])
+}
+
 /* FIRST BUILD STUFF */
 
 let waitingForFirstBuild = []
@@ -267,4 +271,4 @@ function logError(error, file) {
   }
 }
 
-export default { buildScripts, afterFirstBuild }
+export default { buildScripts, afterFirstBuild, watchForBuild }
