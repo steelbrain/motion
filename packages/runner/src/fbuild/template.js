@@ -11,7 +11,6 @@ export default async function makeTemplate() {
     .replace('<!-- SCRIPTS -->', [
       '<script src="/_/react.prod.js"></script>',
       '  <script src="/_/flint.prod.js"></script>',
-      '  <script src="/_/packages.js"></script>',
       '  <script src="/_/'+OPTS.name+'.js"></script>',
       `  <script>window.Flint = flintRun_${OPTS.name}("_flintapp", { app: "${OPTS.name}" });</script>`
     ].join(newLine))

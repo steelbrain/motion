@@ -1,4 +1,3 @@
-import { buildWhileRunning } from '../index'
 import { p } from '../lib/fns'
 import { buildScripts } from '../index'
 import gulp from '../gulp'
@@ -9,15 +8,8 @@ import makeTemplate from './template'
 export default async function build(running) {
   copy.assets()
 
-  await *[
-    copy.flint(),
-    copy.react(),
-    copy.packages(),
-    copy.internals()
-  ]
-
   if (running) {
-    await buildWhileRunning()
+    await gulp.buildWhileRunning()
     makeTemplate()
     keys.stop()
   }
@@ -26,4 +18,10 @@ export default async function build(running) {
     await gulp.afterFirstBuild()
     makeTemplate()
   }
+
+  await *[
+    copy.flint(),
+    copy.react(),
+    copy.app()
+  ]
 }

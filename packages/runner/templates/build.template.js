@@ -1,4 +1,4 @@
-function flintRun_<%= data.name %>(node, opts, cb) {
+window.flintRun_<%= data.name %> = function flintRun_<%= data.name %>(node, opts, cb) {
   var FlintInstace = opts.Flint || runFlint;
   var Flint = FlintInstace(node, opts, cb);
 

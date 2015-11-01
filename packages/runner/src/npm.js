@@ -251,8 +251,7 @@ function packInternals() {
       },
       output: {
         filename: WHERE.internalsOutJS
-      },
-      devtool: 'source-map'
+      }
     }, async err => {
       if (err) {
         console.log(err)
@@ -379,8 +378,7 @@ async function packExternals(file, out) {
       },
       output: {
         filename: WHERE.packagesJS
-      },
-      devtool: 'source-map'
+      }
     }, async err => {
       if (err) {
         // undo written packages
