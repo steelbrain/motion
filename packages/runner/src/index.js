@@ -7,20 +7,20 @@ import server from './server'
 import npm from './npm'
 import opts from './opts'
 import log from './lib/log'
+import { firstRun, writeConfig, readConfig } from './lib/config'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import openInBrowser from './lib/openInBrowser'
 import wport from './lib/wport'
 import clear from './fbuild/clear'
 import keys from './keys'
-import { p, rmdir, readdir, readJSON, writeJSON, readFile } from './lib/fns'
+import { p, rmdir } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
 import multipipe from 'multipipe'
 import path from 'path'
 
-import hostile from 'hostile'
 import through from 'through2'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
@@ -36,33 +36,9 @@ const SCRIPTS_GLOB = [
 ]
 
 let lastSavedTimestamp = {}
-let OPTS, CONFIG
+let OPTS
 
 gulp.task('build', buildScripts)
-
-// prompts for domain they want to use
-const firstRun = () =>
-  new Promise(async (res, rej) => {
-    try {
-      CONFIG = await readJSON(OPTS.configFile)
-      OPTS.config = CONFIG
-      log('got config', CONFIG)
-    }
-    catch(e) {}
-
-    const hasRunBefore = OPTS.build || CONFIG
-    log('first run hasRunBefore:', hasRunBefore)
-
-    if (hasRunBefore)
-      return res(false)
-
-    askForUrlPreference(useFriendly => {
-      CONFIG = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
-      OPTS.config = CONFIG
-      writeConfig(CONFIG)
-      res(true)
-    })
-  })
 
 /* FIRST BUILD STUFF */
 
@@ -311,12 +287,6 @@ function logError(error, file) {
   }
 }
 
-let readConfig = () => readJSON(OPTS.configFile)
-
-function writeConfig(config) {
-  writeJSON(OPTS.configFile, config, { spaces: 2 })
-}
-
 function watchingMessage() {
   keys.start()
   console.log(
@@ -330,18 +300,6 @@ function watchingMessage() {
     // ' • U'.blue.bold + 'pload'.blue + newLine
   )
   keys.resume()
-}
-
-// ask for preferred url and set /etc/hosts
-function askForUrlPreference(cb) {
-  // var promptly = require('promptly');
-  var askCounter = 'Run on ' + OPTS.url + '?';
-
-  // promptly.prompt(askCounter, {}, function(err, val) {
-    var useFriendly = false; // val == 'y';
-    if (useFriendly) hostile.set('127.0.0.1', OPTS.url)
-    cb(useFriendly)
-  // });
 }
 
 function setLogging(opts) {
