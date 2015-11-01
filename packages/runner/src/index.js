@@ -11,10 +11,7 @@ import unicodeToChar from './lib/unicodeToChar'
 import openInBrowser from './lib/openInBrowser'
 import clear from './fbuild/clear'
 import keys from './keys'
-import {
-  p, mkdir, rmdir, readdir, readJSON, writeJSON,
-  readFile, writeFile, touch,
-  exists } from './lib/fns'
+import { p, rmdir, readdir, readJSON, writeJSON, readFile } from './lib/fns'
 
 import flintTransform from 'flint-transform'
 import { Promise } from 'bluebird'
