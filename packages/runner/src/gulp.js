@@ -60,15 +60,7 @@ const $p = {
     extra: {
       production: process.env.production
     }
-  }),
-  buildWrap: () => multipipe(
-    $.concat(`${OPTS.name}.js`),
-    $.wrap(
-      { src: `${__dirname}/../../templates/build.template.js` },
-      { name: OPTS.name },
-      { variable: 'data' }
-    )
-  )
+  })
 }
 
 export function buildScripts(cb, stream) {
@@ -93,7 +85,7 @@ export function buildScripts(cb, stream) {
       if (OPTS.build) console.log()
     }))
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
-    .pipe($.if(OPTS.build, $p.buildWrap()))
+    .pipe($.if(OPTS.build, $.concat(`${OPTS.name}.js`)))
     .pipe($.if(file => file.isInternal,
       multipipe(
         gulp.dest(p(OPTS.flintDir, 'deps', 'internal')),
@@ -203,7 +195,7 @@ export function buildWhileRunning() {
         logError(err)
         rej(err)
       }))
-      .pipe($p.buildWrap())
+      .pipe($.concat(`${OPTS.name}.js`))
       .pipe(gulp.dest(p(OPTS.buildDir, '_')))
       .pipe(pipefn(res))
   });

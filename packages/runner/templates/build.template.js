@@ -1,14 +1,14 @@
-window.flintRun_<%= data.name %> = function flintRun_<%= data.name %>(node, opts, cb) {
+window.flintRun_NAME = function flintRun_NAME(node, opts, cb) {
   var FlintInstace = opts.Flint || runFlint;
   var Flint = FlintInstace(node, opts, cb);
 
   (function(Flint) {
-    <%= data.contents %>
+    CONTENTS
 
     Flint.init()
   })(Flint);
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = flintRun_<%= data.name %>
+  module.exports = flintRun_NAME
 }

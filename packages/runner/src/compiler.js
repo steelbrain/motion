@@ -28,7 +28,11 @@ var Parser = {
   },
 
   post(file, source) {
-    debounce(file, () => npm.scanFile(file, source), 400) // scan for imports
+    // scan for imports/exports
+    debounce(file, () => {
+      log('NPM scanning file', file)
+      npm.scanFile(file, source)
+    }, 400)
 
     const isInternal = findExports(source)
 
@@ -70,10 +74,8 @@ var Parser = {
       })
       .join("\n")
 
-    if (!OPTS.build) {
-      cache.add(file)
-      cache.setViews(file, viewNames)
-    }
+    cache.add(file)
+    cache.setViews(file, viewNames)
 
     return { source }
   }

@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import gulp from 'gulp'
-import { p, copy, writeFile } from '../lib/fns'
+import log from '../lib/log'
+import { p, copy, writeFile, readFile } from '../lib/fns'
 import opts from '../opts'
 
 async function copyWithSourceMap(file, dest) {
@@ -24,41 +25,26 @@ export function react() {
 
 // bundles together packages.js, internals.js and user app files
 export async function app() {
+  log('copy: app: reading packages + internals')
   const depsDir = p(opts.get('flintDir'), 'deps')
   const buildDir = p(opts.get('buildDir'), '_')
 
-  const inFiles = [
-    p(depsDir, 'packages.js'),
-    p(depsDir, 'internals.js'),
-    p(buildDir, opts.get('name') + '.js'),
+  const inFiles = await *[
+    readFile(p(depsDir, 'packages.js')),
+    readFile(p(depsDir, 'internals.js')),
+    readFile(p(buildDir, opts.get('name') + '.js')),
   ]
 
-  // write requires for webpack to build/name.pack.js
-  const requireStr = name => `require("${name}");`
-  const userInStr = inFiles.map(requireStr).join("\n")
-  const userInFile = p(buildDir, `${opts.get('name')}.pack.js`)
-  await writeFile(userInFile, userInStr)
+  const inFilesConcat = inFiles.join(";\n")
+  const wrapper = await readFile(`${__dirname}/../../../templates/build.template.js`)
+
+  const outStr = wrapper.toString()
+    .replace(/NAME/g, opts.get('name'))
+    .replace(/CONTENTS/g, inFilesConcat)
 
   const outFile = p(buildDir, opts.get('name') + '.prod.js')
-  await packApp(userInFile, outFile)
-}
 
-function packApp(inFile, outFile) {
-  return new Promise((res, rej) => {
-    webpack({
-      entry: inFile,
-      externals: {
-        react: 'React',
-        bluebird: '_bluebird',
-        'react-dom': 'ReactDOM'
-      },
-      output: { filename: outFile },
-      devtool: 'source-map'
-    }, err => {
-      if (err) return rej(err)
-      else res()
-    })
-  })
+  await writeFile(outFile, outStr)
 }
 
 export function assets() {

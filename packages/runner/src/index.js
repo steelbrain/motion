@@ -62,13 +62,11 @@ export async function run(_opts, isBuild) {
       )
 
       log('building...')
+      await clear.outDir()
       await clear.buildDir()
       await build(false)
-      await npm.install()
 
-      console.log(
-        "\nBuild Complete! Check your .flint/build directory\n".green.bold
-      )
+      console.log("\nDone! ⇢ .flint/build\n".green.bold)
 
       if (OPTS.watch)
         gulp.watchForBuild()

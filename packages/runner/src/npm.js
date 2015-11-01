@@ -134,10 +134,10 @@ async function install(force) {
           console.log('Failed to install', dep)
         }
       }
-
-      await bundleExternals()
-      onPackagesInstalled()
     }
+
+    await bundleExternals()
+    onPackagesInstalled()
 
     FIRST_RUN = false
     return installed
@@ -149,9 +149,9 @@ async function install(force) {
 
 // => deps.json
 // => deps.js
-const depRequireString = (name, onto = '__flintPackages', pathname = '') => `
+const depRequireString = (name, onto, pathname = '') => `
   try {
-    window.${onto}["${name}"] = require("${pathname}${name}")
+    Flint.${onto}["${name}"] = require("${pathname}${name}")
   }
   catch(e) {
     console.log('Error running package!')
@@ -163,7 +163,9 @@ const depRequireString = (name, onto = '__flintPackages', pathname = '') => `
 async function writeDeps(deps = []) {
   log('npm: writeDeps:', deps)
   await writeJSON(WHERE.depsJSON, { deps })
-  const requireString = deps.map(depRequireString).join('')
+  const requireString = deps.map(name => {
+    return depRequireString(name, 'packages')
+  }).join('')
   await writeFile(WHERE.depsJS, requireString)
 }
 
@@ -212,8 +214,6 @@ function scanFile(file, source) {
 function checkInternals(file, source) {
   log('checkInternals', file)
 
-  if (OPTS.build) return
-
   const foundExports = findExports(source)
   const alreadyExported = cache.isExported(file)
 
@@ -224,15 +224,17 @@ function checkInternals(file, source) {
   // check for newly exported
   if (!alreadyExported && foundExports || alreadyExported && !foundExports) {
     log('changed external', file)
-    bundleInternals(cache.getExported())
+    bundleInternals()
   }
 }
 
-async function bundleInternals(files) {
+export async function bundleInternals() {
+  const files = cache.getExported()
+
   log('bundleInternals', files)
 
   const requireString = files.map(f =>
-    depRequireString(f.replace(/\.js$/, ''), '__flintInternals', './internal/')).join('')
+    depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 
   await writeFile(WHERE.internalsInJS, requireString)
   await packInternals()
@@ -442,4 +444,4 @@ function afterScansClear() {
   awaitingScans = []
 }
 
-export default { init, install, scanFile }
+export default { init, install, scanFile, bundleInternals }

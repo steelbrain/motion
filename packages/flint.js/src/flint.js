@@ -130,7 +130,31 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const emitter = ee({})
 
+  function require(name) {
+    if (name.charAt(0) == '.')
+      return Flint.__flintInternals[name.replace('./', '')]
+
+    if (name == 'bluebird')
+      return root._bluebird
+
+    let pkg = Flint.__flintPackages[name]
+
+    // we may be waiting for packages reload
+    if (!pkg) return
+
+    // may not export a default
+    if (!pkg.default)
+      pkg.default = pkg
+
+    return pkg
+  }
+
+  root.require = require
+
   let Flint = {
+    packages: {},
+    internals: {},
+
     init() {
       router.init({ onChange: Flint.render })
       Flint.render()
