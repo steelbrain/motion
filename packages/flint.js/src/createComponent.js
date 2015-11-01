@@ -196,7 +196,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             view.call(this, this, this.viewOn, this.styles)
           }
           catch(e) {
-            console.error(e)
+            console.error(e.stack)
             reportError(e)
           }
         }
@@ -389,7 +389,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           return els
         }
         catch(e) {
-          console.error(e)
+          console.error(e.stack)
           reportError(e)
 
           const lastRender = Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]

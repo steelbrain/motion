@@ -15,8 +15,6 @@ view Main {
   }
 }
 
-export default function a() {}
-
 view Test {
   let num = 0
   let str = 'hello'

@@ -1,5 +1,6 @@
 import npm from './npm'
 import log from './lib/log'
+import findExports from './lib/findExports'
 import cache from './cache'
 import gutil from 'gulp-util'
 import through from 'through2'
@@ -20,9 +21,6 @@ function debounce(key, cb, time) {
 
   debouncers[key] = setTimeout(cb, time)
 }
-
-const findExports = source =>
-  /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/g.test(source)
 
 var Parser = {
   init(opts) {

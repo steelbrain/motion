@@ -6,6 +6,7 @@ import _ from 'lodash'
 import bridge from './bridge'
 import cache from './cache'
 import handleError from './lib/handleError'
+import findExports from './lib/findExports'
 import exec from './lib/exec'
 import log from './lib/log'
 import { touch, p, mkdir, rmdir, readFile, writeFile, writeJSON, readJSON } from './lib/fns'
@@ -204,9 +205,6 @@ function scanFile(file, source) {
     console.log(e.message)
   }
 }
-
-const findExports = source =>
-  /exports(\[\'default\'\]|\.[a-zA-Z\$\_]+) \=/g.test(source)
 
 // TODO: check this in babel to be more accurate
 // we bundle any internal file that uses:

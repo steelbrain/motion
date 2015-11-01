@@ -11,7 +11,8 @@ export default async function build(running, afterFirstBuild) {
   await *[
     copy.flint(),
     copy.react(),
-    copy.packages()
+    copy.packages(),
+    copy.internals()
   ]
 
   if (running) {

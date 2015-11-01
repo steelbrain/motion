@@ -356,6 +356,7 @@ function getScriptTags(files, req) {
       // devtools
       devToolsDisabled(req) ? '' : [
         '<script src="/__/tools/packages.js"></script>',
+        '<script src="/__/tools/internals.js"></script>',
         '<script src="/__/tools/tools.js"></script>',
         '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
       ].join(newLine),

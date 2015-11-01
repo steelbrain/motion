@@ -27,6 +27,12 @@ export function packages() {
   copyWithSourceMap(read, write);
 }
 
+export function internals() {
+  var read = p(opts.get('flintDir'), 'deps', 'internals.js')
+  var write = p(opts.get('buildDir'), '_', 'internals.js')
+  copyWithSourceMap(read, write);
+}
+
 export function assets() {
   gulp.src('.flint/static/**')
     .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
@@ -36,4 +42,4 @@ export function assets() {
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
 
-export default { flint, react, packages, assets }
+export default { flint, react, packages, assets, internals }

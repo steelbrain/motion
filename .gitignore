@@ -8,4 +8,4 @@ dist
 build/
 deps/
 out/
-./flint.json
+flint.json
