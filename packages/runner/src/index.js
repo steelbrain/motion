@@ -63,7 +63,7 @@ export async function run(_opts, isBuild) {
 
       log('building...')
       await clear.buildDir()
-      await build(false, afterFirstBuild)
+      await build(false)
       await npm.install()
 
       console.log(

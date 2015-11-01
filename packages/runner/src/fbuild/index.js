@@ -1,11 +1,12 @@
 import { buildWhileRunning } from '../index'
 import { p } from '../lib/fns'
 import { buildScripts } from '../index'
+import gulp from '../gulp'
 import keys from '../keys'
 import copy from './copy'
 import makeTemplate from './template'
 
-export default async function build(running, afterFirstBuild) {
+export default async function build(running) {
   copy.assets()
 
   await *[
@@ -21,8 +22,8 @@ export default async function build(running, afterFirstBuild) {
     keys.stop()
   }
   else {
-    buildScripts()
-    await afterFirstBuild()
+    gulp.buildScripts()
+    await gulp.afterFirstBuild()
     makeTemplate()
   }
 }

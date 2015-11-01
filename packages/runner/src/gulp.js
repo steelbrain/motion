@@ -6,6 +6,8 @@ import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 const $ = loadPlugins()
 
+import bridge from './bridge'
+import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
