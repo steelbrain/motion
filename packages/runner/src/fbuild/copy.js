@@ -40,7 +40,7 @@ export async function app() {
 
   const outStr = wrapper.toString()
     .replace(/NAME/g, opts.get('name'))
-    .replace(/CONTENTS/g, inFilesConcat)
+    .replace('CONTENTS', inFilesConcat)
 
   const outFile = p(buildDir, opts.get('name') + '.prod.js')
 

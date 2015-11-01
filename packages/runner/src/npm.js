@@ -376,7 +376,7 @@ async function packExternals(file, out) {
       externals: {
         react: 'React',
         bluebird: '_bluebird',
-        // 'react-dom': 'ReactDOM'
+        'react-dom': 'ReactDOM'
       },
       output: {
         filename: WHERE.packagesJS

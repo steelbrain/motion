@@ -32,12 +32,8 @@ const niceCompilerError = err =>
 const replaceCompilerMsg = (msg) =>
   msg
     .replace(/.*\.js\:/, '')
-    .replace(/identifier ([a-z]*)\s*Unknown global name/, '$' + '1 is not defined')
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
-    .replace(/Flint.([A-Za-z1-9_]*)Wrapper/, '$' + '1')
-    .replace('view.render = () => ', '')
-    .replace(' view={view}', '')
 
 const niceCompilerMessage = err => {
   err.niceMessage = replaceCompilerMsg(err.message, err.fileName)

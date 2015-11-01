@@ -132,12 +132,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   function require(name) {
     if (name.charAt(0) == '.')
-      return Flint.__flintInternals[name.replace('./', '')]
+      return Flint.internals[name.replace('./', '')]
 
     if (name == 'bluebird')
       return root._bluebird
 
-    let pkg = Flint.__flintPackages[name]
+    let pkg = Flint.packages[name]
 
     // we may be waiting for packages reload
     if (!pkg) return

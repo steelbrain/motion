@@ -85,13 +85,13 @@ export function buildScripts(cb, stream) {
       if (OPTS.build) console.log()
     }))
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
-    .pipe($.if(OPTS.build, $.concat(`${OPTS.name}.js`)))
     .pipe($.if(file => file.isInternal,
       multipipe(
         gulp.dest(p(OPTS.flintDir, 'deps', 'internal')),
         $.ignore.exclude(true)
       )
     ))
+    .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.name}.js`)))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not. don't ask me why

@@ -31,8 +31,6 @@ function getScriptTags(files, req) {
       '<!-- FLINT JS -->',
       '<script src="/__/react.dev.js"></script>',
       '<script src="/__/flint.dev.js"></script>',
-      '<script src="/__/packages.js" id="__flintPackages"></script>',
-      '<script src="/__/internals.js" id="__flintInternals"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/__/devtools.dev.js"></script>',
       // devtools
@@ -41,9 +39,11 @@ function getScriptTags(files, req) {
         '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
       ].join(newLine),
       // user files
-      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
       newLine,
       '<!-- APP -->',
+      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
+      '<script src="/__/packages.js" id="__flintPackages"></script>',
+      '<script src="/__/internals.js" id="__flintInternals"></script>',
       assetScriptTags(files),
       '<script>Flint.init()</script>',
       '<!-- END APP -->'
