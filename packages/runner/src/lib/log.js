@@ -25,3 +25,7 @@ export default function log(...args) {
 
   console.log(...args)
 }
+
+log.setLogging = function(opts) {
+  log.debug = opts.debug || opts.verbose
+}
