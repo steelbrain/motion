@@ -133,7 +133,6 @@ export default function createPlugin(options) {
     let keyBase = {}
     let inJSX = false
 
-
     return new Plugin("flint-transform", {
       visitor: {
         // Program: {
@@ -146,6 +145,20 @@ export default function createPlugin(options) {
         //      node.body.push(t.identifier(fileSuffix))
         //   }
         // },
+
+        // transform local import paths
+        ImportDeclaration(node, parent, scope, file) {
+          const isInternal = node.source.value.charAt(0) == '.'
+
+          // this ensures all paths are relative to the root, not the current file
+          if (isInternal) {
+            const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
+            const relImportPath = './' + relativePath(importPath)
+            node.source.value = relImportPath
+            node.source.rawValue = relImportPath
+            node.source.raw = `\'${relImportPath}\'`
+          }
+        },
 
         ViewStatement(node) {
           keyBase = {}
