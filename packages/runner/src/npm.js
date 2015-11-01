@@ -238,7 +238,7 @@ async function bundleInternals(files) {
 
   await writeFile(WHERE.internalsInJS, requireString)
   await packInternals()
-  bridge.message('internals:reload')
+  bridge.message('internals:reload', {})
 }
 
 function packInternals() {

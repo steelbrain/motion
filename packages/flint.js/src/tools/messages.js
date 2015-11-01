@@ -26,25 +26,8 @@ export default function run(browser, opts) {
       compileSuccess()
     },
 
-    'packages:reload': msg => {
-      const el = document.getElementById('__flintPackages')
-      const src = el.src;
-      removeEl(el);
-
-      // avoid bug when starting up and adding script
-      const tag = addScript({ src }, renderFlint)
-      tag.setAttribute('id', '__flintPackages')
-    },
-
-    'internals:reload': msg => {
-      const el = document.getElementById('__flintInternals')
-      const src = el.src;
-      removeEl(el);
-
-      // avoid bug when starting up and adding script
-      const tag = addScript({ src }, renderFlint)
-      tag.setAttribute('id', '__flintInternals')
-    },
+    'packages:reload': reloadScript('__flintPackages'),
+    'internals:reload': reloadScript('__flintInternals'),
 
     'file:delete': file => {
       Flint.deleteFile(file.name)
@@ -62,6 +45,18 @@ export default function run(browser, opts) {
 
     browser.data = message
     browser.emitter.emit(message._type)
+  }
+}
+
+function reloadScript(id) {
+  return () => {
+    const el = document.getElementById(id)
+    const src = el.src
+    removeEl(el)
+
+    // avoid bug when starting up and adding script
+    const tag = addScript({ src }, renderFlint)
+    tag.setAttribute('id', id)
   }
 }
 
