@@ -71,7 +71,7 @@ export async function run(_opts, isBuild) {
       )
 
       if (OPTS.watch)
-        gulp.watch(SCRIPTS_GLOB, ['build'])
+        gulp.watchForBuild()
       else
         process.exit()
     }
