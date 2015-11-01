@@ -1,5 +1,6 @@
 const setLocal = (k,v) =>
   localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
+
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 

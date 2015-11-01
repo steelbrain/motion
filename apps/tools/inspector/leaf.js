@@ -1,4 +1,5 @@
 import md5 from 'md5-o-matic'
+import getType from '../lib/getType'
 
 const PATH_PREFIX = '.root.'
 

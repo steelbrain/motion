@@ -62,8 +62,8 @@ const Cache = {
     return files[name(file)].isExported
   },
 
-  setIsExported(file: string) {
-    files[name(file)].isExported = true
+  setExported(file: string, val: boolean) {
+    files[name(file)].isExported = val
   },
 
   getExported() {
@@ -90,7 +90,9 @@ const Cache = {
     if (!file) {
       let allImports = [].concat(imports)
       Object.keys(files).forEach(file => {
-        allImports = allImports.concat(files[file].imports)
+        const _imports = files[file].imports
+        if (_imports && _imports.length)
+          allImports = allImports.concat(_imports)
       })
       log('cache: getImports: ', allImports)
       return allImports

@@ -12,15 +12,16 @@ const color = ident => {
 export default function log(...args) {
   if (!log.debug) return
 
-  if (
-    typeof args[0] == 'string' &&
-    args[0].indexOf(':') > 0
-  ) {
-    const args0 = args[0].split(':')
-    const ident = args0.shift()
-    console.log((ident + ':' + args0.join(':'))[color(ident)], ...args.splice(1))
-    return
-  }
+  // was to colorize output
+  // if (
+  //   typeof args[0] == 'string' &&
+  //   args[0].indexOf(':') > 0
+  // ) {
+  //   const args0 = args[0].split(':')
+  //   const ident = args0.shift()
+  //   console.log((ident + ':' + args0.join(':'))[color(ident)], ...args.splice(1))
+  //   return
+  // }
 
   console.log(...args)
 }

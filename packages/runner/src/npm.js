@@ -195,7 +195,7 @@ function scanFile(file, source) {
   log('scanFile', file)
   try {
     // install new stuff
-    installInternals(file, source)
+    checkInternals(file, source)
     installExternals(file, source)
   }
   catch (e) {
@@ -211,21 +211,21 @@ const findExports = source =>
 // TODO: check this in babel to be more accurate
 // we bundle any internal file that uses:
 //    exports.xyz, exports['default']
-function installInternals(file, source) {
-  log('installInternals', file)
+function checkInternals(file, source) {
+  log('checkInternals', file)
 
   if (OPTS.build) return
 
   const foundExports = findExports(source)
   const alreadyExported = cache.isExported(file)
 
-  log('installInternals: foundExports', foundExports,
-    'already exported?', alreadyExported)
+  cache.setExported(file, foundExports)
+
+  log('checkInternals: found', foundExports, 'already', alreadyExported)
 
   // check for newly exported
-  if (!alreadyExported && foundExports) {
-    log('new internal', file)
-    cache.setIsExported(file)
+  if (!alreadyExported && foundExports || alreadyExported && !foundExports) {
+    log('changed external', file)
     bundleInternals(cache.getExported())
   }
 }
@@ -276,8 +276,8 @@ async function installExternals(file, source) {
   const already = await getAllExternals()
   const fresh = found.filter(e => already.indexOf(e) < 0)
 
-  log('installExternals: Found packages in file:', found)
-  log('installExternals: New external packages:', fresh)
+  log('installExternals: Found packages in file', found)
+  log('installExternals: New external packages', fresh)
 
   // no new ones found
   if (!fresh.length) return

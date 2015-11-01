@@ -1,3 +1,5 @@
+import lens from '../lib/lens'
+
 view Tree {
   let query = ''
 

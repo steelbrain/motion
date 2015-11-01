@@ -32,7 +32,7 @@ export default function run(browser, opts) {
       removeEl(el);
 
       // avoid bug when starting up and adding script
-      const tag = addScript({ src }, setTimeout(Flint.render,10))
+      const tag = addScript({ src }, renderFlint)
       tag.setAttribute('id', '__flintPackages')
     },
 
@@ -42,7 +42,7 @@ export default function run(browser, opts) {
       removeEl(el);
 
       // avoid bug when starting up and adding script
-      const tag = addScript({ src }, setTimeout(Flint.render,10))
+      const tag = addScript({ src }, renderFlint)
       tag.setAttribute('id', '__flintInternals')
     },
 
@@ -96,4 +96,22 @@ function addScript(message, cb) {
 function removeEl(el) {
   var parent = el.parentNode;
   parent.removeChild(el);
+}
+
+let renderAttempts = 0
+
+function renderFlint() {
+  if (renderAttempts > 10) {
+    renderAttempts = 0
+    return
+  }
+
+  if (Flint) {
+    Flint.render()
+    renderAttempts = 0
+  }
+  else {
+    renderAttempts++
+    setTimeout(renderFlint, 50)
+  }
 }
