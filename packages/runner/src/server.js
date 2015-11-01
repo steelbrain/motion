@@ -62,7 +62,7 @@ async function makeTemplate(req, cb) {
   let paths = []
 
   if (hasFiles) {
-    paths = files.map(file => file.path)
+    paths = files.map(file => file.path).sort()
 
     let mainIndex = 0
 

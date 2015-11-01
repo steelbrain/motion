@@ -4,8 +4,6 @@ import through from 'through2'
 import path from 'path'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
-const $ = loadPlugins()
-
 import bridge from './bridge'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
@@ -15,6 +13,7 @@ import opts from './opts'
 import log from './lib/log'
 import { p, rmdir } from './lib/fns'
 
+const $ = loadPlugins()
 let lastSavedTimestamp = {}
 let OPTS
 
@@ -31,28 +30,6 @@ export function watchForBuild() {
   return gulp.watch(SCRIPTS_GLOB, ['build'])
 }
 
-/* FIRST BUILD STUFF */
-
-let waitingForFirstBuild = []
-
-const afterFirstBuild = () =>
-  new Promise((res, rej) => {
-    if (OPTS.hasRunInitialBuild) return res()
-    else waitingForFirstBuild.push(res)
-  })
-
-const runAfterFirstBuilds = () =>
-  waitingForFirstBuild.forEach(res => res())
-
-/* END FIRST BUILD STUFF */
-
-function pipefn(fn) {
-  return through.obj(function(file, enc, next) {
-    fn && fn(file)
-    next(null, file);
-  })
-}
-
 const watchDeletes = async vinyl => {
   try {
     if (vinyl.event == 'unlink') {
@@ -62,17 +39,9 @@ const watchDeletes = async vinyl => {
       bridge.message('file:delete', { name })
     }
   }
-  catch(e) { handleError(e) }
-}
-
-const relative = file => path.relative(OPTS.appDir, file.path)
-let isWriting = false
-const startWrite = cb => { if (isWriting) return; isWriting = true; cb() }
-const endWrite = cb => { isWriting = false; cb() }
-const out = {
-  file: file => startWrite(() => process.stdout.write(` ⇢ ${relative(file)}\r`)),
-  badFile: (file, err) => endWrite(() => console.log(` ◆ ${relative(file)}`.red)),
-  goodFile: (file, ms) => endWrite(() => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold))
+  catch(e) {
+    handleError(e)
+  }
 }
 
 const $p = {
@@ -103,13 +72,11 @@ const $p = {
 }
 
 export function buildScripts(cb, stream) {
-  OPTS = opts.get()
-
   console.log('Building...'.bold.white)
-  log('build scripts')
-  let startTime, lastScript, curFile, lastError
+
+  OPTS = opts.get()
+  let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
-  let internalDest = p(OPTS.flintDir, 'deps', 'internal')
 
   return (stream || gulp.src(SCRIPTS_GLOB))
     .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
@@ -129,12 +96,13 @@ export function buildScripts(cb, stream) {
     .pipe($.if(OPTS.build, $p.buildWrap()))
     .pipe($.if(file => file.isInternal,
       multipipe(
-        gulp.dest(internalDest),
+        gulp.dest(p(OPTS.flintDir, 'deps', 'internal')),
         $.ignore.exclude(true)
       )
     ))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
+    // why, you ask? because... gulp watch will drop things if not. don't ask me why
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -146,8 +114,7 @@ export function buildScripts(cb, stream) {
     lastError = false
     lastScript = null
     // time build
-    startTime = Date.now()
-    file.startTime = startTime
+    file.startTime = Date.now()
     // log
     out.file(file)
   }
@@ -169,7 +136,7 @@ export function buildScripts(cb, stream) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
-    lastScript = { name, compiledAt: startTime }
+    lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }
 
@@ -187,7 +154,7 @@ export function buildScripts(cb, stream) {
     if (stream || lastError)
       return false
 
-    const endTime = Date.now() - startTime
+    const endTime = Date.now() - file.startTime
 
     out.goodFile(file, endTime)
     log('build took ', endTime, 'ms')
@@ -271,6 +238,40 @@ function logError(error, file) {
     console.log(error.stack)
     log('FILE', "\n", file.contents.toString())
   }
+}
+
+
+/* FIRST BUILD STUFF */
+
+let waitingForFirstBuild = []
+
+const afterFirstBuild = () =>
+  new Promise((res, rej) => {
+    if (OPTS.hasRunInitialBuild) return res()
+    else waitingForFirstBuild.push(res)
+  })
+
+const runAfterFirstBuilds = () =>
+  waitingForFirstBuild.forEach(res => res())
+
+/* END FIRST BUILD STUFF */
+
+
+function pipefn(fn) {
+  return through.obj(function(file, enc, next) {
+    fn && fn(file)
+    next(null, file);
+  })
+}
+
+const relative = file => path.relative(OPTS.appDir, file.path)
+let isWriting = false
+const startWrite = cb => { if (isWriting) return; isWriting = true; cb() }
+const endWrite = cb => { isWriting = false; cb() }
+const out = {
+  file: file => startWrite(() => process.stdout.write(` ⇢ ${relative(file)}\r`)),
+  badFile: (file, err) => endWrite(() => console.log(` ◆ ${relative(file)}`.red)),
+  goodFile: (file, ms) => endWrite(() => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold))
 }
 
 export default { buildScripts, afterFirstBuild, watchForBuild }
