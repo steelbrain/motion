@@ -36,7 +36,6 @@ export async function run(_opts, isBuild) {
       )
 
       log('building...')
-      await clear.outDir()
       await clear.buildDir()
       await build(false)
 
