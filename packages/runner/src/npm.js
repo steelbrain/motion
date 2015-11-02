@@ -236,9 +236,11 @@ export async function bundleInternals() {
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 
-  await writeFile(WHERE.internalsInJS, requireString)
-  await packInternals()
-  bridge.message('internals:reload', {})
+  if (files.length) {
+    await writeFile(WHERE.internalsInJS, requireString)
+    await packInternals()
+    bridge.message('internals:reload', {})
+  }
 }
 
 function packInternals() {
