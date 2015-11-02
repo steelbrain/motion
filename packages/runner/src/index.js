@@ -39,7 +39,7 @@ export async function run(_opts, isBuild) {
       await clear.buildDir()
       await build(false)
 
-      console.log("\nDone! ⇢ .flint/build\n".green.bold)
+      console.log("\nDone! ⇢  .flint/build\n".green.bold)
 
       if (OPTS.watch)
         gulp.watchForBuild()
