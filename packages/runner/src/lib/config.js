@@ -33,7 +33,7 @@ export async function firstRun() {
   if (hasRunBefore)
     return false
 
-  const useFriendly = await askForUrlPreference()
+  const useFriendly = false //await askForUrlPreference()
 
   OPTS.config = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
   writeConfig(OPTS.config)
