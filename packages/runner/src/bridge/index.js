@@ -1,6 +1,7 @@
 import path from 'path'
 import ws from 'nodejs-websocket'
 import log from '../lib/log'
+import wport from '../lib/wport'
 import cache from '../cache'
 
 let wsServer
@@ -79,7 +80,9 @@ export function once(type, cb) {
   })
 }
 
-export function start(port) {
+export function start() {
+  const port = wport()
+
   wsServer = ws.createServer(conn => {
     connections.push(conn)
 

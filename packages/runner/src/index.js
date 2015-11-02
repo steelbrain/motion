@@ -1,44 +1,17 @@
 import bridge from './bridge'
 import compiler from './compiler'
 import handleError from './lib/handleError'
-import build from './fbuild'
 import server from './server'
 import npm from './npm'
 import opts from './opts'
 import log from './lib/log'
-import { firstRun, writeConfig, readConfig } from './lib/config'
+import { firstRun } from './lib/config'
 import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
-import wport from './lib/wport'
+import watchingMessage from './lib/watchingMessage'
 import clear from './fbuild/clear'
-import keys from './keys'
 import path from 'path'
-
-let writeWPort = socketPort =>
-  readConfig().then(config =>
-    writeConfig(Object.assign(config, { socketPort }))
-  )
-
-function watchingMessage() {
-  const newLine = "\n"
-  const userEditor = (process.env.VISUAL || process.env.EDITOR)
-
-  keys.start()
-
-  console.log(
-    newLine +
-    ' • O'.cyan.bold + 'pen        '.cyan +
-      ' • V'.cyan.bold + 'erbose'.cyan + newLine +
-    (userEditor
-      ? (' • E'.cyan.bold + 'dit        '.cyan)
-      : '               ') +
-        ' • I'.cyan.bold + 'nstall (npm)'.cyan + newLine
-    // ' • U'.blue.bold + 'pload'.blue + newLine
-  )
-
-  keys.resume()
-}
 
 export async function run(_opts, isBuild) {
   try {
@@ -77,8 +50,7 @@ export async function run(_opts, isBuild) {
       log('running...')
       await clear.outDir()
       await server()
-      bridge.start(wport())
-      writeWPort(wport())
+      bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
       await npm.install()
