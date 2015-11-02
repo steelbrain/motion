@@ -231,12 +231,14 @@ function checkInternals(file, source) {
 export async function bundleInternals() {
   const files = cache.getExported()
 
+  if (!files.length) return
+
   log('bundleInternals', files)
 
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 
-  if (files.length) {
+  if (files) {
     await writeFile(WHERE.internalsInJS, requireString)
     await packInternals()
     bridge.message('internals:reload', {})
