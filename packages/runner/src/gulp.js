@@ -31,6 +31,12 @@ export function watchForBuild() {
 }
 
 const watchDeletes = async vinyl => {
+  // bugfix. sometimes pipeline slows, but these events keep coming
+  // prevent buildFinished from running early
+  // (vinyl event is undefined before initial run)
+  if (!vinyl.event)
+    buildFinishedCheck()
+
   try {
     if (vinyl.event == 'unlink') {
       cache.remove(vinyl.path)
@@ -122,7 +128,7 @@ export function buildScripts(cb, stream) {
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error })
     // reset finished check
-    buildFinishedCheck(lastScript)
+    buildFinishedCheck()
   }
 
   function setLastFile(file) {
@@ -133,12 +139,12 @@ export function buildScripts(cb, stream) {
   }
 
   function checkWriteable(file) {
+    buildFinishedCheck()
+
     if (file.isInternal)
       return false
 
     file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
-
-    buildFinishedCheck(lastScript)
 
     if (file.isSourceMap)
       return true
@@ -202,7 +208,7 @@ export function buildWhileRunning() {
 }
 
 let buildingTimeout
-function buildFinishedCheck(lastScript) {
+function buildFinishedCheck() {
   if (!OPTS.hasRunInitialBuild) {
     log('buildFinishedCheck setTimeout')
     if (buildingTimeout) clearTimeout(buildingTimeout)

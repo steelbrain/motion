@@ -41,7 +41,7 @@ function getScriptTags(files, req) {
       // user files
       newLine,
       '<!-- APP -->',
-      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" });</script>`,
+      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })</script>`,
       '<script src="/__/packages.js" id="__flintPackages"></script>',
       '<script src="/__/internals.js" id="__flintInternals"></script>',
       assetScriptTags(files),
