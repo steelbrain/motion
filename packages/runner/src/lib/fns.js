@@ -16,7 +16,8 @@ const mkdir = Promise.promisify(mkdirp)
 const readdir = Promise.promisify(readdirp)
 const readJSON = Promise.promisify(jf.readFile)
 const writeJSON = Promise.promisify(jf.writeFile)
-const readFile = Promise.promisify(fs.readFile)
+const fsReadFile = Promise.promisify(fs.readFile)
+const readFile = path => fsReadFile(path, 'utf-8')
 const writeFile = Promise.promisify(fs.writeFile)
 const touch = Promise.promisify(_touch)
 const copy = Promise.promisify(copyFile)
@@ -34,6 +35,10 @@ const recreateDir = (dir) =>
     })
   })
 
+function sanitize(str) {
+  return str.replace(/[^a-zA-Z]/, '')
+}
+
 export default {
   p,
   mkdir,
@@ -47,5 +52,6 @@ export default {
   writeFile,
   copyFile,
   touch,
-  exists
+  exists,
+  sanitize
 }

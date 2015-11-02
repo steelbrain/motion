@@ -2,6 +2,7 @@ import webpack from 'webpack'
 import gulp from 'gulp'
 import log from '../lib/log'
 import { p, copy, writeFile, readFile } from '../lib/fns'
+import sanitize from '../lib/sanitize'
 import opts from '../opts'
 
 async function copyWithSourceMap(file, dest) {
@@ -32,18 +33,17 @@ export async function app() {
   const inFiles = await *[
     readFile(p(depsDir, 'packages.js')),
     readFile(p(depsDir, 'internals.js')),
-    readFile(p(buildDir, opts.get('name') + '.js')),
+    readFile(p(buildDir, opts.get('saneName') + '.js')),
   ]
 
   const inFilesConcat = inFiles.join(";\n")
-  const wrapper = await readFile(`${__dirname}/../../../templates/build.template.js`)
+  const outStr = (
+    preTemplate(opts.get('saneName')) +
+    inFilesConcat +
+    postTemplate(opts.get('saneName'))
+  )
 
-  const outStr = wrapper.toString()
-    .replace(/NAME/g, opts.get('name'))
-    .replace('CONTENTS', inFilesConcat)
-
-  const outFile = p(buildDir, opts.get('name') + '.prod.js')
-
+  const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
   await writeFile(outFile, outStr)
 }
 
@@ -57,3 +57,25 @@ export function assets() {
 }
 
 export default { flint, react, assets, app }
+
+
+function preTemplate(name) {
+  return `window.flintRun_NAME = function flintRun_NAME(node, opts, cb) {
+    var FlintInstace = opts.Flint || runFlint;
+    var Flint = FlintInstace(node, opts, cb);
+
+    (function(Flint) {
+  `.replace(/NAME/g, name)
+}
+
+function postTemplate(name) {
+  return `
+
+      Flint.init()
+    })(Flint);
+  }
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = flintRun_NAME
+  }`.replace(/NAME/g, name)
+}

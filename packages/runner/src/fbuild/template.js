@@ -11,14 +11,14 @@ export default async function makeTemplate() {
     OPTS = opts.get()
 
     const out = p(OPTS.buildDir, 'index.html')
-    const data = await readFile(p(OPTS.flintDir, 'index.html'), 'utf8')
+    const data = await readFile(p(OPTS.flintDir, 'index.html'))
     let template = data
       .replace(/\/static/g, '/_/static')
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.prod.js"></script>',
         '  <script src="/_/flint.prod.js"></script>',
-        '  <script src="/_/'+OPTS.name+'.prod.js"></script>',
-        `  <script>window.Flint = flintRun_${OPTS.name}("_flintapp", { app: "${OPTS.name}" });</script>`
+        '  <script src="/_/'+OPTS.saneName+'.prod.js"></script>',
+        `  <script>window.Flint = flintRun_${OPTS.saneName}("_flintapp", { app: "${OPTS.saneName}" });</script>`
       ].join("\n"))
 
     log('makeTemplate', out, template)
@@ -33,7 +33,7 @@ function makeIsomorphic() {
   // TODO: flint build --isomorphic
   if (OPTS.isomorphic) {
     var Flint = require('flint-js/dist/flint.node');
-    var app = require(p(OPTS.buildDir, '_', OPTS.name));
+    var app = require(p(OPTS.buildDir, '_', OPTS.saneName));
 
     var FlintApp = app(false, { Flint }, async function(output) {
       template = template.replace(

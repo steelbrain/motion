@@ -73,7 +73,7 @@ async function makeTemplate(req, cb) {
       paths.move(mainIndex, 0)
   }
 
-  const fullTemplate = template.toString().replace('<!-- SCRIPTS -->',
+  const fullTemplate = template.replace('<!-- SCRIPTS -->',
     '<div id="_flintdevtools"></div>'
     + newLine
     + getScriptTags(paths, req)

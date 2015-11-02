@@ -1,5 +1,5 @@
 import path from 'path'
-import { p } from './lib/fns'
+import { p, sanitize } from './lib/fns'
 
 let OPTS
 
@@ -41,6 +41,7 @@ function setAll(opts) {
   OPTS.outDir = p(OPTS.flintDir, 'out')
 
   OPTS.name = path.basename(process.cwd())
+  OPTS.saneName = sanitize(OPTS.name)
 
   var folders = OPTS.dir.split('/')
   OPTS.name = folders[folders.length - 1]
