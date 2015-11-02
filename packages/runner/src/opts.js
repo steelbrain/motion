@@ -21,7 +21,7 @@ function setAll(opts) {
   // from cli
   OPTS = {}
 
-  OPTS.debug = opts.debug || opts.verbose
+  OPTS.debug = opts.debug
   OPTS.port = opts.port
   OPTS.host = opts.host
   OPTS.watch = opts.watch

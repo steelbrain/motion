@@ -7,7 +7,7 @@ export default function handleError(handle) {
   if (typeof handle == 'function') {
     return function(err, ...args) {
       if (err) {
-        console.error('Error'.bold.red, err)
+        console.error('ERROR'.bold.red, err)
         process.exit(1)
         return
       }
@@ -17,6 +17,7 @@ export default function handleError(handle) {
   }
   // if used in try/catch
   else {
+    console.error((handle.message || "ERROR").bold.red)
     console.log(handle.stack)
     errorClient.captureException(handle)
   }

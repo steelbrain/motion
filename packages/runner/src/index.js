@@ -11,6 +11,7 @@ import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
 import clear from './fbuild/clear'
+import build from './fbuild/build'
 import path from 'path'
 
 export async function run(_opts, isBuild) {
