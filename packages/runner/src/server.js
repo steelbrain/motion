@@ -53,7 +53,7 @@ function getScriptTags(files, req) {
 async function makeTemplate(req, cb) {
   const templatePath = p(OPTS.dir, OPTS.template)
   const template = await readFile(templatePath)
-  const dir = await readdir({ root: p(OPTS.flintDir, 'out') })
+  const dir = await readdir({ root: OPTS.outDir })
   const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
   const hasFiles = files.length
 
@@ -100,7 +100,7 @@ export default function server() {
 
     // USER files
     // user js files at '/_/filename.js'
-    server.use('/_', express.static('.flint/out'));
+    server.use('/_', express.static('.flint/.internal/out'));
     // user non-js files
     server.use('/', express.static('.', staticOpts));
     // user static files...
@@ -108,7 +108,7 @@ export default function server() {
 
     // INTERNAL files
     // packages.js
-    server.use('/__', express.static('.flint/deps'));
+    server.use('/__', express.static('.flint/.internal/deps'));
     // tools.js
     server.use('/__/tools', express.static(p(OPTS.modulesDir, 'flint-tools', 'build', '_')));
     // flint.js & react.js

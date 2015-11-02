@@ -2,7 +2,7 @@ import opts from './opts'
 import path from 'path'
 import log from './lib/log'
 
-const name = f => path.relative(baseDir, f).replace('.flint/out/', '')
+const name = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>
 type ImportArray = Array<string>

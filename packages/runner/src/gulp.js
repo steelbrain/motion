@@ -190,7 +190,7 @@ export function buildScripts(cb, stream) {
 export function buildWhileRunning() {
   console.log("Building...")
   return new Promise((res, rej) => {
-    gulp.src(['.flint/out/**/*.js'])
+    gulp.src(['.flint/.internal/out/**/*.js'])
       .pipe($.plumber(err => {
         logError(err)
         rej(err)

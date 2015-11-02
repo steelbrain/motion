@@ -34,7 +34,7 @@ let FIRST_RUN = true
 function init(_opts) {
   OPTS = _opts
 
-  WHERE.outDir = p(OPTS.flintDir, 'deps')
+  WHERE.outDir = p(OPTS.internalDir, 'deps')
   WHERE.internalsInJS = p(WHERE.outDir, 'internals.in.js')
   WHERE.internalsOutJS = p(WHERE.outDir, 'internals.js')
   WHERE.depsJS = p(WHERE.outDir, 'deps.js')

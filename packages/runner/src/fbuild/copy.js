@@ -27,7 +27,7 @@ export function react() {
 // bundles together packages.js, internals.js and user app files
 export async function app() {
   log('copy: app: reading packages + internals')
-  const depsDir = p(opts.get('flintDir'), 'deps')
+  const depsDir = p(opts.get('internalDir'), 'deps')
   const buildDir = p(opts.get('buildDir'), '_')
 
   const inFiles = await *[
