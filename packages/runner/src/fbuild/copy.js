@@ -2,7 +2,6 @@ import webpack from 'webpack'
 import gulp from 'gulp'
 import log from '../lib/log'
 import { p, copy, writeFile, readFile } from '../lib/fns'
-import sanitize from '../lib/sanitize'
 import opts from '../opts'
 
 async function copyWithSourceMap(file, dest) {
