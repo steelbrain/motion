@@ -4,10 +4,10 @@ import raf from 'raf'
 // import Radium from 'radium'
 import resolveStyles from 'flint-radium/lib/resolve-styles'
 
+import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
-import phash from './lib/phash'
 
 const capitalize = str =>
   str[0].toUpperCase() + str.substring(1)
@@ -62,19 +62,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       Flint,
       el,
 
-      childContextTypes: {
-        path: React.PropTypes.string
-      },
-
-      contextTypes: {
-        path: React.PropTypes.string
-      },
-
-      getChildContext() {
-        // no need for paths/cache in production
-        if (process.env.production) return {}
-        return { path: this.getPath() }
-      },
+      mixins: [hotCache({ Internal, options })],
 
       // TODO: shouldComponentUpdate based on hot load for perf
       shouldComponentUpdate() {
@@ -87,74 +75,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           !this.isPaused && !this.firstRender &&
           !this.isRendering
         )
-      },
-
-      set(name, val, postfix) {
-        if (!process.env.production) {
-          const path = this.getPath()
-          Internal.getCache[path] = Internal.getCache[path] || {}
-          // undo postfix
-          if (postfix) val = val + (postfix == '++' ? 1 : -1)
-          Internal.setCache(path, name, val)
-        }
-
-        if (this.shouldReRender())
-          this.forceUpdate()
-      },
-
-      get(name, val, where) {
-        // dont cache in prod / undefined
-        if (process.env.production)
-          return val
-
-        // file scoped stuff always updates
-        if (options.unchanged && where == 'fromFile')
-          return val
-
-        const path = this.getPath()
-
-        // setup caches
-        if (!Internal.getCache[path])
-          Internal.getCache[path] = {}
-        if (!Internal.getCacheInit[path])
-          Internal.getCacheInit[path] = {}
-
-        const isComparable = (
-          typeof val == 'number' ||
-          typeof val == 'string' ||
-          typeof val == 'boolean' ||
-          typeof val == 'undefined'
-        )
-
-        const cacheVal = Internal.getCache[path][name]
-        const cacheInitVal = Internal.getCacheInit[path][name]
-
-        let originalValue, restore
-
-        // if edited
-        if (options.changed) {
-          // initial value not undefined
-          if (typeof cacheInitVal != 'undefined') {
-            // only hot update changed variables
-            if (isComparable && cacheInitVal === val) {
-              restore = true
-              originalValue = Internal.getCache[path][name]
-            }
-          }
-
-          Internal.getCacheInit[path][name] = val
-        }
-
-        if (options.changed && typeof cacheVal == 'undefined')
-          Internal.setCache(path, name, val)
-
-        // return cached
-        if (isComparable)
-          if (options.unchanged && cacheVal !== cacheInitVal)
-            return cacheVal
-
-        // if restore, restore
-        return restore ? originalValue : val
       },
 
       // LIFECYCLES
@@ -207,34 +127,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return null
       },
 
-      getPath() {
-        return `${this.path}-${this.props.__key || ''}`
-      },
-
-      setPath() {
-        if (process.env.production || Internal.firstRender)
-          return
-
-        let propsHash
-
-        // get the props hash, but lets cache it so its not a ton of work
-        if (options.changed === true) {
-          propsHash = phash(this.props)
-          Internal.propsHashes[this.context.path] = propsHash
-          options.changed = 2
-        }
-        else if (!propsHash) {
-          propsHash = Internal.propsHashes[this.context.path]
-
-          if (!propsHash) {
-            propsHash = phash(this.props)
-            Internal.propsHashes[this.context.path] = propsHash
-          }
-        }
-
-        this.path = (this.context.path || '') + ',' + name + '.' + propsHash
-      },
-
       runEvents(name) {
         runEvents(this.events, name)
       },
@@ -250,11 +142,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production) {
-          // re-render after first mount
-          // (triggers calculating props hashes for hot reloads)
-          if (Internal.firstRender && !Internal.isDevTools)
-            Flint.render()
-
           this.props._flintOnMount(this.getPath(), this, this.lastRendered)
         }
       },
