@@ -51,6 +51,9 @@ export default function run(browser, opts) {
 function reloadScript(id) {
   return () => {
     const el = document.getElementById(id)
+
+    if (!el) return
+
     const src = el.src
     removeEl(el)
 
@@ -101,7 +104,7 @@ function renderFlint() {
     return
   }
 
-  if (Flint) {
+  if (typeof Flint != 'undefined') {
     Flint.render()
     renderAttempts = 0
   }

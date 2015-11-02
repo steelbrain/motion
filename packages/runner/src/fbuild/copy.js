@@ -26,12 +26,11 @@ export function react() {
 // bundles together packages.js, internals.js and user app files
 export async function app() {
   log('copy: app: reading packages + internals')
-  const depsDir = p(opts.get('internalDir'), 'deps')
   const buildDir = p(opts.get('buildDir'), '_')
 
   const inFiles = await *[
-    readFile(p(depsDir, 'packages.js')),
-    readFile(p(depsDir, 'internals.js')),
+    readFile(p(opts.get('depsDir'), 'packages.js')),
+    readFile(p(opts.get('depsDir'), 'internals.js')),
     readFile(p(buildDir, opts.get('saneName') + '.js')),
   ]
 

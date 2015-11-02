@@ -87,7 +87,7 @@ export function buildScripts(cb, stream) {
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
     .pipe($.if(file => file.isInternal,
       multipipe(
-        gulp.dest(p(OPTS.flintDir, 'deps', 'internal')),
+        gulp.dest(p(OPTS.depsDir, 'internal')),
         $.ignore.exclude(true)
       )
     ))
