@@ -1,7 +1,6 @@
 export default function scopedOn(parentScope) {
   function _on(scope, name, cb) {
     // check if they defined their own scope
-    console.log(name)
     if (name && typeof name == 'string')
       return on(scope, name, cb)
     else

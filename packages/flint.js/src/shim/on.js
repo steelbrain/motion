@@ -20,7 +20,7 @@ function getRoot(scope) {
 }
 
 const onCb = (scope, name, cb) => {
-  const finish = () => cb && cb()
+  const finish = (...args) => cb && cb(...args)
   const events = scope.events
 
   if (!events)
