@@ -231,7 +231,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           props = { yield: true }
         }
 
-        if (numRenders == 1) {
+        else if (numRenders == 1) {
           tags = this.renders[0].call(this)
 
           addWrapper = (
@@ -245,8 +245,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
         }
 
-        if (numRenders > 1) {
+        else if (numRenders > 1) {
           tags = this.renders.map(r => r.call(this))
+        }
+
+        // if $ = false, unwrap if possible
+        if (this.styles._static && this.styles._static.$ == false && tags.length == 1) {
+          addWrapper = false
+          tags = tags[0]
         }
 
         // top level tag returned false

@@ -299,6 +299,8 @@ export default function createPlugin(options) {
 
         VariableDeclaration: {
           exit(node, parent, scope, file) {
+            if (node.isStyle) return
+
             // add getter
             if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
               node.declarations.map(dec => {
@@ -372,7 +374,12 @@ export default function createPlugin(options) {
                 }
               }
 
-              else {
+              else if (t.isLiteral(node.right) && node.right.value === false) {
+                return staticStyleStatement(node, node.right)
+              }
+
+              else{
+
                 return styleAssign(node)
               }
             }
@@ -422,9 +429,24 @@ export default function createPlugin(options) {
             }
 
             function styleAssign(node, right) {
-              let result = t.assignmentExpression('=', styleLeft(node), styleFunction(right || node.right))
-              result.isStyle = true
-              return result
+              const assignment = t.assignmentExpression('=',
+                styleLeft(node),
+                styleFunction(right || node.right)
+              )
+
+              assignment.isStyle = true
+
+              // attempt to make $circles as a variable
+              // let result = t.variableDeclaration('let', [
+              //   t.variableDeclarator(
+              //     t.identifier(node.left.name),
+              //     assignment
+              //   ),
+              // ])
+              //
+              // result.isStyle = true
+
+              return assignment
 
               // (_index) => {}
               function styleFunction(inner) {

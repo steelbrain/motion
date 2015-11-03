@@ -2,9 +2,7 @@ import Route from 'route-parser'
 window.R = Route
 import { createHistory } from 'history'
 
-const history = createHistory()
-
-let render
+let history, render
 let activeID = 1
 let routes = {}
 let routesList = []
@@ -14,6 +12,12 @@ let location = window.location.pathname
 const router = {
   init({ onChange }) {
     render = onChange
+    history = createHistory()
+
+    // router updates
+    history.listen(location => {
+      router.go(location.pathname, true)
+    })
   },
 
   link(...args) {
@@ -90,10 +94,5 @@ const router = {
     return { params: params[path] }
   }
 }
-
-// router updates
-history.listen(location => {
-  router.go(location.pathname, true)
-})
 
 export default router

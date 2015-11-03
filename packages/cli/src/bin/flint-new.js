@@ -55,6 +55,13 @@ if (where) {
 }
 
 var name = args[0]
+
+// test for weird names
+if (/[^a-zA-Z0-9\_\-\$\.]/g.test(name)) {
+  console.error('Name can\'t contain special characters'.bold.red)
+  process.exit(1)
+}
+
 var spinner, fps = 60
 let FLINT = {}
 FLINT.dir = __dirname

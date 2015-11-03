@@ -140,7 +140,8 @@ export default function createElement(viewName) {
     props.__tagName = name
 
     // whitelist tags
-    if (typeof tag == 'string' && !tags[tag])
+    // whitelist wrapper to avoid <Col /> => <col />
+    if (props.isWrapper || typeof tag == 'string' && !tags[tag])
       tag = 'div'
 
     return React.createElement(tag, props, ...args)
