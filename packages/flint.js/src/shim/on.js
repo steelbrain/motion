@@ -20,7 +20,7 @@ function addListener({ scope, name, number, cb }) {
   return scope.addEventListener(name, cb)
 }
 
-function removeListener(scope, name, cb) {
+function removeListener({ scope, name, cb }) {
   scope.removeEventListener(name, cb)
 }
 
@@ -60,10 +60,10 @@ function onCb({ scope, name, number, cb }) {
       listener = addListener({ scope: getRoot(scope), name, number, cb: finish })
     })
 
-    events.unmount.push(() => {
-      if (typeof number == 'undefined') // number = setTimeout = we just push unmount event right in addListener
-        removeListener({ scope: getRoot(scope), name, cb: finish })
-    })
+    if (typeof number == 'undefined') // number = setTimeout = we just push unmount event right in addListener
+      events.unmount.push(() => {
+          removeListener({ scope: getRoot(scope), name, cb: finish })
+      })
 
     return listener
   }
