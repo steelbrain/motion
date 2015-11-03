@@ -27,7 +27,7 @@ export default function run(browser, opts) {
     },
 
     'packages:reload': reloadScript('__flintPackages'),
-    'internals:reload': reloadScript('__flintInternals'),
+    'internals:reload': reloadScript('__flintInternals', { reloadAll: true }),
 
     'file:delete': file => {
       Flint.deleteFile(file.name)
@@ -48,7 +48,7 @@ export default function run(browser, opts) {
   }
 }
 
-function reloadScript(id) {
+function reloadScript(id, opts = {}) {
   return () => {
     const el = document.getElementById(id)
 
@@ -57,10 +57,45 @@ function reloadScript(id) {
     const src = el.src
     removeEl(el)
 
-    // avoid bug when starting up and adding script
-    const tag = addScript({ src }, renderFlint)
+    const finish = opts.reloadAll ? reloadUserScripts : renderFlint
+    const tag = addScript({ src }, finish)
+
     tag.setAttribute('id', id)
   }
+}
+
+function reloadUserScripts() {
+  const scripts = document.querySelectorAll('.__flintScript');
+
+  let loaded = 0
+  let total = scripts.length
+
+  // TODO: have a function in flint.js that does this
+  _Flint.views = {}
+  _Flint.mountedViews = {}
+  _Flint.lastWorkingViews = {}
+  _Flint.firstRender = true;
+
+  [].forEach.call(scripts, script => {
+    let replacement = document.createElement('script');
+    replacement.onload = function() { loaded++ }
+    const attrs = script.attributes
+
+    for (let i = 0; i < attrs.length; i++)
+      replacement.setAttribute(attrs[i].name, attrs[i].value)
+
+    removeEl(script)
+    document.body.appendChild(replacement)
+  })
+
+  function doneLoading() {
+    if (loaded == scripts.length)
+      Flint.render()
+    else
+      setTimeout(doneLoading, 20)
+  }
+
+  setTimeout(doneLoading)
 }
 
 let lastLoadedAt = {};
@@ -92,8 +127,8 @@ function addScript(message, cb) {
 }
 
 function removeEl(el) {
-  var parent = el.parentNode;
-  parent.removeChild(el);
+  var parent = el.parentNode
+  parent.removeChild(el)
 }
 
 let renderAttempts = 0

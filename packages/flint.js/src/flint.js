@@ -61,14 +61,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     reportError(...args)
 
     // restore last working views
-    Object.keys(Flint.views).forEach(name => {
-      Flint.views[name] = Internal.lastWorkingViews[name]
+    Object.keys(Internal.views).forEach(name => {
+      Internal.views[name] = Internal.lastWorkingViews[name]
     })
   }
 
   root.onerror = flintOnError
 
   const Internal = root._Flint = {
+    views: {},
     isRendering: 0,
     firstRender: true,
     isDevTools: opts.app == 'devTools',
@@ -164,9 +165,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     range,
     iff,
 
-    views: {},
     removeView(key) {
-      delete Flint.views[key]
+      delete Internal.views[key]
     },
 
     render() {
@@ -181,7 +181,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         if (Internal.isRendering > 3) return
 
         const MainComponent = (
-            Flint.views.Main.component || Internal.lastWorkingViews.Main.component
+            Internal.views.Main.component || Internal.lastWorkingViews.Main.component
         )
 
         if (!browserNode) {
@@ -267,7 +267,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         return setView(name, comp())
 
       function setView(name, component) {
-        Flint.views[name] = { hash, component }
+        Internal.views[name] = { hash, component }
       }
 
       // set view in cache
@@ -278,7 +278,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       const hash = hashsum(body)
 
       // if new
-      if (!Flint.views[name]) {
+      if (!Internal.views[name]) {
         setView(name, comp({ hash, changed: true }))
         Internal.changedViews.push(name)
         return
@@ -292,12 +292,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         // not new
         // if defined twice during first run
         if (Internal.firstRender) {
-          Flint.views[name] = ErrorDefinedTwice(name)
+          Internal.views[name] = ErrorDefinedTwice(name)
           throw new Error(`Defined a view twice: ${name}`)
         }
 
         // if unchanged
-        if (Flint.views[name].hash == hash) {
+        if (Internal.views[name].hash == hash) {
           setView(name, comp({ hash, unchanged: true }))
           return
         }
@@ -324,12 +324,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       // View.SubView
       const subName = `${parentName}.${name}`
-      if (Flint.views[subName]) {
-        result = Flint.views[subName].component
+      if (Internal.views[subName]) {
+        result = Internal.views[subName].component
       }
       // regular view
-      else if (Flint.views[name]) {
-        result = Flint.views[name].component
+      else if (Internal.views[name]) {
+        result = Internal.views[name].component
       }
       else {
         result = NotFound(name)

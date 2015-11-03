@@ -17,7 +17,7 @@ Array.prototype.move = function(from, to) {
 
 function assetScriptTags(scripts) {
   return scripts.map(function(file) {
-    return '<script src="/_/' + file + '"></script>';
+    return '<script src="/_/' + file + '" class="__flintScript"></script>';
   }).join(newLine);
 }
 

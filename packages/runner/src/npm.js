@@ -211,38 +211,38 @@ function scanFile(file, source) {
 // TODO: check this in babel to be more accurate
 // we bundle any internal file that uses:
 //    exports.xyz, exports['default']
-function checkInternals(file, source) {
+async function checkInternals(file, source) {
   log('checkInternals', file)
 
-  const foundExports = findExports(source)
+  const isExporting = findExports(source)
   const alreadyExported = cache.isExported(file)
+  log('checkInternals: found', isExporting, 'already', alreadyExported)
 
-  cache.setExported(file, foundExports)
+  cache.setExported(file, isExporting)
 
-  log('checkInternals: found', foundExports, 'already', alreadyExported)
-
-  // check for newly exported
-  if (!alreadyExported && foundExports || alreadyExported && !foundExports) {
-    log('changed external', file)
-    bundleInternals()
+  // needs to rewrite internalsIn.js?
+  if (!alreadyExported && isExporting || alreadyExported && !isExporting) {
+    await writeInternalsIn()
   }
+
+  if (isExporting)
+    bundleInternals()
 }
 
-export async function bundleInternals() {
+async function writeInternalsIn() {
+  log('writeInternalsIn')
   const files = cache.getExported()
-
   if (!files.length) return
-
-  log('bundleInternals', files)
 
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 
-  if (files) {
-    await writeFile(WHERE.internalsInJS, requireString)
-    await packInternals()
-    bridge.message('internals:reload', {})
-  }
+  await writeFile(WHERE.internalsInJS, requireString)
+}
+
+export async function bundleInternals() {
+  await packInternals()
+  bridge.message('internals:reload', {})
 }
 
 function packInternals() {
@@ -260,7 +260,7 @@ function packInternals() {
       }
     }, async err => {
       if (err) {
-        console.log(err)
+        console.error(err.stack)
         return rej(err)
       }
 
