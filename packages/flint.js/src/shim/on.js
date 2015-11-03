@@ -1,3 +1,5 @@
+import ReactDOM from 'react-dom'
+
 function onUnmount(scope, cb) {
   if (!scope || !scope.events) return
   if (!scope.events.unmount) scope.events.unmount = []
@@ -42,7 +44,7 @@ function ensureQueue(where, ...names) {
 }
 
 function getRoot(scope) {
-  return scope.refs.view
+  return ReactDOM.findDOMNode(scope)
 }
 
 function hasEvents(events) {
@@ -53,7 +55,7 @@ function onCb({ scope, name, number, cb }) {
   const finish = (...fargs) => cb && cb(...fargs)
   const events = scope && scope.events
 
-  if (events && ['mount', 'unmount', 'change', 'render'].indexOf(name) >= 0) {
+  if (events && ['mount', 'unmount', 'change', 'render', 'props'].indexOf(name) >= 0) {
     if (events && events[name] != 'undefined') {
       ensureQueue(events, name)
       events[name].push(finish)

@@ -215,8 +215,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const wrapperName = name.toLowerCase()
 
         let tagProps = Object.assign({
-          isWrapper: true,
-          ref: 'view'
+          isWrapper: true
         }, props)
 
         return this.el(`${wrapperName}`, tagProps, ...tags)
@@ -262,7 +261,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         const wrappedTags = addWrapper ?
           this.getWrapper(tags, props, numRenders) :
-          React.cloneElement(tags, { ref: 'view' })
+          tags
 
         const styled = resolveStyles(this, wrappedTags)
 
