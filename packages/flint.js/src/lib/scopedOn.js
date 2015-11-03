@@ -1,10 +1,10 @@
 export default function scopedOn(parentScope) {
-  function _on(scope, name, cb) {
+  function _on(scope, name, cb, ...args) {
     // check if they defined their own scope
     if (name && typeof name == 'string')
-      return on(scope, name, cb)
+      return on(scope, name, cb, ...args)
     else
-      return on(parentScope, scope, name)
+      return on(parentScope, scope, name, cb, ...args)
   }
 
   // view defaults
@@ -18,6 +18,6 @@ export default function scopedOn(parentScope) {
   return _on
 }
 
-function boundEvent(viewOn, scope, name) {
-  return (...args) => viewOn(scope, name, ...args)
+function boundEvent(viewOn, scope, name, ...pargs) {
+  return (...args) => viewOn(scope, name, ...pargs, ...args)
 }
