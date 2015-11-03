@@ -4,7 +4,7 @@ function onUnmount(scope, cb) {
   scope.events.unmount.push(cb)
 }
 
-function addListener({ scope, name, number, cb }) {
+function addListener({ root, scope, name, number, cb }) {
   if (name == 'delay') { // on('delay', 400, cb)
     let timer = setTimeout(cb, number)
     onUnmount(scope, () => clearTimeout(timer))
@@ -17,11 +17,22 @@ function addListener({ scope, name, number, cb }) {
     return
   }
 
-  return scope.addEventListener(name, cb)
+  if (name == 'frame') {
+    let active = true
+    let loop = () => requestAnimationFrame(() => {
+      cb()
+      if (active) loop()
+    })
+    loop()
+    onUnmount(scope, () => active = false)
+  }
+
+  return (root || scope).addEventListener(name, cb)
 }
 
 function removeListener({ scope, name, cb }) {
-  scope.removeEventListener(name, cb)
+  if (scope.removeEventListener)
+    scope.removeEventListener(name, cb)
 }
 
 function ensureQueue(where, ...names) {
@@ -57,12 +68,12 @@ function onCb({ scope, name, number, cb }) {
     let listener
 
     events.mount.push(() => {
-      listener = addListener({ scope: getRoot(scope), name, number, cb: finish })
+      listener = addListener({ scope, root: getRoot(scope), name, number, cb: finish })
     })
 
     if (typeof number == 'undefined') // number = setTimeout = we just push unmount event right in addListener
       events.unmount.push(() => {
-          removeListener({ scope: getRoot(scope), name, cb: finish })
+          removeListener({ scope, root: getRoot(scope), name, cb: finish })
       })
 
     return listener
