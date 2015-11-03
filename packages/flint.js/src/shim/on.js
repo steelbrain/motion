@@ -9,17 +9,43 @@ function addListener(name, target, cb) {
   }
 }
 
+function ensureQueue(where, ...names) {
+  names.forEach(name => {
+    where[name] = where[name] || []
+  })
+}
+
+function getRoot(scope) {
+  return scope.refs.view
+}
+
 const onCb = (scope, name, cb) => {
   const finish = () => cb && cb()
+  const events = scope.events
 
-  if (scope.events && scope.events[name] != 'undefined') {
-    if (!scope.events[name])
-      scope.events[name] = []
+  if (!events)
+    return scope.addEventListener(name, finish)
 
-    scope.events[name].push(finish)
+  if (['mount', 'unmount', 'change', 'render'].indexOf(name) >= 0) {
+    if (events && events[name] != 'undefined') {
+      ensureQueue(events, name)
+      events[name].push(finish)
+      return
+    }
   }
-  else
-    return scope.addEventListener(name, finish);
+
+  // if inside parent with mount/unmount events, do auto
+  if (events && typeof events.mount != 'undefined' && typeof events.unmount != 'undefined') {
+    ensureQueue(events, 'mount', 'unmount')
+
+    events.mount.push(() => {
+      getRoot(scope).addEventListener(name, finish)
+    })
+
+    events.unmount.push(() => {
+      getRoot(scope).removeEventListener(name, finish)
+    })
+  }
 }
 
 const on = (scope, name, cb) => {
