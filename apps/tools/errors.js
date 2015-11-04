@@ -155,9 +155,10 @@ view ErrorMessage {
     fullStack = null
 
     // show full stack after a delay
-    on('delay', 2500, () => {
-      fullStack = error.stack
-    })
+    if (error)
+      on.delay(2500, () => {
+        fullStack = error.stack
+      })
   })
 
   function showFlintErrorDiv() {

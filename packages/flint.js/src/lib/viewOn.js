@@ -1,4 +1,4 @@
-export default function scopedOn(parentScope) {
+export default function viewOn(parentScope) {
   function _on(scope, name, cb, ...args) {
     // check if they defined their own scope
     if (name && typeof name == 'string')
@@ -9,6 +9,8 @@ export default function scopedOn(parentScope) {
 
   // view defaults
   const viewEvent = boundEvent.bind(null, _on, parentScope)
+
+  _on.__proto__ = on
 
   _on.mount =  viewEvent('mount')
   _on.unmount = viewEvent('unmount')

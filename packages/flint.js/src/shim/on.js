@@ -119,6 +119,51 @@ function finish(opts) {
   return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
 }
 
+// pre bind some events
+
+// for on.name() usage
+const bindName = name => (scope, cb, number) => on(scope, name, cb, number)
+const onName = name => on[name] = bindName(name)
+
+// flint
+onName('delay')
+onName('every')
+onName('frame')
+
+// DOM level 2 at most
+
+// mouse
+onName('click')
+onName('mousedown')
+onName('mouseenter')
+onName('mouseleave')
+onName('mousemove')
+onName('mouseover')
+onName('mouseout')
+onName('mouseup')
+
+// keyboard
+onName('keydown')
+onName('keypress')
+onName('keyup')
+
+// frame/object
+onName('abort')
+onName('beforeunload')
+onName('error')
+onName('load')
+onName('resize')
+onName('scroll')
+onName('unload')
+
+// form
+onName('blur')
+onName('change')
+onName('focus')
+onName('reset')
+onName('select')
+onName('submit')
+
 // TODO shim this outside this file
 root.on = on
 

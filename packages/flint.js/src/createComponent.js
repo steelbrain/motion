@@ -8,7 +8,7 @@ import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
-import scopedOn from './lib/scopedOn'
+import viewOn from './lib/viewOn'
 
 const capitalize = str =>
   str[0].toUpperCase() + str.substring(1)
@@ -91,7 +91,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.events = { mount: u, unmount: u, update: u, props: u }
 
         // scope on() to view
-        this.viewOn = scopedOn(this)
+        this.viewOn = viewOn(this)
 
         // cache Flint view render() (defined below)
         const flintRender = this.render
