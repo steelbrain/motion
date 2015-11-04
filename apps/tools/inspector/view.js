@@ -1,7 +1,8 @@
 const inspect = window.Flint.inspect
-const viewName = path => {
-  let views = path.split(',')
-  return views[views.length - 1]
+
+function pathToName(path) {
+  let p = path.split(',')
+  return p[p.length - 1].split('.')[0]
 }
 
 view Inspector.View {
@@ -12,21 +13,23 @@ view Inspector.View {
 
   on.props(() => {
     path = view.props.path
-    name = viewName(path)
-    console.log(path, name)
-  })
+    if (path === 'temp') return
 
-  inspect(path, (_name, _props, _state, _wb) => {
-    name = _name
-    props = _props || {}
-    state = _state || {}
-    writeBack = _wb
-    view.update()
+    if (path) {
+      name = pathToName(path)
+
+      inspect(path, (_props, _state, _wb) => {
+        props = _props || {}
+        state = _state || {}
+        writeBack = _wb
+        view.update()
+      })
+    }
   })
 
   <view>
     <Close onClick={view.props.onClose} size={35} />
-    <name>{name || 'Untitled'}</name>
+    <name>{name}</name>
     <section>
       <title>Props</title>
       <Tree data={props} />

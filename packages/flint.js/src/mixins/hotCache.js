@@ -2,7 +2,7 @@ import phash from '../lib/phash'
 import equal from 'deep-equal'
 import clone from 'clone'
 
-export default function hotCache({ Internal, options }) {
+export default function hotCache({ Internal, options, name }) {
   if (process.env.production)
     return {
       get(name, val) { return val },
@@ -45,7 +45,8 @@ export default function hotCache({ Internal, options }) {
         }
       }
 
-      this.path = (this.context.path || '') + ',' + name + '.' + propsHash
+      const sep = name == 'Main' ? '' : ','
+      this.path = (this.context.path || '') + sep + name + '.' + propsHash
     },
 
     set(name, val, postfix) {

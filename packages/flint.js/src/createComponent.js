@@ -63,7 +63,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       Flint,
       el,
 
-      mixins: [hotCache({ Internal, options })],
+      mixins: [hotCache({ Internal, options, name })],
 
       // TODO: shouldComponentUpdate based on hot load for perf
       shouldComponentUpdate() {

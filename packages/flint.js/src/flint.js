@@ -98,11 +98,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     }
   }
 
-  function pathToName(path) {
-    let p = path.split(',')
-    return p[p.length - 1].split('.')[0]
-  }
-
   // devtools edit
   function writeBack(path, writePath) {
     // update getCache
@@ -115,16 +110,16 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     }, Internal.getCache[path])
 
     // update view
-    const name = pathToName(path)
+    // TODO: specific updates: const name = pathToName(path)
     Flint.render()
   }
 
   function setInspector(path) {
     if (Internal.inspector.path && Internal.inspector.path == path) {
-      const name = pathToName(path)
       let props = Internal.viewsAtPath[path].props
       const state = Internal.getCache[path]
-      Internal.inspector.cb(name, props, state, writeBack)
+      console.log('path', path, state)
+      Internal.inspector.cb(props, state, writeBack)
     }
   }
 
