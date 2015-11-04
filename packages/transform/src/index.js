@@ -17,6 +17,11 @@ function hasObjWithProp(node, base, prop) {
     )
 }
 
+function findObjectName(obj) {
+  if (obj.name) return obj.name
+  if (obj.object) return findObjectName(obj.object)
+}
+
 function isInView(scope) {
   return scope.hasBinding("view")
 }
@@ -492,8 +497,8 @@ export default function createPlugin(options) {
               let name, post
 
               if (node.left.object) {
-                name = node.left.object.name
-                post = t.identifier(name = node.left.object.name)
+                name = findObjectName(node.left.object)
+                post = t.identifier(name)
               }
               else if (t.isJSXExpressionContainer(node.left))
                 name = node.left.expression.name

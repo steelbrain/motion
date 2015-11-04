@@ -15,7 +15,7 @@ view Inspector {
 
   let showTemp = false
   let views = []
-  let hoverEvent, clickEvent
+  let hoverOff, clickOff
   let keys = {}
 
   function setView(path) {
@@ -23,8 +23,8 @@ view Inspector {
   }
 
   function setTemp(path) {
+    console.log(views.length)
     views[views.length - 1] = path
-    console.log(views)
   }
 
   function inspect(e) {
@@ -32,7 +32,7 @@ view Inspector {
   }
 
   function glue(e) {
-    // off (hoverEvent)
+    // off (hoverOff)
     views.pop() //remove temp
     setView(findView(e.target))
     glued = true
@@ -43,12 +43,13 @@ view Inspector {
 
     if (showTemp) {
       setView('temp')
-      hoverEvent = on(window, 'mousemove', inspect)
-      clickEvent = on(window, 'click', glue)
+      hoverOff = on(window, 'mousemove', inspect)
+      clickOff = on(window, 'click', glue)
     }
     else {
       views.pop()
-      /* off(hoverEvent) // off(clickEvent) */
+      hoverOff()
+      clickOff()
     }
 
     view.update()

@@ -29,7 +29,11 @@ function addListener({ root, scope, name, number, cb }) {
     onUnmount(scope, () => active = false)
   }
 
-  return (root || scope).addEventListener(name, cb)
+  const target = (root || scope)
+  const listener = target.addEventListener(name, cb)
+  const removeListener = target.removeEventListener.bind(null, name, cb)
+
+  return removeListener
 }
 
 function removeListener({ scope, name, cb }) {

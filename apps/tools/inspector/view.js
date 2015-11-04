@@ -14,6 +14,7 @@ view Inspector.View {
   on.props(() => {
     path = view.props.path
     if (path === 'temp') return
+    // console.log(path)
 
     if (path) {
       name = pathToName(path)
