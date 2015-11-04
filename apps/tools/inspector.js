@@ -36,44 +36,74 @@ view Inspector {
     else return findFlintView(node.parentNode)
   }
 
-  function enterInspect() {
-    const listener = e => {
-      // TODO: not working (react synth events)
-      e.preventDefault()
-      e.stopPropagation()
+  function inspect(e) {
+    // TODO: not working (react synth events)
+    e.preventDefault()
+    e.stopPropagation()
 
-      let found = findFlintView(e.target)
+    let found = findFlintView(e.target)
 
-      if (found)
-        setView(found)
-
-      removeEventListener('click', listener, false)
-    }
-    // settimeout so it doesnt fire right away
-    setTimeout(() => {
-      addEventListener('click', listener, false)
-    })
+    if (found)
+      setView(found)
   }
+
+  let glued = false
+
+  function glue(e) {
+    // off (hoverEvent)
+    inspect(e)
+    glued = true
+  }
+
+  let hoverEvent, clickEvent
 
   function toggle() {
     show = !show
     setLocal('show', show)
+
+    if (show) {
+      hoverEvent = on(window, 'mousemove', inspect)
+      clickEvent = on(window, 'click', glue)
+    }
+    else {
+      // off(hoverEvent)
+      // off(clickEvent)
+    }
+
     view.update()
   }
 
-  // toggle
-  on(window, 'keydown', e => e.ctrlKey ? keys.ctrl = true : null)
-  on(window, 'keyup', e => e.ctrlKey ? keys.ctrl = false : null)
   on(window, 'keydown', e => {
-    if (!keys.ctrl) return
-    if (e.keyCode === 83) { // S
+    if (e.keyIdentifier === 'Alt') {
       toggle()
     }
   })
 
+  on(window, 'keyup', e => {
+    if (e.keyIdentifier === 'Alt') {
+      if (!glued)
+        toggle()
+    }
+  })
+
+  function close() {
+    glued = false
+    toggle()
+  }
+
+  // toggle
+  // on(window, 'keyup', e => e.ctrlKey ? keys.ctrl = false : null)
+  // on(window, 'keydown', e => {
+  //   if (e.ctrlKey) keys.ctrl = true
+  //   if (!keys.ctrl) return
+  //   if (e.keyCode === 83) { // S
+  //     toggle()
+  //   }
+  // })
+
   <state if={show}>
     <view>
-      <Close onClick={toggle} size={35} />
+      <Close onClick={close} size={35} />
       <name>{name || 'Untitled'}</name>
       <section>
         <title>Props</title>
@@ -92,25 +122,33 @@ view Inspector {
   $state = {
     position: 'fixed',
     top: 0, right: 0,
-    width: '20%',
-    minWidth: 250,
-    padding: 10
+    padding: 8
   }
 
   $view = {
+    position: 'relative',
     pointerEvents: 'auto',
-    padding: 5,
+    padding: 8,
+    minWidth: 150,
     color: '#fff',
-    background: 'linear-gradient(rgba(50,50,50,0.95), rgba(0,0,0,0.9))',
+    background: 'linear-gradient(rgba(50,50,50,0.85), rgba(40,40,40,0.9))',
     boxShadow: '0 0 15px rgba(0,0,0,0.2), inset 0 20px 60px rgba(255,255,255,0.1)',
     border: '1px solid rgba(255,255,255,0.2)',
+    borderTopColor: 'rgba(255,255,255,0.35)',
+    borderBottom: 'none',
     fontSize: 12,
-    borderRadius: 5
+    borderRadius: 4
+  }
+
+  $Close = {
+    top: -5,
+    right: -5
   }
 
   $name = {
     fontWeight: 500,
-    margin: [0, 0, 5]
+    margin: [-2, 0, 0],
+    textAlign: 'center'
   }
 
   $expanded = {
@@ -127,14 +165,15 @@ view Inspector {
   }
 
   $title = {
-    fontWeight: 500,
-    color: '#fff',
-    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.33)',
+    textShadow: '0 -1px 0 rgba(0,0,0,0.24)',
+    fontWeight: 200,
     fontSize: 11,
-    margin: [0, 0, 4]
+    margin: [0, 0, 0, -1],
+    textTransform: 'lowercase'
   }
 
   $section = {
-    padding: [0, 0, 10]
+    padding: [0]
   }
 }

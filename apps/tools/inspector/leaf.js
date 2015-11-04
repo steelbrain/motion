@@ -80,21 +80,23 @@ view Leaf {
       </value>
     </label>
     <children>
-      <Leaf
+      <child
         if={expanded && !isPrimitive(data)}
-        repeat={Object.keys(data)}
-        key={getLeafKey(_, data[_])}
-
-        onSet={(...args) => view.props.onSet(key, ...args)}
-        data={data[_]}
-        label={_}
-        prefix={rootPath}
-        onClick={view.props.onClick}
-        id={view.props.id}
-        query={query}
-        getOriginal={original ? null : view.props.getOriginal}
-        isExpanded={view.props.isExpanded}
-      />
+        repeat={Object.keys(data)}>
+        <Leaf
+          if={_.indexOf('__') == -1}
+          key={getLeafKey(_, data[_])}
+          onSet={(...args) => view.props.onSet(key, ...args)}
+          data={data[_]}
+          label={_}
+          prefix={rootPath}
+          onClick={view.props.onClick}
+          id={view.props.id}
+          query={query}
+          getOriginal={original ? null : view.props.getOriginal}
+          isExpanded={view.props.isExpanded}
+        />
+      </child>
     </children>
   </leaf>
 
@@ -108,7 +110,7 @@ view Leaf {
 
   $label = [row, {
     position: 'relative',
-    color: '#ff8ec6',
+    color: 'rgba(255,255,255,0.6)',
     opacity: 1,
 
     ':hover': {
@@ -116,22 +118,22 @@ view Leaf {
     }
   }]
 
-  $helper = $null = { color: '#ff0505' }
-  $boolean = { color: '#06ffd4' }
+  $helper = $null = { color: '#ffff05' }
+  $boolean = { color: '#06ffd4', fontWeight: 700 }
   $number = { color: '#f17817' }
   $string = { color: '#b3ff00' }
 
   $key = [row, {
     color: 'rgba(255,255,255,0.9)',
-    margin: [0, 2, 0, 0]
+    margin: [0],
+    fontWeight: 'bold'
   }]
 
   $name = {
-    margin: [0, 2, 0, 0]
+    margin: [0]
   }
 
   $expand = [row, {
-    fontSize: 13
   }]
 
   $value = [row, {
@@ -144,7 +146,7 @@ view Leaf {
   }
 
   $type = {
-    margin: [0, 5],
-    opacity: 0.5
+    margin: [0, 0, 0, 5],
+    opacity: 0.4
   }
 }

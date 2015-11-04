@@ -3,7 +3,7 @@ view Close {
     x
   </close>
 
-  $close = {
+  $ = {
     position: 'absolute',
     right: 0,
     top: 0,
@@ -13,7 +13,7 @@ view Close {
     justifyContent: 'center',
     alignItems: 'center',
     lineHeight: 1,
-    opacity: 0.5,
+    opacity: 0.3,
     cursor: 'pointer',
 
     ':hover': {
