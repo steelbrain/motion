@@ -133,7 +133,7 @@ cat <<"EOF"
 
   If you want to do this later, run:
 
-    $ sudo shown -R $(whoami) ~/.npm
+    $ sudo chown -R $(whoami) ~/.npm
     $ sudo chown -R $(whoami) /usr/local/lib/node_modules
 
   This would avoid sudo for commands like `npm install -g xyz`
