@@ -1,11 +1,10 @@
-const inspect = window.Flint.inspect
-
 function pathToName(path) {
   let p = path.split(',')
   return p[p.length - 1].split('.')[0]
 }
 
 view Inspector.View {
+  const inspect = window.Flint.inspect
   let name, path
   let state = {}
   let props = {}

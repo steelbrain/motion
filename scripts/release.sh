@@ -22,6 +22,7 @@ release_package() {
 release_tools() {
   echo "Tools"
   cd apps/tools/.flint
+  flint build
 	npm version patch
 	npm publish
   cd ../..
