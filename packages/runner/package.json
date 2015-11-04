@@ -34,6 +34,7 @@
     "jsonfile": "^2.0.0",
     "keypress": "^0.2.1",
     "lodash": "^3.10.1",
+    "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
     "multipipe": "^0.2.0",
     "node-generator-detector": "^0.2.1",

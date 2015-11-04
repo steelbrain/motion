@@ -1,4 +1,4 @@
-import multipipe from 'multipipe'
+import merge from 'merge-stream'
 import flintTransform from 'flint-transform'
 import through from 'through2'
 import path from 'path'
@@ -85,12 +85,12 @@ export function buildScripts(cb, userStream) {
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
-      .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
 
   // either user or gulp stream
   const stream = userStream || gulpSrcStream
 
-  return multipipe(stream, superStream.stream)
+  return merge(stream, superStream.stream)
+    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -98,14 +98,14 @@ export function buildScripts(cb, userStream) {
     .pipe($.sourcemaps.init())
     .pipe($p.babel())
     .pipe($p.flint.post())
-    .pipe($.if(!stream, $.rename({ extname: '.js' })))
+    .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe(pipefn(() => {
       // for spaces when outputting
       if (OPTS.build) console.log()
     }))
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
     .pipe($.if(file => file.isInternal,
-      multipipe(
+      merge(
         gulp.dest(p(OPTS.depsDir, 'internal')),
         $.ignore.exclude(true)
       )
@@ -162,7 +162,7 @@ export function buildScripts(cb, userStream) {
     if (file.isSourceMap)
       return true
 
-    if (stream || lastError)
+    if (userStream || lastError)
       return false
 
     const endTime = Date.now() - file.startTime

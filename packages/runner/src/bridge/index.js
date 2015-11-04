@@ -67,24 +67,26 @@ export function message(type, obj) {
 }
 
 let listeners = {}
-export function on(data) {
+export function on(event, cb) {
   listeners[event] = listeners[event] || []
   listeners[event].push(cb)
 }
 
 function runListeners(data) {
-  console.log('got', data)
+  let obj
+
   try {
-    const obj = JSON.parse(data)
+    obj = JSON.parse(data)
   }
   catch(e) {
     console.error(e.stack)
+    return
   }
 
-  const event = obj.event
-  const ls = listeners[event]
+  const { ...args, _type } = obj
+  const ls = listeners[_type]
   if (!ls || !ls.length) return
-  ls.forEach(l => l(obj.message))
+  ls.forEach(l => l(args))
 }
 
 export function start() {
@@ -94,6 +96,11 @@ export function start() {
     connections.push(conn)
 
     conn.on('text', runListeners)
+
+    const onMsg = JSON.stringify({ _type: 'super:on', file: 'main.js' })
+    const offMsg = JSON.stringify({ _type: 'super:off', file: 'main.js' })
+    setTimeout(() => runListeners(onMsg), 2000)
+    setTimeout(() => runListeners(offMsg), 6000)
 
     if (curError) {
       sendInitialMessages(conn)
