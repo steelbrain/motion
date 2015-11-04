@@ -69,15 +69,37 @@ const $p = {
   })
 }
 
-export function buildScripts(cb, stream) {
+
+var File = require('vinyl')
+var fs = require('fs')
+var stream = through.obj().pipe(through.obj(createFile))
+
+function createFile(globFile, enc, cb) {
+  cb(null, new File(globFile));
+}
+
+function file(_path, data) {
+  return { cwd: __dirname, base: '.', path: _path, contents: new Buffer(data) }
+}
+
+function superRead(_path) {
+  fs.readFile('main.js', (err, data) => {
+    stream.write(file(_path, data))
+  })
+}
+
+export function buildScripts(cb) {
   console.log('Building...'.bold.white)
 
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
-  return (stream || gulp.src(SCRIPTS_GLOB))
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
+  superRead('main.js')
+
+  return stream//(stream || gulp.src(SCRIPTS_GLOB))
+    // .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
+
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -107,6 +129,7 @@ export function buildScripts(cb, stream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
   function resetLastFile(file) {
+    console.log(file)
     // reset
     curFile = file
     lastError = false
