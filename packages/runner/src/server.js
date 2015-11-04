@@ -142,25 +142,17 @@ export default function server() {
     }
 
     var host = 'localhost'
-    var useFriendly = OPTS.config.useFriendly || false
+    var port = OPTS.port || OPTS.defaultPort;
 
-    // friendly = site.dev
-    if (!useFriendly) {
-      var port = OPTS.port || OPTS.defaultPort;
-
-      // if no specified port, find open one
-      if (!OPTS.port) {
-        portfinder.basePort = port;
-        portfinder.getPort({ host: 'localhost' },
-          handleError(serverListen)
-        );
-      }
-      else {
-        serverListen(port);
-      }
+    // if no specified port, find open one
+    if (!OPTS.port) {
+      portfinder.basePort = port;
+      portfinder.getPort({ host: 'localhost' },
+        handleError(serverListen)
+      );
     }
     else {
-      serverListen(80);
+      serverListen(port);
     }
   })
 }

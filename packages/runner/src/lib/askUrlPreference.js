@@ -7,9 +7,12 @@ export default function askForUrlPreference(cb) {
     var askCounter = 'Run on ' + OPTS.url + '?';
 
     // promptly.prompt(askCounter, {}, function(err, val) {
+    /*
       var useFriendly = false; // val == 'y';
       if (useFriendly) hostile.set('127.0.0.1', OPTS.url)
       res(useFriendly)
+    */
+    res(false)
     // });
   })
 }

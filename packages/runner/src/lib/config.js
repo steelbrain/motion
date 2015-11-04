@@ -9,12 +9,12 @@ export async function readConfig() {
   return await readJSON(OPTS.configFile)
 }
 
-export async function writeConfig(config) {
+export async function _writeConfig(config) {
   return await writeJSON(OPTS.configFile, config, { spaces: 2 })
 }
 
 // prompts for domain they want to use
-export async function firstRun() {
+export async function writeConfig() {
   OPTS = opts.get()
 
   try {
@@ -25,24 +25,9 @@ export async function firstRun() {
     log('no config found, ok')
   }
 
-  const hasRunBefore = OPTS.build || OPTS.config
-  log('first run hasRunBefore:', hasRunBefore)
-
-  writePort()
-
-  if (hasRunBefore)
-    return false
-
-  const useFriendly = false //await askForUrlPreference()
-
-  OPTS.config = { friendlyUrl: OPTS.url, useFriendly: useFriendly }
-  writeConfig(OPTS.config)
+  if (OPTS.build) return
+  
+  OPTS.config = { port: wport() }
+  _writeConfig(OPTS.config)
   return true
-}
-
-async function writePort() {
-  const config = OPTS.config
-
-  if (!OPTS.build)
-    return await writeConfig(Object.assign({}, config, { socketPort: wport() }))
 }

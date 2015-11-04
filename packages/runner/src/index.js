@@ -5,7 +5,7 @@ import server from './server'
 import npm from './npm'
 import opts from './opts'
 import log from './lib/log'
-import { firstRun } from './lib/config'
+import { writeConfig } from './lib/config'
 import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
@@ -25,8 +25,6 @@ export async function run(_opts, isBuild) {
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
-
-    await firstRun()
 
     if (OPTS.build) {
       console.log(
@@ -50,6 +48,7 @@ export async function run(_opts, isBuild) {
       log('running...')
       await clear.outDir()
       await server()
+      await writeConfig()
       bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
