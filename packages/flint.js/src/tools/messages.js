@@ -15,7 +15,7 @@ export default function run(browser, opts) {
 
     'script:add': msg => {
       browser.emitter.emit('runtime:success')
-      addScript(msg)
+      addScript(msg, renderFlint)
     },
 
     'compile:error': msg => {
@@ -98,29 +98,53 @@ function reloadUserScripts() {
   setTimeout(doneLoading)
 }
 
-let lastLoadedAt = {};
+const body = document.getElementsByTagName('body')[0]
+let lastLoadedAt = {}
+let lastScript = {}
+let finished = true
 
 function addScript(message, cb) {
+  if (!finished) return
+  finished = false
+
   const { name, timestamp, src } = message;
+  console.log('adding', name, timestamp, src)
   const jsName = removeFlintExt(name)
 
   if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
-    lastLoadedAt[jsName] = timestamp;
+    lastLoadedAt[jsName] = timestamp
 
-    const fullSrc = (src || '/_' + jsName)
-
-    const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
-    if (oldScript) {
-      const oldScriptParent = oldScript.parentElement
-      if (oldScriptParent) oldScriptParent.removeChild(oldScript)
+    let fullSrc = (src || '/_' + jsName)
+    
+    if (lastScript[jsName])
+      fullSrc = fullSrc + "?" + timestamp
+    
+    // remove last script
+    if (lastScript[jsName])
+      lastScript[jsName].parentElement.removeChild(lastScript[jsName])
+    else {
+      const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
+      if (oldScript) {
+        const oldScriptParent = oldScript.parentElement
+        if (oldScriptParent) oldScriptParent.removeChild(oldScript)
+      }
     }
 
-    const body = document.getElementsByTagName('body')[0];
-    const script = document.createElement('script');
-    script.src = fullSrc;
-    body.appendChild(script);
-
-    script.onload = cb;
+    const script = document.createElement('script')
+    script.src = fullSrc
+    body.appendChild(script)
+    lastScript[jsName] = script
+    script.onload = () => {
+      finished = true
+      cb()
+    }
+    script.onerror = () => {
+      console.log('script load error')
+      finished = true
+    }
+    setTimeout(() => {
+      finished = true
+    }, 40)
 
     return script
   }

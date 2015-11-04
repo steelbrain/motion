@@ -80,8 +80,14 @@ export function buildScripts(cb, userStream) {
 
   // super stream watcher
   if (!OPTS.build) {
-    bridge.on('super:on', ({ file }) => superStream.start(file))
-    bridge.on('super:off', superStream.stop)
+    bridge.on('super:on', ({ file }) => {
+      console.log('starting super', file)
+      superStream.start(file)
+    })
+    bridge.on('super:off', () => {
+      console.log('stopping super')
+      superStream.stop()
+    })
   }
 
   // gulp src stream
@@ -122,6 +128,7 @@ export function buildScripts(cb, userStream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
   function resetLastFile(file) {
+    console.log('>>')
     // reset
     curFile = file
     lastError = false
@@ -149,6 +156,8 @@ export function buildScripts(cb, userStream) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
+    if (name.charAt(0) != '/') name = '/' + name
+    console.log('name', name)
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }

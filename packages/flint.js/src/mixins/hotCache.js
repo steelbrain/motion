@@ -87,13 +87,16 @@ export default function hotCache({ Internal, options }) {
 
       // if edited
       if (options.changed) {
+        console.log('changed', isComparable, cacheInitVal, val)
         // initial value not undefined
         if (typeof cacheInitVal != 'undefined') {
           // only hot update changed variables
-          if (isComparable && cacheInitVal === val) {
+          //if (isComparable && cacheInitVal === val) {
+          if (typeof val != 'function' && JSON.stringify(cacheInitVal) == JSON.stringify(val)) {
             restore = true
             originalValue = Internal.getCache[path][name]
           }
+          //}
         }
 
         Internal.getCacheInit[path][name] = val
@@ -110,6 +113,8 @@ export default function hotCache({ Internal, options }) {
 
       if (!result)
         result = restore ? originalValue : val
+        
+        console.log('return', restore, result)
 
       return result
     }
