@@ -7,6 +7,7 @@ import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
 import unicodeToChar from './lib/unicodeToChar'
+import superStream from './lib/superStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
@@ -69,37 +70,27 @@ const $p = {
   })
 }
 
-
-var File = require('vinyl')
-var fs = require('fs')
-var stream = through.obj().pipe(through.obj(createFile))
-
-function createFile(globFile, enc, cb) {
-  cb(null, new File(globFile));
-}
-
-function file(_path, data) {
-  return { cwd: __dirname, base: '.', path: _path, contents: new Buffer(data) }
-}
-
-function superRead(_path) {
-  fs.readFile('main.js', (err, data) => {
-    stream.write(file(_path, data))
-  })
-}
-
-export function buildScripts(cb) {
+export function buildScripts(cb, userStream) {
   console.log('Building...'.bold.white)
 
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
-  superRead('main.js')
+  // super stream watcher
+  if (!OPTS.build) {
+    bridge.on('super:on', ({ file }) => superStream.start(file))
+    bridge.on('super:off', superStream.off)
+  }
 
-  return stream//(stream || gulp.src(SCRIPTS_GLOB))
-    // .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
+  // gulp src stream
+  const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
+      .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
 
+  // either user or gulp stream
+  const stream = userStream || gulpSrcStream
+
+  return multipipe(stream, superStream.stream)
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -129,7 +120,6 @@ export function buildScripts(cb) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
   function resetLastFile(file) {
-    console.log(file)
     // reset
     curFile = file
     lastError = false

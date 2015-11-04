@@ -66,18 +66,25 @@ export function message(type, obj) {
     queue.push(msg)
 }
 
-// receive a message one time
-export function once(type, cb) {
-  let recieved = false
+let listeners = {}
+export function on(data) {
+  listeners[event] = listeners[event] || []
+  listeners[event].push(cb)
+}
 
-  connections.forEach(conn => {
-    conn.on('data', message => {
-      if (message.type != type) return
-      if (recieved) return
-      recieved = true
-      cb(message)
-    })
-  })
+function runListeners(data) {
+  console.log('got', data)
+  try {
+    const obj = JSON.parse(data)
+  }
+  catch(e) {
+    console.error(e.stack)
+  }
+
+  const event = obj.event
+  const ls = listeners[event]
+  if (!ls || !ls.length) return
+  ls.forEach(l => l(obj.message))
 }
 
 export function start() {
@@ -85,6 +92,8 @@ export function start() {
 
   wsServer = ws.createServer(conn => {
     connections.push(conn)
+
+    conn.on('text', runListeners)
 
     if (curError) {
       sendInitialMessages(conn)
@@ -98,4 +107,4 @@ export function start() {
   }).listen(port)
 }
 
-export default { start, message, once }
+export default { start, message, on }
