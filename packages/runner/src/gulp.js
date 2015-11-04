@@ -86,12 +86,13 @@ export function buildScripts(cb, userStream) {
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
+    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
 
   // either user or gulp stream
   const stream = userStream || gulpSrcStream
 
-  return merge(stream, superStream.stream)
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
+  //merge(stream, superStream.stream)
+  return merge(stream)
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -170,6 +171,9 @@ export function buildScripts(cb, userStream) {
 
     out.goodFile(file, endTime)
     log('build took ', endTime, 'ms')
+
+    if (OPTS.build)
+      return true
 
     const isNew = (
       !lastSavedTimestamp[file.path] ||
