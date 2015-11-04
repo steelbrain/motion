@@ -89,9 +89,10 @@ export function buildScripts(cb, userStream) {
     .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
 
   // either user or gulp stream
-  const stream = userStream || gulpSrcStream
+  const sourceStream = userStream || gulpSrcStream
+  const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
-  return merge(stream) //, superStream.stream
+  return stream
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
