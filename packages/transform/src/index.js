@@ -486,7 +486,15 @@ export default function createPlugin(options) {
 
             // view.set
             if (!isRender) {
-              const name = t.isJSXExpressionContainer(node.left) ? node.left.expression.name : node.left.name
+              let name
+
+              if (t.isAssignmentExpression(node) && node.left.object)
+                name = node.left.object.name
+              else if (t.isJSXExpressionContainer(node.left))
+                name = node.left.expression.name
+              else
+                name = node.left.name
+
               sett = node => addSetter(name, node, scope)
               added = true
             }

@@ -5,6 +5,7 @@ view Main {
   <Inspector />
 
   <Test if={window.__isDevingDevTools} />
+  <OtherTest if={window.__isDevingDevTools} />
 
   $ = {
     position: 'fixed',
@@ -27,6 +28,19 @@ view Test {
   <h1>
     inspect me
   </h1>
+
+  $ = {
+    pointerEvents: 'all'
+  }
+}
+
+view OtherTest {
+  let hello = 'WORLD'
+  let obj = { one: 'two', three: 4, arr: [1,2,3,4] }
+
+  <h3>
+    inspect me
+  </h3>
 
   $ = {
     pointerEvents: 'all'
