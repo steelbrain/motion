@@ -132,6 +132,7 @@ export default function createPlugin(options) {
 
     let keyBase = {}
     let inJSX = false
+    let hasView = false
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -145,6 +146,15 @@ export default function createPlugin(options) {
         //      node.body.push(t.identifier(fileSuffix))
         //   }
         // },
+
+        File() {
+          hasView = false
+        },
+
+        ExportDeclaration() {
+          if (hasView)
+            throw new Error("Views don't need to be exported! Put your exports into files without views.")
+        },
 
         // transform local import paths
         ImportDeclaration(node, parent, scope, file) {
@@ -161,6 +171,7 @@ export default function createPlugin(options) {
         },
 
         ViewStatement(node) {
+          hasView = true
           keyBase = {}
 
           const name = node.name.name
