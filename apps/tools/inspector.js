@@ -32,36 +32,35 @@ view Inspector {
   }
 
   function glue(e) {
-    // off (hoverOff)
-    views.pop() //remove temp
-    setView(findView(e.target))
-    glued = true
+    setView('temp')
   }
 
-  function toggle() {
-    showTemp = !showTemp
-
-    if (showTemp) {
+  function showInspect() {
+    if (!showTemp) {
+      showTemp = true
       setView('temp')
       hoverOff = on(window, 'mousemove', inspect)
       clickOff = on(window, 'click', glue)
     }
-    else {
-      views.pop()
+  }
+
+  function hideInspect() {
+    if (showTemp) {
+      showTemp = false
       hoverOff()
       clickOff()
+      views.pop() // remove temp
+      view.update()
     }
-
-    view.update()
   }
 
   function close(path) {
     views[path] = false
   }
 
-  const toggleInspect = e => e.keyIdentifier === 'Alt' && toggle()
-  on(window, 'keydown', toggleInspect)
-  on(window, 'keyup', toggleInspect)
+  const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
+  on(window, 'keydown', isAlt(showInspect))
+  on(window, 'keyup', isAlt(hideInspect))
 
   <views repeat={views}>
     <Inspector.View
@@ -73,6 +72,6 @@ view Inspector {
   $ = {
     position: 'fixed',
     top: 0, right: 0,
-    padding: 8
+    padding: 2
   }
 }

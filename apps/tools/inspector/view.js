@@ -29,7 +29,7 @@ view Inspector.View {
   <view>
     <Close onClick={view.props.onClose} size={35} />
     <name>{name}</name>
-    <section>
+    <section class="props">
       <title>Props</title>
       <Tree data={props} />
     </section>
@@ -45,16 +45,18 @@ view Inspector.View {
   $view = {
     position: 'relative',
     pointerEvents: 'auto',
-    padding: 8,
-    minWidth: 150,
-    color: '#fff',
-    background: 'linear-gradient(rgba(50,50,50,0.85), rgba(40,40,40,0.9))',
-    boxShadow: '0 0 15px rgba(0,0,0,0.2), inset 0 20px 60px rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderTopColor: 'rgba(255,255,255,0.35)',
+    padding: 12,
+    margin: [0, 0, 2],
+    minWidth: 220,
+    color: 'rgba(200,200,200,1)',
+    textShadow: 'rgba(0,0,0,0.05) 0 -1px',
+    background: 'linear-gradient(rgba(77,87,93,1), rgba(67,77,83,1))',
+    boxShadow: '0 0 2px rgba(0,0,0,0.5)',
     borderBottom: 'none',
     fontSize: 12,
-    borderRadius: 4
+    borderRadius: 2,
+    userSelect: 'none',
+    cursor: 'default'
   }
 
   $Close = {
@@ -64,8 +66,9 @@ view Inspector.View {
 
   $name = {
     fontWeight: 500,
-    margin: [-2, 0, 0],
-    textAlign: 'center'
+    margin: [-3, 0, 3],
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
   }
 
   $expanded = {
@@ -82,15 +85,21 @@ view Inspector.View {
   }
 
   $title = {
+    display: 'none',
     color: 'rgba(255,255,255,0.33)',
-    textShadow: '0 -1px 0 rgba(0,0,0,0.24)',
     fontWeight: 200,
-    fontSize: 11,
-    margin: [0, 0, 0, -1],
-    textTransform: 'lowercase'
+    fontSize: 12,
+    margin: [3, 0]
   }
 
   $section = {
     padding: [0]
+  }
+
+  $props = {
+    borderBottom: '1px solid rgba(0,0,0,0.06)',
+    boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.06)',
+    paddingBottom: 8,
+    marginBottom: 8
   }
 }

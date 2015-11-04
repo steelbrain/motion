@@ -65,7 +65,7 @@ view Leaf {
   <leaf class={rootPath}>
     <label if={!view.props.root} htmlFor={view.props.id} onClick={toggle}>
       <key>
-        <name>{format(key)}</name>:
+        <name>{format(key)}</name>
         {label('key', key, key)}
       </key>
       <expand if={type == 'Array'}>
@@ -130,6 +130,7 @@ view Leaf {
   }]
 
   $name = {
+    color: "#fff",
     margin: [0]
   }
 
