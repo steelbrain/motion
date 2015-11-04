@@ -176,7 +176,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         run()
 
       function run() {
-        console.log('rencount', Internal.isRendering)
         Internal.isRendering++
         log(`render(), Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
@@ -195,8 +194,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
           ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
         }
-        
-        console.log('done render')
 
         Internal.firstRender = false
         emitter.emit('afterRender')
@@ -222,7 +219,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let fileExports = {}
 
       // run file
-      console.log(run.toString())
       run(fileExports)
 
       Flint.setExports(fileExports)

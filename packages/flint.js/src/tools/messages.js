@@ -108,17 +108,16 @@ function addScript(message, cb) {
   finished = false
 
   const { name, timestamp, src } = message;
-  console.log('adding', name, timestamp, src)
   const jsName = removeFlintExt(name)
 
   if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
     lastLoadedAt[jsName] = timestamp
 
     let fullSrc = (src || '/_' + jsName)
-    
+
     if (lastScript[jsName])
       fullSrc = fullSrc + "?" + timestamp
-    
+
     // remove last script
     if (lastScript[jsName])
       lastScript[jsName].parentElement.removeChild(lastScript[jsName])
@@ -139,7 +138,6 @@ function addScript(message, cb) {
       cb()
     }
     script.onerror = () => {
-      console.log('script load error')
       finished = true
     }
     setTimeout(() => {

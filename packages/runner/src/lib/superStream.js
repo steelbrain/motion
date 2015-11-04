@@ -16,22 +16,20 @@ function file(_path, contents) {
 
 let lastFile
 function superRead(_path) {
-  console.log('do super')
   fs.readFile(_path, (err, data) => {
     const curFile = data.toString()
     if (curFile != lastFile) {
       stream.write(file(_path, data))
-      lastFile = curFile     
+      lastFile = curFile
     }
 
     if (superReading)
-      setTimeout(() => superRead(_path), 5)
+      setTimeout(() => superRead(_path), 3)
   })
 }
 
 let superReading = false
 function start(_path) {
-  console.log('start siper read')
   superReading = true
   superRead(_path)
 }
