@@ -90,10 +90,12 @@ export default function hotCache({ Internal, options }) {
         // initial value not undefined
         if (typeof cacheInitVal != 'undefined') {
           // only hot update changed variables
-          if (isComparable && cacheInitVal === val) {
+          //if (isComparable && cacheInitVal === val) {
+          if (typeof val != 'function' && JSON.stringify(cacheInitVal) == JSON.stringify(val)) {
             restore = true
             originalValue = Internal.getCache[path][name]
           }
+          //}
         }
 
         Internal.getCacheInit[path][name] = val

@@ -149,6 +149,7 @@ export function buildScripts(cb, userStream) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
+    if (name.charAt(0) != '/') name = '/' + name
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }

@@ -1,11 +1,11 @@
 <p align="center">
   <a href="http://flintjs.com/">
-    <img alt="Flint" src="http://flintjs.com/assets/images/flintlogo20.png" width="520">
+    <img alt="Flint" src="http://flintjs.com/assets/images/flintlogo20.png" width="50%">
   </a>
 </p>
 
 <p align="center">
-  Write web apps creatively.
+  Web apps, creatively.
 </p>
 
 ----
