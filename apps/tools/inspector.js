@@ -62,9 +62,9 @@ view Inspector {
   }
 
   // toggle
-  addEventListener('keydown', e => e.ctrlKey ? keys.ctrl = true : null)
-  addEventListener('keyup', e => e.ctrlKey ? keys.ctrl = false : null)
-  addEventListener('keydown', e => {
+  on(window, 'keydown', e => e.ctrlKey ? keys.ctrl = true : null)
+  on(window, 'keyup', e => e.ctrlKey ? keys.ctrl = false : null)
+  on(window, 'keydown', e => {
     if (!keys.ctrl) return
     if (e.keyCode === 83) { // S
       toggle()
@@ -72,17 +72,9 @@ view Inspector {
   })
 
   <state if={show}>
-    <controls>
-      <button onClick={enterInspect}>Inspect View</button>
-      <Close onClick={toggle} size={35} />
-    </controls>
-
-    <search class={{ expanded: Object.keys(state).length }}>
-      <input type="search" />
-    </search>
-
     <view>
-      <name>{name}</name>
+      <Close onClick={toggle} size={35} />
+      <name>{name || 'Untitled'}</name>
       <section>
         <title>Props</title>
         <Tree data={props} />
@@ -102,37 +94,23 @@ view Inspector {
     top: 0, right: 0,
     width: '20%',
     minWidth: 250,
-    padding: 10,
-    pointerEvents: 'auto'
+    padding: 10
+  }
+
+  $view = {
+    pointerEvents: 'auto',
+    padding: 5,
+    color: '#fff',
+    background: 'linear-gradient(rgba(50,50,50,0.95), rgba(0,0,0,0.9))',
+    boxShadow: '0 0 15px rgba(0,0,0,0.2), inset 0 20px 60px rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    fontSize: 12,
+    borderRadius: 5
   }
 
   $name = {
     fontWeight: 500,
     margin: [0, 0, 5]
-  }
-
-  $controls = {
-    borderBottom: '1px solid #ddd',
-    padding: 5,
-    margin: -10,
-    marginBottom: 0,
-    position: 'relative',
-    zIndex: 100
-  }
-
-  $button = {
-    fontWeight: 'bold',
-    color: '#f52757',
-    background: '#fff',
-    border: '1px solid #ddd',
-    borderRadius: 4,
-    outline: 'none'
-  }
-
-  $search = {
-    transition: 'all ease-in 200ms',
-    transform: { y: -100 },
-    padding: [10, 0]
   }
 
   $expanded = {
@@ -144,16 +122,16 @@ view Inspector {
     border: '1px solid #ccc',
     width: '100%',
     padding: [2, 12],
-    color: 'rgba(0,0,0,0.5)',
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 14,
   }
 
   $title = {
     fontWeight: 500,
-    color: '#ccc',
+    color: '#fff',
     textTransform: 'uppercase',
     fontSize: 11,
-    margin: [4, 0]
+    margin: [0, 0, 4]
   }
 
   $section = {

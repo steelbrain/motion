@@ -108,19 +108,21 @@ view Leaf {
 
   $label = [row, {
     position: 'relative',
+    color: '#ff8ec6',
+    opacity: 1,
 
     ':hover': {
-      background: '#ffffb6'
+      background: 'rgba(255,255,255,0.1)'
     }
   }]
 
-  $helper = $null = { color: '#b0b0b0' }
-  $boolean = { color: '#75b5aa' }
-  $number = { color: '#d28445' }
-  $string = { color: '#798953' }
+  $helper = $null = { color: '#ff0505' }
+  $boolean = { color: '#06ffd4' }
+  $number = { color: '#f17817' }
+  $string = { color: '#b3ff00' }
 
   $key = [row, {
-    color: '#555',
+    color: 'rgba(255,255,255,0.9)',
     margin: [0, 2, 0, 0]
   }]
 
@@ -129,7 +131,6 @@ view Leaf {
   }
 
   $expand = [row, {
-    opacity: 0.5,
     fontSize: 13
   }]
 

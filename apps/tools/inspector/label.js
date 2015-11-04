@@ -28,11 +28,11 @@ view Label {
     left: -1,
     right: 0,
     padding: 1,
-    background: '#fff',
+    background: '#111',
     outline: 'none',
     border: 'none',
     opacity: 0,
-    boxShadow: '1px 1px 4px rgba(0,0,0,0.25)'
+    boxShadow: '1px 1px 4px rgba(0,0,0,0.8)'
   }
 
   $focus = {
