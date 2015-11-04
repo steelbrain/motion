@@ -24,7 +24,7 @@ view Inspector {
 
   function setTemp(path) {
     views[views.length - 1] = path
-    console.log(views)
+    view.update()
   }
 
   function inspect(e) {
@@ -64,7 +64,6 @@ view Inspector {
   on(window, 'keyup', toggleInspect)
 
   <views repeat={views}>
-    <test>{console.log('he',_)}</test>
     <Inspector.View
       path={_}
       onClose={close}

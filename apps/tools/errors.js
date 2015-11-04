@@ -195,7 +195,7 @@ view ErrorMessage {
           </niceStack>
         </shortError>
 
-        <fullStack>
+        <fullStack if={error.fullStack}>
           <ln>{error.fullStack[0]}</ln>
           <ln class="cur">{error.fullStack[1]}</ln>
           <ln>{error.fullStack[2]}</ln>
