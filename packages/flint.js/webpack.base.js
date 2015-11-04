@@ -52,7 +52,11 @@ module.exports = function(opts) {
       loaders: [
         {
           test: /\.js$/,
-          loader: 'babel-loader?{"stage": 0}',
+          loader: 'babel-loader',
+          query: {
+            stage: 2,
+            optional: ['runtime']
+          },
           include: [path.resolve(__dirname, 'src')]
         },
         { test: /\.json$/, loader: 'json-loader' },
