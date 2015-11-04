@@ -1,7 +1,5 @@
 const tools = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
-const propsMatch = /view\.props\./g
-const propsReplace = String.fromCharCode('94')
 
 const niceRuntimeError = err => {
   if (err.file)
@@ -10,7 +8,6 @@ const niceRuntimeError = err => {
 
   err.niceMessage = err.message
     .replace(/Uncaught .*Error:\s*/, '')
-    .replace(propsMatch, propsReplace)
   return err
 }
 
