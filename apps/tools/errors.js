@@ -27,7 +27,7 @@ const niceNpmError = ({ msg, name }) => {
 }
 
 const niceCompilerError = err =>
-  niceCompilerMessage(niceStack(err))
+  niceCompilerMessage(fullStack(niceStack(err)))
 
 const replaceCompilerMsg = (msg) =>
   msg
@@ -40,29 +40,36 @@ const niceCompilerMessage = err => {
   return err
 }
 
+const matchErrorLine = /\>?\s*([0-9]*)\s*\|(.*)/g
+const indicator = /\s*\|\s*\^\s*$/g
+
+const fullStack = err => {
+  if (err.stack) {
+    err.fullStack = ['', '', '']
+    let index = 0
+    err.stack.split("\n").forEach(line => {
+      if (indicator.test(line)) return
+      if (!matchErrorLine.test(line)) return
+      let onLine = line[0] === '>'
+      if (onLine) index = 1
+      if (!onLine && index === 1) index = 2
+      let result = line.replace(matchErrorLine, '$1$2')
+      err.fullStack[index] += result + "\n"
+    })
+  }
+  return err
+}
+
 const niceStack = err => {
   if (err.stack) {
-    err.stack.split("\n").forEach(line => {
+    err.stack.split("\n").map(line => {
       if (line[0] === '>') {
         let result = line
-        let replacedChars = 0
-
-        // this undoes flint stuff but keeps the highlighted area
-        const matches = line.match(propsMatch)
-        if (matches && matches.length) {
-          result = result.replace(propsMatch, propsReplace)
-          replacedChars += (matches.length * 10) // * len of replacement
-        }
-
         // remove the babel " > |" before the line
-        result = result
-          .replace(/\>\s*[0-9]+\s*\|\s*/, '')
-
+        result = result.replace(/\>\s*[0-9]+\s*\|\s*/, '')
         result = replaceCompilerMsg(result)
-
         const colIndex = err.loc.column - 4 // 4 because we remove babel prefix
-        const afterUnflintIndex = colIndex - replacedChars
-        err.niceStack = split(result, afterUnflintIndex)
+        err.niceStack = split(result, colIndex)
       }
     })
   }
@@ -116,7 +123,6 @@ view Errors {
   })
 
   tools.on('runtime:success', () => {
-    compileError = null
     runtimeError = null
     setError()
   })
@@ -133,48 +139,66 @@ view Errors {
   />
 }
 
-const flintAddedLines = 1
+const flintAddedLines = 0
 const last = arr => arr[arr.length - 1]
 const fileName = url => url && url.replace(/[\?\)].*/, '')
 const getLine = err => err && (err.line || err.loc && err.loc.line)
 
 view ErrorMessage {
+  let error, npmError, fullStack
   let line = getLine(view.props.error)
 
-  on('props', () => {
-    line = getLine(view.props.error)
+  on.props(() => {
+    npmError = view.props.npmError
+    error = view.props.error
+    line = getLine(error)
+    fullStack = null
+
+    // show full stack after a delay
+    on('delay', 2500, () => {
+      fullStack = error.stack
+    })
   })
 
   function showFlintErrorDiv() {
     setTimeout(() => {
       const errorDiv = document.getElementById('FLINTERROR')
-      if (errorDiv)
-        errorDiv.className = 'active'
-    },1)
+      if (errorDiv) errorDiv.className = 'active'
+    }, 1)
   }
 
-  <Debounce force={!view.props.error} onUpdate={showFlintErrorDiv}>
+  <Debounce force={!error} onUpdate={showFlintErrorDiv}>
     <bar>
       <Close onClick={view.props.close} size={40} />
-      <inner if={view.props.npmError}>
-        <where><b>{view.props.npmError.name}</b></where> {view.props.npmError.msg}
+
+      <inner if={npmError}>
+        <where><b>{npmError.name}</b></where> {npmError.msg}
       </inner>
-      <inner if={view.props.error}>
+
+      <inner if={error}>
         <where>
-          In <b>{fileName(view.props.error.file)}</b>
+          In <b>{fileName(error.file)}</b>
           <line if={line}>
             <span>&nbsp;line</span> <b>{line - flintAddedLines}</b>
           </line>
         </where>
+
         {' '}
-        <errorTitle>
-          {(view.props.error.niceMessage || view.props.error.message).trim()}
-          <niceStack if={view.props.error.niceStack}>
-            {view.props.error.niceStack[0]}
-            <errCol>{view.props.error.niceStack[1]}</errCol>
-            {view.props.error.niceStack[2]}
+
+        <shortError>
+          {(error.niceMessage || error.message).trim()}
+          <niceStack if={error.niceStack}>
+            {error.niceStack[0]}
+            <errCol>{error.niceStack[1]}</errCol>
+            {error.niceStack[2]}
           </niceStack>
-        </errorTitle>
+        </shortError>
+
+        <fullStack>
+          <ln>{error.fullStack[0]}</ln>
+          <ln class="cur">{error.fullStack[1]}</ln>
+          <ln>{error.fullStack[2]}</ln>
+        </fullStack>
       </inner>
     </bar>
   </Debounce>
@@ -201,9 +225,7 @@ view ErrorMessage {
   }
 
   $inner = {
-    display: 'block',
-    // leave space for close button
-    width: '98%',
+    display: 'block'
   }
 
   $where = {
@@ -223,16 +245,22 @@ view ErrorMessage {
     color: '#fff'
   }
 
-  $errorTitle = {
+  $shortError = {
     display: 'inline',
     color: 'rgba(255,255,255,0.7)'
   }
 
-  $niceStack = {
+  const stack = {
     color: 'rgba(255,255,255,0.85)',
     display: 'inline',
     fontFamily: 'Meslo, Menlo, Monaco, monospace',
     padding: [0, 5]
+  }
+
+  $niceStack = stack
+
+  $cur = {
+    background: 'rgb(253, 255, 237)'
   }
 
   $errCol = {
@@ -243,11 +271,20 @@ view ErrorMessage {
     color: '#fff'
   }
 
-  $stack = {
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    whiteSpace: 'nowrap',
-    maxHeight: 200
+  $fullStack = [stack, {
+    maxHeight: fullStack ? 600 : 0,
+    padding: fullStack ? [10, 0] : 0,
+    transition: 'maxHeight ease-in 300ms',
+    color: 'rgba(150,0,0,0.85)',
+    background: '#fff',
+    display: 'block',
+    whiteSpace: 'pre',
+    margin: [10, -10, -10],
+    fontSize: 14
+  }]
+
+  $ln = {
+    padding: [0, 20]
   }
 
   $boldline = {

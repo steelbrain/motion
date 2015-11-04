@@ -14,6 +14,7 @@ export default function scopedOn(parentScope) {
   _on.unmount = viewEvent('unmount')
   _on.change = viewEvent('change')
   _on.render = viewEvent('render')
+  _on.props = viewEvent('props')
 
   return _on
 }

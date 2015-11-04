@@ -122,27 +122,21 @@ export function buildScripts(cb, userStream) {
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
   function resetLastFile(file) {
-    // reset
-    curFile = file
     lastError = false
+    curFile = file
     lastScript = null
-    // time build
     file.startTime = Date.now()
-    // log
     out.file(file)
   }
 
   function catchError(error) {
+    log('caught error')
     lastError = true
-    // add time
     error.timestamp = Date.now()
-    // log
     out.badFile(curFile)
     logError(error, curFile)
-    // send bridge
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error })
-    // reset finished check
     buildFinishedCheck()
   }
 

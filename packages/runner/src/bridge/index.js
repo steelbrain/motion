@@ -24,8 +24,10 @@ function runQueue() {
 }
 
 function sendInitialMessages(conn) {
-  conn.sendText(curError)
-  // conn.sendText(makeMessage('flint:baseDir', { dir: cache.baseDir() }))
+  conn.sendText(makeMessage('flint:baseDir', { dir: cache.baseDir() }))
+
+  if (curError)
+    conn.sendText(curError)
 }
 
 function cleanError(obj) {
@@ -51,14 +53,13 @@ function makeMessage(type, obj) {
 }
 
 export function message(type, obj) {
+  log('-[socket msg]-', type)
   let msg = makeMessage(type, obj)
 
   // store last error or success
-  if (type.indexOf('compile:error') > 0 || type.indexOf('compile:success') > 0) {
+  if (type == 'compile:error' || type == 'compile:success') {
     curError = msg
   }
-
-  log('-[socket msg]-', msg)
 
   if (connected)
     broadcast(msg)
@@ -96,12 +97,9 @@ export function start() {
     connections.push(conn)
 
     conn.on('text', runListeners)
-
-    if (curError) {
-      sendInitialMessages(conn)
-    }
-
     conn.on('error', err => {})
+
+    sendInitialMessages(conn)
 
     if (connected) return
     connected = true

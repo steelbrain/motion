@@ -3,10 +3,8 @@ function randomColor() {
 }
 
 var colors = [
-    "aliceblue",
     "aqua",
     "aquamarine",
-    "beige",
     "bisque",
     "black",
     "blanchedalmond",
