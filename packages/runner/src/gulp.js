@@ -91,7 +91,7 @@ export function buildScripts(cb, userStream) {
   // either user or gulp stream
   const stream = userStream || gulpSrcStream
 
-  return merge(stream)
+  return merge(stream) //, superStream.stream
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
