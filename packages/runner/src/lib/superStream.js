@@ -16,7 +16,7 @@ function superRead(_path) {
   fs.readFile(_path, (err, data) => {
     stream.write(file(_path, data))
     if (superReading)
-      setTimeout(() => superRead(_path))
+      setTimeout(() => superRead(_path), 3)
   })
 }
 

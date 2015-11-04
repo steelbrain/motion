@@ -70,6 +70,7 @@ const $p = {
   })
 }
 
+// userStream is optional for programmatic usage
 export function buildScripts(cb, userStream) {
   console.log('Building...'.bold.white)
 
@@ -80,7 +81,7 @@ export function buildScripts(cb, userStream) {
   // super stream watcher
   if (!OPTS.build) {
     bridge.on('super:on', ({ file }) => superStream.start(file))
-    bridge.on('super:off', superStream.off)
+    bridge.on('super:off', superStream.stop)
   }
 
   // gulp src stream
