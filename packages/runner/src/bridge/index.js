@@ -99,8 +99,8 @@ export function start() {
 
     const onMsg = JSON.stringify({ _type: 'super:on', file: 'main.js' })
     const offMsg = JSON.stringify({ _type: 'super:off', file: 'main.js' })
-    setTimeout(() => runListeners(onMsg), 2000)
-    setTimeout(() => runListeners(offMsg), 6000)
+    // setTimeout(() => runListeners(onMsg), 2000)
+    // setTimeout(() => runListeners(offMsg), 6000)
 
     if (curError) {
       sendInitialMessages(conn)
