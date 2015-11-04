@@ -91,7 +91,7 @@ export default function createPlugin(options) {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
         let args = [t.literal(name), node]
-        if (postfix) args.push(t.literal(postfix))
+        if (postfix) args = args.concat([postfix, t.identifier('true')])
         const expr = t.callExpression(t.identifier('view.set'), args)
         node.hasSetter = true
         return expr
@@ -298,7 +298,7 @@ export default function createPlugin(options) {
               if (isMutativeArrayFunc(node)) {
                 const callee = node.callee
                 const name = callee.object ? callee.object.name : callee.property.name
-                return addSetter(name, node, scope)
+                return addSetter(name, node, scope, t.identifier(name))
               }
 
               if (isObjectAssign(node)) {
@@ -489,16 +489,18 @@ export default function createPlugin(options) {
 
             // view.set
             if (!isRender) {
-              let name
+              let name, post
 
-              if (node.left.object)
+              if (node.left.object) {
                 name = node.left.object.name
+                post = t.identifier(name = node.left.object.name)
+              }
               else if (t.isJSXExpressionContainer(node.left))
                 name = node.left.expression.name
               else
                 name = node.left.name
 
-              sett = node => addSetter(name, node, scope)
+              sett = node => addSetter(name, node, scope, post)
               added = true
             }
 
@@ -519,8 +521,10 @@ export default function createPlugin(options) {
 
         UpdateExpression: {
           exit(node, _, scope) {
-            if (node.operator == '++' || node.operator == '--')
-              return addSetter(node.argument.name, node, scope, !node.prefix ? node.operator : false)
+            if (node.operator == '++' || node.operator == '--') {
+              const postfix = !node.prefix ? t.identifier(node.argument.name) : void 0
+              return addSetter(node.argument.name, node, scope, postfix)
+            }
           }
         }
       }

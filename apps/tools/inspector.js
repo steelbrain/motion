@@ -24,6 +24,7 @@ view Inspector {
 
   function setTemp(path) {
     views[views.length - 1] = path
+    console.log(views)
   }
 
   function inspect(e) {
@@ -32,6 +33,7 @@ view Inspector {
 
   function glue(e) {
     // off (hoverEvent)
+    views.pop() //remove temp
     setView(findView(e.target))
     glued = true
   }

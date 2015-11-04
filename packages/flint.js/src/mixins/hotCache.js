@@ -49,13 +49,12 @@ export default function hotCache({ Internal, options, name }) {
       this.path = (this.context.path || '') + sep + name + '.' + propsHash
     },
 
-    set(name, val, postfix) {
+    // result = val after mutation, use that instead of val
+    set(name, val, result, useResult) {
       const path = this.getPath()
       if (!Internal.getCache[path]) Internal.getCache[path] = {}
-      // undo postfix
-      if (postfix) val = val + (postfix == '++' ? 1 : -1)
 
-      Internal.setCache(path, name, val)
+      Internal.setCache(path, name, useResult ? result : val)
 
       if (this.shouldReRender())
         this.forceUpdate()
