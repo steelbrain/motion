@@ -171,7 +171,7 @@ export default function createPlugin(options) {
         },
 
         ViewStatement(node) {
-          hasView = true
+          // hasView = true
           keyBase = {}
 
           const name = node.name.name
