@@ -1,4 +1,5 @@
 import merge from 'merge-stream'
+import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
 import through from 'through2'
 import path from 'path'
@@ -107,7 +108,7 @@ export function buildScripts(cb, userStream) {
     }))
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
     .pipe($.if(file => file.isInternal,
-      merge(
+      multipipe(
         gulp.dest(p(OPTS.depsDir, 'internal')),
         $.ignore.exclude(true)
       )
