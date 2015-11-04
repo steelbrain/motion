@@ -1,4 +1,6 @@
 import phash from '../lib/phash'
+import equal from 'deep-equal'
+import clone from 'clone'
 
 export default function hotCache({ Internal, options }) {
   if (process.env.production)
@@ -80,25 +82,34 @@ export default function hotCache({ Internal, options }) {
         val === null
       )
 
+      const checkDeep = true
+
       const cacheVal = Internal.getCache[path][name]
       const cacheInitVal = Internal.getCacheInit[path][name]
 
       let originalValue, restore
+
+      function onEq() {
+        restore = true
+        originalValue = Internal.getCache[path][name]
+      }
 
       // if edited
       if (options.changed) {
         // initial value not undefined
         if (typeof cacheInitVal != 'undefined') {
           // only hot update changed variables
-          //if (isComparable && cacheInitVal === val) {
-          if (typeof val != 'function' && JSON.stringify(cacheInitVal) == JSON.stringify(val)) {
-            restore = true
-            originalValue = Internal.getCache[path][name]
+          if (isComparable) {
+            if (cacheInitVal === val)
+              onEq()
           }
-          //}
+          else {
+            if (typeof val == 'object' && checkDeep && equal(cacheInitVal, val))
+              onEq()
+          }
         }
 
-        Internal.getCacheInit[path][name] = val
+        Internal.getCacheInit[path][name] = clone(val)
       }
 
       // set changed cache val

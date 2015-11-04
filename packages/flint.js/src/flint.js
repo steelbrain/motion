@@ -8,7 +8,6 @@ import Bluebird, { Promise } from 'bluebird'
 
 import 'reapp-object-assign'
 import './shim/root'
-import './shim/flintMap'
 import './shim/on'
 import './shim/partial'
 import './lib/bluebirdErrorHandle'
