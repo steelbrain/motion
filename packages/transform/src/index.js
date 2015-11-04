@@ -114,6 +114,7 @@ export default function createPlugin(options) {
 
     function addGetter(node, scope, file) {
       if (scope.hasOwnBinding('view')) {
+        if (node.left.object) return node
         node.right = viewGetter(node.left.name, node.right, scope, file)
         node.hasGetter = true
       }
@@ -295,7 +296,9 @@ export default function createPlugin(options) {
             // mutative array methods
             if (isInView(scope)) {
               if (isMutativeArrayFunc(node)) {
-                return addSetter(node.callee.property.name, node, scope)
+                const callee = node.callee
+                const name = callee.object ? callee.object.name : callee.property.name
+                return addSetter(name, node, scope)
               }
 
               if (isObjectAssign(node)) {
@@ -488,7 +491,7 @@ export default function createPlugin(options) {
             if (!isRender) {
               let name
 
-              if (t.isAssignmentExpression(node) && node.left.object)
+              if (node.left.object)
                 name = node.left.object.name
               else if (t.isJSXExpressionContainer(node.left))
                 name = node.left.expression.name
