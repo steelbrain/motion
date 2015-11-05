@@ -29,11 +29,11 @@ view Inspector.View {
   <view>
     <Close onClick={view.props.onClose} size={35} />
     <name>{name}</name>
-    <section class="props">
+    <section if={props} class="props">
       <title>Props</title>
       <Tree data={props} />
     </section>
-    <section>
+    <section if={state}>
       <title>State</title>
       <Tree
         onSet={write => view.props.writeBack(path, write)}

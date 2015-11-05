@@ -42,7 +42,6 @@
     "exports-loader": "*",
     "imports-loader": "^0.6.4",
     "node-fetch": "^1.3.3",
-    "node-libs-browser": "^0.5.3",
     "webpack": "^1.10.1"
   }
 }
