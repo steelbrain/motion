@@ -1,5 +1,6 @@
 import opts from '../opts'
 import log from './log'
+import handleError from './handleError'
 import wport from './wport'
 import { readJSON, writeJSON } from './fns'
 
@@ -9,25 +10,26 @@ export async function readConfig() {
   return await readJSON(OPTS.configFile)
 }
 
-export async function _writeConfig(config) {
-  return await writeJSON(OPTS.configFile, config, { spaces: 2 })
-}
-
 // prompts for domain they want to use
-export async function writeConfig() {
-  OPTS = opts.get()
+export async function writeConfig(config) {
+  if (!config) return console.error("Must provide a config to write")
 
   try {
-    OPTS.config = await readJSON(OPTS.configFile)
-    log('got config', CONFIG)
+    log('writing'.bold, config)
+    return await writeJSON(OPTS.configFile, config, { spaces: 2 })
   }
   catch(e) {
-    log('no config found, ok')
+    handleError(e)
   }
+}
 
-  if (OPTS.build) return
+export async function initConfig() {
+  OPTS = opts.get()
 
-  OPTS.config = { port: wport() }
-  _writeConfig(OPTS.config)
-  return true
+  const config = await readConfig()
+
+  // first time
+  if (!config) {
+    OPTS.config = { port: wport() }
+  }
 }

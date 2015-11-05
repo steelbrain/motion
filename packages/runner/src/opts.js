@@ -39,7 +39,7 @@ function setAll(opts) {
   OPTS.template = OPTS.template || '.flint/index.html'
   OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
 
-  OPTS.configFile = p(OPTS.flintDir, 'flint.json')
+  OPTS.configFile = p(OPTS.internalDir, 'flint.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
 
   OPTS.name = path.basename(process.cwd())
