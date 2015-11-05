@@ -17,7 +17,6 @@ var colors = [
     "chocolate",
     "coral",
     "cornflowerblue",
-    "cornsilk",
     "crimson",
     "cyan",
     "darkblue",
