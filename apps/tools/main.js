@@ -26,7 +26,8 @@ view Test {
   }
 
   <h1>
-    inspect me
+    inspect me {num}
+    <button onClick={() => num++}>up</button>
   </h1>
 
   $ = {

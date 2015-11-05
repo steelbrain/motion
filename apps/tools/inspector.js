@@ -57,6 +57,18 @@ view Inspector {
   function close(path) {
     views[path] = false
   }
+  
+  function write(path, data) {
+    const name  = data[1][0]
+    const current = _Flint.getCache[path][name]
+    let value = data[1][1]
+    
+    if (typeof current == 'number') {
+      value = +value
+    }
+    _Flint.setCache(path, name, value)
+    _Flint.viewsAtPath[path].forceUpdate()
+  }
 
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
   on(window, 'keydown', isAlt(showInspect))
@@ -65,6 +77,7 @@ view Inspector {
   <views repeat={views}>
     <Inspector.View
       path={_}
+      writeBack={write}
       onClose={close}
     />
   </views>
