@@ -37,9 +37,9 @@ export function start() {
 
           break
         case 'i': // install npm
-          console.log('Installing npm packages...'.white, "\n")
+          console.log('Checking packages to install...')
           await npm.install(true)
-          console.log("\n", 'Packages updated!'.green.bold)
+          console.log(`Done!\n`)
           break
         case 'v': // verbose logging
           OPTS.verbose = !OPTS.verbose

@@ -1,7 +1,6 @@
-export default function exec(cmd, dir, cb) {
-  var childExec = require('child_process').exec;
-  childExec(cmd, {
-    uid: process.getuid(),
-    cwd: dir
-  }, cb);
+var _exec = require('child_process').exec
+var uid = process.getuid()
+
+export default function exec(cmd, cwd, cb) {
+  _exec(cmd, { uid, cwd }, cb);
 }

@@ -15,7 +15,7 @@ const filePrefix = path => `!function(){Flint.file('${cache.name(path)}',functio
 const fileSuffix = ' }) }();'
 
 let debouncers = {}
-function debounce(key, cb, time) {
+function debounce(key, time, cb) {
   if (debouncers[key])
     clearTimeout(debouncers[key])
 
@@ -29,15 +29,12 @@ var Parser = {
 
   post(file, source) {
     // scan for imports/exports
-    debounce(file, () => {
-      log('NPM scanning file', file)
+    debounce(file, OPTS.build ? 0 : 400, () => {
       npm.scanFile(file, source)
+    })
 
-      if (OPTS.firstRun) {
-        npm.install()
-        OPTS.firstRun = false
-      }
-    }, 400)
+    if (!OPTS.build)
+      debounce('removeOldImports', 3000, npm.removeOld)
 
     const isInternal = findExports(source)
 

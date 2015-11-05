@@ -28,15 +28,9 @@ export async function run(_opts, isBuild) {
     compiler('init', OPTS)
 
     if (OPTS.build) {
-      console.log(
-        "\nBuilding %s to %s\n".bold.white,
-        OPTS.name + '.js',
-        path.normalize(OPTS.buildDir)
-      )
+      console.log("\nBuilding %s\n".bold, OPTS.name + '.js')
 
       await clear.buildDir()
-
-      log('building...')
 
       // run our pipeline once manually
       gulp.buildScripts()
@@ -59,7 +53,7 @@ export async function run(_opts, isBuild) {
       bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
-      openInBrowser()
+      // openInBrowser()
       watchingMessage()
     }
   }
