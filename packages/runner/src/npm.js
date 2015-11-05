@@ -370,7 +370,6 @@ async function installExternals(file, source) {
   const done = async () => {
     // cache newly installed + already
     const total = installed.concat(already)
-    console.log('total'.bold.green, total)
     await writeInstalled(total)
     logInstalled(installed)
     afterScansClear()
