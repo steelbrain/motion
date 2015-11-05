@@ -59,7 +59,6 @@ export async function run(_opts, isBuild) {
       bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
-      await npm.install()
       openInBrowser()
       watchingMessage()
     }

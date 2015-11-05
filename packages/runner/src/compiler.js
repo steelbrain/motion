@@ -32,6 +32,11 @@ var Parser = {
     debounce(file, () => {
       log('NPM scanning file', file)
       npm.scanFile(file, source)
+
+      if (OPTS.firstRun) {
+        npm.install()
+        OPTS.firstRun = false
+      }
     }, 400)
 
     const isInternal = findExports(source)
