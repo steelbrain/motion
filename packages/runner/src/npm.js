@@ -81,11 +81,11 @@ const onPackagesInstalled = () => {
 const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
 const installKey = 'installed'
 
-async function getInstalled() {
+async function readInstalled() {
   try {
     const conf = await readConfig()
-    const installed = rmFlintExternals(conf[installKey] || [])
-    log('npm: install: installed:', installed)
+    const installed = conf[installKey] || []
+    log('readInstalled()', installed)
     return installed
   }
   catch(e) {
@@ -95,8 +95,9 @@ async function getInstalled() {
 
 async function writeInstalled(deps) {
   try {
+    log('writeInstalled()', deps)
     const conf = await readConfig()
-    conf[installKey] = deps
+    conf[installKey] = rmFlintExternals(deps)
     await writeConfig(conf)
   }
   catch(e) {
@@ -122,7 +123,7 @@ async function getWritten() {
 const filterFalse = ls => ls.filter(l => !!l)
 
 async function removeOld() {
-  const installed = await getInstalled()
+  const installed = await readInstalled()
   const toUninstall = _.difference(installed, cache.getImports())
   log('npm: removeOld() toUninstall', toUninstall)
 
@@ -144,7 +145,7 @@ async function removeOld() {
 }
 
 async function saveNew() {
-  const installed = await getInstalled()
+  const installed = await readInstalled()
   const written = await getWritten()
   const toInstall = _.difference(installed, written)
   log('npm: saveAll() toInstall', toInstall)
@@ -192,7 +193,6 @@ async function install(force) {
     await bundleExternals()
     onPackagesInstalled()
     FIRST_RUN = false
-    return installed
   } catch(e) {
     handleError(e)
     throw new Error(e)
@@ -224,7 +224,7 @@ async function writeDeps(deps = []) {
 // allInstalled() => packExternals()
 async function bundleExternals() {
   log('npm: bundleExternals')
-  const installed = await getInstalled()
+  const installed = await readInstalled()
   await writeDeps(installed)
   await packExternals()
 }
@@ -317,7 +317,7 @@ const findExternalRequires = source =>
 async function installExternals(file, source) {
   log('installExternals', file)
   const found = findExternalRequires(source)
-  const already = await getInstalled()
+  const already = await readInstalled()
   const fresh = found.filter(e => already.indexOf(e) < 0)
 
   log('installExternals: Found packages in file', found)
