@@ -24,10 +24,16 @@ export async function writeConfig(config) {
 }
 
 export async function initConfig() {
-  const config = await readConfig()
+  let config
 
-  // first time
-  if (!config) {
-    opts.set('config', { port: wport() })
+  try {
+    config = await readConfig()
   }
+  catch(e) {
+    config = { port: wport() }
+    opts.set('config', config)
+    await writeConfig(config)
+  }
+
+  return config
 }
