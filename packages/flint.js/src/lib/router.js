@@ -1,6 +1,5 @@
 import Route from 'route-parser'
 window.R = Route
-import { createHistory } from 'history'
 
 let history, render
 let activeID = 1
@@ -12,17 +11,15 @@ let location = window.location.pathname
 const router = {
   init({ onChange }) {
     render = onChange
-    history = createHistory()
-
-    // router updates
-    history.listen(location => {
-      router.go(location.pathname, true)
-    })
+    router.go(location, true)
   },
 
   link(...args) {
     return () => router.go(...args)
   },
+
+  back() { window.history.go(-1) },
+  forward() { window.history.go(1) },
 
   go(path, dontPush) {
     if (!render) return
@@ -33,7 +30,9 @@ const router = {
     if (location[0] !== '/')
       location = '/' + location
 
-    if (!dontPush) history.pushState(null, path)
+    if (!dontPush)
+      window.history.pushState(null, null, path)
+
     router.next()
     router.recognize()
     render()
