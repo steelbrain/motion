@@ -8,6 +8,7 @@ import cache from './cache'
 import handleError from './lib/handleError'
 import findExports from './lib/findExports'
 import exec from './lib/exec'
+import { readConfig, writeConfig } from './lib/config'
 import log from './lib/log'
 import { touch, p, mkdir, rmdir, readFile, writeFile, writeJSON, readJSON } from './lib/fns'
 
@@ -15,6 +16,13 @@ let WHERE = {}
 let OPTS
 let INSTALLING = false
 let FIRST_RUN = true
+
+const externals = [
+  'flint-js',
+  'react',
+  'react-dom',
+  'bluebird'
+]
 
 /*
 
@@ -40,21 +48,10 @@ function init(_opts) {
   WHERE.depsJS = p(WHERE.outDir, 'deps.js')
   WHERE.depsJSON = p(WHERE.outDir, 'deps.json')
   WHERE.packagesJS = p(WHERE.outDir, 'packages.js')
-  WHERE.packageJSON = p(OPTS.flintDir, 'package.json')
 }
 
-async function mkDir(redo) {
-  if (redo)
-    await rmdir(WHERE.depsJSON)
 
-  await mkdir(WHERE.outDir)
-  await* [
-    touch(WHERE.depsJSON),
-    touch(WHERE.depsJS),
-    touch(WHERE.packagesJS),
-    touch(WHERE.internalsOutJS)
-  ]
-}
+// messaging
 
 const onPackageStart = (name) => {
   if (OPTS.build) return
@@ -78,69 +75,124 @@ const onPackagesInstalled = () => {
   bridge.message('packages:reload', {})
 }
 
-const externals = [
-  'flint-js',
-  'react',
-  'react-dom',
-  'bluebird'
-]
+
+// readers / writers
 
 const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+const installKey = 'installed'
 
-/*
+async function readInstalled() {
+  try {
+    const conf = await readConfig()
+    const installed = conf[installKey] || []
+    log('readInstalled()', installed)
+    return installed
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
 
-  ensures all packages both in files and in package.json.installed
-  are written out to the bundled js file
+async function writeInstalled(deps) {
+  try {
+    log('writeInstalled()', deps)
+    const conf = await readConfig()
+    conf[installKey] = rmFlintExternals(deps)
+    await writeConfig(conf)
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
 
-*/
+async function getWritten() {
+  try {
+    const written = await readJSON(WHERE.depsJSON)
+    log('npm: install: written:', written)
+    return written.deps
+  }
+  catch(e) {
+    log('npm: install: no deps installed')
+    return null
+  }
+}
+
+
+// doers
+
+const filterFalse = ls => ls.filter(l => !!l)
+
+async function removeOld() {
+  const installed = await readInstalled()
+  const toUninstall = _.difference(installed, cache.getImports())
+  log('npm: removeOld() toUninstall', toUninstall)
+
+  const newlyUninstalled = await* toUninstall.map(async dep => {
+    try {
+      await unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
+      console.log(' ✘ ', dep)
+      return dep
+    }
+    catch(e) {
+      console.log('Failed to uninstall', dep)
+      return false
+    }
+  })
+
+  const successfullyUninstalled = filterFalse(newlyUninstalled)
+  await writeInstalled(_.difference(installed, successfullyUninstalled))
+  return successfullyUninstalled
+}
+
+async function saveNew() {
+  const installed = await readInstalled()
+  const written = await getWritten()
+  const toInstall = _.difference(installed, written)
+  log('npm: saveAll() toInstall', toInstall)
+  if (!toInstall.length) return
+
+  console.log("\n",'Installing Packages...'.white.bold)
+
+  const newlyInstalled = await* toInstall.map(async dep => {
+    try {
+      await save(dep, toInstall.indexOf(dep), toInstall.length)
+      console.log(' ⇢ ', dep)
+      return dep
+    }
+    catch(e) {
+      console.log('Failed to install', dep)
+      return false
+    }
+  })
+
+  const installedSuccessfully = filterFalse(newlyInstalled)
+  await writeInstalled(_.union(installed, installedSuccessfully))
+  return installedSuccessfully
+}
+
+async function remakeInstallDir(redo) {
+  if (redo)
+    await rmdir(WHERE.depsJSON)
+
+  await mkdir(WHERE.outDir)
+  await* [
+    touch(WHERE.depsJSON),
+    touch(WHERE.depsJS),
+    touch(WHERE.packagesJS),
+    touch(WHERE.internalsOutJS)
+  ]
+}
+
+// ensures all packages installed, uninstalled, written out to bundle
 async function install(force) {
   log('npm: install')
   try {
-    // ensure deps dir
-    await mkDir(force)
-
-    // write out to package.installed
-    const allInstalled = await setInstalled()
-
-    log('npm: install: allInstalled:', allInstalled)
-
-    // remove externals
-    const installed = rmFlintExternals(allInstalled)
-
-    // written = packages already written out to js bundle
-    let written = []
-    try {
-      const installed = await readJSON(WHERE.depsJSON)
-      written = rmFlintExternals(installed.deps)
-    }
-    catch(e) {
-      log('npm: install: no deps installed')
-    }
-    log('npm: install: written:', written)
-
-
-    // install unwritten
-    const un = _.difference(installed, written)
-    log('npm: install: un: ', un)
-    if (un.length) {
-      console.log("\n",'Installing Packages...'.white.bold)
-
-      for (let dep of un) {
-        console.log(dep)
-        try {
-          await save(dep, un.indexOf(dep), un.length)
-        }
-        catch(e) {
-          console.log('Failed to install', dep)
-        }
-      }
-    }
-
+    await remakeInstallDir(force)
+    await removeOld()
+    await saveNew()
     await bundleExternals()
     onPackagesInstalled()
-
     FIRST_RUN = false
-    return installed
   } catch(e) {
     handleError(e)
     throw new Error(e)
@@ -172,20 +224,9 @@ async function writeDeps(deps = []) {
 // allInstalled() => packExternals()
 async function bundleExternals() {
   log('npm: bundleExternals')
-  const installed = await getAllExternals()
+  const installed = await readInstalled()
   await writeDeps(installed)
   await packExternals()
-}
-
-async function getAllExternals() {
-  const fileImports = cache.getImports()
-  const pkg = await readJSON(WHERE.packageJSON)
-
-  const all = _.union(pkg.installed, fileImports)
-    .filter(x => typeof x == 'string')
-
-  log('npm: getAllExternals: all:', all)
-  return all
 }
 
 const findRequires = source =>
@@ -276,7 +317,7 @@ const findExternalRequires = source =>
 async function installExternals(file, source) {
   log('installExternals', file)
   const found = findExternalRequires(source)
-  const already = await getAllExternals()
+  const already = await readInstalled()
   const fresh = found.filter(e => already.indexOf(e) < 0)
 
   log('installExternals: Found packages in file', found)
@@ -332,23 +373,24 @@ async function installExternals(file, source) {
   installNext()
 }
 
-// npm install --save 'name'
-function save(name, index, total) {
-  let spinner
+function logProgress(tag, name, index, total) {
+  log('npm', tag, name)
   const out = total ?
     ` ${index+1} of ${total}: ${name}` :
-    `Installing: ${name}`
+    `${tag}: ${name}`
 
   if (OPTS.build)
     console.log(out)
   else {
-    spinner = new Spinner(out)
+    let spinner = new Spinner(out)
     spinner.start({ fps: 30 })
+    return spinner
   }
+}
 
-  log('npm: save:', name)
+function execPromise(name, cmd, dir, spinner) {
   return new Promise((res, rej) => {
-    exec('npm install --save ' + name, OPTS.flintDir, (err, stdout, stderr) => {
+    exec(cmd, dir, (err, stdout, stderr) => {
       if (spinner) spinner.stop()
       if (err) rej({ msg: stderr, name })
       else res(name)
@@ -356,18 +398,19 @@ function save(name, index, total) {
   })
 }
 
-// all found installs => package.json.installed
-async function setInstalled() {
-  log('npm: setInstalled')
-  await afterScans()
+async function progressTask(label, cmd, name, index, total) {
+  const spinner = logProgress(label, name, index, total)
+  await execPromise(name, cmd, OPTS.flintDir, spinner)
+}
 
-  const pkg = await readJSON(WHERE.packageJSON)
-  const all = await getAllExternals()
+// npm install --save 'name'
+async function save(name, index, total) {
+  await progressTask('Installing', 'npm install --save ' + name, name, index, total)
+}
 
-  pkg.installed = all
-
-  await writeJSON(WHERE.packageJSON, pkg, {spaces: 2})
-  return pkg.installed
+// npm uninstall --save 'name'
+async function unsave(name, index, total) {
+  await progressTask('Uninstalling', 'npm uninstall --save ' + name, name, index, total)
 }
 
 // webpack

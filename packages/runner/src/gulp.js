@@ -128,7 +128,7 @@ export function buildScripts(cb, userStream) {
     ))
     .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
-    .pipe($.if(OPTS.build, extrasStream))
+    .pipe($.if(OPTS.build, extrasStream || pipefn()))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not. don't ask me why
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())

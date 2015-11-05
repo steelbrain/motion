@@ -26,7 +26,7 @@ export async function writeConfig() {
   }
 
   if (OPTS.build) return
-  
+
   OPTS.config = { port: wport() }
   _writeConfig(OPTS.config)
   return true
