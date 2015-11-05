@@ -8,7 +8,7 @@ import cache from './cache'
 import handleError from './lib/handleError'
 import findExports from './lib/findExports'
 import exec from './lib/exec'
-import { readConfig } from './lib/config'
+import { readConfig, writeConfig } from './lib/config'
 import log from './lib/log'
 import { touch, p, mkdir, rmdir, readFile, writeFile, writeJSON, readJSON } from './lib/fns'
 
@@ -76,16 +76,28 @@ const onPackagesInstalled = () => {
 }
 
 
-// readers
+// readers / writers
 
 const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+const installKey = 'installed'
 
 async function getInstalled() {
   try {
     const conf = await readConfig()
-    const installed = rmFlintExternals(conf.installed || [])
+    const installed = rmFlintExternals(conf[installKey] || [])
     log('npm: install: installed:', installed)
     return installed
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
+
+async function writeInstalled(deps) {
+  try {
+    const conf = await readConfig()
+    conf[installKey] = deps
+    await writeConfig(conf)
   }
   catch(e) {
     handleError(e)
@@ -114,7 +126,7 @@ async function removeOld() {
   const toUninstall = _.difference(installed, cache.getImports())
   log('npm: removeOld() toUninstall', toUninstall)
 
-  const uninstalled = await* toUninstall.map(async dep => {
+  const newlyUninstalled = await* toUninstall.map(async dep => {
     try {
       await unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
       console.log(' ✘ ', dep)
@@ -126,7 +138,9 @@ async function removeOld() {
     }
   })
 
-  return filterFalse(uninstalled)
+  const successfullyUninstalled = filterFalse(newlyUninstalled)
+  await writeInstalled(_.difference(installed, successfullyUninstalled))
+  return successfullyUninstalled
 }
 
 async function saveNew() {
@@ -150,7 +164,9 @@ async function saveNew() {
     }
   })
 
-  return filterFalse(newlyInstalled)
+  const installedSuccessfully = filterFalse(newlyInstalled)
+  await writeInstalled(_.union(installed, installedSuccessfully))
+  return installedSuccessfully
 }
 
 async function remakeInstallDir(redo) {
@@ -171,7 +187,7 @@ async function install(force) {
   log('npm: install')
   try {
     await remakeInstallDir(force)
-    const uninstalled = await removeOld()
+    await removeOld()
     await saveNew()
     await bundleExternals()
     onPackagesInstalled()
