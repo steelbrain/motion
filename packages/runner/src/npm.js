@@ -17,13 +17,6 @@ let OPTS
 let INSTALLING = false
 let FIRST_RUN = true
 
-const externals = [
-  'flint-js',
-  'react',
-  'react-dom',
-  'bluebird'
-]
-
 /*
 
   Public:
@@ -78,13 +71,14 @@ const onPackagesInstalled = () => {
 
 // readers / writers
 
+const externals = [ 'flint-js', 'react', 'react-dom', 'bluebird' ]
 const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
 const installKey = 'installed'
 
 async function readInstalled() {
   try {
-    const conf = await readConfig()
-    const installed = conf[installKey] || []
+    const config = await readConfig()
+    const installed = config[installKey] || []
     log('readInstalled()', installed)
     return installed
   }
@@ -96,9 +90,9 @@ async function readInstalled() {
 async function writeInstalled(deps) {
   try {
     log('writeInstalled()', deps)
-    const conf = await readConfig()
-    conf[installKey] = rmFlintExternals(deps)
-    await writeConfig(conf)
+    const config = await readConfig()
+    config[installKey] = rmFlintExternals(deps)
+    await writeConfig(config)
   }
   catch(e) {
     handleError(e)
@@ -124,6 +118,7 @@ const filterFalse = ls => ls.filter(l => !!l)
 
 async function removeOld() {
   const installed = await readInstalled()
+  log('cache imports'.yellow, cache.getImports())
   const toUninstall = _.difference(installed, cache.getImports())
   log('npm: removeOld() toUninstall', toUninstall)
 
@@ -140,7 +135,9 @@ async function removeOld() {
   })
 
   const successfullyUninstalled = filterFalse(newlyUninstalled)
-  await writeInstalled(_.difference(installed, successfullyUninstalled))
+  const final = _.difference(installed, )
+  log('writing from removeOld()', final)
+  await writeInstalled(final)
   return successfullyUninstalled
 }
 
@@ -166,7 +163,9 @@ async function saveNew() {
   })
 
   const installedSuccessfully = filterFalse(newlyInstalled)
-  await writeInstalled(_.union(installed, installedSuccessfully))
+  const final = _.union(installed, installedSuccessfully)
+  log('writeing from saveNew()', final)
+  await writeInstalled(final)
   return installedSuccessfully
 }
 
@@ -320,8 +319,8 @@ async function installExternals(file, source) {
   const already = await readInstalled()
   const fresh = found.filter(e => already.indexOf(e) < 0)
 
-  log('installExternals: Found packages in file', found)
-  log('installExternals: New external packages', fresh)
+  log('installExternals() Found packages in file', found)
+  log('installExternals() FRESH', fresh)
 
   // no new ones found
   if (!fresh.length) return
@@ -359,12 +358,14 @@ async function installExternals(file, source) {
 
   const done = async () => {
     // cache newly installed + already
-    cache.setFileImports(file, installed.concat(already))
+    const total = installed.concat(already)
+    cache.setFileImports(file, total)
+    await writeInstalled(total)
     logInstalled(installed)
     afterScansClear()
 
     if (!FIRST_RUN) {
-      log('npm: installExternals', '!firstrun, bundleExternals()')
+      log('npm: installExternals() -> bundleExternals()')
       await bundleExternals()
       onPackagesInstalled()
     }
