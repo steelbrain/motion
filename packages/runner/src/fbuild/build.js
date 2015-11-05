@@ -17,7 +17,7 @@ export default async function build() {
 
   log('Building extras, npm...')
   await *[
-    npm.install(),
+    npm.install(true),
     npm.bundleInternals()
   ]
 

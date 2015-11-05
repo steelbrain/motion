@@ -194,7 +194,7 @@ async function install(force) {
   log('npm: install')
   try {
     await remakeInstallDir(force)
-    await removeOld()
+    // await removeOld()
     await saveNew()
     await bundleExternals()
     onPackagesInstalled()
@@ -322,8 +322,8 @@ const findExternalRequires = source =>
 
 async function installExternals(file, source) {
   log('installExternals', file)
-  removeOld()
-  
+  // removeOld()
+
   const found = findExternalRequires(source)
   cache.setFileImports(file, found)
 
