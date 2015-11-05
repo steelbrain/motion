@@ -118,6 +118,7 @@ const filterFalse = ls => ls.filter(l => !!l)
 
 async function removeOld() {
   const installed = await readInstalled()
+  log('cache imports'.yellow, cache.getImports())
   const toUninstall = _.difference(installed, cache.getImports())
   log('npm: removeOld() toUninstall', toUninstall)
 
