@@ -29,8 +29,7 @@ module.exports = function(opts) {
 
   if (opts.minify)
     plugins.push(
-      new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
-      new webpack.optimize.OccurenceOrderPlugin()
+      new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } })
     )
 
   if (opts.dedupe)
@@ -47,6 +46,13 @@ module.exports = function(opts) {
     target: opts.target || 'web',
     entry: opts.entry || entry,
     devtool: 'source-map',
+
+    node: {
+      global: false,
+      process: false,
+      Buffer: false,
+      setImmediate: false
+    },
 
     module: {
       loaders: [
@@ -65,8 +71,8 @@ module.exports = function(opts) {
 
     output: {
       path: path.join(__dirname, 'dist'),
-      filename: opts.name ? '[name].'+opts.name+'.js' : '[name].js',
-      libraryTarget: opts.libraryTarget
+      filename: opts.name ? '[name].'+opts.name+'.js' : '[name].js'
+      // libraryTarget: opts.libraryTarget
     },
 
     plugins: plugins,
