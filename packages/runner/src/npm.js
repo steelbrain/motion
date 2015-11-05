@@ -182,12 +182,19 @@ async function remakeInstallDir(redo) {
   ]
 }
 
+function promiseTimeout(delay) {
+  return new Promise((res, rej) => {
+    setTimeout(res, delay)
+  })
+}
+
+
 // ensures all packages installed, uninstalled, written out to bundle
 async function install(force) {
   log('npm: install')
   try {
     await remakeInstallDir(force)
-    await removeOld()
+    // await removeOld()
     await saveNew()
     await bundleExternals()
     onPackagesInstalled()
@@ -315,7 +322,11 @@ const findExternalRequires = source =>
 
 async function installExternals(file, source) {
   log('installExternals', file)
+  // removeOld()
+
   const found = findExternalRequires(source)
+  cache.setFileImports(file, found)
+
   const already = await readInstalled()
   const fresh = found.filter(e => already.indexOf(e) < 0)
 
@@ -359,7 +370,6 @@ async function installExternals(file, source) {
   const done = async () => {
     // cache newly installed + already
     const total = installed.concat(already)
-    cache.setFileImports(file, total)
     await writeInstalled(total)
     logInstalled(installed)
     afterScansClear()
@@ -369,6 +379,7 @@ async function installExternals(file, source) {
       await bundleExternals()
       onPackagesInstalled()
     }
+
   }
 
   installNext()

@@ -22,7 +22,7 @@ function assetScriptTags(scripts) {
 }
 
 function devToolsDisabled(req) {
-  return OPTS.config.tools === 'false' || req && req.query && req.query['!dev'];
+  return OPTS.config && OPTS.config.tools === 'false' || req && req.query && req.query['!dev'];
 }
 
 function getScriptTags(files, req) {
@@ -51,36 +51,40 @@ function getScriptTags(files, req) {
 }
 
 async function makeTemplate(req, cb) {
-  const templatePath = p(OPTS.dir, OPTS.template)
-  const template = await readFile(templatePath)
-  const dir = await readdir({ root: OPTS.outDir })
-  const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
-  const hasFiles = files.length
+  try {
+    const templatePath = p(OPTS.dir, OPTS.template)
+    const template = await readFile(templatePath)
+    const dir = await readdir({ root: OPTS.outDir })
+    const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
+    const hasFiles = files.length
 
-  let paths = []
+    let paths = []
 
-  if (hasFiles) {
-    paths = files.map(file => file.path).sort()
+    if (hasFiles) {
+      paths = files.map(file => file.path).sort()
 
-    let mainIndex = 0
+      let mainIndex = 0
 
-    paths.forEach((p, i) => {
-      if (/[Mm]ain\.jsf?$/.test(p))
-        mainIndex = i
-    })
+      paths.forEach((p, i) => {
+        if (/[Mm]ain\.jsf?$/.test(p))
+          mainIndex = i
+      })
 
-    if (mainIndex !== -1)
-      paths.move(mainIndex, 0)
+      if (mainIndex !== -1)
+        paths.move(mainIndex, 0)
+    }
+
+    const fullTemplate = template.replace('<!-- SCRIPTS -->',
+      '<div id="_flintdevtools"></div>'
+      + newLine
+      + getScriptTags(paths, req)
+    )
+
+    cb(fullTemplate)
   }
-
-  const fullTemplate = template.replace('<!-- SCRIPTS -->',
-    '<div id="_flintdevtools"></div>'
-    + newLine
-    + getScriptTags(paths, req)
-  )
-
-
-  cb(fullTemplate)
+  catch(e) {
+    handleError(e)
+  }
 }
 
 export default function server() {
@@ -125,7 +129,7 @@ export default function server() {
     });
 
     function runAfterFirstBuildComplete(cb) {
-      if (OPTS.hasRunInitialBuild) cb();
+      if (OPTS.hasRunInitialBuild) cb()
       else setTimeout(runAfterFirstBuildComplete.bind(null, cb), 150);
     }
 

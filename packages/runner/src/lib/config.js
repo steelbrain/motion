@@ -7,7 +7,7 @@ import { readJSON, writeJSON } from './fns'
 let OPTS
 
 export async function readConfig() {
-  return await readJSON(OPTS.configFile)
+  return await readJSON(opts.get('configFile'))
 }
 
 // prompts for domain they want to use
@@ -16,7 +16,7 @@ export async function writeConfig(config) {
 
   try {
     log('writing'.bold, config)
-    return await writeJSON(OPTS.configFile, config, { spaces: 2 })
+    return await writeJSON(opts.get('configFile'), config, { spaces: 2 })
   }
   catch(e) {
     handleError(e)
@@ -24,12 +24,10 @@ export async function writeConfig(config) {
 }
 
 export async function initConfig() {
-  OPTS = opts.get()
-
   const config = await readConfig()
 
   // first time
   if (!config) {
-    OPTS.config = { port: wport() }
+    opts.set('config', { port: wport() })
   }
 }
