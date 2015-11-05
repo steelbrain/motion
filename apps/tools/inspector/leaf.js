@@ -23,8 +23,12 @@ view Leaf {
     rootPath = `${view.props.prefix}.${view.props.label}`
     key = view.props.label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
-    data = original || view.props.data || {}
+    // originally was stream of ||s, but 0 was turning into false
+    data = original 
+    if (data === undefined) data = view.props.data
+    if (data === undefined) data = {}
     type = getType(data)
+    console.log(path, 'key', key, 'data', data, 'type', type)
     query = view.props.query || ''
 
     if (view.props.root)
@@ -48,16 +52,17 @@ view Leaf {
   }
 
   const getLeafKey = (key, value) => isPrimitive(value) ?
-    (key + ':' + md5(String(value))) :
+    (key + ':' + md5(String(key))) :
     (key + '[' + getType(value) + ']')
 
   const format = key => (
     <Highlighter string={key} highlight={query} />
   )
 
-  const label  = (type, val, sets) => (
+  const label = (type, val, sets, editable) => (
     <Label
       val={val}
+      editable={editable}
       onSet={_ => view.props.onSet([sets, _])}
     />
   )
@@ -66,7 +71,7 @@ view Leaf {
     <label if={!view.props.root} htmlFor={view.props.id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>
-        {label('key', key, key)}
+        {label('key', key, key, false)}
       </key>
       <expand if={type == 'Array'}>
         <type>[]</type> {items(data.length)}
@@ -76,7 +81,7 @@ view Leaf {
       </expand>
       <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
         {format(String(data))}
-        {label('val', data, key)}
+        {label('val', data, key, true)}
       </value>
     </label>
     <children>

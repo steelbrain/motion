@@ -61,12 +61,14 @@ export default function hotCache({ Internal, options, name }) {
     },
 
     get(name, val, where) {
+      const path = this.getPath()
+      
+      if (_Flint.inspectorRefreshing) return Internal.getCache[path][name]
       // file scoped stuff always updates
       if (options.unchanged && where == 'fromFile')
         return val
 
       let result
-      const path = this.getPath()
 
       // setup caches
       if (!Internal.getCache[path])

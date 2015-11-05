@@ -82,6 +82,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     propsHashes: {},
 
     changedViews: [],
+    getInitialStates: [],
     mountedViews: {},
     lastWorkingViews: {},
     lastWorkingRenders: {},

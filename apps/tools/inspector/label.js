@@ -2,6 +2,7 @@ view Label {
   let focus, newVal
 
   const onFocus = e => {
+    if (!view.props.editable) return
     focus = true
     e => e.target.select()
   }
@@ -9,6 +10,13 @@ view Label {
   const onBlur = e => {
     focus = false
   }
+  
+  const onChange = e => {
+    newVal = e.target.value
+    view.props.onSet(newVal)
+  }
+  
+  let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}
 
   <input
     defaultValue={String(view.props.val)}
@@ -18,17 +26,19 @@ view Label {
     spellCheck={false}
     onClick={e => e.stopPropagation()}
     onFocus={onFocus}
+    onEnter={onBlur}
     onBlur={onBlur}
-    onEnter={view.props.onSet.partial(newVal)}
+    onChange={onChange}
+    {...tabIndex(view.props.editable)}
   />
 
   $input = {
     position: 'absolute',
     top: 0,
+    background: 'yellow',
     left: -1,
     right: 0,
     padding: 1,
-    background: '#111',
     outline: 'none',
     border: 'none',
     opacity: 0,
