@@ -8,10 +8,6 @@ import makeTemplate from './template'
 import log from '../lib/log'
 
 export default async function build() {
-  log('Building extras, assets...')
-
-  copy.assets()
-
   log('Building extras, template...')
   makeTemplate()
 

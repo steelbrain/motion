@@ -1,4 +1,5 @@
 import webpack from 'webpack'
+import uglify from 'uglify-js'
 import gulp from 'gulp'
 import log from '../lib/log'
 import { p, copy, writeFile, readFile } from '../lib/fns'
@@ -35,9 +36,17 @@ export async function app() {
   ]
 
   const inFilesConcat = inFiles.join(";\n")
+
+  console.log("\n  Minifying".bold)
+  const minified = uglify.minify(inFilesConcat, {
+    fromString: true,
+    // inSourceMap: "compiled.js.map",
+    // outSourceMap: "minified.js.map"
+  })
+
   const outStr = (
     preTemplate(opts.get('saneName')) +
-    inFilesConcat +
+    minified.code +
     postTemplate(opts.get('saneName'))
   )
 

@@ -11,6 +11,7 @@ import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
 import clear from './fbuild/clear'
+import copy from './fbuild/copy'
 import build from './fbuild/build'
 import path from 'path'
 
@@ -31,6 +32,8 @@ export async function run(_opts, isBuild) {
       console.log("\nBuilding %s\n".bold, OPTS.name + '.js')
 
       await clear.buildDir()
+
+      copy.assets()
 
       // run our pipeline once manually
       gulp.buildScripts()

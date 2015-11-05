@@ -89,11 +89,9 @@ export function buildScripts(cb, userStream) {
     bridge.on('super:on', ({ file }) => superStream.start(file))
     bridge.on('super:off', superStream.stop)
   }
-  // extras stream
   else {
-    extrasStream = through.obj().pipe(through.obj(
-      (a, b, cb) => build() && cb(null)
-    ))
+    // null for build
+    extrasStream = through.obj().pipe(through.obj())
   }
 
   // gulp src stream
