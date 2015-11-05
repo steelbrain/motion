@@ -23,10 +23,10 @@ export async function run(_opts, isBuild) {
     log.setLogging(OPTS)
     log('run', OPTS)
 
-    await initConfig()
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
+    await initConfig()
 
     if (OPTS.build) {
       console.log("\nBuilding %s\n".bold, OPTS.name + '.js')
