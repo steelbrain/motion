@@ -5,6 +5,7 @@ import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
 import editor from './lib/editor'
 import opts from './opts'
+import npm from './npm'
 
 const proc = process // cache for keypress
 
@@ -36,9 +37,9 @@ export function start() {
 
           break
         case 'i': // install npm
-          console.log('Installing npm packages...'.white.bold)
+          console.log('Installing npm packages...'.white, "\n")
           await npm.install(true)
-          console.log('Packages updated!'.green.bold)
+          console.log("\n", 'Packages updated!'.green.bold)
           break
         case 'v': // verbose logging
           OPTS.verbose = !OPTS.verbose
