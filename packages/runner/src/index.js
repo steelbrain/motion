@@ -33,9 +33,16 @@ export async function run(_opts, isBuild) {
         path.normalize(OPTS.buildDir)
       )
 
-      log('building...')
       await clear.buildDir()
-      await build(false)
+
+      log('building...')
+
+      // run our pipeline once manually
+      gulp.buildScripts()
+      await gulp.afterFirstBuild()
+
+      // build assets once manually
+      await build()
 
       console.log("\nDone! ⇢  .flint/build\n".green.bold)
 

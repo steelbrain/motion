@@ -5,34 +5,26 @@ import npm from '../npm'
 import keys from '../keys'
 import copy from './copy'
 import makeTemplate from './template'
+import log from '../lib/log'
 
-export default async function build(running) {
-  // copy assets
+export default async function build() {
+  log('Building extras, assets...')
+
   copy.assets()
 
-  // build user files
-  if (running) {
-    await gulp.buildWhileRunning()
-    makeTemplate()
-    keys.stop()
-  }
-  else {
-    gulp.buildScripts()
-    await gulp.afterFirstBuild()
-    makeTemplate()
-  }
+  log('Building extras, template...')
+  makeTemplate()
 
-  // bundle npm / internals
+  log('Building extras, npm...')
   await *[
     npm.install(),
     npm.bundleInternals()
   ]
 
-  // copy / concat js
+  log('Building extras, copy...')
   await *[
     copy.flint(),
     copy.react(),
     copy.app()
   ]
-
 }
