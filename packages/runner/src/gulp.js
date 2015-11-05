@@ -7,6 +7,7 @@ import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
+import build from './fbuild/build'
 import unicodeToChar from './lib/unicodeToChar'
 import superStream from './lib/superStream'
 import compiler from './compiler'
@@ -76,7 +77,7 @@ export function buildScripts(cb, userStream) {
   console.log('Building...'.bold.white)
 
   OPTS = opts.get()
-  let lastScript, curFile, lastError
+  let lastScript, curFile, lastError, extrasStream
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   // super stream watcher
@@ -89,6 +90,12 @@ export function buildScripts(cb, userStream) {
       console.log('super:off')
       return superStream.stop
     })
+  }
+  // extras stream
+  else {
+    extrasStream = through.obj().pipe(through.obj(
+      (a, b, cb) => build() && cb(null)
+    ))
   }
 
   // gulp src stream
@@ -121,6 +128,7 @@ export function buildScripts(cb, userStream) {
     ))
     .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
+    .pipe($.if(OPTS.build, extrasStream))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not. don't ask me why
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
