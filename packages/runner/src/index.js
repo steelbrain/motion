@@ -22,6 +22,7 @@ export async function run(_opts, isBuild) {
     log.setLogging(OPTS)
     log('run', OPTS)
 
+    await initConfig()
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
@@ -55,7 +56,6 @@ export async function run(_opts, isBuild) {
       log('running...')
       await clear.outDir()
       await server()
-      await initConfig()
       bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
