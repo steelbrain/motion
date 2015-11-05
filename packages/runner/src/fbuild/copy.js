@@ -37,21 +37,19 @@ export async function app() {
 
   const inFilesConcat = inFiles.join(";\n")
 
-  console.log("\n  Minifying".bold)
-  const minified = uglify.minify(inFilesConcat, {
-    fromString: true,
-    // inSourceMap: "compiled.js.map",
-    // outSourceMap: "minified.js.map"
-  })
-
   const outStr = (
     preTemplate(opts.get('saneName')) +
-    minified.code +
+    inFilesConcat +
     postTemplate(opts.get('saneName'))
   )
 
+  console.log("\n  Minifying".bold)
+  const minified = uglify.minify(outStr, {
+    fromString: true
+  })
+
   const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
-  await writeFile(outFile, outStr)
+  await writeFile(outFile, minified.code)
 }
 
 export function assets() {
