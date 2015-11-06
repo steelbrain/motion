@@ -7,6 +7,13 @@ let routes = {}
 let routesList = []
 let params = {}
 let location = window.location.pathname
+let listeners = []
+
+function runListeners(location) {
+  listeners.forEach(listener => {
+    listener(location)
+  })
+}
 
 const router = {
   init({ onChange }) {
@@ -16,7 +23,15 @@ const router = {
     // router updates
     history.listen(location => {
       router.go(location.pathname, true)
+      runListeners(location)
     })
+  },
+
+  onChange(cb) {
+    if (typeof cb !== 'function')
+      throw new Error('Must provide function to Flint.router.onChange')
+
+    listeners.push(cb)
   },
 
   link(...args) {
