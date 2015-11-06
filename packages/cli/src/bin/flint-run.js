@@ -18,5 +18,5 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('-h, --host [host]', 'specify hostname')
     .parse(process.argv);
 
-  runner.run(Program);
+  runner(Program);
 })
