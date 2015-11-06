@@ -190,7 +190,7 @@ export function buildScripts(afterEach, userStream) {
   }
 
   function afterWrite(file) {
-    if (OPTS.build) build()
+    if (OPTS.build && OPTS.watch) build()
 
     if (file.isSourceMap) return
 

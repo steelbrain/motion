@@ -10,6 +10,7 @@ import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
+import build from './fbuild/build'
 import clear from './fbuild/clear'
 import copy from './fbuild/copy'
 import path from 'path'
@@ -40,8 +41,10 @@ export default async function run(_opts = {}, isBuild) {
 
       if (OPTS.watch)
         gulp.watchForBuild()
-      else
+      else {
+        await build()
         process.exit()
+      }
     }
     else {
       log('running...')
