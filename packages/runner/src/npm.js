@@ -313,8 +313,9 @@ async function installAll(deps) {
   if (!deps)
     deps = cache.getImports()
 
+  const filteredDeps = rmFlintExternals(deps)
   const installed = await readInstalled()
-  const fresh = _.difference(deps, installed)
+  const fresh = _.difference(filteredDeps, installed)
 
   // no new ones found
   if (!fresh.length) return
