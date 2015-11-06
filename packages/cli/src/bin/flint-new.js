@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Program from 'commander'
+import flintNew from '../lib/new'
 
 Program
   .option('-n, --nocache', 'dont use local cache of latest flint scaffold')
@@ -20,4 +21,4 @@ const use = Program.use || args[1]
 const nocache = Program.nocache
 const debug = Program.debug
 
-flintNew({ name, use, nocache, debug }))
+flintNew({ name, use, nocache, debug })

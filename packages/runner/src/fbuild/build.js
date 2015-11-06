@@ -23,4 +23,6 @@ export default async function build() {
     copy.react(),
     copy.app()
   ]
+
+  console.log("\nDone! ⇢  .flint/build\n".green.bold)
 }

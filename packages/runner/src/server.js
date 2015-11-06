@@ -35,7 +35,7 @@ function getScriptTags(files, req) {
       '<script src="/__/devtools.dev.js"></script>',
       // devtools
       devToolsDisabled(req) ? '' : [
-        '<script src="/__/tools/tools.prod.js"></script>',
+        '<script src="/__/tools/tools.js"></script>',
         '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
       ].join(newLine),
       // user files

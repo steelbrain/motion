@@ -28,11 +28,12 @@ export function react() {
 export async function app() {
   log('copy: app: reading packages + internals')
   const buildDir = p(opts.get('buildDir'), '_')
+  const appFile = p(buildDir, opts.get('saneName') + '.js')
 
   const inFiles = await *[
     readFile(p(opts.get('depsDir'), 'packages.js')),
     readFile(p(opts.get('depsDir'), 'internals.js')),
-    readFile(p(buildDir, opts.get('saneName') + '.js')),
+    readFile(appFile),
   ]
 
   const inFilesConcat = inFiles.join(";\n")
@@ -42,6 +43,9 @@ export async function app() {
     inFilesConcat +
     postTemplate(opts.get('saneName'))
   )
+
+  // overwrite with full app code
+  await writeFile(appFile, outStr)
 
   console.log("\n  Minifying".bold)
   const minified = uglify.minify(outStr, {

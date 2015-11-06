@@ -12,7 +12,6 @@ import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
 import clear from './fbuild/clear'
 import copy from './fbuild/copy'
-import build from './fbuild/build'
 import path from 'path'
 
 export default async function run(_opts = {}, isBuild) {
@@ -38,11 +37,6 @@ export default async function run(_opts = {}, isBuild) {
       // run our pipeline once manually
       gulp.buildScripts()
       await gulp.afterFirstBuild()
-
-      // build assets once manually
-      await build()
-
-      console.log("\nDone! ⇢  .flint/build\n".green.bold)
 
       if (OPTS.watch)
         gulp.watchForBuild()

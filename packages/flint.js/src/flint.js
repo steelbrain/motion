@@ -207,6 +207,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.viewsInFile[file] = []
         Internal.changedViews = []
         Internal.currentHotFile = file
+        Internal.caughtRuntimeErrors = 0
       }
 
       // capture exports
@@ -234,10 +235,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         raf(() => {
           const added = arrayDiff(views, cached)
 
-          // send runtime success before render
-          if (Tools)
-            Tools.emitter.emit('runtime:success')
-
           // if removed, just root
           if (removed.length || added.length)
             return Flint.render()
@@ -250,6 +247,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
               }
             }).filter(x => !!x)
           })
+
+          // send runtime success before render
+          if (!Tools) return
+          if (Internal.caughtRuntimeErrors) return
+          Tools.emitter.emit('runtime:success')
         })
       }
     },

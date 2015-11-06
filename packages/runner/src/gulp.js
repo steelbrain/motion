@@ -79,19 +79,15 @@ const $p = {
 }
 
 // userStream is optional for programmatic usage
-export function buildScripts(cb, userStream) {
+export function buildScripts(afterEach, userStream) {
   OPTS = opts.get()
-  let lastScript, curFile, lastError, extrasStream
+  let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   // super stream watcher
   if (!OPTS.build) {
     bridge.on('super:on', ({ file }) => superStream.start(file))
     bridge.on('super:off', superStream.stop)
-  }
-  else {
-    // null for build
-    extrasStream = through.obj().pipe(through.obj())
   }
 
   // gulp src stream
@@ -124,7 +120,6 @@ export function buildScripts(cb, userStream) {
     ))
     .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
-    .pipe($.if(OPTS.build, extrasStream || pipefn()))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -195,6 +190,8 @@ export function buildScripts(cb, userStream) {
   }
 
   function afterWrite(file) {
+    if (OPTS.build) build()
+
     if (file.isSourceMap) return
 
     log('OPTS.hasRunInitialBuild', OPTS.hasRunInitialBuild)
