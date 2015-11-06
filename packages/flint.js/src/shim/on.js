@@ -89,14 +89,22 @@ function onCb({ scope, name, number, cb }) {
 }
 
 function on(scope, name, cb, number) {
+  //  console.log('scope', scope, 'name', name, 'cb', cb, 'number', number)
+
   // dynamic arguments
 
   // delay/every
   if (name == 'delay' || name == 'every') {
-    // swap
-    let realCb = number
-    number = cb
-    cb = realCb
+    // from view
+    if (number) {
+      let realCb = number
+      number = cb
+      cb = realCb
+    }
+    else {
+      number = scope
+    }
+
     return finish({ scope, name, number, cb })
   }
 
@@ -127,7 +135,9 @@ function finish(opts) {
 
 // for on.name() usage
 const bindName = name => (scope, cb, number) => on(scope, name, cb, number)
-const onName = name => on[name] = bindName(name)
+const onName = name => {
+  on[name] = bindName(name)
+}
 
 // flint
 onName('delay')

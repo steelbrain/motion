@@ -1,11 +1,14 @@
 view Main {
+  const internal = window.__isDevingDevTools
+
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
+
   <Errors />
   <Installer />
-  <Inspector />
 
-  <Test if={window.__isDevingDevTools} />
-  <OtherTest if={window.__isDevingDevTools} />
+  <Inspector if={internal} />
+  <Test if={internal} />
+  <OtherTest if={internal} />
 
   $ = {
     position: 'fixed',
