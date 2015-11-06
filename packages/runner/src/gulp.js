@@ -70,7 +70,7 @@ const $p = {
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
-    optional: ['regenerator'],
+    optional: ['runtime'],
     plugins: [flintTransform({ basePath: OPTS.dir })],
     extra: {
       production: process.env.production

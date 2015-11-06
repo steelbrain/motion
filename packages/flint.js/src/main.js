@@ -4,7 +4,6 @@ import 'whatwg-fetch'
 import React from 'react'
 import rafBatch from './lib/reactRaf'
 import runFlint from './flint'
-import './shim/require'
 
 if (process.env.production)
   rafBatch.inject();

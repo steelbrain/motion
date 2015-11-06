@@ -112,13 +112,20 @@ async function getWritten() {
 }
 
 
-// doers
+// helpers
 
 const filterFalse = ls => ls.filter(l => !!l)
 
+ // ['pkg/x', 'pkg/y'] => ['pkg'] and remove flint externals
+const normalize = deps =>
+  rmFlintExternals(_.uniq(deps.map(dep => dep.indexOf('/') ? dep.replace(/\/.*/, '') : dep)))
+
+
+
 async function removeOld(rebundle) {
   const installed = await readInstalled()
-  const toUninstall = _.difference(installed, cache.getImports())
+  const imported = cache.getImports()
+  const toUninstall = _.difference(normalize(installed), normalize(imported))
   log('npm: removeOld() toUninstall', toUninstall)
 
   if (!toUninstall.length) return
@@ -306,16 +313,21 @@ async function installExternals(file, source) {
   installAll(found)
 }
 
+let successful = []
+let failed = []
+let installingFullNames = []
 let installing = []
 let isInstalling = false
 
 async function installAll(deps) {
-  if (!deps)
-    deps = cache.getImports()
+  if (!deps) deps = cache.getImports()
 
-  const filteredDeps = rmFlintExternals(deps)
-  const installed = await readInstalled()
-  const fresh = _.difference(filteredDeps, installed)
+  // full names keeps paths like 'babel/runtime/etc'
+  if (deps.length)
+    installingFullNames.push(deps)
+
+  const prevInstalled = await readInstalled()
+  const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
 
   // no new ones found
   if (!fresh.length) return
@@ -327,21 +339,22 @@ async function installAll(deps) {
   if (isInstalling) return
   isInstalling = true
 
-  let successful = []
-
   const installNext = async () => {
-    const dep = installing.shift()
-    log('start install:', dep)
+    const dep = installing[0]
     onPackageStart(dep)
 
     try {
       await save(dep)
       successful.push(dep)
       onPackageFinish(dep)
-      next()
-    } catch(e) {
+    }
+    catch(e) {
+      failed.push(dep)
       log('package install failed', dep)
       onPackageError(dep, e)
+    }
+    finally {
+      installing.shift() // remove
       next()
     }
   }
@@ -349,14 +362,23 @@ async function installAll(deps) {
   const next = () => installing.length ? installNext() : done()
 
   const done = async () => {
-    // cache newly successful + installed
-    const total = successful.concat(installed)
-    await writeInstalled(total)
+    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+    let final = [].concat(prevInstalled, installedFullPaths)
+
+    // remove failed
+    if (failed.length)
+      final = final.filter(dep => failed.indexOf(dep) >= 0)
+
     logInstalled(successful)
-    log('npm: installExternals() -> bundleExternals()')
+    await writeInstalled(final)
     await bundleExternals()
+
+    // reset
+    installingFullNames = []
+    failed = []
     isInstalling = false
-    return true
+
+    return final
   }
 
   installNext()

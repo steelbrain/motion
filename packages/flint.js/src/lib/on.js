@@ -92,7 +92,11 @@ function finish(opts) {
   return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
 }
 
-function on(scope, name, cb, number) {
+function On(scope) {
+  this.scope = scope || window
+}
+
+On.prototype.run = function(scope, name, cb, number) {
   //  console.log('scope', scope, 'name', name, 'cb', cb, 'number', number)
 
   // dynamic arguments
@@ -131,55 +135,53 @@ function on(scope, name, cb, number) {
   return finish({ scope, name, cb })
 }
 
-// pre bind some events
-
-// for on.name() usage
-const bindName = name => (scope, cb, number) => on(scope, name, cb, number)
-const onName = name => {
-  on[name] = bindName(name)
+function defaultOnEvents(names) {
+  names.forEach(name => {
+    On.prototype[name] = function(scope, ...args) {
+      this.run(scope, name, ...args)
+    }
+  })
 }
 
-// flint
-onName('delay')
-onName('every')
-onName('frame')
+defaultOnEvents([
+  // flint
+  'delay',
+  'every',
+  'frame',
 
-// DOM level 2 at most
+  // DOM level 2 at most
 
-// mouse
-onName('click')
-onName('mousedown')
-onName('mouseenter')
-onName('mouseleave')
-onName('mousemove')
-onName('mouseover')
-onName('mouseout')
-onName('mouseup')
+  // mouse
+  'click',
+  'mousedown',
+  'mouseenter',
+  'mouseleave',
+  'mousemove',
+  'mouseover',
+  'mouseout',
+  'mouseup',
 
-// keyboard
-onName('keydown')
-onName('keypress')
-onName('keyup')
+  // keyboard
+  'keydown',
+  'keypress',
+  'keyup',
 
-// frame/object
-onName('abort')
-onName('beforeunload')
-onName('error')
-onName('load')
-onName('resize')
-onName('scroll')
-onName('unload')
+  // frame/object
+  'abort',
+  'beforeunload',
+  'error',
+  'load',
+  'resize',
+  'scroll',
+  'unload',
 
-// form
-onName('blur')
-onName('change')
-onName('focus')
-onName('reset')
-onName('select')
-onName('submit')
+  // form
+  'blur',
+  'change',
+  'focus',
+  'reset',
+  'select',
+  'submit',
+])
 
-
-// TODO shim this outside this file
-root.on = on
-
-export default on
+export default On
