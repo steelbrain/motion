@@ -88,6 +88,10 @@ function onCb({ scope, name, number, cb }) {
   return addListener({ scope, name, cb: finish })
 }
 
+function finish(opts) {
+  return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
+}
+
 function on(scope, name, cb, number) {
   //  console.log('scope', scope, 'name', name, 'cb', cb, 'number', number)
 
@@ -105,6 +109,7 @@ function on(scope, name, cb, number) {
       number = scope
     }
 
+    debugger
     return finish({ scope, name, number, cb })
   }
 
@@ -125,10 +130,6 @@ function on(scope, name, cb, number) {
     throw new Error("When using on(), you must pass a name, like on('scroll')")
 
   return finish({ scope, name, cb })
-}
-
-function finish(opts) {
-  return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
 }
 
 // pre bind some events

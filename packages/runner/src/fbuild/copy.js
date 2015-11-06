@@ -47,13 +47,15 @@ export async function app() {
   // overwrite with full app code
   await writeFile(appFile, outStr)
 
-  console.log("\n  Minifying".bold)
-  const minified = uglify.minify(outStr, {
-    fromString: true
-  })
+  // console.log("\n  Minifying".bold)
+  // const minified = uglify.minify(outStr, {
+  //   fromString: true
+  // })
+
+  const final = outStr//minified.code
 
   const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
-  await writeFile(outFile, minified.code)
+  await writeFile(outFile, final)
 }
 
 export function assets() {
