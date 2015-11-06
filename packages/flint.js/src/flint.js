@@ -22,7 +22,7 @@ import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
-import Main from './views/Main'
+import MainView from './views/Main'
 
 /*
 
@@ -174,19 +174,19 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         log(`render(), Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
-        const MainComponent = (
-            Internal.views.Main.component || Internal.lastWorkingViews.Main.component
-        )
+        let Main = Internal.views.Main || Internal.lastWorkingViews.Main
+
+        Main = Main ? Main.component : MainView
 
         if (!browserNode) {
-          Flint.renderedToString = React.renderToString(<MainComponent />)
+          Flint.renderedToString = React.renderToString(<Main />)
           afterRenderCb && afterRenderCb(Flint.renderedToString)
         }
         else {
           if (window.__isDevingDevTools)
             browserNode = '_flintdevtools'
 
-          ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
+          ReactDOM.render(<Main />, document.getElementById(browserNode))
         }
 
         Internal.firstRender = false
