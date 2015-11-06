@@ -14,7 +14,6 @@ export default function run(browser, opts) {
     },
 
     'script:add': msg => {
-      browser.emitter.emit('runtime:success')
       addScript(msg, renderFlint)
     },
 

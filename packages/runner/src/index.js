@@ -10,47 +10,41 @@ import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
-import clear from './fbuild/clear'
 import build from './fbuild/build'
+import clear from './fbuild/clear'
+import copy from './fbuild/copy'
 import path from 'path'
 
-export async function run(_opts, isBuild) {
+export default async function run(_opts = {}, isBuild) {
   try {
-    const appDir = path.normalize(process.cwd());
+    const appDir = _opts.appDir || path.normalize(process.cwd());
     const OPTS = opts.set({ ..._opts, appDir, isBuild })
 
     log.setLogging(OPTS)
     log('run', OPTS)
 
-    await initConfig()
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
+    await initConfig()
 
     if (OPTS.build) {
-      console.log(
-        "\nBuilding %s to %s\n".bold.white,
-        OPTS.name + '.js',
-        path.normalize(OPTS.buildDir)
-      )
+      console.log("\nBuilding %s\n".bold, OPTS.name + '.js')
 
       await clear.buildDir()
 
-      log('building...')
+      copy.assets()
 
       // run our pipeline once manually
       gulp.buildScripts()
       await gulp.afterFirstBuild()
 
-      // build assets once manually
-      await build()
-
-      console.log("\nDone! ⇢  .flint/build\n".green.bold)
-
       if (OPTS.watch)
         gulp.watchForBuild()
-      else
+      else {
+        await build()
         process.exit()
+      }
     }
     else {
       log('running...')
@@ -59,9 +53,11 @@ export async function run(_opts, isBuild) {
       bridge.start()
       gulp.buildScripts()
       await gulp.afterFirstBuild()
-      openInBrowser()
+      // openInBrowser()
       watchingMessage()
     }
+
+    return opts.get()
   }
   catch(e) {
     if (!e.silent)

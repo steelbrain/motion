@@ -17,5 +17,5 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     .option('-i, --isomorphic', 'render template isomorphic')
     .parse(process.argv);
 
-  runner.run(Program, true);
+  runner(Program, true);
 })

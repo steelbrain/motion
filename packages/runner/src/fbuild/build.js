@@ -8,10 +8,6 @@ import makeTemplate from './template'
 import log from '../lib/log'
 
 export default async function build() {
-  log('Building extras, assets...')
-
-  copy.assets()
-
   log('Building extras, template...')
   makeTemplate()
 
@@ -27,4 +23,6 @@ export default async function build() {
     copy.react(),
     copy.app()
   ]
+
+  console.log("\nDone! ⇢  .flint/build\n".green.bold)
 }

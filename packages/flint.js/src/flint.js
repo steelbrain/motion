@@ -22,7 +22,7 @@ import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
-import Main from './views/Main'
+import MainView from './views/Main'
 
 /*
 
@@ -175,19 +175,19 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         log(`render(), Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
-        const MainComponent = (
-            Internal.views.Main.component || Internal.lastWorkingViews.Main.component
-        )
+        let Main = Internal.views.Main || Internal.lastWorkingViews.Main
+
+        Main = Main ? Main.component : MainView
 
         if (!browserNode) {
-          Flint.renderedToString = React.renderToString(<MainComponent />)
+          Flint.renderedToString = React.renderToString(<Main />)
           afterRenderCb && afterRenderCb(Flint.renderedToString)
         }
         else {
           if (window.__isDevingDevTools)
             browserNode = '_flintdevtools'
 
-          ReactDOM.render(<MainComponent />, document.getElementById(browserNode))
+          ReactDOM.render(<Main />, document.getElementById(browserNode))
         }
 
         Internal.firstRender = false
@@ -208,6 +208,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.viewsInFile[file] = []
         Internal.changedViews = []
         Internal.currentHotFile = file
+        Internal.caughtRuntimeErrors = 0
       }
 
       // capture exports
@@ -235,10 +236,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         raf(() => {
           const added = arrayDiff(views, cached)
 
-          // send runtime success before render
-          if (Tools)
-            Tools.emitter.emit('runtime:success')
-
           // if removed, just root
           if (removed.length || added.length)
             return Flint.render()
@@ -251,6 +248,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
               }
             }).filter(x => !!x)
           })
+
+          // send runtime success before render
+          if (!Tools) return
+          if (Internal.caughtRuntimeErrors) return
+          Tools.emitter.emit('runtime:success')
         })
       }
     },

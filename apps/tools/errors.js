@@ -3,34 +3,38 @@ const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1
 
 const niceRuntimeError = err => {
   if (err.file)
-    err.file = err.file
-      .replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
+    err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
 
-  err.niceMessage = err.message
-    .replace(/Uncaught .*Error:\s*/, '')
+  if (err.message)
+    err.niceMessage = err.message.replace(/Uncaught .*Error:\s*/, '')
+
   return err
 }
 
 const niceNpmError = ({ msg, name }) => {
-  msg = msg
-    .replace(/(npm WARN.*\n|ERR\!)/g, '')
-    .replace(/npm  argv.*\n/g, '')
-    .replace(/npm  node v.*\n/g, '')
-    .replace(/npm  npm.*\n/g, '')
-    .replace(/npm  code.*\n/g, '')
-    .replace(/npm  peerinvalid /g, '')
-    .replace(/npm  404 /g, '')
+  if (msg)
+    msg = msg
+      .replace(/(npm WARN.*\n|ERR\!)/g, '')
+      .replace(/npm  argv.*\n/g, '')
+      .replace(/npm  node v.*\n/g, '')
+      .replace(/npm  npm.*\n/g, '')
+      .replace(/npm  code.*\n/g, '')
+      .replace(/npm  peerinvalid /g, '')
+      .replace(/npm  404 /g, '')
+
   return { msg, name }
 }
 
 const niceCompilerError = err =>
   niceCompilerMessage(fullStack(niceStack(err)))
 
-const replaceCompilerMsg = (msg) =>
-  msg
+const replaceCompilerMsg = (msg) => {
+  if (!msg) return ''
+  return msg
     .replace(/.*\.js\:/, '')
     .replace(/\([0-9]+\:[0-9]+\)/, '')
     .replace(/Line [0-9]+\:\s*/, '')
+}
 
 const niceCompilerMessage = err => {
   err.niceMessage = replaceCompilerMsg(err.message, err.fileName)
@@ -62,6 +66,7 @@ const niceStack = err => {
     err.stack.split("\n").map(line => {
       if (line[0] === '>') {
         let result = line
+        if (!result) return
         // remove the babel " > |" before the line
         result = result.replace(/\>\s*[0-9]+\s*\|\s*/, '')
         result = replaceCompilerMsg(result)
@@ -145,6 +150,7 @@ view ErrorMessage {
   let error, npmError, fullStack
   let line = getLine(view.props.error)
 
+
   on.props(() => {
     npmError = view.props.npmError
     error = view.props.error
@@ -154,6 +160,7 @@ view ErrorMessage {
     // show full stack after a delay
     if (error)
       on.delay(2500, () => {
+        console.log('full', error)
         fullStack = error.stack
       })
   })

@@ -15,8 +15,7 @@ export async function writeConfig(config) {
   if (!config) return console.error("Must provide a config to write")
 
   try {
-    log('writing'.bold, config)
-    return await writeJSON(opts.get('configFile'), config, { spaces: 2 })
+    await writeJSON(opts.get('configFile'), config, { spaces: 2 })
   }
   catch(e) {
     handleError(e)

@@ -21,8 +21,6 @@ function setAll(opts) {
   // from cli
   OPTS = {}
 
-  OPTS.firstRun = true
-
   OPTS.debug = opts.debug
   OPTS.port = opts.port
   OPTS.host = opts.host

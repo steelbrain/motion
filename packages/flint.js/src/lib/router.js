@@ -1,5 +1,4 @@
 import Route from 'route-parser'
-window.R = Route
 import { createHistory } from 'history'
 
 let history, render
@@ -8,6 +7,13 @@ let routes = {}
 let routesList = []
 let params = {}
 let location = window.location.pathname
+let listeners = []
+
+function runListeners(location) {
+  listeners.forEach(listener => {
+    listener(location)
+  })
+}
 
 const router = {
   init({ onChange }) {
@@ -17,12 +23,23 @@ const router = {
     // router updates
     history.listen(location => {
       router.go(location.pathname, true)
+      runListeners(location)
     })
+  },
+
+  onChange(cb) {
+    if (typeof cb !== 'function')
+      throw new Error('Must provide function to Flint.router.onChange')
+
+    listeners.push(cb)
   },
 
   link(...args) {
     return () => router.go(...args)
   },
+
+  back() { history.goBack() },
+  forward() {history.goForward() },
 
   go(path, dontPush) {
     if (!render) return
@@ -33,7 +50,9 @@ const router = {
     if (location[0] !== '/')
       location = '/' + location
 
-    if (!dontPush) history.pushState(null, path)
+    if (!dontPush)
+      history.pushState(null, path)
+
     router.next()
     router.recognize()
     render()

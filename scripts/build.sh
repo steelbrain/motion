@@ -40,7 +40,7 @@ if [ $1="--watch" ]; then
   chsum1=""
   cd packages/cli
 
-  sleep 2
+  sleep 1
   hasLinkedOnce='false'
   while [[ true ]]
   do
@@ -52,7 +52,6 @@ if [ $1="--watch" ]; then
 
         # watch tools after first build
         if [ $hasLinkedOnce == 'false' ]; then
-          sleep 2 # todo: wait for webpack finish
           cd ../..
           cd apps/tools
           flint build --watch &

@@ -109,13 +109,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
         if (process.env.production)
           view.call(this, this, this.viewOn, this.styles)
         else {
-          // catch errors in view loop
           try {
             view.call(this, this, this.viewOn, this.styles)
           }
           catch(e) {
-            console.error(e.stack)
+            Internal.caughtRuntimeErrors++
             reportError(e)
+            console.error(e.stack)
+            this.renders = [() => this.getLastGoodRender()]
           }
         }
 
@@ -270,6 +271,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return styled
       },
 
+      getLastGoodRender() {
+        return Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]
+      },
+
       render() {
         this.isRendering = true
         this.firstRender = false
@@ -284,10 +289,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
           return els
         }
         catch(e) {
+          Internal.caughtRuntimeErrors++
           console.error(e.stack)
           reportError(e)
 
-          const lastRender = Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]
+          const lastRender = this.getLastGoodRender()
 
           try {
             let inner = <div>Error in view {name}</div>

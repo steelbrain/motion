@@ -15,13 +15,12 @@ import { touch, p, mkdir, rmdir, readFile, writeFile, writeJSON, readJSON } from
 let WHERE = {}
 let OPTS
 let INSTALLING = false
-let FIRST_RUN = true
 
 /*
 
   Public:
    - init: set options
-   - install: checks all imports (cache + package.json.installed) and bundleExternalss
+   - install: checks installed and reinstalls based on current cache
    - scanFile: checks for imports in file and installs/caches
 
   Private:
@@ -32,7 +31,7 @@ let FIRST_RUN = true
 
 */
 
-function init(_opts) {
+async function init(_opts) {
   OPTS = _opts
 
   WHERE.outDir = p(OPTS.internalDir, 'deps')
@@ -41,6 +40,8 @@ function init(_opts) {
   WHERE.depsJS = p(WHERE.outDir, 'deps.js')
   WHERE.depsJSON = p(WHERE.outDir, 'deps.json')
   WHERE.packagesJS = p(WHERE.outDir, 'packages.js')
+
+  await remakeInstallDir()
 }
 
 
@@ -102,30 +103,38 @@ async function writeInstalled(deps) {
 async function getWritten() {
   try {
     const written = await readJSON(WHERE.depsJSON)
-    log('npm: install: written:', written)
     return written.deps
   }
   catch(e) {
     log('npm: install: no deps installed')
-    return null
+    return []
   }
 }
 
 
-// doers
+// helpers
 
 const filterFalse = ls => ls.filter(l => !!l)
 
-async function removeOld() {
+ // ['pkg/x', 'pkg/y'] => ['pkg'] and remove flint externals
+const normalize = deps =>
+  rmFlintExternals(_.uniq(deps.map(dep => dep.indexOf('/') ? dep.replace(/\/.*/, '') : dep)))
+
+
+
+async function removeOld(rebundle) {
   const installed = await readInstalled()
-  log('cache imports'.yellow, cache.getImports())
-  const toUninstall = _.difference(installed, cache.getImports())
+  const imported = cache.getImports()
+  const toUninstall = _.difference(normalize(installed), normalize(imported))
   log('npm: removeOld() toUninstall', toUninstall)
 
-  const newlyUninstalled = await* toUninstall.map(async dep => {
+  if (!toUninstall.length) return
+
+  console.log(`\n  Uninstalling...`.bold)
+  const attempted = await* toUninstall.map(async dep => {
     try {
       await unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
-      console.log(' ✘ ', dep)
+      console.log(`  ✘ ${dep}`.red)
       return dep
     }
     catch(e) {
@@ -134,39 +143,16 @@ async function removeOld() {
     }
   })
 
-  const successfullyUninstalled = filterFalse(newlyUninstalled)
-  const final = _.difference(installed, )
+  const success = filterFalse(attempted)
+  const final = _.difference(installed, success)
   log('writing from removeOld()', final)
   await writeInstalled(final)
-  return successfullyUninstalled
-}
 
-async function saveNew() {
-  const installed = await readInstalled()
-  const written = await getWritten()
-  const toInstall = _.difference(installed, written)
-  log('npm: saveAll() toInstall', toInstall)
-  if (!toInstall.length) return
+  if (rebundle) {
+    await bundleExternals()
+  }
 
-  console.log("\n",'Installing Packages...'.white.bold)
-
-  const newlyInstalled = await* toInstall.map(async dep => {
-    try {
-      await save(dep, toInstall.indexOf(dep), toInstall.length)
-      console.log(' ⇢ ', dep)
-      return dep
-    }
-    catch(e) {
-      console.log('Failed to install', dep)
-      return false
-    }
-  })
-
-  const installedSuccessfully = filterFalse(newlyInstalled)
-  const final = _.union(installed, installedSuccessfully)
-  log('writeing from saveNew()', final)
-  await writeInstalled(final)
-  return installedSuccessfully
+  return success
 }
 
 async function remakeInstallDir(redo) {
@@ -194,11 +180,9 @@ async function install(force) {
   log('npm: install')
   try {
     await remakeInstallDir(force)
-    // await removeOld()
-    await saveNew()
+    await removeOld()
+    await installAll()
     await bundleExternals()
-    onPackagesInstalled()
-    FIRST_RUN = false
   } catch(e) {
     handleError(e)
     throw new Error(e)
@@ -233,6 +217,7 @@ async function bundleExternals() {
   const installed = await readInstalled()
   await writeDeps(installed)
   await packExternals()
+  onPackagesInstalled()
 }
 
 const findRequires = source =>
@@ -322,64 +307,78 @@ const findExternalRequires = source =>
 
 async function installExternals(file, source) {
   log('installExternals', file)
-  // removeOld()
 
   const found = findExternalRequires(source)
   cache.setFileImports(file, found)
+  installAll(found)
+}
 
-  const already = await readInstalled()
-  const fresh = found.filter(e => already.indexOf(e) < 0)
+let successful = []
+let failed = []
+let installingFullNames = []
+let installing = []
+let isInstalling = false
 
-  log('installExternals() Found packages in file', found)
-  log('installExternals() FRESH', fresh)
+async function installAll(deps) {
+  if (!deps) deps = cache.getImports()
+
+  // full names keeps paths like 'babel/runtime/etc'
+  if (deps.length)
+    installingFullNames.push(deps)
+
+  const prevInstalled = await readInstalled()
+  const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
 
   // no new ones found
   if (!fresh.length) return
 
-  let installed = []
-  let installing = fresh
+  // push installing
+  installing = installing.concat(fresh)
 
-  INSTALLING = true
+  // check if installed running
+  if (isInstalling) return
+  isInstalling = true
 
-  // install deps one by one
   const installNext = async () => {
-    const dep = installing.shift()
-    log('installExternals: start install:', dep)
+    const dep = installing[0]
     onPackageStart(dep)
 
     try {
       await save(dep)
-      log('installExternals: package installed', dep)
-      installed.push(dep)
+      successful.push(dep)
       onPackageFinish(dep)
-      next()
-    } catch(e) {
-      log('installExternals: package install failed', dep)
+    }
+    catch(e) {
+      failed.push(dep)
+      log('package install failed', dep)
       onPackageError(dep, e)
+    }
+    finally {
+      installing.shift() // remove
       next()
     }
   }
 
-  // loop
-  const next = () => {
-    log('installExternals: installing.length', installing.length)
-    if (installing.length) return installNext()
-    done()
-  }
+  const next = () => installing.length ? installNext() : done()
 
   const done = async () => {
-    // cache newly installed + already
-    const total = installed.concat(already)
-    await writeInstalled(total)
-    logInstalled(installed)
-    afterScansClear()
+    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+    let final = [].concat(prevInstalled, installedFullPaths)
 
-    if (!FIRST_RUN) {
-      log('npm: installExternals() -> bundleExternals()')
-      await bundleExternals()
-      onPackagesInstalled()
-    }
+    // remove failed
+    if (failed.length)
+      final = final.filter(dep => failed.indexOf(dep) >= 0)
 
+    logInstalled(successful)
+    await writeInstalled(final)
+    await bundleExternals()
+
+    // reset
+    installingFullNames = []
+    failed = []
+    isInstalling = false
+
+    return final
   }
 
   installNext()
@@ -387,6 +386,7 @@ async function installExternals(file, source) {
 
 function logProgress(tag, name, index, total) {
   log('npm', tag, name)
+
   const out = total ?
     ` ${index+1} of ${total}: ${name}` :
     `${tag}: ${name}`
@@ -394,6 +394,7 @@ function logProgress(tag, name, index, total) {
   if (OPTS.build)
     console.log(out)
   else {
+    console.log()
     let spinner = new Spinner(out)
     spinner.start({ fps: 30 })
     return spinner
@@ -404,15 +405,20 @@ function execPromise(name, cmd, dir, spinner) {
   return new Promise((res, rej) => {
     exec(cmd, dir, (err, stdout, stderr) => {
       if (spinner) spinner.stop()
-      if (err) rej({ msg: stderr, name })
+      if (err) rej(err)
       else res(name)
     })
   })
 }
 
 async function progressTask(label, cmd, name, index, total) {
-  const spinner = logProgress(label, name, index, total)
-  await execPromise(name, cmd, OPTS.flintDir, spinner)
+  try {
+    const spinner = logProgress(label, name, index, total)
+    await execPromise(name, cmd, OPTS.flintDir, spinner)
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 // npm install --save 'name'
@@ -454,16 +460,6 @@ async function packExternals(file, out) {
   })
 }
 
-// npm install
-function installPackage(dir) {
-  return new Promise((res, rej) => {
-    exec('npm install', dir || OPTS.flintDir, err => {
-      if (err) rej(err)
-      else res()
-    })
-  })
-}
-
 function getMatches(string, regex, index) {
   index || (index = 1) // default to the first capturing group
   var matches = []
@@ -477,30 +473,11 @@ function getMatches(string, regex, index) {
 function logInstalled(deps) {
   if (!deps.length) return
   console.log()
-  console.log(`Installed ${deps.length} packages`.blue.bold)
+  console.log(`  Installed ${deps.length} packages`.bold)
   deps.forEach(dep => {
-    console.log(` - ${dep}`)
+    console.log(`  ✓ ${dep}`.green)
   })
   console.log()
 }
 
-// wait for installs
-let awaitingScans = []
-function afterScans() {
-  return new Promise((resolve, reject) => {
-    log('npm: afterScans: INSTALLING: ', INSTALLING)
-    if (INSTALLING)
-      awaitingScans.push(resolve)
-    else
-      resolve()
-  })
-}
-
-function afterScansClear() {
-  INSTALLING = false
-  log('npm: afterScansClear: awaiting:', awaitingScans.length)
-  awaitingScans.forEach(res => res())
-  awaitingScans = []
-}
-
-export default { init, install, scanFile, bundleInternals }
+export default { init, install, scanFile, bundleInternals, removeOld }

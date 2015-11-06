@@ -1,4 +1,5 @@
 import webpack from 'webpack'
+import uglify from 'uglify-js'
 import gulp from 'gulp'
 import log from '../lib/log'
 import { p, copy, writeFile, readFile } from '../lib/fns'
@@ -27,22 +28,34 @@ export function react() {
 export async function app() {
   log('copy: app: reading packages + internals')
   const buildDir = p(opts.get('buildDir'), '_')
+  const appFile = p(buildDir, opts.get('saneName') + '.js')
 
   const inFiles = await *[
     readFile(p(opts.get('depsDir'), 'packages.js')),
     readFile(p(opts.get('depsDir'), 'internals.js')),
-    readFile(p(buildDir, opts.get('saneName') + '.js')),
+    readFile(appFile),
   ]
 
   const inFilesConcat = inFiles.join(";\n")
+
   const outStr = (
     preTemplate(opts.get('saneName')) +
     inFilesConcat +
     postTemplate(opts.get('saneName'))
   )
 
+  // overwrite with full app code
+  await writeFile(appFile, outStr)
+
+  console.log("\n  Minifying".bold)
+  const minified = uglify.minify(outStr, {
+    fromString: true
+  })
+
+  const final = minified.code
+
   const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
-  await writeFile(outFile, outStr)
+  await writeFile(outFile, final)
 }
 
 export function assets() {
@@ -50,7 +63,7 @@ export function assets() {
     .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
 
   var stream = gulp
-    .src(['*', '**/*', '!**/*.jsf?', ], { dot: false })
+    .src(['*', '**/*', '!**/*.js' ], { dot: false })
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
 

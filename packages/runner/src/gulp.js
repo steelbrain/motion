@@ -27,6 +27,12 @@ const SCRIPTS_GLOB = [
   '!.flint{,/**}'
 ]
 
+const relative = file => path.relative(opts.get('appDir'), file.path)
+const time = _ => _ ? ` - ${_}ms` : ''
+const out = {
+  badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
+  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}${time(ms)}`.bold)
+}
 gulp.task('build', buildScripts)
 
 export function watchForBuild() {
@@ -64,7 +70,7 @@ const $p = {
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
-    optional: ['bluebirdCoroutines'],
+    optional: ['runtime'],
     plugins: [flintTransform({ basePath: OPTS.dir })],
     extra: {
       production: process.env.production
@@ -73,11 +79,9 @@ const $p = {
 }
 
 // userStream is optional for programmatic usage
-export function buildScripts(cb, userStream) {
-  console.log('Building...'.bold.white)
-
+export function buildScripts(afterEach, userStream) {
   OPTS = opts.get()
-  let lastScript, curFile, lastError, extrasStream
+  let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
 
   // super stream watcher
@@ -90,12 +94,6 @@ export function buildScripts(cb, userStream) {
       console.log('super:off')
       return superStream.stop
     })
-  }
-  // extras stream
-  else {
-    extrasStream = through.obj().pipe(through.obj(
-      (a, b, cb) => build() && cb(null)
-    ))
   }
 
   // gulp src stream
@@ -115,9 +113,9 @@ export function buildScripts(cb, userStream) {
     .pipe($p.babel())
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-    .pipe(pipefn(() => {
+    .pipe(pipefn(file => {
       // for spaces when outputting
-      if (OPTS.build) console.log()
+      if (OPTS.build) out.goodFile(file)
     }))
     .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
     .pipe($.if(file => file.isInternal,
@@ -128,9 +126,8 @@ export function buildScripts(cb, userStream) {
     ))
     .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
-    .pipe($.if(OPTS.build, extrasStream || pipefn()))
     .pipe(pipefn(afterWrite))
-    // why, you ask? because... gulp watch will drop things if not. don't ask me why
+    // why, you ask? because... gulp watch will drop things if not
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -141,7 +138,6 @@ export function buildScripts(cb, userStream) {
     curFile = file
     lastScript = null
     file.startTime = Date.now()
-    out.file(file)
   }
 
   function catchError(error) {
@@ -200,6 +196,8 @@ export function buildScripts(cb, userStream) {
   }
 
   function afterWrite(file) {
+    if (OPTS.build && OPTS.watch) build()
+
     if (file.isSourceMap) return
 
     log('OPTS.hasRunInitialBuild', OPTS.hasRunInitialBuild)
@@ -222,7 +220,6 @@ export function buildScripts(cb, userStream) {
 }
 
 export function buildWhileRunning() {
-  console.log("Building...")
   return new Promise((res, rej) => {
     gulp.src(['.flint/.internal/out/**/*.js'])
       .pipe($.plumber(err => {
@@ -288,16 +285,6 @@ function pipefn(fn) {
     fn && fn(file)
     next(null, file);
   })
-}
-
-const relative = file => path.relative(OPTS.appDir, file.path)
-let isWriting = false
-const startWrite = cb => { if (isWriting) return; isWriting = true; cb() }
-const endWrite = cb => { isWriting = false; cb() }
-const out = {
-  file: file => startWrite(() => process.stdout.write(` ⇢ ${relative(file)}\r`)),
-  badFile: (file, err) => endWrite(() => console.log(` ◆ ${relative(file)}`.red)),
-  goodFile: (file, ms) => endWrite(() => console.log(` ✓ ${relative(file)} - ${ms}ms`.bold))
 }
 
 export default { buildScripts, afterFirstBuild, watchForBuild }
