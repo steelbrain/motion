@@ -36,7 +36,7 @@ const router = {
       location = '/' + location
 
     if (!dontPush)
-      history.pushState(null, null, path)
+      history.pushState(null, path)
 
     router.next()
     router.recognize()
