@@ -47,12 +47,12 @@ export async function app() {
   // overwrite with full app code
   await writeFile(appFile, outStr)
 
-  // console.log("\n  Minifying".bold)
-  // const minified = uglify.minify(outStr, {
-  //   fromString: true
-  // })
+  console.log("\n  Minifying".bold)
+  const minified = uglify.minify(outStr, {
+    fromString: true
+  })
 
-  const final = outStr//minified.code
+  const final = minified.code
 
   const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
   await writeFile(outFile, final)
@@ -63,7 +63,7 @@ export function assets() {
     .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
 
   var stream = gulp
-    .src(['*', '**/*', '!**/*.jsf?', ], { dot: false })
+    .src(['*', '**/*', '!**/*.js' ], { dot: false })
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
 
