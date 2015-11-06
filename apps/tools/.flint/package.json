@@ -7,6 +7,7 @@
   "main": "",
   "scripts": {},
   "dependencies": {
+    "babel-runtime": "^6.0.14",
     "md5-o-matic": "^0.1.1"
   },
   "installed": [
