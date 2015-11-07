@@ -202,7 +202,7 @@ export default function createPlugin(options) {
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
               inView = false
 
-              const rawStyles = {}
+              let rawStyles = {}
 
               Object.keys(viewStatics).forEach(tagName => {
                 const styleProps = viewStatics[tagName]
@@ -216,13 +216,17 @@ export default function createPlugin(options) {
 
               const stylesheet = StyleSheet.create(rawStyles)
 
-              console.log(stylesheet)
-              console.log(StyleSheet.render())
+              const classNamesObject = t.objectExpression(
+                Object.keys(stylesheet).reduce((acc, key) => {
+                  acc.push(t.property(null, t.literal(key), t.literal(stylesheet[key])))
+                  return acc
+                }, [])
+              )
 
               return [node,
                 t.callExpression(t.identifier('Flint.staticStyles'), [
                   t.literal(inView),
-                  t.objectExpression(viewStatics),
+                  classNamesObject,
                   t.literal(StyleSheet.render())
                 ])
               ]
