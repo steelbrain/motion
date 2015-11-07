@@ -6,6 +6,7 @@ export default function watchingMessage() {
 
   keys.start()
 
+  console.log('Shortcuts:')
   console.log(
     newLine +
     ' • O'.cyan.bold + 'pen        '.cyan +

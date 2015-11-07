@@ -87,6 +87,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     lastWorkingRenders: {},
     preloaders: [], // async functions needed before loading app
 
+    resetViewState() {
+      Internal.views = {}
+      Internal.mountedViews = {}
+      Internal.lastWorkingViews = {}
+      Internal.firstRender = true
+    },
+
     // devtools
     inspector: {},
     viewsAtPath: {},

@@ -4,13 +4,8 @@ import { p, sanitize } from './lib/fns'
 let OPTS
 
 function set(key, val) {
-  // bulk setting
-  if (!val)
-    return setAll(key)
-  else {
-    OPTS[key] = val
-    return val
-  }
+  OPTS[key] = val
+  return val
 }
 
 function get(key) {
@@ -52,4 +47,4 @@ function setAll(opts) {
   return OPTS
 }
 
-export default { get, set }
+export default { get, set, setAll }

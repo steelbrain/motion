@@ -3,16 +3,20 @@ import log from '../lib/log'
 import handleError from '../lib/handleError'
 import opts from '../opts'
 
+export async function internalDir() {
+  log('internalDir')
+  await recreateDir(opts.get('internalDir'))
+}
+
 export async function outDir() {
   log('outDir')
-  await recreateDir(p(opts.get('flintDir'), 'out'))
+  await recreateDir(opts.get('outDir'))
 }
 
 export async function buildDir() {
   log('buildDir')
-  await recreateDir(p(opts.get('flintDir'), 'build'))
-  log('buildDir: make _ dir')
-  await mkdir(p(opts.get('flintDir'), 'build', '_'))
+  await recreateDir(opts.get('buildDir'))
+  await mkdir(p(opts.get('buildDir'), '_'))
 }
 
-export default { outDir, buildDir }
+export default { outDir, buildDir, internalDir }

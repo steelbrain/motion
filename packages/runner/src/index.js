@@ -15,29 +15,39 @@ import clear from './fbuild/clear'
 import copy from './fbuild/copy'
 import path from 'path'
 
+async function waitForFirstBuild() {
+  await gulp.afterFirstBuild()
+  await npm.finishedInstalling()
+}
+
+function welcome(action) {
+  console.log(`${action} ${opts.get('name')}\n`.bold)
+}
+
 export default async function run(_opts = {}, isBuild) {
   try {
+    console.log()
     const appDir = _opts.appDir || path.normalize(process.cwd());
-    const OPTS = opts.set({ ..._opts, appDir, isBuild })
+    const OPTS = opts.setAll({ ..._opts, appDir, isBuild })
 
     log.setLogging(OPTS)
-    log('run', OPTS)
+    log('opts', OPTS)
 
+    // clear stuff, init
+    await clear.internalDir()
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
     await initConfig()
 
     if (OPTS.build) {
-      console.log("\nBuilding %s\n".bold, OPTS.name + '.js')
-
+      welcome(`Building`)
       await clear.buildDir()
-
       copy.assets()
 
       // run our pipeline once manually
       gulp.buildScripts()
-      await gulp.afterFirstBuild()
+      await waitForFirstBuild()
 
       if (OPTS.watch)
         gulp.watchForBuild()
@@ -47,14 +57,18 @@ export default async function run(_opts = {}, isBuild) {
       }
     }
     else {
-      log('running...')
-      await clear.outDir()
-      await server()
+      welcome(`Running`)
+      await server.run()
       bridge.start()
       gulp.buildScripts()
-      await gulp.afterFirstBuild()
-      // openInBrowser()
+
+      // wait for build
+      await waitForFirstBuild()
+
+      console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
+
       watchingMessage()
+      // openInBrowser()
     }
 
     return opts.get()

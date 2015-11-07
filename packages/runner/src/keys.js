@@ -3,6 +3,7 @@ import keypress from 'keypress'
 
 import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
+import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
 import npm from './npm'
@@ -42,16 +43,17 @@ export function start() {
           console.log(`Done!\n`)
           break
         case 'v': // verbose logging
-          OPTS.verbose = !OPTS.verbose
-          setLogging(OPTS)
-          console.log(OPTS.verbose ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, newLine)
+          opts.set('verbose', !opts.get('verbose'))
+          console.log(opts.get('verbose') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
           // build(true)
           break
       }
     }
-    catch(e) { handleError(e) }
+    catch(e) {
+      handleError(e)
+    }
 
     // exit
     if (key.ctrl && key.name == 'c')
