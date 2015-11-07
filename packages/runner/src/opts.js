@@ -1,14 +1,17 @@
 import path from 'path'
+import log from './lib/log'
 import { p, sanitize } from './lib/fns'
 
 let OPTS
 
 function set(key, val) {
+  log('opts.set'.bold.yellow, key, val)
   OPTS[key] = val
   return val
 }
 
 function get(key) {
+  log('opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 

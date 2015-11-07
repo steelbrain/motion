@@ -43,8 +43,9 @@ export function start() {
           console.log(`Done!\n`)
           break
         case 'v': // verbose logging
-          opts.set('verbose', !opts.get('verbose'))
-          console.log(opts.get('verbose') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
+          opts.set('debug', !opts.get('debug'))
+          log.setLogging()
+          console.log(opts.get('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
           // build(true)

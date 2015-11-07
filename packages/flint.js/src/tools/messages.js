@@ -113,7 +113,7 @@ function addScript(message, cb) {
       fullSrc = fullSrc + "?" + timestamp
 
     // remove last script
-    if (lastScript[jsName])
+    if (lastScript[jsName] && lastScript[jsName].parentElement)
       lastScript[jsName].parentElement.removeChild(lastScript[jsName])
     else {
       const oldScript = document.querySelector(`script[src="${fullSrc}"]`)

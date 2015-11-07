@@ -157,8 +157,9 @@ async function removeOld(rebundle) {
 }
 
 async function remakeInstallDir(redo) {
-  if (redo)
-    await rmdir(WHERE.depsJSON)
+  if (redo) {
+    await rmdir(WHERE.outDir)
+  }
 
   await mkdir(WHERE.outDir)
   await* [
@@ -331,7 +332,12 @@ async function installAll(deps) {
   const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
 
   // no new ones found
-  if (!fresh.length) return
+  if (!fresh.length) {
+    if (!_isInstalling)
+      opts.set('hasRunInitialInstall', true)
+
+    return
+  }
 
   // push installing
   installing = installing.concat(fresh)

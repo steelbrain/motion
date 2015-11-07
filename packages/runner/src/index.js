@@ -30,7 +30,7 @@ export default async function run(_opts = {}, isBuild) {
     const appDir = _opts.appDir || path.normalize(process.cwd());
     const OPTS = opts.setAll({ ..._opts, appDir, isBuild })
 
-    log.setLogging(OPTS)
+    log.setLogging()
     log('opts', OPTS)
 
     npm.init(OPTS)

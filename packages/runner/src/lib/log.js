@@ -1,3 +1,5 @@
+import opts from '../opts'
+
 const seed = (s) => {
   s = Math.sin(s) * 10000;
   return s - Math.floor(s)
@@ -9,8 +11,10 @@ const color = ident => {
   return colors[Math.floor(seed(num) * colors.length)]
 }
 
+let debug = false
+
 export default function log(...args) {
-  if (!log.debug) return
+  if (!debug) return
 
   // was to colorize output
   // if (
@@ -26,6 +30,6 @@ export default function log(...args) {
   console.log(...args)
 }
 
-log.setLogging = function(opts) {
-  log.debug = opts.debug || opts.verbose
+log.setLogging = function() {
+  debug = opts.get('debug')
 }
