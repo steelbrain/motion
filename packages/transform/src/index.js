@@ -222,7 +222,7 @@ export default function createPlugin(options) {
               return [node,
                 t.callExpression(t.identifier('Flint.staticStyles'), [
                   t.literal(inView),
-                  t.objectExpression(stylesheet),
+                  t.objectExpression(viewStatics),
                   t.literal(StyleSheet.render())
                 ])
               ]
