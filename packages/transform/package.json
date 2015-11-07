@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.3.66",
+  "version": "1.3.67",
   "main": "entry.js",
   "dependencies": {}
 }
