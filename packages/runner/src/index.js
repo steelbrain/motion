@@ -40,6 +40,7 @@ export default async function run(_opts = {}, isBuild) {
 
     if (OPTS.build) {
       welcome(`Building`)
+      await npm.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
 

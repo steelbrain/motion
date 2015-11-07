@@ -4,6 +4,7 @@ import React from 'react'
 import raf from 'raf'
 import ReactDOM from 'react-dom'
 import clone from 'clone'
+import regeneratorRuntime from 'regenerator/runtime'
 import Bluebird, { Promise } from 'bluebird'
 
 import 'reapp-object-assign'
@@ -37,6 +38,7 @@ import MainView from './views/Main'
 Promise.longStackTraces()
 
 // GLOBALS
+root.regeneratorRuntime = regeneratorRuntime
 root._history = history // for imported modules to use
 root._bluebird = Bluebird // for imported modules to use
 root.Promise = Promise // for modules to use

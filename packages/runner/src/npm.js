@@ -158,7 +158,12 @@ async function removeOld(rebundle) {
 
 async function remakeInstallDir(redo) {
   if (redo) {
-    await rmdir(WHERE.outDir)
+    await writeInstalled([])
+
+    try {
+      await rmdir(WHERE.outDir)
+    }
+    catch(e) {}
   }
 
   await mkdir(WHERE.outDir)
@@ -185,6 +190,11 @@ async function install(force) {
     await removeOld()
     await installAll()
     await bundleExternals()
+
+    if (force) {
+      await writeInternalsIn()
+      await bundleInternals()
+    }
   } catch(e) {
     handleError(e)
     throw new Error(e)
@@ -505,4 +515,4 @@ function finishedInstallingLoop(res) {
   }
 }
 
-export default { init, install, scanFile, bundleInternals, removeOld, isInstalling, finishedInstalling }
+export default { init, install, scanFile, bundleInternals, removeOld, isInstalling, finishedInstalling, remakeInstallDir }
