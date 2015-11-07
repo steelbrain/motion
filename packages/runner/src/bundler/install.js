@@ -1,5 +1,7 @@
+import { Promise } from 'bluebird'
 import _ from 'lodash'
 import readInstalled from './lib/readInstalled'
+import writeInstalled from './lib/writeInstalled'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
 import cache from '../cache'
@@ -81,7 +83,12 @@ export async function installAll(deps) {
     }
   }
 
-  const next = () => installing.length ? installNext() : done()
+  function next() {
+    if (installing.length)
+      installNext()
+    else
+      done()
+  }
 
   async function done() {
     const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
