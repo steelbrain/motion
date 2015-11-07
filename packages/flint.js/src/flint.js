@@ -47,8 +47,6 @@ root.on = on
 root.module = {}
 root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
-const uuid = () => Math.floor(Math.random() * 1000000)
-
 export default function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
     namespace: {},

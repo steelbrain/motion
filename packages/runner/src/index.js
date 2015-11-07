@@ -33,7 +33,7 @@ export default async function run(_opts = {}, isBuild) {
     log.setLogging()
     log('opts', OPTS)
 
-    npm.init(OPTS)
+    await bundler.init()
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
     await initConfig()
