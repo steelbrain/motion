@@ -1,3 +1,4 @@
+import StyleSheet from 'stilr'
 import path from 'path'
 
 function isUpperCase(str) {
@@ -140,7 +141,7 @@ export default function createPlugin(options) {
     let inJSX = false
     let inView = null
     let hasView = false
-    let viewStatics = []
+    let viewStatics = {}
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -192,12 +193,6 @@ export default function createPlugin(options) {
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
             )
-          },
-
-          exit() {
-
-
-
           }
         },
 
@@ -207,18 +202,30 @@ export default function createPlugin(options) {
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
               inView = false
 
-              console.log(viewStatics)
+              const rawStyles = {}
 
-              const rawObj = viewStatics.reduce((acc, cur) => {
-                acc[cur.key.name] = cur.value.value
-                return acc
-              }, {})
+              Object.keys(viewStatics).forEach(tagName => {
+                const styleProps = viewStatics[tagName]
+                const styles = styleProps.reduce((acc, cur) => {
+                  acc[cur.key.name] = cur.value.value
+                  return acc
+                }, {})
 
-              console.log(rawObj)
+                rawStyles[tagName] = styles
+              })
 
-              // .forEach(style => {
-              //   console.log(style)
-              // })
+              const stylesheet = StyleSheet.create(rawStyles)
+
+              console.log(stylesheet)
+              console.log(StyleSheet.render())
+
+              return [node,
+                t.callExpression(t.identifier('Flint.staticStyles'), [
+                  t.literal(inView),
+                  t.objectExpression(stylesheet),
+                  t.literal(StyleSheet.render())
+                ])
+              ]
             }
           }
         },
@@ -409,7 +416,7 @@ export default function createPlugin(options) {
 
               // if just object
               else if (t.isObjectExpression(node.right)) {
-                let { statics, dynamics } = extractStatics(node.right)
+                let { statics, dynamics } = extractStatics(node)
 
                 if (statics.length) {
                   const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
@@ -439,12 +446,14 @@ export default function createPlugin(options) {
 
             // find statics/dynamics in object
             function extractStatics(node) {
+              let obj = node.right
               let statics = []
               let dynamics = []
 
-              for (let prop of node.properties) {
+              for (let prop of obj.properties) {
                 if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
-                  viewStatics.push(prop)
+                  viewStatics[node.left.name] = viewStatics[node.left.name] || []
+                  viewStatics[node.left.name].push(prop)
                   statics.push(prop)
                 }
                 else {
