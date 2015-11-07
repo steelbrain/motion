@@ -58,6 +58,11 @@ view Leaf {
   const format = key => (
     <Highlighter string={key} highlight={query} />
   )
+  
+  const fnParams = fn => fn.toString()
+    .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
+    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+    .split(/,/)
 
   const label = (type, val, sets, editable) => (
     <Label
@@ -73,13 +78,17 @@ view Leaf {
         <name>{format(key)}</name>
         {label('key', key, key, false)}
       </key>
+      <expand class="function" if={type == 'Function'}>
+        fn({fnParams(data).join(', ')})
+      </expand>
+      
       <expand if={type == 'Array'}>
         <type>[]</type> {items(data.length)}
       </expand>
       <expand if={type == 'Object'}>
         <type>{'{}'}</type> {items(Object.keys(data).length)}
       </expand>
-      <value if={type != 'Array' && type != 'Object'} class={type.toLowerCase()}>
+      <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
         {format(String(data))}
         {label('val', data, key, true)}
       </value>
@@ -124,18 +133,21 @@ view Leaf {
   }]
 
   $helper = $null = { color: '#ffff05' }
-  $boolean = { color: '#06ffd4', fontWeight: 700 }
-  $number = { color: '#f17817' }
-  $string = { color: '#b3ff00' }
+  //$boolean = { color: '#06ffd4', fontWeight: 700 }
+  //$number = { color: '#f17817' }
+  //$string = { color: '#b3ff00' }
 
   $key = [row, {
     color: 'rgba(255,255,255,0.9)',
     margin: [0],
     fontWeight: 'bold'
   }]
+  
+  $function = { marginLeft: 10 }
 
   $name = {
-    color: "#fff",
+    color: "rgba(255,255,255,.8)",
+    fontSize: 13,
     margin: [0]
   }
 

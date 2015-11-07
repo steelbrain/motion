@@ -35,9 +35,10 @@ view Label {
   $input = {
     position: 'absolute',
     top: 0,
-    background: 'yellow',
     left: -1,
     right: 0,
+    color: '#d6d6d6',
+    fontWeight: 600,
     padding: 1,
     outline: 'none',
     border: 'none',

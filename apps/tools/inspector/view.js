@@ -27,7 +27,7 @@ view Inspector.View {
   })
 
   <view>
-    <Close onClick={view.props.onClose} size={35} />
+    <Close onClick={view.props.onClose} fontSize={30} size={35} />
     <name>{name}</name>
     <section if={props} class="props">
       <title>Props</title>
@@ -46,22 +46,23 @@ view Inspector.View {
     position: 'relative',
     pointerEvents: 'auto',
     padding: 12,
-    margin: [0, 0, 2],
+    margin: 10,
     minWidth: 220,
-    color: 'rgba(200,200,200,1)',
-    textShadow: 'rgba(0,0,0,0.05) 0 -1px',
-    background: 'linear-gradient(rgba(77,87,93,1), rgba(67,77,83,1))',
-    boxShadow: '0 0 2px rgba(0,0,0,0.5)',
     borderBottom: 'none',
     fontSize: 12,
     borderRadius: 2,
     userSelect: 'none',
-    cursor: 'default'
+    cursor: 'default',
+    background: '#4b4b4b',
+    boxShadow: '0 0 0 1px rgba(39,39,39,.9)',
+    borderRadius: 2,
+    color: '#b0b0b0',
+    textShadow: '0 -1px rgba(0,0,0,.3)'
   }
 
   $Close = {
-    top: -5,
-    right: -5
+    top: -2,
+    right: -2,
   }
 
   $name = {
