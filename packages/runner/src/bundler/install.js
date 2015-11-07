@@ -1,12 +1,16 @@
 import _ from 'lodash'
-
+import readInstalled from './lib/readInstalled'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
 import { onStart, onFinish, onError } './messages'
 import { normalize } from './helpers'
+import remakeInstallDir from './lib/remakeInstallDir'
+import { uninstall } from './uninstall'
+import { bundleExternals } from './externals'
+import { bundleInternals, writeInternalsIn } from './internals'
 
 // ensures all packages installed, uninstalled, written out to bundle
-async function install(force) {
+export async function install(force) {
   log('npm: install')
   try {
     await remakeInstallDir(force)
@@ -98,8 +102,6 @@ export async function installAll(deps) {
 
   installNext()
 }
-
-
 
 function logInstalled(deps) {
   if (!deps.length) return

@@ -1,3 +1,7 @@
+import _ from 'lodash'
+import readInstalled from './lib/readInstalled'
+import { bundleExternals } from './externals'
+import writeInstalled from './lib/writeInstalled'
 import log from '../lib/log'
 
 const filterFalse = ls => ls.filter(l => !!l)

@@ -1,6 +1,29 @@
-import log from '../lib/log'
-import cache from '../cache'
 import webpack from 'webpack'
+import { Promise } from 'bluebird'
+import readInstalled from './lib/readInstalled'
+import depRequireString from './lib/depRequireString'
+import findExports from '../lib/findExports'
+import bridge from '../bridge'
+import cache from '../cache'
+import opts from '../opts'
+import log from '../lib/log'
+import { writeFile } from '../lib/fns'
+
+export async function bundleInternals() {
+  await packInternals()
+  bridge.message('internals:reload', {})
+}
+
+export async function writeInternalsIn() {
+  log('writeInternalsIn')
+  const files = cache.getExported()
+  if (!files.length) return
+
+  const requireString = files.map(f =>
+    depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
+
+  await writeFile(opts.get('deps').internalsIn, requireString)
+}
 
 // TODO: check this in babel to be more accurate
 async function checkInternals(file, source) {
@@ -21,34 +44,18 @@ async function checkInternals(file, source) {
     bundleInternals()
 }
 
-async function writeInternalsIn() {
-  log('writeInternalsIn')
-  const files = cache.getExported()
-  if (!files.length) return
-
-  const requireString = files.map(f =>
-    depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
-
-  await writeFile(DEPS.internalsIn, requireString)
-}
-
-export async function bundleInternals() {
-  await packInternals()
-  bridge.message('internals:reload', {})
-}
-
 function packInternals() {
   log('packInternals')
   return new Promise((res, rej) => {
     webpack({
-      entry: DEPS.internalsIn,
+      entry: opts.get('deps').internalsIn,
       externals: {
         react: 'React',
         bluebird: '_bluebird',
         'react-dom': 'ReactDOM'
       },
       output: {
-        filename: DEPS.internalsOut
+        filename: opts.get('deps').internalsOut
       }
     }, async err => {
       if (err) {

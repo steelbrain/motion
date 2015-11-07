@@ -1,4 +1,4 @@
-import bridge from './bridge'
+import bridge from '../bridge'
 import opts from '../opts'
 
 // messaging
