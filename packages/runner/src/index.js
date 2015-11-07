@@ -33,8 +33,6 @@ export default async function run(_opts = {}, isBuild) {
     log.setLogging(OPTS)
     log('opts', OPTS)
 
-    // clear stuff, init
-    await clear.internalDir()
     npm.init(OPTS)
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
@@ -58,6 +56,7 @@ export default async function run(_opts = {}, isBuild) {
     }
     else {
       welcome(`Running`)
+      await clear.outDir()
       await server.run()
       bridge.start()
       gulp.buildScripts()
