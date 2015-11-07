@@ -200,6 +200,7 @@ export default function createPlugin(options) {
           exit(node) {
             // exit flint view
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+              const viewName = t.literal(inView)
               inView = false
 
               let rawStyles = {}
@@ -225,7 +226,7 @@ export default function createPlugin(options) {
 
               return [node,
                 t.callExpression(t.identifier('Flint.staticStyles'), [
-                  t.literal(inView),
+                  viewName,
                   classNamesObject,
                   t.literal(StyleSheet.render())
                 ])
