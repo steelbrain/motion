@@ -35,10 +35,12 @@ function domTests(err, window) {
   if (err) throw new Error(err)
 
   const $ = window.$
+  const Flint = window.Flint
+  const Internal = window.Internal
 
-  setTimeout(() => {
-    console.log($('h1'))
-  }, 500)
+  Flint.on('afterRender', () => {
+    console.log('rendered')
+  })
 
   // console.log($('h1').first())
   // assert($('h1')[0].text() == 'Hello world!')

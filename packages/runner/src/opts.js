@@ -28,6 +28,8 @@ function setAll(opts) {
   OPTS.build = opts.isBuild
 
   OPTS.defaultPort = 4000
+
+  // base dirs
   OPTS.modulesDir = p(__dirname, '..', '..', 'node_modules')
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
@@ -36,6 +38,15 @@ function setAll(opts) {
   OPTS.depsDir = p(OPTS.internalDir, 'deps')
   OPTS.template = OPTS.template || '.flint/index.html'
   OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
+
+  // deps dirs
+  OPTS.deps = {}
+  OPTS.deps.dir = p(OPTS.internalDir, 'deps')
+  OPTS.deps.internalsIn = p(OPTS.deps.dir, 'internals.in.js')
+  OPTS.deps.internalsOut = p(OPTS.deps.dir, 'internals.js')
+  OPTS.deps.depsJS = p(OPTS.deps.dir, 'deps.js')
+  OPTS.deps.depsJSON = p(OPTS.deps.dir, 'deps.json')
+  OPTS.deps.packagesJS = p(OPTS.deps.dir, 'packages.js')
 
   OPTS.configFile = p(OPTS.internalDir, 'flint.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
