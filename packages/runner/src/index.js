@@ -10,9 +10,9 @@ import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
-import build from './fbuild/build'
-import clear from './fbuild/clear'
-import copy from './fbuild/copy'
+import build from './builder/build'
+import clear from './builder/clear'
+import copy from './builder/copy'
 import path from 'path'
 
 async function waitForFirstBuild() {

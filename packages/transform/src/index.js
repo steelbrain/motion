@@ -138,7 +138,9 @@ export default function createPlugin(options) {
 
     let keyBase = {}
     let inJSX = false
+    let inView = null
     let hasView = false
+    let viewStatics = []
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -176,17 +178,49 @@ export default function createPlugin(options) {
           }
         },
 
-        ViewStatement(node) {
-          // hasView = true
-          keyBase = {}
+        ViewStatement: {
+          enter(node) {
+            // hasView = true
+            keyBase = {}
 
-          const name = node.name.name
-          const subName = node.subName && node.subName.name
-          const fullName = name + (subName ? `.${subName}` : '')
+            const name = node.name.name
+            const subName = node.subName && node.subName.name
+            const fullName = name + (subName ? `.${subName}` : '')
 
-          return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
-            t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
-          )
+            inView = fullName
+
+            return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
+              t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
+            )
+          },
+
+          exit() {
+
+
+
+          }
+        },
+
+        Statement: {
+          exit(node) {
+            // exit flint view
+            if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+              inView = false
+
+              console.log(viewStatics)
+
+              const rawObj = viewStatics.reduce((acc, cur) => {
+                acc[cur.key.name] = cur.value.value
+                return acc
+              }, {})
+
+              console.log(rawObj)
+
+              // .forEach(style => {
+              //   console.log(style)
+              // })
+            }
+          }
         },
 
         JSXElement: {
@@ -338,7 +372,7 @@ export default function createPlugin(options) {
         },
 
         AssignmentExpression: {
-          exit(node, parent, scope, file) {
+          enter(node) {
             if (node.isStyle) return
 
             // styles
@@ -365,7 +399,7 @@ export default function createPlugin(options) {
                   if (statics.length) staticProps = staticProps.concat(statics)
                   if (dynamics.length) return t.objectExpression(dynamics)
                   else return null
-                }).filter(x => x !== null)
+                }).filter(x => !!x)
 
                 return [
                   staticStyleStatement(node, t.objectExpression(staticProps)),
@@ -409,10 +443,13 @@ export default function createPlugin(options) {
               let dynamics = []
 
               for (let prop of node.properties) {
-                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key))
+                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
+                  viewStatics.push(prop)
                   statics.push(prop)
-                else
+                }
+                else {
                   dynamics.push(prop)
+                }
               }
 
               return { statics, dynamics }
@@ -478,9 +515,11 @@ export default function createPlugin(options) {
             function exprStatement(node) {
               return t.expressionStatement(node)
             }
+          },
 
+          exit(node, parent, scope, file) {
             // non-styles
-            if (node.flintTracked || node.hasSetter || node.hasGetter) return
+            if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
 
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return
