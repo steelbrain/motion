@@ -5,7 +5,7 @@ view Tree {
 
   const search = q => query === '' || view.props.validateQuery(query) ? query = q : false
   const getOriginal = path => lens(view.props.data, path)
-
+  
   <Leaf
     data={view.props.data}
     onClick={view.props.onClick}

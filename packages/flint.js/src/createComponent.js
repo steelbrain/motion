@@ -82,6 +82,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       getInitialState() {
         this.setPath()
+        
+        Internal.getInitialStates[this.getPath()] = () => this.getInitialState()
 
         let u = null
 

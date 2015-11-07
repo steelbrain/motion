@@ -88,8 +88,14 @@ export function buildScripts(afterEach, userStream) {
 
   // super stream watcher
   if (!OPTS.build) {
-    bridge.on('super:on', ({ file }) => superStream.start(file))
-    bridge.on('super:off', superStream.stop)
+    bridge.on('super:on', ({ file }) => {
+      console.log('super:on')
+      return superStream.start(file)
+    })
+    bridge.on('super:off', () => {
+      console.log('super:off')
+      return superStream.stop
+    })
   }
 
   // gulp src stream
