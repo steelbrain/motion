@@ -43,10 +43,6 @@ export default function elementStyles(key, view, name, tag, props) {
   const isWrapper = props && props.isWrapper
   const deservesRootStyles = (isRootName && hasOneRender || isWrapper)
 
-  function addClassName(name) {
-    props.className += ` ${name}`
-  }
-
   if (view.styles) {
     const index = props.repeat ? key[1] : void 0
 
@@ -65,29 +61,19 @@ export default function elementStyles(key, view, name, tag, props) {
     if (diffName)
       nameStyleStatic = view.styles._static[name]
 
-    if (Flint.styleClasses[view.name]) {
-      const classes = Flint.styleClasses[view.name]
-      const tagClass = classes[`${prefix}${name}`]
-      const nameClass = classes[`${prefix}${name}`]
-
-      if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
-      if (tagClass) addClassName(tagClass)
-      if (nameClass) addClassName(nameClass)
-    }
-
     // add tag and name styles
     let result = mergeStyles(null,
       // tag style
       tagStyle ? tagStyle(index) : null,
       // base style
       deservesRootStyles && viewStyle,
-      // deservesRootStyles && viewStyleStatic,
+      deservesRootStyles && viewStyleStatic,
       // name dynamic styles
       nameStyle && diffName && nameStyle(index),
       // tag static
-      // tagStyleStatic,
+      tagStyleStatic,
       // name static
-      // nameStyleStatic,
+      nameStyleStatic,
     )
 
     // add class styles
