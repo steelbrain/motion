@@ -65,17 +65,12 @@ function reloadScript(id, opts = {}) {
 
 function reloadUserScripts() {
   const scripts = document.querySelectorAll('.__flintScript');
-
   let loaded = 0
   let total = scripts.length
 
-  // TODO: have a function in flint.js that does this
-  _Flint.views = {}
-  _Flint.mountedViews = {}
-  _Flint.lastWorkingViews = {}
-  _Flint.firstRender = true;
+  _Flint.resetViewState()
 
-  [].forEach.call(scripts, script => {
+  ;[].forEach.call(scripts, script => {
     let replacement = document.createElement('script');
     replacement.onload = function() { loaded++ }
     const attrs = script.attributes
@@ -118,7 +113,7 @@ function addScript(message, cb) {
       fullSrc = fullSrc + "?" + timestamp
 
     // remove last script
-    if (lastScript[jsName])
+    if (lastScript[jsName] && lastScript[jsName].parentElement)
       lastScript[jsName].parentElement.removeChild(lastScript[jsName])
     else {
       const oldScript = document.querySelector(`script[src="${fullSrc}"]`)

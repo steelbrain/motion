@@ -159,8 +159,8 @@ view ErrorMessage {
 
     // show full stack after a delay
     if (error)
-      on.delay(2500, () => {
-        console.log('full', error)
+      on('delay', 2500, () => {
+        debugger
         fullStack = error.stack
       })
   })

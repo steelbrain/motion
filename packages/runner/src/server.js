@@ -87,7 +87,7 @@ async function makeTemplate(req, cb) {
   }
 }
 
-export default function server() {
+export function run() {
   OPTS = opts.get()
 
   return new Promise((res, rej) => {
@@ -134,15 +134,10 @@ export default function server() {
     }
 
     function serverListen(port) {
-      process.stdout.write("\nFlint app running on ".white)
-      console.log(
-        "http://%s".bold + newLine,
-        host + (port && port !== 80 ? ':' + port : '')
-      );
-
       opts.set('port', port)
-      res();
-      server.listen(port, host);
+      opts.set('host', host)
+      server.listen(port, host)
+      res()
     }
 
     var host = 'localhost'
@@ -160,3 +155,11 @@ export default function server() {
     }
   })
 }
+
+export function url() {
+  const host = opts.get('host')
+  const port = opts.get('port')
+  return host + (port && port !== 80 ? ':' + port : '')
+}
+
+export default { run, url }

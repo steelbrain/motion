@@ -7,6 +7,7 @@ import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
+import npm from './npm'
 import build from './fbuild/build'
 import unicodeToChar from './lib/unicodeToChar'
 import superStream from './lib/superStream'
@@ -33,13 +34,14 @@ const out = {
   badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
   goodFile: (file, ms) => console.log(` ✓ ${relative(file)}${time(ms)}`.bold)
 }
+
 gulp.task('build', buildScripts)
 
 export function watchForBuild() {
   return gulp.watch(SCRIPTS_GLOB, ['build'])
 }
 
-const watchDeletes = async vinyl => {
+async function watchDeletes(vinyl) {
   // bugfix. sometimes pipeline slows, but these events keep coming
   // prevent buildFinished from running early
   // (vinyl event is undefined before initial run)
@@ -70,7 +72,7 @@ const $p = {
     blacklist: ['flow', 'es6.tailCall', 'strict'],
     retainLines: true,
     comments: true,
-    optional: ['runtime'],
+    optional: ['regenerator'],
     plugins: [flintTransform({ basePath: OPTS.dir })],
     extra: {
       production: process.env.production
@@ -196,15 +198,13 @@ export function buildScripts(afterEach, userStream) {
   }
 
   function afterWrite(file) {
-    if (OPTS.build && OPTS.watch) build()
+    if (OPTS.build && OPTS.watch)
+      return build()
 
     if (file.isSourceMap) return
 
-    log('OPTS.hasRunInitialBuild', OPTS.hasRunInitialBuild)
-    log('lastError', lastError)
-
     // after initial build
-    if (OPTS.hasRunInitialBuild) {
+    if (hasFinished()) {
       if (!lastError && !file.isInternal) {
         cache.removeError(file.path)
         bridge.message('script:add', lastScript)
@@ -234,15 +234,12 @@ export function buildWhileRunning() {
 
 let buildingTimeout
 function buildFinishedCheck() {
-  if (!OPTS.hasRunInitialBuild) {
-    log('buildFinishedCheck setTimeout')
+  if (!opts.get('hasRunInitialBuild')) {
     if (buildingTimeout) clearTimeout(buildingTimeout)
     buildingTimeout = setTimeout(() => {
-      log('OPTS.hasRunInitialBuild = true')
-      OPTS.hasRunInitialBuild = true
-
+      opts.set('hasRunInitialBuild', true)
       runAfterFirstBuilds()
-    }, 450)
+    }, 420)
   }
 }
 
@@ -268,9 +265,11 @@ function logError(error, file) {
 
 let waitingForFirstBuild = []
 
+const hasFinished = () => opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
+
 const afterFirstBuild = () =>
   new Promise((res, rej) => {
-    if (OPTS.hasRunInitialBuild) return res()
+    if (hasFinished()) return res()
     else waitingForFirstBuild.push(res)
   })
 

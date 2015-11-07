@@ -4,6 +4,7 @@ import fs from 'fs'
 import webpack from 'webpack'
 import _ from 'lodash'
 import bridge from './bridge'
+import opts from './opts'
 import cache from './cache'
 import handleError from './lib/handleError'
 import findExports from './lib/findExports'
@@ -156,8 +157,14 @@ async function removeOld(rebundle) {
 }
 
 async function remakeInstallDir(redo) {
-  if (redo)
-    await rmdir(WHERE.depsJSON)
+  if (redo) {
+    await writeInstalled([])
+
+    try {
+      await rmdir(WHERE.outDir)
+    }
+    catch(e) {}
+  }
 
   await mkdir(WHERE.outDir)
   await* [
@@ -183,6 +190,11 @@ async function install(force) {
     await removeOld()
     await installAll()
     await bundleExternals()
+
+    if (force) {
+      await writeInternalsIn()
+      await bundleInternals()
+    }
   } catch(e) {
     handleError(e)
     throw new Error(e)
@@ -317,7 +329,7 @@ let successful = []
 let failed = []
 let installingFullNames = []
 let installing = []
-let isInstalling = false
+let _isInstalling = false
 
 async function installAll(deps) {
   if (!deps) deps = cache.getImports()
@@ -330,14 +342,19 @@ async function installAll(deps) {
   const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
 
   // no new ones found
-  if (!fresh.length) return
+  if (!fresh.length) {
+    if (!_isInstalling)
+      opts.set('hasRunInitialInstall', true)
+
+    return
+  }
 
   // push installing
   installing = installing.concat(fresh)
 
   // check if installed running
-  if (isInstalling) return
-  isInstalling = true
+  if (_isInstalling) return
+  _isInstalling = true
 
   const installNext = async () => {
     const dep = installing[0]
@@ -361,7 +378,7 @@ async function installAll(deps) {
 
   const next = () => installing.length ? installNext() : done()
 
-  const done = async () => {
+  async function done() {
     const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
     let final = [].concat(prevInstalled, installedFullPaths)
 
@@ -376,15 +393,18 @@ async function installAll(deps) {
     // reset
     installingFullNames = []
     failed = []
-    isInstalling = false
-
-    return final
+    _isInstalling = false
+    opts.set('hasRunInitialInstall', true)
   }
 
   installNext()
 }
 
 function logProgress(tag, name, index, total) {
+  if (!opts.get('hasRunInitialBuild')) {
+    return
+  }
+
   log('npm', tag, name)
 
   const out = total ?
@@ -480,4 +500,19 @@ function logInstalled(deps) {
   console.log()
 }
 
-export default { init, install, scanFile, bundleInternals, removeOld }
+function isInstalling() {
+  return _isInstalling
+}
+
+function finishedInstalling() {
+  return new Promise(finishedInstallingLoop)
+}
+
+function finishedInstallingLoop(res) {
+  if (!_isInstalling) res()
+  else {
+    setTimeout(() => finishedInstallingLoop(res), 100)
+  }
+}
+
+export default { init, install, scanFile, bundleInternals, removeOld, isInstalling, finishedInstalling, remakeInstallDir }

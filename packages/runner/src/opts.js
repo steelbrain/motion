@@ -1,19 +1,17 @@
 import path from 'path'
+import log from './lib/log'
 import { p, sanitize } from './lib/fns'
 
 let OPTS
 
 function set(key, val) {
-  // bulk setting
-  if (!val)
-    return setAll(key)
-  else {
-    OPTS[key] = val
-    return val
-  }
+  log('opts.set'.bold.yellow, key, val)
+  OPTS[key] = val
+  return val
 }
 
 function get(key) {
+  log('opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 
@@ -52,4 +50,4 @@ function setAll(opts) {
   return OPTS
 }
 
-export default { get, set }
+export default { get, set, setAll }
