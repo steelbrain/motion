@@ -71,7 +71,9 @@ export default function createElement(viewName) {
     }
 
     props = props || {}
+
     const view = this
+    const Flint = view.Flint
 
     let name = fullname
     let originalTag
@@ -99,7 +101,7 @@ export default function createElement(viewName) {
       }
       // find a view
       else if (!tag) {
-        tag = view.Flint.getView(name, viewName)
+        tag = Flint.getView(name, viewName)
       }
     }
 

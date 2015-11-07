@@ -224,12 +224,15 @@ export default function createPlugin(options) {
                 }, [])
               )
 
-              return [node,
-                t.callExpression(t.identifier('Flint.staticStyles'), [
-                  viewName,
-                  classNamesObject,
-                  t.literal(StyleSheet.render())
-                ])
+              return [
+                t.expressionStatement(
+                  t.callExpression(t.identifier('Flint.staticStyles'), [
+                    viewName,
+                    classNamesObject,
+                    t.literal(StyleSheet.render())
+                  ])
+                ),
+                node
               ]
             }
           }
@@ -407,7 +410,9 @@ export default function createPlugin(options) {
 
                 node.right.elements = node.right.elements.map(el => {
                   if (!t.isObjectExpression(el)) return el
-                  let { statics, dynamics } = extractStatics(el)
+                  const extracted = extractStatics(el)
+                  if (!extracted) return null
+                  let { statics, dynamics } = extracted
                   if (statics.length) staticProps = staticProps.concat(statics)
                   if (dynamics.length) return t.objectExpression(dynamics)
                   else return null
@@ -452,6 +457,9 @@ export default function createPlugin(options) {
             // find statics/dynamics in object
             function extractStatics(node) {
               let obj = node.right
+
+              if (!obj) return
+
               let statics = []
               let dynamics = []
 
