@@ -26,7 +26,7 @@ export async function writeInternalsIn() {
 }
 
 // TODO: check this in babel to be more accurate
-async function checkInternals(file, source) {
+export async function checkInternals(file, source) {
   log('checkInternals', file)
 
   const isExporting = findExports(source)

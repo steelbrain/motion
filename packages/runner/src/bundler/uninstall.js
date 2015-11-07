@@ -1,5 +1,7 @@
 import _ from 'lodash'
+import cache from '../cache'
 import readInstalled from './lib/readInstalled'
+import normalize from './lib/normalize'
 import { bundleExternals } from './externals'
 import writeInstalled from './lib/writeInstalled'
 import log from '../lib/log'

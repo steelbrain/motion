@@ -6,7 +6,7 @@ import openInBrowser from './lib/openInBrowser'
 import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
-import npm from './npm'
+import bundler from './bundler'
 
 const proc = process // cache for keypress
 
@@ -37,9 +37,9 @@ export function start() {
           }
 
           break
-        case 'i': // install npm
+        case 'i': // bundler
           console.log('Checking packages to install...')
-          await npm.install(true)
+          await bundler.install(true)
           console.log(`Done!\n`)
           break
         case 'v': // verbose logging

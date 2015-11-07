@@ -1,4 +1,4 @@
-import npm from './npm'
+import bundler from './bundler'
 import log from './lib/log'
 import findExports from './lib/findExports'
 import cache from './cache'
@@ -30,11 +30,11 @@ var Parser = {
   post(file, source) {
     // scan for imports/exports
     debounce(file, OPTS.build ? 0 : 400, () => {
-      npm.scanFile(file, source)
+      bundler.scanFile(file, source)
     })
 
     if (!OPTS.build)
-      debounce('removeOldImports', 3000, npm.removeOld)
+      debounce('removeOldImports', 3000, bundler.uninstall)
 
     const isInternal = findExports(source)
 

@@ -2,7 +2,7 @@ import bridge from './bridge'
 import compiler from './compiler'
 import handleError from './lib/handleError'
 import server from './server'
-import npm from './npm'
+import bundler from './bundler'
 import opts from './opts'
 import log from './lib/log'
 import { initConfig } from './lib/config'
@@ -17,7 +17,7 @@ import path from 'path'
 
 async function waitForFirstBuild() {
   await gulp.afterFirstBuild()
-  await npm.finishedInstalling()
+  await bundler.finishedInstalling()
 }
 
 function welcome(action) {
@@ -40,7 +40,7 @@ export default async function run(_opts = {}, isBuild) {
 
     if (OPTS.build) {
       welcome(`Building`)
-      await npm.remakeInstallDir(true)
+      await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
 

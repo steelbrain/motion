@@ -1,6 +1,14 @@
-const externals = [ 'flint-js', 'react', 'react-dom', 'bluebird' ]
-const rmFlintExternals = ls => ls.filter(i => externals.indexOf(i) < 0)
+import _ from 'lodash'
+import rmFlintExternals from './rmFlintExternals'
 
- // ['pkg/x', 'pkg/y'] => ['pkg'] and remove flint externals
-export const normalize = deps =>
-  rmFlintExternals(_.uniq(deps.map(dep => dep.indexOf('/') ? dep.replace(/\/.*/, '') : dep)))
+ // ['pkg/x', 'pkg/y'] => ['pkg']
+ // remove flint externals
+
+export default function normalize(deps) {
+  return rmFlintExternals(_.uniq(deps.map(replaceSubPath)))
+}
+
+
+function replaceSubPath(dep) {
+  return dep.indexOf('/') ? dep.replace(/\/.*/, '') : dep
+}

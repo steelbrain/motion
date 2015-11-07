@@ -1,23 +1,27 @@
 import { rmdir, touch, mkdir } from '../../lib/fns'
+import writeInstalled from './writeInstalled'
 import handleError from '../../lib/handleError'
+import opts from '../../opts'
 
 export default async function remakeInstallDir(redo) {
+  const deps = opts.get('deps')
+
   try {
     if (redo) {
       await writeInstalled([])
 
       try {
-        await rmdir(DEPS.dir)
+        await rmdir(deps.dir)
       }
       catch(e) {}
     }
 
-    await mkdir(DEPS.dir)
+    await mkdir(deps.dir)
     await* [
-      touch(DEPS.depsJSON),
-      touch(DEPS.depsJS),
-      touch(DEPS.packagesJS),
-      touch(DEPS.internalsOut)
+      touch(deps.depsJSON),
+      touch(deps.depsJS),
+      touch(deps.packagesJS),
+      touch(deps.internalsOut)
     ]
   }
   catch(e) {

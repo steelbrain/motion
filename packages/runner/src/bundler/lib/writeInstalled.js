@@ -1,5 +1,7 @@
+import log from '../../lib/log'
 import handleError from '../../lib/handleError'
-import { writeConfig } from '../../lib/config'
+import rmFlintExternals from './rmFlintExternals'
+import { readConfig, writeConfig } from '../../lib/config'
 
 export default async function writeInstalled(deps) {
   try {

@@ -2,8 +2,10 @@ import _ from 'lodash'
 import readInstalled from './lib/readInstalled'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
-import { onStart, onFinish, onError } './messages'
-import { normalize } from './helpers'
+import cache from '../cache'
+import opts from '../opts'
+import { onStart, onFinish, onError } from './messages'
+import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
 import { bundleExternals } from './externals'
@@ -113,14 +115,13 @@ function logInstalled(deps) {
   console.log()
 }
 
-
+// check for install finish
+export function finishedInstalling() {
+  return new Promise(finishedInstallingLoop)
+}
 
 function isInstalling() {
   return _isInstalling
-}
-
-function finishedInstalling() {
-  return new Promise(finishedInstallingLoop)
 }
 
 function finishedInstallingLoop(res) {

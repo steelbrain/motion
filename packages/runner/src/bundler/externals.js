@@ -24,6 +24,14 @@ export async function bundleExternals() {
   onInstalled()
 }
 
+export async function installExternals(file, source) {
+  log('installExternals', file)
+
+  const found = findExternalRequires(source)
+  cache.setFileImports(file, found)
+  installAll(found)
+}
+
 async function packExternals(file, out) {
   log('npm: pack')
   return new Promise((resolve, reject) => {
@@ -58,12 +66,4 @@ async function writeDeps(deps = []) {
     return depRequireString(name, 'packages')
   }).join('')
   await writeFile(opts.get('deps').depsJS, requireString)
-}
-
-async function installExternals(file, source) {
-  log('installExternals', file)
-
-  const found = findExternalRequires(source)
-  cache.setFileImports(file, found)
-  installAll(found)
 }
