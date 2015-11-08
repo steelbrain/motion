@@ -229,7 +229,6 @@ export default function createPlugin(options) {
               const sheet = StyleSheet.render()
 
               fs.writeFile(file, sheet, err => {
-                console.log('wrote', file, sheet)
                 if (err) throw new Error(err)
                 if (options.onStyle) options.onStyle(viewName, file)
               })
