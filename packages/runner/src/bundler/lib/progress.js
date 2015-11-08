@@ -25,7 +25,7 @@ function logProgress(tag, name, index, total) {
     ` ${index+1} of ${total}: ${name}` :
     `${tag}: ${name}`
 
-  if (OPTS.build)
+  if (opts.get('build'))
     console.log(out)
   else {
     console.log()
