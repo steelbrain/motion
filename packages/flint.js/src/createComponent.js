@@ -82,7 +82,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       getInitialState() {
         this.setPath()
-        
+
         Internal.getInitialStates[this.getPath()] = () => this.getInitialState()
 
         let u = null
@@ -296,11 +296,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
           const lastRender = this.getLastGoodRender()
 
           try {
-            let inner = <div>Error in view {name}</div>
+            let inner = <span>Error in view {name}</span>
 
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
-              inner = <div dangerouslySetInnerHTML={{ __html }} />
+              inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
             // highlight in red and return last working render
