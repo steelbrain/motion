@@ -142,7 +142,7 @@ export default function createPlugin(options) {
     let inJSX = false
     let inView = null
     let hasView = false
-    let viewStatics = {}
+    let viewStyles = {}
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -206,14 +206,18 @@ export default function createPlugin(options) {
 
               let rawStyles = {}
 
-              Object.keys(viewStatics).forEach(tagName => {
-                const styleProps = viewStatics[tagName]
-                const styles = styleProps.reduce((acc, cur) => {
+              const styles = viewStyles[viewName]
+
+              if (!styles) return node
+
+              Object.keys(styles).forEach(tag => {
+                const styleProps = styles[tag]
+                const viewstyle = styleProps.reduce((acc, cur) => {
                   acc[cur.key.name] = cur.value.value
                   return acc
                 }, {})
 
-                rawStyles[tagName] = styles
+                rawStyles[tag] = viewstyle
               })
 
               const stylesheet = StyleSheet.create(rawStyles)
@@ -475,8 +479,9 @@ export default function createPlugin(options) {
 
               for (let prop of obj.properties) {
                 if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
-                  viewStatics[node.left.name] = viewStatics[node.left.name] || []
-                  viewStatics[node.left.name].push(prop)
+                  viewStyles[inView] = viewStyles[inView] || {}
+                  viewStyles[inView][node.left.name] = viewStyles[inView][node.left.name] || []
+                  viewStyles[inView][node.left.name].push(prop)
                   statics.push(prop)
                 }
                 else {

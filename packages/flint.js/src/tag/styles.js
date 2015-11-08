@@ -59,13 +59,15 @@ export default function elementStyles(key, view, name, tag, props) {
     const nameStyle = view.styles[name]
 
     if (view.Flint.styleClasses[view.name]) {
+      console.log(view.Flint.styleClasses)
       const classes = view.Flint.styleClasses[view.name]
-      const tagClass = classes[`${prefix}${name}`]
-      const nameClass = classes[`${prefix}${name}`]
+      const tagClass = classes[`${prefix}${tag}`]
+      const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
+      console.log(tag, name, tagClass, nameClass, classes)
 
       if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
       if (tagClass) addClassName(tagClass)
-      if (nameClass && nameClass != tagClass) addClassName(nameClass)
+      if (nameClass) addClassName(nameClass)
     }
 
     // add tag and name styles
