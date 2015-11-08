@@ -34,8 +34,9 @@ const arrayToString = val =>
 
 // <name-tag />
 export default function elementStyles(key, view, name, tag, props) {
-  if (typeof name !== 'string')
-    return
+  if (typeof name !== 'string') return
+
+  let styles
 
   // attach view styles from $ to element matching view name lowercase
   const isRootName = view.name && view.name.toLowerCase() == name
@@ -101,68 +102,65 @@ export default function elementStyles(key, view, name, tag, props) {
 
     // put styles back into props.style
     if (result)
-      props.style = result
+      styles = result
   }
 
   // HELPERS
-  if (props.style) {
-    const ps = props.style
-
+  if (styles) {
     // zIndex add position:relative
-    if (typeof ps.zIndex != 'undefined' && typeof ps.position == 'undefined')
-      ps.position = 'relative'
+    if (typeof styles.zIndex != 'undefined' && typeof styles.position == 'undefined')
+      styles.position = 'relative'
 
     // position
-    if (ps.position && Array.isArray(ps.position)) {
-      ps.top = ps.position[0]
-      ps.right = ps.position[1]
-      ps.bottom = ps.position[2]
-      ps.left = ps.position[3]
-      ps.position = 'absolute'
+    if (styles.position && Array.isArray(styles.position)) {
+      styles.top = styles.position[0]
+      styles.right = styles.position[1]
+      styles.bottom = styles.position[2]
+      styles.left = styles.position[3]
+      styles.position = 'absolute'
     }
 
     // background { r, g, b, a }
-    if (ps.background && typeof ps.background == 'object') {
-      const bg = ps.background
+    if (styles.background && typeof styles.background == 'object') {
+      const bg = styles.background
 
       if (Array.isArray(bg)) {
         if (bg.length == 4)
-          ps.background = `rgba(${bg[0]}, ${bg[1]}, ${bg[2]}, ${bg[3]})`
+          styles.background = `rgba(${bg[0]}, ${bg[1]}, ${bg[2]}, ${bg[3]})`
         else
-          ps.background = `rgb(${bg[0]}, ${bg[1]}, ${bg[2]})`
+          styles.background = `rgb(${bg[0]}, ${bg[1]}, ${bg[2]})`
       }
       else {
         if (bg.a)
-          ps.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
+          styles.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
         else
-          ps.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
+          styles.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
       }
     }
 
-    // final maps
-    Object.keys(ps).forEach(key => {
+    // final mastyles
+    Object.keys(styles).forEach(key => {
       // array to string transforms
         // @media queries
       if (key[0] == '@')
-        Object.keys(ps[key]).forEach(subKey => {
-          if (Array.isArray(ps[key][subKey]))
-            ps[key][subKey] = arrayToString(ps[key][subKey])
+        Object.keys(styles[key]).forEach(subKey => {
+          if (Array.isArray(styles[key][subKey]))
+            styles[key][subKey] = arrayToString(styles[key][subKey])
         })
         // regular
-      else if (Array.isArray(ps[key]))
-        ps[key] = arrayToString(ps[key])
+      else if (Array.isArray(styles[key]))
+        styles[key] = arrayToString(styles[key])
     })
 
     // { transform: { x: 10, y: 10, z: 10 } }
-    if (typeof ps.transform === 'object') {
-      ps.transform = Object.keys(ps.transform).map(key =>
-        `${transformKeysMap[key] || key}(${ps.transform[key]}${isNumerical(ps.transform, key) ? 'px' : ''})`
+    if (typeof styles.transform === 'object') {
+      styles.transform = Object.keys(styles.transform).map(key =>
+        `${transformKeysMap[key] || key}(${styles.transform[key]}${isNumerical(styles.transform, key) ? 'px' : ''})`
       ).join(' ')
     }
   }
 
   // set body bg to Main view bg
-
   if (
     view.name == 'Main' &&
     name == 'view.Main' &&
@@ -178,4 +176,6 @@ export default function elementStyles(key, view, name, tag, props) {
       body.style.background = bg
     }
   }
+
+  return styles
 }

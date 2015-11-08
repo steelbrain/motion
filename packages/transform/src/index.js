@@ -202,7 +202,6 @@ export default function createPlugin(options) {
             // exit flint view
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
               const viewName = inView
-              inView = false
 
               const styles = viewStyles[viewName]
               if (!styles) return
