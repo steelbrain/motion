@@ -416,28 +416,30 @@ export default function createPlugin(options) {
 
             // splits styles into static/dynamic pieces
             function extractAndAssign(node) {
-              // if array of objects
-              if (t.isArrayExpression(node.right)) {
-                let staticProps = []
-
-                node.right.elements = node.right.elements.map(el => {
-                  if (!t.isObjectExpression(el)) return el
-                  const extracted = extractStatics(node.left.name, el)
-                  if (!extracted) return null
-                  let { statics, dynamics } = extracted
-                  if (statics.length) staticProps = staticProps.concat(statics)
-                  if (dynamics.length) return t.objectExpression(dynamics)
-                  else return null
-                }).filter(x => !!x)
-
-                return [
-                  staticStyleStatement(node, t.objectExpression(staticProps)),
-                  dynamicStyleStatement(node, node.right)
-                ]
-              }
+              // TODO: only do this is the array is just objects, if they use a variable
+              // it wont work with the static classname extraction
+              // // if array of objects
+              // if (t.isArrayExpression(node.right)) {
+              //   let staticProps = []
+              //
+              //   node.right.elements = node.right.elements.map(el => {
+              //     if (!t.isObjectExpression(el)) return el
+              //     const extracted = extractStatics(node.left.name, el)
+              //     if (!extracted) return null
+              //     let { statics, dynamics } = extracted
+              //     if (statics.length) staticProps = staticProps.concat(statics)
+              //     if (dynamics.length) return t.objectExpression(dynamics)
+              //     else return null
+              //   }).filter(x => !!x)
+              //
+              //   return [
+              //     staticStyleStatement(node, t.objectExpression(staticProps)),
+              //     dynamicStyleStatement(node, node.right)
+              //   ]
+              // }
 
               // if just object
-              else if (t.isObjectExpression(node.right)) {
+              if (t.isObjectExpression(node.right)) {
                 let { statics, dynamics } = extractStatics(node.left.name, node.right)
 
                 if (statics.length) {
