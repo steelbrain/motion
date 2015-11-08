@@ -27,7 +27,7 @@ view Inspector.View {
   })
 
   <view>
-    <Close onClick={view.props.onClose} fontSize={30} size={35} />
+    <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <name>{name}</name>
     <section if={props} class="props">
       <title>Props</title>
@@ -48,16 +48,15 @@ view Inspector.View {
     padding: 12,
     margin: 10,
     minWidth: 220,
-    borderBottom: 'none',
     fontSize: 12,
     borderRadius: 2,
     userSelect: 'none',
     cursor: 'default',
-    background: '#4b4b4b',
-    boxShadow: '0 0 0 1px rgba(39,39,39,.9)',
-    borderRadius: 2,
-    color: '#b0b0b0',
-    textShadow: '0 -1px rgba(0,0,0,.3)'
+    background: '#fff',
+    boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.1)',
+    border: '1px solid #ccc',
+    borderRadius: 4,
+    color: '#333',
   }
 
   $Close = {
@@ -68,7 +67,7 @@ view Inspector.View {
   $name = {
     fontWeight: 500,
     margin: [-3, 0, 3],
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(0,0,0,0.8)',
     fontSize: 14,
   }
 
@@ -81,13 +80,13 @@ view Inspector.View {
     border: '1px solid #ccc',
     width: '100%',
     padding: [2, 12],
-    color: 'rgba(255,255,255,0.5)',
+    color: '#333',
     fontSize: 14,
   }
 
   $title = {
     display: 'none',
-    color: 'rgba(255,255,255,0.33)',
+    color: '#333',
     fontWeight: 200,
     fontSize: 12,
     margin: [3, 0]

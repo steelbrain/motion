@@ -1,3 +1,6 @@
+/*
+*/
+
 view Main {
   const internal = window.__isDevingDevTools
 
@@ -5,7 +8,7 @@ view Main {
 
   <Errors />
   <Installer />
-
+  
   <Inspector if={internal} />
   <Name if={internal} />
   <Counter if={internal} />
@@ -23,7 +26,7 @@ view Main {
 view Counter {
   let count = 0
   
-  <h1>count is {count}</h1>
+  <h1>count is {count} {view.getPath()}</h1>
   <button onClick={() => count++}>up</button>
   <button onClick={() => count--}>down</button>
 }

@@ -126,7 +126,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     if (Internal.inspector.path && Internal.inspector.path == path) {
       let props = Internal.viewsAtPath[path].props
       const state = Internal.getCache[path]
-      console.log('path', path, state)
       Internal.inspector.cb(props, state, writeBack)
     }
   }

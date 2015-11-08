@@ -81,6 +81,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // LIFECYCLES
 
       getInitialState() {
+        //if (!this.getPath()) this.setPath()
         this.setPath()
         
         Internal.getInitialStates[this.getPath()] = () => this.getInitialState()

@@ -4,7 +4,6 @@ import getType from '../lib/getType'
 const PATH_PREFIX = '.root.'
 
 const contains = (string, substring) => string.indexOf(substring) !== -1
-const items = count => count + (count === 1 ? ' item' : ' items')
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 
 view Leaf {
@@ -28,7 +27,6 @@ view Leaf {
     if (data === undefined) data = view.props.data
     if (data === undefined) data = {}
     type = getType(data)
-    console.log(path, 'key', key, 'data', data, 'type', type)
     query = view.props.query || ''
 
     if (view.props.root)
@@ -83,7 +81,7 @@ view Leaf {
       </expand>
       
       <expand if={type == 'Array'}>
-        <type>[]</type> {items(data.length)}
+        <type>Array[{data.length}]</type>
       </expand>
       <expand if={type == 'Object'}>
         <type>{'{}'}</type> {items(Object.keys(data).length)}
@@ -121,14 +119,14 @@ view Leaf {
   const row = {
     flexFlow: 'row'
   }
-
+  
   $label = [row, {
     position: 'relative',
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(0,0,0,0.8)',
     opacity: 1,
 
     ':hover': {
-      background: 'rgba(255,255,255,0.1)'
+      background: 'rgba(0,0,0,0.1)'
     }
   }]
 
@@ -138,7 +136,7 @@ view Leaf {
   //$string = { color: '#b3ff00' }
 
   $key = [row, {
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(0,0,0,0.9)',
     margin: [0],
     fontWeight: 'bold'
   }]
@@ -146,7 +144,8 @@ view Leaf {
   $function = { marginLeft: 10 }
 
   $name = {
-    color: "rgba(255,255,255,.8)",
+    color: "#ff2f2f",
+    fontWeight: 300,
     fontSize: 13,
     margin: [0]
   }
@@ -156,7 +155,7 @@ view Leaf {
 
   $value = [row, {
     position: 'relative',
-    margin: [0, 4]
+    margin: [2, 4]
   }]
 
   $children = {
@@ -164,7 +163,8 @@ view Leaf {
   }
 
   $type = {
-    margin: [0, 0, 0, 5],
-    opacity: 0.4
+    margin: [2, 0, 0, 8],
+    opacity: 0.4,
+    flexFlow: 'row',
   }
 }

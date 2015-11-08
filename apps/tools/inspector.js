@@ -21,7 +21,6 @@ view Inspector {
 
   function inspect(e) {
     const path = findView(e.target)
-    console.log('temp path', path)
     if (!path || path === temp) return 
     temp = path
     view.update()
@@ -64,18 +63,20 @@ view Inspector {
   }
   
   function write(path, data) {
+    console.log('writing', path, data)
     const name  = data[1][0]
     const current = _Flint.getCache[path][name]
     let value = data[1][1]
+    console.log('current is', current)
     
     if (typeof current == 'number') {
       value = +value
     }
     _Flint.setCache(path, name, value)
-    _Flint.inspectorRefreshing = true
+    _Flint.inspectorRefreshing = path
     _Flint.getInitialStates[path]()
     _Flint.viewsAtPath[path].forceUpdate()
-    _Flint.inspectorRefreshing = false
+    _Flint.inspectorRefreshing = null
     view.update()
   }
 
