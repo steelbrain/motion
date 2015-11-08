@@ -85,10 +85,10 @@ function getElement(identifier, viewName, getView) {
   if (process.env.production)
     tag = 'div'
 
-  return { fullname, key, index, tag, originalTag }
+  return { fullname, name, key, index, tag, originalTag }
 }
 
-function getProps(props, viewProps, key, index) {
+function getProps(props, viewProps, name, key, index) {
   if (props)
     props = niceProps(props)
 
@@ -123,8 +123,8 @@ function getProps(props, viewProps, key, index) {
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
     const view = this
-    const { fullname, key, index, tag, originalTag } = getElement(identifier, viewName, view.Flint.getView)
-    props = getProps(props, view.props, key, index)
+    const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, view.Flint.getView)
+    props = getProps(props, view.props, name, key, index)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
     return React.createElement(tag, props, ...args)
   }
