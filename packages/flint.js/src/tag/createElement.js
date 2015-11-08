@@ -88,7 +88,7 @@ function getElement(identifier, viewName, getView) {
   return { fullname, name, key, index, tag, originalTag }
 }
 
-function getProps(props, viewProps, name, key, index) {
+function getProps(viewName, Flint, props, viewProps, name, key, index) {
   if (props)
     props = niceProps(props)
 
@@ -114,6 +114,13 @@ function getProps(props, viewProps, name, key, index) {
   if (props.yield)
     props = Object.assign(props, viewProps, { style: props.style });
 
+
+  const viewClasses = Flint.styleClasses[viewName]
+
+  if (viewClasses && viewClasses[`$${name}`]) {
+    props.__styleClasses = viewClasses[`$${name}`]
+  }
+
   props.__key = key
   props.__tagName = name
 
@@ -123,8 +130,9 @@ function getProps(props, viewProps, name, key, index) {
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
     const view = this
-    const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, view.Flint.getView)
-    props = getProps(props, view.props, name, key, index)
+    const Flint = view.Flint
+    const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, Flint.getView)
+    props = getProps(viewName, Flint, props, view.props, name, key, index)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
     return React.createElement(tag, props, ...args)
   }

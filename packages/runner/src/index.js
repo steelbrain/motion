@@ -21,10 +21,6 @@ async function waitForFirstBuild() {
   await bundler.finishedInstalling()
 }
 
-function welcome(action) {
-  console.log(`${action} ${opts.get('name')}\n`.bold)
-}
-
 export default async function run(_opts = {}, isBuild) {
   try {
     console.log()
@@ -41,7 +37,6 @@ export default async function run(_opts = {}, isBuild) {
     await initConfig()
 
     if (OPTS.build) {
-      welcome(`Building`)
       await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
@@ -58,7 +53,6 @@ export default async function run(_opts = {}, isBuild) {
       }
     }
     else {
-      welcome(`Running`)
       await clear.outDir()
       await server.run()
       bridge.start()

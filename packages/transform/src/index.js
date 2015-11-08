@@ -422,7 +422,7 @@ export default function createPlugin(options) {
 
                 node.right.elements = node.right.elements.map(el => {
                   if (!t.isObjectExpression(el)) return el
-                  const extracted = extractStatics(el)
+                  const extracted = extractStatics(node.left.name, el)
                   if (!extracted) return null
                   let { statics, dynamics } = extracted
                   if (statics.length) staticProps = staticProps.concat(statics)
@@ -438,7 +438,7 @@ export default function createPlugin(options) {
 
               // if just object
               else if (t.isObjectExpression(node.right)) {
-                let { statics, dynamics } = extractStatics(node)
+                let { statics, dynamics } = extractStatics(node.left.name, node.right)
 
                 if (statics.length) {
                   const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
@@ -467,19 +467,15 @@ export default function createPlugin(options) {
             }
 
             // find statics/dynamics in object
-            function extractStatics(node) {
-              let obj = node.right
-
-              if (!obj) return
-
+            function extractStatics(name, node) {
               let statics = []
               let dynamics = []
 
-              for (let prop of obj.properties) {
+              for (let prop of node.properties) {
                 if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
                   viewStyles[inView] = viewStyles[inView] || {}
-                  viewStyles[inView][node.left.name] = viewStyles[inView][node.left.name] || []
-                  viewStyles[inView][node.left.name].push(prop)
+                  viewStyles[inView][name] = viewStyles[inView][name] || []
+                  viewStyles[inView][name].push(prop)
                   statics.push(prop)
                 }
                 else {

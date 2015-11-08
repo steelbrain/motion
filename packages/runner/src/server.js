@@ -50,9 +50,8 @@ async function readScripts() {
   return paths
 }
 
-async function getScripts() {
+async function getScripts({ disableTools }) {
   const files = await readScripts()
-  const disableTools = devToolsDisabled()
 
   return [
     disableTools ? '' : '<div id="_flintdevtools"></div>',
@@ -91,7 +90,8 @@ async function makeTemplate(req) {
   try {
     const templatePath = p(OPTS.dir, OPTS.template)
     const template = await readFile(templatePath)
-    const scripts = await getScripts()
+    const disableTools = devToolsDisabled(req)
+    const scripts = await getScripts({ disableTools })
     const styles = await getStyles()
 
     return template

@@ -39,6 +39,7 @@ export default function elementStyles(key, view, name, tag, props) {
   let styles
 
   // attach view styles from $ to element matching view name lowercase
+  const Flint = view.Flint
   const isRootName = view.name && view.name.toLowerCase() == name
   const hasOneRender = view.renders.length <= 1
   const isWrapper = props && props.isWrapper
@@ -56,16 +57,22 @@ export default function elementStyles(key, view, name, tag, props) {
     const hasTag = typeof tag == 'string'
     const tagStyle = hasTag && view.styles[tag]
 
+    // if (tag == 'h2') debugger
+
     // add static styles
-    if (view.Flint.styleClasses[view.name]) {
-      const classes = view.Flint.styleClasses[view.name]
+    if (Flint.styleClasses[view.name]) {
+      const classes = Flint.styleClasses[view.name]
       const tagClass = classes[`${prefix}${tag}`]
       const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
-      // console.log(tag, name, tagClass, nameClass, classes)
 
       if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
       if (tagClass) addClassName(tagClass)
       if (nameClass) addClassName(nameClass)
+    }
+
+    if (deservesRootStyles && view.props.__styleClasses) {
+      console.log('add it', view.props.__styleClasses)
+      addClassName(view.props.__styleClasses)
     }
 
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
@@ -84,7 +91,8 @@ export default function elementStyles(key, view, name, tag, props) {
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (view.styles[className]) result = mergeStyles(result, view.styles[className](index))
+        if (!view.styles[className]) return
+        result = mergeStyles(result, view.styles[className](index))
       })
     }
 
