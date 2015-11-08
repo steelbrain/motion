@@ -91,6 +91,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.firstRender = true
         this.styles = { _static: {} }
         this.events = { mount: u, unmount: u, update: u, props: u }
+        this.path = null
 
         // scope on() to view
         this.viewOn = viewOn(this)
