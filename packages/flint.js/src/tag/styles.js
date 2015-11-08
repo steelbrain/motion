@@ -57,23 +57,7 @@ export default function elementStyles(key, view, name, tag, props) {
     const hasTag = typeof tag == 'string'
     const tagStyle = hasTag && view.styles[tag]
 
-    // if (tag == 'h2') debugger
-
-    // add static styles
-    if (Flint.styleClasses[view.name]) {
-      const classes = Flint.styleClasses[view.name]
-      const tagClass = classes[`${prefix}${tag}`]
-      const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
-
-      if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
-      if (tagClass) addClassName(tagClass)
-      if (nameClass) addClassName(nameClass)
-    }
-
-    if (deservesRootStyles && view.props.__styleClasses) {
-      console.log('add it', view.props.__styleClasses)
-      addClassName(view.props.__styleClasses)
-    }
+    const classes = Flint.styleClasses[view.name]
 
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
     const nameStyle = view.styles[name]
@@ -91,9 +75,30 @@ export default function elementStyles(key, view, name, tag, props) {
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (!view.styles[className]) return
-        result = mergeStyles(result, view.styles[className](index))
+        if (view.styles[className]) {
+          result = mergeStyles(result, view.styles[className](index))
+        }
+
+        const styleForClass = classes && classes[`${prefix}${className}`]
+        if (styleForClass) {
+          addClassName(styleForClass)
+        }
       })
+    }
+
+    // add static styles (after className checks)
+    if (classes) {
+      const tagClass = classes[`${prefix}${tag}`]
+      const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
+
+      if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
+      if (tagClass) addClassName(tagClass)
+      if (nameClass) addClassName(nameClass)
+    }
+
+    if (deservesRootStyles && view.props.__styleClasses) {
+      console.log('add it', view.props.__styleClasses)
+      addClassName(view.props.__styleClasses)
     }
 
     // merge styles [] into {}
