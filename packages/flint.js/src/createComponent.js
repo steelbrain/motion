@@ -290,7 +290,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
         catch(e) {
           Internal.caughtRuntimeErrors++
-          console.error(e.stack)
+
+          console.error('Render error', e.message)
           reportError(e)
 
           const lastRender = this.getLastGoodRender()
@@ -300,6 +301,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
+              __html = __html.replace(/data\-reactid\=\"[^"]+\"/g, '')
+
               inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
