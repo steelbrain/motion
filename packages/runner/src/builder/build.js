@@ -4,7 +4,7 @@ import gulp from '../gulp'
 import bundler from '../bundler'
 import keys from '../keys'
 import copy from './copy'
-import makeTemplate from './template'
+import makeTemplate from './makeTemplate'
 import log from '../lib/log'
 
 export default async function build() {

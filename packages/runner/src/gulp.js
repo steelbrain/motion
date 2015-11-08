@@ -72,7 +72,12 @@ const $p = {
     retainLines: true,
     comments: true,
     optional: ['regenerator'],
-    plugins: [flintTransform({ basePath: OPTS.dir })],
+    plugins: [flintTransform({
+      basePath: OPTS.dir,
+      onStyle: (view, file) => {
+        bridge.message('stylesheet:add', { view, file })
+      }
+    })],
     extra: {
       production: process.env.production
     }

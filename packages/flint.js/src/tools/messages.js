@@ -17,6 +17,10 @@ export default function run(browser, opts) {
       addScript(msg, renderFlint)
     },
 
+    'stylesheet:add': msg => {
+      addSheet(msg)
+    },
+
     'compile:error': msg => {
       compileError(msg.error);
     },
@@ -45,6 +49,28 @@ export default function run(browser, opts) {
     browser.data = message
     browser.emitter.emit(message._type)
   }
+}
+
+function styleId(name) {
+  return '_flintV' + name
+}
+
+function addSheet(message) {
+  const { view, file } = message
+
+  let href = '/__/styles/' + view + '.css?' + Date.now()
+  let tag = document.getElementById(styleId(view))
+
+  if (!tag) {
+    tag = document.createElement('link')
+    tag.href = href
+    tag.rel = "stylesheet"
+    tag.id = styleId(view)
+    document.head.appendChild(tag)
+    return
+  }
+
+  tag.setAttribute('href', href)
 }
 
 function reloadScript(id, opts = {}) {

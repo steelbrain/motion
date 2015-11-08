@@ -1,5 +1,6 @@
 import StyleSheet from 'stilr'
 import path from 'path'
+import fs from 'fs'
 
 function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
@@ -200,7 +201,7 @@ export default function createPlugin(options) {
           exit(node) {
             // exit flint view
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
-              const viewName = t.literal(inView)
+              const viewName = inView
               inView = false
 
               let rawStyles = {}
@@ -224,16 +225,26 @@ export default function createPlugin(options) {
                 }, [])
               )
 
-              return [
-                t.expressionStatement(
-                  t.callExpression(t.identifier('Flint.staticStyles'), [
-                    viewName,
-                    classNamesObject,
-                    t.literal(StyleSheet.render())
-                  ])
-                ),
-                node
-              ]
+              const file = path.join(basePath, '.flint', '.internal', 'styles', viewName + '.css')
+              const sheet = StyleSheet.render()
+
+              fs.writeFile(file, sheet, err => {
+                console.log('wrote', file, sheet)
+                if (err) throw new Error(err)
+                if (options.onStyle) options.onStyle(viewName, file)
+              })
+
+              StyleSheet.clear()
+              inView = false
+
+              const expr = t.expressionStatement(
+                t.callExpression(t.identifier('Flint.staticStyles'), [
+                  t.literal(viewName),
+                  classNamesObject
+                ])
+              )
+
+              return [ expr, node ]
             }
           }
         },
