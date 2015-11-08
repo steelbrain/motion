@@ -96,8 +96,8 @@ export default function elementStyles(key, view, name, tag, props) {
       if (nameClass) addClassName(nameClass)
     }
 
+    // root styles classname
     if (deservesRootStyles && view.props.__styleClasses) {
-      console.log('add it', view.props.__styleClasses)
       addClassName(view.props.__styleClasses)
     }
 
