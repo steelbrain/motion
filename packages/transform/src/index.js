@@ -204,11 +204,10 @@ export default function createPlugin(options) {
               const viewName = inView
               inView = false
 
-              let rawStyles = {}
-
               const styles = viewStyles[viewName]
+              if (!styles) return
 
-              if (!styles) return node
+              let rawStyles = {}
 
               Object.keys(styles).forEach(tag => {
                 const styleProps = styles[tag]

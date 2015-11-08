@@ -55,20 +55,20 @@ export default function elementStyles(key, view, name, tag, props) {
     const hasTag = typeof tag == 'string'
     const tagStyle = hasTag && view.styles[tag]
 
-    const viewStyle = view.styles[prefix] && view.styles[prefix](index)
-    const nameStyle = view.styles[name]
-
+    // add static styles
     if (view.Flint.styleClasses[view.name]) {
-      console.log(view.Flint.styleClasses)
       const classes = view.Flint.styleClasses[view.name]
       const tagClass = classes[`${prefix}${tag}`]
       const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
-      console.log(tag, name, tagClass, nameClass, classes)
+      // console.log(tag, name, tagClass, nameClass, classes)
 
       if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
       if (tagClass) addClassName(tagClass)
       if (nameClass) addClassName(nameClass)
     }
+
+    const viewStyle = view.styles[prefix] && view.styles[prefix](index)
+    const nameStyle = view.styles[name]
 
     // add tag and name styles
     let result = mergeStyles(null,
@@ -83,8 +83,7 @@ export default function elementStyles(key, view, name, tag, props) {
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (view.styles[className] || view.styles._static[className])
-          result = mergeStyles(result, view.styles[className] && view.styles[className](index), view.styles._static[className])
+        if (view.styles[className]) result = mergeStyles(result, view.styles[className](index))
       })
     }
 
