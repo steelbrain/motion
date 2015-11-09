@@ -1,7 +1,6 @@
 import webpack from 'webpack'
 import uglify from 'uglify-js'
 import gulp from 'gulp'
-import concat from 'gulp-concat'
 import log from '../lib/log'
 import handleError from '../lib/handleError'
 import { p, copy, writeFile, readFile, readdir } from '../lib/fns'
