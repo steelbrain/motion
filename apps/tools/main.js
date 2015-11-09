@@ -2,6 +2,7 @@ view Main {
   const internal = window.__isDevingDevTools
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
+  <link rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
 
   <Errors />
   <Installer />

@@ -48,7 +48,8 @@ function setAll(opts) {
   OPTS.deps.depsJSON = p(OPTS.deps.dir, 'deps.json')
   OPTS.deps.packagesJS = p(OPTS.deps.dir, 'packages.js')
 
-  OPTS.configFile = p(OPTS.internalDir, 'flint.json')
+  OPTS.configFile = p(OPTS.flintDir, 'flint.json')
+  OPTS.stateFile = p(OPTS.internalDir, 'state.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
   OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')

@@ -151,7 +151,7 @@ view ErrorMessage {
   let line = getLine(view.props.error)
 
 
-  on.props(() => {
+  on('props', () => {
     npmError = view.props.npmError
     error = view.props.error
     line = getLine(error)
@@ -160,7 +160,6 @@ view ErrorMessage {
     // show full stack after a delay
     if (error)
       on('delay', 2500, () => {
-        debugger
         fullStack = error.stack
       })
   })

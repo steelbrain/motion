@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/flintjs/runner",
   "dependencies": {
+    "autoprefixer": "^6.1.0",
     "babel-runtime": "^5.8.29",
     "bluebird": "^2.10.2",
     "chokidar": "^1.2.0",
@@ -41,6 +42,7 @@
     "object-assign": "^4.0.1",
     "open": "0.0.5",
     "portfinder": "^0.4.0",
+    "postcss": "^5.0.11",
     "raven": "^0.8.1",
     "readdirp": "^2.0.0",
     "reapp-object-assign": "^1.0.0",

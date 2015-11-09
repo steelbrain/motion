@@ -89,7 +89,7 @@ export default function elementStyles(key, view, name, tag, props) {
     // add static styles (after className checks)
     if (classes) {
       const tagClass = classes[`${prefix}${tag}`]
-      const nameClass = nameClass != tagClass && classes[`${prefix}${name}`]
+      const nameClass = name != tag && classes[`${prefix}${name}`]
 
       if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
       if (tagClass) addClassName(tagClass)
@@ -100,6 +100,9 @@ export default function elementStyles(key, view, name, tag, props) {
     if (deservesRootStyles && view.props.__styleClasses) {
       addClassName(view.props.__styleClasses)
     }
+
+    if (props.className == '_XWstL')
+      debugger
 
     // merge styles [] into {}
     if (Array.isArray(result))

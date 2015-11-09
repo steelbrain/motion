@@ -5,7 +5,7 @@ import server from './server'
 import bundler from './bundler'
 import opts from './opts'
 import log from './lib/log'
-import { initConfig } from './lib/config'
+import internal from './internal'
 import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
@@ -35,7 +35,7 @@ export default async function run(_opts = {}, isBuild) {
     await bundler.init()
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
-    await initConfig()
+    await internal.init()
     watchDeletes()
 
     if (OPTS.build) {

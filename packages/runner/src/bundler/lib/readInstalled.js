@@ -1,11 +1,11 @@
 import handleError from '../../lib/handleError'
 import log from '../../lib/log'
-import { readConfig } from '../../lib/config'
+import { readState } from '../../internal'
 
 export default async function readInstalled() {
   try {
-    const config = await readConfig()
-    const installed = config['installed'] || []
+    const state = await readState()
+    const installed = state['installed'] || []
     log('readInstalled()', installed)
     return installed
   }

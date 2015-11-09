@@ -14,6 +14,7 @@ import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
 import log from './lib/log'
+import writeStyle from './lib/writeStyle'
 import { p, rmdir } from './lib/fns'
 
 const $ = loadPlugins()
@@ -65,9 +66,8 @@ const $p = {
     optional: ['regenerator'],
     plugins: [flintTransform({
       basePath: OPTS.dir,
-      onStyle: (view, file) => {
-        bridge.message('stylesheet:add', { view, file })
-      }
+      selectorPrefix: OPTS.config.selectorPrefix ? '._flintdevtools' : '._flintapp',
+      writeStyle
     })],
     extra: {
       production: process.env.production

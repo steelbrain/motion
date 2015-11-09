@@ -1,6 +1,5 @@
 import StyleSheet from 'stilr'
 import path from 'path'
-import fs from 'fs'
 
 function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
@@ -227,13 +226,8 @@ export default function createPlugin(options) {
                 }, [])
               )
 
-              const file = path.join(basePath, '.flint', '.internal', 'styles', viewName + '.css')
-              const sheet = StyleSheet.render()
-
-              fs.writeFile(file, sheet, err => {
-                if (err) throw new Error(err)
-                if (options.onStyle) options.onStyle(viewName, file)
-              })
+              if (options.writeStyle)
+                options.writeStyle(viewName, StyleSheet.render())
 
               StyleSheet.clear()
               inView = false

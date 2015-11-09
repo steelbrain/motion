@@ -3,6 +3,7 @@ import cors from 'cors'
 import portfinder from 'portfinder'
 
 import opts from './opts'
+import internal from './internal'
 import bridge from './bridge'
 import handleError from './lib/handleError'
 import wport from './lib/wport'
@@ -149,6 +150,7 @@ export function run() {
     function serverListen(port) {
       opts.set('port', port)
       opts.set('host', host)
+      internal.setServerState()
       server.listen(port, host)
       res()
     }
