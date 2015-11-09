@@ -14,7 +14,6 @@ import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
 import log from './lib/log'
-import deleteStyles from './lib/deleteStyles'
 import { p, rmdir } from './lib/fns'
 
 const $ = loadPlugins()
