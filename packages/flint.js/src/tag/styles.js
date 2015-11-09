@@ -123,10 +123,6 @@ export default function elementStyles(key, view, name, tag, props) {
 
   // HELPERS
   if (styles) {
-    // zIndex add position:relative
-    if (typeof styles.zIndex != 'undefined' && typeof styles.position == 'undefined')
-      styles.position = 'relative'
-
     // position
     if (styles.position && Array.isArray(styles.position)) {
       styles.top = styles.position[0]
