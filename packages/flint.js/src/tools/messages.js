@@ -171,7 +171,7 @@ function renderFlint() {
   }
 
   if (typeof Flint != 'undefined') {
-    Flint.render()
+    setTimeout(Flint.render)
     renderAttempts = 0
   }
   else {
