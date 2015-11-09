@@ -1,6 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import portfinder from 'portfinder'
+import flintjs from 'flint-js'
+import flinttools from 'flint-tools'
+
 
 import opts from './opts'
 import internal from './internal'
@@ -130,10 +133,11 @@ export function run() {
     // INTERNAL files
     server.use('/__', express.static('.flint/.internal/deps'))
     server.use('/__/styles', express.static('.flint/.internal/styles'))
+
     // tools.js
-    server.use('/__/tools', express.static(p(OPTS.modulesDir, 'flint-tools', 'build', '_')))
+    server.use('/__/tools', express.static(p(flinttools(), 'build', '_')))
     // flint.js & react.js
-    server.use('/__', express.static(p(OPTS.modulesDir, 'flint-js', 'dist')))
+    server.use('/__', express.static(p(flintjs(), 'dist')))
 
     server.get('*', function(req, res) {
       runAfterFirstBuildComplete(async function() {
