@@ -101,9 +101,6 @@ export default function elementStyles(key, view, name, tag, props) {
       addClassName(view.props.__styleClasses)
     }
 
-    if (props.className == '_XWstL')
-      debugger
-
     // merge styles [] into {}
     if (Array.isArray(result))
       result = mergeStyles(...result)

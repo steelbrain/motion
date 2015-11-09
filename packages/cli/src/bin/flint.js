@@ -13,7 +13,7 @@ function getFlintIndex() {
       return index
 
     index++
-  }  
+  }
 }
 
 // make sure flags are still passed to `flint run`
@@ -38,7 +38,7 @@ exec(checkversion, (err, version) => {
     let pkgVersion = getversion(pkg.version)
 
     if (curVersion != pkgVersion) {
-      console.log('`npm install -g flint` to update', pkgVersion, 'to', curVersion)
+      console.log('Flint update available', pkgVersion, 'to', curVersion)
     }
   }
 })
