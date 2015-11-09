@@ -3,21 +3,26 @@ import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
 import handleError from '../lib/handleError'
+import log from '../lib/log'
 import { p, rmdir } from './fns'
 
 async function deleteJS(view) {
-  await rmdir(p(OPTS.outDir, view))
+  const file = p(OPTS.outDir, view + '.js')
+  log('delete js', file)
+  await rmdir(file)
 }
 
 async function deleteStyle(view) {
-  console.log('deete', opts.get('styleDir'), view + '.css')
-  await rmdir(p(opts.get('styleDir'), view + '.css'))
+  const file = p(opts.get('styleDir'), view + '.css')
+  log('delete style', file)
+  await rmdir(file)
 }
 
 export default function watchDeletes() {
   try {
     cache.onDeleteView(async view => {
       await deleteStyle(view)
+      bridge.message('stylesheet:remove', { view })
     })
 
     cache.onDeleteFile(async view => {

@@ -21,6 +21,10 @@ export default function run(browser, opts) {
       addSheet(msg)
     },
 
+    'stylesheet:remove': msg => {
+      removeSheet(msg)
+    },
+
     'compile:error': msg => {
       compileError(msg.error);
     },
@@ -55,9 +59,12 @@ function styleId(name) {
   return '_flintV' + name
 }
 
-function addSheet(message) {
-  const { view, file } = message
+function removeSheet({ view }) {
+  let tag = document.getElementById(styleId(view))
+  tag.parentNode.removeChild(tag)
+}
 
+function addSheet({ view }) {
   let href = '/__/styles/' + view + '.css?' + Date.now()
   let tag = document.getElementById(styleId(view))
 
