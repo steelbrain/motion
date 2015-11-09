@@ -56,6 +56,10 @@ const Cache = {
     return files[name(file)]
   },
 
+  getAll() {
+    return files
+  },
+
   onDeleteFile(cb) {
     deleteFileCbs.push(cb)
   },

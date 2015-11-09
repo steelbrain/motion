@@ -26,7 +26,10 @@ export default function watchDeletes() {
       bridge.message('stylesheet:remove', { view })
     })
 
-    cache.onDeleteFile(async view => {
+    cache.onDeleteFile(async file => {
+      if (file.isExported)
+        await bundler.bundleInternals()
+
       await file.views.forEach(async view => {
         await deleteStyle(view)
         await deleteJS(view)
