@@ -7,10 +7,13 @@ var flintIndex = getFlintIndex()
 
  // find where index of flint is
 function getFlintIndex() {
-  for (let [index, arg] of process.argv.entries()) {
+  let index = 0
+  for (let arg of process.argv) {
     if (arg.indexOf('flint') > 0)
       return index
-    }
+
+    index++
+  }  
 }
 
 // make sure flags are still passed to `flint run`
