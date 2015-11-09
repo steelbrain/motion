@@ -22,6 +22,7 @@ export default function watchDeletes() {
   try {
     cache.onDeleteView(async view => {
       await deleteStyle(view)
+      console.log('remove', view)
       bridge.message('stylesheet:remove', { view })
     })
 

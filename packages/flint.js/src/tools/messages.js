@@ -61,7 +61,9 @@ function styleId(name) {
 
 function removeSheet({ view }) {
   let tag = document.getElementById(styleId(view))
-  tag.parentNode.removeChild(tag)
+  console.log(view)
+  if (tag && tag.parentNode)
+    tag.parentNode.removeChild(tag)
 }
 
 function addSheet({ view }) {
