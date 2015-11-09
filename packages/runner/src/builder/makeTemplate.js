@@ -14,6 +14,7 @@ export default async function makeTemplate() {
     const data = await readFile(p(OPTS.flintDir, 'index.html'))
     let template = data
       .replace(/\/static/g, '/_/static')
+      .replace('<!-- STYLES -->', '<link rel="stylesheet" href="/_/styles.css" />')
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.prod.js"></script>',
         '  <script src="/_/flint.prod.js"></script>',

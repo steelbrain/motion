@@ -51,6 +51,7 @@ function setAll(opts) {
   OPTS.configFile = p(OPTS.internalDir, 'flint.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
+  OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
 
   OPTS.name = path.basename(process.cwd())
   OPTS.saneName = sanitize(OPTS.name)

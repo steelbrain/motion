@@ -3,7 +3,8 @@ import uglify from 'uglify-js'
 import gulp from 'gulp'
 import concat from 'gulp-concat'
 import log from '../lib/log'
-import { p, copy, writeFile, readFile } from '../lib/fns'
+import handleError from '../lib/handleError'
+import { p, copy, writeFile, readFile, readdir } from '../lib/fns'
 import opts from '../opts'
 
 async function copyWithSourceMap(file, dest) {
@@ -59,10 +60,24 @@ export async function app() {
   await writeFile(outFile, final)
 }
 
-export function styles() {
-  // return gulp.src('.flint/.internal/styles/**')
-  //   .pipe(concat('styles.css'))
-  //   .pipe(gulp.dest(opts.get('buildDir')))
+export async function styles() {
+  try {
+    let source = ''
+
+    try {
+      const dir = await readdir({ root: opts.get('styleDir') })
+      const sources = await* dir.files.map(async file => await readFile(file.fullPath))
+      source = sources.join("\n\n")
+    }
+    catch(e) {
+      // no styles, thats ok
+    }
+
+    await writeFile(opts.get('styleOutDir'), source)
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 export function assets() {
