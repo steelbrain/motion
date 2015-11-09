@@ -31,7 +31,7 @@ export default async function run(_opts = {}, isBuild) {
     log.setLogging()
     log('opts', OPTS)
 
-    await mkdir(OPTS.styleDir)
+    await clear.styles()
     await bundler.init()
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
@@ -42,6 +42,7 @@ export default async function run(_opts = {}, isBuild) {
       await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
+      copy.styles()
 
       // run our pipeline once manually
       gulp.buildScripts()

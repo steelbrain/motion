@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import uglify from 'uglify-js'
 import gulp from 'gulp'
+import concat from 'gulp-concat'
 import log from '../lib/log'
 import { p, copy, writeFile, readFile } from '../lib/fns'
 import opts from '../opts'
@@ -58,6 +59,12 @@ export async function app() {
   await writeFile(outFile, final)
 }
 
+export function styles() {
+  // return gulp.src('.flint/.internal/styles/**')
+  //   .pipe(concat('styles.css'))
+  //   .pipe(gulp.dest(opts.get('buildDir')))
+}
+
 export function assets() {
   gulp.src('.flint/static/**')
     .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
@@ -66,9 +73,6 @@ export function assets() {
     .src(['*', '**/*', '!**/*.js' ], { dot: false })
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
-
-export default { flint, react, assets, app }
-
 
 function preTemplate(name) {
   return `window.flintRun_NAME = function flintRun_NAME(node, opts, cb) {
@@ -82,7 +86,7 @@ function preTemplate(name) {
 function postTemplate(name) {
   return `
 
-      Flint.init()
+      ;Flint.init()
     })(Flint);
   }
 
@@ -90,3 +94,5 @@ function postTemplate(name) {
     module.exports = flintRun_NAME
   }`.replace(/NAME/g, name)
 }
+
+export default { flint, react, assets, app, styles }

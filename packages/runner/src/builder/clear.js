@@ -13,10 +13,15 @@ export async function outDir() {
   await recreateDir(opts.get('outDir'))
 }
 
+export async function styles() {
+  log('outDir')
+  await recreateDir(opts.get('styleDir'))
+}
+
 export async function buildDir() {
   log('buildDir')
   await recreateDir(opts.get('buildDir'))
   await mkdir(p(opts.get('buildDir'), '_'))
 }
 
-export default { outDir, buildDir, internalDir }
+export default { outDir, buildDir, internalDir, styles }
