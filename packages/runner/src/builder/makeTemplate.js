@@ -32,18 +32,18 @@ export default async function makeTemplate() {
 
 function makeIsomorphic() {
   // TODO: flint build --isomorphic
-  if (OPTS.isomorphic) {
-    var Flint = require('flint-js/dist/flint.node');
-    var app = require(p(OPTS.buildDir, '_', OPTS.saneName));
-
-    var FlintApp = app(false, { Flint }, async function(output) {
-      template = template.replace(
-        '<div id="_flintapp"></div>',
-        '<div id="_flintapp">' + output + '</div>'
-      )
-
-      await writeFile(out, template)
-    })
-    return
-  }
+  // if (OPTS.isomorphic) {
+  //   var Flint = require('flint-js/dist/flint.node')
+  //   var app = require(p(OPTS.buildDir, '_', OPTS.saneName))
+  //
+  //   var FlintApp = app(false, { Flint }, async function(output) {
+  //     template = template.replace(
+  //       '<div id="_flintapp"></div>',
+  //       '<div id="_flintapp">' + output + '</div>'
+  //     )
+  //
+  //     await writeFile(out, template)
+  //   })
+  //   return
+  // }
 }

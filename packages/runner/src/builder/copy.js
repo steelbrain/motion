@@ -5,6 +5,7 @@ import log from '../lib/log'
 import handleError from '../lib/handleError'
 import { p, copy, writeFile, readFile, readdir } from '../lib/fns'
 import opts from '../opts'
+import flintjs from 'flint-js'
 
 async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
@@ -14,13 +15,13 @@ async function copyWithSourceMap(file, dest) {
 }
 
 export function flint() {
-  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'flint.prod.js');
+  var read = p(flintjs(), 'dist', 'flint.prod.js');
   var write = p(opts.get('buildDir'), '_', 'flint.prod.js');
   return copyWithSourceMap(read, write)
 }
 
 export function react() {
-  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'react.prod.js');
+  var read = p(flintjs(), 'dist', 'react.prod.js');
   var write = p(opts.get('buildDir'), '_', 'react.prod.js');
   return copyWithSourceMap(read, write)
 }

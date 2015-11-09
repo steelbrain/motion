@@ -1,5 +1,4 @@
 import { p } from '../lib/fns'
-import { buildScripts } from '../index'
 import gulp from '../gulp'
 import bundler from '../bundler'
 import keys from '../keys'

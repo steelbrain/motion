@@ -5,13 +5,13 @@ import { p, sanitize } from './lib/fns'
 let OPTS
 
 function set(key, val) {
-  log(arguments.callee.caller.name, 'opts.set'.bold.yellow, key, val)
+  log('opts.set'.bold.yellow, key, val)
   OPTS[key] = val
   return val
 }
 
 function get(key) {
-  if (key != 'deps') log(arguments.callee.caller.name, 'opts.get'.bold.green, key, OPTS[key])
+  if (key != 'deps') log('opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 
@@ -30,7 +30,6 @@ function setAll(opts) {
   OPTS.defaultPort = 4000
 
   // base dirs
-  OPTS.modulesDir = p(__dirname, '..', '..', 'node_modules')
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')

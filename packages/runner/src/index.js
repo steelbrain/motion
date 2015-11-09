@@ -1,3 +1,6 @@
+import regenerator from 'regenerator/runtime'
+global.regeneratorRuntime = regeneratorRuntime
+
 import bridge from './bridge'
 import compiler from './compiler'
 import handleError from './lib/handleError'
