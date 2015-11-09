@@ -42,11 +42,12 @@ export default async function run(_opts = {}, isBuild) {
       await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
-      copy.styles()
 
       // run our pipeline once manually
       gulp.buildScripts()
       await waitForFirstBuild()
+
+      copy.styles()
 
       if (OPTS.watch)
         gulp.watchForBuild()
