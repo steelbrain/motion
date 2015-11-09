@@ -210,7 +210,7 @@ view ErrorMessage {
   const red = '#cd423e'
 
   $bar = {
-    dispay: 'block',
+    display: 'block',
     background: red,
     position: 'fixed',
     left: 0,
