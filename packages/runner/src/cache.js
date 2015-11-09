@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import opts from './opts'
 import path from 'path'
 import log from './lib/log'
@@ -16,10 +17,18 @@ type File = {
 let files: { name: File } = {}
 let imports: ImportArray = []
 let baseDir = ''
-let deleteCbs = []
 
-function deleted(file) {
-  deleteCbs.forEach(cb => cb(file))
+let deleteFileCbs = []
+let deleteViewCbs = []
+
+function onDeleteFile(file) {
+  deleteFileCbs.forEach(cb => cb(file))
+}
+
+function onDeleteViews(views) {
+  views.forEach(view => {
+    deleteViewCbs.forEach(cb => cb(view))
+  })
 }
 
 const Cache = {
@@ -47,21 +56,26 @@ const Cache = {
     return files[name(file)]
   },
 
-  onDelete(cb) {
-    deleteCbs.push(cb)
+  onDeleteFile(cb) {
+    deleteFileCbs.push(cb)
+  },
+
+  onDeleteView(cb) {
+    deleteViewCbs.push(cb)
   },
 
   remove(file: string) {
     const filename = name(file)
-    deleted(files[filename])
+    onDeleteFile(files[filename])
     delete files[filename]
     log('cache: remove', files)
   },
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
-    const removed =
-    files[name(file)].views = views
+    const cFile = files[name(file)]
+    onDeleteViews(_.difference(cFile.views, views))
+    cFile.views = views
     log('cache: setViews', files)
   },
 

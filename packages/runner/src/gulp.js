@@ -48,18 +48,8 @@ async function watchDeletes(vinyl) {
   if (!vinyl.event)
     buildFinishedCheck()
 
-  try {
-    if (vinyl.event == 'unlink') {
-      deleteStyles(cache.get(vinyl.path).views)
-      cache.remove(vinyl.path)
-      const name = path.relative(OPTS.outDir, vinyl.path)
-      await rmdir(p(OPTS.outDir, name))
-      bridge.message('file:delete', { name })
-    }
-  }
-  catch(e) {
-    handleError(e)
-  }
+  if (vinyl.event == 'unlink')
+    cache.remove(vinyl.path)
 }
 
 const $p = {
