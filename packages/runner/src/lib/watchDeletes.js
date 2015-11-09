@@ -5,7 +5,7 @@ import { rmdir } from './fns'
 export default function watchDeletes() {
   cache.onDelete(file => {
     file.views.forEach(view => {
-      rmdir(opts.get('styleDir'))
+      rmdir(opts.get('styleDir'), view + '.css')
     })
   })
 }
