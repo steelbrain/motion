@@ -1,8 +1,8 @@
 import path from 'path'
 import ws from 'nodejs-websocket'
-import log from '../lib/log'
-import wport from '../lib/wport'
-import cache from '../cache'
+import log from './lib/log'
+import wport from './lib/wport'
+import cache from './cache'
 
 let wsServer
 let connected = false

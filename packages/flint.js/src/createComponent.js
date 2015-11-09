@@ -83,7 +83,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       getInitialState() {
         //if (!this.getPath()) this.setPath()
         this.setPath()
-        
+
         Internal.getInitialStates[this.getPath()] = () => this.getInitialState()
 
         let u = null
@@ -92,6 +92,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.firstRender = true
         this.styles = { _static: {} }
         this.events = { mount: u, unmount: u, update: u, props: u }
+        this.path = null
 
         // scope on() to view
         this.viewOn = viewOn(this)
@@ -291,17 +292,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
         catch(e) {
           Internal.caughtRuntimeErrors++
-          console.error(e.stack)
+
+          console.error('Render error', e.message)
           reportError(e)
 
           const lastRender = this.getLastGoodRender()
 
           try {
-            let inner = <div>Error in view {name}</div>
+            let inner = <span>Error in view {name}</span>
 
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
-              inner = <div dangerouslySetInnerHTML={{ __html }} />
+              __html = __html.replace(/data\-reactid\=\"[^"]+\"/g, '')
+
+              inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
             // highlight in red and return last working render

@@ -16,6 +16,7 @@ import createComponent from './createComponent'
 import range from './lib/range'
 import iff from './lib/iff'
 import router from './lib/router'
+import staticStyles from './lib/staticStyles'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
 import reportError from './lib/reportError'
@@ -165,6 +166,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     router,
     range,
     iff,
+
+    staticStyles,
+    styleClasses: {},
 
     removeView(key) {
       delete Internal.views[key]

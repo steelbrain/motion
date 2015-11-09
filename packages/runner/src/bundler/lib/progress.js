@@ -1,5 +1,5 @@
 import exec from '../../lib/exec'
-import { Spinner } from '../lib/console'
+import { Spinner } from '../../lib/console'
 import opts from '../../opts'
 import log from '../../lib/log'
 import handleError from '../../lib/handleError'
@@ -7,7 +7,7 @@ import handleError from '../../lib/handleError'
 export default async function progress(label, cmd, name, index, total) {
   try {
     const spinner = logProgress(label, name, index, total)
-    await execPromise(name, cmd, OPTS.flintDir, spinner)
+    await execPromise(name, cmd, opts.get('flintDir'), spinner)
   }
   catch(e) {
     handleError(e)
@@ -25,7 +25,7 @@ function logProgress(tag, name, index, total) {
     ` ${index+1} of ${total}: ${name}` :
     `${tag}: ${name}`
 
-  if (OPTS.build)
+  if (opts.get('build'))
     console.log(out)
   else {
     console.log()

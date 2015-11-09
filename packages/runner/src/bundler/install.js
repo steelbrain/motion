@@ -1,12 +1,13 @@
 import { Promise } from 'bluebird'
 import _ from 'lodash'
-import readInstalled from './lib/readInstalled'
+import readWritten from './lib/readWritten'
 import writeInstalled from './lib/writeInstalled'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
 import cache from '../cache'
 import opts from '../opts'
 import { onStart, onFinish, onError } from './messages'
+import { save } from './lib/npm'
 import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
@@ -39,77 +40,82 @@ let installing = []
 let _isInstalling = false
 
 export async function installAll(deps) {
-  if (!deps) deps = cache.getImports()
+  try {
+    if (!deps) deps = cache.getImports()
+    log('installing...', deps)
 
-  // full names keeps paths like 'babel/runtime/etc'
-  if (deps.length)
-    installingFullNames.push(deps)
+    // full names keeps paths like 'babel/runtime/etc'
+    if (deps.length)
+      installingFullNames.push(deps)
 
-  const prevInstalled = await readInstalled()
-  const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
+    const prevInstalled = await readWritten()
+    const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
+    log('installAll() fresh = ', fresh)
 
-  // no new ones found
-  if (!fresh.length) {
-    if (!_isInstalling)
+    // no new ones found
+    if (!fresh.length) {
+      if (!_isInstalling) opts.set('hasRunInitialInstall', true)
+      return
+    }
+
+    // push installing
+    installing = installing.concat(fresh)
+
+    // check if installed running
+    if (_isInstalling) return
+    _isInstalling = true
+
+    const installNext = async () => {
+      const dep = installing[0]
+      onStart(dep)
+
+      try {
+        await save(dep)
+        successful.push(dep)
+        onFinish(dep)
+      }
+      catch(e) {
+        failed.push(dep)
+        log('package install failed', dep)
+        onError(dep, e)
+      }
+      finally {
+        installing.shift() // remove
+        next()
+      }
+    }
+
+    function next() {
+      if (installing.length)
+        installNext()
+      else
+        done()
+    }
+
+    async function done() {
+      const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+      let final = [].concat(prevInstalled, installedFullPaths)
+
+      // remove failed
+      if (failed.length)
+        final = final.filter(dep => failed.indexOf(dep) >= 0)
+
+      logInstalled(successful)
+      await writeInstalled(final)
+      await bundleExternals()
+
+      // reset
+      installingFullNames = []
+      failed = []
+      _isInstalling = false
       opts.set('hasRunInitialInstall', true)
-
-    return
-  }
-
-  // push installing
-  installing = installing.concat(fresh)
-
-  // check if installed running
-  if (_isInstalling) return
-  _isInstalling = true
-
-  const installNext = async () => {
-    const dep = installing[0]
-    onStart(dep)
-
-    try {
-      await save(dep)
-      successful.push(dep)
-      onFinish(dep)
     }
-    catch(e) {
-      failed.push(dep)
-      log('package install failed', dep)
-      onError(dep, e)
-    }
-    finally {
-      installing.shift() // remove
-      next()
-    }
+
+    installNext()
   }
-
-  function next() {
-    if (installing.length)
-      installNext()
-    else
-      done()
+  catch(e) {
+    handleError(e)
   }
-
-  async function done() {
-    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
-    let final = [].concat(prevInstalled, installedFullPaths)
-
-    // remove failed
-    if (failed.length)
-      final = final.filter(dep => failed.indexOf(dep) >= 0)
-
-    logInstalled(successful)
-    await writeInstalled(final)
-    await bundleExternals()
-
-    // reset
-    installingFullNames = []
-    failed = []
-    _isInstalling = false
-    opts.set('hasRunInitialInstall', true)
-  }
-
-  installNext()
 }
 
 function logInstalled(deps) {
