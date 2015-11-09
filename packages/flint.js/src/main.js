@@ -19,6 +19,6 @@ window.exports = {}
 // console.warn
 const originalWarn = console.warn
 window.console.warn = (...args) => {
-  if (args[0] && args[0].indexOf('Unsupported CSS property "dispay') == 0) return
+  if (args[0] && args[0].indexOf('Unsupported CSS property "display') == 0) return
   originalWarn.call(console,...args)
 }
