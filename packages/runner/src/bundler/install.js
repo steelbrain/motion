@@ -12,7 +12,7 @@ import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
 import { bundleExternals } from './externals'
-import { bundleInternals, writeInternalsIn } from './internals'
+import { bundleInternals } from './internals'
 
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
@@ -24,7 +24,6 @@ export async function install(force) {
     await bundleExternals()
 
     if (force) {
-      await writeInternalsIn()
       await bundleInternals()
     }
   } catch(e) {

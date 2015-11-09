@@ -3,7 +3,7 @@ import opts from './opts'
 import path from 'path'
 import log from './lib/log'
 
-const name = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
+const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>
 type ImportArray = Array<string>
@@ -21,8 +21,8 @@ let baseDir = ''
 let deleteFileCbs = []
 let deleteViewCbs = []
 
-function onDeleteFile(file) {
-  deleteFileCbs.forEach(cb => cb(file))
+function onDeleteFile({ name, file, state }) {
+  deleteFileCbs.forEach(cb => cb({ name, file, state }))
 }
 
 function onDeleteViews(views) {
@@ -42,18 +42,18 @@ const Cache = {
   },
 
   name(file : string) {
-    return name(file)
+    return relative(file)
   },
 
   add(file: string) {
     if (!file) return
-    const n = name(file)
+    const n = relative(file)
     files[n] = files[n] || {}
     return files[n]
   },
 
   get(file: string) {
-    return files[name(file)]
+    return files[relative(file)]
   },
 
   getAll() {
@@ -69,15 +69,16 @@ const Cache = {
   },
 
   remove(file: string) {
-    const filename = name(file)
-    onDeleteFile(files[filename])
-    delete files[filename]
-    log('cache: remove', files)
+    const name = relative(file)
+    const state = files[name]
+    log('cache: remove', name)
+    delete files[name]
+    onDeleteFile({ file, name, state })
   },
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
-    const cFile = files[name(file)]
+    const cFile = files[relative(file)]
     onDeleteViews(_.difference(cFile.views, views))
     cFile.views = views
     log('cache: setViews', files)
@@ -89,14 +90,15 @@ const Cache = {
   },
 
   isExported(file: string) {
-    return files[name(file)].isExported
+    return files[relative(file)].isExported
   },
 
   setExported(file: string, val: boolean) {
-    files[name(file)].isExported = val
+    files[relative(file)].isExported = val
   },
 
   getExported() {
+    log('cache', 'getExported', files)
     return Object.keys(files)
       .map(name => files[name].isExported ? name : null)
       .filter(f => !!f)
@@ -113,7 +115,7 @@ const Cache = {
   },
 
   getViews(file?: string) {
-    return files[name(file)].views
+    return files[relative(file)].views
   },
 
   getImports(file?: string) {
@@ -128,17 +130,17 @@ const Cache = {
       return allImports
     }
 
-    return files[name(file)].imports
+    return files[relative(file)].imports
   },
 
   addError(file : string, error : object) {
-    if (files[name(file)])
-      files[name(file)].error = error
+    if (files[relative(file)])
+      files[relative(file)].error = error
   },
 
   removeError(file : string) {
-    if (files[name(file)])
-      files[name(file)].error = null
+    if (files[relative(file)])
+      files[relative(file)].error = null
   },
 
   getLastError() {
