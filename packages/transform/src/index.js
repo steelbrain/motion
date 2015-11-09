@@ -231,6 +231,7 @@ export default function createPlugin(options) {
 
               StyleSheet.clear()
               inView = false
+              viewStyles[viewName] = {}
 
               const expr = t.expressionStatement(
                 t.callExpression(t.identifier('Flint.staticStyles'), [

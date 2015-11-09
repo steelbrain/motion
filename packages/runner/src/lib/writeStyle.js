@@ -15,6 +15,7 @@ export default async function writeStyle(view, sheet) {
     final = final.replace(/(\._[^{]+{)/, `${selectorPrefix} $1`)
   }
 
+  // console.log(sheet)
   fs.writeFile(file, final, err => {
     if (err) throw new Error(err)
 
