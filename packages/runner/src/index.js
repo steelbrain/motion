@@ -13,6 +13,7 @@ import watchingMessage from './lib/watchingMessage'
 import build from './builder/build'
 import clear from './builder/clear'
 import copy from './builder/copy'
+import watchDeletes from './lib/watchDeletes'
 import { mkdir } from './lib/fns'
 import path from 'path'
 
@@ -35,6 +36,7 @@ export default async function run(_opts = {}, isBuild) {
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
     await initConfig()
+    watchDeletes()
 
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)

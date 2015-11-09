@@ -16,6 +16,11 @@ type File = {
 let files: { name: File } = {}
 let imports: ImportArray = []
 let baseDir = ''
+let deleteCbs = []
+
+function deleted(file) {
+  deleteCbs.forEach(cb => cb(file))
+}
 
 const Cache = {
   setBaseDir(dir : string) {
@@ -42,13 +47,20 @@ const Cache = {
     return files[name(file)]
   },
 
+  onDelete(cb) {
+    deleteCbs.push(cb)
+  },
+
   remove(file: string) {
-    delete files[name(file)]
+    const filename = name(file)
+    deleted(files[filename])
+    delete files[filename]
     log('cache: remove', files)
   },
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
+    const removed =
     files[name(file)].views = views
     log('cache: setViews', files)
   },

@@ -14,6 +14,7 @@ import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
 import log from './lib/log'
+import deleteStyles from './lib/deleteStyles'
 import { p, rmdir } from './lib/fns'
 
 const $ = loadPlugins()
@@ -49,6 +50,7 @@ async function watchDeletes(vinyl) {
 
   try {
     if (vinyl.event == 'unlink') {
+      deleteStyles(cache.get(vinyl.path).views)
       cache.remove(vinyl.path)
       const name = path.relative(OPTS.outDir, vinyl.path)
       await rmdir(p(OPTS.outDir, name))
