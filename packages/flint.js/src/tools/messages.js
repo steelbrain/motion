@@ -61,7 +61,6 @@ function styleId(name) {
 
 function removeSheet({ view }) {
   let tag = document.getElementById(styleId(view))
-  console.log(view)
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
@@ -92,12 +91,16 @@ function reloadScript(id, opts = {}) {
     const el = document.getElementById(id)
     if (!el) return
 
-    const finish = opts.reloadAll ? reloadUserScripts : renderFlint
-    const tag = replaceScript({ src }, finish)
+    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
+    const tag = refreshTag(el, 'src', el.src, finish)
   }
 }
 
-function reloadUserScripts() {
+function removeTime(str) {
+  return str.replace(/\?.*/, '')
+}
+
+function reloadAllScripts() {
   const scripts = document.querySelectorAll('.__flintScript');
   let loaded = 0
   let total = scripts.length
@@ -105,14 +108,12 @@ function reloadUserScripts() {
   _Flint.resetViewState()
 
   ;[].forEach.call(scripts, script => {
-    refreshTag(script, 'src', script.src.replace(/\?.*/, ''))
+    refreshTag(script, 'src', removeTime(script.src))
   })
 
   function doneLoading() {
-    if (loaded == scripts.length)
-      Flint.render()
-    else
-      setTimeout(doneLoading, 20)
+    if (loaded == scripts.length) Flint.render()
+    else setTimeout(doneLoading, 20)
   }
 
   setTimeout(doneLoading)
@@ -126,14 +127,18 @@ function replaceTag(tag) {
     return console.log('no parent for', tag)
 
   let replacement = document.createElement(tag.tagName)
+  replacement.src = removeTime(tag.getAttribute('src')) + `?${Date.now()}`
 
   const attrs = tag.attributes
   for (let i = 0; i < attrs.length; i++)
-    replacement.setAttribute(attrs[i].name, attrs[i].value)
+    if (attrs[i].name != 'src')
+      replacement.setAttribute(attrs[i].name, attrs[i].value)
 
   const parent = tag.parentNode
   parent.removeChild(tag)
   parent.appendChild(replacement)
+
+  return replacement
 }
 
 function replaceScript({ name, timestamp, src }, cb) {
