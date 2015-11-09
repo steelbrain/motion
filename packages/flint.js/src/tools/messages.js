@@ -94,6 +94,8 @@ function reloadScript(id, opts = {}) {
     const finish = opts.reloadAll ? reloadUserScripts : renderFlint
     const tag = addScript({ src }, finish)
 
+    if (!tag) return
+
     tag.setAttribute('id', id)
   }
 }

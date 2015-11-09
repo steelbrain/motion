@@ -54,7 +54,7 @@ async function getScripts({ disableTools }) {
   const files = await readScripts()
 
   return [
-    disableTools ? '' : '<div id="_flintdevtools"></div>',
+    '<div id="_flintdevtools" class="_flintdevtools"></div>',
     newLine,
     '<!-- FLINT JS -->',
     '<script src="/__/react.dev.js"></script>',
