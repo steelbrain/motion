@@ -7,6 +7,7 @@ import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
+import copy from './builder/copy'
 import build from './builder/build'
 import unicodeToChar from './lib/unicodeToChar'
 import superStream from './lib/superStream'
@@ -14,6 +15,7 @@ import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
 import log from './lib/log'
+import writeStyle from './lib/writeStyle'
 import { p, rmdir } from './lib/fns'
 
 const $ = loadPlugins()
@@ -47,17 +49,8 @@ async function watchDeletes(vinyl) {
   if (!vinyl.event)
     buildFinishedCheck()
 
-  try {
-    if (vinyl.event == 'unlink') {
-      cache.remove(vinyl.path)
-      const name = path.relative(OPTS.outDir, vinyl.path)
-      await rmdir(p(OPTS.outDir, name))
-      bridge.message('file:delete', { name })
-    }
-  }
-  catch(e) {
-    handleError(e)
-  }
+  if (vinyl.event == 'unlink')
+    cache.remove(vinyl.path)
 }
 
 const $p = {
@@ -72,7 +65,10 @@ const $p = {
     retainLines: true,
     comments: true,
     optional: ['regenerator'],
-    plugins: [flintTransform({ basePath: OPTS.dir })],
+    plugins: [flintTransform({
+      basePath: OPTS.dir,
+      writeStyle
+    })],
     extra: {
       production: process.env.production
     }
@@ -125,7 +121,9 @@ export function buildScripts(afterEach, userStream) {
         $.ignore.exclude(true)
       )
     ))
-    .pipe($.if(file => !file.isInternal && OPTS.build, $.concat(`${OPTS.saneName}.js`)))
+    .pipe($.if(file => !file.isInternal && OPTS.build,
+      $.concat(`${OPTS.saneName}.js`)
+    ))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not
@@ -162,6 +160,10 @@ export function buildScripts(afterEach, userStream) {
 
   function checkWriteable(file) {
     buildFinishedCheck()
+
+    if (OPTS.build) {
+      copy.styles()
+    }
 
     if (file.isInternal)
       return false

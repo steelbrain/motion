@@ -16,7 +16,7 @@
   opacity: 1;
 }
 
-#_flintdevtools {
+._flintdevtools {
   font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -28,7 +28,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-#_flintdevtools * {
+._flintdevtools * {
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
@@ -43,48 +43,48 @@
   -webkit-flex-wrap: nowrap;
 }
 
-#_flintdevtools a,
-#_flintdevtools button,
-#_flintdevtools input,
-#_flintdevtools textarea {
+._flintdevtools a,
+._flintdevtools button,
+._flintdevtools input,
+._flintdevtools textarea {
   align-self: flex-start;
 }
 
-#_flintdevtools a,
-#_flintdevtools span,
-#_flintdevtools em,
-#_flintdevtools b,
-#_flintdevtools strong,
-#_flintdevtools i {
+._flintdevtools a,
+._flintdevtools span,
+._flintdevtools em,
+._flintdevtools b,
+._flintdevtools strong,
+._flintdevtools i {
   white-space: pre-wrap;
   display: inline;
 }
 
-#_flintdevtools script,
-#_flintdevtools meta,
-#_flintdevtools link {
+._flintdevtools script,
+._flintdevtools meta,
+._flintdevtools link {
   display: none;
 }
 
-#_flintdevtools a,
-#_flintdevtools input,
-#_flintdevtools textarea,
-#_flintdevtools select {
+._flintdevtools a,
+._flintdevtools input,
+._flintdevtools textarea,
+._flintdevtools select {
   outline: 0;
 }
 
-#_flintdevtools p,
-#_flintdevtools h1,
-#_flintdevtools h2,
-#_flintdevtools h3,
-#_flintdevtools h4,
-#_flintdevtools h5,
-#_flintdevtools h6,
-#_flintdevtools br {
+._flintdevtools p,
+._flintdevtools h1,
+._flintdevtools h2,
+._flintdevtools h3,
+._flintdevtools h4,
+._flintdevtools h5,
+._flintdevtools h6,
+._flintdevtools br {
   display: block;
 }
 
-#_flintdevtools html {
+._flintdevtools html {
   font-family: sans-serif; /* 1 */
   -ms-text-size-adjust: 100%; /* 2 */
   -webkit-text-size-adjust: 100%; /* 2 */
@@ -94,17 +94,17 @@
 
 /* tools specific */
 
-#_flintdevtools .block {
+._flintdevtools .block {
   display: block;
 }
 
-#_flintdevtools .block * {
+._flintdevtools .block * {
   display: block;
 }
 
-#_flintdevtools .block span,
-#_flintdevtools .block em,
-#_flintdevtools .block b,
-#_flintdevtools .block a {
+._flintdevtools .block span,
+._flintdevtools .block em,
+._flintdevtools .block b,
+._flintdevtools .block a {
   display: inline;
 }

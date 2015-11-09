@@ -11,7 +11,7 @@ function set(key, val) {
 }
 
 function get(key) {
-  log('opts.get'.bold.green, key, OPTS[key])
+  if (key != 'deps') log('opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 
@@ -30,7 +30,6 @@ function setAll(opts) {
   OPTS.defaultPort = 4000
 
   // base dirs
-  OPTS.modulesDir = p(__dirname, '..', '..', 'node_modules')
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')
@@ -48,8 +47,11 @@ function setAll(opts) {
   OPTS.deps.depsJSON = p(OPTS.deps.dir, 'deps.json')
   OPTS.deps.packagesJS = p(OPTS.deps.dir, 'packages.js')
 
-  OPTS.configFile = p(OPTS.internalDir, 'flint.json')
+  OPTS.configFile = p(OPTS.flintDir, 'flint.json')
+  OPTS.stateFile = p(OPTS.internalDir, 'state.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
+  OPTS.styleDir = p(OPTS.internalDir, 'styles')
+  OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
 
   OPTS.name = path.basename(process.cwd())
   OPTS.saneName = sanitize(OPTS.name)

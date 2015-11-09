@@ -193,7 +193,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       update() {
         if (!Internal.firstRender && !this.isRendering) {
           this.queuedUpdate = false
-          raf(() => this.forceUpdate())
+          raf(() => this.isMounted() && this.forceUpdate())
         }
         else {
           log(name, 'called update, isRendering still, queued?', this.queuedUpdate)
@@ -303,7 +303,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
-              __html = __html.replace(/data\-reactid\=\"[^"]+\"/g, '')
+              __html = __html.replace(/\s*data\-react[a-z-]*\=\"[^"]*\"/g, '')
 
               inner = <span dangerouslySetInnerHTML={{ __html }} />
             }

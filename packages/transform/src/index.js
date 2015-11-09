@@ -1,3 +1,4 @@
+import StyleSheet from 'stilr'
 import path from 'path'
 
 function isUpperCase(str) {
@@ -138,7 +139,9 @@ export default function createPlugin(options) {
 
     let keyBase = {}
     let inJSX = false
+    let inView = null
     let hasView = false
+    let viewStyles = {}
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -176,17 +179,70 @@ export default function createPlugin(options) {
           }
         },
 
-        ViewStatement(node) {
-          // hasView = true
-          keyBase = {}
+        ViewStatement: {
+          enter(node) {
+            // hasView = true
+            keyBase = {}
 
-          const name = node.name.name
-          const subName = node.subName && node.subName.name
-          const fullName = name + (subName ? `.${subName}` : '')
+            const name = node.name.name
+            const subName = node.subName && node.subName.name
+            const fullName = name + (subName ? `.${subName}` : '')
 
-          return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
-            t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
-          )
+            inView = fullName
+
+            return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
+              t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
+            )
+          }
+        },
+
+        Statement: {
+          exit(node) {
+            // exit flint view
+            if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+              const viewName = inView
+
+              const styles = viewStyles[viewName]
+              if (!styles) return
+
+              let rawStyles = {}
+
+              Object.keys(styles).forEach(tag => {
+                const styleProps = styles[tag]
+                const viewstyle = styleProps.reduce((acc, cur) => {
+                  acc[cur.key.name] = cur.value.value
+                  return acc
+                }, {})
+
+                rawStyles[tag] = viewstyle
+              })
+
+              const stylesheet = StyleSheet.create(rawStyles)
+
+              const classNamesObject = t.objectExpression(
+                Object.keys(stylesheet).reduce((acc, key) => {
+                  acc.push(t.property(null, t.literal(key), t.literal(stylesheet[key])))
+                  return acc
+                }, [])
+              )
+
+              if (options.writeStyle)
+                options.writeStyle(viewName, StyleSheet.render())
+
+              StyleSheet.clear()
+              inView = false
+              viewStyles[viewName] = {}
+
+              const expr = t.expressionStatement(
+                t.callExpression(t.identifier('Flint.staticStyles'), [
+                  t.literal(viewName),
+                  classNamesObject
+                ])
+              )
+
+              return [ expr, node ]
+            }
+          }
         },
 
         JSXElement: {
@@ -338,7 +394,7 @@ export default function createPlugin(options) {
         },
 
         AssignmentExpression: {
-          exit(node, parent, scope, file) {
+          enter(node) {
             if (node.isStyle) return
 
             // styles
@@ -355,27 +411,31 @@ export default function createPlugin(options) {
 
             // splits styles into static/dynamic pieces
             function extractAndAssign(node) {
-              // if array of objects
-              if (t.isArrayExpression(node.right)) {
-                let staticProps = []
-
-                node.right.elements = node.right.elements.map(el => {
-                  if (!t.isObjectExpression(el)) return el
-                  let { statics, dynamics } = extractStatics(el)
-                  if (statics.length) staticProps = staticProps.concat(statics)
-                  if (dynamics.length) return t.objectExpression(dynamics)
-                  else return null
-                }).filter(x => x !== null)
-
-                return [
-                  staticStyleStatement(node, t.objectExpression(staticProps)),
-                  dynamicStyleStatement(node, node.right)
-                ]
-              }
+              // TODO: only do this is the array is just objects, if they use a variable
+              // it wont work with the static classname extraction
+              // // if array of objects
+              // if (t.isArrayExpression(node.right)) {
+              //   let staticProps = []
+              //
+              //   node.right.elements = node.right.elements.map(el => {
+              //     if (!t.isObjectExpression(el)) return el
+              //     const extracted = extractStatics(node.left.name, el)
+              //     if (!extracted) return null
+              //     let { statics, dynamics } = extracted
+              //     if (statics.length) staticProps = staticProps.concat(statics)
+              //     if (dynamics.length) return t.objectExpression(dynamics)
+              //     else return null
+              //   }).filter(x => !!x)
+              //
+              //   return [
+              //     staticStyleStatement(node, t.objectExpression(staticProps)),
+              //     dynamicStyleStatement(node, node.right)
+              //   ]
+              // }
 
               // if just object
-              else if (t.isObjectExpression(node.right)) {
-                let { statics, dynamics } = extractStatics(node.right)
+              if (t.isObjectExpression(node.right)) {
+                let { statics, dynamics } = extractStatics(node.left.name, node.right)
 
                 if (statics.length) {
                   const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
@@ -404,15 +464,21 @@ export default function createPlugin(options) {
             }
 
             // find statics/dynamics in object
-            function extractStatics(node) {
+            function extractStatics(name, node) {
               let statics = []
               let dynamics = []
 
+              viewStyles[inView] = viewStyles[inView] || {}
+              viewStyles[inView][name] = []
+
               for (let prop of node.properties) {
-                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key))
+                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
+                  viewStyles[inView][name].push(prop)
                   statics.push(prop)
-                else
+                }
+                else {
                   dynamics.push(prop)
+                }
               }
 
               return { statics, dynamics }
@@ -478,9 +544,11 @@ export default function createPlugin(options) {
             function exprStatement(node) {
               return t.expressionStatement(node)
             }
+          },
 
+          exit(node, parent, scope, file) {
             // non-styles
-            if (node.flintTracked || node.hasSetter || node.hasGetter) return
+            if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
 
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return

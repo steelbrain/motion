@@ -2,8 +2,10 @@ import webpack from 'webpack'
 import uglify from 'uglify-js'
 import gulp from 'gulp'
 import log from '../lib/log'
-import { p, copy, writeFile, readFile } from '../lib/fns'
+import handleError from '../lib/handleError'
+import { p, copy, writeFile, readFile, readdir } from '../lib/fns'
 import opts from '../opts'
+import flintjs from 'flint-js'
 
 async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
@@ -13,13 +15,13 @@ async function copyWithSourceMap(file, dest) {
 }
 
 export function flint() {
-  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'flint.prod.js');
+  var read = p(flintjs(), 'dist', 'flint.prod.js');
   var write = p(opts.get('buildDir'), '_', 'flint.prod.js');
   return copyWithSourceMap(read, write)
 }
 
 export function react() {
-  var read = p(opts.get('modulesDir'), 'flint-js', 'dist', 'react.prod.js');
+  var read = p(flintjs(), 'dist', 'react.prod.js');
   var write = p(opts.get('buildDir'), '_', 'react.prod.js');
   return copyWithSourceMap(read, write)
 }
@@ -58,6 +60,26 @@ export async function app() {
   await writeFile(outFile, final)
 }
 
+export async function styles() {
+  try {
+    let source = ''
+
+    try {
+      const dir = await readdir({ root: opts.get('styleDir') })
+      const sources = await* dir.files.map(async file => await readFile(file.fullPath))
+      source = sources.join("\n\n")
+    }
+    catch(e) {
+      // no styles, thats ok
+    }
+
+    await writeFile(opts.get('styleOutDir'), source)
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
+
 export function assets() {
   gulp.src('.flint/static/**')
     .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
@@ -66,9 +88,6 @@ export function assets() {
     .src(['*', '**/*', '!**/*.js' ], { dot: false })
     .pipe(gulp.dest(p(opts.get('buildDir'))));
 }
-
-export default { flint, react, assets, app }
-
 
 function preTemplate(name) {
   return `window.flintRun_NAME = function flintRun_NAME(node, opts, cb) {
@@ -82,7 +101,7 @@ function preTemplate(name) {
 function postTemplate(name) {
   return `
 
-      Flint.init()
+      ;Flint.init()
     })(Flint);
   }
 
@@ -90,3 +109,5 @@ function postTemplate(name) {
     module.exports = flintRun_NAME
   }`.replace(/NAME/g, name)
 }
+
+export default { flint, react, assets, app, styles }

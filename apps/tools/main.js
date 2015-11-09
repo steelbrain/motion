@@ -5,6 +5,7 @@ view Main {
   const internal = window.__isDevingDevTools
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
+  <link rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
 
   <Errors />
   <Installer />
@@ -25,8 +26,7 @@ view Main {
 
 view Counter {
   let count = 0
-  
-  <h1>count is {count} {view.getPath()}</h1>
+  <h1>count is {count}</h1>
   <button onClick={() => count++}>up</button>
   <button onClick={() => count--}>down</button>
 }
@@ -62,8 +62,6 @@ view Circles {
   $circles = { position: 'relative', background: '#eee', height: 400, width: 400 }
 }
 
-import { spring, Motion } from 'react-motion'
-
 view Circle {
   let c = () => Math.round(Math.random()*255)
   let base = {
@@ -77,9 +75,6 @@ view Circle {
   let style = scale =>
     ({ ...base, transform: { scale } })
 
-  <Motion defaultStyle={{x: 0}}
-    style={{x: spring(1, [300, 10])}}>
-    {s => <circle style={style(s.x)} /> }
-  </Motion>
+  <circle style={style(1)} />
 }
-  
+

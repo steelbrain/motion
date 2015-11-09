@@ -253,7 +253,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           Internal.changedViews.forEach(name => {
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
               if (view.isMounted()) {
-                view.forceUpdate()
+                view.setState({ __render: 1 })
                 return view
               }
             }).filter(x => !!x)

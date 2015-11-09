@@ -3,6 +3,7 @@ import cache from '../cache'
 import readInstalled from './lib/readInstalled'
 import normalize from './lib/normalize'
 import { bundleExternals } from './externals'
+import { unsave } from './lib/npm'
 import writeInstalled from './lib/writeInstalled'
 import log from '../lib/log'
 

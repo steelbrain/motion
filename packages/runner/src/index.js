@@ -1,3 +1,6 @@
+import regenerator from 'regenerator/runtime'
+global.regeneratorRuntime = regeneratorRuntime
+
 import bridge from './bridge'
 import compiler from './compiler'
 import handleError from './lib/handleError'
@@ -5,7 +8,7 @@ import server from './server'
 import bundler from './bundler'
 import opts from './opts'
 import log from './lib/log'
-import { initConfig } from './lib/config'
+import internal from './internal'
 import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
@@ -13,15 +16,13 @@ import watchingMessage from './lib/watchingMessage'
 import build from './builder/build'
 import clear from './builder/clear'
 import copy from './builder/copy'
+import watchDeletes from './lib/watchDeletes'
+import { mkdir } from './lib/fns'
 import path from 'path'
 
 async function waitForFirstBuild() {
   await gulp.afterFirstBuild()
   await bundler.finishedInstalling()
-}
-
-function welcome(action) {
-  console.log(`${action} ${opts.get('name')}\n`.bold)
 }
 
 export default async function run(_opts = {}, isBuild) {
@@ -33,13 +34,14 @@ export default async function run(_opts = {}, isBuild) {
     log.setLogging()
     log('opts', OPTS)
 
+    await clear.styles()
     await bundler.init()
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
-    await initConfig()
+    await internal.init()
+    watchDeletes()
 
     if (OPTS.build) {
-      welcome(`Building`)
       await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
@@ -56,7 +58,6 @@ export default async function run(_opts = {}, isBuild) {
       }
     }
     else {
-      welcome(`Running`)
       await clear.outDir()
       await server.run()
       bridge.start()

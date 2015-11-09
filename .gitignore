@@ -1,3 +1,4 @@
+apps/tools/.flint/.internal
 .DS_Store
 node_modules
 npm-debug.log
@@ -8,5 +9,4 @@ dist
 build/
 deps/
 out/
-flint.json
 .tmp
