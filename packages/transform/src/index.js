@@ -1,4 +1,3 @@
-import StyleSheet from 'stilr'
 import path from 'path'
 import fs from 'fs'
 
@@ -140,7 +139,6 @@ export default function createPlugin(options) {
 
     let keyBase = {}
     let inJSX = false
-    let inView = null
     let hasView = false
     let viewStyles = {}
 
@@ -180,14 +178,13 @@ export default function createPlugin(options) {
           }
         },
 
-        ViewStatement: {
-          enter(node) {
-            // hasView = true
-            keyBase = {}
+        ViewStatement(node) {
+          // hasView = true
+          keyBase = {}
 
-            const name = node.name.name
-            const subName = node.subName && node.subName.name
-            const fullName = name + (subName ? `.${subName}` : '')
+          const name = node.name.name
+          const subName = node.subName && node.subName.name
+          const fullName = name + (subName ? `.${subName}` : '')
 
             inView = fullName
 
@@ -399,7 +396,7 @@ export default function createPlugin(options) {
         },
 
         AssignmentExpression: {
-          enter(node) {
+          exit(node, parent, scope, file) {
             if (node.isStyle) return
 
             // styles
@@ -479,10 +476,8 @@ export default function createPlugin(options) {
                   viewStyles[inView][name] = viewStyles[inView][name] || []
                   viewStyles[inView][name].push(prop)
                   statics.push(prop)
-                }
-                else {
+                else
                   dynamics.push(prop)
-                }
               }
 
               return { statics, dynamics }
@@ -548,11 +543,9 @@ export default function createPlugin(options) {
             function exprStatement(node) {
               return t.expressionStatement(node)
             }
-          },
 
-          exit(node, parent, scope, file) {
             // non-styles
-            if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
+            if (node.flintTracked || node.hasSetter || node.hasGetter) return
 
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return

@@ -31,19 +31,8 @@ export default function hotCache({ Internal, options, name }) {
       let propsHash
 
       // get the props hash, but lets cache it so its not a ton of work
-      if (options.changed === true) {
-        propsHash = phash(this.props)
-        Internal.propsHashes[this.context.path] = propsHash
-        options.changed = 2
-      }
-      else if (!propsHash) {
-        propsHash = Internal.propsHashes[this.context.path]
-
-        if (!propsHash) {
-          propsHash = phash(this.props)
-          Internal.propsHashes[this.context.path] = propsHash
-        }
-      }
+      propsHash = phash(this.props)
+      Internal.propsHashes[this.context.path] = propsHash
 
       const sep = name == 'Main' ? '' : ','
       this.path = (this.context.path || '') + sep + name + '.' + propsHash
@@ -62,7 +51,7 @@ export default function hotCache({ Internal, options, name }) {
 
     get(name, val, where) {
       const path = this.getPath()
-      
+
       if (_Flint.inspectorRefreshing) return Internal.getCache[path][name]
       // file scoped stuff always updates
       if (options.unchanged && where == 'fromFile')
