@@ -14,7 +14,7 @@ export default function run(browser, opts) {
     },
 
     'script:add': msg => {
-      addScript(msg, renderFlint)
+      replaceScript(msg)
     },
 
     'stylesheet:add': msg => {
@@ -66,8 +66,13 @@ function removeSheet({ view }) {
     tag.parentNode.removeChild(tag)
 }
 
+function refreshTag(tag, attr, val, cb) {
+  tag.onload = cb
+  tag.setAttribute(attr, val + '?' + Date.now())
+}
+
 function addSheet({ view }) {
-  let href = '/__/styles/' + view + '.css?' + Date.now()
+  let href = '/__/styles/' + view + '.css'
   let tag = document.getElementById(styleId(view))
 
   if (!tag) {
@@ -79,24 +84,16 @@ function addSheet({ view }) {
     return
   }
 
-  tag.setAttribute('href', href)
+  refreshTag(tag, 'href', href)
 }
 
 function reloadScript(id, opts = {}) {
   return () => {
     const el = document.getElementById(id)
-
     if (!el) return
 
-    const src = el.src
-    removeEl(el)
-
     const finish = opts.reloadAll ? reloadUserScripts : renderFlint
-    const tag = addScript({ src }, finish)
-
-    if (!tag) return
-
-    tag.setAttribute('id', id)
+    const tag = replaceScript({ src }, finish)
   }
 }
 
@@ -108,15 +105,7 @@ function reloadUserScripts() {
   _Flint.resetViewState()
 
   ;[].forEach.call(scripts, script => {
-    let replacement = document.createElement('script');
-    replacement.onload = function() { loaded++ }
-    const attrs = script.attributes
-
-    for (let i = 0; i < attrs.length; i++)
-      replacement.setAttribute(attrs[i].name, attrs[i].value)
-
-    removeEl(script)
-    document.body.appendChild(replacement)
+    refreshTag(script, 'src', script.src.replace(/\?.*/, ''))
   })
 
   function doneLoading() {
@@ -129,53 +118,38 @@ function reloadUserScripts() {
   setTimeout(doneLoading)
 }
 
-const body = document.getElementsByTagName('body')[0]
 let lastLoadedAt = {}
 let lastScript = {}
-let finished = true
 
-function addScript(message, cb) {
-  if (!finished) return
-  finished = false
+function replaceTag(tag) {
+  if (!tag || !tag.parentNode)
+    return console.log('no parent for', tag)
 
-  const { name, timestamp, src } = message;
+  let replacement = document.createElement(tag.tagName)
+
+  const attrs = tag.attributes
+  for (let i = 0; i < attrs.length; i++)
+    replacement.setAttribute(attrs[i].name, attrs[i].value)
+
+  const parent = tag.parentNode
+  parent.removeChild(tag)
+  parent.appendChild(replacement)
+}
+
+function replaceScript({ name, timestamp, src }, cb) {
   const jsName = removeFlintExt(name)
 
   if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
     lastLoadedAt[jsName] = timestamp
 
-    let fullSrc = (src || '/_' + jsName)
+    let fullSrc = src || `/_${jsName}`
+    let tag = lastScript[jsName]
 
-    if (lastScript[jsName])
-      fullSrc = fullSrc + "?" + timestamp
-
-    // remove last script
-    if (lastScript[jsName] && lastScript[jsName].parentElement)
-      lastScript[jsName].parentElement.removeChild(lastScript[jsName])
-    else {
-      const oldScript = document.querySelector(`script[src="${fullSrc}"]`)
-      if (oldScript) {
-        const oldScriptParent = oldScript.parentElement
-        if (oldScriptParent) oldScriptParent.removeChild(oldScript)
-      }
+    if (!lastScript[jsName]) {
+      tag = document.querySelector(`script[src="${fullSrc}"]`)
     }
 
-    const script = document.createElement('script')
-    script.src = fullSrc
-    body.appendChild(script)
-    lastScript[jsName] = script
-    script.onload = () => {
-      finished = true
-      cb()
-    }
-    script.onerror = () => {
-      finished = true
-    }
-    setTimeout(() => {
-      finished = true
-    }, 40)
-
-    return script
+    lastScript[jsName] = replaceTag(tag)
   }
 }
 
