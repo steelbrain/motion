@@ -467,10 +467,11 @@ export default function createPlugin(options) {
               let statics = []
               let dynamics = []
 
+              viewStyles[inView] = viewStyles[inView] || {}
+              viewStyles[inView][name] = []
+
               for (let prop of node.properties) {
                 if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
-                  viewStyles[inView] = viewStyles[inView] || {}
-                  viewStyles[inView][name] = viewStyles[inView][name] || []
                   viewStyles[inView][name].push(prop)
                   statics.push(prop)
                 }
