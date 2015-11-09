@@ -5,11 +5,17 @@ import path from 'path'
 import bridge from '../bridge'
 import opts from '../opts'
 
-export default function(view, sheet) {
+export default async function writeStyle(view, sheet) {
   const file = path.join(opts.get('dir'), '.flint', '.internal', 'styles', view + '.css')
-  const prefixedSheet = postcss([ autoprefixer ]).process(sheet)
+  const prefixed = await postcss([ autoprefixer ]).process(sheet)
+  let final = prefixed.css
 
-  fs.writeFile(file, prefixedSheet, err => {
+  const selectorPrefix = opts.get('config').selectorPrefix
+  if (final && selectorPrefix) {
+    final = final.replace(/(\._[^{]+{)/, `${selectorPrefix} $1`)
+  }
+
+  fs.writeFile(file, final, err => {
     if (err) throw new Error(err)
 
     bridge.message('stylesheet:add', { view, file })
