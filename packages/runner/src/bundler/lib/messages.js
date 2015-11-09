@@ -1,26 +1,41 @@
-import bridge from '../bridge'
-import opts from '../opts'
+import bridge from '../../bridge'
+import opts from '../../opts'
 
 // messaging
 
+function avoid() {
+  if (opts.get('build'))
+    return true
+
+  return (
+    !opts.get('hasRunInitialInstall') ||
+    !opts.get('hasRunInitialBuild')
+  )
+}
+
 export function onStart(name) {
-  if (opts.get('build')) return
+  if (avoid()) return
   bridge.message('package:install', { name })
 }
 
 export function onError(name, error) {
-  if (opts.get('build')) return
+  if (avoid()) return
   bridge.message('package:error', { name, error })
   bridge.message('npm:error', { error })
 }
 
 export function onFinish(name) {
-  if (opts.get('build')) return
+  if (avoid()) return
   log('runner: onPackageFinish: ', name)
   bridge.message('package:installed', { name })
 }
 
 export function onInstalled() {
-  if (opts.get('build')) return
+  if (avoid()) return
   bridge.message('packages:reload', {})
+}
+
+export function onInternalInstalled() {
+  if (avoid()) return
+  bridge.message('internals:reload', {})
 }

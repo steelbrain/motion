@@ -1,5 +1,6 @@
 import webpack from 'webpack'
 import { Promise } from 'bluebird'
+import { onInternalInstalled } from './lib/messages'
 import readInstalled from './lib/readInstalled'
 import depRequireString from './lib/depRequireString'
 import findExports from '../lib/findExports'
@@ -11,7 +12,7 @@ import { writeFile } from '../lib/fns'
 
 export async function bundleInternals() {
   await packInternals()
-  bridge.message('internals:reload', {})
+  onInternalInstalled()
 }
 
 export async function writeInternalsIn() {

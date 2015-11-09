@@ -22,6 +22,7 @@ for f in packages/*; do
       --loose all \
       --blacklist es6.tailCall \
       --optional runtime \
+      --blacklist strict \
       --copy-files $1 &
 
     node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib/modern" \
@@ -29,6 +30,7 @@ for f in packages/*; do
       --loose all \
       --optional asyncToGenerator \
       --blacklist es6.tailCall \
+      --blacklist strict \
       --copy-files $1 &
   fi
 done

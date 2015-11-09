@@ -5,13 +5,13 @@ import { p, sanitize } from './lib/fns'
 let OPTS
 
 function set(key, val) {
-  log('opts.set'.bold.yellow, key, val)
+  log(arguments.callee.caller.name, 'opts.set'.bold.yellow, key, val)
   OPTS[key] = val
   return val
 }
 
 function get(key) {
-  log('opts.get'.bold.green, key, OPTS[key])
+  if (key != 'deps') log(arguments.callee.caller.name, 'opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 
