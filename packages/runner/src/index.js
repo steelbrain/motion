@@ -47,8 +47,6 @@ export default async function run(_opts = {}, isBuild) {
       gulp.buildScripts()
       await waitForFirstBuild()
 
-      copy.styles()
-
       if (OPTS.watch)
         gulp.watchForBuild()
       else {
