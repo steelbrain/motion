@@ -5,7 +5,11 @@ function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
 }
 
-function getViewSelector(name, tag, options) {
+function viewMainSelector(name, options) {
+  return `${options.selectorPrefix || ''}.View${name}`
+}
+
+function viewSelector(name, tag, options) {
   const pre = options.selectorPrefix || ''
   const selTag = `.View${name} ${tag}`
   const selClass = `.View${name} .${tag}`
@@ -227,9 +231,11 @@ export default function createPlugin(options) {
 
               function getSelector(viewName, tag) {
                 let cleanViewName = viewName.replace('.', '-')
-                if (tag == '$') return `.View${cleanViewName}`
+                if (tag == '$')
+                  return viewMainSelector(cleanViewName, options)
+
                 tag = tag.replace(/^\$/, '')
-                return getViewSelector(cleanViewName, tag, options)
+                return viewSelector(cleanViewName, tag, options)
               }
 
               const stylesheet = StyleSheet.create(rawStyles, {
