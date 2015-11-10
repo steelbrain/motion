@@ -73,12 +73,12 @@ function removeSheet({ view }) {
 }
 
 function safeLoader() {
-  let last = {}
+  let cachedTag = {}
   let loading = {}
   let wait = {}
 
   return function guard(key, fn) {
-    let tag = last[key]
+    let tag = cachedTag[key]
 
     if (loading[key]) {
       wait[key] = true
@@ -88,7 +88,7 @@ function safeLoader() {
     loading[key] = true
 
     fn(tag, newTag => {
-      last[key] = newTag
+      cachedTag[key] = newTag
       loading[key] = false
       if (wait[key]) {
         wait[key] = false
