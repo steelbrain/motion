@@ -267,7 +267,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.getWrapper(tags, props, numRenders) :
           tags
 
-        const viewClassName = `View${name.replace('.', '-')}`
+        const cleanName = name.replace('.', '-')
+        const viewClassName = `View${cleanName}`
         const parentClassName = wrappedTags.props.className
         const className = parentClassName
           ? `${viewClassName} ${parentClassName}`
