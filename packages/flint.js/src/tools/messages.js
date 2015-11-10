@@ -55,10 +55,11 @@ export default function run(browser, opts) {
   }
 }
 
-function createSheet(href) {
+function createSheet(name, href) {
   let tag = document.createElement('link')
   tag.href = href
   tag.rel = "stylesheet"
+  tag.class = name
   return tag
 }
 
@@ -73,12 +74,12 @@ function removeSheet({ view }) {
 }
 
 function safeLoader() {
-  let cachedTag = {}
+  let last = {}
   let loading = {}
   let wait = {}
 
   return function guard(key, fn) {
-    let tag = cachedTag[key]
+    let tag = last[key]
 
     if (loading[key]) {
       wait[key] = true
@@ -88,11 +89,11 @@ function safeLoader() {
     loading[key] = true
 
     fn(tag, newTag => {
-      cachedTag[key] = newTag
+      last[key] = newTag
       loading[key] = false
       if (wait[key]) {
         wait[key] = false
-        fn(key)
+        fn(last[key])
       }
     })
   }
@@ -106,10 +107,13 @@ function addSheet(view) {
   function adder(tag, done) {
     if (!tag) {
       let href = `/__/styles/${view}.css`
-      tag = document.querySelector(`link[href="${href}"]`)
+      tag = (
+        document.querySelector(`link.Style${view}`) ||
+        document.querySelector(`link[href="${href}"]`)
+      )
 
       if (!tag)
-        tag = createSheet(href)
+        tag = createSheet(view, href)
     }
 
     replaceTag(tag, 'href', done)
@@ -155,6 +159,8 @@ function replaceTag(tag, attr, cb) {
   if (!tag) return console.error('no tag')
 
   let parent = tag.parentNode
+
+  if (!tag.cloneNode) debugger
   let clone = tag.cloneNode(false)
 
   clone[attr] = replaceTime(tag.getAttribute(attr))
