@@ -17,6 +17,11 @@ view Inspector.View {
   let state = {}
   let props = null
   let writeBack = null
+  
+  let onSet = (write) => {
+    console.log('writing', path, write)
+    view.props.writeBack(path, write)
+  }
 
   on.props(() => {
     path = view.props.path
@@ -45,7 +50,7 @@ view Inspector.View {
     <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
         editable={true}
-        onSet={write => view.props.writeBack(path, write)}
+        onSet={onSet}
         data={state}
       />
     </Inspector.Section>

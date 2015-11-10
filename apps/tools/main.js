@@ -31,6 +31,12 @@ view Counter {
   <button onClick={() => count--}>down</button>
 }
 
+view Deep {
+  let person = { name: 'nick', tools: ['js', 'juggling balls', 'coffee'] }
+  <h1>deep</h1>
+  <h2>{JSON.stringify(person)}</h2>
+}
+
 view Name {
   let first = 'nick'
   let last = 'cammarata'

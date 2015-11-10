@@ -140,7 +140,7 @@ view Leaf {
     fontWeight: 'bold'
   }]
   
-  $function = { marginLeft: 10, marginTop: 2, color: '#bf3aed' }
+  $function = { marginLeft: 10, marginTop: 2, color: '#962eba' }
   
   $colon = { marginTop: 2, marginLeft: 1, fontWeight: 400 }
 
