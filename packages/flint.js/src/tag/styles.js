@@ -3,6 +3,18 @@ import reportError from '../lib/reportError'
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
 
+const states = {
+  active: ':active',
+  hover: ':hover',
+  focus: ':focus',
+  link: ':link',
+  visited: ':visited',
+  checked: ':checked',
+  disabled: ':disabled',
+  empty: ':empty',
+  invalid: ':invalid',
+}
+
 const transformKeysMap = {
   x: 'translateX',
   y: 'translateY',
@@ -120,6 +132,9 @@ export default function elementStyles(key, view, name, tag, props) {
 
   // HELPERS
   if (styles) {
+    // convert flint syntax to radium
+    if (styles)
+
     // position
     if (styles.position && Array.isArray(styles.position)) {
       styles.top = styles.position[0]
@@ -149,6 +164,11 @@ export default function elementStyles(key, view, name, tag, props) {
 
     // final mastyles
     Object.keys(styles).forEach(key => {
+      // convert states 'active' => ':active'
+      if (states[key]) {
+        styles[states[key]] = styles[key]
+      }
+
       // array to string transforms
         // @media queries
       if (key[0] == '@')
