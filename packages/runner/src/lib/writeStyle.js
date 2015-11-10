@@ -10,11 +10,6 @@ export default async function writeStyle(view, sheet) {
   const prefixed = await postcss([ autoprefixer ]).process(sheet)
   let final = prefixed.css
 
-  const selectorPrefix = opts.get('config').selectorPrefix
-  if (final && selectorPrefix) {
-    final = final.replace(/(\._[^{]+{)/, `${selectorPrefix} $1`)
-  }
-
   // console.log(sheet)
   fs.writeFile(file, final, err => {
     if (err) throw new Error(err)

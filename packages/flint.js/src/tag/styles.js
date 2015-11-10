@@ -3,7 +3,7 @@ import reportError from '../lib/reportError'
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
 
-const states = {
+const pseudos = {
   active: ':active',
   hover: ':hover',
   focus: ':focus',
@@ -99,19 +99,19 @@ export default function elementStyles(key, view, name, tag, props) {
     }
 
     // add static styles (after className checks)
-    if (classes) {
-      const tagClass = classes[`${prefix}${tag}`]
-      const nameClass = name != tag && classes[`${prefix}${name}`]
-
-      if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
-      if (tagClass) addClassName(tagClass)
-      if (nameClass) addClassName(nameClass)
-    }
+    // if (classes) {
+    //   const tagClass = classes[`${prefix}${tag}`]
+    //   const nameClass = name != tag && classes[`${prefix}${name}`]
+    //
+    //   if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
+    //   if (tagClass) addClassName(tagClass)
+    //   if (nameClass) addClassName(nameClass)
+    // }
 
     // root styles classname
-    if (deservesRootStyles && view.props.__styleClasses) {
-      addClassName(view.props.__styleClasses)
-    }
+    // if (deservesRootStyles && view.props.__styleClasses) {
+    //   addClassName(view.props.__styleClasses)
+    // }
 
     // merge styles [] into {}
     if (Array.isArray(result))
@@ -162,11 +162,11 @@ export default function elementStyles(key, view, name, tag, props) {
       }
     }
 
-    // final mastyles
+    // final styles
     Object.keys(styles).forEach(key => {
-      // convert states 'active' => ':active'
-      if (states[key]) {
-        styles[states[key]] = styles[key]
+      // convert pseudos 'active' => ':active'
+      if (pseudos[key] && typeof styles[key] == 'object') {
+        styles[pseudos[key]] = styles[key]
       }
 
       // array to string transforms

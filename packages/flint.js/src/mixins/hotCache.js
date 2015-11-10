@@ -46,7 +46,7 @@ export default function hotCache({ Internal, options, name }) {
       Internal.setCache(path, name, useResult ? result : val)
 
       if (this.shouldReRender())
-        this.forceUpdate()
+        this.setState({ render: 1 })
     },
 
     get(name, val, where) {

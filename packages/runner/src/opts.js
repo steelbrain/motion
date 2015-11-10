@@ -53,6 +53,8 @@ function setAll(opts) {
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
   OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
 
+  OPTS.config = {}
+
   OPTS.name = path.basename(process.cwd())
   OPTS.saneName = sanitize(OPTS.name)
 

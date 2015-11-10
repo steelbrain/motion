@@ -58,6 +58,7 @@ const $p = {
     optional: ['regenerator'],
     plugins: [flintTransform({
       basePath: OPTS.dir,
+      selectorPrefix: opts.get('config').selectorPrefix,
       writeStyle
     })],
     extra: {

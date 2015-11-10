@@ -112,14 +112,7 @@ function getProps(viewName, Flint, props, viewProps, name, key, index) {
   }
 
   if (props.yield)
-    props = Object.assign(props, viewProps, { style: props.style });
-
-
-  const viewClasses = Flint.styleClasses[viewName]
-
-  if (viewClasses && viewClasses[`$${name}`]) {
-    props.__styleClasses = viewClasses[`$${name}`]
-  }
+    props = Object.assign(props, viewProps, { style: props.style })
 
   props.__key = key
   props.__tagName = name
