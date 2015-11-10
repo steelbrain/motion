@@ -276,12 +276,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const withClass = React.cloneElement(wrappedTags, { className })
 
         let styled = null
-        let resolver = () => resolveStyles(this, withClass)
+        let styler = () => resolveStyles(this, withClass)
 
         if (process.env.production)
-          styled = resolver()
+          styled = styler()
         else
-          try { styled = resolver() } catch(e) { return null }
+          try { styled = styler() } catch(e) { return null }
 
         return styled
       },
