@@ -268,7 +268,22 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.getWrapper(tags, props, numRenders) :
           tags
 
-        const styled = resolveStyles(this, wrappedTags)
+        const cleanName = name.replace('.', '-')
+        const viewClassName = `View${cleanName}`
+        const parentClassName = wrappedTags.props.className
+        const className = parentClassName
+          ? `${viewClassName} ${parentClassName}`
+          : viewClassName
+
+        const withClass = React.cloneElement(wrappedTags, { className })
+
+        let styled = null
+        let styler = () => resolveStyles(this, withClass)
+
+        if (process.env.production)
+          styled = styler()
+        else
+          try { styled = styler() } catch(e) { return null }
 
         return styled
       },

@@ -5,6 +5,19 @@ function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
 }
 
+function viewMainSelector(name, options) {
+  const pre = options.selectorPrefix || ''
+  return `${pre}.View${name}`
+}
+
+function viewSelector(name, tag, options) {
+  const pre = options.selectorPrefix || ''
+  const selTag = `.View${name} ${tag}`
+  const selClass = `.View${name} .${tag}`
+  const selSelf = `${tag}.View${name}`
+  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf} `
+}
+
 function hasObjWithProp(node, base, prop) {
   return node.left
     && node.left.object
@@ -142,6 +155,7 @@ export default function createPlugin(options) {
     let inView = null
     let hasView = false
     let viewStyles = {}
+    let viewRootNodes = []
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -189,6 +203,7 @@ export default function createPlugin(options) {
             const fullName = name + (subName ? `.${subName}` : '')
 
             inView = fullName
+            viewRootNodes = []
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -198,8 +213,21 @@ export default function createPlugin(options) {
 
         Statement: {
           exit(node) {
-            // exit flint view
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+              let rootTag = '$'
+
+
+              // check if child tag is direct root
+              const numRoots = viewRootNodes.length
+
+              let shouldStyleTagnameAsRoot = numRoots == 0
+
+              if (numRoots == 1) {
+                const tagName = inView.toLowerCase()
+                const rootTagName = viewRootNodes[0].openingElement.name.elements[0].value
+                shouldStyleTagnameAsRoot = rootTagName == tagName
+              }
+
               const viewName = inView
 
               const styles = viewStyles[viewName]
@@ -217,7 +245,19 @@ export default function createPlugin(options) {
                 rawStyles[tag] = viewstyle
               })
 
-              const stylesheet = StyleSheet.create(rawStyles)
+              function getSelector(viewName, tag) {
+                let cleanViewName = viewName.replace('.', '-')
+
+                if (shouldStyleTagnameAsRoot || tag == '$')
+                  return viewMainSelector(cleanViewName, options, rootTag)
+
+                tag = tag.replace(/^\$/, '')
+                return viewSelector(cleanViewName, tag, options)
+              }
+
+              const stylesheet = StyleSheet.create(rawStyles, {
+                selector: tag => getSelector(viewName, tag)
+              })
 
               const classNamesObject = t.objectExpression(
                 Object.keys(stylesheet).reduce((acc, key) => {
@@ -247,8 +287,6 @@ export default function createPlugin(options) {
 
         JSXElement: {
           enter(node, parent, scope, file) {
-            inJSX = true
-
             const el = node.openingElement
 
             // avoid reprocessing
@@ -262,6 +300,13 @@ export default function createPlugin(options) {
                 node.flintJSXVisits = 2
                 return
               }
+
+              // top level JSX element
+              if (scope.hasOwnBinding('view')) {
+                viewRootNodes.push(node)
+              }
+
+              inJSX = true
 
               node.flintJSXVisits = 1
               const name = nodeToNameString(el.name)

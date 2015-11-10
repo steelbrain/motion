@@ -126,11 +126,13 @@ view Errors {
 
   tools.on('runtime:success', () => {
     runtimeError = null
+    npmError = null
     setError()
   })
 
   tools.on('compile:success', () => {
     compileError = null
+    npmError = null
     setError()
   })
 
@@ -221,7 +223,7 @@ view ErrorMessage {
     fontWeight: 300,
     color: '#fff',
     fontSize: '14px',
-    padding: 10,
+    padding: 6,
     pointerEvents: 'all',
     overflow: 'scroll',
     zIndex: 2147483647,
