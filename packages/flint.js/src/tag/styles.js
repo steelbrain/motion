@@ -67,26 +67,37 @@ export default function elementStyles(key, view, name, tag, props) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'
-    const tagStyle = hasTag && view.styles[tag]
+    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](index)
 
     const classes = Flint.styleClasses[view.name]
-
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
-    const nameStyle = view.styles[name]
+    const nameStyle = diffName && view.styles[name] && view.styles[name](index)
 
-    // add tag and name styles
-    let result = mergeStyles(null,
+    // base
+    let result = mergeStyles({},
       // tag style
-      tagStyle ? tagStyle(index) : null,
-      // base style
-      deservesRootStyles && viewStyle,
+      tagStyle,
       // name dynamic styles
-      nameStyle && diffName && nameStyle(index)
+      nameStyle,
+      // base style
+      deservesRootStyles && viewStyle
     )
 
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
+        // ensure static class styles overwrite dynamic tag/name styles
+        const viewStaticStyles = Flint.styleObjects[view.name]
+        if (viewStaticStyles) {
+          const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
+          if (staticClassStyles) {
+            Object.keys(staticClassStyles).forEach(key => {
+              // check if already in styles, and rewrite to class style
+              if (result[key]) result[key] = staticClassStyles[key]
+            })
+          }
+        }
+
         if (view.styles[className]) {
           result = mergeStyles(result, view.styles[className](index))
         }

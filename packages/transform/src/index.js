@@ -15,7 +15,8 @@ function viewSelector(name, tag, options) {
   const selTag = `.View${name} ${tag}`
   const selClass = `.View${name} .${tag}`
   const selSelf = `${tag}.View${name}`
-  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf} `
+  const selSelfClass = `.View${name}.${tag}`
+  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf}, ${pre + selSelfClass}`
 }
 
 function hasObjWithProp(node, base, prop) {
