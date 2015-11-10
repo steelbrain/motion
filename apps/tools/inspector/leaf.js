@@ -49,6 +49,7 @@ view Leaf {
     e.stopPropagation()
   }
 
+  console.log('leaf edit', view.props.editable)
   const getLeafKey = (key, value) => isPrimitive(value) ?
     (key + ':' + md5(String(key))) :
     (key + '[' + getType(value) + ']')
@@ -76,19 +77,20 @@ view Leaf {
         <name>{format(key)}</name>
         {label('key', key, key, false)}
       </key>
+      <colon>:</colon>
       <expand class="function" if={type == 'Function'}>
-        fn({fnParams(data).join(', ')})
+        <i>fn ({fnParams(data).join(', ')})</i>
       </expand>
       
       <expand if={type == 'Array'}>
         <type>Array[{data.length}]</type>
       </expand>
       <expand if={type == 'Object'}>
-        <type>{'{}'}</type> {items(Object.keys(data).length)}
+        <type>{'{}   ' + Object.keys(data).length + ' keys'}</type>
       </expand>
       <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
         {format(String(data))}
-        {label('val', data, key, true)}
+        {label('val', data, key, view.props.editable)}
       </value>
     </label>
     <children>
@@ -100,6 +102,7 @@ view Leaf {
           key={getLeafKey(_, data[_])}
           onSet={(...args) => view.props.onSet(key, ...args)}
           data={data[_]}
+          editable={view.props.editable}
           label={_}
           prefix={rootPath}
           onClick={view.props.onClick}
@@ -124,16 +127,12 @@ view Leaf {
     position: 'relative',
     color: 'rgba(0,0,0,0.8)',
     opacity: 1,
-
-    ':hover': {
-      background: 'rgba(0,0,0,0.1)'
-    }
   }]
-
+  
   $helper = $null = { color: '#ffff05' }
-  //$boolean = { color: '#06ffd4', fontWeight: 700 }
-  //$number = { color: '#f17817' }
-  //$string = { color: '#b3ff00' }
+  $boolean = { color: '#32a3cd', fontWeight: 700 }
+  $number = { color: '#b92222', marginTop: 2, fontWeight: 500 }
+  $string = { color: '#698c17' }
 
   $key = [row, {
     color: 'rgba(0,0,0,0.9)',
@@ -141,7 +140,9 @@ view Leaf {
     fontWeight: 'bold'
   }]
   
-  $function = { marginLeft: 10 }
+  $function = { marginLeft: 10, marginTop: 2, color: '#bf3aed' }
+  
+  $colon = { marginTop: 2, marginLeft: 1, fontWeight: 400 }
 
   $name = {
     color: "#ff2f2f",
@@ -155,7 +156,7 @@ view Leaf {
 
   $value = [row, {
     position: 'relative',
-    margin: [2, 4]
+    margin: [3, 4]
   }]
 
   $children = {
@@ -163,8 +164,8 @@ view Leaf {
   }
 
   $type = {
-    margin: [2, 0, 0, 8],
-    opacity: 0.4,
+    margin: [1, 0, 0, 8],
+    opacity: 0.7,
     flexFlow: 'row',
   }
 }

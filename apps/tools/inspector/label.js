@@ -36,7 +36,7 @@ view Label {
     onChange={onChange}
     {...tabIndex(view.props.editable)}
   />
-
+  
   $input = {
     position: 'absolute',
     top: 0,
@@ -44,6 +44,7 @@ view Label {
     right: 0,
     color: '#333',
     padding: 1,
+    width: 140,
     outline: 'none',
     border: 'none',
     opacity: 0,
@@ -51,6 +52,6 @@ view Label {
   }
 
   $focus = {
-    opacity: 1
+    opacity: '1 !important',
   }
 }

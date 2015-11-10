@@ -3,27 +3,33 @@ const setLocal = (k,v) =>
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
-function findView(node) {
+function findPath(node) {
   if (!node || !node.getAttribute) return null
   const flintid = node.__flintID
   if (flintid) return flintid
-  else return findView(node.parentNode)
+  else return findPath(node.parentNode)
 }
 
 view Inspector {
   view.pause()
 
+  let hudActive = false
   let showTemp = false
   let temp = null
   let views = []
-  let hoverOff, clickOff
+  let clickOff
   let keys = {}
+  let lastTarget = null 
 
-  function inspect(e) {
-    const path = findView(e.target)
+  function inspect(path) {
     if (!path || path === temp) return 
     temp = path
     view.update()
+  }
+  
+  function mouseMove({ target }) {
+    lastTarget = target
+    if (hudActive) inspect(findPath(lastTarget))
   }
   
   function removeTemp() {
@@ -39,7 +45,7 @@ view Inspector {
   }
 
   function glue(e) {
-    const path = findView(e.target)
+    const path = findPath(e.target)
     
     /* toggle whether views has path */
     if (views.indexOf(path) > -1) {
@@ -52,12 +58,13 @@ view Inspector {
   }
 
   function showInspect() {
-    hoverOff = on(window, 'mousemove', inspect)
+    inspect(findPath(lastTarget))
+    hudActive = true
     clickOff = on(window, 'click', glue)
   }
 
   function hideInspect() {
-    hoverOff()
+    hudActive = false
     clickOff()
     removeTemp()
   }
@@ -81,6 +88,8 @@ view Inspector {
   }
 
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
+  let hoverOff = on(window, 'mousemove', mouseMove)
+  
   on(window, 'keydown', isAlt(showInspect))
   on(window, 'keyup', isAlt(hideInspect))
 

@@ -1,13 +1,21 @@
+import clone from 'clone'
+
 function pathToName(path) {
   let p = path.split(',')
   return p[p.length - 1].split('.')[0]
+}
+
+let filterProps = props => {
+  ['if', 'repeat', 'style', '__key', '__tagName'].map(name => { delete props[name] })
+  console.log('props are', props)
+  return props
 }
 
 view Inspector.View {
   const inspect = window.Flint.inspect
   let name, path
   let state = {}
-  let props = {}
+  let props = null
   let writeBack = null
 
   on.props(() => {
@@ -18,34 +26,34 @@ view Inspector.View {
       name = pathToName(path)
 
       inspect(path, (_props, _state, _wb) => {
-        props = _props || {}
+        props = filterProps(clone(_props || {}))
         state = _state || {}
         writeBack = _wb
         view.update()
       })
     }
   })
+  
+  let hasKeys = o => o && Object.keys(o).length > 0
 
   <view>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <name>{name}</name>
-    <section if={props} class="props">
-      <title>Props</title>
-      <Tree data={props} />
-    </section>
-    <section if={state}>
-      <title>State</title>
+    <Inspector.Section title="Props" if={hasKeys(props)} class="props">
+      <Tree editable={false} data={props} />
+    </Inspector.Section>
+    <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
+        editable={true}
         onSet={write => view.props.writeBack(path, write)}
         data={state}
       />
-    </section>
+    </Inspector.Section>
   </view>
 
   $view = {
     position: 'relative',
     pointerEvents: 'auto',
-    padding: 12,
     margin: 10,
     minWidth: 220,
     fontSize: 12,
@@ -60,12 +68,15 @@ view Inspector.View {
   }
 
   $Close = {
-    top: -2,
-    right: -2,
+    top: -5,
+    right: 0,
   }
 
   $name = {
     fontWeight: 500,
+    paddingLeft: 12,
+    paddingTop: 8,
+    paddingBottom: 2,
     margin: [-3, 0, 3],
     color: 'rgba(0,0,0,0.8)',
     fontSize: 14,
@@ -90,10 +101,6 @@ view Inspector.View {
     fontWeight: 200,
     fontSize: 12,
     margin: [3, 0]
-  }
-
-  $section = {
-    padding: [0]
   }
 
   $props = {

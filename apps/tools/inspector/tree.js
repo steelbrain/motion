@@ -13,6 +13,7 @@ view Tree {
     getOriginal={getOriginal}
     query={query}
     label="root"
+    editable={view.props.editable}
     root={true}
     validateQuery={query => query.length >= 2}
     isExpanded={view.props.isExpanded || () => false}
