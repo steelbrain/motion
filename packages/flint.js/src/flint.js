@@ -169,6 +169,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     staticStyles,
     styleClasses: {},
+    styleObjects: {},
 
     removeView(key) {
       delete Internal.views[key]

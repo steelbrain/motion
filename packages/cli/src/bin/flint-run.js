@@ -13,7 +13,7 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
   }
 
   Program
-    .option('-d, --debug', 'output extra information for debugging')
+    .option('-d, --debug [what]', 'output extra information for debugging')
     .option('-p, --port [number]', 'specify a port [number]')
     .option('-h, --host [host]', 'specify hostname')
     .parse(process.argv)

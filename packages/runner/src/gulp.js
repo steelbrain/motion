@@ -57,6 +57,7 @@ const $p = {
     comments: true,
     optional: ['regenerator'],
     plugins: [flintTransform({
+      log,
       basePath: OPTS.dir,
       selectorPrefix: opts.get('config').selectorPrefix,
       writeStyle

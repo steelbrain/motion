@@ -90,28 +90,17 @@ export default function elementStyles(key, view, name, tag, props) {
         if (view.styles[className]) {
           result = mergeStyles(result, view.styles[className](index))
         }
-
-        const styleForClass = classes && classes[`${prefix}${className}`]
-        if (styleForClass) {
-          addClassName(styleForClass)
-        }
       })
     }
 
-    // add static styles (after className checks)
-    // if (classes) {
-    //   const tagClass = classes[`${prefix}${tag}`]
-    //   const nameClass = name != tag && classes[`${prefix}${name}`]
-    //
-    //   if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
-    //   if (tagClass) addClassName(tagClass)
-    //   if (nameClass) addClassName(nameClass)
-    // }
-
     // root styles classname
-    // if (deservesRootStyles && view.props.__styleClasses) {
-    //   addClassName(view.props.__styleClasses)
-    // }
+    if (deservesRootStyles && view.props.className) {
+      const selector = `${prefix}${view.props.className}`
+      const parentStaticStyles = Flint.styleObjects[view.props.__parentName][selector]
+      const parentDynamicStyles = view.props.__parentStyles[selector]
+
+      result = mergeStyles(result, parentStaticStyles, parentDynamicStyles)
+    }
 
     // merge styles [] into {}
     if (Array.isArray(result))

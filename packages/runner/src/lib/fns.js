@@ -7,6 +7,9 @@ import copyFile from './copyFile'
 import path from 'path'
 import _touch from 'touch'
 
+import log from './log'
+import handleError from './handleError'
+
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
@@ -41,6 +44,7 @@ function sanitize(str) {
 
 export default {
   p,
+  path,
   mkdir,
   rmdir,
   copy,
@@ -53,5 +57,7 @@ export default {
   copyFile,
   touch,
   exists,
-  sanitize
+  sanitize,
+  log,
+  handleError
 }
