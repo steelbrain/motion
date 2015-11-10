@@ -18,7 +18,7 @@ export default function run(browser, opts) {
     },
 
     'stylesheet:add': msg => {
-      addSheet(msg)
+      addSheet(msg.view)
     },
 
     'stylesheet:remove': msg => {
@@ -72,34 +72,47 @@ function removeSheet({ view }) {
     tag.parentNode.removeChild(tag)
 }
 
-let lastSheet = {}
-let sheetLoading = {}
-let waitingToLoadSheet
+function safeLoader() {
+  let last = {}
+  let loading = {}
+  let wait = {}
 
-function addSheet({ view }) {
-  if (sheetLoading[view]) {
-    waitingToLoadSheet = { view }
-    return
+  return function guard(key, fn) {
+    let tag = last[key]
+
+    if (loading[key]) {
+      wait[key] = true
+      return
+    }
+
+    loading[key] = true
+
+    fn(tag, newTag => {
+      last[key] = newTag
+      loading[key] = false
+      if (wait[key]) {
+        wait[key] = false
+        fn(key)
+      }
+    })
   }
+}
 
-  sheetLoading[view] = true
+let sheetGuard = safeLoader()
 
-  let tag = lastSheet[view]
+function addSheet(view) {
+  sheetGuard(view, adder)
 
-  if (!tag) {
-    let href = `/__/styles/${view}.css`
-    tag = document.querySelector(`link[href="${href}"]`)
+  function adder(tag, done) {
+    if (!tag) {
+      let href = `/__/styles/${view}.css`
+      tag = document.querySelector(`link[href="${href}"]`)
 
-    if (!tag)
-      tag = createSheet(href)
-  }
+      if (!tag)
+        tag = createSheet(href)
+    }
 
-  replaceTag(tag, 'href', done)
-
-  function done(tag) {
-    lastSheet[view] = tag
-    sheetLoading[view] = false
-    if (waitingToLoadSheet) addSheet(waitingToLoadSheet)
+    replaceTag(tag, 'href', done)
   }
 }
 
@@ -150,7 +163,9 @@ function replaceTag(tag, attr, cb) {
     try {
       if (parent) parent.removeChild(tag)
     }
-    catch(e) {}
+    catch(e) {
+      console.log('error removing', tag, attr)
+    }
 
     clone.onreadystatechange = null
     cb && cb(clone)
@@ -163,25 +178,26 @@ function replaceTag(tag, attr, cb) {
 }
 
 let lastLoadedAt = {}
-let lastScript = {}
-
 function replaceScript({ name, timestamp, src }, cb) {
   const jsName = removeFlintExt(name)
 
   if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
     lastLoadedAt[jsName] = timestamp
+    addScript(src || `/_${jsName}`)
+  }
+}
 
-    let fullSrc = src || `/_${jsName}`
-    let tag = lastScript[jsName]
+let scriptGuard = safeLoader()
+function addScript(src) {
+  scriptGuard(src, adder)
 
-    if (!lastScript[jsName]) {
-      tag = document.querySelector(`script[src="${fullSrc}"]`)
-    }
+  function adder(tag, done) {
+    if (!tag)
+      tag = document.querySelector(`script[src="${src}"]`)
+    if (!tag)
+      return
 
-    // this is due to gulp sending script:add when we delete files
-    if (!tag) return
-
-    lastScript[jsName] = replaceTag(tag, 'src')
+    replaceTag(tag, 'src', done)
   }
 }
 
@@ -207,5 +223,3 @@ function renderFlint() {
     setTimeout(renderFlint, 50)
   }
 }
-
-function noop() {}

@@ -86,7 +86,7 @@ async function getStyles() {
   const dir = await readdir({ root: OPTS.styleDir })
   const names = dir.files.map(file => file.path).sort()
   return names
-    .map(name => `<link rel="stylesheet" href="/__/styles/${name}" id="_flintV${name.replace('.css', '')}" />`)
+    .map(name => `<link rel="stylesheet" href="/__/styles/${name}" />`)
     .join(newLine)
 }
 
