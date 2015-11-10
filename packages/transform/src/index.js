@@ -1,4 +1,4 @@
-import StyleSheet from 'stilr'
+import StyleSheet from 'flint-stilr'
 import path from 'path'
 
 function isUpperCase(str) {
