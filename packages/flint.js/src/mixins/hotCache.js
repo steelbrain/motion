@@ -36,7 +36,7 @@ export default function hotCache({ Internal, options, name }) {
 
       const sep = name == 'Main' ? '' : ','
       //console.log('props are', this.props, 'path is ', (this.context.path || '') + sep + name + '.' + propsHash)
-      
+
       this.path = (this.context.path || '') + sep + name + '.' + propsHash
     },
 
