@@ -22,7 +22,7 @@ export default function run(browser, opts) {
     },
 
     'stylesheet:remove': msg => {
-      removeSheet(msg)
+      removeSheet(msg.view)
     },
 
     'compile:error': msg => {
@@ -63,12 +63,12 @@ function createSheet(name, href) {
   return tag
 }
 
-function styleId(name) {
-  return '_flintV' + name
+function sheetSelector(name) {
+  return `.Style${name}`
 }
 
-function removeSheet({ view }) {
-  let tag = document.getElementById(styleId(view))
+function removeSheet(name) {
+  let tag = document.querySelector(sheetSelector(view))
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
@@ -101,19 +101,19 @@ function safeLoader() {
 
 let sheetGuard = safeLoader()
 
-function addSheet(view) {
-  sheetGuard(view, adder)
+function addSheet(name) {
+  sheetGuard(name, adder)
 
   function adder(tag, done) {
     if (!tag) {
-      let href = `/__/styles/${view}.css`
+      let href = `/__/styles/${name}.css`
       tag = (
-        document.querySelector(`link.Style${view}`) ||
+        document.querySelector(`link${sheetSelector(name)}`) ||
         document.querySelector(`link[href="${href}"]`)
       )
 
       if (!tag)
-        tag = createSheet(view, href)
+        tag = createSheet(name, href)
     }
 
     replaceTag(tag, 'href', done)
@@ -131,7 +131,7 @@ function reloadScript(id, opts = {}) {
 }
 
 function removeTime(str) {
-  return str.replace(/\?.*/, '')
+  return str.replace(/\?[0-9]+$/, '')
 }
 
 function replaceTime(str) {
@@ -152,16 +152,31 @@ function reloadAllScripts() {
     replaceTag(script, 'src')
   })
 
+  // TODO: this should wait for all tags to be done loading
   setTimeout(Flint.render, 10)
+}
+
+function cloneNode(node) {
+  if (node.tagName != 'SCRIPT') {
+    return node.cloneNode(false)
+  }
+  else {
+    let clone = document.createElement('script')
+
+    const attrs = node.attributes
+    for (let i = 0; i < attrs.length; i++)
+       if (attrs[i].name != 'src')
+         clone.setAttribute(attrs[i].name, attrs[i].value)
+
+    return clone
+  }
 }
 
 function replaceTag(tag, attr, cb) {
   if (!tag) return console.error('no tag')
 
   let parent = tag.parentNode
-
-  if (!tag.cloneNode) debugger
-  let clone = tag.cloneNode(false)
+  let clone = cloneNode(tag)
 
   clone[attr] = replaceTime(tag.getAttribute(attr))
 
@@ -169,9 +184,7 @@ function replaceTag(tag, attr, cb) {
     try {
       if (parent) parent.removeChild(tag)
     }
-    catch(e) {
-      console.log('error removing', tag, attr)
-    }
+    catch(e) { console.log('error removing', tag, attr) }
 
     clone.onreadystatechange = null
     cb && cb(clone)
