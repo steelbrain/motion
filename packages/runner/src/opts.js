@@ -11,7 +11,7 @@ function set(key, val) {
 }
 
 function get(key) {
-  if (key != 'deps') log('opts.get'.bold.green, key, OPTS[key])
+  // if (key != 'deps') log('opts.get'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 

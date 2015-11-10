@@ -8,18 +8,24 @@ import bridge from '../bridge'
 import cache from '../cache'
 import opts from '../opts'
 import log from '../lib/log'
+import handleError from '../lib/handleError'
 import { writeFile } from '../lib/fns'
 
 export async function bundleInternals() {
-  await packInternals()
-  onInternalInstalled()
+  try {
+    log('bundleInternals')
+    await writeInternalsIn()
+    await packInternals()
+    onInternalInstalled()
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
-export async function writeInternalsIn() {
+async function writeInternalsIn() {
   log('writeInternalsIn')
   const files = cache.getExported()
-  if (!files.length) return
-
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 

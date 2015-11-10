@@ -2,6 +2,7 @@ import path from 'path'
 import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
+import { bundleInternals } from '../bundler/internals'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
 import { p, rmdir } from './fns'
@@ -21,18 +22,22 @@ async function deleteStyle(view) {
 export default function watchDeletes() {
   try {
     cache.onDeleteView(async view => {
+      log('onDeleteView', view)
       await deleteStyle(view)
-      console.log('remove', view)
       bridge.message('stylesheet:remove', { view })
     })
 
-    cache.onDeleteFile(async view => {
-      await file.views.forEach(async view => {
+    cache.onDeleteFile(async ({ name, file, state }) => {
+      log('onDeleteFile', name, file, state)
+
+      if (state.isExported)
+        await bundleInternals()
+
+      await state.views.forEach(async view => {
         await deleteStyle(view)
         await deleteJS(view)
       })
 
-      const name = path.relative(opts.get('outDir'), vinyl.path)
       bridge.message('file:delete', { name })
     })
   }

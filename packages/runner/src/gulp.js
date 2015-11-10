@@ -1,3 +1,4 @@
+import chokidar from 'chokidar'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
@@ -24,7 +25,8 @@ let OPTS
 
 const newLine = "\n"
 const SCRIPTS_GLOB = [
-  '[Mm]ain.js', '**/*.{js,jsf}',
+  '[Mm]ain.js',
+  '**/*.{js,jsf}',
   '!node_modules{,/**}',
   '!.flint{,/**}'
 ]
@@ -40,17 +42,6 @@ gulp.task('build', buildScripts)
 
 export function watchForBuild() {
   return gulp.watch(SCRIPTS_GLOB, ['build'])
-}
-
-async function watchDeletes(vinyl) {
-  // bugfix. sometimes pipeline slows, but these events keep coming
-  // prevent buildFinished from running early
-  // (vinyl event is undefined before initial run)
-  if (!vinyl.event)
-    buildFinishedCheck()
-
-  if (vinyl.event == 'unlink')
-    cache.remove(vinyl.path)
 }
 
 const $p = {
@@ -75,14 +66,27 @@ const $p = {
   })
 }
 
+// gulp doesnt send unlink events for files in deleted folders, so we do our own
+function watchDeletes() {
+  chokidar.watch('.', {ignored: /[\/\\]\./})
+    .on('unlink', (file) => {
+      if (/jsf?/.test(path.extname(file))) {
+        cache.remove(file)
+      }
+    })
+}
+
 // userStream is optional for programmatic usage
 export function buildScripts(afterEach, userStream) {
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+  let justDeleted = {} // fix gulp sending add when its deleted
 
   // super stream watcher
   if (!OPTS.build) {
+    watchDeletes()
+
     bridge.on('super:on', ({ file }) => {
       console.log('super:on')
       return superStream.start(file)
@@ -95,7 +99,7 @@ export function buildScripts(afterEach, userStream) {
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, watchDeletes)))
+    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, resetBuildWatch)))
 
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
@@ -127,10 +131,11 @@ export function buildScripts(afterEach, userStream) {
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     // why, you ask? because... gulp watch will drop things if not
-    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+
+  function resetBuildWatch(vinyl) {
+    if (!vinyl.event) buildFinishedCheck()
+  }
 
   function resetLastFile(file) {
     lastError = false
@@ -206,7 +211,7 @@ export function buildScripts(afterEach, userStream) {
 
     // after initial build
     if (hasFinished()) {
-      if (!lastError && !file.isInternal) {
+      if (!lastError && !file.isInternal && cache.get(file.path)) {
         cache.removeError(file.path)
         bridge.message('script:add', lastScript)
         bridge.message('compile:success', lastScript)

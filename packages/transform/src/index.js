@@ -358,7 +358,7 @@ export default function createPlugin(options) {
             if (isInView(scope)) {
               if (isMutativeArrayFunc(node)) {
                 const callee = node.callee
-                const name = callee.object ? callee.object.name : callee.property.name
+                const name = callee.object ? findObjectName(callee.object) : callee.property.name
                 return addSetter(name, node, scope, t.identifier(name))
               }
 

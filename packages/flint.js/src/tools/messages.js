@@ -106,6 +106,10 @@ function replaceTime(str) {
 
 function reloadAllScripts() {
   const scripts = document.querySelectorAll('.__flintScript')
+
+  if (!scripts.length)
+    return
+
   let total = scripts.length
 
   _Flint.resetViewState()
@@ -152,6 +156,9 @@ function replaceScript({ name, timestamp, src }, cb) {
     if (!lastScript[jsName]) {
       tag = document.querySelector(`script[src="${fullSrc}"]`)
     }
+
+    // this is due to gulp sending script:add when we delete files
+    if (!tag) return
 
     lastScript[jsName] = replaceTag(tag)
   }

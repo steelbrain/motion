@@ -37,7 +37,7 @@ export function start() {
           }
 
           break
-        case 'i': // bundler
+        case 'r': // bundler
           console.log('Checking packages to install...')
           await bundler.install(true)
           console.log(`Done!\n`)

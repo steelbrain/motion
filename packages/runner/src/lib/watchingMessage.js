@@ -6,16 +6,16 @@ export default function watchingMessage() {
 
   keys.start()
 
-  console.log('Shortcuts:')
+  const prefix = '•'
+
   console.log(
-    newLine +
-    ' • O'.cyan.bold + 'pen        '.cyan +
-      ' • V'.cyan.bold + 'erbose'.cyan + newLine +
+    `${prefix} `+'O'.cyan.bold + 'pen     '.cyan +
+      `${prefix} `+'V'.bold + 'erbose log' + newLine +
     (userEditor
-      ? (' • E'.cyan.bold + 'dit        '.cyan)
-      : '               ') +
-        ' • I'.cyan.bold + 'nstall (npm)'.cyan + newLine
-    // ' • U'.blue.bold + 'pload'.blue + newLine
+      ? (`${prefix} `+'E'.cyan.bold + 'ditor   '.cyan)
+      : '           ') +
+        `${prefix} `+'R'.bold+'efresh packages' + newLine
+    // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
   )
 
   keys.resume()

@@ -3,6 +3,7 @@ import File from 'vinyl'
 import fs from 'fs'
 import path from 'path'
 import opts from '../opts'
+import log from '../lib/log'
 
 const stream = through.obj().pipe(through.obj(createFile))
 
@@ -16,6 +17,7 @@ function file(_path, contents) {
 
 let lastFile
 function superRead(_path) {
+  log('start super read')
   fs.readFile(_path, (err, data) => {
     const curFile = data.toString()
     if (curFile != lastFile) {
@@ -25,6 +27,8 @@ function superRead(_path) {
 
     if (superReading)
       setTimeout(() => superRead(_path), 3)
+    else
+      log('stop super read')
   })
 }
 
