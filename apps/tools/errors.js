@@ -3,7 +3,21 @@ const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1
 
 const niceRuntimeError = err => {
   if (err.file)
-    err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/\_\/)?'), '')
+    err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/[_]+\/)?'), '')
+
+  if (err.file.indexOf('internals.js') >= 0) {
+    if (err.message.indexOf('Cannot find module') == 0) {
+      const badModule = err.message.match(/(fs|path)/)
+
+      if (badModule && badModule.length) {
+        err.file = 'imported module:'
+        err.message = `Cannot import node-only module: ${badModule[0]}`
+      }
+    }
+    else {
+      err.message = `Error in a locally required file. ${err.message}`
+    }
+  }
 
   if (err.message)
     err.niceMessage = err.message.replace(/Uncaught .*Error:\s*/, '')
@@ -152,7 +166,6 @@ view ErrorMessage {
   let error, npmError, fullStack
   let line = getLine(view.props.error)
 
-
   on('props', () => {
     npmError = view.props.npmError
     error = view.props.error
@@ -175,7 +188,7 @@ view ErrorMessage {
 
   <Debounce force={!error} onUpdate={showFlintErrorDiv}>
     <bar>
-      <Close onClick={view.props.close} size={40} />
+      <Close onClick={view.props.close} size={35} />
 
       <inner if={npmError}>
         <where><b>{npmError.name}</b></where> {npmError.msg}
@@ -200,6 +213,10 @@ view ErrorMessage {
           </niceStack>
         </shortError>
 
+        <help if={error.help}>
+          {error.help}
+        </help>
+
         <fullStack if={error.fullStack}>
           <ln>{error.fullStack[0]}</ln>
           <ln class="cur">{error.fullStack[1]}</ln>
@@ -223,7 +240,7 @@ view ErrorMessage {
     fontWeight: 300,
     color: '#fff',
     fontSize: '14px',
-    padding: 6,
+    padding: 8,
     pointerEvents: 'all',
     overflow: 'scroll',
     zIndex: 2147483647,

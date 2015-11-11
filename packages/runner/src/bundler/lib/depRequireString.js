@@ -4,8 +4,9 @@ export default function depRequireString(name, onto, pathname = '') {
       Flint.${onto}["${name}"] = require("${pathname}${name}")
     }
     catch(e) {
-      console.log('Error running package!')
+      console.log('Error bundling package ${name}!')
       console.error(e)
+      Flint.reportError(e)
     };
   `
 }

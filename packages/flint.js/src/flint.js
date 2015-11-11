@@ -164,6 +164,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.render()
     },
 
+    reportError,
     router,
     range,
     iff,
