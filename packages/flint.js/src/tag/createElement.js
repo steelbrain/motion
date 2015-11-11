@@ -88,7 +88,7 @@ function getElement(identifier, viewName, getView) {
   return { fullname, name, key, index, tag, originalTag }
 }
 
-function getProps(view, viewName, Flint, props, viewProps, name, key, index) {
+function getProps(view, viewName, Flint, props, viewProps, name, tag, key, index) {
   if (props)
     props = niceProps(props)
 
@@ -119,6 +119,11 @@ function getProps(view, viewName, Flint, props, viewProps, name, key, index) {
   props.__key = key
   props.__tagName = name
 
+  if (typeof tag == 'string' && tag !== name) {
+    if (props.className) props.className += ` ${name}`
+    else props.className = name
+  }
+
   return props
 }
 
@@ -127,7 +132,7 @@ export default function createElement(viewName) {
     const view = this
     const Flint = view.Flint
     const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, Flint.getView)
-    props = getProps(view, viewName, Flint, props, view.props, name, key, index)
+    props = getProps(view, viewName, Flint, props, view.props, name, tag, key, index)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
     return React.createElement(tag, props, ...args)
   }

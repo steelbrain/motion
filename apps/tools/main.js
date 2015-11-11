@@ -9,8 +9,8 @@ view Main {
 
   <Errors />
   <Installer />
-  
-  <Inspector if={internal} />
+
+  <Inspector />
   <Name if={internal} />
   <Counter if={internal} />
   <Circles if={internal} />
