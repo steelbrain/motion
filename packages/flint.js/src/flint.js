@@ -61,9 +61,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     reportError(...args)
 
     // restore last working views
-    Object.keys(Internal.views).forEach(name => {
-      Internal.views[name] = Internal.lastWorkingViews[name]
-    })
+    if (!Internal.firstRender)
+      Object.keys(Internal.views).forEach(name => {
+        Internal.views[name] = Internal.lastWorkingViews[name]
+      })
   }
 
   root.onerror = flintOnError
@@ -274,6 +275,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       if (process.env.production)
         return setView(name, comp())
 
+      const hash = hashsum(body)
+
       function setView(name, component) {
         Internal.views[name] = { hash, component }
       }
@@ -282,8 +285,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let viewsInCurrentFile = Internal.viewsInFile[Internal.currentHotFile]
 
       viewsInCurrentFile.push(name)
-
-      const hash = hashsum(body)
 
       // if new
       if (!Internal.views[name]) {

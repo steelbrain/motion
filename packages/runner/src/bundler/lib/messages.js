@@ -26,7 +26,7 @@ export function onError(name, error) {
 
 export function onFinish(name) {
   if (avoid()) return
-  log('runner: onPackageFinish: ', name)
+  log('bundler', 'onPackageFinish: ', name)
   bridge.message('package:installed', { name })
 }
 

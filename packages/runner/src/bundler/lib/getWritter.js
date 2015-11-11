@@ -8,7 +8,7 @@ export default async function getWritten() {
     return written.deps
   }
   catch(e) {
-    log('npm: install: no deps installed')
+    log('bundler', 'install: no deps installed')
     return []
   }
 }

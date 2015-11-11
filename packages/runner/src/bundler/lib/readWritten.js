@@ -7,6 +7,7 @@ export default async function readWritten() {
   try {
     const deps = opts.get('deps')
     const written = await readJSON(deps.depsJSON)
+    log('bundler', 'readWritten, written:', written)
     return written.deps
   }
   catch(e) {

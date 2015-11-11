@@ -16,7 +16,7 @@ import { bundleInternals } from './internals'
 
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
-  log('npm: install')
+  log('bundler', 'install')
   try {
     await remakeInstallDir(force)
     await uninstall()
@@ -41,7 +41,7 @@ let _isInstalling = false
 export async function installAll(deps) {
   try {
     if (!deps) deps = cache.getImports()
-    log('installing...', deps)
+    log('bundler', 'installing...', deps)
 
     // full names keeps paths like 'babel/runtime/etc'
     if (deps.length)
@@ -49,7 +49,7 @@ export async function installAll(deps) {
 
     const prevInstalled = await readWritten()
     const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
-    log('installAll() fresh = ', fresh)
+    log('bundler', 'installAll() fresh = ', fresh)
 
     // no new ones found
     if (!fresh.length) {
@@ -75,7 +75,7 @@ export async function installAll(deps) {
       }
       catch(e) {
         failed.push(dep)
-        log('package install failed', dep)
+        log('bundler', 'package install failed', dep)
         onError(dep, e)
       }
       finally {

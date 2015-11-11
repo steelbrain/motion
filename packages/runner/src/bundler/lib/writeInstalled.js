@@ -5,7 +5,7 @@ import { readState, writeState } from '../../internal'
 
 export default async function writeInstalled(deps) {
   try {
-    log('writeInstalled()', deps)
+    log('bundler', 'writeInstalled()', deps)
     const config = await readState()
     config['installed'] = rmFlintExternals(deps)
     await writeState(config)
