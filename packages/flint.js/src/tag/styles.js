@@ -76,7 +76,8 @@ export default function elementStyles(key, view, name, tag, props) {
     const parentStatics = Flint.styleObjects[view.props.__parentName]
     const parentDynamics = view.props.__parentStyles
 
-    // base
+    // merge styles
+
     let result = mergeStyles({},
       // tag style
       tagStyle,
@@ -85,8 +86,8 @@ export default function elementStyles(key, view, name, tag, props) {
       // base style
       deservesRootStyles && viewStyle,
       // passed down styles
-      deservesRootStyles && parentStatics && parentStatics[`${view.name}`],
-      deservesRootStyles && parentDynamics && parentDynamics[`${view.name}`],
+      deservesRootStyles && parentStatics && parentStatics[`${prefix}${view.name}`],
+      deservesRootStyles && parentDynamics && parentDynamics[`${prefix}${view.name}`],
     )
 
     // add class styles
