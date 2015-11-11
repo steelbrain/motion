@@ -1,13 +1,12 @@
-import log from '../../lib/log'
-import handleError from '../../lib/handleError'
+import { log, handleError } from '../../lib/fns'
 import rmFlintExternals from './rmFlintExternals'
 import { readState, writeState } from '../../internal'
 
 export default async function writeInstalled(deps) {
   try {
-    log('bundler', 'writeInstalled()', deps)
     const config = await readState()
     config['installed'] = rmFlintExternals(deps)
+    log('externals', 'writeInstalled()', config)
     await writeState(config)
   }
   catch(e) {

@@ -70,6 +70,9 @@ export default async function run(_opts = {}, isBuild) {
       // wait for build
       await waitForFirstBuild()
 
+      // ensure we have clean packages before open
+      await bundler.uninstall()
+
       console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
 
       watchingMessage()

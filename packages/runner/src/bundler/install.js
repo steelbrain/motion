@@ -1,6 +1,6 @@
 import { Promise } from 'bluebird'
 import _ from 'lodash'
-import readWritten from './lib/readWritten'
+import readInstalled from './lib/readInstalled'
 import writeInstalled from './lib/writeInstalled'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
@@ -40,18 +40,25 @@ let installingFullNames = []
 let installing = []
 let _isInstalling = false
 
-export async function installAll(deps) {
+export async function installAll(toInstall) {
   try {
-    if (!deps) deps = cache.getImports()
-    log(LOG, 'installing...', deps)
+    if (!toInstall)
+      toInstall = cache.getImports()
+
+    log(LOG, 'toInstall', toInstall)
 
     // full names keeps paths like 'babel/runtime/etc'
-    if (deps.length)
-      installingFullNames.push(deps)
+    if (toInstall.length)
+      installingFullNames.push(toInstall)
+    else
+      return
 
-    const prevInstalled = await readWritten()
-    const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
-    log(LOG, 'installAll', 'fresh', fresh)
+    const _toInstall = normalize(toInstall)
+    const prevInstalled = await readInstalled()
+    const _prevInstalled = normalize(prevInstalled)
+    const fresh = _.difference(_toInstall, _prevInstalled, installing)
+    log(LOG, 'installAll', 'fresh = ', fresh, ' = ')
+    log(LOG, '  =', _toInstall, '(toInstall) - ', _prevInstalled, '(prevInstalled) - ', installing, '(currently installing)')
 
     // no new ones found
     if (!fresh.length) {
