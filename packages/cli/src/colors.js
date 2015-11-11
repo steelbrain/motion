@@ -7,7 +7,6 @@ var colors = [
     "aquamarine",
     "bisque",
     "black",
-    "blanchedalmond",
     "blue",
     "blueviolet",
     "brown",

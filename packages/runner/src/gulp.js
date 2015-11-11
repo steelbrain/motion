@@ -31,6 +31,10 @@ const SCRIPTS_GLOB = [
   '!.flint{,/**}'
 ]
 
+const hasFinished = () => {
+  // console.log(opts.get('hasRunInitialBuild'), opts.get('hasRunInitialInstall'))
+  return opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
+}
 const relative = file => path.relative(opts.get('appDir'), file.path)
 const time = _ => _ ? ` - ${_}ms` : ''
 const out = {
@@ -272,8 +276,6 @@ function logError(error, file) {
 /* FIRST BUILD STUFF */
 
 let waitingForFirstBuild = []
-
-const hasFinished = () => opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
 
 const afterFirstBuild = () =>
   new Promise((res, rej) => {

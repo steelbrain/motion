@@ -50,8 +50,10 @@ export async function installAll(toInstall) {
     // full names keeps paths like 'babel/runtime/etc'
     if (toInstall.length)
       installingFullNames.push(toInstall)
-    else
+    else {
+      opts.set('hasRunInitialInstall', true)
       return
+    }
 
     const _toInstall = normalize(toInstall)
     const prevInstalled = await readInstalled()
