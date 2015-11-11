@@ -18,11 +18,11 @@ export default function run(browser, opts) {
     },
 
     'stylesheet:add': msg => {
-      addSheet(msg)
+      addSheet(msg.view)
     },
 
     'stylesheet:remove': msg => {
-      removeSheet(msg)
+      removeSheet(msg.view)
     },
 
     'compile:error': msg => {
@@ -55,35 +55,69 @@ export default function run(browser, opts) {
   }
 }
 
-function styleId(name) {
-  return '_flintV' + name
+function createSheet(name, href) {
+  let tag = document.createElement('link')
+  tag.href = href
+  tag.rel = "stylesheet"
+  tag.class = name
+  return tag
 }
 
-function removeSheet({ view }) {
-  let tag = document.getElementById(styleId(view))
+function sheetSelector(name) {
+  return `.Style${name}`
+}
+
+function removeSheet(name) {
+  let tag = document.querySelector(sheetSelector(view))
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
 
-function refreshTag(tag, attr, val, cb) {
-  tag.setAttribute(attr, replaceTime(val))
-  setTimeout(cb)
+function safeLoader() {
+  let last = {}
+  let loading = {}
+  let wait = {}
+
+  return function guard(key, fn) {
+    let tag = last[key]
+
+    if (loading[key]) {
+      wait[key] = true
+      return
+    }
+
+    loading[key] = true
+
+    fn(tag, newTag => {
+      last[key] = newTag
+      loading[key] = false
+      if (wait[key]) {
+        wait[key] = false
+        fn(last[key])
+      }
+    })
+  }
 }
 
-function addSheet({ view }) {
-  let href = '/__/styles/' + view + '.css'
-  let tag = document.getElementById(styleId(view))
+let sheetGuard = safeLoader()
 
-  if (!tag) {
-    tag = document.createElement('link')
-    tag.href = href
-    tag.rel = "stylesheet"
-    tag.id = styleId(view)
-    document.head.appendChild(tag)
-    return
+function addSheet(name) {
+  sheetGuard(name, adder)
+
+  function adder(tag, done) {
+    if (!tag) {
+      let href = `/__/styles/${name}.css`
+      tag = (
+        document.querySelector(`link${sheetSelector(name)}`) ||
+        document.querySelector(`link[href="${href}"]`)
+      )
+
+      if (!tag)
+        tag = createSheet(name, href)
+    }
+
+    replaceTag(tag, 'href', done)
   }
-
-  refreshTag(tag, 'href', href)
 }
 
 function reloadScript(id, opts = {}) {
@@ -92,12 +126,12 @@ function reloadScript(id, opts = {}) {
     if (!el) return
 
     const finish = opts.reloadAll ? reloadAllScripts : renderFlint
-    const tag = replaceTag(el, finish)
+    const tag = replaceTag(el, 'src', finish)
   }
 }
 
 function removeTime(str) {
-  return str.replace(/\?.*/, '')
+  return str.replace(/\?[0-9]+$/, '')
 }
 
 function replaceTime(str) {
@@ -115,52 +149,74 @@ function reloadAllScripts() {
   _Flint.resetViewState()
 
   ;[].forEach.call(scripts, script => {
-    replaceTag(script)
+    replaceTag(script, 'src')
   })
 
+  // TODO: this should wait for all tags to be done loading
   setTimeout(Flint.render, 10)
 }
 
-let lastLoadedAt = {}
-let lastScript = {}
+function cloneNode(node) {
+  if (node.tagName != 'SCRIPT') {
+    return node.cloneNode(false)
+  }
+  else {
+    let clone = document.createElement('script')
 
-function replaceTag(tag, cb) {
-  if (!tag || !tag.parentNode)
-    return console.log('no parent for', tag)
+    const attrs = node.attributes
+    for (let i = 0; i < attrs.length; i++)
+       if (attrs[i].name != 'src')
+         clone.setAttribute(attrs[i].name, attrs[i].value)
 
-  let replacement = document.createElement(tag.tagName)
-  replacement.src = replaceTime(tag.getAttribute('src'))
-  replacement.onload = cb || noop
-
-  const attrs = tag.attributes
-  for (let i = 0; i < attrs.length; i++)
-    if (attrs[i].name != 'src')
-      replacement.setAttribute(attrs[i].name, attrs[i].value)
-
-  const parent = tag.parentNode
-  parent.removeChild(tag)
-  parent.appendChild(replacement)
-
-  return replacement
+    return clone
+  }
 }
 
+function replaceTag(tag, attr, cb) {
+  if (!tag) return console.error('no tag')
+
+  let parent = tag.parentNode
+  let clone = cloneNode(tag)
+
+  clone[attr] = replaceTime(tag.getAttribute(attr))
+
+  clone.onload = () => {
+    try {
+      if (parent) parent.removeChild(tag)
+    }
+    catch(e) { console.log('error removing', tag, attr) }
+
+    clone.onreadystatechange = null
+    cb && cb(clone)
+  }
+
+  if (parent)
+    parent.appendChild(clone)
+  else
+    document.head.appendChild(clone)
+}
+
+let lastLoadedAt = {}
 function replaceScript({ name, timestamp, src }, cb) {
   const jsName = removeFlintExt(name)
 
   if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
     lastLoadedAt[jsName] = timestamp
+    addScript(src || `/_${jsName}`)
+  }
+}
 
-    let fullSrc = src || `/_${jsName}`
-    let tag = lastScript[jsName]
+let scriptGuard = safeLoader()
+function addScript(src) {
+  scriptGuard(src, adder)
 
-    if (!lastScript[jsName]) {
-      tag = document.querySelector(`script[src="${fullSrc}"]`)
-    }
+  function adder(tag, done) {
+    if (!tag)
+      tag = document.querySelector(`script[src="${src}"]`)
+    if (!tag)
+      return
 
-    // this is due to gulp sending script:add when we delete files
-    if (!tag) return
-
-    lastScript[jsName] = replaceTag(tag)
+    replaceTag(tag, 'src', done)
   }
 }
 
@@ -186,5 +242,3 @@ function renderFlint() {
     setTimeout(renderFlint, 50)
   }
 }
-
-function noop() {}

@@ -35,10 +35,14 @@ export default async function run(_opts = {}, isBuild) {
     log('opts', OPTS)
 
     await clear.styles()
-    await bundler.init()
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
+
+    // internals/externals
+    await bundler.init()
     await internal.init()
+
+    // cache watching
     watchDeletes()
 
     if (OPTS.build) {

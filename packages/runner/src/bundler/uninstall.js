@@ -13,7 +13,7 @@ export async function uninstall(rebundle) {
   const installed = await readInstalled()
   const imported = cache.getImports()
   const toUninstall = _.difference(normalize(installed), normalize(imported))
-  log('npm: uninstall() toUninstall', toUninstall)
+  log('bundler', 'uninstall() toUninstall', toUninstall)
 
   if (!toUninstall.length) return
 
@@ -32,7 +32,7 @@ export async function uninstall(rebundle) {
 
   const success = filterFalse(attempted)
   const final = _.difference(installed, success)
-  log('writing from uninstall()', final)
+  log('bundler', 'writing from uninstall()', final)
   await writeInstalled(final)
 
   if (rebundle) {

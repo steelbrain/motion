@@ -6,7 +6,7 @@ export default async function readInstalled() {
   try {
     const state = await readState()
     const installed = state['installed'] || []
-    log('readInstalled()', installed)
+    log('bundler', 'readInstalled()', installed)
     return installed
   }
   catch(e) {

@@ -1,5 +1,6 @@
 import bridge from '../../bridge'
 import opts from '../../opts'
+import log from '../../lib/log'
 
 // messaging
 
@@ -26,7 +27,7 @@ export function onError(name, error) {
 
 export function onFinish(name) {
   if (avoid()) return
-  log('runner: onPackageFinish: ', name)
+  log('bundler', 'onPackageFinish: ', name)
   bridge.message('package:installed', { name })
 }
 

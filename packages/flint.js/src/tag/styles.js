@@ -67,51 +67,55 @@ export default function elementStyles(key, view, name, tag, props) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'
-    const tagStyle = hasTag && view.styles[tag]
+    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](index)
 
     const classes = Flint.styleClasses[view.name]
-
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
-    const nameStyle = view.styles[name]
+    const nameStyle = diffName && view.styles[name] && view.styles[name](index)
 
-    // add tag and name styles
-    let result = mergeStyles(null,
+    const parentStatics = Flint.styleObjects[view.props.__parentName]
+    const parentDynamics = view.props.__parentStyles
+
+    // merge styles
+
+    let result = mergeStyles({},
       // tag style
-      tagStyle ? tagStyle(index) : null,
+      tagStyle,
+      // name dynamic styles
+      nameStyle,
       // base style
       deservesRootStyles && viewStyle,
-      // name dynamic styles
-      nameStyle && diffName && nameStyle(index)
+      // passed down styles
+      deservesRootStyles && parentStatics && parentStatics[`${prefix}${view.name}`],
+      deservesRootStyles && parentDynamics && parentDynamics[`${prefix}${view.name}`],
     )
 
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (view.styles[className]) {
-          result = mergeStyles(result, view.styles[className](index))
+        // ensure static class styles overwrite dynamic tag/name styles
+        const viewStaticStyles = Flint.styleObjects[view.name]
+        if (viewStaticStyles) {
+          const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
+          if (staticClassStyles) {
+            Object.keys(staticClassStyles).forEach(key => {
+              // check if already in styles, and rewrite to class style
+              if (result[key]) result[key] = staticClassStyles[key]
+            })
+          }
         }
 
-        const styleForClass = classes && classes[`${prefix}${className}`]
-        if (styleForClass) {
-          addClassName(styleForClass)
+        if (view.styles[className]) {
+          result = mergeStyles(result, view.styles[className](index))
         }
       })
     }
 
-    // add static styles (after className checks)
-    // if (classes) {
-    //   const tagClass = classes[`${prefix}${tag}`]
-    //   const nameClass = name != tag && classes[`${prefix}${name}`]
-    //
-    //   if (deservesRootStyles && classes[prefix]) addClassName(classes[prefix])
-    //   if (tagClass) addClassName(tagClass)
-    //   if (nameClass) addClassName(nameClass)
-    // }
-
     // root styles classname
-    // if (deservesRootStyles && view.props.__styleClasses) {
-    //   addClassName(view.props.__styleClasses)
-    // }
+    if (deservesRootStyles && view.props.className) {
+      const selector = `${prefix}${view.props.className}`
+      result = mergeStyles(result, parentStatics[selector], parentDynamics[selector])
+    }
 
     // merge styles [] into {}
     if (Array.isArray(result))

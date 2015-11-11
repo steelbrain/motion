@@ -3,6 +3,7 @@ import classnames from 'classnames'
 import elementStyles from './styles'
 import tags from './tags'
 
+// tags that shouldn't map out to real names
 const divWhitelist = [
   'title',
   'meta',
@@ -88,7 +89,11 @@ function getElement(identifier, viewName, getView) {
   return { fullname, name, key, index, tag, originalTag }
 }
 
-function getProps(viewName, Flint, props, viewProps, name, key, index) {
+function addClassName(props, name) {
+  return props.className ? `${props.className} ${name}` : name
+}
+
+function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTag, key, index) {
   if (props)
     props = niceProps(props)
 
@@ -114,8 +119,21 @@ function getProps(viewName, Flint, props, viewProps, name, key, index) {
   if (props.yield)
     props = Object.assign(props, viewProps, { style: props.style })
 
+  props.__parentStyles = view.styles
+  props.__parentName = viewName
   props.__key = key
   props.__tagName = name
+
+  // this switches the name onto the classname, when you
+  // do tags like <name-h2>, so styles still attach
+  if (typeof tag == 'string' && tag !== name) {
+    props.className = addClassName(props, name)
+  }
+
+  // also add tag to class if its whitelisted
+  if (typeof tag == 'string' && tag != originalTag) {
+    props.className = addClassName(props, tag)
+  }
 
   return props
 }
@@ -125,7 +143,7 @@ export default function createElement(viewName) {
     const view = this
     const Flint = view.Flint
     const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, Flint.getView)
-    props = getProps(viewName, Flint, props, view.props, name, key, index)
+    props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
     return React.createElement(tag, props, ...args)
   }

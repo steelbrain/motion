@@ -3,6 +3,8 @@ import opts from './opts'
 import path from 'path'
 import log from './lib/log'
 
+const LOG = 'cache'
+
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>
@@ -34,7 +36,7 @@ function onDeleteViews(views) {
 const Cache = {
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir)
-    log('cache: baseDir', baseDir)
+    log(LOG, 'baseDir', baseDir)
   },
 
   baseDir() {
@@ -71,7 +73,7 @@ const Cache = {
   remove(file: string) {
     const name = relative(file)
     const state = files[name]
-    log('cache: remove', name)
+    log(LOG, 'remove', name)
     delete files[name]
     onDeleteFile({ file, name, state })
   },
@@ -81,11 +83,11 @@ const Cache = {
     const cFile = files[relative(file)]
     onDeleteViews(_.difference(cFile.views, views))
     cFile.views = views
-    log('cache: setViews', files)
+    log(LOG, 'setViews', files)
   },
 
   setImports(_imports: ImportArray) {
-    log('cache: setImports', _imports)
+    log(LOG, 'setImports', _imports)
     imports = _imports
   },
 
@@ -98,14 +100,14 @@ const Cache = {
   },
 
   getExported() {
-    log('cache', 'getExported', files)
+    log(LOG, 'cache', 'getExported', files)
     return Object.keys(files)
       .map(name => files[name].isExported ? name : null)
       .filter(f => !!f)
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    log('cache: setFileImports', file, imports);
+    log(LOG, 'setFileImports', file, imports);
     let cacheFile = Cache.get(file)
 
     if (!cacheFile)
@@ -126,7 +128,7 @@ const Cache = {
         if (_imports && _imports.length)
           allImports = allImports.concat(_imports)
       })
-      log('cache: getImports: ', allImports)
+      log(LOG, 'getImports: ', allImports)
       return allImports
     }
 

@@ -10,6 +10,8 @@ import { writeJSON, writeFile, rmdir } from '../lib/fns'
 import getMatches from './lib/getMatches'
 import log from '../lib/log'
 
+const LOG = 'externals'
+
 const findRequires = source =>
   getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
 
@@ -17,7 +19,7 @@ const findExternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) != '.')
 
 export async function bundleExternals() {
-  log('npm: bundleExternals')
+  log(LOG, 'bundleExternals')
   const installed = await readInstalled()
   await writeDeps(installed)
   await packExternals()
@@ -25,7 +27,7 @@ export async function bundleExternals() {
 }
 
 export async function installExternals(file, source) {
-  log('installExternals', file)
+  log(LOG, 'installExternals', file)
 
   const found = findExternalRequires(source)
   cache.setFileImports(file, found)
@@ -33,7 +35,7 @@ export async function installExternals(file, source) {
 }
 
 async function packExternals(file, out) {
-  log('npm: pack')
+  log(LOG, 'pack')
   return new Promise((resolve, reject) => {
     webpack({
       entry: opts.get('deps').depsJS,
@@ -53,14 +55,14 @@ async function packExternals(file, out) {
         return reject(err)
       }
 
-      log('npm: pack: finished')
+      log(LOG, 'pack: finished')
       resolve()
     })
   })
 }
 
 async function writeDeps(deps = []) {
-  log('npm: writeDeps:', deps)
+  log(LOG, 'writeDeps:', deps)
   await writeJSON(opts.get('deps').depsJSON, { deps })
   const requireString = deps.map(name => {
     return depRequireString(name, 'packages')

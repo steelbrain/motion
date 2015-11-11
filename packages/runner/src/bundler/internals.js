@@ -11,9 +11,11 @@ import log from '../lib/log'
 import handleError from '../lib/handleError'
 import { writeFile } from '../lib/fns'
 
+const LOG = 'internals'
+
 export async function bundleInternals() {
   try {
-    log('bundleInternals')
+    log(LOG, 'bundleInternals')
     await writeInternalsIn()
     await packInternals()
     onInternalInstalled()
@@ -24,7 +26,7 @@ export async function bundleInternals() {
 }
 
 async function writeInternalsIn() {
-  log('writeInternalsIn')
+  log(LOG, 'writeInternalsIn')
   const files = cache.getExported()
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
@@ -34,11 +36,11 @@ async function writeInternalsIn() {
 
 // TODO: check this in babel to be more accurate
 export async function checkInternals(file, source) {
-  log('checkInternals', file)
+  log(LOG, 'checkInternals', file)
 
   const isExporting = findExports(source)
   const alreadyExported = cache.isExported(file)
-  log('checkInternals: found', isExporting, 'already', alreadyExported)
+  log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported)
 
   cache.setExported(file, isExporting)
 
@@ -52,7 +54,7 @@ export async function checkInternals(file, source) {
 }
 
 function packInternals() {
-  log('packInternals')
+  log(LOG, 'packInternals')
   return new Promise((res, rej) => {
     webpack({
       entry: opts.get('deps').internalsIn,
@@ -70,7 +72,7 @@ function packInternals() {
         return rej(err)
       }
 
-      log('npm: pack: finished')
+      log(LOG, 'pack: finished')
       res()
     })
   })

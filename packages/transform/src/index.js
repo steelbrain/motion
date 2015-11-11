@@ -15,7 +15,8 @@ function viewSelector(name, tag, options) {
   const selTag = `.View${name} ${tag}`
   const selClass = `.View${name} .${tag}`
   const selSelf = `${tag}.View${name}`
-  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf} `
+  const selSelfClass = `.View${name}.${tag}`
+  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf}, ${pre + selSelfClass}`
 }
 
 function hasObjWithProp(node, base, prop) {
@@ -80,11 +81,16 @@ function niceJSXAttributes(name) {
 }
 
 const idFn = x => x
+let log = function() {}
 
 export default function createPlugin(options) {
   if (options.Transformer) {
     // running directly (no user options)
     return FlintPlugin(options)
+  }
+  else {
+    if (options.log)
+      log = options.log
   }
 
   // options
@@ -216,7 +222,6 @@ export default function createPlugin(options) {
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
               let rootTag = '$'
 
-
               // check if child tag is direct root
               const numRoots = viewRootNodes.length
 
@@ -247,14 +252,16 @@ export default function createPlugin(options) {
 
               function getSelector(viewName, tag) {
                 let cleanViewName = viewName.replace('.', '-')
+                tag = tag.replace(/^\$/, '')
 
-                if (shouldStyleTagnameAsRoot || tag == '$')
+                log('styles', 'getSelector', 'viewName', viewName, 'tag', tag)
+                if (shouldStyleTagnameAsRoot && tag == inView.toLowerCase() || tag == '')
                   return viewMainSelector(cleanViewName, options, rootTag)
 
-                tag = tag.replace(/^\$/, '')
                 return viewSelector(cleanViewName, tag, options)
               }
 
+              log('styles', 'rawStyles', rawStyles)
               const stylesheet = StyleSheet.create(rawStyles, {
                 selector: tag => getSelector(viewName, tag)
               })
@@ -273,10 +280,19 @@ export default function createPlugin(options) {
               inView = false
               viewStyles[viewName] = {}
 
+              // inline the static styles as js object for use when needing to override dynamics
+              const stylesObject = t.objectExpression(
+                Object.keys(styles).reduce((acc, key) => {
+                  acc.push(t.property(null, t.literal(key), t.objectExpression(styles[key])))
+                  return acc
+                }, [])
+              )
+
               const expr = t.expressionStatement(
                 t.callExpression(t.identifier('Flint.staticStyles'), [
                   t.literal(viewName),
-                  classNamesObject
+                  classNamesObject,
+                  stylesObject
                 ])
               )
 

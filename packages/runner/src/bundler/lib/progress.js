@@ -19,7 +19,7 @@ function logProgress(tag, name, index, total) {
     return
   }
 
-  log('npm', tag, name)
+  log('bundler', 'logProgress', tag, name)
 
   const out = total ?
     ` ${index+1} of ${total}: ${name}` :
