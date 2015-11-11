@@ -10,7 +10,7 @@ view Label {
   const onBlur = e => {
     focus = false
   }
-  
+
   const onChange = e => {
     newVal = e.target.value
     view.props.onSet(newVal)
@@ -19,7 +19,7 @@ view Label {
     e.stopPropagation()
     view.refs.input.select()
   }
-  
+
   let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}
 
   <input
@@ -27,7 +27,7 @@ view Label {
     sync={newVal}
     class={{ focus }}
     ref="input"
-    size={Math.max(4, view.props.val.length)}
+    size={Math.max(4, view.props.val && view.props.val.length || 0)}
     spellCheck={false}
     onClick={select}
     onFocus={onFocus}
@@ -36,7 +36,7 @@ view Label {
     onChange={onChange}
     {...tabIndex(view.props.editable)}
   />
-  
+
   $input = {
     position: 'absolute',
     top: 0,

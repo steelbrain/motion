@@ -93,6 +93,8 @@ export default function elementStyles(key, view, name, tag, props) {
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
+        if (className[0] == className[0].toUpperCase()) return
+
         // ensure static class styles overwrite dynamic tag/name styles
         const viewStaticStyles = Flint.styleObjects[view.name]
         if (viewStaticStyles) {
@@ -111,11 +113,11 @@ export default function elementStyles(key, view, name, tag, props) {
       })
     }
 
-    // root styles classname
-    if (deservesRootStyles && view.props.className) {
-      const selector = `${prefix}${view.props.className}`
-      result = mergeStyles(result, parentStatics[selector], parentDynamics[selector])
-    }
+    // // root styles classname
+    // if (deservesRootStyles && view.props.className) {
+    //   const selector = `${prefix}${view.props.className}`
+    //   result = mergeStyles(result, parentStatics[selector], parentDynamics[selector])
+    // }
 
     // merge styles [] into {}
     if (Array.isArray(result))

@@ -17,7 +17,7 @@ view Inspector.View {
   let state = {}
   let props = null
   let writeBack = null
-  
+
   let onSet = (write) => {
     console.log('writing', path, write)
     view.props.writeBack(path, write)
@@ -38,7 +38,7 @@ view Inspector.View {
       })
     }
   })
-  
+
   let hasKeys = o => o && Object.keys(o).length > 0
 
   <view>
@@ -79,12 +79,7 @@ view Inspector.View {
 
   $name = {
     fontWeight: 500,
-    paddingLeft: 12,
-    paddingTop: 8,
-    paddingBottom: 2,
-    margin: [-3, 0, 3],
     color: 'rgba(0,0,0,0.8)',
-    fontSize: 14,
   }
 
   $expanded = {

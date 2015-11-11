@@ -5,18 +5,17 @@ function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
 }
 
-function viewMainSelector(name, options) {
+function viewMainSelector(viewName, options) {
   const pre = options.selectorPrefix || ''
-  return `${pre}.View${name}`
+  return `${pre}.View${viewName}`
 }
 
-function viewSelector(name, tag, options) {
+function viewSelector(viewName, tag, options) {
   const pre = options.selectorPrefix || ''
-  const selTag = `.View${name} ${tag}`
-  const selClass = `.View${name} .${tag}`
-  const selSelf = `${tag}.View${name}`
-  const selSelfClass = `.View${name}.${tag}`
-  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelf}, ${pre + selSelfClass}`
+  const selTag = `${tag}.${viewName}`
+  const selClass = `.${viewName}.${tag}`
+  const selSelfClass = `.View${viewName}.${tag}`
+  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelfClass}`
 }
 
 function hasObjWithProp(node, base, prop) {
@@ -234,8 +233,8 @@ export default function createPlugin(options) {
               }
 
               const viewName = inView
-
               const styles = viewStyles[viewName]
+
               if (!styles) return
 
               let rawStyles = {}

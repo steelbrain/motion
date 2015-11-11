@@ -23,7 +23,7 @@ view Leaf {
     key = view.props.label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
     // originally was stream of ||s, but 0 was turning into false
-    data = original 
+    data = original
     if (data === undefined) data = view.props.data
     if (data === undefined) data = {}
     type = getType(data)
@@ -57,7 +57,7 @@ view Leaf {
   const format = key => (
     <Highlighter string={key} highlight={query} />
   )
-  
+
   const fnParams = fn => fn.toString()
     .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
     .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
@@ -81,7 +81,7 @@ view Leaf {
       <expand class="function" if={type == 'Function'}>
         <i>fn ({fnParams(data).join(', ')})</i>
       </expand>
-      
+
       <expand if={type == 'Array'}>
         <type>Array[{data.length}]</type>
       </expand>
@@ -122,14 +122,14 @@ view Leaf {
   const row = {
     flexFlow: 'row'
   }
-  
+
   $label = [row, {
     position: 'relative',
     color: 'rgba(0,0,0,0.8)',
     opacity: 1,
   }]
-  
-  $helper = $null = { color: '#ffff05' }
+
+  $helper = { color: '#ffff05' }
   $boolean = { color: '#32a3cd', fontWeight: 700 }
   $number = { color: '#b92222', marginTop: 2, fontWeight: 500 }
   $string = { color: '#698c17' }
@@ -139,9 +139,9 @@ view Leaf {
     margin: [0],
     fontWeight: 'bold'
   }]
-  
+
   $function = { marginLeft: 10, marginTop: 2, color: '#962eba' }
-  
+
   $colon = { marginTop: 2, marginLeft: 1, fontWeight: 400 }
 
   $name = {

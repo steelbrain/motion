@@ -135,6 +135,8 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
     props.className = addClassName(props, tag)
   }
 
+  props.className = addClassName(props, viewName)
+
   return props
 }
 
