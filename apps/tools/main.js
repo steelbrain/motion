@@ -3,6 +3,7 @@
 
 view Main {
   const internal = window.__isDevingDevTools
+  const showInspector = internal || window.location.search == '?inspect'
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
   <link rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
@@ -10,7 +11,7 @@ view Main {
   <Errors />
   <Installer />
   
-  <Inspector if={internal} />
+  <Inspector if={showInspector} />
   <Name if={internal} />
   <Counter if={internal} />
   <Circles if={internal} />
@@ -75,8 +76,8 @@ view Circle {
     position: 'absolute',
     top: view.props.top,
     left: view.props.left,
-    width: 80, height: 80,
-    borderRadius: 100
+    width: 118, height: 29,
+    borderRadius: 27
   }
   let style = scale =>
     ({ ...base, transform: { scale } })
