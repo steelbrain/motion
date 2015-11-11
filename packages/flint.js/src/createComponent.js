@@ -39,7 +39,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const lastRendered = component.lastRendered
 
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
-        Internal.mountedViews[name].push(component)
+        Internal.mountedViews[name].push(this)
         Internal.viewsAtPath[path] = component
 
         if (lastRendered)
