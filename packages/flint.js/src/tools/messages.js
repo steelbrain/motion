@@ -79,6 +79,7 @@ function TagLoader() {
   let wait = {}
 
   return function(key, next) {
+    // console.log('add', key, 'loading', loading[key])
     let tag = last[key]
 
     if (loading[key]) {
@@ -89,8 +90,11 @@ function TagLoader() {
     loading[key] = true
 
     function afterLoad(newTag) {
+      // console.log('afterLoad', newTag)
       last[key] = newTag
       loading[key] = false
+
+      // console.log('waiting for another?', wait[key], last[key])
       if (wait[key]) {
         wait[key] = false
         next(last[key], afterLoad)
@@ -104,7 +108,8 @@ function TagLoader() {
 let sheetLoad = TagLoader()
 
 function addSheet(name) {
-  sheetLoad(name, function(tag, done) {
+  // console.log('add sheet', name)
+  sheetLoad(name, function(tag, after) {
     if (!tag) {
       let href = `/__/styles/${name}.css`
 
@@ -116,7 +121,7 @@ function addSheet(name) {
       tag = tag || createSheet(name, href)
     }
 
-    replaceTag(tag, 'href', done)
+    replaceTag(tag, 'href', after)
   })
 }
 
@@ -172,32 +177,53 @@ function cloneNode(node) {
   }
 }
 
-function replaceTag(tag, attr, cb) {
+let oldElements = []
+
+function replaceTag(tag, attr, after) {
   if (!tag) return console.error('no tag')
+  oldElements.push(tag)
+
+  // console.log('replace', tag)
 
   let parent = tag.parentNode
-  let clone = cloneNode(tag)
-
+  let sibling = tag.nextSibling
+  let clone = cloneNode(tag, attr)
+  // console.log('clone', clone)
   clone.setAttribute(attr, replaceTime(tag.getAttribute(attr)))
 
   clone.onload = () => {
-    try {
-      parent.removeChild(tag)
-    }
-    catch(e) { /* already removed */ }
-
-    clone.onreadystatechange = null
-    setTimeout(() => cb && cb(clone), 5)
+    removeOld()
+    if (after) after(clone)
   }
 
-  clone.onerror = () => {
-    cb && cb(null)
-  }
+  clone.onerror = () => after && after(null)
 
-  if (parent)
+  if (!parent)
+    console.log('lost parent node')
+  else if (parent.lastChild == tag)
     parent.appendChild(clone)
   else
-    document.head.appendChild(clone)
+    parent.insertBefore(clone, sibling)
+}
+
+function removeOld() {
+  let pending = 0
+
+  for (let i = 0; i < oldElements.length; i++) {
+    let el = oldElements.shift()
+
+    try {
+      el.parentNode.removeChild(el)
+    }
+    catch(e) {
+      pending++
+    }
+
+    if (pending)
+      setTimeout(removeOld, 50)
+  }
+
+  return true
 }
 
 let lastLoadedAt = {}
