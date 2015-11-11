@@ -2,6 +2,7 @@ import reportError from '../lib/reportError'
 
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
+const isLowerCase = s => s.toLowerCase() == s
 
 const pseudos = {
   active: ':active',
@@ -73,8 +74,12 @@ export default function elementStyles(key, view, name, tag, props) {
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
     const nameStyle = diffName && view.styles[name] && view.styles[name](index)
 
-    const parentStatics = Flint.styleObjects[view.props.__parentName]
-    const parentDynamics = view.props.__parentStyles
+    let parentStyles, parentStylesStatic
+
+    if (deservesRootStyles) {
+      parentStyles = view.props.__parentStyles
+      parentStylesStatic = parentStyles && parentStyles._static
+    }
 
     // merge styles
 
@@ -86,14 +91,14 @@ export default function elementStyles(key, view, name, tag, props) {
       // base style
       deservesRootStyles && viewStyle,
       // passed down styles
-      deservesRootStyles && parentStatics && parentStatics[`${prefix}${view.name}`],
-      deservesRootStyles && parentDynamics && parentDynamics[`${prefix}${view.name}`],
+      parentStyles && parentStyles[`${prefix}${view.name}`],
+      parentStylesStatic && parentStylesStatic[view.name],
     )
 
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
-        if (className[0] == className[0].toUpperCase()) return
+        if (!isLowerCase(className[0])) return
 
         // ensure static class styles overwrite dynamic tag/name styles
         const viewStaticStyles = Flint.styleObjects[view.name]
@@ -113,11 +118,13 @@ export default function elementStyles(key, view, name, tag, props) {
       })
     }
 
-    // // root styles classname
-    // if (deservesRootStyles && view.props.className) {
-    //   const selector = `${prefix}${view.props.className}`
-    //   result = mergeStyles(result, parentStatics[selector], parentDynamics[selector])
-    // }
+    // parent $Child classes apply to Child wrapper
+    if (deservesRootStyles && view.props.className) {
+      view.props.className.split(' ').forEach(className => {
+        if (!isLowerCase(className[0])) return
+        result = mergeStyles(result, parentStyles[`${prefix}${className}`], parentStylesStatic[className])
+      })
+    }
 
     // merge styles [] into {}
     if (Array.isArray(result))
