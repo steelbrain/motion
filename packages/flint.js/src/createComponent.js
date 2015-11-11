@@ -1,8 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
 import React from 'react'
 import raf from 'raf'
-// import Radium from 'radium'
-import resolveStyles from 'flint-radium/lib/resolve-styles'
+import Radium from 'flint-radium'
 
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
@@ -280,15 +279,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         const withClass = React.cloneElement(wrappedTags, { className })
 
-        let styled = null
-        let styler = () => resolveStyles(this, withClass)
-
-        if (process.env.production)
-          styled = styler()
-        else
-          try { styled = styler() } catch(e) { return null }
-
-        return styled
+        return withClass
       },
 
       getLastGoodRender() {
@@ -341,7 +332,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       }
     })
 
-    return component
+    return Radium(component)
   }
 }
 
