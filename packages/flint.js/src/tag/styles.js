@@ -100,6 +100,10 @@ export default function elementStyles(key, view, name, tag, props) {
       props.className.split(' ').forEach(className => {
         if (!isLowerCase(className[0])) return
 
+        if (view.styles[className]) {
+          result = mergeStyles(result, view.styles[className](index))
+        }
+
         // ensure static class styles overwrite dynamic tag/name styles
         const viewStaticStyles = Flint.styleObjects[view.name]
         if (viewStaticStyles) {
@@ -107,13 +111,11 @@ export default function elementStyles(key, view, name, tag, props) {
           if (staticClassStyles) {
             Object.keys(staticClassStyles).forEach(key => {
               // check if already in styles, and rewrite to class style
-              if (result[key]) result[key] = staticClassStyles[key]
+              if (result[key]) {
+                result[key] = staticClassStyles[key]
+              }
             })
           }
-        }
-
-        if (view.styles[className]) {
-          result = mergeStyles(result, view.styles[className](index))
         }
       })
     }

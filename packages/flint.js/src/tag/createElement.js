@@ -124,18 +124,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   props.__key = key
   props.__tagName = name
 
-  // this switches the name onto the classname, when you
-  // do tags like <name-h2>, so styles still attach
-  if (typeof tag == 'string' && tag !== name) {
-    props.className = addClassName(props, name)
-  }
-
-  // also add tag to class if its whitelisted
-  if (typeof tag == 'string' && tag != originalTag) {
-    props.className = addClassName(props, tag)
-  }
-
-  props.className = addClassName(props, viewName)
+  props.className = addClassName(props, viewName.replace('.', '-'))
 
   return props
 }
@@ -147,6 +136,18 @@ export default function createElement(viewName) {
     const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, Flint.getView)
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
+
+    // this switches the name onto the classname, when you
+    // do tags like <name-h2>, so styles still attach
+    if (typeof tag == 'string' && tag !== name) {
+      props.className = addClassName(props, name)
+    }
+
+    // also add tag to class if its whitelisted
+    if (typeof tag == 'string' && tag != originalTag) {
+      props.className = addClassName(props, tag)
+    }
+
     return React.createElement(tag, props, ...args)
   }
 }
