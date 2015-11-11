@@ -68,32 +68,33 @@ function sheetSelector(name) {
 }
 
 function removeSheet(name) {
-  let tag = document.querySelector(sheetSelector(view))
+  let tag = document.querySelector(sheetSelector(name))
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
 
+// return namespace for guarding things
 function safeLoader() {
   let last = {}
-  let loading = {}
+  let isLoading = {}
   let wait = {}
 
-  return function guard(key, fn) {
-    let tag = last[key]
-
-    if (loading[key]) {
-      wait[key] = true
+  // guards against multiple scripts loading at once
+  return function guard(key, done) {
+    if (isLoading[key])
       return
-    }
 
-    loading[key] = true
+    let oldTag = last[key]
+    isLoading[key] = true
 
-    fn(tag, newTag => {
+    done(oldTag, newTag => {
+      // clear
       last[key] = newTag
-      loading[key] = false
-      if (wait[key]) {
-        wait[key] = false
-        fn(last[key])
+
+      // if waiting for a newer tag, run that now
+      if (isLoading[key]) {
+        isLoading[key] = false
+        done(last[key], noop)
       }
     })
   }
@@ -102,9 +103,7 @@ function safeLoader() {
 let sheetGuard = safeLoader()
 
 function addSheet(name) {
-  sheetGuard(name, adder)
-
-  function adder(tag, done) {
+  sheetGuard(name, (tag, done) => {
     if (!tag) {
       let href = `/__/styles/${name}.css`
       tag = (
@@ -117,7 +116,7 @@ function addSheet(name) {
     }
 
     replaceTag(tag, 'href', done)
-  }
+  })
 }
 
 function reloadScript(id, opts = {}) {
@@ -242,3 +241,5 @@ function renderFlint() {
     setTimeout(renderFlint, 50)
   }
 }
+
+function noop() {}
