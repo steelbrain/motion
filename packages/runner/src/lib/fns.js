@@ -13,18 +13,26 @@ import handleError from './handleError'
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
+const LOG = 'file'
+const logWrap = (name, fn) => {
+  return (...args) => {
+    log(LOG, name, ...args)
+    return fn(...args)
+  }
+}
+
 // promisify
-const rmdir = Promise.promisify(rimraf)
-const mkdir = Promise.promisify(mkdirp)
-const readdir = Promise.promisify(readdirp)
-const readJSON = Promise.promisify(jf.readFile)
-const writeJSON = Promise.promisify(jf.writeFile)
-const fsReadFile = Promise.promisify(fs.readFile)
-const readFile = path => fsReadFile(path, 'utf-8')
-const writeFile = Promise.promisify(fs.writeFile)
-const touch = Promise.promisify(_touch)
-const copy = Promise.promisify(copyFile)
-const exists = Promise.promisify(fs.stat)
+const rmdir = logWrap('rmdir', Promise.promisify(rimraf))
+const mkdir = logWrap('mkdir', Promise.promisify(mkdirp))
+const readdir = logWrap('readdir', Promise.promisify(readdirp))
+const readJSON = logWrap('readJSON', Promise.promisify(jf.readFile))
+const writeJSON = logWrap('writeJSON', Promise.promisify(jf.writeFile))
+const fsReadFile = logWrap('fsReadFile', Promise.promisify(fs.readFile))
+const readFile = logWrap('',readFile => fsReadFile(path, 'utf-8'))
+const writeFile = logWrap('writeFile', Promise.promisify(fs.writeFile))
+const touch = logWrap('touch', Promise.promisify(_touch))
+const copy = logWrap('copy', Promise.promisify(copyFile))
+const exists = logWrap('exists', Promise.promisify(fs.stat))
 
 const p = path.join
 const recreateDir = (dir) =>

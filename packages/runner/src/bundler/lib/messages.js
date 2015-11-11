@@ -1,5 +1,6 @@
 import bridge from '../../bridge'
 import opts from '../../opts'
+import log from '../../lib/log'
 
 // messaging
 

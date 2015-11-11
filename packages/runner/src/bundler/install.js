@@ -41,7 +41,7 @@ let _isInstalling = false
 export async function installAll(deps) {
   try {
     if (!deps) deps = cache.getImports()
-    log('bundler', 'installing...', deps)
+    log('externals', 'installing...', deps)
 
     // full names keeps paths like 'babel/runtime/etc'
     if (deps.length)
@@ -49,7 +49,7 @@ export async function installAll(deps) {
 
     const prevInstalled = await readWritten()
     const fresh = _.difference(normalize(deps), normalize(prevInstalled), installing)
-    log('bundler', 'installAll() fresh = ', fresh)
+    log('externals', 'installAll() fresh = ', fresh)
 
     // no new ones found
     if (!fresh.length) {
@@ -74,8 +74,9 @@ export async function installAll(deps) {
         onFinish(dep)
       }
       catch(e) {
+        console.error(`Error installing ${dep}`, e.message)
         failed.push(dep)
-        log('bundler', 'package install failed', dep)
+        log('externals', 'package install failed', dep, e.message, e.stack)
         onError(dep, e)
       }
       finally {
