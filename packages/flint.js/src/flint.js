@@ -24,7 +24,7 @@ import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
-import MainView from './views/Main'
+import MainErrorView from './views/Main'
 
 /*
 
@@ -189,8 +189,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         if (Internal.isRendering > 3) return
 
         const main = Internal.views.Main
-        let Main = main && main.component || Internal.lastWorkingViews.Main || MainView
 
+        let goodMain = main || Internal.lastWorkingViews
+        let Main = goodMain ? goodMain.component : MainErrorView
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<Main />)
@@ -203,7 +204,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           ReactDOM.render(<Main />, document.getElementById(browserNode))
         }
 
-        Internal.lastWorkingViews.Main = Main.component
+        Internal.lastWorkingViews.Main = Main
         Internal.firstRender = false
         emitter.emit('afterRender')
         Internal.isRendering = 0
