@@ -59,7 +59,7 @@ const $p = {
     plugins: [flintTransform({
       log,
       basePath: OPTS.dir,
-      selectorPrefix: opts.get('config').selectorPrefix,
+      selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
       writeStyle
     })],
     extra: {

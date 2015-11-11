@@ -8,7 +8,8 @@ export default async function remakeInstallDir(redo) {
   const deps = opts.get('deps')
 
   try {
-    await rmdir(deps.depsJSON)
+    
+    // await rmdir(deps.depsJSON)
 
     if (redo) {
       await writeInstalled([])

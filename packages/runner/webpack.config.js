@@ -6,11 +6,12 @@ var nodeModules = fs.readdirSync('node_modules')
 module.exports = {
   entry: './src/index.js',
   target: 'node',
+  devtool: 'sourcemap',
   output: {
     library: 'flint-runner',
     libraryTarget: 'umd',
     path: path.join(__dirname, 'dist'),
-    filename: 'index.js'
+    filename: 'runner.js'
   },
   node: {
     Buffer: false,
@@ -30,9 +31,10 @@ module.exports = {
     }
   ],
   plugins: [
-    new webpack.IgnorePlugin(/\.(css|less)$/),
-    // new webpack.BannerPlugin('require("source-map-support").install()',
-    //                          { raw: true, entryOnly: false })
+    new webpack.BannerPlugin('require("source-map-support").install();', {
+      raw: true,
+      entryOnly: false
+    })
   ],
   // devtool: 'sourcemap',
   module: {
