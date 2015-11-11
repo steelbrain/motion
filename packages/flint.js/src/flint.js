@@ -187,9 +187,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         log(`render(), Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
-        let Main = Internal.views.Main || Internal.lastWorkingViews.Main
-
-        Main = Main ? Main.component : MainView
+        const main = Internal.views.Main
+        let Main = main && main.component || Internal.lastWorkingViews.Main || MainView
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<Main />)
@@ -202,6 +201,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           ReactDOM.render(<Main />, document.getElementById(browserNode))
         }
 
+        Internal.lastWorkingViews.Main = Main
         Internal.firstRender = false
         emitter.emit('afterRender')
         Internal.isRendering = 0

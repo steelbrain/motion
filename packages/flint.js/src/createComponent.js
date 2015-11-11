@@ -34,13 +34,16 @@ export default function createComponent(Flint, Internal, name, view, options = {
   function createProxyComponent() {
     return React.createClass({
 
-      onMount(path, component, renderedEls) {
-        Internal.mountedViews[name] = Internal.mountedViews[name] || []
-        Internal.mountedViews[name].push(this)
-        Internal.viewsAtPath[path] = this
+      onMount(component) {
+        const path = component.getPath()
+        const lastRendered = component.lastRendered
 
-        if (renderedEls)
-          Internal.lastWorkingRenders[pathWithoutProps(path)] = renderedEls
+        Internal.mountedViews[name] = Internal.mountedViews[name] || []
+        Internal.mountedViews[name].push(component)
+        Internal.viewsAtPath[path] = component
+
+        if (lastRendered)
+          Internal.lastWorkingRenders[pathWithoutProps(path)] = lastRendered
 
         Internal.lastWorkingViews[name] = { component }
       },
@@ -143,7 +146,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production) {
-          this.props._flintOnMount(this.getPath(), this, this.lastRendered)
+          this.props._flintOnMount(this)
         }
       },
 
