@@ -40,9 +40,8 @@ export async function uninstall(rebundle) {
     const success = filterFalse(attempted)
     const final = normalize(_.difference(installed, success))
     log('externals', 'success', success, 'final', final)
-    await writeInstalled(final)
 
-    if (rebundle) {
+    if (rebundle || success.length) {
       await bundleExternals()
     }
 

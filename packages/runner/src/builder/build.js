@@ -13,7 +13,7 @@ export default async function build() {
   log('Building extras, bundler...')
   await *[
     bundler.install(),
-    bundler.bundleInternals()
+    bundler.internals()
   ]
 
   log('Building extras, copy...')

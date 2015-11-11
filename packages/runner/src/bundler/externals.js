@@ -19,8 +19,8 @@ const findExternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) != '.')
 
 export async function bundleExternals() {
-  log(LOG, 'bundleExternals')
   const installed = await readInstalled()
+  log(LOG, 'bundleExternals', installed)
   await writeDeps(installed)
   await packExternals()
   onInstalled()
