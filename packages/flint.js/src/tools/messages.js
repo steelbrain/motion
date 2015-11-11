@@ -73,12 +73,12 @@ function removeSheet(name) {
     tag.parentNode.removeChild(tag)
 }
 
-function safeLoader() {
+function TagLoader() {
   let last = {}
   let loading = {}
   let wait = {}
 
-  return function guard(key, fn) {
+  return function(key, next) {
     let tag = last[key]
 
     if (loading[key]) {
@@ -88,36 +88,36 @@ function safeLoader() {
 
     loading[key] = true
 
-    fn(tag, newTag => {
+    function afterLoad(newTag) {
       last[key] = newTag
       loading[key] = false
       if (wait[key]) {
         wait[key] = false
-        fn(last[key])
+        next(last[key], afterLoad)
       }
-    })
+    }
+
+    next(tag, afterLoad)
   }
 }
 
-let sheetGuard = safeLoader()
+let sheetLoad = TagLoader()
 
 function addSheet(name) {
-  sheetGuard(name, adder)
-
-  function adder(tag, done) {
+  sheetLoad(name, function(tag, done) {
     if (!tag) {
       let href = `/__/styles/${name}.css`
+
       tag = (
         document.querySelector(`link${sheetSelector(name)}`) ||
-        document.querySelector(`link[href="${href}"]`)
+        document.querySelector(`link[href^="${removeTime(href)}"]`)
       )
 
-      if (!tag)
-        tag = createSheet(name, href)
+      tag = tag || createSheet(name, href)
     }
 
     replaceTag(tag, 'href', done)
-  }
+  })
 }
 
 function reloadScript(id, opts = {}) {
@@ -178,16 +178,20 @@ function replaceTag(tag, attr, cb) {
   let parent = tag.parentNode
   let clone = cloneNode(tag)
 
-  clone[attr] = replaceTime(tag.getAttribute(attr))
+  clone.setAttribute(attr, replaceTime(tag.getAttribute(attr)))
 
   clone.onload = () => {
     try {
-      if (parent) parent.removeChild(tag)
+      parent.removeChild(tag)
     }
-    catch(e) { console.log('error removing', tag, attr) }
+    catch(e) { /* already removed */ }
 
     clone.onreadystatechange = null
-    cb && cb(clone)
+    setTimeout(() => cb && cb(clone), 5)
+  }
+
+  clone.onerror = () => {
+    cb && cb(null)
   }
 
   if (parent)
@@ -206,18 +210,17 @@ function replaceScript({ name, timestamp, src }, cb) {
   }
 }
 
-let scriptGuard = safeLoader()
-function addScript(src) {
-  scriptGuard(src, adder)
+let scriptGuard = TagLoader()
 
-  function adder(tag, done) {
+function addScript(src) {
+  scriptGuard(src, function (tag, done) {
     if (!tag)
       tag = document.querySelector(`script[src="${src}"]`)
     if (!tag)
       return
 
     replaceTag(tag, 'src', done)
-  }
+  })
 }
 
 function removeEl(el) {
