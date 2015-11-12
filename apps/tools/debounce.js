@@ -18,7 +18,7 @@ view Debounce {
   // dont update unless we want to
   view.pause()
 
-  on('props', () => {
+  on.props(() => {
     delay = view.props.delay || Delay
     curDelay = curDelay || delay
 

@@ -3,7 +3,7 @@ view Modal {
 
   let children, title, open
 
-  on('props', setMessage)
+  on.props(setMessage)
 
   function setMessage() {
     open = view.props.open
