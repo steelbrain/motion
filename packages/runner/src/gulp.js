@@ -94,11 +94,9 @@ export function buildScripts(afterEach, userStream) {
     watchDeletes()
 
     bridge.on('super:on', ({ file }) => {
-      console.log('super:on')
       return superStream.start(file)
     })
     bridge.on('super:off', () => {
-      console.log('super:off')
       return superStream.stop
     })
   }
