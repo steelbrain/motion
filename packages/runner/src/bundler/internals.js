@@ -60,8 +60,8 @@ function packInternals() {
       entry: opts.get('deps').internalsIn,
       externals: {
         react: 'React',
+        'react-dom': 'ReactDOM',
         bluebird: '_bluebird',
-        'react-dom': 'ReactDOM'
       },
       output: {
         filename: opts.get('deps').internalsOut

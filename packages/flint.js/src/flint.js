@@ -45,6 +45,7 @@ console.warn = (...args) => {
 Promise.longStackTraces()
 
 // GLOBALS
+root.global = root // for radium
 root.regeneratorRuntime = regeneratorRuntime
 root._history = history // for imported modules to use
 root._bluebird = Bluebird // for imported modules to use
@@ -197,7 +198,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         const main = Internal.views.Main
 
         let goodMain = main || Internal.lastWorkingViews
-        let Main = goodMain ? goodMain.component : MainErrorView
+        let Main = goodMain && goodMain.component || MainErrorView
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<Main />)

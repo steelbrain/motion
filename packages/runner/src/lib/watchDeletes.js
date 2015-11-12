@@ -5,18 +5,18 @@ import bridge from '../bridge'
 import { bundleInternals } from '../bundler/internals'
 import handleError from '../lib/handleError'
 import log from '../lib/log'
-import { p, rmdir } from './fns'
+import { p, rm } from './fns'
 
 async function deleteJS(view) {
   const file = p(OPTS.outDir, view + '.js')
   log('delete js', file)
-  await rmdir(file)
+  await rm(file)
 }
 
 async function deleteStyle(view) {
   const file = p(opts.get('styleDir'), view + '.css')
   log('delete style', file)
-  await rmdir(file)
+  await rm(file)
 }
 
 export default function watchDeletes() {

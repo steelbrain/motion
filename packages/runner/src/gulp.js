@@ -17,7 +17,7 @@ import babel from './lib/gulp-babel'
 import opts from './opts'
 import log from './lib/log'
 import writeStyle from './lib/writeStyle'
-import { p, rmdir } from './lib/fns'
+import { p } from './lib/fns'
 
 const $ = loadPlugins()
 let lastSavedTimestamp = {}

@@ -5,6 +5,7 @@ import rmFlintExternals from './rmFlintExternals'
  // remove flint externals
 
 export default function normalize(deps) {
+  if (!deps) return []
   return rmFlintExternals(_.uniq(deps.map(replaceSubPath)))
 }
 
