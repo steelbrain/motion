@@ -101,8 +101,7 @@ function On(view) {
     // delay/every
     if (name == 'delay' || name == 'every') {
       let number = scope
-      scope = view
-      return finish({ scope, name, number, cb })
+      return finish({ view, name, number, cb })
     }
 
     // callback with no scope
