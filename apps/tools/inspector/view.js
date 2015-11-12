@@ -5,9 +5,8 @@ function pathToName(path) {
   return p[p.length - 1].split('.')[0]
 }
 
-let filterProps = props => {
-  ['if', 'repeat', 'style', '__key', '__tagName'].map(name => { delete props[name] })
-  console.log('props are', props)
+function filterProps(props) {
+  ['if', 'repeat', 'style', '__key', '__tagName', '_flintOnMount'].map(name => { delete props[name] })
   return props
 }
 
@@ -19,7 +18,6 @@ view Inspector.View {
   let writeBack = null
 
   let onSet = (write) => {
-    console.log('writing', path, write)
     view.props.writeBack(path, write)
   }
 
@@ -62,24 +60,26 @@ view Inspector.View {
     margin: 10,
     minWidth: 220,
     fontSize: 12,
-    borderRadius: 2,
     userSelect: 'none',
     cursor: 'default',
     background: '#fff',
-    boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.1)',
+    boxShadow: '0px 2px 16px rgba(0,0,0,0.1)',
     border: '1px solid #ccc',
-    borderRadius: 4,
+    borderRadius: 5,
     color: '#333',
   }
 
   $Close = {
     top: -5,
-    right: 0,
+    right: -5,
+    fontSize: 16
   }
 
   $name = {
-    fontWeight: 500,
+    fontWeight: 400,
     color: 'rgba(0,0,0,0.8)',
+    padding: 8,
+    fontSize: 14
   }
 
   $expanded = {
@@ -104,9 +104,6 @@ view Inspector.View {
   }
 
   $props = {
-    borderBottom: '1px solid rgba(0,0,0,0.06)',
-    boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.06)',
-    paddingBottom: 8,
-    marginBottom: 8
+    marginBottom: 2
   }
 }

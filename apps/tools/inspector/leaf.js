@@ -24,11 +24,10 @@ view Leaf {
     key = view.props.label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
     // originally was stream of ||s, but 0 was turning into false
-    data = original
+    data = view.props.data
 
     if (data)
       dataKeys = Object.keys(data).sort()
-        .filter(x => x.indexOf('_flint') != 0)
 
     if (data === undefined) data = view.props.data
     if (data === undefined) data = {}
@@ -55,7 +54,6 @@ view Leaf {
     e.stopPropagation()
   }
 
-  console.log('leaf edit', view.props.editable)
   const getLeafKey = (key, value) => isPrimitive(value) ?
     (key + ':' + md5(String(key))) :
     (key + '[' + getType(value) + ']')
@@ -122,7 +120,8 @@ view Leaf {
   </leaf>
 
   $leaf = {
-    padding: [1, 0]
+    padding: [1, 0],
+    fontSize: 13
   }
 
   const row = {
@@ -133,6 +132,7 @@ view Leaf {
     position: 'relative',
     color: 'rgba(0,0,0,0.8)',
     opacity: 1,
+    alignItems: 'center'
   }]
 
   $helper = { color: '#ffff05' }
@@ -148,13 +148,15 @@ view Leaf {
 
   $function = { marginLeft: 10, marginTop: 2, color: '#962eba' }
 
-  $colon = { marginTop: 2, marginLeft: 1, fontWeight: 400 }
+  $colon = {
+    opacity: 0.3,
+    color: '#000'
+  }
 
   $name = {
     color: "#ff2f2f",
-    fontWeight: 300,
-    fontSize: 13,
-    margin: [0]
+    fontWeight: 400,
+    margin: ['auto', 0]
   }
 
   $expand = [row, {
@@ -162,7 +164,7 @@ view Leaf {
 
   $value = [row, {
     position: 'relative',
-    margin: [3, 4]
+    margin: [0, 4]
   }]
 
   $children = {

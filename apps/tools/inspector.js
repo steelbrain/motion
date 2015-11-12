@@ -101,7 +101,6 @@ view Inspector {
       writeBack={write}
       onClose={e => close(_, e)}
     />
-    <br />
     <Inspector.View
       if={temp}
       path={temp}

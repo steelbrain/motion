@@ -6,11 +6,11 @@ view Main {
   const showInspector = internal || window.location.search == '?inspect'
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
-  <link rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
+  <link if={!internal} rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
 
   <Errors />
   <Installer />
-  
+
   <Inspector if={showInspector} />
   <Name if={internal} />
   <Counter if={internal} />
