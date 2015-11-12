@@ -1,4 +1,4 @@
-import { rmdir, touch, mkdir, log } from '../../lib/fns'
+import { rm, touch, mkdir, log } from '../../lib/fns'
 import writeInstalled from './writeInstalled'
 import handleError from '../../lib/handleError'
 import opts from '../../opts'
@@ -8,20 +8,23 @@ export default async function remakeInstallDir(redo) {
   const deps = opts.get('deps')
 
   try {
+    await mkdir(deps.dir)
+
     if (redo) {
       await writeInstalled([])
-
-      try {
-        await rmdir(deps.dir)
-      }
-      catch(e) {}
+      await* [
+        rm(deps.externalsIn),
+        rm(deps.externalsOut),
+        rm(deps.internalsIn),
+        rm(deps.internalsOut),
+      ]
     }
 
-    await mkdir(deps.dir)
     await* [
       touch(deps.externalsIn),
       touch(deps.externalsOut),
-      touch(deps.internalsOut)
+      touch(deps.internalsIn),
+      touch(deps.internalsOut),
     ]
 
     log('bundler', 'remakeInstallDir done')

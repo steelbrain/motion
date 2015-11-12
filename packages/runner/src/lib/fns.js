@@ -22,7 +22,7 @@ const logWrap = (name, fn) => {
 }
 
 // promisify
-const rmdir = logWrap('rmdir', Promise.promisify(rimraf))
+const rm = logWrap('rm', Promise.promisify(rimraf))
 const mkdir = logWrap('mkdir', Promise.promisify(mkdirp))
 const readdir = logWrap('readdir', Promise.promisify(readdirp))
 const readJSON = logWrap('readJSON', Promise.promisify(jf.readFile))
@@ -54,7 +54,7 @@ export default {
   p,
   path,
   mkdir,
-  rmdir,
+  rm,
   copy,
   recreateDir,
   readdir,

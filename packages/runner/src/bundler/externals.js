@@ -6,7 +6,7 @@ import opts from '../opts'
 import cache from '../cache'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
-import { writeJSON, writeFile, rmdir } from '../lib/fns'
+import { writeJSON, writeFile } from '../lib/fns'
 import getMatches from './lib/getMatches'
 import log from '../lib/log'
 
@@ -41,8 +41,8 @@ async function packExternals(file, out) {
       entry: opts.get('deps').externalsIn,
       externals: {
         react: 'React',
+        'react-dom': 'ReactDOM',
         bluebird: '_bluebird',
-        'react-dom': 'ReactDOM'
       },
       output: {
         filename: opts.get('deps').externalsOut
