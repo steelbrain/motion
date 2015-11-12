@@ -1,10 +1,16 @@
 view Label {
+  let input = null
   let focus, newVal
 
+  on.props(() => {
+    newVal = view.props.val
+  })
+  
   const onFocus = e => {
     if (!view.props.editable) return
     focus = true
-    e => e.target.select()
+    e.stopPropagation()
+    e.target.select()
   }
 
   const onBlur = e => {
@@ -13,11 +19,11 @@ view Label {
 
   const onChange = e => {
     newVal = e.target.value
+    
+    // todo: debate
+    if (newVal === 'false') newVal = false
+    if (newVal === 'true') newVal = true
     view.props.onSet(newVal)
-  }
-  const select = e => {
-    e.stopPropagation()
-    view.refs.input.select()
   }
 
   let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}
@@ -26,10 +32,9 @@ view Label {
     defaultValue={String(view.props.val)}
     sync={newVal}
     class={{ focus }}
-    ref="input"
     size={Math.max(4, view.props.val && view.props.val.length || 0)}
     spellCheck={false}
-    onClick={select}
+    onMouseUp={onFocus}
     onFocus={onFocus}
     onEnter={onBlur}
     onBlur={onBlur}

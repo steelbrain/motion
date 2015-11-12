@@ -8,12 +8,14 @@
   "scripts": {},
   "dependencies": {
     "clone": "^1.0.2",
+    "ellipsize": "0.0.2",
     "events": "^1.1.0",
     "md5-o-matic": "^0.1.1",
     "mouse-event-offset": "^3.0.2",
     "react": "^0.14.2",
     "react-motion": "^0.3.1",
-    "rethinkdb-websocket-client": "^0.4.4"
+    "rethinkdb-websocket-client": "^0.4.4",
+    "underscore": "^1.8.3"
   },
   "installed": [
     "md5-o-matic"

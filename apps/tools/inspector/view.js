@@ -1,4 +1,5 @@
 import clone from 'clone'
+import under from 'underscore'
 
 function pathToName(path) {
   let p = path.split(',')
@@ -6,8 +7,10 @@ function pathToName(path) {
 }
 
 function filterProps(props) {
-  ['if', 'repeat', 'style', '__key', '__tagName', '_flintOnMount'].map(name => { delete props[name] })
-  return props
+  let omit = ['if', 'repeat', 'style', 
+              '__key', '__tagName', '_flintOnMount',
+              '__parentName', '__parentStyles']
+  return under.omit.apply(null, [props].concat(omit))
 }
 
 view Inspector.View {
@@ -29,7 +32,7 @@ view Inspector.View {
       name = pathToName(path)
 
       inspect(path, (_props, _state, _wb) => {
-        props = filterProps(clone(_props || {}))
+        props = filterProps(_props || {})
         state = _state || {}
         writeBack = _wb
         view.update()
@@ -42,9 +45,11 @@ view Inspector.View {
   <view>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <name>{name}</name>
+    <none if={!hasKeys(props)}>No Props</none>
     <Inspector.Section title="Props" if={hasKeys(props)} class="props">
       <Tree editable={false} data={props} />
     </Inspector.Section>
+    <none if={!hasKeys(state)}>No state</none>
     <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
         editable={true}
@@ -53,6 +58,16 @@ view Inspector.View {
       />
     </Inspector.Section>
   </view>
+  
+  const bg = 250
+  $none = {
+    fontWeight: 500,
+    color: '#666',
+    background: `rgba(${bg}, ${bg}, ${bg}, 1)`,
+    flexFlow: 'row',
+    paddingLeft: 18,
+    paddingTop: 1, paddingBottom: 1,
+  }
 
   $view = {
     position: 'relative',

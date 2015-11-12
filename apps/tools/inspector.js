@@ -81,22 +81,26 @@ view Inspector {
     }
     else {
       views.push(path)
-      hoverOff()
-      // let reHover = on.mousemove(hover, () => reHover())
       view.update()
     }
     return false
+  }
+  
+  const hover = () => {
+    hoverOff = on.mousemove(window, mouseMove)
   }
 
   function showInspect() {
     inspect(findPath(lastTarget))
     hudActive = true
+    hover()
     clickOff = on.click(window, glue)
   }
 
   function hideInspect() {
     _Flint.isInspecting = false
     hideHighlight()
+    hoverOff()
     hudActive = false
     clickOff()
     removeTemp()
@@ -119,9 +123,6 @@ view Inspector {
     view.update()
   }
 
-  const hover = () => {
-    hoverOff = on.mousemove(window, mouseMove)
-  }
 
   hover()
 

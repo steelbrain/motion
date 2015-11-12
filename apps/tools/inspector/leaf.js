@@ -1,6 +1,6 @@
 import md5 from 'md5-o-matic'
 import getType from '../lib/getType'
-
+import ellipsize from 'ellipsize'
 const PATH_PREFIX = '.root.'
 
 const contains = (string, substring) => string.indexOf(substring) !== -1
@@ -93,7 +93,12 @@ view Leaf {
         <type>{'{}   ' + dataKeys.length + ' keys'}</type>
       </expand>
       <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
-        {format(String(data))}
+        <str if={type.toLowerCase() == 'string'}>
+          {format(ellipsize(String(data), 25))}
+        </str>
+        <else if={type.toLowerCase() != 'string'}>
+          {format(String(data))}
+        </else>
         {label('val', data, key, view.props.editable)}
       </value>
     </label>
