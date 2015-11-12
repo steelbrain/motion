@@ -29,7 +29,7 @@ function addListener({ root, scope, name, number, cb }) {
     onUnmount(scope, () => active = false)
   }
 
-  const target = (root || scope)
+  const target = (scope || root)
   const listener = target.addEventListener(name, cb)
   const removeListener = target.removeEventListener.bind(null, name, cb)
 
@@ -55,11 +55,13 @@ function hasEvents(events) {
   return events && typeof events.mount != 'undefined' && typeof events.unmount != 'undefined'
 }
 
-function onCb({ scope, name, number, cb }) {
-  const finish = (...fargs) => cb && cb(...fargs)
-  const events = scope && scope.events
+const viewEvents = ['mount', 'unmount', 'change', 'render', 'props']
 
-  if (events && ['mount', 'unmount', 'change', 'render', 'props'].indexOf(name) >= 0) {
+function onCb({ view, scope, name, number, cb }) {
+  const finish = (...fargs) => cb && cb(...fargs)
+  const events = view && view.events
+
+  if (events && viewEvents.indexOf(name) >= 0) {
     if (events && events[name] != 'undefined') {
       ensureQueue(events, name)
       events[name].push(finish)
@@ -74,13 +76,15 @@ function onCb({ scope, name, number, cb }) {
     let listener
 
     events.mount.push(() => {
-      listener = addListener({ scope, root: getRoot(scope), name, number, cb: finish })
+      listener = addListener({ scope, root: getRoot(view), name, number, cb: finish })
     })
 
-    if (typeof number == 'undefined') // number = setTimeout = we just push unmount event right in addListener
+    // number = setTimeout = we just push unmount event right in addListener
+    if (typeof number == 'undefined') {
       events.unmount.push(() => {
-          removeListener({ scope, root: getRoot(scope), name, cb: finish })
+        removeListener({ scope, root: getRoot(view), name, cb: finish })
       })
+    }
 
     return listener
   }
@@ -92,40 +96,25 @@ function finish(opts) {
   return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
 }
 
-function On(parentScope) {
-  this.run = (name, scope, cb, number) => {
+function On(view) {
+  this.run = (name, scope, cb) => {
     // delay/every
     if (name == 'delay' || name == 'every') {
-      // from view
-      if (number) {
-        let realCb = number
-        number = cb
-        cb = realCb
-      }
-      else {
-        number = scope
-      }
-
+      let number = scope
+      scope = view
       return finish({ scope, name, number, cb })
     }
 
     // callback with no scope
-    else if (typeof name == 'function') {
-      cb = name
-      name = scope
+    else if (typeof scope == 'function') {
+      cb = scope
       scope = root
-    }
-
-    // no scope
-    else if (typeof name == 'undefined') {
-      name = scope
-      scope = parentScope || root
     }
 
     if (typeof name != 'string')
       throw new Error("When using on(), you must pass a name, like on('scroll')")
 
-    return finish({ scope, name, cb })
+    return finish({ scope, name, cb, view })
   }
 }
 
@@ -138,7 +127,9 @@ const proto = name => {
 }
 
 // custom events
-proto('event')
+On.prototype.event = function(name, scope, cb, number) {
+  this.run(name, scope, cb, number)
+}
 
 // flint
 proto('delay')
