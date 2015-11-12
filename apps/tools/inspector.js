@@ -3,11 +3,30 @@ const setLocal = (k,v) =>
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
+const round = Math.round
+
+let highlighter
+
+function positionHighlight(node) {
+  const bounds = node.getBoundingClientRect()
+  highlighter.setAttribute('style', `
+    top: ${round(bounds.top)}px;
+    left: ${round(bounds.left)}px;
+    width: ${round(bounds.right - bounds.left)}px;
+    height: ${round(bounds.bottom - bounds.top)}px;
+  `)
+}
+
+function hideHighlight() {
+  highlighter.setAttribute('style', '')
+}
+
 function findPath(node) {
   if (!node || !node.getAttribute) return null
   const flintid = node.__flintID
-  if (flintid) return flintid
-  else return findPath(node.parentNode)
+  if (!flintid) return findPath(node.parentNode)
+  positionHighlight(node)
+  return flintid
 }
 
 view Inspector {
@@ -20,9 +39,18 @@ view Inspector {
   let clickOff
   let keys = {}
   let lastTarget = null
+  let hoverOff
+
+  on.mount(() => {
+    if (highlighter) return
+    highlighter = document.createElement('div')
+    highlighter.className = "_flintHighlighter"
+    document.body.appendChild(highlighter)
+  })
 
   function inspect(path) {
     if (!path || path === temp) return
+    _Flint.isInspecting = true
     temp = path
     view.update()
   }
@@ -50,8 +78,11 @@ view Inspector {
     /* toggle whether views has path */
     if (views.indexOf(path) > -1) {
       close(path)
-    } else {
+    }
+    else {
       views.push(path)
+      hoverOff()
+      // let reHover = on.mousemove(hover, () => reHover())
       view.update()
     }
     return false
@@ -64,17 +95,17 @@ view Inspector {
   }
 
   function hideInspect() {
+    _Flint.isInspecting = false
+    hideHighlight()
     hudActive = false
-    clickOff && clickOff()
+    clickOff()
     removeTemp()
   }
 
   function write(path, data) {
-    console.log('writing', path, data)
     const name  = data[1][0]
     const current = _Flint.getCache[path][name]
     let value = data[1][1]
-    console.log('current is', current)
 
     if (typeof current == 'number') {
       value = +value
@@ -88,8 +119,13 @@ view Inspector {
     view.update()
   }
 
+  const hover = () => {
+    hoverOff = on.mousemove(window, mouseMove)
+  }
+
+  hover()
+
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
-  let hoverOff = on.mousemove(window, mouseMove)
 
   on.keydown(window, isAlt(showInspect))
   on.keyup(window, isAlt(hideInspect))

@@ -1,5 +1,12 @@
 /* flex box */
 
+._flintHighlighter {
+  background: rgba(0,0,200,0.1);
+  position: fixed;
+  z-index: 2147483646;
+  pointer-events: none;
+}
+
 #FLINTERROR {
   position: absolute;
   top: 0;

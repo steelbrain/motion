@@ -119,6 +119,15 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   if (props.yield)
     props = Object.assign(props, viewProps, { style: props.style })
 
+  if (props.onClick) {
+    const originalOnClick = props.onClick
+
+    props.onClick = function(...args) {
+      if (_Flint.isInspecting) return false
+      return originalOnClick.call(this, ...args)
+    }
+  }
+
   props.__parentStyles = view.styles
   props.__parentName = viewName
   props.__key = key

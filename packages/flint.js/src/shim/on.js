@@ -6,7 +6,18 @@ function onUnmount(scope, cb) {
   scope.events.unmount.push(cb)
 }
 
-function addListener({ root, scope, name, number, cb }) {
+let removeByUids = {}
+let uid = 0
+function getUid() { return uid++ % Number.MAX_VALUE }
+function unlistenFromUid(uid) {
+  return () => {
+    if (removeByUids[uid]) removeByUids[uid]()
+    else throw new Error("Could not remove listener yet, view hasn't mounted!")
+    delete removeByUids[uid]
+  }
+}
+
+function addListener({ root, scope, name, number, cb, uid }) {
   if (name == 'delay') { // on('delay', 400, cb)
     let timer = setTimeout(cb, number)
     onUnmount(scope, () => clearTimeout(timer))
@@ -27,6 +38,7 @@ function addListener({ root, scope, name, number, cb }) {
     })
     loop()
     onUnmount(scope, () => active = false)
+    return
   }
 
   const target = (scope || root)
@@ -74,15 +86,18 @@ function onCb({ view, scope, name, number, cb }) {
     ensureQueue(events, 'mount', 'unmount')
 
     let listener
-    let eventFn = () => addListener({ scope, root: getRoot(view), name, number, cb: finish })
+    let eventFn = uid => {
+      return removeByUids[uid] = addListener({ scope, root: getRoot(view), name, number, cb: finish })
+    }
 
     // attach to mount depending
     if (view._isMounted)
       listener = eventFn()
-    else
-      events.mount.push(() => {
-        listener = eventFn()
-      })
+    else {
+      let uid = getUid()
+      listener = unlistenFromUid(uid)
+      events.mount.push(() => eventFn(uid))
+    }
 
     // number = setTimeout = we just push unmount event right in addListener
     if (typeof number == 'undefined') {
@@ -91,6 +106,7 @@ function onCb({ view, scope, name, number, cb }) {
       })
     }
 
+    console.log('returning', name, listener)
     return listener
   }
 
@@ -126,13 +142,13 @@ root.On = On//TODO
 
 const proto = name => {
   On.prototype[name] = function(scope, cb, number) {
-    this.run(name, scope, cb, number)
+    return this.run(name, scope, cb, number)
   }
 }
 
 // custom events
 On.prototype.event = function(name, scope, cb, number) {
-  this.run(name, scope, cb, number)
+  return this.run(name, scope, cb, number)
 }
 
 // flint
