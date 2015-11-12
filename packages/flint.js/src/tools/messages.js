@@ -26,14 +26,14 @@ export default function run(browser, opts) {
     },
 
     'compile:error': msg => {
-      compileError(msg.error);
+      compileError(msg.error)
     },
 
     'compile:success': msg => {
       compileSuccess()
     },
 
-    'packages:reload': reloadScript('__flintPackages'),
+    'packages:reload': reloadScript('__flintExternals'),
     'internals:reload': reloadScript('__flintInternals', { reloadAll: true }),
 
     'file:delete': file => {
@@ -45,32 +45,12 @@ export default function run(browser, opts) {
     message = JSON.parse(message.data)
     if (!message) return
 
-    const action = actions[message._type];
-
-    if (action)
-      action(message)
+    const action = actions[message._type]
+    if (action) action(message)
 
     browser.data = message
     browser.emitter.emit(message._type)
   }
-}
-
-function createSheet(name, href) {
-  let tag = document.createElement('link')
-  tag.href = href
-  tag.rel = "stylesheet"
-  tag.class = name
-  return tag
-}
-
-function sheetSelector(name) {
-  return `.Style${name}`
-}
-
-function removeSheet(name) {
-  let tag = document.querySelector(sheetSelector(name))
-  if (tag && tag.parentNode)
-    tag.parentNode.removeChild(tag)
 }
 
 function TagLoader() {
@@ -78,8 +58,7 @@ function TagLoader() {
   let loading = {}
   let wait = {}
 
-  return function(key, next) {
-    // console.log('add', key, 'loading', loading[key])
+  return function(key, load) {
     let tag = last[key]
 
     if (loading[key]) {
@@ -90,120 +69,62 @@ function TagLoader() {
     loading[key] = true
 
     function afterLoad(newTag) {
-      // console.log('afterLoad', newTag)
       last[key] = newTag
       loading[key] = false
 
-      // console.log('waiting for another?', wait[key], last[key])
       if (wait[key]) {
         wait[key] = false
-        next(last[key], afterLoad)
+        load(last[key], afterLoad)
       }
     }
 
-    next(tag, afterLoad)
+    load(tag, afterLoad)
   }
 }
 
-let sheetLoad = TagLoader()
+const scrLoad = TagLoader()
+const cssLoad = TagLoader()
+
+function addScript(src) {
+  scrLoad(src, (lastTag, done) => {
+    lastTag = lastTag || document.querySelector(`script[src^="${removeTime(src)}"]`)
+    replaceTag(lastTag, 'src', done)
+  })
+}
 
 function addSheet(name) {
-  // console.log('add sheet', name)
-  sheetLoad(name, function(tag, after) {
-    if (!tag) {
-      let href = `/__/styles/${name}.css`
-
-      tag = (
-        document.querySelector(`link${sheetSelector(name)}`) ||
-        document.querySelector(`link[href^="${removeTime(href)}"]`)
-      )
-
-      tag = tag || createSheet(name, href)
-    }
-
-    replaceTag(tag, 'href', after)
+  cssLoad(name, (lastTag, done) => {
+    lastTag = lastTag || document.querySelector(`link[href^="${removeTime(`/__/styles/${name}.css`)}"]`)
+    replaceTag(lastTag, 'href', done)
   })
-}
-
-function reloadScript(id, opts = {}) {
-  return () => {
-    const el = document.getElementById(id)
-    if (!el) return
-
-    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
-    const tag = replaceTag(el, 'src', finish)
-  }
-}
-
-function removeTime(str) {
-  return str.replace(/\?[0-9]+$/, '')
-}
-
-function replaceTime(str) {
-  return removeTime(str) + `?${Date.now()}`
-}
-
-function reloadAllScripts() {
-  const scripts = document.querySelectorAll('.__flintScript')
-
-  if (!scripts.length)
-    return
-
-  let total = scripts.length
-
-  _Flint.resetViewState()
-
-  ;[].forEach.call(scripts, script => {
-    replaceTag(script, 'src')
-  })
-
-  // TODO: this should wait for all tags to be done loading
-  setTimeout(Flint.render, 10)
-}
-
-function cloneNode(node) {
-  if (node.tagName != 'SCRIPT') {
-    return node.cloneNode(false)
-  }
-  else {
-    let clone = document.createElement('script')
-
-    const attrs = node.attributes
-    for (let i = 0; i < attrs.length; i++)
-       if (attrs[i].name != 'src')
-         clone.setAttribute(attrs[i].name, attrs[i].value)
-
-    return clone
-  }
 }
 
 let oldElements = []
 
 function replaceTag(tag, attr, after) {
-  if (!tag) return console.error('no tag')
+  if (!tag) return
+
   oldElements.push(tag)
 
-  // console.log('replace', tag)
-
   let parent = tag.parentNode
-  let sibling = tag.nextSibling
   let clone = cloneNode(tag, attr)
-  // console.log('clone', clone)
-  clone.setAttribute(attr, replaceTime(tag.getAttribute(attr)))
 
+  clone.onerror = () => after && after()
   clone.onload = () => {
-    removeOld()
-    if (after) after(clone)
+    after && after(clone)
+    setTimeout(removeOld, 5)
   }
 
-  clone.onerror = () => after && after(null)
+  if (!parent) {
+    if (tag.nodeName == 'SCRIPT')
+      document.body.appendChild(clone)
+    else
+      document.head.appendChild(clone)
 
-  if (!parent)
-    console.log('lost parent node')
-  else if (parent.lastChild == tag)
-    parent.appendChild(clone)
-  else
-    parent.insertBefore(clone, sibling)
+    return
+  }
+
+  parent.appendChild(clone)
 }
 
 function removeOld() {
@@ -226,32 +147,37 @@ function removeOld() {
   return true
 }
 
-let lastLoadedAt = {}
-function replaceScript({ name, timestamp, src }, cb) {
-  const jsName = removeFlintExt(name)
+function reloadScript(id, opts = {}) {
+  return () => {
+    const el = document.getElementById(id)
+    if (!el) return
 
-  if (!lastLoadedAt[jsName] || lastLoadedAt[jsName] < timestamp) {
-    lastLoadedAt[jsName] = timestamp
-    addScript(src || `/_${jsName}`)
+    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
+    const tag = replaceTag(el, 'src', finish)
   }
 }
 
-let scriptGuard = TagLoader()
-
-function addScript(src) {
-  scriptGuard(src, function (tag, done) {
-    if (!tag)
-      tag = document.querySelector(`script[src="${src}"]`)
-    if (!tag)
-      return
-
-    replaceTag(tag, 'src', done)
-  })
+function replaceScript({ name, timestamp, src }, cb) {
+  const jsName = removeFlintExt(name)
+  addScript(src || `/_${jsName}`)
 }
 
-function removeEl(el) {
-  var parent = el.parentNode
-  parent.removeChild(el)
+function reloadAllScripts() {
+  const scripts = document.querySelectorAll('.__flintScript')
+
+  if (!scripts.length)
+    return
+
+  let total = scripts.length
+
+  _Flint.resetViewState()
+
+  ;[].forEach.call(scripts, script => {
+    replaceTag(script, 'src')
+  })
+
+  // TODO: this should wait for all tags to be done loading
+  setTimeout(Flint.render, 10)
 }
 
 let renderAttempts = 0
@@ -270,4 +196,50 @@ function renderFlint() {
     renderAttempts++
     setTimeout(renderFlint, 50)
   }
+}
+
+function removeTime(str) {
+  return str.replace(/\?[0-9]+$/, '')
+}
+
+function replaceTime(str) {
+  return removeTime(str) + `?${Date.now()}`
+}
+
+function createSheet(name, href) {
+  let tag = document.createElement('link')
+  tag.href = href
+  tag.rel = "stylesheet"
+  tag.class = name
+  return tag
+}
+
+function cloneNode(node, attr) {
+  let clone
+
+  if (node.tagName != 'SCRIPT') {
+    clone = node.cloneNode(false)
+  }
+  else {
+    clone = document.createElement('script')
+
+    const attrs = node.attributes
+    for (let i = 0; i < attrs.length; i++)
+       if (attrs[i].name != 'src')
+         clone.setAttribute(attrs[i].name, attrs[i].value)
+  }
+
+  clone.setAttribute(attr, replaceTime(node.getAttribute(attr)))
+
+  return clone
+}
+
+function sheetSelector(name) {
+  return `.Style${name}`
+}
+
+function removeSheet(name) {
+  let tag = document.querySelector(sheetSelector(name))
+  if (tag && tag.parentNode)
+    tag.parentNode.removeChild(tag)
 }

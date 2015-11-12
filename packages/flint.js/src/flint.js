@@ -26,6 +26,12 @@ import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
 import MainErrorView from './views/Main'
 
+const originalWarn = console.warn
+console.warn = (...args) => {
+  if (args[0] && args[0].indexOf('Radium:') == 0) return
+  originalWarn.call(console, ...args)
+}
+
 /*
 
   Welcome to Flint!

@@ -43,9 +43,8 @@ function setAll(opts) {
   OPTS.deps.dir = p(OPTS.internalDir, 'deps')
   OPTS.deps.internalsIn = p(OPTS.deps.dir, 'internals.in.js')
   OPTS.deps.internalsOut = p(OPTS.deps.dir, 'internals.js')
-  OPTS.deps.depsJS = p(OPTS.deps.dir, 'deps.js')
-  OPTS.deps.depsJSON = p(OPTS.deps.dir, 'deps.json')
-  OPTS.deps.packagesJS = p(OPTS.deps.dir, 'packages.js')
+  OPTS.deps.externalsIn = p(OPTS.deps.dir, 'externals.in.js')
+  OPTS.deps.externalsOut = p(OPTS.deps.dir, 'externals.js')
 
   OPTS.configFile = p(OPTS.flintDir, 'flint.json')
   OPTS.stateFile = p(OPTS.internalDir, 'state.json')

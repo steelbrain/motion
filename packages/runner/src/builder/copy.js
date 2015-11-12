@@ -33,8 +33,8 @@ export async function app() {
   const appFile = p(buildDir, opts.get('saneName') + '.js')
 
   const inFiles = await *[
-    readFile(p(opts.get('depsDir'), 'packages.js')),
-    readFile(p(opts.get('depsDir'), 'internals.js')),
+    readFile(opts.get('deps').externalsOut),
+    readFile(opts.get('deps').internalsOut),
     readFile(appFile),
   ]
 

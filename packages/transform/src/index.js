@@ -418,6 +418,11 @@ export default function createPlugin(options) {
             if (isInView(scope)) {
               if (isMutativeArrayFunc(node)) {
                 const callee = node.callee
+
+                // avoid doing stuff on Object.keys(x).sort()
+                if (t.isCallExpression(callee.object))
+                  return
+
                 const name = callee.object ? findObjectName(callee.object) : callee.property.name
                 return addSetter(name, node, scope, t.identifier(name))
               }

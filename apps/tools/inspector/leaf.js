@@ -9,7 +9,7 @@ const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 view Leaf {
   view.pause()
 
-  let rootPath, path, data, type, key, original, expanded
+  let rootPath, path, data, type, key, original, expanded, dataKeys
   let prefix = ''
   let query = ''
 
@@ -18,12 +18,16 @@ view Leaf {
     !query && view.props.isExpanded(path, data) ||
     !contains(path, query) && (typeof view.props.getOriginal === 'function')
 
-  on('props', () => {
+  on.props(() => {
     rootPath = `${view.props.prefix}.${view.props.label}`
     key = view.props.label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
     // originally was stream of ||s, but 0 was turning into false
     data = original
+
+    dataKeys = Object.keys(data).sort()
+      .filter(x => x.indexOf('_flint') != 0)
+
     if (data === undefined) data = view.props.data
     if (data === undefined) data = {}
     type = getType(data)
@@ -86,7 +90,7 @@ view Leaf {
         <type>Array[{data.length}]</type>
       </expand>
       <expand if={type == 'Object'}>
-        <type>{'{}   ' + Object.keys(data).length + ' keys'}</type>
+        <type>{'{}   ' + dataKeys.length + ' keys'}</type>
       </expand>
       <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
         {format(String(data))}
@@ -96,7 +100,7 @@ view Leaf {
     <children>
       <child
         if={expanded && !isPrimitive(data)}
-        repeat={Object.keys(data)}>
+        repeat={dataKeys}>
         <Leaf
           if={_.indexOf('__') == -1}
           key={getLeafKey(_, data[_])}

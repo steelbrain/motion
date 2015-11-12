@@ -74,7 +74,7 @@ async function getScripts({ disableTools }) {
     newLine,
     '<!-- APP -->',
     `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })</script>`,
-    '<script src="/__/packages.js" id="__flintPackages"></script>',
+    '<script src="/__/externals.js" id="__flintExternals"></script>',
     '<script src="/__/internals.js" id="__flintInternals"></script>',
     scriptTags(files),
     '<script>Flint.init()</script>',
@@ -86,7 +86,7 @@ async function getStyles() {
   const dir = await readdir({ root: OPTS.styleDir })
   const names = dir.files.map(file => file.path).sort()
   return names
-    .map(name => `<link class="Style${name.replace('.css', '')}" rel="stylesheet" href="/__/styles/${name}" />`)
+    .map(name => `<link rel="stylesheet" href="/__/styles/${name}" />`)
     .join(newLine)
 }
 

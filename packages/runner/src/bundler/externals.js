@@ -38,19 +38,18 @@ async function packExternals(file, out) {
   log(LOG, 'pack')
   return new Promise((resolve, reject) => {
     webpack({
-      entry: opts.get('deps').depsJS,
+      entry: opts.get('deps').externalsIn,
       externals: {
         react: 'React',
         bluebird: '_bluebird',
         'react-dom': 'ReactDOM'
       },
       output: {
-        filename: opts.get('deps').packagesJS
+        filename: opts.get('deps').externalsOut
       }
     }, async err => {
       if (err) {
         // undo written packages
-        await rmdir(opts.get('deps').depsJSON)
         console.log("Error bundling your packages:", err)
         return reject(err)
       }
@@ -63,9 +62,8 @@ async function packExternals(file, out) {
 
 async function writeDeps(deps = []) {
   log(LOG, 'writeDeps:', deps)
-  await writeJSON(opts.get('deps').depsJSON, { deps })
   const requireString = deps.map(name => {
     return depRequireString(name, 'packages')
   }).join('')
-  await writeFile(opts.get('deps').depsJS, requireString)
+  await writeFile(opts.get('deps').externalsIn, requireString)
 }
