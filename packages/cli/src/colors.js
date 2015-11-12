@@ -113,4 +113,8 @@ var colors = [
     "yellowgreen"
 ]
 
+// for saturday
+colors = ['royalblue']
+
 export default randomColor
+
