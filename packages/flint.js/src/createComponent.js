@@ -1,7 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
 import React from 'react'
 import raf from 'raf'
-import Radium from 'flint-radium'
+import Radium from 'radium'
 
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'

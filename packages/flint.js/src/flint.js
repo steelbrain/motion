@@ -45,6 +45,7 @@ console.warn = (...args) => {
 Promise.longStackTraces()
 
 // GLOBALS
+root.global = root // for radium
 root.regeneratorRuntime = regeneratorRuntime
 root._history = history // for imported modules to use
 root._bluebird = Bluebird // for imported modules to use
