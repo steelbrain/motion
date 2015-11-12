@@ -5,8 +5,8 @@ import { readState } from '../../internal'
 export default async function readInstalled() {
   try {
     const state = await readState()
-    const installed = state['installed'] || []
-    log('bundler', 'readInstalled()', installed)
+    const installed = state.installed || []
+    log('externals', 'readInstalled()', installed)
     return installed
   }
   catch(e) {

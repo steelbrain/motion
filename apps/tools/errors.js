@@ -59,6 +59,7 @@ const matchErrorLine = /\>?\s*([0-9]*)\s*\|(.*)/g
 const indicator = /\s*\|\s*\^\s*$/g
 
 const fullStack = err => {
+  if (!err) return
   if (err.stack) {
     err.fullStack = ['', '', '']
     let index = 0
@@ -76,6 +77,7 @@ const fullStack = err => {
 }
 
 const niceStack = err => {
+  if (!err) return
   if (err.stack) {
     err.stack.split("\n").map(line => {
       if (line[0] === '>') {
@@ -175,7 +177,7 @@ view ErrorMessage {
     // show full stack after a delay
     if (error)
       on.delay(2500, () => {
-        fullStack = error.stack
+        if (error) fullStack = error.stack
       })
   })
 

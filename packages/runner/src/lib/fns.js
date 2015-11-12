@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import readdirp from 'readdirp'
 import mkdirp from 'mkdirp'
 import jf from 'jsonfile'
@@ -8,6 +9,7 @@ import path from 'path'
 import _touch from 'touch'
 
 import log from './log'
+import opts from '../opts'
 import handleError from './handleError'
 
 import { Promise } from 'bluebird'
@@ -51,6 +53,7 @@ function sanitize(str) {
 }
 
 export default {
+  _,
   p,
   path,
   mkdir,
@@ -67,5 +70,6 @@ export default {
   exists,
   sanitize,
   log,
-  handleError
+  handleError,
+  opts
 }

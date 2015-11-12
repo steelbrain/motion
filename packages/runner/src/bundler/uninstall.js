@@ -1,30 +1,38 @@
-import _ from 'lodash'
 import cache from '../cache'
 import readInstalled from './lib/readInstalled'
 import normalize from './lib/normalize'
 import { bundleExternals } from './externals'
 import { unsave } from './lib/npm'
 import writeInstalled from './lib/writeInstalled'
-import { log, handleError } from '../lib/fns'
+import readFullPaths from './lib/readFullPaths'
+import filterExternalsWithPath from './lib/filterExternalsWithPath'
+import { _, log, handleError } from '../lib/fns'
 
-const filterFalse = ls => ls.filter(l => !!l)
+const LOG = 'externals'
 
 export async function uninstall(rebundle) {
   try {
-    const installed = await readInstalled()
+    // get full paths
+    const installed = await readFullPaths()
     const imported = cache.getImports()
-    const _installed = normalize(installed)
-    const _imported = normalize(imported)
-    const toUninstall = _.difference(_installed, _imported)
-    log('externals', 'uninstall: _installed', _installed, '_imported', _imported, 'toUninstall', toUninstall)
 
-    if (!toUninstall.length) {
-      // ensure we overwrite any bad deps.json
-      await writeInstalled(_installed)
+    // difference, uniq
+    const toUninstallPaths = _.difference(installed, imported)
+    const toUninstall = normalize(toUninstallPaths)
+
+    log(LOG, 'uninstall',
+      'installed', installed,
+      'imported', imported,
+      'toUninstallPaths', toUninstallPaths,
+      'toUninstall', toUninstall,
+    )
+
+    if (!toUninstall.length)
       return
-    }
 
     console.log(`\n  Uninstalling...`.bold)
+
+    // do uninstalls
     const attempted = await* toUninstall.map(async dep => {
       try {
         await unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
@@ -37,15 +45,24 @@ export async function uninstall(rebundle) {
       }
     })
 
-    const success = filterFalse(attempted)
-    const final = normalize(_.difference(installed, success))
-    log('externals', 'success', success, 'final', final)
+    const uninstalled = attempted.filter(l => !!l)
 
-    if (rebundle || success.length) {
+    log('externals', 'uninstalled', uninstalled, 'final', final)
+
+    // if uninstalled stuff, write
+    if (uninstalled.length) {
+      const nowInstalled = _.difference(toUninstall, uninstalled)
+      const nowInstalledPaths = filterExternalsWithPath(toUninstall, nowInstalled)
+      log(LOG, 'uninstall', 'nowInstalled', nowInstalled, 'nowInstalledPaths', nowInstalledPaths)
+      await writeInstalled(nowInstalledPaths)
+    }
+
+    // if asked to rebundle or uninstalled, rebundle
+    if (rebundle || uninstalled.length) {
       await bundleExternals()
     }
 
-    return success
+    return uninstalled
   }
   catch(e) {
     handleError(e)

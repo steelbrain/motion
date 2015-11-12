@@ -65,6 +65,7 @@ export async function installAll(toInstall) {
     // no new ones found
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
+      await writeInstalled(prevInstalled)
       return
     }
 

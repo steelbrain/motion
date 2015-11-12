@@ -1,6 +1,6 @@
 import webpack from 'webpack'
 import { Promise } from 'bluebird'
-import readInstalled from './lib/readInstalled'
+import readFullPaths from './lib/readFullPaths'
 import depRequireString from './lib/depRequireString'
 import opts from '../opts'
 import cache from '../cache'
@@ -19,9 +19,8 @@ const findExternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) != '.')
 
 export async function bundleExternals() {
-  const installed = await readInstalled()
-  log(LOG, 'bundleExternals', installed)
-  await writeDeps(installed)
+  const fullpaths = await readFullPaths()
+  log(LOG, 'bundleExternals', fullpaths)
   await packExternals()
   onInstalled()
 }
@@ -60,8 +59,8 @@ async function packExternals(file, out) {
   })
 }
 
-async function writeDeps(deps = []) {
-  log(LOG, 'writeDeps:', deps)
+async function writeFullPaths(deps = []) {
+  log(LOG, 'writeFullPaths:', deps)
   const requireString = deps.map(name => {
     return depRequireString(name, 'packages')
   }).join('')

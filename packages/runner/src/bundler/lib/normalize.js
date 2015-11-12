@@ -6,10 +6,11 @@ import rmFlintExternals from './rmFlintExternals'
 
 export default function normalize(deps) {
   if (!deps) return []
-  return rmFlintExternals(_.uniq(deps.map(replaceSubPath)))
+  return rmFlintExternals(_.uniq(deps.map(replaceSubPath))).filter(x => x !== '')
 }
 
 
 function replaceSubPath(dep) {
+  if (typeof dep != 'string') return '' // fix bugs if they have a weird thing in there
   return dep.indexOf('/') ? dep.replace(/\/.*/, '') : dep
 }
