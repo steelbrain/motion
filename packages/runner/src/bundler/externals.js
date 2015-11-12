@@ -1,5 +1,6 @@
 import webpack from 'webpack'
 import { Promise } from 'bluebird'
+import handleWebpackErrors from './lib/handleWebpackErrors'
 import readFullPaths from './lib/readFullPaths'
 import depRequireString from './lib/depRequireString'
 import opts from '../opts'
@@ -20,6 +21,7 @@ const findExternalRequires = source =>
 
 export async function bundleExternals() {
   const fullpaths = await readFullPaths()
+  await writeFullPaths(fullpaths)
   log(LOG, 'bundleExternals', fullpaths)
   await packExternals()
   onInstalled()
@@ -33,7 +35,7 @@ export async function installExternals(file, source) {
   installAll(found)
 }
 
-async function packExternals(file, out) {
+async function packExternals() {
   log(LOG, 'pack')
   return new Promise((resolve, reject) => {
     webpack({
@@ -46,15 +48,8 @@ async function packExternals(file, out) {
       output: {
         filename: opts.get('deps').externalsOut
       }
-    }, async err => {
-      if (err) {
-        // undo written packages
-        console.log("Error bundling your packages:", err)
-        return reject(err)
-      }
-
-      log(LOG, 'pack: finished')
-      resolve()
+    }, async (err, stats) => {
+      handleWebpackErrors(err, stats, resolve, reject)
     })
   })
 }

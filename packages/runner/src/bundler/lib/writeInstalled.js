@@ -4,16 +4,17 @@ import { log, handleError } from '../../lib/fns'
 import rmFlintExternals from './rmFlintExternals'
 import readFullPaths from './readFullPaths'
 import writeFullPaths from './writeFullPaths'
-import filterExternalsWithPath from './filterExternalsWithPath'
+import filterWithPath from './filterWithPath'
 import { readState, writeState } from '../../internal'
 
 const LOG = 'externals'
 
-export default async function writeInstalled(_packages) {
+export default async function writeInstalled(_packages, _paths) {
   try {
-    const fullPaths = rmFlintExternals(normalize(_packages))
-    const installed = filterExternalsWithPath(cache.getImports(), fullPaths)
-    log(LOG, 'writeInstalled', 'fullPaths', fullPaths, 'installed', installed)
+    log(LOG, 'writeInstalled')
+    const packages = rmFlintExternals(normalize(_packages))
+    const fullPaths = filterWithPath(_paths || cache.getImports(), _packages)
+    log(LOG, 'writeInstalled', 'packages', packages, 'fullPaths', fullPaths)
 
     const config = await readState()
 
@@ -21,7 +22,7 @@ export default async function writeInstalled(_packages) {
     const oldFullPaths = await readFullPaths()
 
     try {
-      config.installed = installed
+      config.installed = packages
       await writeState(config)
       await writeFullPaths(fullPaths)
     }

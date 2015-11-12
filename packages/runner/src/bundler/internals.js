@@ -2,6 +2,7 @@ import webpack from 'webpack'
 import { Promise } from 'bluebird'
 import { onInternalInstalled } from './lib/messages'
 import readInstalled from './lib/readInstalled'
+import handleWebpackErrors from './lib/handleWebpackErrors'
 import depRequireString from './lib/depRequireString'
 import findExports from '../lib/findExports'
 import bridge from '../bridge'
@@ -55,7 +56,7 @@ export async function checkInternals(file, source) {
 
 function packInternals() {
   log(LOG, 'packInternals')
-  return new Promise((res, rej) => {
+  return new Promise((resolve, reject) => {
     webpack({
       entry: opts.get('deps').internalsIn,
       externals: {
@@ -66,14 +67,8 @@ function packInternals() {
       output: {
         filename: opts.get('deps').internalsOut
       }
-    }, async err => {
-      if (err) {
-        console.error(err.stack)
-        return rej(err)
-      }
-
-      log(LOG, 'pack: finished')
-      res()
+    }, async (err, stats) => {
+      handleWebpackErrors(err, stats, resolve, reject)
     })
   })
 }

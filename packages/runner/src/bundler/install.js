@@ -66,6 +66,7 @@ export async function installAll(toInstall) {
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
       await writeInstalled(prevInstalled)
+      await bundleExternals()
       return
     }
 
@@ -106,14 +107,15 @@ export async function installAll(toInstall) {
 
     async function done() {
       const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
-      let final = [].concat(prevInstalled, installedFullPaths)
+      let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
+      log(LOG, 'finalPaths', finalPaths)
 
       // remove failed
       if (failed.length)
-        final = final.filter(dep => failed.indexOf(dep) >= 0)
+        finalPaths = finalPaths.filter(dep => failed.indexOf(dep) >= 0)
 
       logInstalled(successful)
-      await writeInstalled(final)
+      await writeInstalled(finalPaths, toInstall)
       await bundleExternals()
 
       // reset
