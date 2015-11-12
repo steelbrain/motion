@@ -302,7 +302,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         catch(e) {
           Internal.caughtRuntimeErrors++
 
-          console.error('Render error', e.message)
+          console.error('Render error', name, e)
           reportError(e)
 
           const lastRender = this.getLastGoodRender()

@@ -65,7 +65,7 @@ view Inspector {
 
   function hideInspect() {
     hudActive = false
-    clickOff()
+    clickOff && clickOff()
     removeTemp()
   }
 
@@ -79,6 +79,7 @@ view Inspector {
     if (typeof current == 'number') {
       value = +value
     }
+
     _Flint.setCache(path, name, value)
     _Flint.inspectorRefreshing = path
     _Flint.getInitialStates[path]()
@@ -115,4 +116,3 @@ view Inspector {
     padding: 2
   }
 }
-

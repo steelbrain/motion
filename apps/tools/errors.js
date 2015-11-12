@@ -5,8 +5,8 @@ const niceRuntimeError = err => {
   if (err.file)
     err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/[_]+\/)?'), '')
 
-  if (err.file.indexOf('internals.js') >= 0) {
-    if (err.message.indexOf('Cannot find module') == 0) {
+  if (err.file && err.file.indexOf('internals.js') >= 0) {
+    if (err.message && err.message.indexOf('Cannot find module') == 0) {
       const badModule = err.message.match(/(fs|path)/)
 
       if (badModule && badModule.length) {

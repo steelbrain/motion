@@ -9,7 +9,8 @@ const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 view Leaf {
   view.pause()
 
-  let rootPath, path, data, type, key, original, expanded, dataKeys
+  let rootPath, path, data, type, key, original, expanded
+  let dataKeys = []
   let prefix = ''
   let query = ''
 
@@ -25,8 +26,9 @@ view Leaf {
     // originally was stream of ||s, but 0 was turning into false
     data = original
 
-    dataKeys = Object.keys(data).sort()
-      .filter(x => x.indexOf('_flint') != 0)
+    if (data)
+      dataKeys = Object.keys(data).sort()
+        .filter(x => x.indexOf('_flint') != 0)
 
     if (data === undefined) data = view.props.data
     if (data === undefined) data = {}

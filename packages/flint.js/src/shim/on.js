@@ -74,10 +74,15 @@ function onCb({ view, scope, name, number, cb }) {
     ensureQueue(events, 'mount', 'unmount')
 
     let listener
+    let eventFn = () => addListener({ scope, root: getRoot(view), name, number, cb: finish })
 
-    events.mount.push(() => {
-      listener = addListener({ scope, root: getRoot(view), name, number, cb: finish })
-    })
+    // attach to mount depending
+    if (view._isMounted)
+      listener = eventFn()
+    else
+      events.mount.push(() => {
+        listener = eventFn()
+      })
 
     // number = setTimeout = we just push unmount event right in addListener
     if (typeof number == 'undefined') {
