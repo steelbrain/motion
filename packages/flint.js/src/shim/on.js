@@ -92,118 +92,102 @@ function finish(opts) {
   return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
 }
 
-function on(scope, name, cb, number) {
-  //  console.log('scope', scope, 'name', name, 'cb', cb, 'number', number)
+function On(parentScope) {
+  this.run = (name, scope, cb, number) => {
+    // delay/every
+    if (name == 'delay' || name == 'every') {
+      // from view
+      if (number) {
+        let realCb = number
+        number = cb
+        cb = realCb
+      }
+      else {
+        number = scope
+      }
 
-  // dynamic arguments
-
-  // delay/every
-  if (name == 'delay' || name == 'every') {
-    // from view
-    if (number) {
-      let realCb = number
-      number = cb
-      cb = realCb
+      return finish({ scope, name, number, cb })
     }
-    else {
-      number = scope
+
+    // callback with no scope
+    else if (typeof name == 'function') {
+      cb = name
+      name = scope
+      scope = root
     }
 
-    return finish({ scope, name, number, cb })
+    // no scope
+    else if (typeof name == 'undefined') {
+      name = scope
+      scope = parentScope || root
+    }
+
+    if (typeof name != 'string')
+      throw new Error("When using on(), you must pass a name, like on('scroll')")
+
+    return finish({ scope, name, cb })
   }
-
-  // callback with no scope
-  else if (typeof name == 'function') {
-    cb = name
-    name = scope
-    scope = root
-  }
-
-  // no scope
-  else if (typeof name == 'undefined') {
-    name = scope
-    scope = root
-  }
-
-  if (typeof name != 'string')
-    throw new Error("When using on(), you must pass a name, like on('scroll')")
-
-  return finish({ scope, name, cb })
 }
 
-// pre bind some events
+root.On = On//TODO
 
-// for on.name() usage
-const bindName = name => (scope, cb, number) => on(scope, name, cb, number)
-const onName = name => {
-  on[name] = bindName(name)
+const proto = name => {
+  On.prototype[name] = function(scope, cb, number) {
+    this.run(name, scope, cb, number)
+  }
 }
+
+// custom events
+proto('event')
 
 // flint
-onName('delay')
-onName('every')
-onName('frame')
+proto('delay')
+proto('every')
+proto('frame')
+
+proto('mount')
+proto('unmount')
+proto('change')
+proto('render')
+proto('props')
 
 // DOM level 2 at most
 
 // mouse
-onName('click')
-onName('mousedown')
-onName('mouseenter')
-onName('mouseleave')
-onName('mousemove')
-onName('mouseover')
-onName('mouseout')
-onName('mouseup')
+proto('click')
+proto('mousedown')
+proto('mouseenter')
+proto('mouseleave')
+proto('mousemove')
+proto('mouseover')
+proto('mouseout')
+proto('mouseup')
 
 // keyboard
-onName('keydown')
-onName('keypress')
-onName('keyup')
+proto('keydown')
+proto('keypress')
+proto('keyup')
 
 // frame/object
-onName('abort')
-onName('beforeunload')
-onName('error')
-onName('load')
-onName('resize')
-onName('scroll')
-onName('unload')
+proto('abort')
+proto('beforeunload')
+proto('error')
+proto('load')
+proto('resize')
+proto('scroll')
+proto('unload')
 
 // form
-onName('blur')
-onName('change')
-onName('focus')
-onName('reset')
-onName('select')
-onName('submit')
+proto('blur')
+proto('change')
+proto('focus')
+proto('reset')
+proto('select')
+proto('submit')
 
+const on = new On()
 
 // TODO shim this outside this file
 root.on = on
 
 export default on
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

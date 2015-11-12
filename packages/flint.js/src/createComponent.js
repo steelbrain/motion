@@ -93,7 +93,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.successfulRender = null
         this.firstRender = true
         this.styles = { _static: {} }
-        this.events = { mount: u, unmount: u, update: u, props: u }
+        this.events = { mount: u, unmount: u, change: u, props: u }
         this.path = null
 
         // scope on() to view
@@ -161,13 +161,13 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       componentWillMount() {
         // componentWillUpdate only run after first render
-        this.runEvents('update')
+        this.runEvents('change')
         this.runEvents('props')
       },
 
       componentWillUpdate() {
         this.isUpdating = true
-        this.runEvents('update')
+        this.runEvents('change')
       },
 
       componentDidUpdate() {
