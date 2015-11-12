@@ -44,11 +44,14 @@ const router = {
   go(path, dontPush) {
     if (!render) return
 
-    location = path
-
     // ensure prefixed with /
-    if (location[0] !== '/')
-      location = '/' + location
+    if (path[0] !== '/')
+      path = '/' + path
+
+    if (path == location)
+      return // already at this route
+
+    location = path
 
     if (!dontPush)
       history.pushState(null, path)
