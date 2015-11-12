@@ -106,7 +106,6 @@ function onCb({ view, scope, name, number, cb }) {
       })
     }
 
-    console.log('returning', name, listener)
     return listener
   }
 
