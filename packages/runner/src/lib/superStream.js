@@ -26,7 +26,7 @@ function superRead(_path) {
     }
 
     if (superReading)
-      setTimeout(() => superRead(_path), 3)
+      setTimeout(() => superRead(_path), 5)
     else
       log('stop super read')
   })

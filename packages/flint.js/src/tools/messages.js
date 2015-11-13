@@ -59,7 +59,7 @@ function TagLoader() {
   let wait = {}
 
   return function(key, load) {
-    let tag = last[key]
+    let oldTag = last[key]
 
     if (loading[key]) {
       wait[key] = true
@@ -68,17 +68,17 @@ function TagLoader() {
 
     loading[key] = true
 
-    function afterLoad(newTag) {
+    load(oldTag, onDone)
+
+    function onDone(newTag) {
       last[key] = newTag
       loading[key] = false
 
       if (wait[key]) {
         wait[key] = false
-        load(last[key], afterLoad)
+        load(last[key], onDone)
       }
     }
-
-    load(tag, afterLoad)
   }
 }
 
@@ -99,52 +99,42 @@ function addSheet(name) {
   })
 }
 
-let oldElements = []
+function getParent(tag) {
+  if (tag.parentNode) return tag.parentNode
+  if (tag.nodeName == 'SCRIPT') return document.body
+  else return document.head
+}
 
 function replaceTag(tag, attr, after) {
   if (!tag) return
 
-  oldElements.push(tag)
-
-  let parent = tag.parentNode
   let clone = cloneNode(tag, attr)
+  let parent = getParent(tag)
 
-  clone.onerror = () => after && after()
-  clone.onload = () => {
-    after && after(clone)
-    setTimeout(removeOld, 5)
+  const afterFinish = () => {
+    removeTag(tag, parent, () => {
+      after && after(clone)
+    })
   }
 
-  if (!parent) {
-    if (tag.nodeName == 'SCRIPT')
-      document.body.appendChild(clone)
-    else
-      document.head.appendChild(clone)
-
-    return
-  }
-
+  clone.onerror = afterFinish
+  clone.onload = afterFinish
   parent.appendChild(clone)
 }
 
-function removeOld() {
-  let pending = 0
+function removeTag(tag, _parent, cb, attempts = 0) {
+  const parent = (parent || getParent(tag))
 
-  for (let i = 0; i < oldElements.length; i++) {
-    let el = oldElements.shift()
-
-    try {
-      el.parentNode.removeChild(el)
-    }
-    catch(e) {
-      pending++
-    }
-
-    if (pending)
-      setTimeout(removeOld, 50)
+  try {
+    parent.removeChild(tag)
+    setTimeout(cb, 2)
   }
-
-  return true
+  catch(e) {
+    if (attempts > 10)
+      throw new Error('Tag is unremovable')
+    else
+      setTimeout(() => removeTag(tag, parent, cb, ++attempts), 50)
+  }
 }
 
 function reloadScript(id, opts = {}) {
