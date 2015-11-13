@@ -19,7 +19,10 @@ const findRequires = source =>
 const findExternalRequires = source =>
   findRequires(source).filter(x => x.charAt(0) != '.')
 
-export async function bundleExternals() {
+export async function bundleExternals(opts = {}) {
+  if (opts.doInstall)
+    await installAll()
+
   const fullpaths = await readFullPaths()
   await writeFullPaths(fullpaths)
   log(LOG, 'bundleExternals', fullpaths)
@@ -32,7 +35,9 @@ export async function installExternals(file, source) {
 
   const found = findExternalRequires(source)
   cache.setFileImports(file, found)
-  installAll(found)
+
+  if (opts.get('build') || opts.get('hasRunInitialBuild'))
+    installAll(found)
 }
 
 async function packExternals() {

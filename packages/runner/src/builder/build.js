@@ -11,10 +11,8 @@ export default async function build() {
   makeTemplate()
 
   log('Building extras, bundler...')
-  await *[
-    bundler.install(),
-    bundler.internals()
-  ]
+  await bundler.install()
+  await bundler.internals()
 
   log('Building extras, copy...')
   await *[

@@ -1,4 +1,4 @@
-import { install, isInstalling, finishedInstalling } from './install'
+import { install, installAll, isInstalling, finishedInstalling } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
 import { bundleInternals } from './internals'
@@ -12,6 +12,7 @@ async function init() {
 export default {
   init,
   install,
+  installAll,
   uninstall,
   scanFile,
   externals: bundleExternals,

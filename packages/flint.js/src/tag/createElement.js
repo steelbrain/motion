@@ -35,7 +35,7 @@ function niceProps(props) {
 }
 
 function getElement(identifier, viewName, getView) {
-  let fullname, key, index, tag
+  let fullname, key, index, tag, isView
 
   // used directly by user
   if (typeof identifier == 'string') {
@@ -79,6 +79,7 @@ function getElement(identifier, viewName, getView) {
     }
     // find a view
     else if (!tag) {
+      isView = true
       tag = getView(name, viewName)
     }
   }
@@ -86,14 +87,14 @@ function getElement(identifier, viewName, getView) {
   if (process.env.production)
     tag = 'div'
 
-  return { fullname, name, key, index, tag, originalTag }
+  return { fullname, name, key, index, tag, originalTag, isView }
 }
 
 function addClassName(props, name) {
   return props.className ? `${props.className} ${name}` : name
 }
 
-function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTag, key, index) {
+function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTag, key, index, isView) {
   if (props)
     props = niceProps(props)
 
@@ -128,14 +129,17 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
     }
   }
 
-  props.__parentStyles = view.styles
-  props.__parentName = viewName
-  props.__key = key
-  props.__tagName = name
+  // if not external component
+  if (isView || typeof tag != 'function') {
+    props.__parentStyles = view.styles
+    props.__parentName = viewName
+    props.__key = key
+    props.__tagName = name
 
-  // only for tags
-  if (name[0] == name[0].toLowerCase()) {
-    props.className = addClassName(props, viewName.replace('.', '-'))
+    // only for tags
+    if (name[0] == name[0].toLowerCase()) {
+      props.className = addClassName(props, viewName.replace('.', '-'))
+    }
   }
 
   return props
@@ -143,10 +147,13 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
 
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
+    if (props && props.skipFlint)
+      return React.createElement(identifier[1], props, ...args)
+
     const view = this
     const Flint = view.Flint
-    const { fullname, name, key, index, tag, originalTag } = getElement(identifier, viewName, Flint.getView)
-    props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index)
+    const { fullname, name, key, index, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
+    props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
     props.style = elementStyles([key, index], view, name, originalTag || tag, props)
 
     // only for tags
