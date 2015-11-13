@@ -59,7 +59,7 @@ export async function installAll(toInstall) {
     const prevInstalled = await readInstalled()
     const _prevInstalled = normalize(prevInstalled)
     const fresh = _.difference(_toInstall, _prevInstalled, installing)
-    log(LOG, 'installAll', 'fresh = ', fresh, ' = ')
+    log(LOG, 'installAll/fresh = ', fresh, ' = ')
     log(LOG, '  =', _toInstall, '(toInstall) - ', _prevInstalled, '(prevInstalled) - ', installing, '(currently installing)')
 
     // no new ones found
@@ -83,6 +83,7 @@ export async function installAll(toInstall) {
 
       try {
         await save(dep)
+        log(LOG, 'install', 'succces, saved', dep)
         successful.push(dep)
         onFinish(dep)
       }
@@ -94,6 +95,7 @@ export async function installAll(toInstall) {
       }
       finally {
         installing.shift() // remove
+        log(LOG, 'install, finally:', installing)
         next()
       }
     }

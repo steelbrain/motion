@@ -71,7 +71,7 @@ export default async function run(_opts = {}, isBuild) {
       await waitForFirstBuild()
 
       // ensure we have clean packages before open
-      await bundler.externals()
+      await bundler.externals({ doInstall: true })
       await bundler.uninstall()
 
       console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)

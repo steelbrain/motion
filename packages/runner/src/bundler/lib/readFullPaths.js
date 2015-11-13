@@ -1,15 +1,20 @@
 import opts from '../../opts'
-import { readJSON, writeJSON, log, handleError } from '../../lib/fns'
+import { readJSON, exists, log, handleError } from '../../lib/fns'
 
 export default async function readFullPaths() {
-  const file = opts.get('deps').externalsPaths
+  const pathsFile = opts.get('deps').externalsPaths
 
-  try {
-    const paths = await readJSON(file)
-    log('externals', 'readFullPaths()', paths)
-    return paths
-  }
-  catch(e) {
-    handleError(e)
-  }
+  const hasFiles = await exists(pathsFile)
+
+  if (hasFiles)
+    try {
+      const paths = await readJSON(pathsFile)
+      log('externals', 'readFullPaths()', paths)
+      return paths
+    }
+    catch(e) {
+      handleError(e)
+    }
+  else
+    return []
 }

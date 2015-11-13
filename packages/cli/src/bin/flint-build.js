@@ -13,7 +13,7 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
 
   Program
     .option('-w, --watch', 'incremental builds')
-    .option('-v, --debug', 'output extra information for debugging')
+    .option('-v, --debug [what]', 'output extra information for debugging')
     .option('-i, --isomorphic', 'render template isomorphic')
     .parse(process.argv);
 
