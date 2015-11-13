@@ -49,6 +49,7 @@ view Inspector {
   })
 
   function inspect(path) {
+    console.log('path is', path)
     if (!path || path === temp) return
     _Flint.isInspecting = true
     temp = path

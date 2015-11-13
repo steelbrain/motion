@@ -146,6 +146,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         if (!process.env.production) {
           this.props._flintOnMount(this)
+          this.setID()
         }
       },
 
@@ -169,15 +170,19 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.isUpdating = true
         this.runEvents('change')
       },
+      
+      setID() {
+        // set flintID for state inspect
+        const node = ReactDOM.findDOMNode(this)
+        if (node) node.__flintID = this.getPath()
+      },
 
       componentDidUpdate() {
         this.isRendering = false
         this.isUpdating = false
-
+        
         if (!process.env.production) {
-          // set flintID for state inspect
-          const node = ReactDOM.findDOMNode(this)
-          if (node) node.__flintID = this.getPath()
+          this.setID()
 
           if (this.queuedUpdate) {
             this.isRendering = false
