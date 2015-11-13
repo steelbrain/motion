@@ -42,14 +42,17 @@ view Inspector.View {
 
   let hasKeys = o => o && Object.keys(o).length > 0
 
-  <view>
+  let active = !view.props.animate
+  on.delay(200, () => active = true)
+
+  <view class={{ active }}>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <name>{name}</name>
-    <none if={!hasKeys(props)}>No Props</none>
+    <Inspector.Title if={!hasKeys(props)}>No Props</Inspector.Title>
     <Inspector.Section title="Props" if={hasKeys(props)} class="props">
       <Tree editable={false} data={props} />
     </Inspector.Section>
-    <none if={!hasKeys(state)}>No state</none>
+    <Inspector.Title if={!hasKeys(state)}>No State</Inspector.Title>
     <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
         editable={true}
@@ -59,20 +62,11 @@ view Inspector.View {
     </Inspector.Section>
   </view>
 
-  const bg = 250
-  $none = {
-    fontWeight: 500,
-    color: '#666',
-    background: `rgba(${bg}, ${bg}, ${bg}, 1)`,
-    flexFlow: 'row',
-    paddingLeft: 18,
-    paddingTop: 1, paddingBottom: 1,
-  }
-
   $view = {
     position: 'relative',
     pointerEvents: 'auto',
     margin: 10,
+    padding: [0, 0, 1],
     minWidth: 220,
     fontSize: 12,
     userSelect: 'none',
@@ -82,6 +76,18 @@ view Inspector.View {
     border: '1px solid #ccc',
     borderRadius: 5,
     color: '#333',
+    transition: 'all ease-in 60ms',
+    opacity: 0,
+    transform: {
+      x: 20
+    }
+  }
+
+  $active = {
+    opacity: 1,
+    transform: {
+      x: 0
+    }
   }
 
   $Close = {
@@ -93,7 +99,8 @@ view Inspector.View {
   $name = {
     fontWeight: 400,
     color: 'rgba(0,0,0,0.8)',
-    padding: 8,
+    padding: [8, 8, 0],
+    margin: [0, 0, -6],
     fontSize: 14
   }
 

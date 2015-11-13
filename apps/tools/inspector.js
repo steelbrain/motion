@@ -154,6 +154,7 @@ view Inspector {
     <Inspector.View
       if={temp}
       path={temp}
+      animate={true}
       writeBack={writeBack}
       onClose={removeTemp}
     />
