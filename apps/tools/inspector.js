@@ -49,7 +49,6 @@ view Inspector {
   })
 
   function inspect(path) {
-    console.log('path is', path)
     if (!path || path === temp) return
     _Flint.isInspecting = true
     temp = path
@@ -73,8 +72,19 @@ view Inspector {
     setTimeout(view.update, 100)
   }
 
+  function hideHudTemporarily() {
+    hideInspect()
+    const offAgain = on.mousemove(() => {
+      offAgain()
+      if (hudActive)
+        showInspect()
+    })
+  }
+
   function glue(e) {
     const path = findPath(e.target)
+
+    hideHudTemporarily()
 
     /* toggle whether views has path */
     if (views.indexOf(path) > -1) {
@@ -98,13 +108,15 @@ view Inspector {
     clickOff = on.click(window, glue)
   }
 
-  function hideInspect() {
+  function hideInspect(turnOffHud) {
     _Flint.isInspecting = false
     hideHighlight()
     hoverOff()
-    hudActive = false
     clickOff()
     removeTemp()
+
+    if (turnOffHud)
+      hudActive = false
   }
 
   function writeBack(path, data) {
@@ -130,7 +142,7 @@ view Inspector {
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 
   on.keydown(window, isAlt(showInspect))
-  on.keyup(window, isAlt(hideInspect))
+  on.keyup(window, isAlt(hideInspect.bind(null, true)))
 
   <views>
     <Inspector.View
