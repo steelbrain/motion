@@ -82,12 +82,15 @@ function TagLoader() {
   }
 }
 
+const scriptSelector = src => `script[src^="${removeTime(src)}"]`
+const sheetSelector = href => `link[href^="${removeTime(href)}"]`
+
 const scrLoad = TagLoader()
 const cssLoad = TagLoader()
 
 function addScript(src) {
   scrLoad(src, (lastTag, done) => {
-    lastTag = lastTag || document.querySelector(`script[src^="${removeTime(src)}"]`)
+    lastTag = lastTag || document.querySelector(scriptSelector(src))
     replaceTag(lastTag, 'src', done)
   })
 }
@@ -95,7 +98,7 @@ function addScript(src) {
 function addSheet(name) {
   cssLoad(name, (lastTag, done) => {
     const href = `/__/styles/${name}.css`
-    lastTag = lastTag || document.querySelector(`link[href^="${removeTime(href)}"]`) || createSheet(href)
+    lastTag = lastTag || document.querySelector(sheetSelector(href)) || createSheet(href)
     replaceTag(lastTag, 'href', done)
   })
 }
@@ -131,8 +134,25 @@ function removeTag(tag, _parent, cb, attempts = 0) {
     setTimeout(cb, 2)
   }
   catch(e) {
-    if (attempts > 9)
-      return cb()
+    if (attempts > 3) {
+      const isScript = tag.nodeName == 'SCRIPT'
+      let tags
+
+      if (isScript) {
+        tags = document.querySelectorAll(scriptSelector(tag.src))
+      }
+      else {
+        tags = document.querySelectorAll(scriptSelector(tag.href))
+      }
+
+      // remove all but last one
+      ;[].forEach.call(tags, (tag, i) => {
+        if (i < tags.length - 2)
+          tag.parentNode.removeChild(tag)
+      })
+
+      setTimeout(cb, 10)
+    }
     else
       setTimeout(() => removeTag(tag, parent, cb, ++attempts), 50)
   }
@@ -225,12 +245,12 @@ function cloneNode(node, attr) {
   return clone
 }
 
-function sheetSelector(name) {
+function sheetClassSelector(name) {
   return `.Style${name}`
 }
 
 function removeSheet(name) {
-  let tag = document.querySelector(sheetSelector(name))
+  let tag = document.querySelector(sheetClassSelector(name))
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
