@@ -263,6 +263,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             return Flint.render()
 
           Internal.changedViews.forEach(name => {
+            if (!Internal.mountedViews[name]) return
+
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
               if (view.isMounted()) {
                 view.setState({ __render: 1 })

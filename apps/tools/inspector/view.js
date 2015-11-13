@@ -1,5 +1,5 @@
 import clone from 'clone'
-import under from 'underscore'
+import _ from 'underscore'
 
 function pathToName(path) {
   let p = path.split(',')
@@ -7,10 +7,10 @@ function pathToName(path) {
 }
 
 function filterProps(props) {
-  let omit = ['if', 'repeat', 'style', 
+  let omit = ['if', 'repeat', 'style',
               '__key', '__tagName', '_flintOnMount',
               '__parentName', '__parentStyles']
-  return under.omit.apply(null, [props].concat(omit))
+  return _.omit.apply(null, [props].concat(omit))
 }
 
 view Inspector.View {
@@ -58,7 +58,7 @@ view Inspector.View {
       />
     </Inspector.Section>
   </view>
-  
+
   const bg = 250
   $none = {
     fontWeight: 500,

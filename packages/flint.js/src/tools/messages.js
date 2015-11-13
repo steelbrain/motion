@@ -94,7 +94,8 @@ function addScript(src) {
 
 function addSheet(name) {
   cssLoad(name, (lastTag, done) => {
-    lastTag = lastTag || document.querySelector(`link[href^="${removeTime(`/__/styles/${name}.css`)}"]`)
+    const href = `/__/styles/${name}.css`
+    lastTag = lastTag || document.querySelector(`link[href^="${removeTime(href)}"]`) || createSheet(href)
     replaceTag(lastTag, 'href', done)
   })
 }
