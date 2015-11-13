@@ -124,15 +124,15 @@ function replaceTag(tag, attr, after) {
 }
 
 function removeTag(tag, _parent, cb, attempts = 0) {
-  const parent = (parent || getParent(tag))
+  if (!parent) return cb()
 
   try {
     parent.removeChild(tag)
     setTimeout(cb, 2)
   }
   catch(e) {
-    if (attempts > 10)
-      throw new Error('Tag is unremovable')
+    if (attempts > 9)
+      return cb()
     else
       setTimeout(() => removeTag(tag, parent, cb, ++attempts), 50)
   }
