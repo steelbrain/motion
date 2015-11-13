@@ -23,6 +23,10 @@ let baseDir = ''
 let deleteFileCbs = []
 let deleteViewCbs = []
 
+function onSetExported(file) {
+  // debugger // TODO: remove from either out or add to out
+}
+
 function onDeleteFile({ name, file, state }) {
   deleteFileCbs.forEach(cb => cb({ name, file, state }))
 }
@@ -96,7 +100,12 @@ const Cache = {
   },
 
   setExported(file: string, val: boolean) {
-    files[relative(file)].isExported = val
+    const name = relative(file)
+    const isExported = files[name].isExported
+    files[name].isExported = val
+
+    if (isExported != val)
+      onSetExported(name, val)
   },
 
   getExported() {

@@ -82,6 +82,15 @@ function TagLoader() {
   }
 }
 
+/*
+
+  This should be a closed async loop for hot loading files.
+
+  ws:add => addScript => tagloader => replaceTag =>
+    replaceTag => (tagLoader|null)
+
+*/
+
 const scriptSelector = src => `script[src^="${removeTime(src)}"]`
 const sheetSelector = href => `link[href^="${removeTime(href)}"]`
 
@@ -126,7 +135,7 @@ function replaceTag(tag, attr, after) {
   parent.appendChild(clone)
 }
 
-function removeTag(tag, _parent, cb, attempts = 0) {
+function removeTag(tag, parent, cb, attempts = 0) {
   if (!parent) return cb()
 
   try {
@@ -147,8 +156,14 @@ function removeTag(tag, _parent, cb, attempts = 0) {
 
       // remove all but last one
       ;[].forEach.call(tags, (tag, i) => {
-        if (i < tags.length - 2)
-          tag.parentNode.removeChild(tag)
+        if (i < tags.length - 2) {
+          try {
+            tag.parentNode.removeChild(tag)
+            document.body.removeChild(tag)
+            document.head.removeChild(tag)
+          }
+          catch(e) {} //oh well
+        }
       })
 
       setTimeout(cb, 10)

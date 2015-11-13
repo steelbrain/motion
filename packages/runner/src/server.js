@@ -4,7 +4,6 @@ import portfinder from 'portfinder'
 import flintjs from 'flint-js'
 import flinttools from 'flint-tools'
 
-
 import opts from './opts'
 import internal from './internal'
 import bridge from './bridge'

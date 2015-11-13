@@ -101,7 +101,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Internal.views = {}
       Internal.mountedViews = {}
       Internal.lastWorkingViews = {}
-      Internal.firstRender = true
     },
 
     // devtools
