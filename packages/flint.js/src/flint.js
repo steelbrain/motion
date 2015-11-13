@@ -195,10 +195,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         log(`render(), Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
-        const main = Internal.views.Main
+        let Main = Internal.views.Main && Internal.views.Main.component
 
-        let goodMain = main || Internal.lastWorkingViews
-        let Main = goodMain && goodMain.component || MainErrorView
+        if (!Main && Internal.lastWorkingRenders.Main) {
+          Main = React.createClass({ render() { return Internal.lastWorkingRenders.Main } })
+        }
+
+        if (!Main) {
+          Main = MainErrorView
+        }
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<Main />)
