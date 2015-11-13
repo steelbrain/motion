@@ -182,11 +182,11 @@ function removeTag(tag, parent, cb, attempts = 0) {
 
 function reloadScript(id, opts = {}) {
   return () => {
-    // const el = document.getElementById(id)
-    // if (!el) return
-    //
-    // const finish = opts.reloadAll ? reloadAllScripts : renderFlint
-    // const tag = replaceTag(el, 'src', finish)
+    const el = document.getElementById(id)
+    if (!el) return
+
+    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
+    const tag = replaceTag(el, 'src', finish)
   }
 }
 
