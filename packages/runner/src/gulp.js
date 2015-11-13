@@ -213,7 +213,6 @@ export function buildScripts(afterEach, userStream) {
 
     if (file.isSourceMap) return
 
-    // after initial build
     if (hasFinished()) {
       if (!lastError && !file.isInternal && cache.get(file.path)) {
         cache.removeError(file.path)
