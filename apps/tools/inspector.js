@@ -55,6 +55,12 @@ view Inspector {
     view.update()
   }
 
+  function hideLast() {
+    if (!views.length) return
+    views.pop()
+    view.update()
+  }
+
   function mouseMove({ target }) {
     lastTarget = target
     if (hudActive) inspect(findPath(lastTarget))
@@ -140,9 +146,11 @@ view Inspector {
   hover()
 
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
+  const isEsc = cb => e => e.keyCode === 27 && cb()
 
   on.keydown(window, isAlt(showInspect))
   on.keyup(window, isAlt(hideInspect.bind(null, true)))
+  on.keyup(window, isEsc(hideLast))
 
   <views>
     <Inspector.View
