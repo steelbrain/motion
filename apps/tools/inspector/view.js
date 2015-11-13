@@ -20,7 +20,7 @@ view Inspector.View {
   let props = null
   let writeBack = null
 
-  let onSet = (write) => {
+  function onSet(write) {
     view.props.writeBack(path, write)
   }
 

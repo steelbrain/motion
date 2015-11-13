@@ -86,7 +86,7 @@ view Inspector {
     }
     return false
   }
-  
+
   const hover = () => {
     hoverOff = on.mousemove(window, mouseMove)
   }
@@ -107,7 +107,7 @@ view Inspector {
     removeTemp()
   }
 
-  function write(path, data) {
+  function writeBack(path, data) {
     const name  = data[1][0]
     const current = _Flint.getCache[path][name]
     let value = data[1][1]
@@ -136,13 +136,13 @@ view Inspector {
     <Inspector.View
       repeat={views}
       path={_}
-      writeBack={write}
+      writeBack={writeBack}
       onClose={e => close(_, e)}
     />
     <Inspector.View
       if={temp}
       path={temp}
-      writeBack={write}
+      writeBack={writeBack}
       onClose={removeTemp}
     />
   </views>

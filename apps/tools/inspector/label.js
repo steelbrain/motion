@@ -5,7 +5,7 @@ view Label {
   on.props(() => {
     newVal = view.props.val
   })
-  
+
   const onFocus = e => {
     if (!view.props.editable) return
     focus = true
@@ -19,7 +19,7 @@ view Label {
 
   const onChange = e => {
     newVal = e.target.value
-    
+
     // todo: debate
     if (newVal === 'false') newVal = false
     if (newVal === 'true') newVal = true
