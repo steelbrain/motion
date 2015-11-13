@@ -27,7 +27,9 @@ export async function bundleExternals(opts = {}) {
   await writeFullPaths(fullpaths)
   log(LOG, 'bundleExternals', fullpaths)
   await packExternals()
-  onInstalled()
+
+  if (!opts.silent)
+    onInstalled()
 }
 
 export async function installExternals(file, source) {

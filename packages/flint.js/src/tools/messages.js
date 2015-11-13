@@ -91,8 +91,8 @@ function TagLoader() {
 
 */
 
-const scriptSelector = src => `script[src^="${removeTime(src)}"]`
-const sheetSelector = href => `link[href^="${removeTime(href)}"]`
+const scriptSelector = src => `script[src^="${removeTime(removeBase(src))}"]`
+const sheetSelector = href => `link[href^="${removeTime(removeBase(href))}"]`
 
 const scrLoad = TagLoader()
 const cssLoad = TagLoader()
@@ -121,12 +121,14 @@ function getParent(tag) {
 function replaceTag(tag, attr, after) {
   if (!tag) return
 
-  let clone = cloneNode(tag, attr)
   let parent = getParent(tag)
+  let clone = cloneNode(tag, attr)
 
   const afterFinish = () => {
-    removeTag(tag, parent, () => {
-      after && after(clone)
+    setTimeout(() => {
+      removeTag(tag, parent, () => {
+        after && after(clone)
+      })
     })
   }
 
@@ -151,22 +153,27 @@ function removeTag(tag, parent, cb, attempts = 0) {
         tags = document.querySelectorAll(scriptSelector(tag.src))
       }
       else {
-        tags = document.querySelectorAll(scriptSelector(tag.href))
+        tags = document.querySelectorAll(sheetSelector(tag.href))
       }
 
       // remove all but last one
-      ;[].forEach.call(tags, (tag, i) => {
-        if (i < tags.length - 2) {
+      for (let i = 0; i < tags.length - 1; i++) {
+        const tag = tags[i]
+        try {
+          tag.parentNode.removeChild(tag)
+        }
+        catch(e) {
           try {
-            tag.parentNode.removeChild(tag)
             document.body.removeChild(tag)
             document.head.removeChild(tag)
           }
-          catch(e) {} //oh well
+          catch(e) { //oh well
+            tag[isScript ? 'src' : 'href'] = ''
+          }
         }
-      })
+      }
 
-      setTimeout(cb, 10)
+      setTimeout(cb, 5)
     }
     else
       setTimeout(() => removeTag(tag, parent, cb, ++attempts), 50)
@@ -175,11 +182,11 @@ function removeTag(tag, parent, cb, attempts = 0) {
 
 function reloadScript(id, opts = {}) {
   return () => {
-    const el = document.getElementById(id)
-    if (!el) return
-
-    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
-    const tag = replaceTag(el, 'src', finish)
+    // const el = document.getElementById(id)
+    // if (!el) return
+    //
+    // const finish = opts.reloadAll ? reloadAllScripts : renderFlint
+    // const tag = replaceTag(el, 'src', finish)
   }
 }
 
@@ -222,6 +229,10 @@ function renderFlint() {
     renderAttempts++
     setTimeout(renderFlint, 50)
   }
+}
+
+function removeBase(str) {
+  return str.replace(/^http\:\/\/[^/]+/, '')
 }
 
 function removeTime(str) {

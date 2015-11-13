@@ -66,7 +66,7 @@ export async function installAll(toInstall) {
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
       await writeInstalled(prevInstalled)
-      await bundleExternals()
+      await bundleExternals({ silent: true })
       return
     }
 
