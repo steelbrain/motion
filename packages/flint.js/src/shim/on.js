@@ -27,7 +27,7 @@ function addListener({ root, scope, name, number, cb, uid }) {
   if (name == 'every') { // on('every', 20, cb)
     let interval = setInterval(cb, number)
     onUnmount(scope, () => clearInterval(interval))
-    return
+    return interval
   }
 
   if (name == 'frame') {
@@ -38,7 +38,7 @@ function addListener({ root, scope, name, number, cb, uid }) {
     })
     loop()
     onUnmount(scope, () => active = false)
-    return
+    return () => active = false
   }
 
   const target = (scope || root)
