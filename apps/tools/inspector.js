@@ -59,7 +59,8 @@ view Inspector {
   function inspect(target) {
     _Flint.isInspecting = true
     let path = findPath(target)
-    views[0] = { path }
+    removeTemp()
+    views.unshift({ path, temp: true })
     view.update()
   }
 
@@ -72,7 +73,11 @@ view Inspector {
   }
 
   function removeTemp() {
-    removeView(0)
+    views = views.filter(v => !v.temp)
+  }
+  
+  function tempActive() {
+    return views.filter(v => !v.temp).length > 0
   }
 
   function removeView(index) {
@@ -105,21 +110,28 @@ view Inspector {
   function findView(path) {
     return views.filter(v => v.path == path)
   }
+  
+  function toggleView(path) {
+    views = views
+      .filter(v => v.path != path)
+      .concat([{ temp:false, closing: false, path }])
+    view.update()
+  }
 
   function glue(e) {
     const path = findPath(e.target)
+    console.log('views are', JSON.stringify(views), 'gluing', path)
 
-    tempHideHUD()
+    //tempHideHUD()
 
     // close if no view active
-    if (views[0] && views[0].path == 'temp') {
-      removeView(0)
-    }
-    else {
-      hideHighlight()
-      hoverOff()
-      clickOff()
-      view.update()
+    if (tempActive()) {
+      removeTemp()
+    } else {
+      // hideHighlight()
+      // hoverOff()
+      // clickOff()
+      toggleView(path)
     }
     return false
   }
@@ -139,6 +151,7 @@ view Inspector {
 
   function hideInspect() {
     _Flint.isInspecting = false
+    hudActive = false
     hideHighlight()
     clickOff()
     removeTemp()
