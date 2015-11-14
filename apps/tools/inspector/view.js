@@ -30,9 +30,11 @@ view Inspector.View {
   })
 
   on.props(() => {
-    highlight = true
+    highlight = view.props.highlight
     closing = view.props.closing
     path = view.props.path
+    
+    if (closing === true) active = false
 
     if (!path) return
 

@@ -60,7 +60,14 @@ view Inspector {
     _Flint.isInspecting = true
     let path = findPath(target)
     removeTemp()
-    views.unshift({ path, temp: true })
+    if (pathActive(path)) {
+      views = views.map((v) => {
+        if (v.path == path) { v.highlight = true }
+        return v
+      })
+    } else {
+      views.unshift({ path, highlight: false, temp: true })
+    }
     view.update()
   }
 
@@ -73,22 +80,20 @@ view Inspector {
   }
 
   function removeTemp() {
-    views = views.filter(v => !v.temp)
+    views = views
+      .filter(v => !v.temp)
+      .map(v => ({ ...v, highlight: false }))
+  }
+  
+  function pathActive(path) {
+    return views.filter(v => v.path == path).length > 0
   }
 
   function tempActive() {
     return views.filter(v => !v.temp).length > 0
   }
 
-  function removeView(index) {
-    views[index].closing = true
-    view.update()
-    on.delay(1000, () => {
-      views.splice(index, 1)
-      view.update()
-    })
-  }
-
+  /* todo use escape */
   function closeLast() {
     if (!views.length) return
     removeView(views.length - 1)
@@ -96,7 +101,19 @@ view Inspector {
 
   function close(path, e) {
     if (e) e.stopPropagation()
-    removeView(views.indexOf(view => view.path == path))
+    
+    views = views
+      .map(v => {
+        if (v.path == path) { v.closing = true }
+        return v
+      })
+    view.update()
+      
+    on.delay(200, () => {
+      views = views.filter(v => path != v.path)
+      view.update()
+    })
+    
   }
 
   // function tempHideHUD() {
@@ -112,9 +129,15 @@ view Inspector {
   }
 
   function toggleView(path) {
-    views = views
-      .filter(v => v.path != path)
-      .concat([{ temp: false, closing: false, path }])
+    if (pathActive(path)) {
+      views = views.map(v => {
+        if (v.path == path) v.temp = true
+        return v
+      })
+    } else {
+      views = views
+        .concat([{ temp: false, highlight: false, closing: false, path }])
+    }
     view.update()
   }
 
@@ -125,15 +148,17 @@ view Inspector {
     //tempHideHUD()
 
     // close if no view active
+    removeTemp()
+    toggleView(path)
+    /*
     if (tempActive()) {
-      removeTemp()
     }
     else {
       // hideHighlight()
       // hoverOff()
       // clickOff()
-      toggleView(path)
     }
+    */
     return false
   }
 
@@ -151,12 +176,14 @@ view Inspector {
   }
 
   function hideInspect() {
+    console.log('views hide() are', views)
     _Flint.isInspecting = false
     hudActive = false
     hideHighlight()
     clickOff()
     removeTemp()
     view.update()
+    console.log('views hide() after are', views)
   }
 
   function writeBack(path, data) {
@@ -189,7 +216,7 @@ view Inspector {
       key={_.path}
       {..._}
       writeBack={writeBack}
-      onClose={e => close(_, e)}
+      onClose={e => close(_.path, e)}
     />
   </views>
 
