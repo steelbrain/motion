@@ -238,11 +238,10 @@ function replaceTime(str) {
   return removeTime(str) + `?${Date.now()}`
 }
 
-function createSheet(name, href) {
+function createSheet(href) {
   let tag = document.createElement('link')
   tag.href = href
   tag.rel = "stylesheet"
-  tag.class = name
   return tag
 }
 

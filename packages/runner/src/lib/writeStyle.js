@@ -12,7 +12,6 @@ export default async function writeStyle(view, sheet) {
     const prefixed = await postcss([ autoprefixer ]).process(sheet)
     let final = prefixed.css
 
-    // console.log(sheet)
     await writeFile(file, final)
 
     setTimeout(() => {

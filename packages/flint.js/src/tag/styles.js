@@ -178,8 +178,10 @@ export default function elementStyles(key, view, name, tag, props) {
     Object.keys(styles).forEach(key => {
       // when live coding we type "rc" then "rc()"
       // but "rc" is a function and it breaks, so clear it
-      if (typeof styles[key] == 'function')
+      if (typeof styles[key] == 'function') {
         styles[key] = null
+        console.warn(`Passed a function to a style property in view ${view.name} tag ${tag}`)
+      }
 
       // convert pseudos 'active' => ':active'
       if (pseudos[key] && typeof styles[key] == 'object') {
