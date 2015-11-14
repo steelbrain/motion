@@ -15,7 +15,7 @@ function filterProps(props) {
 
 view Inspector.View {
   const inspect = window.Flint.inspect
-  let name, path
+  let name, path, closing, active
   let state = {}
   let props = null
   let writeBack = null
@@ -25,8 +25,11 @@ view Inspector.View {
   }
 
   on.props(() => {
+    closing = view.props.closing
+    active = !closing
     path = view.props.path
-    if (path === 'temp') return
+
+    if (!path) return
 
     if (path) {
       name = pathToName(path)
@@ -42,7 +45,6 @@ view Inspector.View {
 
   let hasKeys = o => o && Object.keys(o).length > 0
 
-  let active = !view.props.animate
   on.delay(200, () => active = true)
 
   <view class={{ active }}>
@@ -72,14 +74,14 @@ view Inspector.View {
     userSelect: 'none',
     cursor: 'default',
     background: '#fff',
-    boxShadow: '0px 2px 16px rgba(0,0,0,0.1)',
+    boxShadow: '0px 2px 16px rgba(0,0,0,0.2)',
     border: '1px solid #ccc',
     borderRadius: 5,
     color: '#333',
     transition: 'all ease-in 60ms',
     opacity: 0,
     transform: {
-      x: 20
+      x: 30
     }
   }
 
