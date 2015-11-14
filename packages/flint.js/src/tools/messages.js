@@ -180,7 +180,7 @@ function removeTag(tag, parent, cb, attempts = 0) {
         }
       }
 
-      setTimeout(cb, 5)
+      setTimeout(cb)
     }
     else
       setTimeout(() => removeTag(tag, parent, cb, ++attempts), 30)

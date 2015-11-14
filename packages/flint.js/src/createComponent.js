@@ -170,7 +170,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.isUpdating = true
         this.runEvents('change')
       },
-      
+
       setID() {
         // set flintID for state inspect
         const node = ReactDOM.findDOMNode(this)
@@ -180,7 +180,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentDidUpdate() {
         this.isRendering = false
         this.isUpdating = false
-        
+
         if (!process.env.production) {
           this.setID()
 
@@ -262,10 +262,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         // if $ = false, unwrap if possible
-        if (this.styles._static && this.styles._static.$ == false && tags.length == 1) {
-          addWrapper = false
-          tags = tags[0]
-        }
+        // if (this.styles._static && this.styles._static.$ == false && tags.length == 1) {
+        //   addWrapper = false
+        //   tags = tags[0]
+        // }
 
         // top level tag returned false
         if (!tags)

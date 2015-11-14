@@ -498,24 +498,10 @@ export default function createPlugin(options) {
               //   ]
               // }
 
-              // if just object
+              // extract statics, but return just dynamics
               if (t.isObjectExpression(node.right)) {
-                let { statics, dynamics } = extractStatics(node.left.name, node.right)
-
-                if (statics.length) {
-                  const staticStatement = staticStyleStatement(node, t.objectExpression(statics))
-
-                  if (dynamics.length)
-                    return [
-                      staticStatement,
-                      dynamicStyleStatement(node, t.objectExpression(dynamics))
-                    ]
-                  else
-                    return staticStatement
-                }
-                else {
-                  return styleAssign(node, t.objectExpression(dynamics))
-                }
+                let { dynamics } = extractStatics(node.left.name, node.right)
+                return styleAssign(node, t.objectExpression(dynamics))
               }
 
               else if (t.isLiteral(node.right) && node.right.value === false) {

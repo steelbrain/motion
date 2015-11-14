@@ -78,7 +78,7 @@ export default function elementStyles(key, view, name, tag, props) {
 
     if (deservesRootStyles) {
       parentStyles = view.props.__parentStyles
-      parentStylesStatic = parentStyles && parentStyles._static
+      parentStylesStatic = Flint.styleObjects[view.props.__parentName]
     }
 
     // merge styles
@@ -92,7 +92,7 @@ export default function elementStyles(key, view, name, tag, props) {
       deservesRootStyles && viewStyle,
       // passed down styles
       parentStyles && parentStyles[`${prefix}${view.name}`],
-      parentStylesStatic && parentStylesStatic[view.name],
+      parentStylesStatic && parentStylesStatic[`${prefix}${view.name}`],
     )
 
     // add class styles

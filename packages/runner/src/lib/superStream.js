@@ -6,6 +6,7 @@ import bridge from '../bridge'
 import { _, log, readFile, handleError } from '../lib/fns'
 
 let stream = new Readable({ objectMode: true })
+stream._read = function(n) {}
 
 function fileSend({ path, contents }) {
   // write to stream
@@ -14,15 +15,8 @@ function fileSend({ path, contents }) {
 }
 
 function init() {
-  let fileSender = _.throttle(fileSend, 10, { leading: true })
+  let fileSender = _.throttle(fileSend, 30, { leading: true })
   bridge.on('super:file', fileSender)
-}
-
-stream._read = function(n) {}
-
-function createFile(globFile, enc, cb) {
-  console.log('got', globFile)
-  cb(null, new File(globFile));
 }
 
 function vinyl(_path, contents) {
