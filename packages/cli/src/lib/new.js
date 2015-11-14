@@ -131,7 +131,7 @@ export default function run({ name, use, nocache, debug }) {
     log('Looking for updated scaffold in %s', FLINT.scaffoldRepo)
 
     return new Promise(function(resolve, reject) {
-      return checkNewScaffold(needsNew => {
+      checkNewScaffold(needsNew => {
         log('checkNewScaffold needsNew?', needsNew)
         if (!needsNew) return resolve(true)
 
@@ -178,7 +178,7 @@ export default function run({ name, use, nocache, debug }) {
           }
         })
         .catch(err => {
-          cb(false)
+          cb(true)
         })
     })
   }
