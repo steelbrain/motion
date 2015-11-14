@@ -75,7 +75,7 @@ view Inspector {
   function removeTemp() {
     views = views.filter(v => !v.temp)
   }
-  
+
   function tempActive() {
     return views.filter(v => !v.temp).length > 0
   }
@@ -110,11 +110,11 @@ view Inspector {
   function findView(path) {
     return views.filter(v => v.path == path)
   }
-  
+
   function toggleView(path) {
     views = views
       .filter(v => v.path != path)
-      .concat([{ temp:false, closing: false, path }])
+      .concat([{ temp: false, closing: false, path }])
     view.update()
   }
 
@@ -127,7 +127,8 @@ view Inspector {
     // close if no view active
     if (tempActive()) {
       removeTemp()
-    } else {
+    }
+    else {
       // hideHighlight()
       // hoverOff()
       // clickOff()
@@ -155,6 +156,7 @@ view Inspector {
     hideHighlight()
     clickOff()
     removeTemp()
+    view.update()
   }
 
   function writeBack(path, data) {
@@ -184,6 +186,7 @@ view Inspector {
   <views>
     <Inspector.View
       repeat={views}
+      key={_.path}
       {..._}
       writeBack={writeBack}
       onClose={e => close(_, e)}

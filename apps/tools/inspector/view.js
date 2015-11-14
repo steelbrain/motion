@@ -15,7 +15,8 @@ function filterProps(props) {
 
 view Inspector.View {
   const inspect = window.Flint.inspect
-  let name, path, closing, active
+  let name, path, closing, highlight
+  let active = false
   let state = {}
   let props = null
   let writeBack = null
@@ -24,9 +25,13 @@ view Inspector.View {
     view.props.writeBack(path, write)
   }
 
+  on.delay(200, () => {
+    active = true
+  })
+
   on.props(() => {
+    highlight = true
     closing = view.props.closing
-    active = !closing
     path = view.props.path
 
     if (!path) return
@@ -45,9 +50,7 @@ view Inspector.View {
 
   let hasKeys = o => o && Object.keys(o).length > 0
 
-  on.delay(200, () => active = true)
-
-  <view class={{ active }}>
+  <view class={{ active, highlight }}>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <name>{name}</name>
     <Inspector.Title if={!hasKeys(props)}>No Props</Inspector.Title>
@@ -81,7 +84,7 @@ view Inspector.View {
     transition: 'all ease-in 60ms',
     opacity: 0,
     transform: {
-      x: 30
+      x: 20
     }
   }
 
@@ -90,6 +93,10 @@ view Inspector.View {
     transform: {
       x: 0
     }
+  }
+
+  $highlight = {
+    border: '2px solid #afb4e2'
   }
 
   $Close = {
