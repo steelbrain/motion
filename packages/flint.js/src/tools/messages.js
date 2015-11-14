@@ -1,16 +1,15 @@
 import { compileError, compileSuccess } from './errors';
 import removeFlintExt from '../lib/flintExt';
+import socket from './socket'
 
 export default function run(browser, opts) {
-  const ws = new WebSocket('ws://localhost:' + opts.websocketPort + '/')
-
-  const actions = {
+  socket(browser, opts, {
     'editor:location': msg => {
-      browser.editorLocation = msg;
+      browser.editorLocation = msg
     },
 
     'view:locations': msg => {
-      browser.viewLocations = msg;
+      browser.viewLocations = msg
     },
 
     'script:add': msg => {
@@ -39,18 +38,7 @@ export default function run(browser, opts) {
     'file:delete': file => {
       Flint.deleteFile(file.name)
     }
-  }
-
-  ws.onmessage = function(message) {
-    message = JSON.parse(message.data)
-    if (!message) return
-
-    const action = actions[message._type]
-    if (action) action(message)
-
-    browser.data = message
-    browser.emitter.emit(message._type)
-  }
+  })
 }
 
 function TagLoader() {

@@ -259,7 +259,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         if (Internal.firstRender)
           return
 
-        raf(() => {
+        setTimeout(() => {
           const added = arrayDiff(views, cached)
 
           // if removed, just root
