@@ -147,9 +147,6 @@ export default function elementStyles(key, view, name, tag, props) {
 
   // HELPERS
   if (styles) {
-    // convert flint syntax to radium
-    if (styles)
-
     // position
     if (styles.position && Array.isArray(styles.position)) {
       styles.top = styles.position[0]
@@ -179,6 +176,11 @@ export default function elementStyles(key, view, name, tag, props) {
 
     // final styles
     Object.keys(styles).forEach(key => {
+      // when live coding we type "rc" then "rc()"
+      // but "rc" is a function and it breaks, so clear it
+      if (typeof styles[key] == 'function')
+        styles[key] = null
+
       // convert pseudos 'active' => ':active'
       if (pseudos[key] && typeof styles[key] == 'object') {
         styles[pseudos[key]] = styles[key]
