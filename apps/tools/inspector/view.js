@@ -25,7 +25,7 @@ view Inspector.View {
     view.props.writeBack(path, write)
   }
 
-  on.delay(200, () => {
+  on.delay(60, () => {
     active = true
   })
 
