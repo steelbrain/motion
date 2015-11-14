@@ -9,11 +9,21 @@ let highlighter
 
 function positionHighlight(node) {
   const bounds = node.getBoundingClientRect()
+  const winW = window.innerWidth
+  const winH = window.innerHeight
+  const width = round(bounds.right - bounds.left)
+  const height = round(bounds.bottom - bounds.top)
+  let opacity = 1
+
+  if (width >= winW && height >= winH)
+    opacity = 0.2
+
   highlighter.setAttribute('style', `
     top: ${round(bounds.top)}px;
     left: ${round(bounds.left)}px;
-    width: ${round(bounds.right - bounds.left)}px;
-    height: ${round(bounds.bottom - bounds.top)}px;
+    width: ${width}px;
+    height: ${height}px;
+    opacity: ${opacity};
   `)
 }
 
@@ -33,8 +43,6 @@ view Inspector {
   view.pause()
 
   let hudActive = false
-  let showTemp = false
-  let temp = null
   let views = []
   let clickOff
   let keys = {}
@@ -48,56 +56,69 @@ view Inspector {
     document.body.appendChild(highlighter)
   })
 
-  function inspect(path) {
-    if (!path || path === temp) return
+  function inspect(target) {
     _Flint.isInspecting = true
-    temp = path
-    view.update()
-  }
-
-  function hideLast() {
-    if (!views.length) return
-    views.pop()
+    let path = findPath(target)
+    views[0] = { path }
     view.update()
   }
 
   function mouseMove({ target }) {
     lastTarget = target
-    if (hudActive) inspect(findPath(lastTarget))
+
+    if (hudActive) {
+      inspect(lastTarget)
+    }
   }
 
   function removeTemp() {
-    temp = null
+    removeView(0)
+  }
+
+  function removeView(index) {
+    views[index].closing = true
     view.update()
+    on.delay(1000, () => {
+      views.splice(index, 1)
+      view.update()
+    })
+  }
+
+  function closeLast() {
+    if (!views.length) return
+    removeView(views.length - 1)
   }
 
   function close(path, e) {
-    if (e) { e.stopPropagation() }
-
-    views = views.filter(_id => _id != path)
-    setTimeout(view.update, 100)
+    if (e) e.stopPropagation()
+    removeView(views.indexOf(view => view.path == path))
   }
 
-  function hideHudTemporarily() {
-    hideInspect()
-    const offAgain = on.mousemove(() => {
-      offAgain()
-      if (hudActive)
-        showInspect()
-    })
+  // function tempHideHUD() {
+  //   hideInspect()
+  //   const offAgain = on.mousemove(() => {
+  //     offAgain()
+  //     if (hudActive) showInspect()
+  //   })
+  // }
+
+  function findView(path) {
+    return views.filter(v => v.path == path)
   }
 
   function glue(e) {
     const path = findPath(e.target)
 
-    hideHudTemporarily()
+    tempHideHUD()
 
-    /* toggle whether views has path */
-    if (views.indexOf(path) > -1) {
-      close(path)
+    // close if no view active
+    if (views[0] && views[0].path == 'temp') {
+      removeView(0)
     }
     else {
-      views.push(path)
+      hideHighlight()
+      hoverOff()
+      clickOff()
       view.update()
     }
     return false
@@ -107,22 +128,20 @@ view Inspector {
     hoverOff = on.mousemove(window, mouseMove)
   }
 
+  // follow hover always
+  hover()
+
   function showInspect() {
-    inspect(findPath(lastTarget))
+    inspect(lastTarget)
     hudActive = true
-    hover()
     clickOff = on.click(window, glue)
   }
 
-  function hideInspect(turnOffHud) {
+  function hideInspect() {
     _Flint.isInspecting = false
     hideHighlight()
-    hoverOff()
     clickOff()
     removeTemp()
-
-    if (turnOffHud)
-      hudActive = false
   }
 
   function writeBack(path, data) {
@@ -142,29 +161,19 @@ view Inspector {
     view.update()
   }
 
-
-  hover()
-
   const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
   const isEsc = cb => e => e.keyCode === 27 && cb()
 
   on.keydown(window, isAlt(showInspect))
-  on.keyup(window, isAlt(hideInspect.bind(null, true)))
-  on.keyup(window, isEsc(hideLast))
+  on.keyup(window, isAlt(hideInspect))
+  on.keyup(window, isEsc(closeLast))
 
   <views>
     <Inspector.View
       repeat={views}
-      path={_}
+      {..._}
       writeBack={writeBack}
       onClose={e => close(_, e)}
-    />
-    <Inspector.View
-      if={temp}
-      path={temp}
-      animate={true}
-      writeBack={writeBack}
-      onClose={removeTemp}
     />
   </views>
 
