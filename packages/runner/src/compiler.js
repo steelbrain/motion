@@ -29,13 +29,17 @@ var Parser = {
 
   post(file, source) {
     // scan for imports/exports
-    debounce(file, OPTS.build ? 0 : 400, () => {
-      bundler.scanFile(file, source)
-    })
+    const bundle = () => bundler.scanFile(file, source)
 
+    // debounce installs when running
+    if (OPTS.build) bundle()
+    else debounce(file, 400, bundle)
+
+    // debounce a lot to uninstall
     if (!OPTS.build)
       debounce('removeOldImports', 3000, bundler.uninstall)
 
+    // check internals
     const isInternal = findExports(source)
 
     // wrap closure if not exports file

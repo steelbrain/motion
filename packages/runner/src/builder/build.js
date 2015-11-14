@@ -12,6 +12,9 @@ export default async function build() {
     if (!opts.get('hasRunInitialInstall'))
       setTimeout(build, 50)
 
+    if (opts.get('hasRunInitialBuild'))
+      await copy.assets()
+
     log('Building extras, template...')
     makeTemplate()
 

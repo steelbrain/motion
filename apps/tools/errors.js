@@ -185,7 +185,7 @@ view ErrorMessage {
     setTimeout(() => {
       const errorDiv = document.getElementById('FLINTERROR')
       if (errorDiv) errorDiv.className = 'active'
-    }, 1)
+    })
   }
 
   <Debounce force={!error} onUpdate={showFlintErrorDiv}>

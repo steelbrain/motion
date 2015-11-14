@@ -2,10 +2,8 @@
 // detects if we are in autosave mode
 
 const sum = (a, b) => a + b
-
 const Delay = 300
 const AutoDelay = 800
-
 const Avg = 5000
 const Clear = 1000 * 10
 const AutoDetectAvgDiff = 1000
@@ -60,6 +58,4 @@ view Debounce {
     clearTimeout(timeout)
     timeout = setTimeout(show, curDelay)
   })
-
-  <debounce yield />
 }
