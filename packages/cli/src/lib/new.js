@@ -177,6 +177,9 @@ export default function run({ name, use, nocache, debug }) {
             cb(false)
           }
         })
+        .catch(err => {
+          cb(false)
+        })
     })
   }
 
