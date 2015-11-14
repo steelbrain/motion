@@ -230,7 +230,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           isWrapper: true
         }, props)
 
-        return this.el(`${wrapperName}`, tagProps, ...tags)
+        return this.el(`view`, tagProps, ...tags)
       },
 
       getRender() {
