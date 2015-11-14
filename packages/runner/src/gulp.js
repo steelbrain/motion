@@ -89,16 +89,9 @@ export function buildScripts(afterEach, userStream) {
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
   let justDeleted = {} // fix gulp sending add when its deleted
 
-  // super stream watcher
-  if (!OPTS.build) {
+  if (!opts.get('build')) {
     watchDeletes()
-
-    bridge.on('super:on', ({ file }) => {
-      return superStream.start(file)
-    })
-    bridge.on('super:off', () => {
-      return superStream.stop
-    })
+    superStream.init()
   }
 
   // gulp src stream

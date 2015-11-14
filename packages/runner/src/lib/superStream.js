@@ -1,45 +1,32 @@
 import through from 'through2'
 import File from 'vinyl'
-import fs from 'fs'
 import path from 'path'
 import opts from '../opts'
-import log from '../lib/log'
+import bridge from '../bridge'
+import { log, readFile, handleError } from '../lib/fns'
 
-const stream = through.obj().pipe(through.obj(createFile))
+// const stream = through.obj().pipe(through.obj(createFile))
 
-function createFile(globFile, enc, cb) {
-  cb(null, new File(globFile));
-}
+import { Readable } from 'stream'
+let stream = new Readable({ objectMode: true })
 
-function file(_path, contents) {
-  return { cwd: opts.get('appDir'), base: opts.get('appDir') + '/', path: path.basename(_path), contents }
-}
-
-let lastFile
-function superRead(_path) {
-  log('start super read')
-  fs.readFile(_path, (err, data) => {
-    const curFile = data.toString()
-    if (curFile != lastFile) {
-      stream.write(file(_path, data))
-      lastFile = curFile
-    }
-
-    if (superReading)
-      setTimeout(() => superRead(_path), 8)
-    else
-      log('stop super read')
+function init() {
+  bridge.on('super:file', ({ path, contents, timestamp }) => {
+    // write to stream
+    const file = vinyl(path, new Buffer(contents))
+    stream.push(new File(file))
   })
 }
 
-let superReading = false
-function start(_path) {
-  superReading = true
-  superRead(_path)
+stream._read = function(n) {}
+
+function createFile(globFile, enc, cb) {
+  console.log('got', globFile)
+  cb(null, new File(globFile));
 }
 
-function stop(_path) {
-  superReading = false
+function vinyl(_path, contents) {
+  return { cwd: opts.get('appDir'), base: opts.get('appDir') + '/', path: path.basename(_path), contents }
 }
 
-export default { stream, start, stop }
+export default { init, stream }
