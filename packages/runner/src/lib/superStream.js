@@ -1,21 +1,21 @@
-import through from 'through2'
+import { Readable } from 'stream'
 import File from 'vinyl'
 import path from 'path'
 import opts from '../opts'
 import bridge from '../bridge'
-import { log, readFile, handleError } from '../lib/fns'
+import { _, log, readFile, handleError } from '../lib/fns'
 
-// const stream = through.obj().pipe(through.obj(createFile))
-
-import { Readable } from 'stream'
 let stream = new Readable({ objectMode: true })
 
+function fileSend({ path, contents }) {
+  // write to stream
+  const file = vinyl(path, new Buffer(contents))
+  stream.push(new File(file))
+}
+
 function init() {
-  bridge.on('super:file', ({ path, contents, timestamp }) => {
-    // write to stream
-    const file = vinyl(path, new Buffer(contents))
-    stream.push(new File(file))
-  })
+  let fileSender = _.throttle(fileSend, 10, { leading: true })
+  bridge.on('super:file', fileSender)
 }
 
 stream._read = function(n) {}
