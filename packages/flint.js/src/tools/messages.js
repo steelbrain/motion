@@ -163,7 +163,7 @@ function removeTag(tag, parent, cb, attempts = 0) {
         tags = document.querySelectorAll(sheetSelector(tag.href))
       }
 
-      // remove all but last one
+      // remove all but last two (one causes flicker)
       for (let i = 0; i < tags.length - 2; i++) {
         const tag = tags[i]
         try {
