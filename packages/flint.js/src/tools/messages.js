@@ -104,11 +104,18 @@ function addScript(src) {
   })
 }
 
+let firstLoad = true
 function addSheet(name) {
   cssLoad(name, (lastTag, done) => {
     const href = `/__/styles/${name}.css`
-    lastTag = lastTag || document.querySelector(sheetSelector(href)) || createSheet(href)
-    replaceTag(lastTag, 'href', done)
+    lastTag = lastTag || document.querySelector(sheetSelector(href))
+
+    if (!lastTag && firstLoad) {
+      firstLoad = false
+      replaceTag(createSheet(href), 'href', done)
+    }
+    else
+      replaceTag(lastTag, 'href', done)
   })
 }
 
@@ -157,7 +164,7 @@ function removeTag(tag, parent, cb, attempts = 0) {
       }
 
       // remove all but last one
-      for (let i = 0; i < tags.length - 1; i++) {
+      for (let i = 0; i < tags.length - 2; i++) {
         const tag = tags[i]
         try {
           tag.parentNode.removeChild(tag)
@@ -176,7 +183,7 @@ function removeTag(tag, parent, cb, attempts = 0) {
       setTimeout(cb, 5)
     }
     else
-      setTimeout(() => removeTag(tag, parent, cb, ++attempts), 50)
+      setTimeout(() => removeTag(tag, parent, cb, ++attempts), 30)
   }
 }
 

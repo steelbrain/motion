@@ -14,7 +14,10 @@ export default async function writeStyle(view, sheet) {
 
     // console.log(sheet)
     await writeFile(file, final)
-    bridge.message('stylesheet:add', { view, file })
+
+    setTimeout(() => {
+      bridge.message('stylesheet:add', { view, file })
+    }, 2)
   }
   catch(e) {
     handleError(e)
