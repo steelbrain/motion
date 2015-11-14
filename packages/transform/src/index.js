@@ -254,9 +254,16 @@ export default function createPlugin(options) {
                 tag = tag.replace(/^\$/, '')
 
                 log('styles', 'getSelector', 'viewName', viewName, 'tag', tag)
-                if (shouldStyleTagnameAsRoot && tag == inView.toLowerCase() || tag == '')
-                  return viewMainSelector(cleanViewName, options, rootTag)
 
+                // styling root tag
+                if (shouldStyleTagnameAsRoot && tag == inView.toLowerCase() || tag == '')
+                  return viewMainSelector(cleanViewName, options)
+
+                // styling child view
+                if (tag[0] == tag[0].toUpperCase())
+                  return viewMainSelector(`${cleanViewName} .View${tag}`, options)
+
+                // styling tag in view
                 return viewSelector(cleanViewName, tag, options)
               }
 

@@ -92,7 +92,6 @@ export default function elementStyles(key, view, name, tag, props) {
       deservesRootStyles && viewStyle,
       // passed down styles
       parentStyles && parentStyles[`${prefix}${view.name}`],
-      parentStylesStatic && parentStylesStatic[`${prefix}${view.name}`],
     )
 
     // add class styles
@@ -120,6 +119,7 @@ export default function elementStyles(key, view, name, tag, props) {
       })
     }
 
+    // TODO: this shouldnt work with hot reloads anymore because we wont call re-render
     // parent $Child classes apply to Child wrapper
     if (deservesRootStyles && view.props.className) {
       view.props.className.split(' ').forEach(className => {
