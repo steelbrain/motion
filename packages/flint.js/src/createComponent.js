@@ -44,7 +44,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getChildContext() {
-        console.log('getchildcontext', name, this.getPath())
         return {
           path: this.getPath()
         }
