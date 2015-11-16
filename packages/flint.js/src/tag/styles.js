@@ -77,8 +77,8 @@ export default function elementStyles(key, view, name, tag, props) {
     let parentStyles, parentStylesStatic
 
     if (deservesRootStyles) {
-      parentStyles = view.props.__parentStyles
-      parentStylesStatic = Flint.styleObjects[view.props.__parentName]
+      parentStyles = view.props.__flint.__parentStyles
+      parentStylesStatic = Flint.styleObjects[view.props.__flint.__parentName]
 
       // TODO: shouldnt be in styles
       if (view.props.className) {

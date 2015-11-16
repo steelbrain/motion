@@ -7,9 +7,7 @@ function pathToName(path) {
 }
 
 function filterProps(props) {
-  let omit = ['if', 'repeat', 'style',
-              '__key', '__tagName', '_flintOnMount',
-              '__parentName', '__parentStyles']
+  let omit = ['if', 'repeat', 'style', 'yield', '__flint']
   return _.omit.apply(null, [props].concat(omit))
 }
 
@@ -33,7 +31,7 @@ view Inspector.View {
     highlight = view.props.highlight
     closing = view.props.closing
     path = view.props.path
-    
+
     if (closing === true) active = false
 
     if (!path) return

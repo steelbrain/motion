@@ -58,12 +58,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       getPath() {
         if (!this.path) this.setPath()
-        return `${this.path}-${this.props.__key || ''}`
+        return `${this.path}-${this.props.__flint.__key || ''}`
       },
 
       setPath() {
         if (!isChanged) {
-          const prevPath = Internal.paths[this.context.path + this.props.__key]
+          const prevPath = Internal.paths[this.context.path + this.props.__flint.__key]
           if (prevPath) {
             console.log('using prev path', name)
             this.path = prevPath
@@ -80,7 +80,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.path = (this.context.path || '') + sep + name + '.' + propsHash
 
         // for faster retrieval hot reloading
-        Internal.paths[this.context.path + this.props.__key] = this.path
+        Internal.paths[this.context.path + this.props.__flint.__key] = this.path
       },
 
       onMount(component) {
@@ -302,7 +302,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             !tags.props
           )
 
-          if (!Array.isArray(tags) && tags.props && tags.props.__tagName != name.toLowerCase()) {
+          if (!Array.isArray(tags) && tags.props && tags.props.__flint.tagName != name.toLowerCase()) {
             addWrapper = true
             tags = [tags]
           }

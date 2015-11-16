@@ -131,10 +131,12 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
 
   // if not external component
   if (isView || typeof tag != 'function') {
-    props.__parentStyles = view.styles
-    props.__parentName = viewName
-    props.__key = key
-    props.__tagName = name
+    props.__flint = {
+      parentStyles: view.styles
+      parentName: viewName
+      key: key
+      tagName: name
+    }
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {
