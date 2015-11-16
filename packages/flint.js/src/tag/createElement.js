@@ -170,8 +170,6 @@ export default function createElement(viewName) {
       }
     }
 
-    console.log(tag, props)
-
     return React.createElement(tag, props, ...args)
   }
 }
