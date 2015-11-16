@@ -53,13 +53,12 @@ export default async function run(_opts = {}, isBuild) {
       // run our pipeline once manually
       gulp.buildScripts()
       await waitForFirstBuild()
+      await build()
 
       if (OPTS.watch)
-        gulp.watchForBuild()
-      else {
-        await build()
-        process.exit()
-      }
+        return gulp.watchForBuild()
+
+      process.exit()
     }
     else {
       await clear.outDir()
