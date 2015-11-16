@@ -84,8 +84,8 @@ function getElement(identifier, viewName, getView) {
     }
   }
 
-  if (process.env.production)
-    tag = 'div'
+  // if (process.env.production)
+  //   tag = 'div'
 
   return { fullname, name, key, index, tag, originalTag, isView }
 }
@@ -169,6 +169,8 @@ export default function createElement(viewName) {
         props.className = addClassName(props, tag)
       }
     }
+
+    console.log(tag, props)
 
     return React.createElement(tag, props, ...args)
   }
