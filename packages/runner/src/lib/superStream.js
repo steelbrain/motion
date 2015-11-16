@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
 import File from 'vinyl'
-import path from 'path'
+import nodepath from 'path'
 import opts from '../opts'
 import bridge from '../bridge'
 import { _, log, readFile, handleError } from '../lib/fns'
@@ -20,7 +20,11 @@ function init() {
 }
 
 function vinyl(_path, contents) {
-  return { cwd: opts.get('appDir'), base: opts.get('appDir') + '/', path: path.basename(_path), contents }
+  const app = opts.get('appDir')
+  const cwd = app
+  const base = app + '/'
+  const path = nodepath.relative(app, _path)
+  return { cwd, base, path, contents }
 }
 
 export default { init, stream }

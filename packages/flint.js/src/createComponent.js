@@ -20,6 +20,7 @@ let views = {}
 
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
+  let isChanged = options.changed
 
   if (process.env.production)
     return createViewComponent()
@@ -27,6 +28,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
   if (options.changed) {
     views[name] = createViewComponent()
   }
+
+  // once rendered, isChanged is used to prevent
+  // unnecessary props hashing, for faster hot reloads
+  Flint.on('render:done', () => {
+    isChanged = false
+  })
 
   return createProxyComponent()
 
@@ -55,18 +62,25 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       setPath() {
-        let propsHash
+        if (!isChanged) {
+          const prevPath = Internal.paths[this.context.path + this.props.__key]
+          if (prevPath) {
+            console.log('using prev path', name)
+            this.path = prevPath
+            return
+          }
+        }
+
+        console.log('not using prev path', name)
 
         // get the props hash, but lets cache it so its not a ton of work
-        propsHash = phash(this.props)
-        Internal.propsHashes[this.context.path] = propsHash
+        let propsHash = phash(this.props)
 
         const sep = name == 'Main' ? '' : ','
-        //console.log('props are', this.props, 'path is ', (this.context.path || '') + sep + name + '.' + propsHash)
-
         this.path = (this.context.path || '') + sep + name + '.' + propsHash
 
-        // Internal.paths[this.path] = Internal.paths[this.path] || {}
+        // for faster retrieval hot reloading
+        Internal.paths[this.context.path + this.props.__key] = this.path
       },
 
       onMount(component) {

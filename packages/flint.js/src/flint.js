@@ -79,19 +79,18 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   // flints internal state
   const Internal = root._Flint = {
     views: {},
-    paths: {},
 
     isRendering: 0,
     firstRender: true,
     isDevTools: opts.app == 'devTools',
 
+    paths: {}, // cache hotreload paths
     viewCache: {}, // map of views in various files
     viewsInFile: {}, // current build up of running hot insertion
     currentFileViews: null, // tracks views as file loads, for hot reloading
     currentHotFile: null, // current file that is running
     getCache: {}, // stores { path: { name: val } } for use in view.get()
     getCacheInit: {}, // stores the vars after a view is first run
-    propsHashes: {},
 
     changedViews: [],
     getInitialStates: [],
@@ -220,7 +219,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         Internal.lastWorkingViews.Main = Main
         Internal.firstRender = false
-        emitter.emit('afterRender')
+        emitter.emit('render:done')
         Internal.isRendering = 0
       }
     },
@@ -278,6 +277,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
                 return view
               }
             }).filter(x => !!x)
+
+            setTimeout(() => emitter.emit('render:done'))
           })
 
           // send runtime success before render

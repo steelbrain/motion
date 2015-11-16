@@ -38,7 +38,7 @@ function domTests(err, window) {
   const Flint = window.Flint
   const Internal = window.Internal
 
-  Flint.on('afterRender', () => {
+  Flint.on('after:render', () => {
     console.log('rendered')
   })
 

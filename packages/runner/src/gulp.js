@@ -87,7 +87,6 @@ export function buildScripts(afterEach, userStream) {
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
-  let justDeleted = {} // fix gulp sending add when its deleted
 
   if (!opts.get('build')) {
     watchDeletes()
