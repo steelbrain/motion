@@ -11,7 +11,7 @@ export default function hotCache({ Internal, options, name }) {
   return {
     // result = val after mutation, use that instead of val
     set(name, val, result, useResult) {
-      const path = this.props.__flintPath
+      const path = this.props.__flint.path
 
       if (!Internal.getCache[path])
         Internal.getCache[path] = {}
@@ -23,7 +23,7 @@ export default function hotCache({ Internal, options, name }) {
     },
 
     get(name, val, where) {
-      const path = this.props.__flintPath
+      const path = this.props.__flint.path
       if (_Flint.inspectorRefreshing === path) return Internal.getCache[path][name]
       // file scoped stuff always updates
       if (options.unchanged && where == 'fromFile')

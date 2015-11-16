@@ -132,9 +132,9 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   // if not external component
   if (isView || typeof tag != 'function') {
     props.__flint = {
-      parentStyles: view.styles
-      parentName: viewName
-      key: key
+      parentStyles: view.styles,
+      parentName: viewName,
+      key,
       tagName: name
     }
 

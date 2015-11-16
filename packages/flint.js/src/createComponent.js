@@ -58,20 +58,21 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       getPath() {
         if (!this.path) this.setPath()
-        return `${this.path}-${this.props.__flint.__key || ''}`
+        return `${this.path}-${this.props.__flint && this.props.__flint.key || ''}`
+      },
+
+      pathKey() {
+        return this.context.path + this.props.__flint && this.props.__flint.key
       },
 
       setPath() {
         if (!isChanged) {
-          const prevPath = Internal.paths[this.context.path + this.props.__flint.__key]
+          const prevPath = Internal.paths[this.pathKey()]
           if (prevPath) {
-            console.log('using prev path', name)
             this.path = prevPath
             return
           }
         }
-
-        console.log('not using prev path', name)
 
         // get the props hash, but lets cache it so its not a ton of work
         let propsHash = phash(this.props)
@@ -80,7 +81,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.path = (this.context.path || '') + sep + name + '.' + propsHash
 
         // for faster retrieval hot reloading
-        Internal.paths[this.context.path + this.props.__flint.__key] = this.path
+        Internal.paths[this.pathKey()] = this.path
       },
 
       onMount(component) {
@@ -100,13 +101,13 @@ export default function createComponent(Flint, Internal, name, view, options = {
       render() {
         const View = views[name]
 
-        return (
-          <View
-            {...this.props}
-            _flintOnMount={this.onMount}
-            __flintPath={this.getPath()}
-          />
-        )
+        let viewProps = Object.assign({}, this.props)
+
+        viewProps.__flint = viewProps.__flint || {}
+        viewProps.__flint.onMount = this.onMount
+        viewProps.__flint.path = this.getPath()
+
+        return React.createElement(View, viewProps)
       }
     })
   }
@@ -137,7 +138,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // LIFECYCLES
 
       getInitialState() {
-        Internal.getInitialStates[this.props.__flintPath] = () => this.getInitialState()
+        const fprops = this.props.__flint
+        Internal.getInitialStates[fprops ? fprops.flintPath : 'Main'] = () => this.getInitialState()
 
         let u = null
 
@@ -196,7 +198,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('mount')
 
         if (!process.env.production) {
-          this.props._flintOnMount(this)
+          this.props.__flint.onMount(this)
           this.setID()
         }
       },
@@ -225,7 +227,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       setID() {
         // set flintID for state inspect
         const node = ReactDOM.findDOMNode(this)
-        if (node) node.__flintID = this.props.__flintPath
+        if (node) node.__flintID = this.props.__flint.flintPath
       },
 
       componentDidUpdate() {
@@ -339,7 +341,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getLastGoodRender() {
-        return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flintPath)]
+        return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.flintPath)]
       },
 
       render() {
@@ -358,7 +360,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         catch(e) {
           Internal.caughtRuntimeErrors++
 
-          console.error('Render error', name, e)
+          console.error('Render error in view', name, 'at path', this.props.__flint.path, e)
           reportError(e)
 
           const lastRender = this.getLastGoodRender()
