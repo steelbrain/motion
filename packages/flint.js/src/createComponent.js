@@ -3,6 +3,7 @@ import React from 'react'
 import raf from 'raf'
 import Radium from 'radium'
 
+import phash from './lib/phash'
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
@@ -33,8 +34,44 @@ export default function createComponent(Flint, Internal, name, view, options = {
   function createProxyComponent() {
     return React.createClass({
 
+      childContextTypes: {
+        path: React.PropTypes.string,
+        displayName: React.PropTypes.string
+      },
+
+      contextTypes: {
+        path: React.PropTypes.string
+      },
+
+      getChildContext() {
+        console.log('getchildcontext', name, this.getPath())
+        return {
+          path: this.getPath()
+        }
+      },
+
+      getPath() {
+        if (!this.path) this.setPath()
+        return `${this.path}-${this.props.__key || ''}`
+      },
+
+      setPath() {
+        let propsHash
+
+        // get the props hash, but lets cache it so its not a ton of work
+        propsHash = phash(this.props)
+        Internal.propsHashes[this.context.path] = propsHash
+
+        const sep = name == 'Main' ? '' : ','
+        //console.log('props are', this.props, 'path is ', (this.context.path || '') + sep + name + '.' + propsHash)
+
+        this.path = (this.context.path || '') + sep + name + '.' + propsHash
+
+        // Internal.paths[this.path] = Internal.paths[this.path] || {}
+      },
+
       onMount(component) {
-        const path = component.getPath()
+        const path = this.getPath()
         const lastRendered = component.lastRendered
 
         Internal.mountedViews[name] = Internal.mountedViews[name] || []
@@ -51,7 +88,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const View = views[name]
 
         return (
-          <View {...this.props} _flintOnMount={this.onMount} />
+          <View
+            {...this.props}
+            _flintOnMount={this.onMount}
+            __flintPath={this.getPath()}
+          />
         )
       }
     })
@@ -83,10 +124,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // LIFECYCLES
 
       getInitialState() {
-        //if (!this.getPath()) this.setPath()
-        this.setPath()
-
-        Internal.getInitialStates[this.getPath()] = () => this.getInitialState()
+        Internal.getInitialStates[this.props.__flintPath] = () => this.getInitialState()
 
         let u = null
 
@@ -174,7 +212,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       setID() {
         // set flintID for state inspect
         const node = ReactDOM.findDOMNode(this)
-        if (node) node.__flintID = this.getPath()
+        if (node) node.__flintID = this.props.__flintPath
       },
 
       componentDidUpdate() {
@@ -288,7 +326,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getLastGoodRender() {
-        return Internal.lastWorkingRenders[pathWithoutProps(this.getPath())]
+        return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flintPath)]
       },
 
       render() {

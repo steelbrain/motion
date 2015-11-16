@@ -1,4 +1,3 @@
-import phash from '../lib/phash'
 import equal from 'deep-equal'
 import clone from 'clone'
 
@@ -6,44 +5,16 @@ export default function hotCache({ Internal, options, name }) {
   if (process.env.production)
     return {
       get(name, val) { return val },
-      set() { this.shouldReRender() && this.forceUpdate() }
+      set() { this.shouldReRender() && this.setState({ render: 1 }) }
     }
 
   return {
-    childContextTypes: {
-      path: React.PropTypes.string
-    },
-
-    contextTypes: {
-      path: React.PropTypes.string
-    },
-
-    getChildContext() {
-      return { path: this.getPath() }
-    },
-
-    getPath() {
-      if (!this.path) this.setPath()
-      return `${this.path}-${this.props.__key || ''}`
-    },
-
-    setPath() {
-      let propsHash
-
-      // get the props hash, but lets cache it so its not a ton of work
-      propsHash = phash(this.props)
-      Internal.propsHashes[this.context.path] = propsHash
-
-      const sep = name == 'Main' ? '' : ','
-      //console.log('props are', this.props, 'path is ', (this.context.path || '') + sep + name + '.' + propsHash)
-
-      this.path = (this.context.path || '') + sep + name + '.' + propsHash
-    },
-
     // result = val after mutation, use that instead of val
     set(name, val, result, useResult) {
-      const path = this.getPath()
-      if (!Internal.getCache[path]) Internal.getCache[path] = {}
+      const path = this.props.__flintPath
+
+      if (!Internal.getCache[path])
+        Internal.getCache[path] = {}
 
       Internal.setCache(path, name, useResult ? result : val)
 
@@ -52,7 +23,7 @@ export default function hotCache({ Internal, options, name }) {
     },
 
     get(name, val, where) {
-      const path = this.getPath()
+      const path = this.props.__flintPath
       if (_Flint.inspectorRefreshing === path) return Internal.getCache[path][name]
       // file scoped stuff always updates
       if (options.unchanged && where == 'fromFile')

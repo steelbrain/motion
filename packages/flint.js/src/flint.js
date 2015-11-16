@@ -76,8 +76,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   root.onerror = flintOnError
 
+  // flints internal state
   const Internal = root._Flint = {
     views: {},
+    paths: {},
+
     isRendering: 0,
     firstRender: true,
     isDevTools: opts.app == 'devTools',
@@ -286,7 +289,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     },
 
     view(name, body) {
-      const comp = createComponent.partial(Flint, Internal, name, body)
+      const comp = opts => createComponent(Flint, Internal, name, body, opts)
 
       if (process.env.production)
         return setView(name, comp())
