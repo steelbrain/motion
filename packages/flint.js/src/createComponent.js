@@ -228,7 +228,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       setID() {
         // set flintID for state inspect
         const node = ReactDOM.findDOMNode(this)
-        if (node) node.__flintID = this.props.__flint.flintPath
+        if (node) node.__flintID = this.props.__flint.path
       },
 
       componentDidUpdate() {
@@ -342,7 +342,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getLastGoodRender() {
-        return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.flintPath)]
+        return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.path)]
       },
 
       render() {
