@@ -305,7 +305,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             !tags.props
           )
 
-          if (!Array.isArray(tags) && tags.props && tags.props.__flint.tagName != name.toLowerCase()) {
+          if (!Array.isArray(tags) && tags.props && tags.props.__flint && tags.props.__flint.tagName != name.toLowerCase()) {
             addWrapper = true
             tags = [tags]
           }
