@@ -342,11 +342,19 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       }
     },
 
+    getFile(name) {
+      return Internal.viewsInFile[name] || []
+    },
+
     deleteFile(name) {
-      const weirdName = `/${name}`
-      Internal.viewsInFile[weirdName].map(Flint.removeView)
-      delete Internal.viewsInFile[weirdName]
-      delete Internal.viewCache[weirdName]
+      const viewsInFile = Internal.viewsInFile[name]
+
+      if (viewsInFile) {
+        Internal.viewsInFile[name].map(Flint.removeView)
+        delete Internal.viewsInFile[name]
+      }
+
+      delete Internal.viewCache[name]
       Flint.render()
     },
 

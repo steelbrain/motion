@@ -15,9 +15,8 @@ import superStream from './lib/superStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
-import log from './lib/log'
 import writeStyle from './lib/writeStyle'
-import { p } from './lib/fns'
+import { p, rm, handleError, log } from './lib/fns'
 
 const $ = loadPlugins()
 let lastSavedTimestamp = {}
@@ -75,9 +74,16 @@ const $p = {
 // gulp doesnt send unlink events for files in deleted folders, so we do our own
 function watchDeletes() {
   chokidar.watch('.', {ignored: /[\/\\]\./})
-    .on('unlink', (file) => {
-      if (/jsf?/.test(path.extname(file))) {
-        cache.remove(file)
+    .on('unlink', async (file) => {
+      try {
+        log('gulp', 'unlink', file)
+        if (/jsf?/.test(path.extname(file))) {
+          await rm(p(opts.get('outDir'), file))
+          cache.remove(file)
+        }
+      }
+      catch(e) {
+        handleError(e)
       }
     })
 }
@@ -136,7 +142,7 @@ export function buildScripts(afterEach, userStream) {
   }
 
   function catchError(error) {
-    log('caught error')
+    log('gulp', 'catchError', error)
     lastError = true
     error.timestamp = Date.now()
     out.badFile(curFile)
@@ -149,6 +155,7 @@ export function buildScripts(afterEach, userStream) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
+    log('gulp', 'setLastFile', 'name', name)
     if (name.charAt(0) != '/') name = '/' + name
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
@@ -185,7 +192,7 @@ export function buildScripts(afterEach, userStream) {
       file.startTime > lastSavedTimestamp[file.path]
     )
 
-    log('is new file', isNew)
+    log('gulp', 'isNew', isNew)
     if (isNew) {
       lastSavedTimestamp[file.path] = file.startTime
       return true
@@ -200,8 +207,11 @@ export function buildScripts(afterEach, userStream) {
 
     if (file.isSourceMap) return
 
+    log('gulp', 'afterWrite', 'hasFinished', hasFinished())
     if (hasFinished()) {
-      if (!lastError && !file.isInternal && cache.get(file.path)) {
+      const cacheHasFile = cache.get(file.path)
+      log('gulp', 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
+      if (!lastError && !file.isInternal && cacheHasFile) {
         cache.removeError(file.path)
         bridge.message('script:add', lastScript)
         bridge.message('compile:success', lastScript)

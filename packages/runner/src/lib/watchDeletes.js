@@ -3,9 +3,7 @@ import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
 import { bundleInternals } from '../bundler/internals'
-import handleError from '../lib/handleError'
-import log from '../lib/log'
-import { p, rm } from './fns'
+import { p, rm, log, handleError } from './fns'
 
 async function deleteJS(view) {
   const file = p(OPTS.outDir, view + '.js')

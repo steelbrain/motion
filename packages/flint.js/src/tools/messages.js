@@ -36,8 +36,12 @@ export default function run(browser, opts) {
     'packages:reload': reloadScript('__flintExternals'),
     'internals:reload': reloadScript('__flintInternals', { reloadAll: true }),
 
-    'file:delete': file => {
-      Flint.deleteFile(file.name)
+    'file:delete': ({ name }) => {
+      let views = Flint.getFile(name)
+      views.map(removeSheet)
+      removeScript(name)
+
+      Flint.deleteFile(name)
     }
   })
 }
@@ -81,7 +85,12 @@ function TagLoader() {
 */
 
 const scriptSelector = src => `script[src^="${removeTime(removeBase(src))}"]`
+const scriptUrl = name => `/_/${name}.js`
+const findScript = name => document.querySelector(scriptSelector(scriptUrl(name)))
+
 const sheetSelector = href => `link[href^="${removeTime(removeBase(href))}"]`
+const sheetUrl = name => `/__/styles/${name}.css`
+const findSheet = name => document.querySelector(sheetSelector(sheetUrl(name)))
 
 const scrLoad = TagLoader()
 const cssLoad = TagLoader()
@@ -89,20 +98,20 @@ const cssLoad = TagLoader()
 function addScript(src) {
   scrLoad(src, (lastTag, done) => {
     lastTag = lastTag || document.querySelector(scriptSelector(src))
-    replaceTag(lastTag, 'src', done)
+
+    if (!lastTag)
+      replaceTag(createScript(src), 'src', done)
+    else
+      replaceTag(lastTag, 'src', done)
   })
 }
 
-let firstLoad = true
 function addSheet(name) {
   cssLoad(name, (lastTag, done) => {
-    const href = `/__/styles/${name}.css`
-    lastTag = lastTag || document.querySelector(sheetSelector(href))
+    lastTag = lastTag || findSheet(name)
 
-    if (!lastTag && firstLoad) {
-      firstLoad = false
+    if (!lastTag)
       replaceTag(createSheet(href), 'href', done)
-    }
     else
       replaceTag(lastTag, 'href', done)
   })
@@ -234,6 +243,12 @@ function replaceTime(str) {
   return removeTime(str) + `?${Date.now()}`
 }
 
+function createScript(src) {
+  let tag = document.createElement('script')
+  tag.src = src
+  return tag
+}
+
 function createSheet(href) {
   let tag = document.createElement('link')
   tag.href = href
@@ -261,12 +276,14 @@ function cloneNode(node, attr) {
   return clone
 }
 
-function sheetClassSelector(name) {
-  return `.Style${name}`
+function removeSheet(name) {
+  let tag = findSheet(name)
+  if (tag && tag.parentNode)
+    tag.parentNode.removeChild(tag)
 }
 
-function removeSheet(name) {
-  let tag = document.querySelector(sheetClassSelector(name))
+function removeScript(name) {
+  let tag = findScript(name.replace('.js', ''))
   if (tag && tag.parentNode)
     tag.parentNode.removeChild(tag)
 }
