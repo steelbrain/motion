@@ -84,7 +84,7 @@ view Inspector {
       .filter(v => !v.temp)
       .map(v => ({ ...v, highlight: false }))
   }
-  
+
   function pathActive(path) {
     return views.filter(v => v.path == path).length > 0
   }
@@ -101,19 +101,19 @@ view Inspector {
 
   function close(path, e) {
     if (e) e.stopPropagation()
-    
+
     views = views
       .map(v => {
         if (v.path == path) { v.closing = true }
         return v
       })
     view.update()
-      
+
     on.delay(200, () => {
       views = views.filter(v => path != v.path)
       view.update()
     })
-    
+
   }
 
   // function tempHideHUD() {

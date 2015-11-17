@@ -4,6 +4,7 @@ import raf from 'raf'
 import Radium from 'radium'
 
 import phash from './lib/phash'
+import log from './lib/log'
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
@@ -393,8 +394,4 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
     return Radium(component)
   }
-}
-
-function log(...args) {
-  if (window.location.search == '?debug') console.log(...args)
 }

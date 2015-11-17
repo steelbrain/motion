@@ -1,3 +1,5 @@
+import log from '../lib/log'
+
 let opts
 let browser
 let actions
@@ -14,6 +16,7 @@ export default function socket(_browser, _opts, _actions) {
 }
 
 function open() {
+  log('socket', 'open', 'isOpening', isOpening)
   if (isOpening) return
   isOpening = true
 
@@ -33,6 +36,7 @@ function onOpen() {
 function onMessage(message) {
   message = JSON.parse(message.data)
   if (!message) return
+  log('socket', 'onMessage', 'message', message._type, message)
 
   const action = actions[message._type]
   if (action) action(message)

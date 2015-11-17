@@ -4,9 +4,15 @@ import { writeFile, log, handleError, path } from './fns'
 import bridge from '../bridge'
 import opts from '../opts'
 
+let cache = {}
+
 export default async function writeStyle(view, sheet) {
   try {
     log('styles', 'view', view, 'sheet', sheet)
+
+    // avoid sending if not necessary
+    if (cache[view] === sheet) return
+    cache[view] = sheet
 
     const file = path.join(opts.get('dir'), '.flint', '.internal', 'styles', view + '.css')
     const prefixed = await postcss([ autoprefixer ]).process(sheet)
@@ -16,7 +22,7 @@ export default async function writeStyle(view, sheet) {
 
     setTimeout(() => {
       bridge.message('stylesheet:add', { view, file })
-    }, 2)
+    })
   }
   catch(e) {
     handleError(e)

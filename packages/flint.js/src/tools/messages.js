@@ -1,6 +1,7 @@
 import { compileError, compileSuccess } from './errors';
 import removeFlintExt from '../lib/flintExt';
 import socket from './socket'
+import log from '../lib/log'
 
 export default function run(browser, opts) {
   socket(browser, opts, {
@@ -124,7 +125,7 @@ function replaceTag(tag, attr, after) {
       removeTag(tag, parent, () => {
         after && after(clone)
       })
-    })
+    }, 4)
   }
 
   clone.onerror = afterFinish
@@ -133,8 +134,6 @@ function replaceTag(tag, attr, after) {
 }
 
 function removeTag(tag, parent, cb, attempts = 0) {
-  if (!parent) return cb()
-
   try {
     parent.removeChild(tag)
     setTimeout(cb, 2)
@@ -142,17 +141,12 @@ function removeTag(tag, parent, cb, attempts = 0) {
   catch(e) {
     if (attempts > 3) {
       const isScript = tag.nodeName == 'SCRIPT'
-      let tags
+      let tags = document.querySelectorAll(isScript ? scriptSelector(tag.src) : sheetSelector(tag.href))
 
-      if (isScript) {
-        tags = document.querySelectorAll(scriptSelector(tag.src))
-      }
-      else {
-        tags = document.querySelectorAll(sheetSelector(tag.href))
-      }
+      // remove all but last couple (one causes flicker)
+      let leftover = 2
 
-      // remove all but last two (one causes flicker)
-      for (let i = 0; i < tags.length - 2; i++) {
+      for (let i = 0; i < tags.length - (leftover + 1); i++) {
         const tag = tags[i]
         try {
           tag.parentNode.removeChild(tag)
@@ -170,8 +164,10 @@ function removeTag(tag, parent, cb, attempts = 0) {
 
       setTimeout(cb)
     }
-    else
+    else {
+      log('socket', 'removeTag', 'attempts', attempts)
       setTimeout(() => removeTag(tag, parent, cb, ++attempts), 30)
+    }
   }
 }
 

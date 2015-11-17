@@ -14,6 +14,7 @@ import './shim/partial'
 import './lib/bluebirdErrorHandle'
 import createComponent from './createComponent'
 import range from './lib/range'
+import log from './lib/log'
 import iff from './lib/iff'
 import router from './lib/router'
 import staticStyles from './lib/staticStyles'
@@ -413,8 +414,4 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   Object.freeze(Flint)
 
   return Flint
-}
-
-function log(...args) {
-  if (window.location.search == '?debug') console.log(...args)
 }
