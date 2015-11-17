@@ -654,8 +654,15 @@ export default function createPlugin(options) {
         UpdateExpression: {
           exit(node, _, scope) {
             if (node.operator == '++' || node.operator == '--') {
-              const postfix = !node.prefix ? t.identifier(node.argument.name) : void 0
-              return addSetter(node.argument.name, node, scope, postfix)
+              let name
+
+              if (node.argument.object)
+                name = findObjectName(node.argument.object)
+              else
+                name = node.argument.name
+
+              const postfix = !node.prefix ? t.identifier(name) : void 0
+              return addSetter(name, node, scope, postfix)
             }
           }
         }
