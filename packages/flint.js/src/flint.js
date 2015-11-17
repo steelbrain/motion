@@ -25,6 +25,7 @@ import arrayDiff from './lib/arrayDiff'
 import createElement from './tag/createElement'
 import ErrorDefinedTwice from './views/ErrorDefinedTwice'
 import NotFound from './views/NotFound'
+import LastWorkingMainFactory from './views/LastWorkingMain'
 import MainErrorView from './views/Main'
 
 const originalWarn = console.warn
@@ -117,6 +118,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     }
   }
 
+  const LastWorkingMain = LastWorkingMainFactory(Internal)
+
   // devtools edit
   function writeBack(path, writePath) {
     // update getCache
@@ -194,18 +197,16 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       function run() {
         Internal.isRendering++
-        log(`render(), Internal.isRendering(${Internal.isRendering})`)
+        log('render', `Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
         let Main = Internal.views.Main && Internal.views.Main.component
 
-        if (!Main && Internal.lastWorkingRenders.Main) {
-          Main = React.createClass({ render() { return Internal.lastWorkingRenders.Main } })
-        }
+        if (!Main && Internal.lastWorkingRenders.Main)
+          Main = LastWorkingMain
 
-        if (!Main) {
+        if (!Main)
           Main = MainErrorView
-        }
 
         if (!browserNode) {
           Flint.renderedToString = React.renderToString(<Main />)

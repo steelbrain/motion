@@ -4,7 +4,7 @@ export default function log(...args) {
   let search = window.location.search
   let type = search && search.match(/[?&]log=([a-z]+)/)
 
-  if (!search || !search.indexOf('log=')) return
+  if (!search || search.indexOf('log=') == -1) return
 
   let logger = () => console.log.call(console, ...args)
 

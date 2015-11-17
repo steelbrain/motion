@@ -170,12 +170,13 @@ export default function createComponent(Flint, Internal, name, view, options = {
         else {
           try {
             view.call(this, this, this.viewOn, this.styles)
+            this.recoveryRender = false
           }
           catch(e) {
             Internal.caughtRuntimeErrors++
             reportError(e)
             console.error(e.stack)
-            this.renders = [() => this.getLastGoodRender()]
+            this.recoveryRender = true
           }
         }
 
@@ -289,6 +290,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       getRender() {
+        if (this.recoveryRender)
+          return this.getLastGoodRender()
+
         let tags, props
         let addWrapper = true
         const numRenders = this.renders && this.renders.length

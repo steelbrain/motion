@@ -20,6 +20,23 @@ import watchDeletes from './lib/watchDeletes'
 import { mkdir } from './lib/fns'
 import path from 'path'
 
+
+
+// DONT RELEASE ME!
+// import memwatch from 'memwatch-next'
+// import heapdump from 'heapdump'
+// memwatch.on('leak', function(info) {
+//  console.error(info)
+//  var file = '/tmp/myapp-' + process.pid + '-' + Date.now() + '.heapsnapshot'
+//  heapdump.writeSnapshot(file, function(err){
+//    if (err) console.error(err)
+//    else console.error('Wrote snapshot: ' + file)
+//   })
+// })
+// DONT RELEASE ME!
+
+
+
 async function waitForFirstBuild() {
   await gulp.afterFirstBuild()
   await bundler.finishedInstalling()

@@ -59,6 +59,8 @@
     "webpack": "^1.12.2"
   },
   "devDependencies": {
-    "babel-loader": "^5.3.2"
+    "babel-loader": "^5.3.2",
+    "heapdump": "^0.3.7",
+    "memwatch-next": "^0.2.10"
   }
 }
