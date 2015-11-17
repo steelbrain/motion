@@ -407,8 +407,8 @@ export default function createPlugin(options) {
           enter(node, parent, scope) {
             if (node.name.name == 'sync') {
               return [
-                t.JSXAttribute(t.literal('value'), node.value),
-                t.JSXAttribute(t.literal('onChange'), t.functionExpression(null, [t.identifier('e')],
+                t.JSXAttribute(t.literal('__flintValue'), node.value),
+                t.JSXAttribute(t.literal('__flintOnChange'), t.functionExpression(null, [t.identifier('e')],
                   t.blockStatement([
                     t.assignmentExpression('=', node.value, t.identifier('e.target.value'))
                   ])

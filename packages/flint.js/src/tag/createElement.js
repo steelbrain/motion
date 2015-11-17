@@ -129,6 +129,19 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
     }
   }
 
+  // sync
+  if (props.__flintOnChange) {
+    let userOnChange = props.onChange
+
+    props.onChange = function(e) {
+      if (userOnChange) userOnChange.call(this, e)
+      props.__flintOnChange(e)
+    }
+
+    if (!props.value)
+      props.value = props.__flintValue
+  }
+
   // if not external component
   if (isView || typeof tag != 'function') {
     props.__flint = {
