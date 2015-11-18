@@ -1,8 +1,13 @@
+import bridge from '../bridge'
 import raven from 'raven'
 
 const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
 
 export default function handleError(handle) {
+  if (!handle) {
+    throw new Error('Null error returned')
+  }
+
   // if used for callback
   if (typeof handle == 'function') {
     return function(err, ...args) {
@@ -17,8 +22,12 @@ export default function handleError(handle) {
   }
   // if used in try/catch
   else {
-    console.error((handle.message || "ERROR").bold.red)
-    console.log(handle.stack)
-    errorClient.captureException(handle)
+    const error = handle
+
+    console.error((error && error.message || "ERROR").bold.red)
+    console.log(error.stack)
+    errorClient.captureException(error)
+
+    bridge.message('compile:error', { error })
   }
 }

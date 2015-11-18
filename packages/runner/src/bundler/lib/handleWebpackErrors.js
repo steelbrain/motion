@@ -6,8 +6,10 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
 
   const jsonStats = stats.toJson()
 
-  if (jsonStats.errors.length)
-    return reject(err)
+  if (jsonStats.errors.length) {
+    err = jsonStats.errors.join("\n")
+    return reject({ file: 'Webpack', message: err })
+  }
 
   if (jsonStats.warnings.length) {
     console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))

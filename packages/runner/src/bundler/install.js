@@ -1,9 +1,7 @@
 import { Promise } from 'bluebird'
-import _ from 'lodash'
 import readInstalled from './lib/readInstalled'
 import writeInstalled from './lib/writeInstalled'
-import handleError from '../lib/handleError'
-import log from '../lib/log'
+import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
 import { onStart, onFinish, onError } from './lib/messages'
@@ -113,7 +111,7 @@ export async function installAll(toInstall) {
       log(LOG, 'finalPaths', finalPaths)
 
       // remove failed
-      if (failed.length)
+      if (failed && failed.length)
         finalPaths = finalPaths.filter(dep => failed.indexOf(dep) >= 0)
 
       logInstalled(successful)

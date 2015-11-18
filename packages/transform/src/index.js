@@ -125,8 +125,11 @@ export default function createPlugin(options) {
       return node
     }
 
+    function getter(name, val, ...args) {
+      return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
+    }
+
     function viewGetter(name, val, scope, file) {
-      let getter = (name, val, ...args) => t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
       let isInView = scope.hasOwnBinding('view')
       let comesFromFile = file.scope.hasOwnBinding(val.name)
 
@@ -453,11 +456,21 @@ export default function createPlugin(options) {
             if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
+
+                if (t.isObjectPattern(dec.id)) {
+                  // let setters = dec.id.properties.map(prop => {
+                  //   // console.log(prop.key.name)
+                  //   return addSetter(prop.key.name, prop, scope)
+                  // })
+                  return dec
+                }
+
                 if (!dec.init) {
                   dec.init = viewGetter(dec.id.name, t.identifier('undefined'), scope, file)
                   dec.flintTracked = true
                   return dec
                 }
+
                 dec.init = viewGetter(dec.id.name, dec.init, scope, file)
                 node.flintTracked = true
                 return dec

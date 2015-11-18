@@ -250,7 +250,9 @@ view ErrorMessage {
   }
 
   $inner = {
-    display: 'block'
+    display: 'block',
+    maxHeight: 200,
+    overflowY: 'scroll'
   }
 
   $where = {

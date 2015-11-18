@@ -31,7 +31,9 @@ function sendInitialMessages(conn) {
 }
 
 function cleanError(obj) {
-  obj.error.file = path.relative(cache.baseDir(), obj.error.fileName)
+  if (obj.error.fileName)
+    obj.error.file = path.relative(cache.baseDir(), obj.error.fileName)
+
   return obj
 }
 
