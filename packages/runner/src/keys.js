@@ -1,3 +1,4 @@
+import runner from './index'
 import open from 'open'
 import keypress from 'keypress'
 
@@ -57,8 +58,9 @@ export function start() {
     }
 
     // exit
-    if (key.ctrl && key.name == 'c')
-      process.exit()
+    if (key.ctrl && key.name == 'c') {
+      runner.stop()
+    }
   });
 
   resume()

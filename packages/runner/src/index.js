@@ -1,6 +1,3 @@
-import regenerator from 'regenerator/runtime'
-global.regeneratorRuntime = regeneratorRuntime
-
 import bridge from './bridge'
 import compiler from './compiler'
 import handleError from './lib/handleError'
@@ -36,13 +33,41 @@ import path from 'path'
 // DONT RELEASE ME!
 
 
+// STOP
+
+process.on('SIGINT', cleanExit)
+process.on('SIGTERM', cleanExit)
+
+let child
+
+function cleanExit() {
+  let child = opts.get('child')
+
+  if (child) {
+    child.send('EXIT') // this seems to be required
+    child.exit()
+  }
+
+  process.exit(0)
+  console.log('Press ctrl-c again to exit', "\n") // in case
+}
+
+export function stop() {
+  cleanExit()
+}
+
+export function setChild(_child) {
+  child = _child
+}
+
+// RUN
 
 async function waitForFirstBuild() {
   await gulp.afterFirstBuild()
   await bundler.finishedInstalling()
 }
 
-export default async function run(_opts = {}, isBuild) {
+export async function run(_opts = {}, isBuild) {
   try {
     console.log()
     const appDir = _opts.appDir || path.normalize(process.cwd());
@@ -79,7 +104,7 @@ export default async function run(_opts = {}, isBuild) {
     }
     else {
       await clear.outDir()
-      await server.run()
+      child = await server.run()
       bridge.start()
       gulp.buildScripts()
 
@@ -103,3 +128,5 @@ export default async function run(_opts = {}, isBuild) {
       handleError(e)
   }
 }
+
+export default { run, stop, setChild }
