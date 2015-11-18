@@ -131,8 +131,11 @@ function replaceTag(tag, attr, after) {
 
   let parent = getParent(tag)
   let clone = cloneNode(tag, attr)
+  let already = false
 
   const afterFinish = () => {
+    if (already) return
+    already = true
     setTimeout(() => {
       removeTag(tag, parent, () => {
         after && after(clone)
@@ -143,6 +146,9 @@ function replaceTag(tag, attr, after) {
   clone.onerror = afterFinish
   clone.onload = afterFinish
   parent.appendChild(clone)
+
+  // ceil of 250ms for slow loads
+  setTimeout(afterFinish, 200)
 }
 
 function removeTag(tag, parent, cb, attempts = 0) {

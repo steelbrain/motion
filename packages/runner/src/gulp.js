@@ -88,8 +88,6 @@ function watchDeletes() {
     })
 }
 
-let fileLoading = {}
-
 // userStream is optional for programmatic usage
 export function buildScripts(afterEach, userStream) {
   OPTS = opts.get()
@@ -99,15 +97,6 @@ export function buildScripts(afterEach, userStream) {
   if (!opts.get('build')) {
     watchDeletes()
     superStream.init()
-
-    // ignore stream when loading file in browser
-    let base = p => p.replace('/_/', '')
-    bridge.on('file:load', ({ name }) => {
-      fileLoading[base(name)] = true
-    })
-    bridge.on('file:done', ({ name }) => {
-      fileLoading[base(name)] = false
-    })
   }
 
   // gulp src stream
@@ -119,11 +108,6 @@ export function buildScripts(afterEach, userStream) {
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
-    // ignore if browser is loading current file
-    .pipe($.if(file => {
-      // log(file.path, fileLoading)
-      return fileLoading[file.path]
-    }, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
