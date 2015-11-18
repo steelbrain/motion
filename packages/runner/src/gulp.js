@@ -116,14 +116,14 @@ export function buildScripts(afterEach, userStream) {
     .pipe($p.babel())
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-    .pipe($.if(file => !OPTS.build && !file.isInternal, $.sourcemaps.write('.')))
     .pipe($.if(file => file.isInternal,
       multipipe(
         gulp.dest(p(OPTS.depsDir, 'internal')),
         $.ignore.exclude(true)
       )
     ))
-    .pipe($.if(file => !file.isInternal && OPTS.build,
+    .pipe($.if(!OPTS.build, $.sourcemaps.write('.')))
+    .pipe($.if(OPTS.build,
       $.concat(`${OPTS.saneName}.js`)
     ))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
@@ -167,9 +167,6 @@ export function buildScripts(afterEach, userStream) {
     if (OPTS.build) {
       copy.styles()
     }
-
-    if (file.isInternal)
-      return false
 
     file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
 
