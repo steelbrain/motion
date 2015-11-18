@@ -110,7 +110,10 @@ export function run() {
   OPTS = opts.get()
 
   return new Promise((res, rej) => {
-    var server = express()
+    var server = express({
+      env: 'production'
+    })
+
     server.use(cors())
     server.use((req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*')
