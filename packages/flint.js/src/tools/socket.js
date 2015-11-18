@@ -15,6 +15,12 @@ export default function socket(_browser, _opts, _actions) {
   open()
 }
 
+socket.send = function send(type, obj) {
+  obj = obj || {}
+  obj._type = type
+  ws.send(JSON.stringify(obj))
+}
+
 function open() {
   log('socket', 'open', 'isOpening', isOpening)
   if (isOpening) return

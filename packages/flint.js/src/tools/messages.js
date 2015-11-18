@@ -51,25 +51,28 @@ function TagLoader() {
   let loading = {}
   let wait = {}
 
-  return function(key, load) {
-    let oldTag = last[key]
+  return function(name, load) {
+    socket.send('file:load', { name })
 
-    if (loading[key]) {
-      wait[key] = true
+    let oldTag = last[name]
+
+    if (loading[name]) {
+      wait[name] = true
       return
     }
 
-    loading[key] = true
+    loading[name] = true
 
     load(oldTag, onDone)
 
     function onDone(newTag) {
-      last[key] = newTag
-      loading[key] = false
+      socket.send('file:done', { name })
+      last[name] = newTag
+      loading[name] = false
 
-      if (wait[key]) {
-        wait[key] = false
-        load(last[key], onDone)
+      if (wait[name]) {
+        wait[name] = false
+        load(last[name], onDone)
       }
     }
   }
