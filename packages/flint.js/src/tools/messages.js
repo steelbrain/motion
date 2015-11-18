@@ -118,7 +118,7 @@ function addSheet(name) {
     lastTag = lastTag || findSheet(name)
 
     if (!lastTag)
-      replaceTag(createSheet(href), 'href', done)
+      replaceTag(createSheet(sheetUrl(name)), 'href', done)
     else
       replaceTag(lastTag, 'href', done)
   })
