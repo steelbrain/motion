@@ -41,22 +41,12 @@ process.on('SIGTERM', cleanExit)
 let child
 
 function cleanExit() {
-  if (child) {
-    child.send('EXIT') // this seems to be required
-    child.exit()
-  }
-
+  if (child) child.send('EXIT') // this seems to be required
   process.exit(0)
-  console.log('Press ctrl-c again to exit', "\n") // in case
 }
 
-export function stop() {
-  cleanExit()
-}
-
-export function setChild(_child) {
-  child = _child
-}
+export function stop() { cleanExit() }
+export function setChild(_child) { child = _child }
 
 // RUN
 
