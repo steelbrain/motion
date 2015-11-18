@@ -4,7 +4,6 @@ import portfinder from 'portfinder'
 import flintjs from 'flint-js'
 import flinttools from 'flint-tools'
 
-import internal from './internal'
 import { p, readFile, readdir, handleError } from './lib/fns'
 
 const newLine = "\n"
@@ -29,56 +28,66 @@ function devToolsDisabled(req) {
 }
 
 async function readScripts() {
-  const dir = await readdir({ root: OPTS.outDir })
-  const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
-  const hasFiles = files.length
+  try {
+    const dir = await readdir({ root: OPTS.outDir })
+    const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
+    const hasFiles = files.length
 
-  let paths = []
+    let paths = []
 
-  // deterministic order
-  if (hasFiles) {
-    paths = files.map(file => file.path).sort()
+    // deterministic order
+    if (hasFiles) {
+      paths = files.map(file => file.path).sort()
 
-    let mainIndex = 0
+      let mainIndex = 0
 
-    paths.forEach((p, i) => {
-      if (/[Mm]ain\.jsf?$/.test(p))
-        mainIndex = i
-    })
+      paths.forEach((p, i) => {
+        if (/[Mm]ain\.jsf?$/.test(p))
+          mainIndex = i
+      })
 
-    if (mainIndex !== -1)
-      paths.move(mainIndex, 0)
+      if (mainIndex !== -1)
+        paths.move(mainIndex, 0)
+    }
+
+    return paths
   }
-
-  return paths
+  catch(e) {
+    handleError(e)
+  }
 }
 
 async function getScripts({ disableTools }) {
-  const files = await readScripts()
+  try {
+    const files = await readScripts()
 
-  return [
-    '<div id="_flintdevtools" class="_flintdevtools"></div>',
-    newLine,
-    '<!-- FLINT JS -->',
-    '<script src="/__/react.dev.js"></script>',
-    '<script src="/__/flint.dev.js"></script>',
-    '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
-    '<script src="/__/devtools.dev.js"></script>',
-    // devtools
-    disableTools ? '' : [
-      '<script src="/__/tools/tools.js"></script>',
-      '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
-    ].join(newLine),
-    // user files
-    newLine,
-    '<!-- APP -->',
-    `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })</script>`,
-    '<script src="/__/externals.js" id="__flintExternals"></script>',
-    '<script src="/__/internals.js" id="__flintInternals"></script>',
-    scriptTags(files),
-    '<script>Flint.init()</script>',
-    '<!-- END APP -->'
-  ].join(newLine)
+    return [
+      '<div id="_flintdevtools" class="_flintdevtools"></div>',
+      newLine,
+      '<!-- FLINT JS -->',
+      '<script src="/__/react.dev.js"></script>',
+      '<script src="/__/flint.dev.js"></script>',
+      '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
+      '<script src="/__/devtools.dev.js"></script>',
+      // devtools
+      disableTools ? '' : [
+        '<script src="/__/tools/tools.js"></script>',
+        '<script>flintRun_tools("_flintdevtools", { app: "devTools" });</script>'
+      ].join(newLine),
+      // user files
+      newLine,
+      '<!-- APP -->',
+      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })</script>`,
+      '<script src="/__/externals.js" id="__flintExternals"></script>',
+      '<script src="/__/internals.js" id="__flintInternals"></script>',
+      scriptTags(files),
+      '<script>Flint.init()</script>',
+      '<!-- END APP -->'
+    ].join(newLine)
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 async function getStyles() {
@@ -152,7 +161,6 @@ function run() {
     }
 
     function serverListen(port) {
-      internal.setServerState()
       server.listen(port, host)
       process.send(JSON.stringify({ host, port }))
     }

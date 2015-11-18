@@ -5,6 +5,7 @@
 import cp from 'child_process'
 import runner from './index'
 import opts from './opts'
+import internal from './internal'
 
 export function run() {
   return new Promise((res, rej) => {
@@ -17,11 +18,13 @@ export function run() {
 
     child.send(JSON.stringify(opts.get()))
 
-    child.on('message', message => {
+    child.once('message', message => {
       let { port, host } = JSON.parse(message)
 
       opts.set('port', port)
       opts.set('host', host)
+
+      internal.setServerState()
 
       res()
     })
