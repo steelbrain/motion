@@ -144,8 +144,9 @@ export function buildScripts(afterEach, userStream) {
   function catchError(error) {
     log('gulp', 'catchError', error)
     lastError = true
-    error.timestamp = Date.now()
     out.badFile(curFile)
+
+    error.timestamp = Date.now()
     logError(error, curFile)
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error })

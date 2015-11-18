@@ -22,10 +22,11 @@ function fileSend({ path, contents }) {
   }
 
   const rPath = nodepath.relative(basePath, path)
+
   log('stream', rPath)
 
   // write to stream
-  const file = new File(vinyl(rPath, new Buffer(contents)))
+  const file = new File(vinyl(path, new Buffer(contents)))
 
   function pushStream() {
     log('stream', 'pushing!')
@@ -98,7 +99,7 @@ function init() {
 }
 
 function vinyl(path, contents) {
-  const cwd = basePath
+  const cwd = '/'
   const base = basePath + '/'
   return { cwd, base, path, contents }
 }
