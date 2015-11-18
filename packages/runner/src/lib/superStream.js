@@ -92,7 +92,7 @@ function init() {
   initScriptWait()
 
   // throttle the stream a bit
-  let fileSender = _.throttle(fileSend, 5, { leading: true })
+  let fileSender = _.throttle(fileSend, 10, { leading: true })
 
   bridge.on('super:file', fileSender)
 }
