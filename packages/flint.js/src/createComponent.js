@@ -18,6 +18,7 @@ const pathWithoutProps = path =>
   path.replace(/\.[a-z0-9\-]+$/, '')
 
 let views = {}
+let viewErrorDebouncers = {}
 
 export default function createComponent(Flint, Internal, name, view, options = {}) {
   const el = createElement(name)
@@ -351,26 +352,35 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       render() {
-        this.isRendering = true
-        this.firstRender = false
+        const self = this
+
+        self.isRendering = true
+        self.firstRender = false
 
         if (process.env.production)
-          return this.getRender()
+          return self.getRender()
+        else {
+          clearTimeout(viewErrorDebouncers[self.props.__flint.path])
+        }
 
         // try render
         try {
-          const els = this.getRender()
-          this.lastRendered = els
+          const els = self.getRender()
+          self.lastRendered = els
           return els
         }
         catch(e) {
           Internal.caughtRuntimeErrors++
 
-          console.warn(`Render error in view ${name}:`)
-          console.error(e)
+          // console warn, with debounce
+          viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
+            console.warn(`Render error in view ${name}:`)
+            console.error(e)
+          }, 500)
+
           reportError(e)
 
-          const lastRender = this.getLastGoodRender()
+          const lastRender = self.getLastGoodRender()
 
           try {
             let inner = <span>Error in view {name}</span>
@@ -378,7 +388,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
               __html = __html.replace(/\s*data\-react[a-z-]*\=\"[^"]*\"/g, '')
-
               inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
