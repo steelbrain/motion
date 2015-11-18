@@ -141,7 +141,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       getInitialState() {
         const fprops = this.props.__flint
 
-        Internal.getInitialStates[fprops ? fprops.flintPath : 'Main'] = () => this.getInitialState()
+        Internal.getInitialStates[fprops ? fprops.path : 'Main'] = () => this.getInitialState()
 
         let u = null
 
