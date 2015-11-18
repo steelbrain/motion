@@ -46,6 +46,10 @@ export default function run(browser, opts) {
   })
 }
 
+// tag loader is a throttler
+// it accepts requests to load tags
+// and once those tags load, it will continue
+
 function TagLoader() {
   let last = {}
   let loading = {}
@@ -132,9 +136,11 @@ function replaceTag(tag, attr, after) {
   let parent = getParent(tag)
   let clone = cloneNode(tag, attr)
   let already = false
+  let cielTimeout
 
   const afterFinish = () => {
     if (already) return
+    clearTimeout(cielTimeout)
     already = true
     setTimeout(() => {
       removeTag(tag, parent, () => {
@@ -148,44 +154,41 @@ function replaceTag(tag, attr, after) {
   parent.appendChild(clone)
 
   // ceil of 250ms for slow loads
-  setTimeout(afterFinish, 200)
+  cielTimeout = setTimeout(() => {
+    if (already) return
+    removeTag(tag, tag.parentNode, afterFinish, { leftover: 0 })
+  }, 200)
 }
 
-function removeTag(tag, parent, cb, attempts = 0) {
+function removeTag(tag, parent, cb, opts = {}) {
+  let { leftover } = opts
+  leftover = leftover || 2 // leave two tags at most
+
   try {
     parent.removeChild(tag)
     setTimeout(cb, 2)
   }
   catch(e) {
-    if (attempts > 3) {
-      const isScript = tag.nodeName == 'SCRIPT'
-      let tags = document.querySelectorAll(isScript ? scriptSelector(tag.src) : sheetSelector(tag.href))
+    const isScript = tag.nodeName == 'SCRIPT'
+    let tags = document.querySelectorAll(isScript ? scriptSelector(tag.src) : sheetSelector(tag.href))
 
-      // remove all but last couple (one causes flicker)
-      let leftover = 2
-
-      for (let i = 0; i < tags.length - (leftover + 1); i++) {
-        const tag = tags[i]
-        try {
-          tag.parentNode.removeChild(tag)
-        }
-        catch(e) {
-          try {
-            document.body.removeChild(tag)
-            document.head.removeChild(tag)
-          }
-          catch(e) { //oh well
-            tag[isScript ? 'src' : 'href'] = ''
-          }
-        }
+    // attempt force removal
+    for (let i = 0; i < tags.length - leftover; i++) {
+      const tag = tags[i]
+      try {
+        tag.parentNode.removeChild(tag)
       }
+      catch(e) {
+        try {
+          document.body.removeChild(tag)
+          document.head.removeChild(tag)
+        }
+        catch(e) { /* oh well */ }
+      }
+    }
 
-      setTimeout(cb)
-    }
-    else {
-      log('socket', 'removeTag', 'attempts', attempts)
-      setTimeout(() => removeTag(tag, parent, cb, ++attempts), 30)
-    }
+    // wait a bit longer after recovery
+    setTimeout(cb, 30)
   }
 }
 
