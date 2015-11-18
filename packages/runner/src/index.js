@@ -41,8 +41,6 @@ process.on('SIGTERM', cleanExit)
 let child
 
 function cleanExit() {
-  let child = opts.get('child')
-
   if (child) {
     child.send('EXIT') // this seems to be required
     child.exit()
@@ -104,7 +102,7 @@ export async function run(_opts = {}, isBuild) {
     }
     else {
       await clear.outDir()
-      child = await server.run()
+      await server.run()
       bridge.start()
       gulp.buildScripts()
 
