@@ -10,6 +10,12 @@ export default async function progress(label, cmd, name, index, total) {
     await execPromise(name, cmd, opts.get('flintDir'), spinner)
   }
   catch(e) {
+    if (e.code == 1) {
+      return handleError({
+        message: `NPM command ${cmd} failed`
+      })
+    }
+
     handleError(e)
   }
 }

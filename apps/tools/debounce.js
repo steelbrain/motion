@@ -9,7 +9,7 @@ const Clear = 1000 * 10
 const AutoDetectAvgDiff = 1000
 
 view Debounce {
-  let timeout, lastTime, delay, curDelay, avgDiff
+  let showKey, timeout, lastTime, delay, curDelay, avgDiff
   let isAutoSaving = false
   let lastFew = []
 
@@ -17,6 +17,11 @@ view Debounce {
   view.pause()
 
   on.props(() => {
+    if (view.props.showKey && view.props.showKey == showKey) {
+      return
+    }
+
+    showKey = view.props.showKey
     delay = view.props.delay || Delay
     curDelay = curDelay || delay
 
@@ -46,7 +51,9 @@ view Debounce {
     }
 
     function show() {
-      if (view.props.onUpdate) view.props.onUpdate()
+      if (view.props.onUpdate)
+        view.props.onUpdate()
+
       view.update()
     }
 

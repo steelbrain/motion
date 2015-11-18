@@ -366,7 +366,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
         catch(e) {
           Internal.caughtRuntimeErrors++
 
-          console.error('Render error in view', name, 'at path', this.props.__flint.path, e)
+          console.warn(`Render error in view ${name}:`)
+          console.error(e)
           reportError(e)
 
           const lastRender = this.getLastGoodRender()
