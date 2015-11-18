@@ -27,6 +27,10 @@ view Inspector.View {
     active = true
   })
 
+  on.unmount(() => {
+    delete window._Flint.inspector[view.props.path]
+  })
+
   on.props(() => {
     highlight = view.props.highlight
     closing = view.props.closing

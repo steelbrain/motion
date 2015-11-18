@@ -84,4 +84,3 @@ view Circle {
 
   <circle style={style(1)} />
 }
-

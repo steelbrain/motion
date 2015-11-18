@@ -137,10 +137,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   function setInspector(path) {
-    if (Internal.inspector.path && Internal.inspector.path == path) {
+    if (Internal.inspector[path]) {
       let props = Internal.viewsAtPath[path].props
       const state = Internal.getCache[path]
-      Internal.inspector.cb(props, state, writeBack)
+      Internal.inspector[path](props, state, writeBack)
     }
   }
 
@@ -406,7 +406,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     },
 
     inspect(path, cb) {
-      Internal.inspector = { path, cb }
+      Internal.inspector[path] = cb
       setInspector(path)
     }
   }

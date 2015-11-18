@@ -162,7 +162,7 @@ function replaceTag(tag, attr, after) {
 
 function removeTag(tag, parent, cb, opts = {}) {
   let { leftover } = opts
-  leftover = leftover || 2 // leave two tags at most
+  leftover = leftover || 4 // leave two tags at most
 
   try {
     parent.removeChild(tag)
