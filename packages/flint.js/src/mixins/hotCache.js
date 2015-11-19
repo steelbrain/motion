@@ -20,6 +20,8 @@ export default function hotCache({ Internal, options, name }) {
 
       if (this.shouldReRender())
         this.setState({ render: 1 })
+      else
+        this.queuedUpdate = true
     },
 
     get(name, val, where) {

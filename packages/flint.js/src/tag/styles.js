@@ -114,6 +114,7 @@ export default function elementStyles(key, view, name, tag, props) {
           const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
           if (staticClassStyles) {
             Object.keys(staticClassStyles).forEach(key => {
+              // console.log(key, staticClassStyles[key])
               // check if already in styles, and rewrite to class style
               if (result[key]) {
                 result[key] = staticClassStyles[key]

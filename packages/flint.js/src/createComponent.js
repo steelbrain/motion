@@ -375,6 +375,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const self = this
 
         self.isRendering = true
+        self.firstRender = false
 
         if (process.env.production)
           return self.getRender()
