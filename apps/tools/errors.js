@@ -167,20 +167,26 @@ const getLine = err => err && (err.line || err.loc && err.loc.line)
 view ErrorMessage {
   view.pause()
 
-  let error, npmError, fullStack
+  let hasError = false
+  let error = {}
+  let npmError, fullStack
   let line = getLine(view.props.error)
   let clearDelay
 
   on.props(() => {
+    clearDelay && clearDelay()
+
     npmError = view.props.npmError
-    error = view.props.error
+    hasError = !!(view.props.error || view.props.npmError)
+    console.log('hasError', hasError)
+    error = view.props.error || error // keep old
     line = getLine(error)
     fullStack = null
+
     view.update()
 
     // show full stack after a delay
     if (error) {
-      clearDelay && clearDelay()
       clearDelay = on.delay(2500, () => {
         if (error && error.fullStack) {
           fullStack = error.fullStack
@@ -201,21 +207,24 @@ view ErrorMessage {
     })
   }
 
-  <Debounce force={!error} showKey={fullStack || error && error.message} onUpdate={showFlintErrorDiv}>
-    <bar>
+  <Debounce
+    delay={1000}
+    force={hasError === false}
+    showKey={fullStack || error && error.message}
+    onUpdate={showFlintErrorDiv}
+  >
+    <bar class={{ hasError }}>
       <Close onClick={view.props.close} size={35} />
 
       <inner if={npmError}>
-        <where><bold>{npmError.name}</bold></where> {npmError.msg}
+        <where><flint>{npmError.name}</flint></where> {npmError.msg}
       </inner>
 
-      <inner if={error}>
+      <inner>
         <top>
           <where>
-            In <bold>{fileName(error.file)}</bold>
-            <line if={line}>
-              <span>&nbsp;line</span> <bold>{line - flintAddedLines}</bold>
-            </line>
+            <span>In <flint>{fileName(error.file)}</flint></span>
+            <line>{line ? ' line' : ''} <flint if={line}>{line - flintAddedLines}</flint></line>
           </where>
 
           {' '}
@@ -250,7 +259,7 @@ view ErrorMessage {
     background: red,
     position: 'fixed',
     left: 0,
-    bottom: view.props.error ? 0 : -100,
+    bottom: -100,
     transition: 'all 200ms ease-in',
     right: 0,
     fontFamily: '-apple-system, "San Francisco", Roboto, "Segou UI", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -262,6 +271,10 @@ view ErrorMessage {
     overflow: 'scroll',
     zIndex: 2147483647,
     boxShadow: '0 -6px 12px rgba(0,0,0,0.06)',
+  }
+
+  $hasError = {
+    bottom: 0
   }
 
   $inner = {
@@ -288,7 +301,7 @@ view ErrorMessage {
     pointerEvents: 'all'
   }
 
-  $bold = {
+  $flint = {
     display: 'inline',
     fontWeight: 700,
     color: '#fff'
@@ -337,10 +350,10 @@ view ErrorMessage {
     padding: [0, 20]
   }
 
-  $boldline = {
+  $flintline = {
     whiteSpace: 'pre',
     pointerEvents: 'all',
-    fontWeight: 'bold'
+    fontWeight: 'flint'
   }
 }
 

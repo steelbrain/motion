@@ -17,9 +17,12 @@ view Debounce {
   view.pause()
 
   on.props(() => {
-    if (view.props.showKey && view.props.showKey == showKey) {
+    // override
+    if (view.props.force)
+      return show()
+
+    if (view.props.showKey && view.props.showKey == showKey)
       return
-    }
 
     showKey = view.props.showKey
     delay = view.props.delay || Delay
@@ -56,10 +59,6 @@ view Debounce {
 
       view.update()
     }
-
-    // override
-    if (view.props.force)
-      return show()
 
     // debounce
     clearTimeout(timeout)

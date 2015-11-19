@@ -250,6 +250,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentDidUpdate() {
         this.isRendering = false
         this.isUpdating = false
+        this.queuedUpdate = false
 
         if (this.queuedUpdate)
           this.update()
@@ -267,6 +268,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       // for looping while waiting
       delayUpdate() {
+        if (this.queuedUpdate) return
+
         this.queuedUpdate = true
 
         setTimeout(() => {
@@ -276,7 +279,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       update() {
         if (!Internal.firstRender && !this.isRendering && !this.isUpdating && this._isMounted) {
-          this.queuedUpdate = false
+          this.isUpdating = true
           setTimeout(() => this.forceUpdate())
         }
         else {
