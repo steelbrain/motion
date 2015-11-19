@@ -64,6 +64,12 @@ function packInternals() {
         'react-dom': 'ReactDOM',
         bluebird: '_bluebird',
       },
+      node: {
+        global: false,
+        process: false,
+        Buffer: false,
+        setImmediate: false
+      },
       output: {
         filename: opts.get('deps').internalsOut
       }
