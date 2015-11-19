@@ -4,7 +4,7 @@ import React from 'react'
 import raf from 'raf'
 import ReactDOM from 'react-dom'
 import clone from 'clone'
-import regeneratorRuntime from 'regenerator/runtime'
+import regeneratorRuntime from './vendor/regenerator'
 import Bluebird, { Promise } from 'bluebird'
 
 import 'reapp-object-assign'

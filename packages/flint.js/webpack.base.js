@@ -60,10 +60,10 @@ module.exports = function(opts) {
           test: /\.js$/,
           loader: 'babel-loader',
           query: {
-            stage: 2,
-            optional: ['runtime']
+            stage: 2
           },
-          include: [path.resolve(__dirname, 'src')]
+          include: [path.resolve(__dirname, 'src')],
+          exclude: [path.resolve(__dirname, 'src', 'vendor')]
         },
         { test: /\.json$/, loader: 'json-loader' },
       ]
