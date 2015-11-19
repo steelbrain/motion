@@ -208,7 +208,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillUnmount() {
-        // fixes unmount errors #60
+        // fixes unmount errors github.com/flintjs/flint/issues/60
         if (!process.env.production) {
           this.render()
         }
