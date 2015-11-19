@@ -394,19 +394,21 @@ export default function createComponent(Flint, Internal, name, view, options = {
           try {
             let inner = <span>Error in view {name}</span>
 
+            if (Internal.isDevTools)
+              return inner
+
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
               __html = __html.replace(/\s*data\-react[a-z-]*\=\"[^"]*\"/g, '')
-              console.log('__html', __html)
               inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
             // highlight in red and return last working render
             return (
-              <div style={{ position: 'relative' }}>
-                <div className="__flintError" />
+              <span style={{ display: 'block', position: 'relative' }}>
+                <span className="__flintError" />
                 {inner}
-              </div>
+              </span>
             )
           }
           catch(e) {

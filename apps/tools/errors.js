@@ -177,10 +177,10 @@ view ErrorMessage {
 
     // show full stack after a delay
     if (error) {
-      // clearDelay && clearDelay()
+      clearDelay && clearDelay()
       clearDelay = on.delay(2500, () => {
-        if (error)
-          fullStack = error.stack
+        if (error.fullStack)
+          fullStack = error.fullStack
       })
     }
   })
@@ -201,15 +201,15 @@ view ErrorMessage {
       <Close onClick={view.props.close} size={35} />
 
       <inner if={npmError}>
-        <where><b>{npmError.name}</b></where> {npmError.msg}
+        <where><bold>{npmError.name}</bold></where> {npmError.msg}
       </inner>
 
       <inner if={error}>
         <top>
           <where>
-            In <b>{fileName(error.file)}</b>
+            In <bold>{fileName(error.file)}</bold>
             <line if={line}>
-              <span>&nbsp;line</span> <b>{line - flintAddedLines}</b>
+              <span>&nbsp;line</span> <bold>{line - flintAddedLines}</bold>
             </line>
           </where>
 
@@ -229,10 +229,10 @@ view ErrorMessage {
           </help>
         </top>
 
-        <fullStack if={error.fullStack}>
-          <ln>{error.fullStack[0]}</ln>
-          <ln class="cur">{error.fullStack[1]}</ln>
-          <ln>{error.fullStack[2]}</ln>
+        <fullStack if={fullStack}>
+          <ln>{'' + fullStack[0]}</ln>
+          <ln class="cur">{'' + fullStack[1]}</ln>
+          <ln>{'' + fullStack[2]}</ln>
         </fullStack>
       </inner>
     </bar>
@@ -283,7 +283,9 @@ view ErrorMessage {
     pointerEvents: 'all'
   }
 
-  $b = {
+  $bold = {
+    display: 'inline',
+    fontWeight: 700,
     color: '#fff'
   }
 

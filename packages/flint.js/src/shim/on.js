@@ -20,14 +20,16 @@ function unlistenFromUid(uid) {
 function addListener({ root, scope, name, number, cb, uid }) {
   if (name == 'delay') { // on('delay', 400, cb)
     let timer = setTimeout(cb, number)
-    onUnmount(scope, () => clearTimeout(timer))
-    return
+    let clearTimer = () => clearTimeout(timer)
+    onUnmount(scope, clearTimer)
+    return clearTimer
   }
 
   if (name == 'every') { // on('every', 20, cb)
     let interval = setInterval(cb, number)
-    onUnmount(scope, () => clearInterval(interval))
-    return interval
+    let clearInterval = () => clearInterval(interval)
+    onUnmount(scope, clearInterval)
+    return clearInterval
   }
 
   if (name == 'frame') {
@@ -37,8 +39,9 @@ function addListener({ root, scope, name, number, cb, uid }) {
       if (active) loop()
     })
     loop()
-    onUnmount(scope, () => active = false)
-    return () => active = false
+    let clearFrame = () => active = false
+    onUnmount(scope, clearFrame)
+    return clearFrame
   }
 
   const target = (scope || root)
