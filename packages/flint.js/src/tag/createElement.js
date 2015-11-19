@@ -138,7 +138,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
       props.__flintOnChange(e)
     }
 
-    if (!props.value)
+    if (props.__flintValue)
       props.value = props.__flintValue
   }
 
