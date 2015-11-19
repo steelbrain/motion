@@ -178,7 +178,6 @@ view ErrorMessage {
 
     npmError = view.props.npmError
     hasError = !!(view.props.error || view.props.npmError)
-    console.log('hasError', hasError)
     error = view.props.error || error // keep old
     line = getLine(error)
     fullStack = null
