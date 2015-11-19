@@ -7,7 +7,7 @@
   pointer-events: none;
 }
 
-#FLINTERROR {
+.__flintError {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,7 +19,7 @@
   transition: all ease-in 1000ms;
 }
 
-#FLINTERROR.active {
+.__flintError.active {
   opacity: 1;
 }
 

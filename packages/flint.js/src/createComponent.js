@@ -381,8 +381,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
           // console warn, with debounce
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
-            console.warn(`Render error in view ${name}:`)
-            console.error(e, e.stack)
+            console.groupCollapsed(`Render error in view ${name} (${e.message})`)
+            console.warn(e.message)
+            console.error(...e.stack.split("\n"))
+            console.groupEnd()
           }, 500)
 
           reportError(e)
@@ -401,7 +403,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             // highlight in red and return last working render
             return (
               <div style={{ position: 'relative' }}>
-                <div id="FLINTERROR" />
+                <div className="__flintError" />
                 {inner}
               </div>
             )

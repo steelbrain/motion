@@ -187,8 +187,12 @@ view ErrorMessage {
 
   function showFlintErrorDiv() {
     setTimeout(() => {
-      const errorDiv = document.getElementById('FLINTERROR')
-      if (errorDiv) errorDiv.className = 'active'
+      const errors = document.querySelectorAll('.__flintError')
+      if (!errors.length) return
+      // add active class to show them
+      ;[].forEach.call(errors, error => {
+        error.className += ' active'
+      })
     })
   }
 
