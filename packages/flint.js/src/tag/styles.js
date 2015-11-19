@@ -50,6 +50,7 @@ export default function elementStyles(key, view, name, tag, props) {
   if (typeof name !== 'string') return
 
   let styles
+  let parentStyles, parentStylesStatic, parentStylesStaticView
 
   // attach view styles from $ to element matching view name lowercase
   const Flint = view.Flint
@@ -74,11 +75,10 @@ export default function elementStyles(key, view, name, tag, props) {
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
     const nameStyle = diffName && view.styles[name] && view.styles[name](index)
 
-    let parentStyles, parentStylesStatic
-
     if (deservesRootStyles) {
       parentStyles = view.props.__flint.parentStyles
       parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
+      parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
 
       // TODO: shouldnt be in styles
       if (view.props.className) {
@@ -211,6 +211,12 @@ export default function elementStyles(key, view, name, tag, props) {
         `${transformKeysMap[key] || key}(${styles.transform[key]}${isNumerical(styles.transform, key) ? 'px' : ''})`
       ).join(' ')
     }
+  }
+
+  if (parentStylesStaticView) {
+    Object.keys(parentStylesStaticView).forEach(key => {
+      styles[key] = parentStylesStaticView[key]
+    })
   }
 
   // set body bg to Main view bg
