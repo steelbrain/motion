@@ -165,6 +165,8 @@ const fileName = url => url && url.replace(/[\?\)].*/, '')
 const getLine = err => err && (err.line || err.loc && err.loc.line)
 
 view ErrorMessage {
+  view.pause()
+
   let error, npmError, fullStack
   let line = getLine(view.props.error)
   let clearDelay
@@ -174,13 +176,16 @@ view ErrorMessage {
     error = view.props.error
     line = getLine(error)
     fullStack = null
+    view.update()
 
     // show full stack after a delay
     if (error) {
       clearDelay && clearDelay()
       clearDelay = on.delay(2500, () => {
-        if (error && error.fullStack)
+        if (error && error.fullStack) {
           fullStack = error.fullStack
+          view.update()
+        }
       })
     }
   })

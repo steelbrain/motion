@@ -275,7 +275,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       update() {
-        console.log('!Internal.firstRender', !Internal.firstRender, '!this.isRendering', !this.isRendering, '!this.isUpdating', !this.isUpdating, this._isMounted)
         if (!Internal.firstRender && !this.isRendering && !this.isUpdating && this._isMounted) {
           this.queuedUpdate = false
           setTimeout(() => this.forceUpdate())
