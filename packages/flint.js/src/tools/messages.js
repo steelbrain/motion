@@ -156,13 +156,13 @@ function replaceTag(tag, attr, after) {
   // ceil of 250ms for slow loads
   cielTimeout = setTimeout(() => {
     if (already) return
-    removeTag(tag, tag.parentNode, afterFinish, { leftover: 0 })
+    removeTag(tag, tag.parentNode, afterFinish, { leftover: 1 })
   }, 200)
 }
 
 function removeTag(tag, parent, cb, opts = {}) {
   let { leftover } = opts
-  leftover = leftover || 4 // leave two tags at most
+  leftover = typeof leftover == 'number' ? leftover : 2 // how many tags to leave
 
   try {
     parent.removeChild(tag)
