@@ -87,7 +87,8 @@ function onCb({ view, scope, name, number, cb }) {
 
     let listener
     let eventFn = uid => {
-      return removeByUids[uid] = addListener({ scope, root: getRoot(view), name, number, cb: finish })
+      let root = getRoot(view)
+      return removeByUids[uid] = addListener({ scope, root, name, number, cb: finish })
     }
 
     // attach to mount depending
@@ -102,7 +103,8 @@ function onCb({ view, scope, name, number, cb }) {
     // number = setTimeout = we just push unmount event right in addListener
     if (typeof number == 'undefined') {
       events.unmount.push(() => {
-        removeListener({ scope, root: getRoot(view), name, cb: finish })
+        let root = getRoot(view)
+        removeListener({ scope, root, name, cb: finish })
       })
     }
 
@@ -147,7 +149,24 @@ const proto = name => {
 
 // custom events
 On.prototype.event = function(name, scope, cb, number) {
-  return this.run(name, scope, cb, number)
+  // firing
+  if (typeof scope == 'undefined') {
+    let event = new Event(name)
+    return window.dispatchEvent(event)
+  }
+
+  // firing on custom scope
+  if (typeof scope != 'function' && typeof cb == 'function') {
+    console.error('we need to implement custom scoped events still :)')
+    return
+  }
+
+  // listening
+  if (typeof scope == 'function') {
+    return this.run(name, window, scope)
+  }
+
+  throw new Error("You called an event without name or scope!")
 }
 
 // flint
