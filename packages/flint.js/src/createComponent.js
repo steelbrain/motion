@@ -397,6 +397,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             if (lastRender) {
               let __html = ReactDOMServer.renderToString(lastRender)
               __html = __html.replace(/\s*data\-react[a-z-]*\=\"[^"]*\"/g, '')
+              console.log('__html', __html)
               inner = <span dangerouslySetInnerHTML={{ __html }} />
             }
 
