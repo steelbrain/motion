@@ -155,6 +155,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.successfulRender = null
         this.firstRender = true
+        this.isUpdating = true
         this.styles = { _static: {} }
         this.events = { mount: u, unmount: u, change: u, props: u }
         this.path = null
@@ -206,7 +207,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentDidMount() {
         this.isRendering = false
         this._isMounted = true
+        this.isUpdating = false
+
         this.runEvents('mount')
+
+        if (this.queuedUpdate)
+          this.update()
 
         if (!process.env.production) {
           this.props.__flint.onMount(this)
@@ -245,13 +251,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.isRendering = false
         this.isUpdating = false
 
+        if (this.queuedUpdate)
+          this.update()
+
         if (!process.env.production) {
           this.setID()
-
-          if (this.queuedUpdate) {
-            this.isRendering = false
-            this.update()
-          }
         }
       },
 
@@ -261,17 +265,24 @@ export default function createComponent(Flint, Internal, name, view, options = {
       pause() { this.isPaused = true },
       resume() { this.isPaused = false },
 
+      // for looping while waiting
+      delayUpdate() {
+        this.queuedUpdate = true
+
+        setTimeout(() => {
+          this.update()
+        })
+      },
+
       update() {
-        if (!Internal.firstRender && !this.isRendering) {
+        console.log('!Internal.firstRender', !Internal.firstRender, '!this.isRendering', !this.isRendering, '!this.isUpdating', !this.isUpdating, this._isMounted)
+        if (!Internal.firstRender && !this.isRendering && !this.isUpdating && this._isMounted) {
           this.queuedUpdate = false
-          raf(() => this.isMounted() && this.forceUpdate())
+          setTimeout(() => this.forceUpdate())
         }
         else {
-          log(name, 'called update, isRendering still, queued?', this.queuedUpdate)
           if (!this.queuedUpdate)
-            raf(() => this.update())
-
-          this.queuedUpdate = true
+            this.delayUpdate()
         }
       },
 
@@ -362,7 +373,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const self = this
 
         self.isRendering = true
-        self.firstRender = false
 
         if (process.env.production)
           return self.getRender()
@@ -383,7 +393,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
             console.groupCollapsed(`Render error in view ${name} (${e.message})`)
             console.warn(e.message)
-            console.error(...e.stack.split("\n"))
+
+            if (e.stack && Array.isArray(e.stack))
+              console.error(...e.stack.split("\n"))
+            else
+              console.error(e)
+
             console.groupEnd()
           }, 500)
 

@@ -179,7 +179,7 @@ view ErrorMessage {
     if (error) {
       clearDelay && clearDelay()
       clearDelay = on.delay(2500, () => {
-        if (error.fullStack)
+        if (error && error.fullStack)
           fullStack = error.fullStack
       })
     }
