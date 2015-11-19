@@ -54,7 +54,6 @@ async function packExternals() {
       },
       node: {
         global: false,
-        process: false,
         Buffer: false,
         setImmediate: false
       },
