@@ -60,30 +60,37 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       getPath() {
         if (!this.path) this.setPath()
-        return `${this.path}-${this.props.__flint && this.props.__flint.key || ''}`
+        return this.path
       },
 
-      pathKey() {
-        return this.context.path + this.props.__flint && this.props.__flint.key
+      getSep() {
+        return name == 'Main' ? '' : ','
+      },
+
+      setPathKey() {
+        const flint = this.props.__flint
+        const key = flint && flint.key || '00'
+        const index = flint && flint.index || '00'
+        const parentPath = this.context.path || ''
+        this.pathKey = `${parentPath}${this.getSep()}${name}-${key}/${index}`
       },
 
       setPath() {
+        this.setPathKey()
+
         if (!isChanged) {
-          const prevPath = Internal.paths[this.pathKey()]
+          const prevPath = Internal.paths[this.pathKey]
           if (prevPath) {
             this.path = prevPath
             return
           }
         }
 
-        // get the props hash, but lets cache it so its not a ton of work
-        let propsHash = phash(this.props)
-
-        const sep = name == 'Main' ? '' : ','
-        this.path = (this.context.path || '') + sep + name + '.' + propsHash
+        const propsHash = phash(this.props)
+        this.path = `${this.pathKey}.${propsHash}`
 
         // for faster retrieval hot reloading
-        Internal.paths[this.pathKey()] = this.path
+        Internal.paths[this.pathKey] = this.path
       },
 
       onMount(component) {

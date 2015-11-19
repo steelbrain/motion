@@ -148,6 +148,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
       parentStyles: view.styles,
       parentName: viewName,
       key,
+      index,
       tagName: name
     }
 
@@ -184,6 +185,10 @@ export default function createElement(viewName) {
         props.className = addClassName(props, tag)
       }
     }
+
+    args = args.map(arg => {
+      return typeof arg == 'object' && !Array.isArray(arg) && !arg.$$typeof ? JSON.stringify(arg) : arg
+    })
 
     return React.createElement(tag, props, ...args)
   }
