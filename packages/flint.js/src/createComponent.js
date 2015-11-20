@@ -152,14 +152,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
       },
 
-      shouldReRender() {
-        return (
-          this._isMounted && !this.isUpdating &&
-          !this.isPaused && !this.firstRender &&
-          !this.isRendering
-        )
-      },
-
       // LIFECYCLES
 
       getInitialState() {
@@ -169,6 +161,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         let u = null
 
+        this.queuedUpdate = false
         this.firstRender = true
         this.isUpdating = true
         this.styles = { _static: {} }
@@ -219,6 +212,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('props')
       },
 
+      componentWillMount() {
+        // componentWillUpdate only run after first render
+        this.runEvents('change')
+        this.runEvents('props')
+      },
+
       componentDidMount() {
         this.isRendering = false
         this._isMounted = true
@@ -226,8 +225,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.runEvents('mount')
 
-        if (this.queuedUpdate)
+        if (this.queuedUpdate) {
+          this.queuedUpdate = false
           this.update()
+        }
 
         if (!process.env.production) {
           this.props.__flint.onMount(this)
@@ -237,18 +238,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       componentWillUnmount() {
         // fixes unmount errors github.com/flintjs/flint/issues/60
-        if (!process.env.production) {
+        if (!process.env.production)
           this.render()
-        }
 
         this._isMounted = false
         this.runEvents('unmount')
-      },
-
-      componentWillMount() {
-        // componentWillUpdate only run after first render
-        this.runEvents('change')
-        this.runEvents('props')
       },
 
       componentWillUpdate() {
@@ -285,22 +279,31 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // for looping while waiting
       delayUpdate() {
         if (this.queuedUpdate) return
-
         this.queuedUpdate = true
-
-        setTimeout(() => {
-          this.update()
-        })
+        setTimeout(() => this.update())
       },
 
-      update() {
-        if (!Internal.firstRender && !this.isRendering && !this.isUpdating && this._isMounted) {
+      // soft = view.set()
+      update(soft) {
+        // view.set respects paused
+        if (soft && this.isPaused)
+          return
+        // dont re-render during first render
+        if (Internal.firstRender || !this._isMounted)
+          return
+        // if during a render, wait
+        if (!this.isRendering && !this.isUpdating) {
           this.isUpdating = true
-          setTimeout(() => this.forceUpdate())
+          this.queuedUpdate = false
+
+          if (soft)
+            this.setState({ renders: 1 })
+          else
+            this.forceUpdate()
         }
+        // otherwise wait for next time
         else {
-          if (!this.queuedUpdate)
-            this.delayUpdate()
+          this.delayUpdate()
         }
       },
 

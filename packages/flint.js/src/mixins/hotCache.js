@@ -5,7 +5,7 @@ export default function hotCache({ Internal, options, name }) {
   if (process.env.production)
     return {
       get(name, val) { return val },
-      set() { this.shouldReRender() && this.setState({ render: 1 }) }
+      set() { this.update(true) }
     }
 
   return {
@@ -17,11 +17,7 @@ export default function hotCache({ Internal, options, name }) {
         Internal.getCache[path] = {}
 
       Internal.setCache(path, name, useResult ? result : val)
-
-      if (this.shouldReRender())
-        this.setState({ render: 1 })
-      else
-        this.queuedUpdate = true
+      this.update(true)
     },
 
     get(name, val, where) {
