@@ -113,8 +113,6 @@ view Errors {
       error = null
     }
 
-    console.log('setting error', error)
-
     view.update()
   }
 

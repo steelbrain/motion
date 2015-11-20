@@ -136,6 +136,22 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return !this.isPaused
       },
 
+      shouldUpdate(fn) {
+        if (this.hasShouldUpdate) {
+          reportError({ message: `You defined shouldUpdate twice in ${name}, remove one!`, fileName: `view ${name}` })
+          return
+        }
+
+        this.hasShouldUpdate = true
+
+        const flintShouldUpdate = this.shouldComponentUpdate.bind(this)
+
+        this.shouldComponentUpdate = (nextProps) => {
+          if (!flintShouldUpdate()) return false
+          return fn(nextProps)
+        }
+      },
+
       shouldReRender() {
         return (
           this._isMounted && !this.isUpdating &&
