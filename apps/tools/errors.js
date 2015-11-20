@@ -1,7 +1,7 @@
 const tools = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 
-const niceRuntimeError = err => {
+function niceRuntimeError(err) {
   if (err.file)
     err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/[_]+\/)?'), '')
 
@@ -25,7 +25,7 @@ const niceRuntimeError = err => {
   return err
 }
 
-const niceNpmError = ({ msg, name }) => {
+function niceNpmError({ msg, name }) {
   if (msg)
     msg = msg
       .replace(/(npm WARN.*\n|ERR\!)/g, '')
@@ -66,9 +66,9 @@ const fullStack = err => {
     err.stack.split("\n").forEach(line => {
       if (indicator.test(line)) return
       if (!matchErrorLine.test(line)) return
-      let onLine = line[0] === '>'
-      if (onLine) index = 1
-      if (!onLine && index === 1) index = 2
+      let isLine = line[0] === '>'
+      if (isLine) index = 1
+      if (!isLine && index === 1) index = 2
       let result = line.replace(matchErrorLine, '$1$2').replace(/^(\s*[0-9]+\s*)[;]/, '$1 ')
       err.fullStack[index] += result + "\n"
     })
@@ -112,6 +112,8 @@ view Errors {
     else {
       error = null
     }
+
+    console.log('setting error', error)
 
     view.update()
   }
@@ -187,7 +189,7 @@ view ErrorMessage {
     // show full stack after a delay
     if (error) {
       clearDelay = on.delay(2500, () => {
-        if (error && error.fullStack) {
+        if (hasError && error.fullStack) {
           fullStack = error.fullStack
           view.update()
         }
