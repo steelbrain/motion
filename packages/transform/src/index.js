@@ -159,12 +159,17 @@ export default function createPlugin(options) {
       }
     }
 
+    function isViewState(name, scope) {
+      return viewState[name] && !scope.hasOwnBinding(name)
+    }
+
     let keyBase = {}
     let inJSX = false
     let inView = null
     let hasView = false
     let viewStyles = {}
     let viewRootNodes = []
+    let viewState = {}
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -213,6 +218,7 @@ export default function createPlugin(options) {
 
             inView = fullName
             viewRootNodes = []
+            viewState = {}
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -222,7 +228,11 @@ export default function createPlugin(options) {
 
         Statement: {
           exit(node) {
+            if (node._flintViewParsed) return // avoid parsing twice
+
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+              node._flintViewParsed = true
+
               let rootTag = '$'
 
               // check if child tag is direct root
@@ -426,7 +436,7 @@ export default function createPlugin(options) {
         CallExpression: {
           exit(node, parent, scope) {
             // mutative array methods
-            if (scope.hasOwnBinding('view')) {
+            if (isInView(scope)) {
               if (isMutativeArrayFunc(node)) {
                 const callee = node.callee
 
@@ -435,14 +445,17 @@ export default function createPlugin(options) {
                   return
 
                 const name = callee.object ? findObjectName(callee.object) : callee.property.name
-                return addSetter(name, node, scope, t.identifier(name))
+
+                if (isViewState(name, scope))
+                  return addSetter(name, node, scope, t.identifier(name))
               }
 
               if (isObjectAssign(node)) {
                 // if mutating an object in the view
-                if (scope.hasBinding('view') && scope.hasBinding(node.arguments[0].name)) {
-                  return addSetter(node.arguments[0].name, node, scope)
-                }
+                let name = node.arguments[0].name
+
+                if (isViewState(name, scope))
+                  return addSetter(name, node, scope)
               }
             }
           }
@@ -465,13 +478,16 @@ export default function createPlugin(options) {
                   return dec
                 }
 
+                let name = dec.id.name
+                viewState[name] = true
+
                 if (!dec.init) {
-                  dec.init = viewGetter(dec.id.name, t.identifier('undefined'), scope, file)
+                  dec.init = viewGetter(name, t.identifier('undefined'), scope, file)
                   dec.flintTracked = true
                   return dec
                 }
 
-                dec.init = viewGetter(dec.id.name, dec.init, scope, file)
+                dec.init = viewGetter(name, dec.init, scope, file)
                 node.flintTracked = true
                 return dec
               })
@@ -645,12 +661,14 @@ export default function createPlugin(options) {
               else
                 name = node.left.name
 
-              sett = node => addSetter(name, node, scope, post)
-              added = true
+              if (isViewState(name, scope)) {
+                sett = node => addSetter(name, node, scope, post)
+                added = true
+              }
             }
 
             // add getter
-            if (!isRender) {
+            if (!isRender && isViewState(node.left.name, scope)) {
               gett = node => addGetter(node, scope, file)
               added = true
             }
