@@ -99,6 +99,9 @@ export default function elementStyles(key, view, name, tag, props) {
       parentStyles && parentStyles[`${prefix}${view.name}`],
     )
 
+    // for use in className loop
+    const viewStaticStyles = Flint.styleObjects[view.name]
+
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {
@@ -109,14 +112,13 @@ export default function elementStyles(key, view, name, tag, props) {
         }
 
         // ensure static class styles overwrite dynamic tag/name styles
-        const viewStaticStyles = Flint.styleObjects[view.name]
         if (viewStaticStyles) {
           const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
           if (staticClassStyles) {
             Object.keys(staticClassStyles).forEach(key => {
               // console.log(key, staticClassStyles[key])
               // check if already in styles, and rewrite to class style
-              if (result[key]) {
+              if (typeof result[key] != 'undefined') {
                 result[key] = staticClassStyles[key]
               }
             })
@@ -214,6 +216,7 @@ export default function elementStyles(key, view, name, tag, props) {
     }
   }
 
+  // overwrite any parent styles onto root
   if (parentStylesStaticView) {
     Object.keys(parentStylesStaticView).forEach(key => {
       styles[key] = parentStylesStaticView[key]
