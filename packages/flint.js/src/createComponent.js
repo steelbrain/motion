@@ -153,7 +153,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         let u = null
 
-        this.successfulRender = null
         this.firstRender = true
         this.isUpdating = true
         this.styles = { _static: {} }
@@ -250,10 +249,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentDidUpdate() {
         this.isRendering = false
         this.isUpdating = false
-        this.queuedUpdate = false
 
-        if (this.queuedUpdate)
+        if (this.queuedUpdate) {
+          this.queuedUpdate = false
           this.update()
+        }
 
         if (!process.env.production) {
           this.setID()
