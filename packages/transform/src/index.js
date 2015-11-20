@@ -165,11 +165,12 @@ export default function createPlugin(options) {
 
     let keyBase = {}
     let inJSX = false
-    let inView = null
-    let hasView = false
-    let viewStyles = {}
-    let viewRootNodes = []
-    let viewState = {}
+    let inView = null // track current view name
+    let hasView = false // if file has a view
+    let viewStyles = {} // store styles from views to be extracted
+    let viewRootNodes = [] // track root JSX elements
+    let viewState = {} // track which state to wrap
+    let viewStyleNames = {} // prevent duplicate style names
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -219,6 +220,7 @@ export default function createPlugin(options) {
             inView = fullName
             viewRootNodes = []
             viewState = {}
+            viewStyleNames = {}
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -538,6 +540,12 @@ export default function createPlugin(options) {
               // extract statics, but return just dynamics
               if (t.isObjectExpression(node.right)) {
                 let name = node.left.name
+
+                if (viewStyleNames[name])
+                  throw file.errorWithNode(node.left, `Duplicate style! view ${inView} { ${name} }`)
+
+                viewStyleNames[name] = true
+
                 let { statics, dynamics } = extractStatics(name, node.right)
 
                 let hasStatics = statics.length
@@ -581,7 +589,7 @@ export default function createPlugin(options) {
 
               for (let prop of node.properties) {
                 if (duplicate[prop.key.name])
-                  throw file.errorWithNode(prop, `Duplicate style! view ${inView} { ${name}.${prop.key.name} }`)
+                  throw file.errorWithNode(prop, `Duplicate style prop! view ${inView} { ${name}.${prop.key.name} }`)
 
                 duplicate[prop.key.name] = true
 
