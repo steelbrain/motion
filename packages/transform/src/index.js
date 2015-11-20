@@ -499,7 +499,6 @@ export default function createPlugin(options) {
           enter(node) {
             if (node.isStyle) return
 
-            // styles
             const isStyle = (
               // $variable = {}
               node.left.name && node.left.name.indexOf('$') == 0 ||
@@ -507,9 +506,10 @@ export default function createPlugin(options) {
               node.left.object && node.left.object.name == '$'
             )
 
+            if (!isStyle) return
+
             // styles
-            if (isStyle)
-              return extractAndAssign(node)
+            return extractAndAssign(node)
 
             // splits styles into static/dynamic pieces
             function extractAndAssign(node) {
@@ -537,16 +537,34 @@ export default function createPlugin(options) {
 
               // extract statics, but return just dynamics
               if (t.isObjectExpression(node.right)) {
-                let { dynamics } = extractStatics(node.left.name, node.right)
-                return styleAssign(node, t.objectExpression(dynamics))
+                let name = node.left.name
+                let { statics, dynamics } = extractStatics(name, node.right)
+
+                let hasStatics = statics.length
+                let hasDynamics = dynamics.length
+                let isChildView = name && name.length > 1 && name[1] == name[1].toUpperCase()
+
+                let result = []
+
+                // if no dynamics, leave empty
+                if (!hasStatics && !hasDynamics)
+                  return result
+
+                // keep statics inside view for child view styles (to trigger hot reloads)
+                if (isChildView && hasStatics)
+                  result.push(staticStyleStatement(node, t.objectExpression(statics)))
+
+                if (hasDynamics)
+                  result.push(dynamicStyleStatement(node, node.right))
+
+                return result
               }
 
               else if (t.isLiteral(node.right) && node.right.value === false) {
                 return staticStyleStatement(node, node.right)
               }
 
-              else{
-
+              else {
                 return styleAssign(node)
               }
             }
@@ -601,10 +619,12 @@ export default function createPlugin(options) {
               return t.identifier(`${prefix}["${name}"]`)
             }
 
-            function styleAssign(node, right) {
+            function styleAssign(node, _right) {
+              let right = _right || node.right
+
               const assignment = t.assignmentExpression('=',
                 styleLeft(node),
-                styleFunction(right || node.right)
+                styleFunction(right)
               )
 
               assignment.isStyle = true
