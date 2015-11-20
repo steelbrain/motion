@@ -496,7 +496,7 @@ export default function createPlugin(options) {
         },
 
         AssignmentExpression: {
-          enter(node) {
+          enter(node, parent, scope, file) {
             if (node.isStyle) return
 
             const isStyle = (
@@ -577,7 +577,14 @@ export default function createPlugin(options) {
               viewStyles[inView] = viewStyles[inView] || {}
               viewStyles[inView][name] = []
 
+              let duplicate = {}
+
               for (let prop of node.properties) {
+                if (duplicate[prop.key.name])
+                  throw file.errorWithNode(prop, `Duplicate style! view ${inView} { ${name}.${prop.key.name} }`)
+
+                duplicate[prop.key.name] = true
+
                 if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
                   viewStyles[inView][name].push(prop)
                   statics.push(prop)
