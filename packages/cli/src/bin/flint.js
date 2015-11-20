@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var Program = require('commander');
+var colors = require('colors')
 
 // make `flint run` default command
 var flintIndex = getFlintIndex()
@@ -31,14 +32,18 @@ var checkversion = 'npm view flint version -loglevel silent'
 exec(checkversion, (err, version) => {
   if (err) return
   if (version) {
-    var pkg = require(path.join('..', '..', '..', 'package.json'))
+    let pkg = require(path.join('..', '..', '..', 'package.json'))
 
-    const getversion = v => parseFloat((''+v).replace('.', ''))
-    let curVersion = getversion(version)
-    let pkgVersion = getversion(pkg.version)
+    const getversion = v => (''+v).trim()
+    let curV = getversion(version)
+    let pkgV = getversion(pkg.version)
 
-    if (curVersion != pkgVersion) {
-      console.log('Flint update available', pkgVersion, 'to', curVersion)
+    if (curV != pkgV) {
+      console.log(
+        `──────────────────────────────────\n`.yellow +
+        ` Flint update available: v${curV.slice(-8)} \n`.white +
+        `──────────────────────────────────`.yellow
+      )
     }
   }
 })
