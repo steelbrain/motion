@@ -426,7 +426,7 @@ export default function createPlugin(options) {
         CallExpression: {
           exit(node, parent, scope) {
             // mutative array methods
-            if (isInView(scope)) {
+            if (scope.hasOwnBinding('view')) {
               if (isMutativeArrayFunc(node)) {
                 const callee = node.callee
 
