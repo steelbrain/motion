@@ -52,6 +52,9 @@ async function packExternals() {
         'react-dom': 'ReactDOM',
         bluebird: '_bluebird',
       },
+      // loaders: [
+      //   { test: /\.css$/, loader: 'style-loader!css-loader' }
+      // ],
       node: {
         global: false,
         Buffer: false,

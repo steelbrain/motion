@@ -319,7 +319,9 @@ export default function run({ name, use, nocache, debug }) {
     spinner.stop()
 
     wait().then(function() {
-      console.log('Your Flint app is in ./%s'.green.bold, name)
+      console.log('Done! ⇢'.green.bold)
+      console.log('  cd %s', name)
+      console.log('  flint')
       console.log()
       process.exit()
     })

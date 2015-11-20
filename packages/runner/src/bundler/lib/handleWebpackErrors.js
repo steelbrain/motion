@@ -8,7 +8,7 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
 
   if (jsonStats.errors.length) {
     err = jsonStats.errors.join("\n")
-    return reject({ file: 'Webpack', message: err })
+    return reject(err)
   }
 
   if (jsonStats.warnings.length) {
