@@ -213,14 +213,16 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillMount() {
-        // componentWillUpdate only run after first render
-        this.runEvents('change')
+        if (name === 'Main')
+          Internal.firstRender = false
+
+        // componentWillUpdate only runs after first render
         this.runEvents('props')
       },
 
       componentDidMount() {
         this.isRendering = false
-        this._isMounted = true
+        this.mounted = true
         this.isUpdating = false
 
         this.runEvents('mount')
@@ -241,8 +243,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
         if (!process.env.production)
           this.render()
 
-        this._isMounted = false
         this.runEvents('unmount')
+        this.mounted = false
       },
 
       componentWillUpdate() {
@@ -280,7 +282,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       delayUpdate() {
         if (this.queuedUpdate) return
         this.queuedUpdate = true
-        setTimeout(() => this.update())
+        this.update()
       },
 
       // soft = view.set()
@@ -288,11 +290,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         // view.set respects paused
         if (soft && this.isPaused)
           return
-        // dont re-render during first render
-        if (Internal.firstRender || !this._isMounted)
-          return
+
         // if during a render, wait
-        if (!this.isRendering && !this.isUpdating) {
+        if (this.isRendering || this.isUpdating || Internal.firstRender || !this.mounted) {
+          this.queuedUpdate = true
+        }
+        else {
           this.isUpdating = true
           this.queuedUpdate = false
 
@@ -300,10 +303,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
             this.setState({ renders: 1 })
           else
             this.forceUpdate()
-        }
-        // otherwise wait for next time
-        else {
-          this.delayUpdate()
         }
       },
 

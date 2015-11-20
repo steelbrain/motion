@@ -11,8 +11,9 @@ let uid = 0
 function getUid() { return uid++ % Number.MAX_VALUE }
 function unlistenFromUid(uid) {
   return () => {
-    if (removeByUids[uid]) removeByUids[uid]()
-    else throw new Error("Could not remove listener yet, view hasn't mounted!")
+    if (removeByUids[uid]) {
+      removeByUids[uid]()
+    }
     delete removeByUids[uid]
   }
 }

@@ -220,7 +220,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         }
 
         Internal.lastWorkingViews.Main = Main
-        Internal.firstRender = false
         emitter.emit('render:done')
         Internal.isRendering = 0
       }
