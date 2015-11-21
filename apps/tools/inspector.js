@@ -55,9 +55,20 @@ function removeTemp(views) {
   return views.filter(v => !v.temp).map(v => ({ ...v, highlight: false }))
 }
 
-function setClosing(views) {
+function addTemp(views, path) {
+  return [{ path, highlight: false, temp: true }].concat(views)
+}
+
+function setClosing(views, path) {
   return views.map(v => {
-    if (v.path == path) { v.closing = true }
+    if (v.path == path) v.closing = true
+    return v
+  })
+}
+
+function highlightPath(views, path) {
+  return views.map((v) => {
+    if (v.path == path) v.highlight = true
     return v
   })
 }
@@ -90,15 +101,17 @@ function writeBack(path, data) {
   Internal.inspectorRefreshing = null
 }
 
+function removeLast([l, ...ls]) {
+  return ls
+}
+
 view Inspector {
   view.pause()
 
+  let clickOff, hoverOff, lastTarget
   let hudActive = false
   let views = []
-  let clickOff
   let keys = {}
-  let lastTarget = null
-  let hoverOff
 
   on.mount(() => {
     hoverOff = on.mousemove(window, mouseMove)
@@ -113,15 +126,10 @@ view Inspector {
     let path = findPath(target)
     views = removeTemp(views)
 
-    if (pathActive(views, path)) {
-      views = views.map((v) => {
-        if (v.path == path) { v.highlight = true }
-        return v
-      })
-    }
-    else {
-      views.unshift({ path, highlight: false, temp: true })
-    }
+    if (pathActive(views, path))
+      views = highlightPath(views, path)
+    else
+      views = addTemp(views, path)
 
     view.update()
   }
@@ -134,7 +142,8 @@ view Inspector {
   /* todo use escape */
   function closeLast() {
     if (!views.length) return
-    removeView(views.length - 1)
+    views = removeLast(views)
+    view.update()
   }
 
   function close(path, e) {
@@ -155,13 +164,9 @@ view Inspector {
 
   function glue(e) {
     const path = findPath(e.target)
-    console.log('views are', JSON.stringify(views), 'gluing', path)
-    //tempHideHUD()
-    // close if no view active
     views = removeTemp(views)
     views = toggleView(views, path)
     view.update()
-    /* if (tempActive(views)) { } else { // hideHighlight() // hoverOff() // clickOff() } */
     return false
   }
 
