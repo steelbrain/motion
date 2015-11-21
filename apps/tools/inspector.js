@@ -168,6 +168,7 @@ view Inspector {
 
   function onWriteBack(path, data) {
     writeBack(path, data)
+    view.update()
   }
 
   on.keydown(window, isAlt(showInspect))
