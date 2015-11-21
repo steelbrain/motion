@@ -72,64 +72,95 @@ export async function installAll(toInstall) {
     installing = installing.concat(fresh)
 
     // check if installed running
-    if (_isInstalling) return
+    if (_isInstalling) {
+      return await finishedInstalls()
+    }
+
     _isInstalling = true
 
-    const installNext = async () => {
-      const dep = installing[0]
-      onStart(dep)
-
-      try {
-        await save(dep)
-        log(LOG, 'install', 'succces, saved', dep)
-        successful.push(dep)
-        onFinish(dep)
-      }
-      catch(e) {
-        console.error(`Error installing ${dep}`, e.message)
-        failed.push(dep)
-        log(LOG, 'package install failed', dep, e.message, e.stack)
-        onError(dep, e)
-      }
-      finally {
-        installing.shift() // remove
-        log(LOG, 'install, finally:', installing)
-        next()
-      }
-    }
-
-    function next() {
-      if (installing.length)
-        installNext()
-      else
-        done()
-    }
-
-    async function done() {
-      const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
-      let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
-      log(LOG, 'finalPaths', finalPaths)
-
-      // remove failed
-      if (failed && failed.length)
-        finalPaths = finalPaths.filter(dep => failed.indexOf(dep) >= 0)
-
-      logInstalled(successful)
-      await writeInstalled(finalPaths, toInstall)
-      await bundleExternals()
-
-      // reset
-      installingFullNames = []
-      failed = []
-      _isInstalling = false
-      opts.set('hasRunInitialInstall', true)
-    }
-
-    installNext()
+    await runInstall(prevInstalled)
   }
   catch(e) {
     handleError(e)
   }
+}
+
+function runInstall(prevInstalled, toInstall) {
+  let isDone = false
+
+  async function installNext() {
+    const dep = installing[0]
+    onStart(dep)
+
+    try {
+      await save(dep)
+      log(LOG, 'install', 'succces, saved', dep)
+      successful.push(dep)
+      onFinish(dep)
+    }
+    catch(e) {
+      console.error(`Error installing ${dep}`, e.message)
+      failed.push(dep)
+      log(LOG, 'package install failed', dep, e.message, e.stack)
+      onError(dep, e)
+    }
+    finally {
+      installing.shift() // remove
+      log(LOG, 'install, finally:', installing)
+      next()
+    }
+  }
+
+  function next() {
+    if (installing.length)
+      installNext()
+    else
+      done()
+  }
+
+  async function done() {
+    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+    let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
+    log(LOG, 'finalPaths', finalPaths)
+
+    // remove failed
+    if (failed && failed.length)
+      finalPaths = finalPaths.filter(dep => failed.indexOf(dep) >= 0)
+
+    logInstalled(successful)
+    await writeInstalled(finalPaths, toInstall)
+    await bundleExternals()
+
+    // reset
+    installingFullNames = []
+    failed = []
+    _isInstalling = false
+    opts.set('hasRunInitialInstall', true)
+    isDone = true
+  }
+
+  return new Promise((res) => {
+    // start
+    installNext()
+
+    let finish = setInterval(() => {
+      if (isDone) {
+        clearInterval(finish)
+        finishedWatchers.forEach(w => w())
+        res()
+      }
+    }, 50)
+  })
+}
+
+// to ensure we wait for installs
+let finishedWatchers = []
+function finishedInstalls() {
+  return new Promise((res) => {
+    finishedWatchers.push(() => {
+      res()
+    })
+  })
 }
 
 function logInstalled(deps) {

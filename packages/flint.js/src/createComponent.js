@@ -213,9 +213,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillMount() {
-        if (name === 'Main')
-          Internal.firstRender = false
-
         // componentWillUpdate only runs after first render
         this.runEvents('props')
       },
@@ -231,6 +228,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.queuedUpdate = false
           this.update()
         }
+
+        if (name === 'Main')
+          Internal.firstRender = false
 
         if (!process.env.production) {
           this.props.__flint.onMount(this)
@@ -301,8 +301,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
           if (soft)
             this.setState({ renders: 1 })
-          else
+          else {
             this.forceUpdate()
+          }
         }
       },
 

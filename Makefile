@@ -7,6 +7,9 @@ build: clean
 watch: clean
 	scripts/build.sh --watch
 
+watch-core: clean
+	scripts/build.sh --watch --notools
+
 bootstrap:
 	npm install
 	node scripts/bootstrap.js

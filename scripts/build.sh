@@ -53,7 +53,8 @@ if [ $1="--watch" ]; then
         chsum1=$chsum2
 
         # watch tools after first build
-        if [ $hasLinkedOnce == 'false' ]; then
+        if [ $hasLinkedOnce=='false' ] && [ "$2" != '--notools' ]; then
+          sleep 1
           cd ../..
           cd apps/tools
           flint build --watch &
