@@ -169,7 +169,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.path = null
 
         // scope on() to view
-        this.viewOn = viewOn(this)
+        this.on = viewOn(this)
 
         // cache Flint view render() (defined below)
         const flintRender = this.render
@@ -183,10 +183,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         // call view
         if (process.env.production)
-          view.call(this, this, this.viewOn, this.styles)
+          view.call(this, this, this.on, this.styles)
         else {
           try {
-            view.call(this, this, this.viewOn, this.styles)
+            view.call(this, this, this.on, this.styles)
             this.recoveryRender = false
           }
           catch(e) {
