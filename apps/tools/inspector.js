@@ -125,12 +125,9 @@ view Inspector {
     Internal.isInspecting = true
     let path = findPath(target)
     views = removeTemp(views)
-
-    if (pathActive(views, path))
-      views = highlightPath(views, path)
-    else
-      views = addTemp(views, path)
-
+    views = pathActive(views, path) ?
+      highlightPath(views, path) :
+      addTemp(views, path)
     view.update()
   }
 
@@ -139,7 +136,6 @@ view Inspector {
     if (hudActive) inspect(lastTarget)
   }
 
-  /* todo use escape */
   function closeLast() {
     if (!views.length) return
     views = removeLast(views)
@@ -148,7 +144,6 @@ view Inspector {
 
   function close(path, e) {
     if (e) e.stopPropagation()
-
     views = setClosing(views, path)
     view.update()
 
@@ -156,10 +151,6 @@ view Inspector {
       views = views.filter(v => path != v.path)
       view.update()
     })
-  }
-
-  function findView(path) {
-    return views.filter(v => v.path == path)
   }
 
   function glue(e) {
@@ -194,15 +185,13 @@ view Inspector {
   on.keyup(window, isAlt(hideInspect))
   on.keyup(window, isEsc(closeLast))
 
-  <views>
-    <Inspector.View
-      repeat={views}
-      key={_.path}
-      {..._}
-      writeBack={onWriteBack}
-      onClose={e => close(_.path, e)}
-    />
-  </views>
+  <Inspector.View
+    repeat={views}
+    key={_.path}
+    {..._}
+    writeBack={onWriteBack}
+    onClose={e => close(_.path, e)}
+  />
 
   $ = {
     position: 'fixed',
