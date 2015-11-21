@@ -96,7 +96,7 @@ function onCb({ view, scope, name, number, cb }) {
     }
 
     // attach to mount depending
-    if (view._isMounted)
+    if (view.mounted)
       listener = eventFn()
     else {
       let uid = getUid()

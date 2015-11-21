@@ -1,8 +1,12 @@
+const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
+const isEsc = cb => e => e.keyCode === 27 && cb()
+
 const setLocal = (k,v) =>
   localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
+const Internal = window._Flint
 const round = Math.round
 
 let highlighter
@@ -39,6 +43,53 @@ function findPath(node) {
   return flintid
 }
 
+function tempActive(views) {
+  return views.filter(v => !v.temp).length > 0
+}
+
+function pathActive(views, path) {
+  return views.filter(v => v.path == path).length > 0
+}
+
+function removeTemp(views) {
+  return views.filter(v => !v.temp).map(v => ({ ...v, highlight: false }))
+}
+
+function setClosing(views) {
+  return views.map(v => {
+    if (v.path == path) { v.closing = true }
+    return v
+  })
+}
+
+function toggleView(views, path) {
+  if (pathActive(views, path)) {
+    return views.map(v => {
+      if (v.path == path) v.temp = true
+      return v
+    })
+  }
+  else {
+    return [].concat(views, [{ temp: false, highlight: false, closing: false, path }])
+  }
+}
+
+function writeBack(path, data) {
+  const name  = data[1][0]
+  const current = Internal.getCache[path][name]
+  let value = data[1][1]
+
+  if (typeof current == 'number') {
+    value = +value
+  }
+
+  Internal.setCache(path, name, value)
+  Internal.inspectorRefreshing = path
+  Internal.getInitialStates[path]()
+  Internal.viewsAtPath[path].forceUpdate()
+  Internal.inspectorRefreshing = null
+}
+
 view Inspector {
   view.pause()
 
@@ -50,6 +101,7 @@ view Inspector {
   let hoverOff
 
   on.mount(() => {
+    hoverOff = on.mousemove(window, mouseMove)
     if (highlighter) return
     highlighter = document.createElement('div')
     highlighter.className = "_flintHighlighter"
@@ -57,40 +109,26 @@ view Inspector {
   })
 
   function inspect(target) {
-    _Flint.isInspecting = true
+    Internal.isInspecting = true
     let path = findPath(target)
-    removeTemp()
-    if (pathActive(path)) {
+    views = removeTemp(views)
+
+    if (pathActive(views, path)) {
       views = views.map((v) => {
         if (v.path == path) { v.highlight = true }
         return v
       })
-    } else {
+    }
+    else {
       views.unshift({ path, highlight: false, temp: true })
     }
+
     view.update()
   }
 
   function mouseMove({ target }) {
     lastTarget = target
-
-    if (hudActive) {
-      inspect(lastTarget)
-    }
-  }
-
-  function removeTemp() {
-    views = views
-      .filter(v => !v.temp)
-      .map(v => ({ ...v, highlight: false }))
-  }
-
-  function pathActive(path) {
-    return views.filter(v => v.path == path).length > 0
-  }
-
-  function tempActive() {
-    return views.filter(v => !v.temp).length > 0
+    if (hudActive) inspect(lastTarget)
   }
 
   /* todo use escape */
@@ -102,72 +140,30 @@ view Inspector {
   function close(path, e) {
     if (e) e.stopPropagation()
 
-    views = views
-      .map(v => {
-        if (v.path == path) { v.closing = true }
-        return v
-      })
+    views = setClosing(views, path)
     view.update()
 
     on.delay(200, () => {
       views = views.filter(v => path != v.path)
       view.update()
     })
-
   }
-
-  // function tempHideHUD() {
-  //   hideInspect()
-  //   const offAgain = on.mousemove(() => {
-  //     offAgain()
-  //     if (hudActive) showInspect()
-  //   })
-  // }
 
   function findView(path) {
     return views.filter(v => v.path == path)
   }
 
-  function toggleView(path) {
-    if (pathActive(path)) {
-      views = views.map(v => {
-        if (v.path == path) v.temp = true
-        return v
-      })
-    } else {
-      views = views
-        .concat([{ temp: false, highlight: false, closing: false, path }])
-    }
-    view.update()
-  }
-
   function glue(e) {
     const path = findPath(e.target)
     console.log('views are', JSON.stringify(views), 'gluing', path)
-
     //tempHideHUD()
-
     // close if no view active
-    removeTemp()
-    toggleView(path)
-    /*
-    if (tempActive()) {
-    }
-    else {
-      // hideHighlight()
-      // hoverOff()
-      // clickOff()
-    }
-    */
+    views = removeTemp(views)
+    views = toggleView(views, path)
+    view.update()
+    /* if (tempActive(views)) { } else { // hideHighlight() // hoverOff() // clickOff() } */
     return false
   }
-
-  const hover = () => {
-    hoverOff = on.mousemove(window, mouseMove)
-  }
-
-  // follow hover always
-  hover()
 
   function showInspect() {
     inspect(lastTarget)
@@ -176,35 +172,18 @@ view Inspector {
   }
 
   function hideInspect() {
-    console.log('views hide() are', views)
-    _Flint.isInspecting = false
+    Internal.isInspecting = false
     hudActive = false
     hideHighlight()
     clickOff()
-    removeTemp()
-    view.update()
-    console.log('views hide() after are', views)
-  }
-
-  function writeBack(path, data) {
-    const name  = data[1][0]
-    const current = _Flint.getCache[path][name]
-    let value = data[1][1]
-
-    if (typeof current == 'number') {
-      value = +value
-    }
-
-    _Flint.setCache(path, name, value)
-    _Flint.inspectorRefreshing = path
-    _Flint.getInitialStates[path]()
-    _Flint.viewsAtPath[path].forceUpdate()
-    _Flint.inspectorRefreshing = null
+    views = removeTemp(views)
     view.update()
   }
 
-  const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
-  const isEsc = cb => e => e.keyCode === 27 && cb()
+  function onWriteBack(path, data) {
+    writeBack(path, data)
+    view.update()
+  }
 
   on.keydown(window, isAlt(showInspect))
   on.keyup(window, isAlt(hideInspect))
@@ -215,7 +194,7 @@ view Inspector {
       repeat={views}
       key={_.path}
       {..._}
-      writeBack={writeBack}
+      writeBack={onWriteBack}
       onClose={e => close(_.path, e)}
     />
   </views>
