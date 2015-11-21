@@ -41,8 +41,13 @@ process.on('SIGTERM', cleanExit)
 let child
 
 function cleanExit() {
-  if (child) child.send('EXIT') // this seems to be required
-  process.exit(0)
+  if (child)
+    child.send('EXIT') // this seems to be required
+
+  setTimeout(() => {
+    child.kill('SIGINT')
+    process.exit(0)
+  })
 }
 
 export function stop() { cleanExit() }
