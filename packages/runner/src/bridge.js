@@ -78,7 +78,7 @@ export function on(event, cb) {
 
 // TODO: put this somewhere nice
 on('editor', (msg) => {
-  // TODO: send to editor
+  message('editor', msg)
 })
 
 
