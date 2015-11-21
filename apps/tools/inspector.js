@@ -106,8 +106,6 @@ function removeLast([l, ...ls]) {
 }
 
 view Inspector {
-  view.pause()
-
   let clickOff, hoverOff, lastTarget
   let hudActive = false
   let views = []
@@ -128,7 +126,6 @@ view Inspector {
     views = pathActive(views, path) ?
       highlightPath(views, path) :
       addTemp(views, path)
-    view.update()
   }
 
   function mouseMove({ target }) {
@@ -139,25 +136,19 @@ view Inspector {
   function closeLast() {
     if (!views.length) return
     views = removeLast(views)
-    view.update()
   }
 
   function close(path, e) {
     if (e) e.stopPropagation()
     views = setClosing(views, path)
-    view.update()
 
     on.delay(200, () => {
       views = views.filter(v => path != v.path)
-      view.update()
     })
   }
 
   function glue(e) {
-    const path = findPath(e.target)
-    views = removeTemp(views)
-    views = toggleView(views, path)
-    view.update()
+    views = toggleView(removeTemp(views), findPath(e.target))
     return false
   }
 
@@ -173,12 +164,10 @@ view Inspector {
     hideHighlight()
     clickOff()
     views = removeTemp(views)
-    view.update()
   }
 
   function onWriteBack(path, data) {
     writeBack(path, data)
-    view.update()
   }
 
   on.keydown(window, isAlt(showInspect))
