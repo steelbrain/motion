@@ -13,6 +13,10 @@ export default function socket(_browser, _opts, _actions) {
   browser = _browser
   actions = _actions
   open()
+
+  browser.messageEditor = obj => {
+    send('editor', obj)
+  }
 }
 
 socket.send = function send(type, obj) {

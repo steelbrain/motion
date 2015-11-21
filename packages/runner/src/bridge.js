@@ -75,6 +75,13 @@ export function on(event, cb) {
   listeners[event].push(cb)
 }
 
+
+// TODO: put this somewhere nice
+on('editor', () => {
+  // TODO: send to editor
+})
+
+
 function runListeners(data) {
   let obj
 
