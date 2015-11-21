@@ -161,12 +161,13 @@ function run() {
     }
 
     function serverListen(port) {
+      PORT = port
       server.listen(port, host)
       process.send(JSON.stringify({ host, port }))
     }
 
     var host = 'localhost'
-    let port = PORT = OPTS.port || OPTS.defaultPort
+    let port = OPTS.port || OPTS.defaultPort
 
     // if no specified port, find open one
     if (!OPTS.port) {
