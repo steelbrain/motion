@@ -99,12 +99,15 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     mountedViews: {},
     lastWorkingViews: {},
     lastWorkingRenders: {},
-    preloaders: [], // async functions needed before loading app
 
     resetViewState() {
       Internal.views = {}
       Internal.mountedViews = {}
       Internal.lastWorkingViews = {}
+    },
+
+    removeView(key) {
+      delete Internal.views[key]
     },
 
     // devtools
@@ -168,6 +171,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   root.require = require
 
   let Flint = {
+    // visible but used internally
     packages: {},
     internals: {},
 
@@ -176,22 +180,24 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       Flint.render()
     },
 
+    // semi private API
     reportError,
-    router,
     range,
     iff,
 
+    // external API
+    router,
+    decorateViews: decorator => Internal.viewDecorator = decorator,
+    preloaders: [], // async functions needed before loading app
+
+    // styles, TODO: move internal
     staticStyles,
     styleClasses: {},
     styleObjects: {},
 
-    removeView(key) {
-      delete Internal.views[key]
-    },
-
     render() {
-      if (Internal.preloaders.length)
-        Promise.all(Internal.preloaders.map(loader => loader())).then(run)
+      if (Flint.preloaders.length)
+        Promise.all(Flint.preloaders.map(loader => loader())).then(run)
       else
         run()
 
@@ -254,7 +260,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         // remove Internal.viewsInFile that werent made
         const removed = arrayDiff(cached, views)
-        removed.map(Flint.removeView)
+        removed.map(Internal.removeView)
 
         Internal.currentHotFile = null
         Internal.viewCache[file] = Internal.viewsInFile[file]
@@ -313,7 +319,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         return
       }
 
-      // hot reloaded
+      // dev stuff
       if (!process.env.production) {
         if (!Internal.mountedViews[name])
           Internal.mountedViews[name] = []
@@ -348,7 +354,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       const viewsInFile = Internal.viewsInFile[name]
 
       if (viewsInFile) {
-        Internal.viewsInFile[name].map(Flint.removeView)
+        Internal.viewsInFile[name].map(Internal.removeView)
         delete Internal.viewsInFile[name]
       }
 

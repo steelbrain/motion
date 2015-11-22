@@ -197,6 +197,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
         }
 
+        if (Internal.viewDecorator)
+          Internal.viewDecorator(this)
+
         // reset original render
         this.render = flintRender
 
