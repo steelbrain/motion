@@ -203,18 +203,18 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return null
       },
 
-      runEvents(name) {
-        runEvents(this.events, name)
+      runEvents(name, args) {
+        runEvents(this.events, name, args)
       },
 
       componentWillReceiveProps(nextProps) {
         this.props = nextProps
-        this.runEvents('props')
+        this.runEvents('props', [this.props])
       },
 
       componentWillMount() {
         // componentWillUpdate only runs after first render
-        this.runEvents('props')
+        this.runEvents('props', [this.props])
       },
 
       componentDidMount() {

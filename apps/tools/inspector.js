@@ -1,3 +1,4 @@
+const removeLast = ([l, ...ls]) = ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
 
@@ -99,10 +100,6 @@ function writeBack(path, data) {
   Internal.getInitialStates[path]()
   Internal.viewsAtPath[path].forceUpdate()
   Internal.inspectorRefreshing = null
-}
-
-function removeLast([l, ...ls]) {
-  return ls
 }
 
 view Inspector {
