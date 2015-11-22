@@ -1,4 +1,5 @@
 import reportError from '../lib/reportError'
+import objectToColor from '../lib/objectToColor'
 
 const upper = s => s.toUpperCase()
 const capital = s => upper(s.substr(0, 1)) + s.slice(1)
@@ -164,23 +165,13 @@ export default function elementStyles(key, view, name, tag, props) {
       styles.position = 'absolute'
     }
 
-    // background { r, g, b, a }
-    if (styles.background && typeof styles.background == 'object') {
-      const bg = styles.background
+    // background rgba
+    if (styles.background && typeof styles.background == 'object')
+      styles.background = objectToColor(styles.background)
 
-      if (Array.isArray(bg)) {
-        if (bg.length == 4)
-          styles.background = `rgba(${bg[0]}, ${bg[1]}, ${bg[2]}, ${bg[3]})`
-        else
-          styles.background = `rgb(${bg[0]}, ${bg[1]}, ${bg[2]})`
-      }
-      else {
-        if (bg.a)
-          styles.background = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a})`
-        else
-          styles.background = `rgb(${bg.r}, ${bg.g}, ${bg.b})`
-      }
-    }
+    // color rgba
+    if (styles.color && typeof styles.color == 'object')
+      styles.color = objectToColor(styles.color)
 
     // final styles
     Object.keys(styles).forEach(key => {
