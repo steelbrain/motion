@@ -148,7 +148,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.shouldComponentUpdate = (nextProps) => {
           if (!flintShouldUpdate()) return false
-          return fn(nextProps)
+          return fn(this.props, nextProps)
         }
       },
 
@@ -208,8 +208,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillReceiveProps(nextProps) {
-        this.props = nextProps
-        this.runEvents('props', [this.props])
+        // set timeout becuase otherwise props is mutated before shouldUpdate is run
+        setTimeout(() => {
+          this.props = nextProps
+          this.runEvents('props', [this.props])
+        })
       },
 
       componentWillMount() {
