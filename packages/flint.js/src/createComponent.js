@@ -311,11 +311,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.isUpdating = true
           this.queuedUpdate = false
 
-          if (soft)
-            this.setState({ renders: 1 })
-          else {
-            this.forceUpdate()
-          }
+          // rather than setState because we want to skip shouldUpdate calls
+          this.forceUpdate()
         }
       },
 
