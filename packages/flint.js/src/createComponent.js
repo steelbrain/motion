@@ -161,6 +161,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         let u = null
 
+        this.state = {}
         this.queuedUpdate = false
         this.firstRender = true
         this.isUpdating = true

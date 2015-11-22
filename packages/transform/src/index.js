@@ -484,12 +484,12 @@ export default function createPlugin(options) {
                 viewState[name] = true
 
                 if (!dec.init) {
-                  dec.init = viewGetter(name, t.identifier('undefined'), scope, file)
+                  dec.init = addSetter(name, t.identifier('undefined'), scope)
                   dec.flintTracked = true
                   return dec
                 }
 
-                dec.init = viewGetter(name, dec.init, scope, file)
+                dec.init = addSetter(name, dec.init, scope)
                 node.flintTracked = true
                 return dec
               })

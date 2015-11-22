@@ -2,15 +2,16 @@ import equal from 'deep-equal'
 import clone from 'clone'
 
 export default function hotCache({ Internal, options, name }) {
-  if (process.env.production)
-    return {
-      get(name, val) { return val },
-      set() { this.update(true) }
-    }
-
   return {
     // result = val after mutation, use that instead of val
     set(name, val, result, useResult) {
+      this.state[name] = val
+
+      if (process.env.production) {
+        this.update(true)
+        return val
+      }
+
       const path = this.props.__flint.path
 
       if (!Internal.getCache[path])
@@ -18,9 +19,13 @@ export default function hotCache({ Internal, options, name }) {
 
       Internal.setCache(path, name, useResult ? result : val)
       this.update(true)
+      return val
     },
 
     get(name, val, where) {
+      if (process.env.production)
+        return val
+
       const path = this.props.__flint.path
       if (_Flint.inspectorRefreshing === path) return Internal.getCache[path][name]
       // file scoped stuff always updates
