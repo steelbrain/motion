@@ -75,11 +75,9 @@ export function on(event, cb) {
   listeners[event].push(cb)
 }
 
-
-// TODO: put this somewhere nice
-on('editor', (msg) => {
-  message('editor', msg)
-})
+// passes messages from/to browser/editor
+on('editor', msg => message('editor', msg))
+on('browser', msg => message('browser', msg))
 
 
 function runListeners(data) {

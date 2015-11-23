@@ -15,6 +15,7 @@ import './shim/log'
 import './lib/bluebirdErrorHandle'
 import createComponent from './createComponent'
 import range from './lib/range'
+import handleErrors from './lib/handleErrors'
 import iff from './lib/iff'
 import router from './lib/router'
 import staticStyles from './lib/staticStyles'
@@ -65,19 +66,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const Tools = root._DT
 
-  // error handling
-  const flintOnError = (...args) => {
-    reportError(...args)
-
-    // restore last working views
-    if (!Internal.firstRender)
-      Object.keys(Internal.views).forEach(name => {
-        Internal.views[name] = Internal.lastWorkingViews[name]
-      })
-  }
-
-  root.onerror = flintOnError
-
   // flints internal state
   const Internal = root._Flint = {
     views: {},
@@ -120,6 +108,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       setInspector(path)
     }
   }
+
+  handleErrors(Internal)
 
   const LastWorkingMain = LastWorkingMainFactory(Internal)
 

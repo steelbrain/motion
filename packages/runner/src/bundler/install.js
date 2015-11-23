@@ -183,7 +183,7 @@ function isInstalling() {
 }
 
 function finishedInstallingLoop(res) {
-  if (!_isInstalling) res()
+  if (!_isInstalling && opts.get('hasRunInitialInstall')) res()
   else {
     setTimeout(() => finishedInstallingLoop(res), 100)
   }
