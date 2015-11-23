@@ -178,12 +178,13 @@ export function finishedInstalling() {
   return new Promise(finishedInstallingLoop)
 }
 
-function isInstalling() {
-  return _isInstalling
+function isDone() {
+  if (opts.get('build')) return !_isInstalling && opts.get('hasRunInitialInstall')
+  else return !_isInstalling
 }
 
 function finishedInstallingLoop(res) {
-  if (!_isInstalling && opts.get('hasRunInitialInstall')) res()
+  if (isDone()) res()
   else {
     setTimeout(() => finishedInstallingLoop(res), 100)
   }

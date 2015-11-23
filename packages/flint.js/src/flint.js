@@ -8,14 +8,14 @@ import regeneratorRuntime from './vendor/regenerator'
 import Bluebird, { Promise } from 'bluebird'
 
 import 'reapp-object-assign'
+import './lib/bluebirdErrorHandle'
 import './shim/root'
 import './shim/on'
 import './shim/partial'
-import './shim/log'
-import './lib/bluebirdErrorHandle'
+import log from './shim/log'
+import onError from './shim/onError'
 import createComponent from './createComponent'
 import range from './lib/range'
-import handleErrors from './lib/handleErrors'
 import iff from './lib/iff'
 import router from './lib/router'
 import staticStyles from './lib/staticStyles'
@@ -64,8 +64,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
-  const Tools = root._DT
-
   // flints internal state
   const Internal = root._Flint = {
     views: {},
@@ -101,6 +99,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     // devtools
     inspector: {},
     viewsAtPath: {},
+    editor: {},
 
     setCache(path, name, val) {
       Internal.getCache[path][name] = val
@@ -109,8 +108,22 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     }
   }
 
-  handleErrors(Internal)
+  // internals
+  let Tools
 
+  if (!process.env.production) {
+    // Tools
+    Tools = root._DT
+
+    // pass data from tools to internal
+    Tools.emitter.on('editorState', () => {
+      Internal.editor = Tools.editor
+    })
+  }
+
+  // setup shims that use Internal
+  onError(Internal, Tools)
+  log(Internal, Tools)
   const LastWorkingMain = LastWorkingMainFactory(Internal)
 
   // devtools edit
@@ -222,7 +235,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     },
 
     // internal events
-    on(name, cb) { emitter.on(name, cb) },
+    on(name, cb) {
+      emitter.on(name, cb)
+    },
 
     // for use in jsx
     debug: () => { debugger },
@@ -262,8 +277,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           const added = arrayDiff(views, cached)
 
           // send runtime success before render
-          if (Tools)
-            Tools.emitter.emit('runtime:success')
+          Tools.emitter.emit('runtime:success')
 
           // if removed, just root
           if (removed.length || added.length)

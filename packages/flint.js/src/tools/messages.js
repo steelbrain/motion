@@ -41,6 +41,15 @@ export default function run(browser, opts) {
       removeScript(name)
 
       Flint.deleteFile(name)
+    },
+
+
+    // coming from editor to browser
+
+    fromEditor: ({ key, val }) => {
+      browser.editor = browser.editor || {}
+      browser.editor[key] = val
+      browser.emitter.emit('editorState')
     }
   })
 }

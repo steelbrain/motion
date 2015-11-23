@@ -77,7 +77,7 @@ export function on(event, cb) {
 
 // passes messages from/to browser/editor
 on('editor', msg => message('editor', msg))
-on('browser', msg => message('browser', msg))
+on('fromEditor', msg => message('fromEditor', msg))
 
 
 function runListeners(data) {

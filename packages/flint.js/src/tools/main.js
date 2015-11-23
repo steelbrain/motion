@@ -1,12 +1,13 @@
-import errors from './errors';
-import messages from './messages';
+import errors from './errors'
+import messages from './messages'
 import ee from 'event-emitter'
-const emitter = ee({});
+
+const emitter = ee({})
 
 window._DT = {
-  emitter: emitter,
+  emitter,
   data: null, // should be error
-  on(name, cb) { emitter.on(name, cb) },
+  on(name, cb) { emitter.on(name, cb) }
 }
 
 const opts = {
