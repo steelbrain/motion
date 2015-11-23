@@ -9,7 +9,10 @@ module.exports = function(opts) {
 
   var plugins = [
     new webpack.DefinePlugin({
-      'process.env': { NODE_ENV: JSON.stringify(opts.env || 'production') }
+      'process.env': {
+        NODE_ENV: JSON.stringify(opts.env || 'production'),
+        production: opts.env == 'production'
+      }
     })
   ]
 

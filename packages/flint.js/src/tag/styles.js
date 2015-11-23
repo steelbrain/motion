@@ -77,9 +77,11 @@ export default function elementStyles(key, view, name, tag, props) {
     const nameStyle = diffName && view.styles[name] && view.styles[name](index)
 
     if (deservesRootStyles) {
-      parentStyles = view.props.__flint.parentStyles
-      parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
-      parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
+      if (view.props.__flint) {
+        parentStyles = view.props.__flint.parentStyles
+        parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
+        parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
+      }
 
       // TODO: shouldnt be in styles
       if (view.props.className) {
