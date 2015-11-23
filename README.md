@@ -1,6 +1,6 @@
 <p align="center">
   <a href="http://flintjs.com/">
-    <img alt="Flint" src="http://flintjs.com/assets/images/flintlogo20.png" width="50%">
+    <img alt="Flint" src="http://flintjs.com/assets/images/flintlogo.png" width="50%">
   </a>
 </p>
 

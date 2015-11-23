@@ -41,11 +41,10 @@ process.on('SIGTERM', cleanExit)
 let child
 
 function cleanExit() {
-  if (child)
-    child.send('EXIT') // this seems to be required
+  child && child.send('EXIT') // this seems to be required
 
   setTimeout(() => {
-    child.kill('SIGINT')
+    child &&  child.kill('SIGINT')
     process.exit(0)
   })
 }
@@ -88,10 +87,11 @@ export async function run(_opts = {}, isBuild) {
       // run our pipeline once manually
       gulp.buildScripts()
       await waitForFirstBuild()
-      await build()
 
       if (OPTS.watch)
         return gulp.watchForBuild()
+      else
+        await build()
 
       process.exit()
     }

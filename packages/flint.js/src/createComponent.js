@@ -4,7 +4,7 @@ import raf from 'raf'
 import Radium from 'radium'
 
 import phash from './lib/phash'
-import log from './lib/log'
+import cloneError from './lib/cloneError'
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
@@ -148,7 +148,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.shouldComponentUpdate = (nextProps) => {
           if (!flintShouldUpdate()) return false
-          return fn(nextProps)
+          return fn(this.props, nextProps)
         }
       },
 
@@ -161,6 +161,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         let u = null
 
+        this.state = {}
         this.queuedUpdate = false
         this.firstRender = true
         this.isUpdating = true
@@ -197,27 +198,30 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
         }
 
+        if (Internal.viewDecorator)
+          Internal.viewDecorator(this)
+
         // reset original render
         this.render = flintRender
 
         return null
       },
 
-      runEvents(name) {
-        runEvents(this.events, name)
+      runEvents(name, args) {
+        runEvents(this.events, name, args)
       },
 
       componentWillReceiveProps(nextProps) {
-        this.props = nextProps
-        this.runEvents('props')
+        // set timeout becuase otherwise props is mutated before shouldUpdate is run
+        setTimeout(() => {
+          this.props = nextProps
+          this.runEvents('props', [this.props])
+        })
       },
 
       componentWillMount() {
-        if (name === 'Main')
-          Internal.firstRender = false
-
         // componentWillUpdate only runs after first render
-        this.runEvents('props')
+        this.runEvents('props', [this.props])
       },
 
       componentDidMount() {
@@ -231,6 +235,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.queuedUpdate = false
           this.update()
         }
+
+        if (name === 'Main')
+          Internal.firstRender = false
 
         if (!process.env.production) {
           this.props.__flint.onMount(this)
@@ -291,19 +298,28 @@ export default function createComponent(Flint, Internal, name, view, options = {
         if (soft && this.isPaused)
           return
 
-        // if during a render, wait
-        if (this.isRendering || this.isUpdating || Internal.firstRender || !this.mounted) {
-          this.queuedUpdate = true
-        }
-        else {
-          this.isUpdating = true
-          this.queuedUpdate = false
+        let doUpdate = () => {
+          // if during a render, wait
+          if (this.isRendering || this.isUpdating || !this.mounted || Internal.firstRender) {
+            this.queuedUpdate = true
+          }
+          else {
+            // tools run into weird bug where if error in app on initial render, react gets
+            // mad that you are trying to re-render tools during app render TODO: strip in prod
+            if (!process.env.production && _Flint.firstRender)
+              return setTimeout(this.update)
 
-          if (soft)
-            this.setState({ renders: 1 })
-          else
+            this.isUpdating = true
+            this.queuedUpdate = false
+
+            // rather than setState because we want to skip shouldUpdate calls
             this.forceUpdate()
+          }
         }
+
+        // setTimeout fixes issues with forceUpdate during previous transition in React
+        if (soft) doUpdate()
+        else setTimeout(doUpdate)
       },
 
       // helpers for context
@@ -410,16 +426,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         catch(e) {
           Internal.caughtRuntimeErrors++
 
+          const err = cloneError(e)
+
           // console warn, with debounce
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
-            console.groupCollapsed(`Render error in view ${name} (${e.message})`)
-            console.warn(e.message)
-
-            if (e.stack && Array.isArray(e.stack))
-              console.error(...e.stack.split("\n"))
-            else
-              console.error(e)
-
+            console.groupCollapsed(`Render error in view ${name} (${err.message})`)
+            console.error(err.stack)
             console.groupEnd()
           }, 500)
 
@@ -448,7 +460,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             )
           }
           catch(e) {
-            log("Error rendering last version of view after error")
+            console.flint("Error rendering last version of view after error")
           }
         }
       }

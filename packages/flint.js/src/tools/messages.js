@@ -1,7 +1,6 @@
 import { compileError, compileSuccess } from './errors';
 import removeFlintExt from '../lib/flintExt';
 import socket from './socket'
-import log from '../lib/log'
 
 export default function run(browser, opts) {
   socket(browser, opts, {
