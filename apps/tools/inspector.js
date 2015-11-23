@@ -1,4 +1,4 @@
-const removeLast = ([l, ...ls]) = ls
+const removeLast = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
 
