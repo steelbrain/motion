@@ -112,14 +112,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   }
 
   // internals
-  let Tools
+  const Tools = root._DT
 
-  if (!process.env.production) {
-    // Tools
-    Tools = root._DT
-
+  if (!process.env.production && Tools) {
     // pass data from tools to internal
-    Tools.emitter && Tools.emitter.on('editorState', () => {
+     Tools.emitter.on('editorState', () => {
       Internal.editor = Tools.editor
     })
   }
