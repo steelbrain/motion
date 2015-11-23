@@ -4,7 +4,7 @@ import raf from 'raf'
 import Radium from 'radium'
 
 import phash from './lib/phash'
-import log from './lib/log'
+import cloneError from './lib/cloneError'
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
 import runEvents from './lib/runEvents'
@@ -420,16 +420,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         catch(e) {
           Internal.caughtRuntimeErrors++
 
+          const err = cloneError(e)
+
           // console warn, with debounce
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
-            console.groupCollapsed(`Render error in view ${name} (${e.message})`)
-            console.warn(e.message)
-
-            if (e.stack && Array.isArray(e.stack))
-              console.error(...e.stack.split("\n"))
-            else
-              console.error(e)
-
+            console.groupCollapsed(`Render error in view ${name} (${err.message})`)
+            console.error(err.stack)
             console.groupEnd()
           }, 500)
 
@@ -458,7 +454,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             )
           }
           catch(e) {
-            log("Error rendering last version of view after error")
+            console.flint("Error rendering last version of view after error")
           }
         }
       }

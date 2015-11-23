@@ -11,10 +11,10 @@ import 'reapp-object-assign'
 import './shim/root'
 import './shim/on'
 import './shim/partial'
+import './shim/log'
 import './lib/bluebirdErrorHandle'
 import createComponent from './createComponent'
 import range from './lib/range'
-import log from './lib/log'
 import iff from './lib/iff'
 import router from './lib/router'
 import staticStyles from './lib/staticStyles'
@@ -203,7 +203,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       function run() {
         Internal.isRendering++
-        log('render', `Internal.isRendering(${Internal.isRendering})`)
+        console.flint('render', `Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
         let Main = Internal.views.Main && Internal.views.Main.component

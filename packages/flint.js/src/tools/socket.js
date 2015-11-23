@@ -1,5 +1,3 @@
-import log from '../lib/log'
-
 let opts
 let browser
 let actions
@@ -26,7 +24,7 @@ socket.send = function send(type, obj) {
 }
 
 function open() {
-  log('socket', 'open', 'isOpening', isOpening)
+  console.flint('socket', 'open', 'isOpening', isOpening)
   if (isOpening) return
   isOpening = true
 
@@ -46,7 +44,7 @@ function onOpen() {
 function onMessage(message) {
   message = JSON.parse(message.data)
   if (!message) return
-  log('socket', 'onMessage', 'message', message._type, message)
+  console.flint('socket', 'onMessage', 'message', message._type, message)
 
   const action = actions[message._type]
   if (action) action(message)
