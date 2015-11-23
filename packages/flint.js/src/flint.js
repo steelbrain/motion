@@ -119,7 +119,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     Tools = root._DT
 
     // pass data from tools to internal
-    Tools.emitter.on('editorState', () => {
+    Tools.emitter && Tools.emitter.on('editorState', () => {
       Internal.editor = Tools.editor
     })
   }
