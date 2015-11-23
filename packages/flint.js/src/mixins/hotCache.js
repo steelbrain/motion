@@ -3,10 +3,8 @@ import clone from 'clone'
 
 export default function hotCache({ Internal, options, name }) {
   return {
-    // result = val after mutation, use that instead of val
-    set(name, val, result, useResult) {
-      this.state[name] = val
-
+    // on assign
+    set(name, val, result, useResult) { // result = val after mutation, use that instead of val
       if (process.env.production) {
         this.update(true)
         return val
@@ -22,12 +20,23 @@ export default function hotCache({ Internal, options, name }) {
       return val
     },
 
+    // on declaration
+    dec(name, val, where) {
+      this.state[name] = val
+      return this.get(name, val, where)
+    },
+
+    // on access
     get(name, val, where) {
       if (process.env.production)
         return val
 
       const path = this.props.__flint.path
-      if (_Flint.inspectorRefreshing === path) return Internal.getCache[path][name]
+
+      // Inspector setting new state, prevent infinite loop
+      if (_Flint.inspectorRefreshing === path)
+        return Internal.getCache[path][name]
+
       // file scoped stuff always updates
       if (options.unchanged && where == 'fromFile')
         return val

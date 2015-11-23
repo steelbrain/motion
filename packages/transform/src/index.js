@@ -112,12 +112,12 @@ export default function createPlugin(options) {
       return t.callExpression(t.identifier('Object.freeze'), [node])
     }
 
-    function addSetter(name, node, scope, postfix) {
+    function wrapSetter(name, node, scope, postfix, method = 'set') {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
         let args = [t.literal(name), node]
         if (postfix) args = args.concat([postfix, t.identifier('true')])
-        const expr = t.callExpression(t.identifier('view.set'), args)
+        const expr = t.callExpression(t.identifier(`view.${method}`), args)
         node.hasSetter = true
         return expr
       }
@@ -125,22 +125,27 @@ export default function createPlugin(options) {
       return node
     }
 
+
+    function wrapDeclaration(name, node, scope) {
+      return wrapSetter(name, node, scope, false, 'dec')
+    }
+
+
     function getter(name, val, ...args) {
       return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
     }
 
     function viewGetter(name, val, scope, file) {
-      let isInView = scope.hasOwnBinding('view')
       let comesFromFile = file.scope.hasOwnBinding(val.name)
 
       if (comesFromFile)
         return getter(name, val, t.literal('fromFile'))
 
-      if (isInView)
-        return getter(name, val)
+      return getter(name, val)
     }
 
-    function addGetter(node, scope, file) {
+    function wrapGetter(node, scope, file) {
+      if (node.hasGetter) return
       if (scope.hasOwnBinding('view')) {
         if (node.left.object) return node
         node.right = viewGetter(node.left.name, node.right, scope, file)
@@ -449,7 +454,7 @@ export default function createPlugin(options) {
                 const name = callee.object ? findObjectName(callee.object) : callee.property.name
 
                 if (isViewState(name, scope))
-                  return addSetter(name, node, scope, t.identifier(name))
+                  return wrapSetter(name, node, scope, t.identifier(name))
               }
 
               if (isObjectAssign(node)) {
@@ -457,7 +462,7 @@ export default function createPlugin(options) {
                 let name = node.arguments[0].name
 
                 if (isViewState(name, scope))
-                  return addSetter(name, node, scope)
+                  return wrapSetter(name, node, scope)
               }
             }
           }
@@ -475,7 +480,7 @@ export default function createPlugin(options) {
                 if (t.isObjectPattern(dec.id)) {
                   // let setters = dec.id.properties.map(prop => {
                   //   // console.log(prop.key.name)
-                  //   return addSetter(prop.key.name, prop, scope)
+                  //   return wrapSetter(prop.key.name, prop, scope)
                   // })
                   return dec
                 }
@@ -484,12 +489,12 @@ export default function createPlugin(options) {
                 viewState[name] = true
 
                 if (!dec.init) {
-                  dec.init = addSetter(name, t.identifier('undefined'), scope)
+                  dec.init = wrapDeclaration(name, t.identifier('undefined'), scope)
                   dec.flintTracked = true
                   return dec
                 }
 
-                dec.init = addSetter(name, dec.init, scope)
+                dec.init = wrapDeclaration(name, dec.init, scope)
                 node.flintTracked = true
                 return dec
               })
@@ -697,14 +702,14 @@ export default function createPlugin(options) {
                 name = node.left.name
 
               if (isViewState(name, scope)) {
-                sett = node => addSetter(name, node, scope, post)
+                sett = node => wrapSetter(name, node, scope, post)
                 added = true
               }
             }
 
             // add getter
             if (!isRender && isViewState(node.left.name, scope)) {
-              gett = node => addGetter(node, scope, file)
+              gett = node => wrapGetter(node, scope, file)
               added = true
             }
 
@@ -728,7 +733,7 @@ export default function createPlugin(options) {
                 name = node.argument.name
 
               const postfix = !node.prefix ? t.identifier(name) : void 0
-              return addSetter(name, node, scope, postfix)
+              return wrapSetter(name, node, scope, postfix)
             }
           }
         }
