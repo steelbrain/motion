@@ -13,7 +13,7 @@ import './shim/root'
 import './shim/on'
 import './shim/partial'
 import log from './shim/log'
-import onError from './shim/onError'
+import onError from './shim/flint'
 import createComponent from './createComponent'
 import range from './lib/range'
 import iff from './lib/iff'
@@ -100,6 +100,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     inspector: {},
     viewsAtPath: {},
     editor: {},
+
+    lastFileLoad: null,
+    runtimeErrors: 0,
 
     setCache(path, name, val) {
       Internal.getCache[path][name] = val
@@ -249,6 +252,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.changedViews = []
         Internal.currentHotFile = file
         Internal.caughtRuntimeErrors = 0
+
+        // send runtime success before render
+        Tools.emitter.emit('runtime:success')
+        Internal.lastFileLoad = Date.now()
       }
 
       // capture exports
@@ -275,9 +282,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         setTimeout(() => {
           const added = arrayDiff(views, cached)
-
-          // send runtime success before render
-          Tools.emitter.emit('runtime:success')
 
           // if removed, just root
           if (removed.length || added.length)
@@ -330,7 +334,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
         // not new
         // if defined twice during first run
-        if (Internal.firstRender) {
+        if (Internal.firstRender && !Internal.runtimeErrors) {
           Internal.views[name] = ErrorDefinedTwice(name)
           throw new Error(`Defined a view twice: ${name}`)
         }
