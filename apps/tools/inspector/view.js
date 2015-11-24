@@ -61,7 +61,7 @@ view Inspector.View {
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
     <top>
       <name>{name}</name>
-      <edit onClick={edit}>edit</edit>
+      <edit if={false} onClick={edit}>edit</edit>
     </top>
 
     <Inspector.Title if={!hasKeys(props)}>No Props</Inspector.Title>
