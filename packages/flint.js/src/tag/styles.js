@@ -47,7 +47,7 @@ const arrayToString = val =>
   ).join(' ')
 
 // <name-tag />
-export default function elementStyles(key, view, name, tag, props) {
+export default function elementStyles(key, index, view, name, tag, props) {
   if (typeof name !== 'string') return
 
   let styles
@@ -65,8 +65,6 @@ export default function elementStyles(key, view, name, tag, props) {
   }
 
   if (view.styles) {
-    const index = props.repeat ? key[1] : void 0
-
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'

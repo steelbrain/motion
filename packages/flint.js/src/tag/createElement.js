@@ -170,7 +170,7 @@ export default function createElement(viewName) {
     const Flint = view.Flint
     const { fullname, name, key, index, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
-    props.style = elementStyles([key, index], view, name, originalTag || tag, props)
+    props.style = elementStyles(key, index, view, name, originalTag || tag, props)
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {
