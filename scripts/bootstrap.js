@@ -9,7 +9,7 @@ exec("npm install --loglevel=error")
 var packages = [];
 
 // order important so they are linkable to each other
-var packageNames = ['transform', 'flint.js', 'runner', 'cli'];
+var packageNames = ['transform', 'nice-styles', 'flint.js', 'runner', 'cli'];
 
 packageNames.forEach(function (loc) {
   var name = path.basename(loc);
@@ -24,10 +24,10 @@ packageNames.forEach(function (loc) {
     pkg: pkg,
     name: pkg.name,
     global: pkg.global,
-    links: Object.keys(pkg.dependencies)
+    links: pkg.dependencies && Object.keys(pkg.dependencies)
       .filter(function(package) {
         return package.indexOf('flint-') === 0
-      })
+      }) || []
   });
 });
 
@@ -41,7 +41,7 @@ packageNames.forEach(function (loc) {
 
 // create links
 packages.forEach(function (pkg) {
-  console.log(pkg.name);
+  console.log(pkg.name)
 
   var nodeModulesLoc = "packages/" + pkg.folder + "/node_modules";
   mkdir("-p", nodeModulesLoc);

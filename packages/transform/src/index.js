@@ -1,4 +1,5 @@
 import StyleSheet from 'flint-stilr'
+import niceStyles from 'flint-nice-styles'
 import hash from 'hash-sum'
 import path from 'path'
 
@@ -271,13 +272,17 @@ export default function createPlugin(options) {
 
               let rawStyles = {}
 
+              // turns styles babel tree into js again
               Object.keys(styles).forEach(tag => {
                 const styleProps = styles[tag]
                 const viewstyle = styleProps.reduce((acc, cur) => {
-                  acc[cur.key.name] = cur.value.value
+                  acc[cur.key.name] = t.isArrayExpression(cur.value)
+                    ? cur.value.elements.map(e => e.value)
+                    : cur.value.value
                   return acc
                 }, {})
 
+                niceStyles(viewstyle)
                 rawStyles[tag] = viewstyle
               })
 
@@ -544,29 +549,46 @@ export default function createPlugin(options) {
             // styles
             return extractAndAssign(node)
 
+            function getArrayStatics(node) {
+              let rightEls = []
+              let staticProps = []
+
+              let result = () => [
+                staticStyleStatement(node, t.objectExpression(staticProps)),
+                dynamicStyleStatement(node, node.right)
+              ]
+
+              for (let el of node.right.elements) {
+                // bail out if they arent using just objects (ternery, variable)
+                if (!t.isObjectExpression(el))  {
+                  return result()
+                }
+
+                const extracted = extractStatics(node.left.name, el)
+                if (!extracted) continue
+
+                let { statics, dynamics } = extracted
+
+                if (statics.length)
+                  staticProps = staticProps.concat(statics)
+
+                if (dynamics.length) {
+                  rightEls.push(t.objectExpression(dynamics))
+                  continue
+                }
+              }
+
+              node.right.elements = rightEls
+
+              return result()
+            }
+
             // splits styles into static/dynamic pieces
             function extractAndAssign(node) {
-              // TODO: only do this is the array is just objects, if they use a variable
-              // it wont work with the static classname extraction
-              // // if array of objects
-              // if (t.isArrayExpression(node.right)) {
-              //   let staticProps = []
-              //
-              //   node.right.elements = node.right.elements.map(el => {
-              //     if (!t.isObjectExpression(el)) return el
-              //     const extracted = extractStatics(node.left.name, el)
-              //     if (!extracted) return null
-              //     let { statics, dynamics } = extracted
-              //     if (statics.length) staticProps = staticProps.concat(statics)
-              //     if (dynamics.length) return t.objectExpression(dynamics)
-              //     else return null
-              //   }).filter(x => !!x)
-              //
-              //   return [
-              //     staticStyleStatement(node, t.objectExpression(staticProps)),
-              //     dynamicStyleStatement(node, node.right)
-              //   ]
-              // }
+              // if array of objects
+              if (t.isArrayExpression(node.right)) {
+                return getArrayStatics(node)
+              }
 
               // extract statics, but return just dynamics
               if (t.isObjectExpression(node.right)) {
@@ -644,7 +666,7 @@ export default function createPlugin(options) {
 
                 duplicate[prop.key.name] = true
 
-                if (t.isLiteral(prop.value) && t.isIdentifier(prop.key)) {
+                if (isStatic(prop)) {
                   viewStyles[inView][name].push(prop)
                   statics.push(prop)
                 }
@@ -654,6 +676,24 @@ export default function createPlugin(options) {
               }
 
               return { statics, dynamics }
+            }
+
+            // determine if property is static
+            function isStatic(prop) {
+              const staticKey = t.isIdentifier(prop.key)
+
+              if (!staticKey)
+                return false
+
+              const staticVal = t.isLiteral(prop.value)
+
+              if (staticVal)
+                return true
+
+              // determine if array is fully static
+              if (t.isArrayExpression(prop.value)) {
+                return prop.value.elements.reduce((acc, cur) => acc = acc && t.isLiteral(cur), true)
+              }
             }
 
             // $._static["name"] = ...

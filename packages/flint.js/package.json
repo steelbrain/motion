@@ -15,6 +15,7 @@
     "clone": "^1.0.2",
     "deep-equal": "^1.0.1",
     "event-emitter": "^0.3.3",
+    "flint-nice-styles": "^1.0.0",
     "hash-sum": "^1.0.2",
     "history": "^1.13.0",
     "lodash.isequal": "^3.0.4",

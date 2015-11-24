@@ -1,0 +1,15 @@
+{
+  "name": "flint-nice-styles",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/compat/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Flint",
+  "license": "MPL",
+  "dependencies": {
+    "babel-runtime": "^6.2.0"
+  }
+}
