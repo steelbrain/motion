@@ -37,7 +37,7 @@ runner: ready
 
 transform: ready
 	scripts/release.sh transform
-	git commit -am 'vbump flint.js'
+	git commit -am 'vbump transform'
 
 tools: ready
 	scripts/release.sh tools
