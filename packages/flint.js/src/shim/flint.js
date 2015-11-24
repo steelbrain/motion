@@ -15,7 +15,7 @@ export default function onError(Internal, Tools) {
   // used to prevent tons of logs during live development
   function onError(...args) {
     // send error to dev tools error bar
-    reportError(...args)
+    const flintShowError = () => reportError(...args)
 
     Internal.runtimeErrors++ // for use in detecting if we've started up with errors
     const isLive = Internal.editor.live
@@ -35,6 +35,8 @@ export default function onError(Internal, Tools) {
             return
           }
 
+          flintShowError()
+
           // DEBUGGING PERSON: open your stack trace and look @ first file to find real line #
           // these weird logs only happen during live coding when you type quickly, to prevent
           // *hundreds* of error logs happening.
@@ -43,6 +45,9 @@ export default function onError(Internal, Tools) {
 
         return true
       }
+    }
+    else {
+      flintShowError()
     }
   }
 
