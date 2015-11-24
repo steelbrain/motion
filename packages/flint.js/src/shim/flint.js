@@ -14,6 +14,7 @@ export default function onError(Internal, Tools) {
 
   // used to prevent tons of logs during live development
   function onError(...args) {
+    // send error to dev tools error bar
     reportError(...args)
 
     Internal.runtimeErrors++ // for use in detecting if we've started up with errors

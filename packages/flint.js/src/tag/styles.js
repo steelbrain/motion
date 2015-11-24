@@ -135,7 +135,8 @@ export default function elementStyles(key, view, name, tag, props) {
     if (deservesRootStyles && view.props.className) {
       view.props.className.split(' ').forEach(className => {
         if (!isLowerCase(className[0])) return
-        result = mergeStyles(result, parentStyles[`${prefix}${className}`], parentStylesStatic[className])
+        const key = `${prefix}${className}`
+        result = mergeStyles(result, parentStyles[key], parentStylesStatic[key])
       })
     }
 

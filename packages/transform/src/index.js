@@ -1,4 +1,5 @@
 import StyleSheet from 'flint-stilr'
+import hash from 'hash-sum'
 import path from 'path'
 
 function isUpperCase(str) {
@@ -563,9 +564,11 @@ export default function createPlugin(options) {
                 if (!hasStatics && !hasDynamics)
                   return result
 
-                // keep statics inside view for child view styles (to trigger hot reloads)
-                if (isChildView && hasStatics)
-                  result.push(staticStyleStatement(node, t.objectExpression(statics)))
+                // keep statics hash inside view for child view styles (to trigger hot reloads)
+                if (hasStatics) {
+                  const staticsHash = hash(statics.map(k => k.key.name + k.value.value))
+                  result.push(exprStatement(t.literal(staticsHash)))
+                }
 
                 if (hasDynamics)
                   result.push(dynamicStyleStatement(node, node.right))
