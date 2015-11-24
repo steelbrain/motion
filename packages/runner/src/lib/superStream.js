@@ -21,53 +21,12 @@ function fileSend({ path, contents }) {
     return
   }
 
-  const rPath = nodepath.relative(basePath, path)
-
-  log('stream', rPath)
-
   // write to stream
   const file = new File(vinyl(path, new Buffer(contents)))
 
   function pushStream() {
     log('stream', 'pushing!')
     stream.push(file)
-  }
-
-  let attempts = 0
-
-  // waits for file load before pushing next
-  function checkPushStream() {
-    log('stream', 'checkPushStream', 'rPath', rPath, 'fileLoading', fileLoading[rPath])
-    // loop waiting for browser to finish loading
-    if (fileLoading[rPath]) {
-      // ensures it only runs once after loaded
-      if (scriptWaiting[rPath]) return
-      scriptWaiting[rPath] = true
-
-      log('stream', 'checkPushStream', 'start waiting', rPath)
-
-      // ceil attempts to avoid locks
-      attempts++
-      if (attempts > 50)
-        fileLoading[rPath] = false
-
-      setTimeout(checkPushStream, 5)
-      return
-    }
-
-    log('stream', 'pushStream!', rPath)
-    scriptWaiting[rPath] = false
-    pushStream()
-  }
-
-  // internals debounce
-  if (cache.isExported(path)) {
-    log('stream', 'is exported')
-    clearTimeout(internalTimeout)
-    internalTimeout = setTimeout(pushStream, 1000)
-  }
-  else {
-    checkPushStream()
   }
 }
 

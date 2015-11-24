@@ -4,6 +4,8 @@ import log from './lib/log'
 import wport from './lib/wport'
 import cache from './cache'
 
+const LOG = 'bridge'
+
 let wsServer
 let connected = false
 let connections = []
@@ -55,7 +57,7 @@ function makeMessage(type, obj) {
 }
 
 export function message(type, obj) {
-  log('-[socket msg]-', type)
+  log(LOG, '-[out]-', type)
   let msg = makeMessage(type, obj)
 
   // store last error or success
@@ -81,6 +83,8 @@ on('fromEditor', msg => message('fromEditor', msg))
 
 
 function runListeners(data) {
+  log(LOG, '-[in]-', data)
+
   let obj
 
   try {
