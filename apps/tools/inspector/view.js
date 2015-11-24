@@ -3,7 +3,7 @@ import _ from 'underscore'
 
 function pathToName(path) {
   let p = path.split(',')
-  return p[p.length - 1].split('.')[0]
+  return p[p.length - 1].split('.')[0].split('-')[0]
 }
 
 function filterProps(props) {
@@ -40,9 +40,10 @@ view Inspector.View {
 
     if (!path) return
 
-    if (path) {
-      name = pathToName(path)
+    name = pathToName(path)
 
+    // if not inspecting, inspect
+    if (!_Flint.inspector[view.props.path]) {
       inspect(path, (_props, _state, _wb) => {
         props = filterProps(_props || {})
         state = _state || {}
@@ -50,13 +51,19 @@ view Inspector.View {
         view.update()
       })
     }
+
   })
 
   let hasKeys = o => o && Object.keys(o).length > 0
+  let edit = () => _DT.messageEditor({ type: 'editView', view: name })
 
   <view class={{ active, highlight }}>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
-    <name>{name}</name>
+    <top>
+      <name>{name}</name>
+      <edit onClick={edit}>edit</edit>
+    </top>
+
     <Inspector.Title if={!hasKeys(props)}>No Props</Inspector.Title>
     <Inspector.Section title="Props" if={hasKeys(props)} class="props">
       <Tree editable={false} data={props} />
@@ -92,6 +99,8 @@ view Inspector.View {
     }
   }
 
+  $top = { flexFlow: 'row', }
+
   $active = {
     opacity: 1,
     transform: {
@@ -115,6 +124,15 @@ view Inspector.View {
     padding: [8, 8, 0],
     margin: [0, 0, -6],
     fontSize: 14
+  }
+
+  $edit = {
+    padding: [8, 8, 0],
+    fontSize: 14,
+    margin: [0, 0, -6],
+    marginLeft: 4,
+    fontWeight: 400,
+    color: 'rgba(24, 101, 227, 0.8)',
   }
 
   $expanded = {
