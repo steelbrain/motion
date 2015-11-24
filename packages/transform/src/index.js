@@ -173,7 +173,10 @@ export default function createPlugin(options) {
     let inJSX = false
     let inView = null // track current view name
     let hasView = false // if file has a view
+    let viewHasChild = false // if view calls for a child view
     let viewStyles = {} // store styles from views to be extracted
+    let viewDynamicStyleKeys = {}
+    let viewStaticStyleKeys = {}
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
     let viewStyleNames = {} // prevent duplicate style names
@@ -227,6 +230,9 @@ export default function createPlugin(options) {
             viewRootNodes = []
             viewState = {}
             viewStyleNames = {}
+            viewDynamicStyleKeys = {}
+            viewStaticStyleKeys = {}
+            viewHasChild = false
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -354,6 +360,10 @@ export default function createPlugin(options) {
 
               node.flintJSXVisits = 1
               const name = nodeToNameString(el.name)
+
+              // check if view has a Child view
+              if (name[0].toUpperCase() == name[0])
+                viewHasChild = true
 
               // ['quotedname', key]
               let key
@@ -554,6 +564,13 @@ export default function createPlugin(options) {
 
                 let { statics, dynamics } = extractStatics(name, node.right)
 
+                // sets dynamic keys for use in determining hot reload clear later
+                const statKeys = viewStaticStyleKeys
+                const dynKeys = viewDynamicStyleKeys
+
+                statics.forEach(n => statKeys[n.key.name] = n.value.value)
+                dynamics.forEach(n => dynKeys[n.key.name] = n.value.value)
+
                 let hasStatics = statics.length
                 let hasDynamics = dynamics.length
                 let isChildView = name && name.length > 1 && name[1] == name[1].toUpperCase()
@@ -565,9 +582,20 @@ export default function createPlugin(options) {
                   return result
 
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
-                if (hasStatics) {
+                if (hasStatics && viewHasChild) {
                   const staticsHash = hash(statics.map(k => k.key.name + k.value.value))
                   result.push(exprStatement(t.literal(staticsHash)))
+                }
+
+                // if dynamic + static clash, put that inside view to trigger hot reloads
+                if (hasStatics) {
+                  let uniq = ''
+                  Object.keys(dynKeys).forEach(key => {
+                    if (statKeys[key]) {
+                      uniq += hash(statKeys[key] + dynKeys[key])
+                    }
+                  })
+                  result.push(exprStatement(t.literal(uniq)))
                 }
 
                 if (hasDynamics)
