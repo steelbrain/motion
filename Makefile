@@ -39,6 +39,10 @@ transform: ready
 	scripts/release.sh transform
 	git commit -am 'vbump transform'
 
+styles: ready
+	scripts/release.sh styles
+	git commit -am 'vbump styles'
+
 tools: ready
 	scripts/release.sh tools
 	git commit -am 'vbump tools'
