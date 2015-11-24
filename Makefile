@@ -40,7 +40,7 @@ transform: ready
 	git commit -am 'vbump transform'
 
 styles: ready
-	scripts/release.sh styles
+	scripts/release.sh nice-styles
 	git commit -am 'vbump styles'
 
 tools: ready
