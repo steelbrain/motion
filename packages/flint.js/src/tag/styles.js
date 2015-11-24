@@ -47,7 +47,7 @@ const arrayToString = val =>
   ).join(' ')
 
 // <name-tag />
-export default function elementStyles(key, index, view, name, tag, props) {
+export default function elementStyles(key, index, repeatItem, view, name, tag, props) {
   if (typeof name !== 'string') return
 
   let styles
@@ -68,11 +68,11 @@ export default function elementStyles(key, index, view, name, tag, props) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'
-    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](index)
+    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](repeatItem, index)
 
     const classes = Flint.styleClasses[view.name]
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
-    const nameStyle = diffName && view.styles[name] && view.styles[name](index)
+    const nameStyle = diffName && view.styles[name] && view.styles[name](repeatItem, index)
 
     if (deservesRootStyles) {
       if (view.props.__flint) {

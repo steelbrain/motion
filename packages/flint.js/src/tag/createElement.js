@@ -35,7 +35,7 @@ function niceProps(props) {
 }
 
 function getElement(identifier, viewName, getView) {
-  let fullname, key, index, tag, isView
+  let fullname, key, index, tag, isView, repeatItem
 
   // used directly by user
   if (typeof identifier == 'string') {
@@ -43,11 +43,11 @@ function getElement(identifier, viewName, getView) {
   }
   // passing in a variable as the view
   else if (typeof identifier[0] !== 'string') {
-    [tag, fullname, key, index] = identifier
+    [tag, fullname, key, repeatItem, index] = identifier
   }
   // passing in string ref as view
   else {
-    [fullname, key, index] = identifier
+    [fullname, key, repeatItem, index] = identifier
   }
 
   if (!fullname)
@@ -87,7 +87,7 @@ function getElement(identifier, viewName, getView) {
   // if (process.env.production)
   //   tag = 'div'
 
-  return { fullname, name, key, index, tag, originalTag, isView }
+  return { fullname, name, key, index, repeatItem, tag, originalTag, isView }
 }
 
 function addClassName(props, name) {
@@ -168,9 +168,9 @@ export default function createElement(viewName) {
 
     const view = this
     const Flint = view.Flint
-    const { fullname, name, key, index, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
+    const { fullname, name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
-    props.style = elementStyles(key, index, view, name, originalTag || tag, props)
+    props.style = elementStyles(key, index, repeatItem, view, name, originalTag || tag, props)
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {

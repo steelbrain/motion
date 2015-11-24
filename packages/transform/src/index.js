@@ -169,6 +169,10 @@ export default function createPlugin(options) {
       return viewState[name] && !scope.hasOwnBinding(name)
     }
 
+    function isJSXAttributeOfName(attr, name) {
+       return t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name, { name });
+     }
+
     let keyBase = {}
     let inJSX = false
     let inView = null // track current view name
@@ -344,6 +348,7 @@ export default function createPlugin(options) {
               // add index keys for repeat elements
               if (node.flintJSXVisits == 1) {
                 if (scope.hasBinding('_index')) {
+                  el.name.elements.push(t.identifier('_'))
                   el.name.elements.push(t.identifier('_index'))
                 }
 
@@ -411,7 +416,8 @@ export default function createPlugin(options) {
                 if (name == 'repeat') {
                   rpt = _node => {
                     // remove repeat from inner node
-                    _node.openingElement.attributes = _node.openingElement.attributes.filter(e => e.name && e.name.name !== 'repeat')
+                    const opening = _node.openingElement
+                    opening.attributes = opening.attributes.filter(attr => isJSXAttributeOfName(attr.name, 'repeat'))
 
                     return t.callExpression(
                       t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),
@@ -703,7 +709,7 @@ export default function createPlugin(options) {
 
               // (_index) => {}
               function styleFunction(inner) {
-                return t.functionExpression(null, [t.identifier('_index')],
+                return t.functionExpression(null, [t.identifier('_'), t.identifier('_index')],
                   t.blockStatement([ t.returnStatement(inner) ])
                 )
               }
