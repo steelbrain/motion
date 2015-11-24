@@ -1,6 +1,5 @@
 import autoprefixer from 'autoprefixer'
 import postcss from 'postcss'
-import niceStyles from 'flint-nice-styles'
 import { writeFile, log, handleError, path } from './fns'
 import bridge from '../bridge'
 import opts from '../opts'
