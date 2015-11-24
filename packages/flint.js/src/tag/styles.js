@@ -36,7 +36,20 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     props.className = props.className ? `${props.className} ${name}` : name
   }
 
-  if (view.styles) {
+  if (deservesRootStyles) {
+    if (view.props.__flint) {
+      parentStyles = view.props.__flint.parentStyles
+      parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
+      parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
+    }
+
+    // TODO: shouldnt be in styles
+    if (view.props.className) {
+      addClassName(view.props.className)
+    }
+  }
+
+  if (view.styles || parentStylesStatic || parentStylesStaticView) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = name !== tag
     const hasTag = typeof tag == 'string'
@@ -45,19 +58,6 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     const classes = Flint.styleClasses[view.name]
     const viewStyle = view.styles[prefix] && view.styles[prefix](index)
     const nameStyle = diffName && view.styles[name] && view.styles[name](repeatItem, index)
-
-    if (deservesRootStyles) {
-      if (view.props.__flint) {
-        parentStyles = view.props.__flint.parentStyles
-        parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
-        parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
-      }
-
-      // TODO: shouldnt be in styles
-      if (view.props.className) {
-        addClassName(view.props.className)
-      }
-    }
 
     // merge styles
 
@@ -89,7 +89,6 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
           const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
           if (staticClassStyles) {
             Object.keys(staticClassStyles).forEach(key => {
-              // console.log(key, staticClassStyles[key])
               // check if already in styles, and rewrite to class style
               if (typeof result[key] != 'undefined') {
                 result[key] = staticClassStyles[key]
@@ -100,8 +99,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
       })
     }
 
-    // TODO: this shouldnt work with hot reloads anymore because we wont call re-render
-    // parent $Child classes apply to Child wrapper
+    // parent class styles
     if (deservesRootStyles && view.props.className) {
       view.props.className.split(' ').forEach(className => {
         if (!isLowerCase(className[0])) return
@@ -132,8 +130,10 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
   // overwrite any parent styles onto root
   if (parentStylesStaticView) {
-    Object.keys(parentStylesStaticView).forEach(key => {
-      styles[key] = parentStylesStaticView[key]
+    let pssv = niceStyles.object(parentStylesStaticView)
+
+    Object.keys(pssv).forEach(key => {
+      styles[key] = pssv[key]
     })
   }
 
