@@ -127,7 +127,7 @@ export default function createPlugin(options) {
     }
 
 
-    function wrapDeclaration(name, node, scope) {
+    function wrapDeclarator(name, node, scope) {
       return wrapSetter(name, node, scope, false, 'dec')
     }
 
@@ -499,13 +499,17 @@ export default function createPlugin(options) {
                 let name = dec.id.name
                 viewState[name] = true
 
+                // avoid wrapping in production
+                if (options.production)
+                  return dec
+
                 if (!dec.init) {
-                  dec.init = wrapDeclaration(name, t.identifier('undefined'), scope)
+                  dec.init = wrapDeclarator(name, t.identifier('undefined'), scope)
                   dec.flintTracked = true
                   return dec
                 }
 
-                dec.init = wrapDeclaration(name, dec.init, scope)
+                dec.init = wrapDeclarator(name, dec.init, scope)
                 node.flintTracked = true
                 return dec
               })
@@ -588,7 +592,7 @@ export default function createPlugin(options) {
                 }
 
                 // if dynamic + static clash, put that inside view to trigger hot reloads
-                if (hasStatics) {
+                if (hasStatics && !options.production) {
                   let uniq = ''
                   Object.keys(dynKeys).forEach(key => {
                     if (statKeys[key]) {
@@ -739,7 +743,7 @@ export default function createPlugin(options) {
             }
 
             // add getter
-            if (!isRender && isViewState(node.left.name, scope)) {
+            if (!options.production && !isRender && isViewState(node.left.name, scope)) {
               gett = node => wrapGetter(node, scope, file)
               added = true
             }

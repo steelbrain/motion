@@ -62,6 +62,7 @@ const $p = {
     plugins: [flintTransform({
       log,
       basePath: OPTS.dir,
+      production: OPTS.build,
       selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
       writeStyle
     })],
