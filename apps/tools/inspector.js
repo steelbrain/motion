@@ -82,7 +82,8 @@ function toggleView(views, path) {
     })
   }
   else {
-    return [].concat(views, [{ temp: false, highlight: false, closing: false, path }])
+    let added = { temp: false, highlight: false, closing: false, path }
+    return [].concat([added], views)
   }
 }
 
@@ -126,8 +127,10 @@ view Inspector {
   }
 
   function mouseMove({ target }) {
-    lastTarget = target
-    if (hudActive) inspect(lastTarget)
+    if (lastTarget != target) {
+      lastTarget = target
+      if (hudActive) inspect(lastTarget)
+    }
   }
 
   function closeLast() {
