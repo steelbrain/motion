@@ -7,7 +7,6 @@ const setLocal = (k,v) =>
 const getLocal = (k,d) =>
   JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
-const Internal = window._Flint
 const round = Math.round
 
 let highlighter
@@ -87,20 +86,25 @@ function toggleView(views, path) {
   }
 }
 
+function internal() {
+  return window._Flint
+}
+
 function writeBack(path, data) {
+  const I = internal()
   const name  = data[1][0]
-  const current = Internal.getCache[path][name]
+  const current = I.getCache[path][name]
   let value = data[1][1]
 
   if (typeof current == 'number') {
     value = +value
   }
 
-  Internal.setCache(path, name, value)
-  Internal.inspectorRefreshing = path
-  Internal.getInitialStates[path]()
-  Internal.viewsAtPath[path].forceUpdate()
-  Internal.inspectorRefreshing = null
+  I.setCache(path, name, value)
+  I.inspectorRefreshing = path
+  I.getInitialStates[path]()
+  I.viewsAtPath[path].forceUpdate()
+  I.inspectorRefreshing = null
 }
 
 view Inspector {
@@ -118,7 +122,7 @@ view Inspector {
   })
 
   function inspect(target) {
-    Internal.isInspecting = true
+    internal().isInspecting = true
     let path = findPath(target)
     views = removeTemp(views)
     views = pathActive(views, path) ?
@@ -159,10 +163,10 @@ view Inspector {
   }
 
   function hideInspect() {
-    Internal.isInspecting = false
+    internal().isInspecting = false
     hudActive = false
     hideHighlight()
-    clickOff()
+    clickOff && clickOff()
     views = removeTemp(views)
   }
 
