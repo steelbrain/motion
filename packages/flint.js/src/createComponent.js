@@ -182,7 +182,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.renders.push(renderFn)
         }
 
-        // call view
         if (process.env.production)
           view.call(this, this, this.on, this.styles)
         else {
@@ -322,17 +321,27 @@ export default function createComponent(Flint, Internal, name, view, options = {
         else setTimeout(doUpdate)
       },
 
-      // helpers for context
-      childContext(obj) {
-        if (!obj) return
-
-        Object.keys(obj).forEach(key => {
-          this.constructor.childContextTypes[key] =
-            React.PropTypes[typeof obj[key]]
-        })
-
-        this.getChildContext = () => obj
-      },
+      // childContextTypes: {
+      //   flintContext: React.PropTypes.object
+      // },
+      //
+      // contextTypes: {
+      //   flintContext: React.PropTypes.object
+      // },
+      //
+      // getChildContext() {
+      //   console.log(name, 'get', this)
+      //   return { flintContext: this._context || null }
+      // },
+      //
+      // // helpers for context
+      // setContext(obj) {
+      //   if (typeof obj != 'object')
+      //     throw new Error('Must pass an object to childContext!')
+      //
+      //   console.log(this, name, 'set', obj)
+      //   this.state = { _context: obj }
+      // },
 
       getWrapper(tags, props, numRenders) {
         const wrapperName = name.toLowerCase()
