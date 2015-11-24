@@ -411,7 +411,7 @@ export default function createPlugin(options) {
                 if (name == 'repeat') {
                   rpt = _node => {
                     // remove repeat from inner node
-                    _node.openingElement.attributes = _node.openingElement.attributes.filter(e => e.name.name !== 'repeat')
+                    _node.openingElement.attributes = _node.openingElement.attributes.filter(e => e.name && e.name.name !== 'repeat')
 
                     return t.callExpression(
                       t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),
