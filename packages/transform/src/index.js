@@ -497,18 +497,19 @@ export default function createPlugin(options) {
 
         VariableDeclaration: {
           exit(node, parent, scope, file) {
-            if (node.isStyle) return
+            if (node.isStyle || node._flintDeclarationParsed) return
+            node._flintDeclarationParsed = true
 
             // add getter
             if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
+              let isObjectPattern = false
+
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
 
+                // avoid destructures
                 if (t.isObjectPattern(dec.id)) {
-                  // let setters = dec.id.properties.map(prop => {
-                  //   // console.log(prop.key.name)
-                  //   return wrapSetter(prop.key.name, prop, scope)
-                  // })
+                  isObjectPattern = true
                   return dec
                 }
 
@@ -529,6 +530,12 @@ export default function createPlugin(options) {
                 node.flintTracked = true
                 return dec
               })
+
+              if (isObjectPattern) {
+                // TODO: try handling destructures properly here
+                // console.log(node.declarations[0].id.properties[0].key.name)
+                // return [node, nodeThatAssingsDestructureVars]
+              }
             }
           }
         },
