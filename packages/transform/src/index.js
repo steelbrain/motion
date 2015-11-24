@@ -171,7 +171,7 @@ export default function createPlugin(options) {
     }
 
     function isJSXAttributeOfName(attr, name) {
-       return t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name, { name });
+       return attr.name == name
      }
 
     let keyBase = {}
@@ -421,8 +421,8 @@ export default function createPlugin(options) {
                 if (name == 'repeat') {
                   rpt = _node => {
                     // remove repeat from inner node
-                    const opening = _node.openingElement
-                    opening.attributes = opening.attributes.filter(attr => isJSXAttributeOfName(attr.name, 'repeat'))
+                    // const opening = _node.openingElement
+                    // opening.attributes = opening.attributes.filter(attr => attr.name !== 'repeat')
 
                     return t.callExpression(
                       t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),

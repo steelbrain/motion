@@ -80,6 +80,4 @@ export default function styleValuesToString(styles) {
       ).join(' ')
     }
   }
-
-  console.log(styles)
 }
