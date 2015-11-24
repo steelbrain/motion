@@ -1,3 +1,5 @@
+import reportError from '../lib/reportError'
+
 // Why named flint?? Because it shows in console.log a lot
 
 // fancy (someday) error handling that works with live
@@ -12,6 +14,8 @@ export default function onError(Internal, Tools) {
 
   // used to prevent tons of logs during live development
   function onError(...args) {
+    reportError(...args)
+
     Internal.runtimeErrors++ // for use in detecting if we've started up with errors
     const isLive = Internal.editor.live
 

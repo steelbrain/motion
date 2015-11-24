@@ -33,9 +33,9 @@ export async function bundleExternals(opts = {}) {
 }
 
 export async function installExternals(file, source) {
-  log(LOG, 'installExternals', file)
-
   const found = findExternalRequires(source)
+  log(LOG, 'installExternals', file, 'found', found)
+
   cache.setFileImports(file, found)
 
   if (opts.get('build') || opts.get('hasRunInitialBuild'))
