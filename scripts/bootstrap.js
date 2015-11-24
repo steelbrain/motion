@@ -43,7 +43,14 @@ packageNames.forEach(function (loc) {
 packages.forEach(function (pkg) {
   console.log(pkg.name)
 
-  var nodeModulesLoc = "packages/" + pkg.folder + "/node_modules";
+  var pkgFolder = "packages/" + pkg.folder
+  var nodeModulesLoc = pkgFolder + "/node_modules";
+
+  // prune
+  cd(pkgFolder)
+  exec('npm prune')
+  cd('../..')
+
   mkdir("-p", nodeModulesLoc);
 
   // link them out
