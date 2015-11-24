@@ -5,7 +5,8 @@ export default function(val) {
     return Array.apply(null, Array(val))
       .map((_, i) => i + 1)
   else
-    throw "Must pass an Array or Number to a repeat, you passed " + (typeof val)
+    throw new Error("Must pass an Array or Number to a repeat, you passed " + (typeof val))
+    // TODO: make this use view.range() and then we can throw nicer errors with view name
 }
 
 function isIterable(obj){

@@ -192,7 +192,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           catch(e) {
             Internal.caughtRuntimeErrors++
             reportError(e)
-            console.error(e.stack)
+            console.error(e.stack || e)
             this.recoveryRender = true
           }
         }
@@ -440,7 +440,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           // console warn, with debounce
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
             console.groupCollapsed(`Render error in view ${name} (${err.message})`)
-            console.error(err.stack)
+            console.error(err.stack || err)
             console.groupEnd()
           }, 500)
 
