@@ -284,13 +284,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (removed.length || added.length)
             return Flint.render()
 
-          console.log('changed views', Internal.changedViews)
           Internal.changedViews.forEach(name => {
             if (!Internal.mountedViews[name]) return
 
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
               if (view.isMounted()) {
-                console.log('updating', view.name)
                 view.forceUpdate()
                 return view
               }
