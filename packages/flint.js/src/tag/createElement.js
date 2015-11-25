@@ -186,10 +186,9 @@ export default function createElement(viewName) {
       }
     }
 
-    // convert object to string
-    args = args.map(arg => {
-      return arg != null && typeof arg == 'object' && !Array.isArray(arg) && !arg.$$typeof ? JSON.stringify(arg) : arg
-    })
+    // convert object to string for debugging in dev mode only
+    // if (!process.env.production)
+    //   args = args.map(arg => arg && arg != null && !arg.$$typeof && !Array.isArray(arg) && (arg instanceof Object) ? JSON.stringify(arg) : arg)
 
     return React.createElement(tag, props, ...args)
   }
