@@ -110,6 +110,21 @@ export default function createPlugin(options) {
   function FlintPlugin({ Plugin, types: t }) {
 
     // plugin helpers
+
+    // return unique string based on value of node
+    function nodeToStr(node) {
+      if (t.isMemberExpression(node))
+        return node.object.name + node.property.name
+      if (t.isArrayExpression(node))
+        return node.elements.reduce((acc, cur) => acc + nodeToStr(cur), '')
+      if (t.isObjectExpression(node))
+        return node.properties.reduce((acc, cur) => acc
+          + cur.key.name
+          + nodeToStr(cur.value), '')
+
+      return node.value
+    }
+
     function frozen(node) {
       return t.callExpression(t.identifier('Object.freeze'), [node])
     }
@@ -612,8 +627,8 @@ export default function createPlugin(options) {
                 const statKeys = viewStaticStyleKeys
                 const dynKeys = viewDynamicStyleKeys
 
-                statics.forEach(n => statKeys[n.key.name] = n.value.value)
-                dynamics.forEach(n => dynKeys[n.key.name] = n.value.value)
+                statics.forEach(n => statKeys[n.key.name] = nodeToStr(n.value))
+                dynamics.forEach(n => dynKeys[n.key.name] = nodeToStr(n.value))
 
                 let hasStatics = statics.length
                 let hasDynamics = dynamics.length
@@ -627,8 +642,7 @@ export default function createPlugin(options) {
 
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
                 if (hasStatics && viewHasChild) {
-                  const staticsHash = hash(statics.map(k => k.key.name + k.value.value))
-                  result.push(exprStatement(t.literal(staticsHash)))
+                  result.push(exprStatement(t.literal(hash(statKeys))))
                 }
 
                 // if dynamic + static clash, put that inside view to trigger hot reloads
@@ -636,14 +650,15 @@ export default function createPlugin(options) {
                   let uniq = ''
                   Object.keys(dynKeys).forEach(key => {
                     if (statKeys[key]) {
-                      uniq += hash(statKeys[key] + dynKeys[key])
+                      uniq += hash(statKeys[key] + dynKeys[key]) + hash(key)
                     }
                   })
                   result.push(exprStatement(t.literal(uniq)))
                 }
 
-                if (hasDynamics)
+                if (hasDynamics) {
                   result.push(dynamicStyleStatement(node, dynamics))
+                }
 
                 return result
               }
