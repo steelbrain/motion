@@ -643,7 +643,7 @@ export default function createPlugin(options) {
                 }
 
                 if (hasDynamics)
-                  result.push(dynamicStyleStatement(node, node.right))
+                  result.push(dynamicStyleStatement(node, dynamics))
 
                 return result
               }
@@ -712,7 +712,7 @@ export default function createPlugin(options) {
 
             // $["name"] = ...
             function dynamicStyleStatement(node, dynamics) {
-              return exprStatement(styleAssign(node, dynamics))
+              return exprStatement(styleAssign(node, t.isArrayExpression(dynamics) ? dynamics : t.objectExpression(dynamics)))
             }
 
             function styleLeft(node, isStatic) {
