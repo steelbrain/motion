@@ -193,7 +193,7 @@ export default function createPlugin(options) {
     let inJSX = false
     let inView = null // track current view name
     let hasView = false // if file has a view
-    let viewHasChild = false // if view calls for a child view
+    let viewHasChildWithClass = false // if view calls for a child view
     let viewStyles = {} // store styles from views to be extracted
     let viewDynamicStyleKeys = {}
     let viewStaticStyleKeys = {}
@@ -252,7 +252,7 @@ export default function createPlugin(options) {
             viewStyleNames = {}
             viewDynamicStyleKeys = {}
             viewStaticStyleKeys = {}
-            viewHasChild = false
+            viewHasChildWithClass = false
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -386,10 +386,6 @@ export default function createPlugin(options) {
               node.flintJSXVisits = 1
               const name = nodeToNameString(el.name)
 
-              // check if view has a Child view
-              if (name[0].toUpperCase() == name[0])
-                viewHasChild = true
-
               // ['quotedname', key]
               let key
 
@@ -414,10 +410,13 @@ export default function createPlugin(options) {
               let route = idFn
 
               for (let attr of el.attributes) {
-                const name = attr.name && attr.name.name
+                const attrName = attr.name && attr.name.name
                 const expr = attr.value && (attr.value.expression || t.literal(attr.value.value))
 
-                if (name == 'route') {
+                if (attrName == 'class' && isUpperCase(name))
+                  viewHasChildWithClass = true
+
+                if (attrName == 'route') {
                   route = _node => t.logicalExpression('&&',
                     t.callExpression(t.identifier('Flint.routeMatch'), [expr]),
                     _node
@@ -429,11 +428,11 @@ export default function createPlugin(options) {
                   ))
                 }
 
-                if (name == 'if') {
+                if (attrName == 'if') {
                   iff = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.iff'), [expr]), _node)
                 }
 
-                if (name == 'repeat') {
+                if (attrName == 'repeat') {
                   rpt = _node => {
                     // remove repeat from inner node
                     // const opening = _node.openingElement
@@ -641,13 +640,15 @@ export default function createPlugin(options) {
                   return result
 
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
-                if (hasStatics && viewHasChild) {
+                if (hasStatics && viewHasChildWithClass) {
+                  // console.log(statKeys)
                   result.push(exprStatement(t.literal(hash(statKeys))))
                 }
 
                 // if dynamic + static clash, put that inside view to trigger hot reloads
-                if (hasStatics && !options.production) {
+                if (hasStatics && !options.production && dynKeys.length) {
                   let uniq = ''
+                  console.log('dynKeys', dynKeys)
                   Object.keys(dynKeys).forEach(key => {
                     if (statKeys[key]) {
                       uniq += hash(statKeys[key] + dynKeys[key]) + hash(key)

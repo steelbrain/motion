@@ -56,7 +56,7 @@ const $p = {
     jsxPragma: 'view.el',
     stage: 2,
     blacklist: ['flow', 'es6.tailCall', 'strict'],
-    retainLines: true,
+    retainLines: OPTS.pretty ? false : true,
     comments: true,
     optional: ['regenerator'],
     plugins: [flintTransform({

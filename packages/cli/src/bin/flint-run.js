@@ -16,6 +16,7 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('-d, --debug [what]', 'output extra information for debugging')
     .option('-p, --port [number]', 'specify a port [number]')
     .option('-h, --host [host]', 'specify hostname')
+    .option('--pretty', 'pretty print files')
     .parse(process.argv)
 
   runner(Program)

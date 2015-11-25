@@ -23,6 +23,7 @@ function setAll(opts) {
   OPTS.port = opts.port
   OPTS.host = opts.host
   OPTS.watch = opts.watch
+  OPTS.pretty = opts.pretty
 
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
