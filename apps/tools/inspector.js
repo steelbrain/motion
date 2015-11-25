@@ -1,11 +1,9 @@
-const removeLast = ([l, ...ls]) => ls
+const removeHead = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
 
-const setLocal = (k,v) =>
-  localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
-const getLocal = (k,d) =>
-  JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
+const setLocal = (k,v) => localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
+const getLocal = (k,d) => JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
 
 const round = Math.round
 
@@ -139,7 +137,7 @@ view Inspector {
 
   function closeLast() {
     if (!views.length) return
-    views = removeLast(views)
+    views = removeHead(views)
   }
 
   function close(path, e) {

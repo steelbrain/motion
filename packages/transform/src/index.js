@@ -640,15 +640,14 @@ export default function createPlugin(options) {
                   return result
 
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
-                if (hasStatics && viewHasChildWithClass) {
-                  // console.log(statKeys)
-                  result.push(exprStatement(t.literal(hash(statKeys))))
+                if (hasStatics && viewHasChildWithClass && name != '$') {
+                  const uniq = hash(statKeys)
+                  result.push(exprStatement(t.literal(uniq)))
                 }
 
                 // if dynamic + static clash, put that inside view to trigger hot reloads
                 if (hasStatics && !options.production && dynKeys.length) {
                   let uniq = ''
-                  console.log('dynKeys', dynKeys)
                   Object.keys(dynKeys).forEach(key => {
                     if (statKeys[key]) {
                       uniq += hash(statKeys[key] + dynKeys[key]) + hash(key)
