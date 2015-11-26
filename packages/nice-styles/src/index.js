@@ -67,7 +67,7 @@ function transformKey(styles, key) {
 // { transform: { x: 10, y: 10, z: 10 } }
 function transformTransform(styles) {
   if (typeof styles.transform !== 'object')
-    return val
+    return styles.transform
 
   return Object.keys(styles.transform).map(key =>
     `${transformKeysMap[key] || key}(${styles.transform[key]}${isNumerical(styles.transform, key) ? 'px' : ''})`
