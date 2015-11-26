@@ -1,7 +1,7 @@
 import objectToColor from './objectToColor'
 
 const isNumerical = (obj, key) =>
-  ['x','y','z'].indexOf(key) == 0 && typeof obj[key] == 'number'
+  ['x','y','z'].indexOf(key) >= 0 && typeof obj[key] == 'number'
 
 const pseudos = {
   active: ':active',
