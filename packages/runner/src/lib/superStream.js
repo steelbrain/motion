@@ -20,7 +20,7 @@ function fileSend({ path, contents }) {
   log(LOG, 'fileSend', path)
 
   // check if file actually in flint project
-  if (path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0) {
+  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0) {
     log(LOG, 'file not in path, or in flint dir', basePath, flintPath, path)
     return
   }
