@@ -17,7 +17,7 @@ function viewSelector(viewName, tag, options) {
   const selTag = `${tag}.${viewName}`
   const selClass = `.${viewName}.${tag}`
   const selSelfClass = `.View${viewName}.${tag}`
-  const selChildClass = `.${viewName} > .${tag}`
+  const selChildClass = `.${viewName} > .${tag}` // TODO: necessary?
   return `${pre + selTag}, ${pre + selClass}, ${pre + selSelfClass}, ${pre + selChildClass}`
 }
 

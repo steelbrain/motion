@@ -219,7 +219,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillMount() {
-        // componentWillUpdate only runs after first render
+        // run props before mount
         this.runEvents('props', [this.props])
       },
 

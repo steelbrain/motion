@@ -75,6 +75,14 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     // for use in className loop
     const viewStaticStyles = Flint.styleObjects[view.name]
 
+    if (window.location.search == '?inlineStyles') {
+      result = mergeStyles(result,
+        diffName && viewStaticStyles && viewStaticStyles[`${prefix}${name}`],
+        hasTag && viewStaticStyles && viewStaticStyles[`${prefix}${tag}`],
+        deservesRootStyles && viewStaticStyles && viewStaticStyles[prefix]
+      )
+    }
+
     // add class styles
     if (props.className) {
       props.className.split(' ').forEach(className => {

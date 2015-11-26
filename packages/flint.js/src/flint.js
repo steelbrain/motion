@@ -313,9 +313,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       }
 
       // set view in cache
-      let viewsInCurrentFile = Internal.viewsInFile[Internal.currentHotFile]
-
-      viewsInCurrentFile.push(name)
+      let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
+      if (viewsInFile)
+        viewsInFile.push(name)
 
       // if new
       if (!Internal.views[name]) {
