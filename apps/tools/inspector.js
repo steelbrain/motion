@@ -132,7 +132,7 @@ view Inspector {
     }
     else {
       // wait a little so were not toooo eager
-      offAlt = on.delay(100, () => {
+      offAlt = on.delay(180, () => {
         if (keys.alt && !keys.command) {
           showInspect()
         }
