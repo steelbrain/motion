@@ -100,7 +100,7 @@ const Cache = {
     return f && f.isExported
   },
 
-  setExported(file: string, val: boolean) {
+  setIsExported(file: string, val: boolean) {
     const name = relative(file)
     const f = files[name]
 

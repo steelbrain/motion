@@ -1,9 +1,15 @@
-/*
-*/
+import keycode from 'keycode'
+window.___keycode = keycode
+
+
+on.event('contextmenu', () => {
+
+})
+
 
 view Main {
   const internal = window.__isDevingDevTools
-  const showInspector = true //internal || window.location.search == '?inspect'
+  const showInspector = internal || window.location.search == '?inspect'
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
   <link if={!internal} rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />

@@ -259,6 +259,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       setID() {
+        if (Internal.isDevTools) return
+
         // set flintID for state inspect
         const node = ReactDOM.findDOMNode(this)
         if (node) node.__flintID = this.props.__flint.path

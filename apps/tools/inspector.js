@@ -1,3 +1,5 @@
+import { keys, onKey } from './keys'
+
 const removeHead = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
@@ -109,7 +111,6 @@ view Inspector {
   let clickOff, hoverOff, lastTarget
   let hudActive = false
   let views = []
-  let keys = {}
 
   on.mount(() => {
     hoverOff = on.mousemove(window, mouseMove)
@@ -117,6 +118,26 @@ view Inspector {
     highlighter = document.createElement('div')
     highlighter.className = "_flintHighlighter"
     document.body.appendChild(highlighter)
+  })
+
+  // key events
+
+  onKey('esc', closeLast)
+
+  let offAlt
+  onKey('alt', down => {
+    if (!down) {
+      offAlt()
+      hideInspect()
+    }
+    else {
+      // wait a little so were not toooo eager
+      offAlt = on.delay(100, () => {
+        if (keys.alt && !keys.command) {
+          showInspect()
+        }
+      })
+    }
   })
 
   function inspect(target) {
@@ -172,10 +193,6 @@ view Inspector {
     writeBack(path, data)
     view.update()
   }
-
-  on.keydown(window, isAlt(showInspect))
-  on.keyup(window, isAlt(hideInspect))
-  on.keyup(window, isEsc(closeLast))
 
   <Inspector.View
     repeat={views}
