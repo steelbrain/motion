@@ -1,3 +1,3 @@
 require('babel/register')
 require('shelljs/global')
-require('./test')
+require('./cli')
