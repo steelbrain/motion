@@ -108,6 +108,8 @@ export default function createPlugin(options) {
 
   // plugin
   function FlintPlugin({ Plugin, types: t }) {
+    let viewMeta = {} // meta-data for views for atom
+    let currentView = null
 
     // plugin helpers
 
@@ -199,8 +201,10 @@ export default function createPlugin(options) {
     let viewStaticStyleKeys = {}
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
-    let viewMeta = {} // meta-data for views for atom
     let viewStyleNames = {} // prevent duplicate style names
+
+    // whether sending onmeta
+    let sending = false
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -239,13 +243,31 @@ export default function createPlugin(options) {
         },
 
         ViewStatement: {
-          enter(node) {
+          enter(node, parent, scope, file) {
             // hasView = true
             keyBase = {}
 
             const name = node.name.name
             const subName = node.subName && node.subName.name
             const fullName = name + (subName ? `.${subName}` : '')
+
+            currentView = fullName
+            viewMeta[currentView] = {}
+
+            if (!sending && options.onMeta) {
+              sending = true
+              setTimeout(() => {
+                options.onMeta({ viewMeta, type: 'meta' })
+                sending = false
+              }, 100)
+            }
+            /*
+            if (currentView) {
+              if (options.onMeta) {
+                options.onMeta({hello:'world'})
+              }
+            }
+            */
 
             inView = fullName
             viewRootNodes = []
@@ -258,7 +280,7 @@ export default function createPlugin(options) {
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
             )
-          }
+          },
         },
 
         Statement: {
@@ -396,6 +418,8 @@ export default function createPlugin(options) {
                 key = keyBase[name] = 1
 
               let arr = [t.literal(name), t.literal(key)]
+
+              viewMeta[currentView][name + key] = el.loc.start
 
               // safer, checks for file scope or view scope only
               if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
@@ -845,7 +869,9 @@ export default function createPlugin(options) {
         }
       }
     });
+
   }
+
 
   return FlintPlugin
 }

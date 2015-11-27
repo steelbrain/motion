@@ -203,7 +203,7 @@ view Inspector {
   function showInspect() {
     inspect(lastTarget)
     console.log('editing', activeKey, activeView)
-    _DT.messageEditor({ type: 'editView', key: activeKey, view: activeView })
+    // _DT.messageEditor({ type: 'editView', key: activeKey, view: activeView })
     hudActive = true
     clickOff = on.click(window, glue)
   }
