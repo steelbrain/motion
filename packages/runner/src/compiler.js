@@ -42,8 +42,8 @@ var Parser = {
     // check internals
     const isInternal = findExports(source)
 
-    // wrap closure if not exports file
-    if (!isInternal || OPTS.build)
+    // wrap closure if not internal file
+    if (!isInternal)
       source = filePrefix(file) + source + fileSuffix
 
     return { source, isInternal }
