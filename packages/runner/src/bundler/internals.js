@@ -43,7 +43,7 @@ export async function checkInternals(file, source) {
   const alreadyExported = cache.isExported(file)
   log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported)
 
-  cache.setExported(file, isExporting)
+  cache.setIsExported(file, isExporting)
 
   // needs to rewrite internalsIn.js?
   if (!alreadyExported && isExporting || alreadyExported && !isExporting) {
@@ -54,16 +54,31 @@ export async function checkInternals(file, source) {
     bundleInternals()
 }
 
+function externalsPaths(externals) {
+  return externals.reduce((acc, cur) => {
+    acc[cur] = `Flint.packages["${cur}"]`
+    return acc
+  }, {})
+}
+
 function packInternals() {
   log(LOG, 'packInternals')
+
+  // TODO: #175, internal files arent getting scanned for their external requires
+  // so flint uninstalls their external deps 
+
+  // make sure internals require the flint packed externals
+  let externals = externalsPaths(cache.getImports())
+  log(LOG, 'webpack externals', externals)
+
   return new Promise((resolve, reject) => {
     webpack({
       entry: opts.get('deps').internalsIn,
-      externals: {
+      externals: Object.assign(externals, {
         react: 'React',
         'react-dom': 'ReactDOM',
         bluebird: '_bluebird',
-      },
+      }),
       node: {
         global: false,
         Buffer: false,

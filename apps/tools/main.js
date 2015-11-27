@@ -1,20 +1,25 @@
-/*
-*/
+import keycode from 'keycode'
+window.___keycode = keycode
 
 view Main {
   const internal = window.__isDevingDevTools
-  const showInspector = true //internal || window.location.search == '?inspect'
+  const showInspector = internal || window.location.search == '?inspect'
 
   <link rel="stylesheet" property="stylesheet" href="/__/tools/static/tools.css" />
   <link if={!internal} rel="stylesheet" property="stylesheet" href="/__/tools/styles.css" />
 
   <Errors />
   <Installer />
-
+  <Menu />
   <Inspector if={showInspector} />
-  <Name if={internal} />
-  <Counter if={internal} />
-  <Circles if={internal} />
+
+  <test if={internal}>
+    <Name />
+    <Counter />
+    <Circles />
+  </test>
+
+  $test = { position: 'relative', zIndex: 1 }
 
   $ = {
     position: 'fixed',
