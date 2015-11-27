@@ -1,4 +1,5 @@
 import test from 'blue-tape';
+import shell from 'shelljs';
 
 const before = test;
 const after = test;
