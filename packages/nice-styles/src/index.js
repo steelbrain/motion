@@ -3,7 +3,7 @@ import objectToColor from './objectToColor'
 const isNumerical = (obj, key) =>
   ['x','y','z'].indexOf(key) >= 0 && typeof obj[key] == 'number'
 
-const pseudos = {
+const pseudoAbbrs = {
   active: ':active',
   hover: ':hover',
   focus: ':focus',
@@ -13,6 +13,18 @@ const pseudos = {
   disabled: ':disabled',
   empty: ':empty',
   invalid: ':invalid',
+}
+
+const pseudos = {
+  ':active': true,
+  ':hover': true,
+  ':focus': true,
+  ':link': true,
+  ':visited': true,
+  ':checked': true,
+  ':disabled': true,
+  ':empty': true,
+  ':invalid': true
 }
 
 const transformKeysMap = {
@@ -42,15 +54,23 @@ function transformColor(styles) {
 }
 
 function transformKey(styles, key) {
+  // convert pseudoAbbrs 'active' => ':active'
+  if (pseudoAbbrs[key] && typeof styles[key] == 'object') {
+    styles[pseudoAbbrs[key]] = styles[key]
+    // normalize to :active
+    key = pseudoAbbrs[key]
+  }
+
   // when live coding we type "rc" then "rc()", but "rc" is a function and it breaks, so clear it
   if (typeof styles[key] == 'function') {
     styles[key] = null
     console.warn(`Passed a function to a style property in view ${view.name} tag ${tag}`)
   }
 
-  // convert pseudos 'active' => ':active'
-  if (pseudos[key] && typeof styles[key] == 'object')
-    styles[pseudos[key]] = styles[key]
+  // recurse into psuedos
+  if (pseudos[key]) {
+    styleValuesToString(styles[key])
+  }
 
   // array to string transforms
   // @media queries

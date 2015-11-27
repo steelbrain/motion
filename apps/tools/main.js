@@ -1,12 +1,6 @@
 import keycode from 'keycode'
 window.___keycode = keycode
 
-
-on.event('contextmenu', () => {
-
-})
-
-
 view Main {
   const internal = window.__isDevingDevTools
   const showInspector = internal || window.location.search == '?inspect'
@@ -16,11 +10,16 @@ view Main {
 
   <Errors />
   <Installer />
-
+  <Menu />
   <Inspector if={showInspector} />
-  <Name if={internal} />
-  <Counter if={internal} />
-  <Circles if={internal} />
+
+  <test if={internal}>
+    <Name />
+    <Counter />
+    <Circles />
+  </test>
+
+  $test = { position: 'relative', zIndex: 1 }
 
   $ = {
     position: 'fixed',
