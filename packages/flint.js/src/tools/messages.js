@@ -64,8 +64,6 @@ function TagLoader() {
   let wait = {}
 
   return function(name, load) {
-    socket.send('file:load', { name })
-
     let oldTag = last[name]
 
     if (loading[name]) {
@@ -78,7 +76,6 @@ function TagLoader() {
     load(oldTag, onDone)
 
     function onDone(newTag) {
-      socket.send('file:done', { name })
       last[name] = newTag
       loading[name] = false
 
@@ -111,13 +108,21 @@ const scrLoad = TagLoader()
 const cssLoad = TagLoader()
 
 function addScript(src) {
+  let path = src.replace('/_/', '')
+  console.log('sending script load', path)
+  socket.send('script:load', { path })
   scrLoad(src, (lastTag, done) => {
     lastTag = lastTag || document.querySelector(scriptSelector(src))
 
     if (!lastTag)
-      replaceTag(createScript(src), 'src', done)
+      replaceTag(createScript(src), 'src', finish)
     else
-      replaceTag(lastTag, 'src', done)
+      replaceTag(lastTag, 'src', finish)
+
+    function finish() {
+      socket.send('script:done', { path })
+      done()
+    }
   })
 }
 

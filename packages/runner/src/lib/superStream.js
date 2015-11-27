@@ -32,7 +32,6 @@ function fileSend({ path, contents }) {
   log(LOG, 'rpath', rPath)
 
   function pushStream() {
-    log(LOG, 'pushing!')
     stream.push(file)
   }
 
@@ -60,6 +59,7 @@ function fileSend({ path, contents }) {
 
     log(LOG, 'pushStream!', rPath)
     scriptWaiting[rPath] = false
+    fileLoading[rPath] = true
     pushStream()
   }
 
@@ -76,16 +76,14 @@ function fileSend({ path, contents }) {
 
 // ignore stream when loading file in browser
 function initScriptWait() {
-  let base = p => p.replace('/_/', '')
-
-  bridge.on('file:load', ({ name }) => {
-    log(LOG, 'file:load TRUE', name)
-    fileLoading[base(name)] = true
+  bridge.on('script:load', ({ path }) => {
+    log(LOG, 'script:load', path)
+    fileLoading[path] = true
   })
 
-  bridge.on('file:done', ({ name }) => {
-    log(LOG, 'file:load FALSE', name)
-    fileLoading[base(name)] = false
+  bridge.on('script:done', ({ path }) => {
+    log(LOG, 'script:done', path)
+    fileLoading[path] = false
   })
 }
 
@@ -96,7 +94,7 @@ function init() {
   initScriptWait()
 
   // throttle the stream a bit
-  let fileSender = _.throttle(fileSend, 25, { leading: true })
+  let fileSender = _.throttle(fileSend, 22, { leading: true })
 
   bridge.on('super:file', fileSender)
 }
