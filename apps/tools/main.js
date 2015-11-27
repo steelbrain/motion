@@ -1,6 +1,8 @@
 import keycode from 'keycode'
 window.___keycode = keycode
 
+window.X = Flint
+
 view Main {
   const internal = window.__isDevingDevTools
   const showInspector = internal || window.location.search == '?inspect'
