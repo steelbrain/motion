@@ -575,10 +575,7 @@ export default function createPlugin(options) {
               let rightEls = []
               let staticProps = []
 
-              let result = () => [
-                staticStyleStatement(node, t.objectExpression(staticProps)),
-                dynamicStyleStatement(node, node.right)
-              ]
+              let result = () => dynamicStyleStatement(node, node.right)
 
               for (let el of node.right.elements) {
                 // bail out if they arent using just objects (ternery, variable)
