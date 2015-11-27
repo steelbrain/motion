@@ -199,6 +199,7 @@ export default function createPlugin(options) {
     let viewStaticStyleKeys = {}
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
+    let viewMeta = {} // meta-data for views for atom
     let viewStyleNames = {} // prevent duplicate style names
 
     return new Plugin("flint-transform", {

@@ -16,6 +16,7 @@ import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
 import writeStyle from './lib/writeStyle'
+import onMeta from './lib/onMeta'
 import { p, rm, handleError, log } from './lib/fns'
 
 const $ = loadPlugins()
@@ -64,7 +65,8 @@ const $p = {
       basePath: OPTS.dir,
       production: OPTS.build,
       selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
-      writeStyle
+      writeStyle,
+      onMeta,
     })],
     extra: {
       production: process.env.production
