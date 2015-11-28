@@ -23,6 +23,9 @@
 <p align="center">
   <a href="http://badge.fury.io/js/flint"><img alt="npm version" src="https://badge.fury.io/js/flint.svg"></a>
   <a href="https://npmjs.org/package/flint"><img alt="Downloads" src="http://img.shields.io/npm/dm/flint.svg"></a>
+  <a href="https://circleci.com/gh/flintjs/flint/tree/master">
+    <img src="https://img.shields.io/circleci/project/flintjs/flint/master.svg" alt="CircleCI Build Status">
+  </a>
 </p>
 
 <p align="center">
