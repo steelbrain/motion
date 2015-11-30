@@ -13,14 +13,7 @@ let queue = []
 
 // cache to send on reconnects
 // type : ' => key : ' => messages : []
-let messageCache = {
-  error: {
-    last: []
-  },
-  editor: {
-    viewMeta: []
-  }
-}
+let messageCache = {}
 
 function broadcast(data) {
   connections.forEach(conn => {
@@ -41,8 +34,8 @@ function sendInitialMessages(conn) {
   // send cached stuff on connect
   Object.keys(messageCache).forEach(cat => {
     Object.keys(messageCache[cat]).forEach(key => {
-      let queue = messageCache[cat][key]
-      queue.forEach(({ type, obj }) => message(type, obj))
+      let { type, obj } = messageCache[cat][key]
+      message(obj.type || type, obj)
     })
   })
 }
@@ -71,19 +64,19 @@ function makeMessage(type, obj) {
   return msg
 }
 
-export function cache(key, type, obj) {
-  log(LOG, 'cache', key, type, obj)
-  messageCache[type] = messageCache[type] || {}
-  messageCache[type][key] = messageCache[type][key] || []
-  messageCache[type][key].push({ type, obj })
+export function cache(name, key, obj) {
+  log(LOG, 'cache', key, name, obj)
+  messageCache[name] = messageCache[name] || {}
+  messageCache[name][key] = messageCache[name][key] || []
+  messageCache[name][key] = obj
 }
 
-export function message(type, obj) {
-  // store last error or success
-  if (type == 'compile:error' || type == 'compile:success')
-    messageCache.error = [{ type, obj }]
+export function message(type, obj, cacheKey) {
+  log(LOG, type)
 
-  log(LOG, '-[out]-', type)
+  if (cacheKey)
+    cache(cacheKey, 'last', { type, obj })
+
   let msg = makeMessage(type, obj)
 
   if (connected)

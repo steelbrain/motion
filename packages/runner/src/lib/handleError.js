@@ -28,6 +28,6 @@ export default function handleError(handle) {
     console.log(error.stack)
     errorClient.captureException(error)
 
-    bridge.message('compile:error', { error })
+    bridge.message('compile:error', { error }, 'error')
   }
 }

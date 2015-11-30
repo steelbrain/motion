@@ -152,7 +152,7 @@ export function buildScripts(afterEach, userStream) {
     error.timestamp = Date.now()
     logError(error, curFile)
     cache.addError(error.fileName, error)
-    bridge.message('compile:error', { error })
+    bridge.message('compile:error', { error }, 'error')
     buildFinishedCheck()
   }
 
@@ -215,12 +215,11 @@ export function buildScripts(afterEach, userStream) {
       if (!lastError && !file.isInternal && cacheHasFile) {
         cache.removeError(file.path)
         bridge.message('script:add', lastScript)
-        bridge.message('compile:success', lastScript)
+        bridge.message('compile:success', lastScript, 'error')
 
         // fixed one error but have others
-        const prevError = cache.getLastError()
-        if (prevError)
-          bridge.message('compile:error', { error: prevError })
+        const error = cache.getLastError()
+        if (error) bridge.message('compile:error', { error }, 'error')
       }
     }
   }
