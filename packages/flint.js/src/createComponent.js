@@ -307,7 +307,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
           else {
             // tools run into weird bug where if error in app on initial render, react gets
             // mad that you are trying to re-render tools during app render TODO: strip in prod
-            if (!process.env.production && _Flint.firstRender)
+            // check for isRendering so it shows if fails to render
+            if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
               return setTimeout(this.update)
 
             this.isUpdating = true

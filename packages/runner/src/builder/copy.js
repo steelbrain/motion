@@ -35,7 +35,7 @@ export async function app() {
   const inFiles = await *[
     readFile(opts.get('deps').externalsOut),
     readFile(opts.get('deps').internalsOut),
-    readFile(appFile),
+    readFile(appFile)
   ]
 
   const inFilesConcat = inFiles.join(";\n")
