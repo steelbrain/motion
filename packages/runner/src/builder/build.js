@@ -10,7 +10,7 @@ import { log, handleError } from '../lib/fns'
 export default async function build() {
   try {
     if (!opts.get('hasRunInitialInstall'))
-      setTimeout(build, 50)
+      return setTimeout(build, 50)
 
     if (opts.get('hasRunInitialBuild'))
       await copy.assets()
