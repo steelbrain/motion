@@ -7,22 +7,22 @@ const TEMP_DIR = '.tmp/tests/cli'
 const ORIGINAL_DIR = '../../../'
 const FLINT_CLI_PATH = '../../../packages/cli/entry/flint' // relative to TEMP_DIR
 
-before('cli test setup', assert => {
+before('cli test setup', t => {
   shell.mkdir('-p', TEMP_DIR)
   shell.cd(TEMP_DIR)
-  assert.end()
+  t.end()
 })
 
-test('Creates a new flint app', assert => {
-  assert.equal(shell.exec(FLINT_CLI_PATH + ' new appname').code, 0)
-  assert.ok(shell.test('-d', './appname'))
-  assert.ok(shell.test('-f', './appname/main.js'))
-  assert.ok(shell.test('-d', './appname/.flint'))
-  assert.end()
+test('Creates a new flint app', t => {
+  t.equal(shell.exec(FLINT_CLI_PATH + ' new appname').code, 0)
+  t.ok(shell.test('-d', './appname'))
+  t.ok(shell.test('-f', './appname/main.js'))
+  t.ok(shell.test('-d', './appname/.flint'))
+  t.end()
 })
 
-after('cli test teardown', assert => {
+after('cli test teardown', t => {
   shell.cd(ORIGINAL_DIR)
   shell.rm('-rf', TEMP_DIR)
-  assert.end()
+  t.end()
 })
