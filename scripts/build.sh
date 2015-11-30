@@ -69,4 +69,19 @@ if [ $1="--watch" ]; then
   done
 fi
 
-wait
+FAIL=0
+
+for job in `jobs -p`
+do
+echo $job
+  wait $job || let "FAIL+=1"
+done
+
+echo $FAIL
+
+if [ "$FAIL" == "0" ];
+then
+  exit 0
+else
+  exit 1
+fi
