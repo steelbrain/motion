@@ -3,8 +3,7 @@
 set -e
 
 # kill bg tasks on exit
-
-trap 'kill $(jobs -p)' SIGTERM SIGINT
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 # build
 for f in packages/*; do
@@ -79,8 +78,7 @@ do
   wait $job || let "FAIL+=1"
 done
 
-if [ "$FAIL" == "0" ];
-then
+if [ "$FAIL" == "0" ]; then
   exit 0
 else
   exit 1
