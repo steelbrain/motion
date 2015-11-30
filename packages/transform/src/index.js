@@ -108,7 +108,6 @@ export default function createPlugin(options) {
 
   // plugin
   function FlintPlugin({ Plugin, types: t }) {
-    let viewMeta = {} // meta-data for views for atom
     let currentView = null
 
     // plugin helpers
@@ -203,8 +202,9 @@ export default function createPlugin(options) {
     let viewState = {} // track which state to wrap
     let viewStyleNames = {} // prevent duplicate style names
 
-    // whether sending onmeta
-    let sending = false
+    // meta-data for views for atom
+    let viewMeta = {}
+    let sendingMeta = false
 
     return new Plugin("flint-transform", {
       visitor: {
@@ -254,20 +254,13 @@ export default function createPlugin(options) {
             currentView = fullName
             viewMeta[currentView] = {}
 
-            if (!sending && options.onMeta) {
-              sending = true
+            if (!sendingMeta && options.onMeta) {
+              sendingMeta = true
               setTimeout(() => {
                 options.onMeta({ viewMeta, type: 'meta' })
-                sending = false
+                sendingMeta = false
               }, 100)
             }
-            /*
-            if (currentView) {
-              if (options.onMeta) {
-                options.onMeta({hello:'world'})
-              }
-            }
-            */
 
             inView = fullName
             viewRootNodes = []

@@ -1,8 +1,14 @@
 import bridge from '../bridge'
 
+let meta = {}
+
 export default function onMeta(data) {
-  bridge.message('editor', {
-    _type: 'meta',
-    data
-  })
+  // meta[] =
 }
+
+// bridge.on('focus:element', data => {
+//   bridge.message('editor', {
+//     type: 'meta',
+//     data
+//   })
+// })

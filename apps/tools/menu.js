@@ -18,7 +18,7 @@ view Menu {
   })
 
   let edit = () => {
-    _DT.messageEditor({ type: 'editView', key: __activeEl.key, view: __activeEl.view })
+    _DT.message({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
   }
 
   on.click(window, e => {

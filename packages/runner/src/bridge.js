@@ -2,7 +2,7 @@ import path from 'path'
 import ws from 'nodejs-websocket'
 import log from './lib/log'
 import wport from './lib/wport'
-import cache from './cache'
+import intCache from './cache'
 
 const LOG = 'bridge'
 
@@ -10,7 +10,17 @@ let wsServer
 let connected = false
 let connections = []
 let queue = []
-let curError = null
+
+// cache to send on reconnects
+// type : ' => key : ' => messages : []
+let messageCache = {
+  error: {
+    last: []
+  },
+  editor: {
+    viewMeta: []
+  }
+}
 
 function broadcast(data) {
   connections.forEach(conn => {
@@ -26,15 +36,20 @@ function runQueue() {
 }
 
 function sendInitialMessages(conn) {
-  conn.sendText(makeMessage('flint:baseDir', { dir: cache.baseDir() }))
+  conn.sendText(makeMessage('flint:baseDir', { dir: intCache.baseDir() }))
 
-  if (curError)
-    conn.sendText(curError)
+  // send cached stuff on connect
+  Object.keys(messageCache).forEach(cat => {
+    Object.keys(messageCache[cat]).forEach(key => {
+      let queue = messageCache[cat][key]
+      queue.forEach(({ type, obj }) => message(type, obj))
+    })
+  })
 }
 
 function cleanError(obj) {
   if (obj.error.fileName)
-    obj.error.file = path.relative(cache.baseDir(), obj.error.fileName)
+    obj.error.file = path.relative(intCache.baseDir(), obj.error.fileName)
 
   return obj
 }
@@ -56,14 +71,20 @@ function makeMessage(type, obj) {
   return msg
 }
 
+export function cache(key, type, obj) {
+  log(LOG, 'cache', key, type, obj)
+  messageCache[type] = messageCache[type] || {}
+  messageCache[type][key] = messageCache[type][key] || []
+  messageCache[type][key].push({ type, obj })
+}
+
 export function message(type, obj) {
+  // store last error or success
+  if (type == 'compile:error' || type == 'compile:success')
+    messageCache.error = [{ type, obj }]
+
   log(LOG, '-[out]-', type)
   let msg = makeMessage(type, obj)
-
-  // store last error or success
-  if (type == 'compile:error' || type == 'compile:success') {
-    curError = msg
-  }
 
   if (connected)
     broadcast(msg)
@@ -118,4 +139,4 @@ export function start() {
   }).listen(port)
 }
 
-export default { start, message, on }
+export default { start, message, on, cache }
