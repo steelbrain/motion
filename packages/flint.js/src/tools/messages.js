@@ -109,7 +109,6 @@ const cssLoad = TagLoader()
 
 function addScript(src) {
   let path = src.replace('/_/', '')
-  console.log('sending script load', path)
   socket.send('script:load', { path })
   scrLoad(src, (lastTag, done) => {
     lastTag = lastTag || document.querySelector(scriptSelector(src))
