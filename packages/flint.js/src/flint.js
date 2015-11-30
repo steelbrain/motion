@@ -116,7 +116,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   if (!process.env.production && Tools) {
     // pass data from tools to internal
-     Tools.emitter.on('editorState', () => {
+     Tools.emitter.on('editor:state', () => {
       Internal.editor = Tools.editor
     })
   }

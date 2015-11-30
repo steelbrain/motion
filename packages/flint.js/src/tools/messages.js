@@ -49,7 +49,7 @@ export default function run(browser, opts) {
     fromEditor: ({ key, val }) => {
       browser.editor = browser.editor || {}
       browser.editor[key] = val
-      browser.emitter.emit('editorState')
+      browser.emitter.emit('editor:state')
     }
   })
 }
