@@ -120,7 +120,7 @@ let getReactId = el => {
   if (!reactKey) reactKey = getReactKey(el)
   if (!el[reactKey]) return
   let current = el[reactKey]._currentElement
-  if (!current) return null
+  if (!current || !current.key) return null
 
   let key = current.key
   let split = key.split('$')
