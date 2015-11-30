@@ -91,20 +91,20 @@ function internal() {
 }
 
 function writeBack(path, data) {
-  const I = internal()
+  const Int = internal()
   const name  = data[1][0]
-  const current = I.getCache[path][name]
+  const current = Int.getCache[path][name]
   let value = data[1][1]
 
   if (typeof current == 'number') {
     value = +value
   }
 
-  I.setCache(path, name, value)
-  I.inspectorRefreshing = path
-  I.getInitialStates[path]()
-  I.viewsAtPath[path].forceUpdate()
-  I.inspectorRefreshing = null
+  Int.setCache(path, name, value)
+  Int.inspectorRefreshing = path
+  Int.getInitialStates[path]()
+  Int.viewsAtPath[path].forceUpdate()
+  Int.inspectorRefreshing = null
 }
 
 // holds the hover el for editing purposes

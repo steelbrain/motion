@@ -38,7 +38,6 @@ const arrayToString = val =>
     typeof style == 'number' ? `${style}px` : style
   ).join(' ')
 
-
 // transformers
 
 function transformBackground(styles) {

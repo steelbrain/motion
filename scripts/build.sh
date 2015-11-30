@@ -3,7 +3,8 @@
 set -e
 
 # kill bg tasks on exit
-trap 'kill $(jobs -p)' EXIT
+
+trap 'kill $(jobs -p)' SIGTERM SIGINT
 
 # build
 for f in packages/*; do
@@ -36,7 +37,7 @@ for f in packages/*; do
 done
 
 # extra stuff for watch
-if [ $1="--watch" ]; then
+if [ "$1" = "--watch" ]; then
   # relink cli
   echo "Watch CLI for relink"
   chsum1=""
@@ -69,4 +70,18 @@ if [ $1="--watch" ]; then
   done
 fi
 
-wait
+# wait for bg tasks
+
+FAIL=0
+
+for job in `jobs -p`
+do
+  wait $job || let "FAIL+=1"
+done
+
+if [ "$FAIL" == "0" ];
+then
+  exit 0
+else
+  exit 1
+fi
