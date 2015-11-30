@@ -107,7 +107,8 @@ function writeBack(path, data) {
   I.inspectorRefreshing = null
 }
 
-let activeKey = null
+// holds the hover el for editing purposes
+window.__activeEl = { key: null, active: null }
 let activeView = null
 let reactKey = null
 getReactKey = el =>
@@ -115,7 +116,6 @@ getReactKey = el =>
 
 let getReactId = el => {
   if (!reactKey) reactKey = getReactKey(el)
-  window.abc = el
   if (!el[reactKey]) return
   let current = el[reactKey]._currentElement
   if (!current) return null
@@ -146,7 +146,7 @@ view Inspector {
   let offAlt
   onKey('alt', down => {
     if (!down) {
-      offAlt && offAlt()
+      offAlt()
       hideInspect()
     }
     else {
@@ -171,13 +171,15 @@ view Inspector {
   function mouseMove({ target }) {
     if (lastTarget != target) {
       lastTarget = target
-      activeKey = getReactId(target)
-      activeView = target.classList.toString()
-        .split(' ')
-        .filter(s => s.substr(0,4) != 'View')
-        .filter(s => s.charAt(0).toUpperCase() == s.charAt(0))[0]
+      if (!target.classList.contains('internal')) {
+        __activeEl.key = getReactId(target)
+        __activeEl.view = target.classList.toString()
+          .split(' ')
+          .filter(s => s.substr(0,4) != 'View')
+          .filter(s => s.charAt(0).toUpperCase() == s.charAt(0))[0]
 
-      if (hudActive) inspect(lastTarget)
+        if (hudActive) inspect(lastTarget)
+      }
     }
   }
 
@@ -202,8 +204,6 @@ view Inspector {
 
   function showInspect() {
     inspect(lastTarget)
-    console.log('editing', activeKey, activeView)
-    // _DT.messageEditor({ type: 'editView', key: activeKey, view: activeView })
     hudActive = true
     clickOff = on.click(window, glue)
   }

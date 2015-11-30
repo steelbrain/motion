@@ -17,6 +17,10 @@ view Menu {
     active = true
   })
 
+  let edit = () => {
+    _DT.messageEditor({ type: 'editView', key: __activeEl.key, view: __activeEl.view })
+  }
+
   on.click(window, e => {
     if (active) {
       e.stopPropagation()
@@ -25,10 +29,8 @@ view Menu {
     }
   })
 
-  <menu class={{ active }}>
-    <item>Show ...</item>
-    <item>Show ...</item>
-    <item>Show ...</item>
+  <menu class={{ internal: true, active }}>
+    <item class="internal" onClick={edit}>Edit</item>
   </menu>
 
   $menu = {
