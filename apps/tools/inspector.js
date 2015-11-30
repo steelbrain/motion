@@ -1,5 +1,7 @@
 import { keys, onKey } from './keys'
 
+import throttle from 'lodash.throttle'
+
 const removeHead = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
@@ -132,7 +134,7 @@ view Inspector {
   let views = []
 
   on.mount(() => {
-    hoverOff = on.mousemove(window, mouseMove)
+    hoverOff = on.mousemove(window, throttle(mouseMove, 40))
     if (highlighter) return
     highlighter = document.createElement('div')
     highlighter.className = "_flintHighlighter"
