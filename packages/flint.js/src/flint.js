@@ -116,7 +116,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   if (!process.env.production && Tools) {
     // pass data from tools to internal
-     Tools.emitter.on('editorState', () => {
+     Tools.emitter.on('editor:state', () => {
       Internal.editor = Tools.editor
     })
   }
@@ -126,27 +126,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   log(Internal, Tools)
   const LastWorkingMain = LastWorkingMainFactory(Internal)
 
-  // devtools edit
-  function writeBack(path, writePath) {
-    // update getCache
-    writePath.reduce((acc, key) => {
-      if (key == 'root') return acc
-      if (Array.isArray(key))
-        acc[key[0]] = key[1] // final index is arr: [key, val]
-      else
-        return acc[key]
-    }, Internal.getCache[path])
-
-    // update view
-    // TODO: specific updates: const name = pathToName(path)
-    Flint.render()
-  }
-
   function setInspector(path) {
     if (Internal.inspector[path]) {
       let props = Internal.viewsAtPath[path].props
       const state = Internal.getCache[path]
-      Internal.inspector[path](props, state, writeBack)
+      Internal.inspector[path](props, state)
     }
   }
 

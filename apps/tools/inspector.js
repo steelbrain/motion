@@ -1,4 +1,4 @@
-import { keys, onKey } from './keys'
+import { keys, onKey, onKeyDown } from './keys'
 
 import throttle from 'lodash.throttle'
 
@@ -92,17 +92,28 @@ function internal() {
   return window._Flint
 }
 
-function writeBack(path, data) {
-  const Int = internal()
-  const name  = data[1][0]
-  const current = Int.getCache[path][name]
-  let value = data[1][1]
+function writeBack(path, writePath) {
+  let Int = internal()
+  let cache = Int.getCache[path]
 
-  if (typeof current == 'number') {
-    value = +value
-  }
+  // update getCache
+  writePath.reduce((acc, cur) => {
+    if (cur == 'root') return acc
 
-  Int.setCache(path, name, value)
+    if (!Array.isArray(cur))
+      return acc[cur]
+
+    // is end of path: [key, val]
+    let [ key, val ] = cur
+    let current = acc[key]
+
+    if (typeof current == 'number')
+      val = +val
+
+    // write
+    acc[key] = val
+  }, cache)
+
   Int.inspectorRefreshing = path
   Int.getInitialStates[path]()
   Int.viewsAtPath[path].forceUpdate()
@@ -120,7 +131,7 @@ let getReactId = el => {
   if (!reactKey) reactKey = getReactKey(el)
   if (!el[reactKey]) return
   let current = el[reactKey]._currentElement
-  if (!current) return null
+  if (!current || !current.key) return null
 
   let key = current.key
   let split = key.split('$')
@@ -142,8 +153,7 @@ view Inspector {
   })
 
   // key events
-
-  onKey('esc', closeLast)
+  onKeyDown('esc', closeLast)
 
   let offAlt
   onKey('alt', down => {
@@ -186,6 +196,7 @@ view Inspector {
   }
 
   function closeLast() {
+    console.log('close last')
     if (!views.length) return
     views = removeHead(views)
   }

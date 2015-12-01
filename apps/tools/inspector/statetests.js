@@ -39,7 +39,9 @@ view Tests.Circles {
   }
 
   <circles onClick={addCircle}>
-    <Tests.Circle repeat={coords}
+    <Tests.Circle
+      repeat={coords}
+      key={''+_[0]+_[1]}
       left={_[0]}
       top={_[1]}
     />

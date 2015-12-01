@@ -64,11 +64,10 @@ view Inspector.View {
       <edit if={false} onClick={edit}>edit</edit>
     </top>
 
-    <Inspector.Title if={!hasKeys(props)}>No Props</Inspector.Title>
     <Inspector.Section title="Props" if={hasKeys(props)} class="props">
       <Tree editable={false} data={props} />
     </Inspector.Section>
-    <Inspector.Title if={!hasKeys(state)}>No State</Inspector.Title>
+
     <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
         editable={true}
@@ -82,6 +81,7 @@ view Inspector.View {
     position: 'relative',
     pointerEvents: 'auto',
     margin: 10,
+    marginBottom: 0,
     padding: [0, 0, 1],
     minWidth: 220,
     fontSize: 12,
@@ -99,7 +99,9 @@ view Inspector.View {
     }
   }
 
-  $top = { flexFlow: 'row', }
+  $top = {
+    flexFlow: 'row'
+  }
 
   $active = {
     opacity: 1,
@@ -115,7 +117,7 @@ view Inspector.View {
   $Close = {
     top: -5,
     right: -5,
-    fontSize: 16
+    fontSize: 13
   }
 
   $name = {
@@ -156,7 +158,7 @@ view Inspector.View {
     margin: [3, 0]
   }
 
-  $props = {
-    marginBottom: 2
+  $section = {
+    background: [0,0,0,0.05]
   }
 }

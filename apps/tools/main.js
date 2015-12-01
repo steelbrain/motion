@@ -14,8 +14,6 @@ view Main {
   <Inspector if={showInspector} />
   <StateTests if={internal} />
 
-  $test = { position: 'relative', zIndex: 1 }
-
   $ = {
     position: 'fixed',
     pointerEvents: internal ? 'auto' : 'none',
