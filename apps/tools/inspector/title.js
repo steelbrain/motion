@@ -15,7 +15,7 @@ view Inspector.Title {
     fontWeight: 300,
     borderBottom: '1px solid #eee',
     height: 10,
-    margin: [5],
+    margin: [5, 5, 8],
     color: '#999',
     flexFlow: 'row',
   }

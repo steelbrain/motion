@@ -16,7 +16,8 @@ on.keyup(window, e => {
 
 on.keypress(window, e => {
   const code = ___keycode(e.keyCode)
-  pressListeners[code].forEach(listener => listener())
+  const queue = pressListeners[code]
+  queue && queue.forEach(listener => listener())
 })
 
 function keyDown(code) {
