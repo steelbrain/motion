@@ -98,7 +98,6 @@ function writeBack(path, writePath) {
 
   // update getCache
   writePath.reduce((acc, cur) => {
-    console.log('acc', acc, 'cur', cur)
     if (cur == 'root') return acc
 
     if (!Array.isArray(cur))
@@ -117,7 +116,6 @@ function writeBack(path, writePath) {
 
   Int.inspectorRefreshing = path
   Int.getInitialStates[path]()
-  console.log('views', Int.viewsAtPath[path])
   Int.viewsAtPath[path].forceUpdate()
   Int.inspectorRefreshing = null
 }
