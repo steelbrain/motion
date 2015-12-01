@@ -196,7 +196,6 @@ view Inspector {
   }
 
   function closeLast() {
-    console.log('close last')
     if (!views.length) return
     views = removeHead(views)
   }
