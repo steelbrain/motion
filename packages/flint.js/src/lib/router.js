@@ -80,6 +80,7 @@ const router = {
         delete routeParams._
         routes[path] = activeID
         params[path] = routeParams
+        router.params = routeParams
       }
     })
   },
@@ -112,7 +113,7 @@ const router = {
     router.recognize()
   },
 
-  params(path) {
+  getParams(path) {
     return { params: params[path] }
   }
 }
