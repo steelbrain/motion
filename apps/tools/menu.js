@@ -17,9 +17,14 @@ view Menu {
     active = true
   })
 
-  let edit = () => {
-    _DT.message({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
+  let focusElement = () => {
+    _DT.messageEditor({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
   }
+
+  let focusStyle = () => {
+    _DT.messageEditor({ type: 'focus:style', key: __activeEl.key, view: __activeEl.view })
+  }
+
 
   on.click(window, e => {
     if (active) {
@@ -30,7 +35,8 @@ view Menu {
   })
 
   <menu class={{ internal: true, active }}>
-    <item class="internal" onClick={edit}>Edit</item>
+    <item class="internal" onClick={focusElement}>Edit Element</item>
+    <item class="internal" onClick={focusStyle}>Edit Style</item>
   </menu>
 
   $menu = {

@@ -2,13 +2,24 @@ import bridge from '../bridge'
 
 let meta = {}
 
-export default function onMeta(data) {
-  // meta[] =
-}
+bridge.on('focus:element', data => {
+  console.log('focsuing el', data)
+  bridge.message('editor', {
+    type: 'focus:element',
+    data
+  })
+})
 
-// bridge.on('focus:element', data => {
-//   bridge.message('editor', {
-//     type: 'meta',
-//     data
-//   })
-// })
+bridge.on('focus:style', data => {
+  console.log('focsuing style', data)
+  bridge.message('editor', {
+    type: 'focus:element',
+    data
+  })
+})
+
+export default function onMeta({ viewMeta }) {
+  Object.keys(viewMeta).map(view => {
+    meta[view] = viewMeta[view]
+  })
+}
