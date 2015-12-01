@@ -1,8 +1,8 @@
 import md5 from 'md5-o-matic'
 import getType from '../lib/getType'
 import ellipsize from 'ellipsize'
-const PATH_PREFIX = '.root.'
 
+const PATH_PREFIX = '.root.'
 const contains = (string, substring) => string.indexOf(substring) !== -1
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 

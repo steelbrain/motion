@@ -84,6 +84,7 @@ view Inspector.View {
     marginBottom: 0,
     padding: [0, 0, 1],
     minWidth: 220,
+    minHeight: 34,
     fontSize: 12,
     userSelect: 'none',
     cursor: 'default',
