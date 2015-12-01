@@ -96,7 +96,7 @@ function init() {
   // throttle the stream a bit
   let fileSender = _.throttle(fileSend, 22, { leading: true })
 
-  bridge.on('super:file', fileSender)
+  bridge.on('live:save', fileSender)
 }
 
 function vinyl(path, contents) {
