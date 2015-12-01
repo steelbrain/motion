@@ -92,19 +92,32 @@ function internal() {
   return window._Flint
 }
 
-function writeBack(path, data) {
-  const Int = internal()
-  const name  = data[1][0]
-  const current = Int.getCache[path][name]
-  let value = data[1][1]
+function writeBack(path, writePath) {
+  let Int = internal()
+  let cache = Int.getCache[path]
 
-  if (typeof current == 'number') {
-    value = +value
-  }
+  // update getCache
+  writePath.reduce((acc, cur) => {
+    console.log('acc', acc, 'cur', cur)
+    if (cur == 'root') return acc
 
-  Int.setCache(path, name, value)
+    if (!Array.isArray(cur))
+      return acc[cur]
+
+    // is end of path: [key, val]
+    let [ key, val ] = cur
+    let current = acc[key]
+
+    if (typeof current == 'number')
+      val = +val
+
+    // write
+    acc[key] = val
+  }, cache)
+
   Int.inspectorRefreshing = path
   Int.getInitialStates[path]()
+  console.log('views', Int.viewsAtPath[path])
   Int.viewsAtPath[path].forceUpdate()
   Int.inspectorRefreshing = null
 }

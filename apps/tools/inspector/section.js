@@ -4,7 +4,9 @@ view Inspector.Section {
   <Inspector.Title onToggle={val => open = val}>
     {view.props.title}
   </Inspector.Title>
-  <body if={open}>{view.props.children}</body>
+  <body>
+    {view.props.children}
+  </body>
 
   $ = {
     padding: [5, 0]
@@ -12,5 +14,9 @@ view Inspector.Section {
 
   $body = {
     padding: [0, 12]
+  }
+
+  $inactive = {
+    display: 'none'
   }
 }
