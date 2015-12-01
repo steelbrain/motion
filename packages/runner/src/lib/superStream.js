@@ -38,28 +38,34 @@ function fileSend({ path, contents }) {
   let attempts = 0
 
   // waits for file load before pushing next
-  function checkPushStream() {
-    log(LOG, 'checkPushStream', 'rPath', rPath, 'fileLoading', fileLoading[rPath])
-    // loop waiting for browser to finish loading
-    if (fileLoading[rPath]) {
+  function checkPushStream(loop = false) {
+    if (!loop) {
       // ensures it only runs once after loaded
       if (scriptWaiting[rPath]) return
       scriptWaiting[rPath] = true
+    }
 
+    log(LOG, 'checkPushStream', 'rPath', rPath, 'fileLoading', fileLoading[rPath])
+    // loop waiting for browser to finish loading
+    if (fileLoading[rPath]) {
       log(LOG, 'checkPushStream', 'start waiting', rPath)
 
       // ceil attempts to avoid locks
       attempts++
-      if (attempts > 50)
+      if (attempts > 50) {
+        log(LOG, 'ATTEMPTS > 50!!')
         fileLoading[rPath] = false
+        scriptWaiting[rPath] = false
+        pushStream()
+      }
 
-      setTimeout(checkPushStream, 5)
+      setTimeout(() => checkPushStream(true), 20)
       return
     }
 
     log(LOG, 'pushStream!', rPath)
-    scriptWaiting[rPath] = false
     fileLoading[rPath] = true
+    scriptWaiting[rPath] = false
     pushStream()
   }
 
