@@ -1,4 +1,4 @@
-import { keys, onKey } from './keys'
+import { keys, onKey, onKeyDown } from './keys'
 
 import throttle from 'lodash.throttle'
 
@@ -153,8 +153,7 @@ view Inspector {
   })
 
   // key events
-
-  onKey('esc', closeLast)
+  onKeyDown('esc', closeLast)
 
   let offAlt
   onKey('alt', down => {
@@ -197,6 +196,7 @@ view Inspector {
   }
 
   function closeLast() {
+    console.log('close last')
     if (!views.length) return
     views = removeHead(views)
   }
