@@ -121,7 +121,7 @@ function writeBack(path, writePath) {
 }
 
 // holds the hover el for editing purposes
-window.__activeEl = { key: null, active: null }
+window.__activeEl = { el: null, key: null, active: null }
 let activeView = null
 let reactKey = null
 getReactKey = el =>
@@ -137,7 +137,6 @@ let getReactId = el => {
   let split = key.split('$')
   return split[split.length - 1]
 }
-
 
 view Inspector {
   let clickOff, hoverOff, lastTarget
@@ -185,6 +184,7 @@ view Inspector {
       lastTarget = target
       if (!target.classList.contains('internal')) {
         __activeEl.key = getReactId(target)
+        __activeEl.el = target.tagName.toLowerCase()
         __activeEl.view = target.classList.toString()
           .split(' ')
           .filter(s => s.substr(0,4) != 'View')

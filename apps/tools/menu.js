@@ -10,10 +10,10 @@ view Menu {
 
     e.preventDefault()
 
-    const { pageX, pageY } = e
+    const { clientX, clientY } = e
 
-    left = pageX
-    top = pageY
+    left = clientX
+    top = clientY
     active = true
   })
 
@@ -22,7 +22,7 @@ view Menu {
   }
 
   let focusStyle = () => {
-    _DT.messageEditor({ type: 'focus:style', key: __activeEl.key, view: __activeEl.view })
+    _DT.messageEditor({ type: 'focus:style', el: __activeEl.el, view: __activeEl.view })
   }
 
 

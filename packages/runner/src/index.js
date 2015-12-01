@@ -17,8 +17,6 @@ import watchDeletes from './lib/watchDeletes'
 import { mkdir } from './lib/fns'
 import path from 'path'
 
-
-
 // DONT RELEASE ME!
 // import memwatch from 'memwatch-next'
 // import heapdump from 'heapdump'

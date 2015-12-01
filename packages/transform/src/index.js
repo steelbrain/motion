@@ -252,7 +252,7 @@ export default function createPlugin(options) {
             const fullName = name + (subName ? `.${subName}` : '')
 
             currentView = fullName
-            viewMeta[currentView] = {}
+            viewMeta[currentView] = { styles: {}, els: {} }
 
             if (!sendingMeta && options.onMeta) {
               sendingMeta = true
@@ -412,7 +412,7 @@ export default function createPlugin(options) {
 
               let arr = [t.literal(name), t.literal(key)]
 
-              viewMeta[currentView][name + key] = el.loc.start
+              viewMeta[currentView].els[name + key] = el.loc.start
 
               // safer, checks for file scope or view scope only
               if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
@@ -584,6 +584,8 @@ export default function createPlugin(options) {
             )
 
             if (!isStyle) return
+
+            viewMeta[currentView].styles[node.left.name.substr(1)] = node.loc.start
 
             // styles
             return extractAndAssign(node)
