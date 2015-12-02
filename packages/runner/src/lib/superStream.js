@@ -17,7 +17,7 @@ let fileLoading = {}
 let scriptWaiting = {}
 
 function fileSend({ path, contents }) {
-  log(LOG, 'fileSend', path)
+  log(LOG, '--- STREAM --- fileSend', path)
 
   // check if file actually in flint project
   if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0) {
@@ -49,18 +49,19 @@ function fileSend({ path, contents }) {
     log(LOG, 'checkPushStream', 'rPath', rPath, 'fileLoading', fileLoading[rPath])
     // loop waiting for browser to finish loading
     if (fileLoading[rPath]) {
-      log(LOG, 'checkPushStream', 'start waiting', rPath)
+      log(LOG, 'checkPushStream', 'fileLoading = true', rPath)
 
-      // ceil attempts to avoid locks
-      attempts++
-      if (attempts > 50) {
+      if (++attempts > 50) {
+        // ceil attempts to avoid locks
         log(LOG, 'ATTEMPTS > 50!!')
         fileLoading[rPath] = false
         scriptWaiting[rPath] = false
       }
-
-      setTimeout(() => checkPushStream(true), 20)
-      return
+      else {
+        // loop
+        setTimeout(() => checkPushStream(true), 20)
+        return
+      }
     }
 
     fileLoading[rPath] = true
