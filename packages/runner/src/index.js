@@ -35,6 +35,7 @@ import path from 'path'
 
 process.on('SIGINT', cleanExit)
 process.on('SIGTERM', cleanExit)
+process.on('uncaughtException', cleanExit)
 
 let child
 
