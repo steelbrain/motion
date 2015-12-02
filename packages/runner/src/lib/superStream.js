@@ -64,7 +64,7 @@ function fileSend({ path, contents }) {
       }
     }
 
-    fileLoading[rPath] = true
+    // fileLoading[rPath] = true
     scriptWaiting[rPath] = false
     pushStream()
   }
@@ -84,7 +84,7 @@ function fileSend({ path, contents }) {
 function initScriptWait() {
   bridge.on('script:load', ({ path }) => {
     log(LOG, 'script:load', path)
-    fileLoading[path] = true
+    // fileLoading[path] = true
   })
 
   bridge.on('script:done', ({ path }) => {

@@ -280,7 +280,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
             setTimeout(() => emitter.emit('render:done'))
           })
-        })
+        }, 0)
       }
     },
 

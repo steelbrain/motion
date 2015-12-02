@@ -109,6 +109,7 @@ const cssLoad = TagLoader()
 
 function addScript(src) {
   let path = src.replace('/_/', '')
+  let start = Date.now()
   socket.send('script:load', { path })
   scrLoad(src, (lastTag, done) => {
     lastTag = lastTag || document.querySelector(scriptSelector(src))
@@ -119,6 +120,7 @@ function addScript(src) {
       replaceTag(lastTag, 'src', finish)
 
     function finish() {
+      // console.log('script load took', Date.now() - start)
       socket.send('script:done', { path })
       done()
     }
@@ -165,7 +167,7 @@ function replaceTag(tag, attr, after) {
   clone.onload = afterFinish
   parent.appendChild(clone)
 
-  // ceil of 250ms for slow loads
+  // ceil for slow loads
   cielTimeout = setTimeout(() => {
     if (already) return
     removeTag(tag, tag.parentNode, afterFinish, { leftover: 1 })
