@@ -1,11 +1,39 @@
 import { keys, onKey } from './keys'
+import inspecting from './lib/inspecting'
+
+const Tools = _DT
+const toEditor = Tools.messageEditor
 
 view Menu {
   let active = false
   let top, left
+  let elements = []
 
-  on.event('contextmenu', e => {
-    const mode = keys.alt
+  // prevent select and show custom cursor when ready for context
+  let focused
+  on.keydown(() => {
+    console.log(keys)
+    if (keys.alt && keys.command) {
+      document.body.classList.add('__flintfocus')
+      focused = true
+    }
+  })
+  on.keyup(() => {
+    if (focused) {
+      document.body.classList.remove('__flintfocus')
+      focused = false
+    }
+  })
+
+  on.click(window, e => {
+    if (active) {
+      e.stopPropagation()
+      e.preventDefault()
+      active = false
+      return
+    }
+
+    const mode = keys.alt && keys.command
     if (!mode) return
 
     e.preventDefault()
@@ -15,24 +43,16 @@ view Menu {
     left = clientX
     top = clientY
     active = true
+    elements = inspecting.all()
   })
 
-  let focusElement = () => {
-    _DT.messageEditor({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
+  function focusElement() {
+    toEditor({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
   }
 
-  let focusStyle = () => {
-    _DT.messageEditor({ type: 'focus:style', el: __activeEl.el, view: __activeEl.view })
+  function focusStyle() {
+    toEditor({ type: 'focus:style', el: __activeEl.el, view: __activeEl.view })
   }
-
-
-  on.click(window, e => {
-    if (active) {
-      e.stopPropagation()
-      e.preventDefault()
-      active = false
-    }
-  })
 
   <menu class={{ internal: true, active }}>
     <item class="internal" onClick={focusElement}>Edit Element</item>
