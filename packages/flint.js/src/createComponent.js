@@ -282,6 +282,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       // FLINT HELPERS
 
+      clone(el, props) {        
+        return React.cloneElement(el, props)
+      },
+
       // helpers for controlling re-renders
       pause() { this.isPaused = true },
       resume() { this.isPaused = false },

@@ -40,16 +40,10 @@ const arrayToString = val =>
 
 // transformers
 
-function transformBackground(styles) {
-  return typeof styles.background == 'object'
-    ? objectToColor(styles.background)
-    : styles.background
-}
-
-function transformColor(styles) {
-  return typeof styles.color == 'object'
-    ? objectToColor(styles.color)
-    : styles.color
+function transformColor(styles, attr) {
+  return typeof styles[attr] == 'object'
+    ? objectToColor(styles[attr])
+    : styles[attr]
 }
 
 function transformKey(styles, key) {
@@ -98,10 +92,16 @@ export default function styleValuesToString(styles) {
   if (!styles) return styles
 
   if (styles.background)
-    styles.background = transformBackground(styles)
+    styles.background = transformColor(styles, 'background')
+
+  if (styles.backgroundColor)
+    styles.backgroundColor = transformColor(styles, 'backgroundColor')
 
   if (styles.color)
-    styles.color = transformColor(styles)
+    styles.color = transformColor(styles, 'color')
+
+  if (styles.borderColor)
+    styles.borderColor = transformColor(styles, 'borderColor')
 
   if (styles.transform)
     styles.transform = transformTransform(styles)

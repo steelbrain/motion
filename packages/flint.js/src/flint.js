@@ -376,7 +376,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     },
 
     routeParams(path) {
-      return router.params(path)
+      return router.getParams(path)
     },
 
     // export globals

@@ -8,7 +8,7 @@ export default function phash(_props) {
     if (key == '__flint')
       return acc
 
-    if (prop.hashCode)
+    if (prop instanceof Object && prop.hashCode)
       acc[key] = prop.hashCode()
 
     // TODO: traverse children
