@@ -13,5 +13,6 @@
     "json-loader": "^0.5.3",
     "shelljs": "^0.5.1",
     "webpack": "^1.12.2"
-  }
+  },
+  "dependencies": {}
 }
