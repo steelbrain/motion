@@ -56,7 +56,6 @@ function fileSend({ path, contents }) {
         log(LOG, 'ATTEMPTS > 50!!')
         fileLoading[rPath] = false
         scriptWaiting[rPath] = false
-        pushStream()
       }
 
       setTimeout(() => checkPushStream(true), 20)
