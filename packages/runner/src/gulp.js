@@ -159,8 +159,8 @@ export function buildScripts(afterEach, userStream) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
-    log('gulp', 'setLastFile', 'name', name)
     if (name.charAt(0) != '/') name = '/' + name
+    log('gulp', 'setLastFile', 'path', file.path, 'name', name)
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }

@@ -32,6 +32,7 @@ function fileSend({ path, contents }) {
   log(LOG, 'rpath', rPath)
 
   function pushStream() {
+    log(LOG, 'pushStream()', path, rPath)
     stream.push(file)
   }
 
@@ -56,14 +57,12 @@ function fileSend({ path, contents }) {
         log(LOG, 'ATTEMPTS > 50!!')
         fileLoading[rPath] = false
         scriptWaiting[rPath] = false
-        pushStream()
       }
 
       setTimeout(() => checkPushStream(true), 20)
       return
     }
 
-    log(LOG, 'pushStream!', rPath)
     fileLoading[rPath] = true
     scriptWaiting[rPath] = false
     pushStream()
