@@ -162,5 +162,8 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     }
   }
 
-  return styles
+  if (Object.keys(styles).length)
+    return styles
+  else
+    return null
 }
