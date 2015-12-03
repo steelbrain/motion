@@ -17,8 +17,8 @@ export default () => ({
   },
   module: {
     loaders: [
-      { test: /\.css$/, loaders: ['style', 'css'] },
-      { test: /\.json$/, loader: 'json' }
+      { test: /\.css$/, loaders: ['style-loader', 'css-loader'] },
+      { test: /\.json$/, loader: 'json-loader' }
     ]
   },
   resolveLoader: {
