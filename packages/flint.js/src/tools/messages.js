@@ -43,6 +43,10 @@ export default function run(browser, opts) {
       Flint.deleteFile(name)
     },
 
+    'flint:opts': opts => {
+      window.__flintopts = opts
+    },
+
 
     // coming from editor to browser
 

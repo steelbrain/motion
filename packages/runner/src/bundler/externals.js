@@ -1,5 +1,6 @@
 import webpack from 'webpack'
 import { Promise } from 'bluebird'
+import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import readFullPaths from './lib/readFullPaths'
 import depRequireString from './lib/depRequireString'
@@ -45,25 +46,16 @@ export async function installExternals(file, source) {
 async function packExternals() {
   log(LOG, 'pack')
   return new Promise((resolve, reject) => {
-    webpack({
+    const conf = Object.assign(webpackConfig(), {
       entry: opts.get('deps').externalsIn,
-      externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        bluebird: '_bluebird',
-      },
-      // loaders: [
-      //   { test: /\.css$/, loader: 'style-loader!css-loader' }
-      // ],
-      node: {
-        global: false,
-        Buffer: false,
-        setImmediate: false
-      },
       output: {
         filename: opts.get('deps').externalsOut
       }
-    }, async (err, stats) => {
+    })
+
+    log(LOG, 'webpackConfig', conf)
+
+    webpack(conf, async (err, stats) => {
       handleWebpackErrors(err, stats, resolve, reject)
     })
   })

@@ -187,8 +187,18 @@ export default function createPlugin(options) {
     }
 
     function isJSXAttributeOfName(attr, name) {
-       return attr.name == name
-     }
+      return attr.name == name
+    }
+
+    function tracker(name, type = 'dec') {
+      return t.callExpression(t.identifier(`view.${type}`), [t.literal(name), t.identifier(name)])
+    }
+
+    function destructureTrackers(id, wrapType) {
+      return id.properties.map(prop => {
+        return tracker(prop.key.name, wrapType)
+      })
+    }
 
     let keyBase = {}
     let inJSX = false
@@ -538,14 +548,14 @@ export default function createPlugin(options) {
 
             // add getter
             if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
-              let isObjectPattern = false
+              let destructNodes = []
 
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
 
-                // avoid destructures
+                // destructures
                 if (t.isObjectPattern(dec.id)) {
-                  isObjectPattern = true
+                  destructNodes = destructNodes.concat(destructureTrackers(dec.id, 'dec'))
                   return dec
                 }
 
@@ -567,10 +577,9 @@ export default function createPlugin(options) {
                 return dec
               })
 
-              if (isObjectPattern) {
-                // TODO: try handling destructures properly here
-                // console.log(node.declarations[0].id.properties[0].key.name)
-                // return [node, nodeThatAssingsDestructureVars]
+              // add destructure declarations
+              if (destructNodes.length) {
+                return [node, ...destructNodes]
               }
             }
           }
@@ -650,7 +659,6 @@ export default function createPlugin(options) {
 
                 let hasStatics = statics.length
                 let hasDynamics = dynamics.length
-                let isChildView = name && name.length > 1 && name[1] == name[1].toUpperCase()
 
                 let result = []
 
@@ -658,8 +666,13 @@ export default function createPlugin(options) {
                 if (!hasStatics && !hasDynamics)
                   return result
 
+                // hot reload uniq keys
+
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
-                if (hasStatics && viewHasChildWithClass && name != '$') {
+                const isChildView = hasStatics && name[1] && name[1] == name[1].toUpperCase()
+                const isChildViewClassed = hasStatics && viewHasChildWithClass && name != '$'
+
+                if (isChildView || isChildViewClassed) {
                   const uniq = hash(statKeys)
                   result.push(exprStatement(t.literal(uniq)))
                 }
@@ -674,6 +687,8 @@ export default function createPlugin(options) {
                   })
                   result.push(exprStatement(t.literal(uniq)))
                 }
+
+                // return statement
 
                 if (hasDynamics) {
                   result.push(dynamicStyleStatement(node, dynamics))
@@ -807,6 +822,13 @@ export default function createPlugin(options) {
 
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return
+
+            // destructures
+            if (t.isObjectPattern(node.left)) {
+              let destructNodes = destructureTrackers(node.left, 'set')
+              node.flintTracked = true
+              return [node, ...destructNodes]
+            }
 
             const isRender = hasObjWithProp(node, 'view', 'render')
 

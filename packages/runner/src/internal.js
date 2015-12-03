@@ -1,13 +1,18 @@
 import opts from './opts'
-import log from './lib/log'
 import wport from './lib/wport'
-import handleError from './lib/handleError'
-import { readJSON, writeJSON } from './lib/fns'
+import { log, handleError, readJSON, writeJSON } from './lib/fns'
 
 let OPTS
 
 export async function readState() {
-  return await readJSON(opts.get('stateFile'))
+  try {
+    const state = await readJSON(opts.get('stateFile'))
+    opts.set('state', state)
+    return state
+  }
+  catch(e) {
+    return {}
+  }
 }
 
 // prompts for domain they want to use

@@ -1,0 +1,1 @@
+export default () => window._Flint.opts
