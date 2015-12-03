@@ -3,6 +3,7 @@ import ws from 'nodejs-websocket'
 import log from './lib/log'
 import wport from './lib/wport'
 import intCache from './cache'
+import opts from './opts'
 
 const LOG = 'bridge'
 
@@ -30,6 +31,7 @@ function runQueue() {
 
 function sendInitialMessages(conn) {
   conn.sendText(makeMessage('flint:baseDir', { dir: intCache.baseDir() }))
+  conn.sendText(makeMessage('flint:opts', opts.get()))
 
   // send cached stuff on connect
   Object.keys(messageCache).forEach(cat => {

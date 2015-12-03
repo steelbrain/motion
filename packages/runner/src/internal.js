@@ -6,7 +6,9 @@ let OPTS
 
 export async function readState() {
   try {
-    return await readJSON(opts.get('stateFile'))
+    const state = await readJSON(opts.get('stateFile'))
+    opts.set('state', state)
+    return state
   }
   catch(e) {
     return {}

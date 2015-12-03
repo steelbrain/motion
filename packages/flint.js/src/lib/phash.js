@@ -1,10 +1,9 @@
 import React from 'react'
 import hashsum from 'hash-sum'
-
-const disableHashing = /\?nohash/.test(window.location.search)
+import opts from './opts'
 
 export default function phash(_props) {
-  if (disableHashing)
+  if (opts() && opts().config.disablePropsHashing)
     return hashsum(Math.random())
 
   const props = Object.keys(_props).reduce((acc, key) => {
