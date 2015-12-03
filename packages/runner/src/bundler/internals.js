@@ -1,6 +1,7 @@
 import webpack from 'webpack'
 import { Promise } from 'bluebird'
 import { onInternalInstalled } from './lib/messages'
+import webpackConfig from './lib/webpackConfig'
 import readInstalled from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import depRequireString from './lib/depRequireString'
@@ -65,29 +66,19 @@ function packInternals() {
   log(LOG, 'packInternals')
 
   // TODO: #175, internal files arent getting scanned for their external requires
-  // so flint uninstalls their external deps 
+  // so flint uninstalls their external deps
 
   // make sure internals require the flint packed externals
   let externals = externalsPaths(cache.getImports())
   log(LOG, 'webpack externals', externals)
 
   return new Promise((resolve, reject) => {
-    webpack({
+    webpack(Object.assign(webpackConfig(), {
       entry: opts.get('deps').internalsIn,
-      externals: Object.assign(externals, {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        bluebird: '_bluebird',
-      }),
-      node: {
-        global: false,
-        Buffer: false,
-        setImmediate: false
-      },
       output: {
         filename: opts.get('deps').internalsOut
       }
-    }, async (err, stats) => {
+    }), async (err, stats) => {
       handleWebpackErrors(err, stats, resolve, reject)
     })
   })
