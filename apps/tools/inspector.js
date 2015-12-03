@@ -158,7 +158,7 @@ view Inspector {
   let offAlt
   onKey('alt', down => {
     if (!down) {
-      offAlt()
+      offAlt && offAlt()
       hideInspect()
     }
     else {
