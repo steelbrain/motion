@@ -49,7 +49,9 @@ export async function installAll(toInstall) {
     if (toInstall.length)
       installingFullNames.push(toInstall)
     else {
-      opts.set('hasRunInitialInstall', true)
+      if (opts.get('hasRunInitialBuild'))
+        opts.set('hasRunInitialInstall', true)
+
       return
     }
 
@@ -62,7 +64,9 @@ export async function installAll(toInstall) {
 
     // no new ones found
     if (!fresh.length) {
-      if (!_isInstalling) opts.set('hasRunInitialInstall', true)
+      if (!_isInstalling)
+        opts.set('hasRunInitialInstall', true)
+
       await writeInstalled(prevInstalled)
       await bundleExternals({ silent: true })
       return

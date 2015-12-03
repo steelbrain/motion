@@ -52,8 +52,6 @@ var colors = [
     "indianred",
     "indigo",
     "khaki",
-    "lavender",
-    "lavenderblush",
     "lawngreen",
     "lime",
     "limegreen",
