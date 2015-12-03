@@ -9,6 +9,7 @@ export default () => ({
     'react-dom': 'ReactDOM',
     bluebird: '_bluebird',
   },
+  devtool: 'source-map',
   node: {
     global: false,
     Buffer: false,
