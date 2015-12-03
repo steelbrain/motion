@@ -24,8 +24,14 @@ export default function handleError(handle) {
   else {
     const error = handle
 
-    console.error((error && error.message || "ERROR").bold.red)
-    console.log(error.stack)
+    console.error((error && error.message || "Error:").bold.red)
+
+    if (typeof error == 'string')
+      console.log(error)
+
+    if (error.stack)
+      console.log(error.stack)
+
     errorClient.captureException(error)
 
     bridge.message('compile:error', { error }, 'error')

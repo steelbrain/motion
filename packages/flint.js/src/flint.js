@@ -67,6 +67,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   // flints internal state
   const Internal = root._Flint = {
     views: {},
+    opts: window.__flintopts, // sent from runner
 
     isRendering: 0,
     firstRender: true,
@@ -235,7 +236,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.caughtRuntimeErrors = 0
 
         // send runtime success before render
-        Tools.emitter.emit('runtime:success')
+        Tools && Tools.emitter.emit('runtime:success')
         Internal.lastFileLoad = Date.now()
       }
 

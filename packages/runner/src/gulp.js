@@ -260,8 +260,7 @@ function logError(error, file) {
     console.log(newLine, error.stack.split("\n").splice(0, 7).join("\n"))
   }
   else {
-    console.log('ERROR', "\n", error)
-    console.log(error.stack)
+    // console.log('ERROR', "\n", JSON.stringify(error))
     log('FILE', "\n", file.contents.toString())
   }
 }
