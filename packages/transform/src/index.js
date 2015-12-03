@@ -187,8 +187,18 @@ export default function createPlugin(options) {
     }
 
     function isJSXAttributeOfName(attr, name) {
-       return attr.name == name
-     }
+      return attr.name == name
+    }
+
+    function tracker(name, type = 'dec') {
+      return t.callExpression(t.identifier(`view.${type}`), [t.literal(name), t.identifier(name)])
+    }
+
+    function destructureTrackers(id, wrapType) {
+      return id.properties.map(prop => {
+        return tracker(prop.key.name, wrapType)
+      })
+    }
 
     let keyBase = {}
     let inJSX = false
@@ -534,14 +544,14 @@ export default function createPlugin(options) {
 
             // add getter
             if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
-              let isObjectPattern = false
+              let destructNodes = []
 
               node.declarations.map(dec => {
                 if (dec.flintTracked) return dec
 
-                // avoid destructures
+                // destructures
                 if (t.isObjectPattern(dec.id)) {
-                  isObjectPattern = true
+                  destructNodes = destructNodes.concat(destructureTrackers(dec.id, 'dec'))
                   return dec
                 }
 
@@ -563,10 +573,9 @@ export default function createPlugin(options) {
                 return dec
               })
 
-              if (isObjectPattern) {
-                // TODO: try handling destructures properly here
-                // console.log(node.declarations[0].id.properties[0].key.name)
-                // return [node, nodeThatAssingsDestructureVars]
+              // add destructure declarations
+              if (destructNodes.length) {
+                return [node, ...destructNodes]
               }
             }
           }
@@ -809,6 +818,13 @@ export default function createPlugin(options) {
 
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return
+
+            // destructures
+            if (t.isObjectPattern(node.left)) {
+              let destructNodes = destructureTrackers(node.left, 'set')
+              node.flintTracked = true
+              return [node, ...destructNodes]
+            }
 
             const isRender = hasObjWithProp(node, 'view', 'render')
 
