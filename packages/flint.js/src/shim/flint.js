@@ -19,7 +19,6 @@ export default function onError(Internal, Tools) {
 
     Internal.runtimeErrors++ // for use in detecting if we've started up with errors
     const isLive = Internal.editor.live
-    console.log('isLive', isLive)
 
     if (isLive) {
       let now = Date.now()
@@ -32,7 +31,6 @@ export default function onError(Internal, Tools) {
         timeout = setTimeout(() => {
           // if weve ran successfully in between this timeout, dont show err!
           if (Internal.lastFileLoad > now) {
-            console.log('Ran successfully')
             return
           }
 
