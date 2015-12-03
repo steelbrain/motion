@@ -646,7 +646,6 @@ export default function createPlugin(options) {
 
                 let hasStatics = statics.length
                 let hasDynamics = dynamics.length
-                let isChildView = name && name.length > 1 && name[1] == name[1].toUpperCase()
 
                 let result = []
 
@@ -654,8 +653,13 @@ export default function createPlugin(options) {
                 if (!hasStatics && !hasDynamics)
                   return result
 
+                // hot reload uniq keys
+
                 // keep statics hash inside view for child view styles (to trigger hot reloads)
-                if (hasStatics && viewHasChildWithClass && name != '$') {
+                const isChildView = hasStatics && name[1] && name[1] == name[1].toUpperCase()
+                const isChildViewClassed = hasStatics && viewHasChildWithClass && name != '$'
+
+                if (isChildView || isChildViewClassed) {
                   const uniq = hash(statKeys)
                   result.push(exprStatement(t.literal(uniq)))
                 }
@@ -670,6 +674,8 @@ export default function createPlugin(options) {
                   })
                   result.push(exprStatement(t.literal(uniq)))
                 }
+
+                // return statement
 
                 if (hasDynamics) {
                   result.push(dynamicStyleStatement(node, dynamics))
