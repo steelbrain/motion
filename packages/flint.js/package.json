@@ -1,6 +1,6 @@
 {
   "name": "flint-js",
-  "version": "1.3.253",
+  "version": "1.4.0-beta",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.release.js",
@@ -15,7 +15,7 @@
     "clone": "^1.0.2",
     "deep-equal": "^1.0.1",
     "event-emitter": "^0.3.3",
-    "flint-nice-styles": "^1.0.0",
+    "flint-nice-styles": "^1.4.0-beta",
     "hash-sum": "^1.0.2",
     "history": "^1.13.0",
     "lodash.isequal": "^3.0.4",
