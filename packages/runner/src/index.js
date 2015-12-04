@@ -41,7 +41,7 @@ process.on('uncaughtException', cleanExit)
 let child
 
 function cleanExit(e) {
-  logError(e)
+  if (e) logError(e)
 
   child && child.send('EXIT') // this seems to be required
 
