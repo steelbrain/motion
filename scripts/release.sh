@@ -17,7 +17,7 @@ release_package() {
   npm version patch
   # VERSION=$(npm view flint version -loglevel silent)
   # git tag -a "v$VERSION" -m "`git log -1 --format=%s`"
-  npm publish
+  npm publish --tag beta
   cd ../..
 }
 
@@ -27,7 +27,7 @@ release_tools() {
   flint build
   cd .flint
 	npm version patch
-	npm publish
+	npm publish --tag beta
   cd ../..
 }
 
