@@ -62,7 +62,7 @@ export async function run(_opts = {}, isBuild) {
   try {
     console.log()
     const appDir = _opts.appDir || path.normalize(process.cwd());
-    const OPTS = opts.setAll({ ..._opts, appDir, isBuild })
+    const OPTS = await opts.setAll({ ..._opts, appDir, isBuild })
 
     log.setLogging()
     log('opts', OPTS)

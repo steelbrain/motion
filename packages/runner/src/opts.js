@@ -1,6 +1,7 @@
 import path from 'path'
 import log from './lib/log'
 import { p, sanitize } from './lib/fns'
+import { writeState } from './internal'
 
 let OPTS
 
@@ -15,7 +16,7 @@ function get(key) {
   return key ? OPTS[key] : OPTS
 }
 
-function setAll(opts) {
+async function setAll(opts) {
   // from cli
   OPTS = {}
 
@@ -62,6 +63,12 @@ function setAll(opts) {
   var folders = OPTS.dir.split('/')
   OPTS.name = folders[folders.length - 1]
   OPTS.url = OPTS.name + '.dev'
+
+  await writeState((state, write) => {
+    state.opts = { ...OPTS }
+    delete state.opts.state // prevent circle
+    write(state)
+  })
 
   return OPTS
 }
