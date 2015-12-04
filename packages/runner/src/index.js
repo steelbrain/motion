@@ -97,7 +97,6 @@ export async function run(_opts = {}, isBuild) {
       process.exit()
     }
     else {
-      await clear.outDir()
       await server.run()
       bridge.start()
       gulp.buildScripts(previousOut)

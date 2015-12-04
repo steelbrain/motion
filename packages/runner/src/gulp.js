@@ -94,6 +94,7 @@ function watchDeletes() {
 
 // userStream is optional for programmatic usage
 export function buildScripts({ userStream, previousOut }) {
+  console.log('previous out', previousOut);
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
