@@ -82,10 +82,10 @@ function fileSend({ path, contents }) {
 
 // ignore stream when loading file in browser
 function initScriptWait() {
-  bridge.on('script:load', ({ path }) => {
-    log(LOG, 'script:load', path)
-    // fileLoading[path] = true
-  })
+  // bridge.on('script:load', ({ path }) => {
+  //   log(LOG, 'script:load', path)
+  //   // fileLoading[path] = true
+  // })
 
   bridge.on('script:done', ({ path }) => {
     log(LOG, 'script:done', path)

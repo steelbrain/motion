@@ -82,6 +82,10 @@ function watchDeletes() {
   chokidar.watch('.', {ignored: /[\/\\]\./})
     .on('unlink', async (file) => {
       try {
+        // ignore if in node_modules
+        if (file.indexOf(opts.get('nodeDir')) === 0)
+          return
+
         log('gulp', 'unlink', file)
         if (/jsf?/.test(path.extname(file))) {
           await rm(p(opts.get('outDir'), file))

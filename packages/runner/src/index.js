@@ -14,6 +14,7 @@ import build from './builder/build'
 import clear from './builder/clear'
 import copy from './builder/copy'
 import watchDeletes from './lib/watchDeletes'
+import logError from './lib/logError'
 import { mkdir, readdir } from './lib/fns'
 import path from 'path'
 
@@ -39,7 +40,9 @@ process.on('uncaughtException', cleanExit)
 
 let child
 
-function cleanExit() {
+function cleanExit(e) {
+  logError(e)
+
   child && child.send('EXIT') // this seems to be required
 
   setTimeout(() => {

@@ -36,6 +36,7 @@ async function setAll(opts) {
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')
+  OPTS.nodeDir = p(OPTS.flintDir, 'node_modules')
   OPTS.internalDir = p(OPTS.flintDir, '.internal')
   OPTS.depsDir = p(OPTS.internalDir, 'deps')
   OPTS.template = OPTS.template || '.flint/index.html'

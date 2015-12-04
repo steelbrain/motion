@@ -1,6 +1,7 @@
 import opts from './opts'
 import wport from './lib/wport'
-import { log, handleError, readJSON, writeJSON } from './lib/fns'
+import handleError from './lib/handleError'
+import { log, readJSON, writeJSON } from './lib/fns'
 
 let OPTS
 const LOG = 'writeState'
@@ -74,9 +75,14 @@ export async function init() {
     await readState()
   }
   catch(e) {
-    await writeState((state, write) => {
-      write({})
-    })
+    try {
+      await writeState((state, write) => {
+        write({})
+      })
+    }
+    catch(e) {
+      handleError(e)
+    }
   }
 
   let config
@@ -93,11 +99,16 @@ export async function init() {
 }
 
 export async function setServerState() {
-  await writeState((state, write) => {
-    state.port = opts.get('port')
-    state.wport = wport()
-    write(state)
-  })
+  try {
+    await writeState((state, write) => {
+      state.port = opts.get('port')
+      state.wport = wport()
+      write(state)
+    })
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 export default { init, readState, writeState, setServerState }

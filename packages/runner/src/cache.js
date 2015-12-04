@@ -198,7 +198,7 @@ const Cache = {
   },
 
   getLastError() {
-    let paths = Object.keys(files)
+    let paths = Object.keys(cache.files)
     let errors = paths.map(p => cache.files[p].error)
     errors = errors.filter(e => !!e)
 
