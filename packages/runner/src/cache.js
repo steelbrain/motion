@@ -1,5 +1,7 @@
-import { writeState } from './internal'
-import { _, log, path, opts, writeJSON } from './lib/fns'
+import { readState, writeState } from './internal'
+import handleError from './lib/handleError'
+import opts from './opts'
+import { _, log, path, writeJSON } from './lib/fns'
 
 const LOG = 'cache'
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
@@ -14,10 +16,14 @@ type File = {
 }
 
 type CacheState = {
-  files: { name: File };
+  files: {
+    name: File;
+    time: Date;
+  };
   imports: ImportArray;
 }
 
+let previousCache: CacheState
 let cache: CacheState = {
   files: {},
   imports: []
@@ -42,6 +48,19 @@ function onDeleteViews(views) {
 }
 
 const Cache = {
+  async init() {
+    try {
+      // read in previous cache
+      const state = await readState()
+      previousCache = state.cache
+
+      Cache.setBaseDir(opts.get('dir'))
+    }
+    catch(e) {
+      handleError(e)
+    }
+  },
+
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir)
     log(LOG, 'baseDir', baseDir)
@@ -59,7 +78,14 @@ const Cache = {
     if (!file) return
     const n = relative(file)
     cache.files[n] = cache.files[n] || {}
+    cache.files[n].added = Date.now()
     return cache.files[n]
+  },
+
+  update(file: string) {
+    Cache.setWritten(file.path, Date.now())
+    Cache.removeError(file.path)
+    Cache.serialize()
   },
 
   get(file: string) {
@@ -68,6 +94,15 @@ const Cache = {
 
   getAll() {
     return cache.files
+  },
+
+  getPrevious(file: string) {
+    return previousCache.files[relative(file)]
+  },
+
+  restorePrevious(file: string) {
+    const n = relative(file)
+    cache.files[n] = previousCache.files[n]
   },
 
   onDeleteFile(cb) {
@@ -180,6 +215,11 @@ const Cache = {
     }
 
     return null
+  },
+
+  setWritten(file : string, time) {
+    console.log('set written', )
+    cache.files[relative(file)].writtenAt = time
   },
 
   serialize() {

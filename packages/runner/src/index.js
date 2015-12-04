@@ -72,7 +72,7 @@ export async function run(_opts = {}, isBuild) {
     await clear.outDir()
 
     // init
-    cache.setBaseDir(OPTS.dir)
+    await cache.init()
     compiler('init', OPTS)
     await bundler.init()
     await internal.init()

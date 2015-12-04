@@ -19,5 +19,7 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('--pretty', 'pretty print files')
     .parse(process.argv)
 
+  Program.version = require('../../../package.json').version
+
   runner(Program)
 })

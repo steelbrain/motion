@@ -20,6 +20,7 @@ async function setAll(opts) {
   // from cli
   OPTS = {}
 
+  OPTS.version = opts.version
   OPTS.debug = opts.debug
   OPTS.port = opts.port
   OPTS.host = opts.host

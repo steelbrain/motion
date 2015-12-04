@@ -113,7 +113,7 @@ export function buildScripts({ userStream, previousOut }) {
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
-    // .pipe($.if(alreadyBuilt, $.ignore.exclude(true)))
+    .pipe($.if(buildSkip, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -143,13 +143,30 @@ export function buildScripts({ userStream, previousOut }) {
   }
 
   // only do on first run
-  function alreadyBuilt(file) {
+  function buildSkip(file) {
     // stat.mtime
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
     try {
       const outMTime = fs.statSync(outFile).mtime
       const srcMTime = fs.statSync(file.path).mtime
-      return +srcMTime < +outMTime
+      const goodBuild = +outMTime > +srcMTime
+
+      if (!goodBuild)
+        return false
+
+      const cached = cache.getPrevious(file.path)
+
+      if (!cached)
+        return false
+
+      const goodCache = cached.added > srcMTime
+
+      if (!goodCache)
+        return false
+
+      cache.restorePrevious(file.path)
+      return true
+
     // catch if file doesnt exist
     } catch (e) { return false }
   }
@@ -230,8 +247,7 @@ export function buildScripts({ userStream, previousOut }) {
       const cacheHasFile = cache.get(file.path)
       log('gulp', 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && !file.isInternal && cacheHasFile) {
-        cache.removeError(file.path)
-        cache.serialize()
+        cache.update(file.path)
 
         bridge.message('script:add', lastScript)
         bridge.message('compile:success', lastScript, 'error')
