@@ -1,5 +1,11 @@
 /* flex box */
 
+body.__flintfocus {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: context-menu !important;
+}
+
 ._flintHighlighter {
   background: rgba(0,0,200,0.1);
   position: fixed;

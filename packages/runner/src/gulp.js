@@ -1,6 +1,7 @@
 import chokidar from 'chokidar'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
+import fs from 'fs'
 import flintTransform from 'flint-transform'
 import through from 'through2'
 import path from 'path'
@@ -111,6 +112,7 @@ export function buildScripts({ userStream, previousOut }) {
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
+    .pipe($.if(alreadyBuilt, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -139,6 +141,19 @@ export function buildScripts({ userStream, previousOut }) {
     if (!vinyl.event) buildFinishedCheck()
   }
 
+  // only do on first run
+  function alreadyBuilt(file) {
+    // stat.mtime
+    const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
+    try {
+      const outMTime = fs.statSync(outFile).mtime
+      const srcMTime = fs.statSync(file.path).mtime
+      console.log('outStat', outMTime, 'srcStat', srcMTime)
+      return srcMTime > outMTime
+    // catch if file doesnt exist
+    } catch (e) { return false }
+  }
+
   function resetLastFile(file) {
     lastError = false
     curFile = file
@@ -161,8 +176,8 @@ export function buildScripts({ userStream, previousOut }) {
   function setLastFile(file) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
-    log('gulp', 'setLastFile', 'name', name)
     if (name.charAt(0) != '/') name = '/' + name
+    log('gulp', 'setLastFile', 'path', file.path, 'name', name)
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }

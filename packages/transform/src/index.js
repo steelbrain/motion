@@ -213,7 +213,7 @@ export default function createPlugin(options) {
     let viewStyleNames = {} // prevent duplicate style names
 
     // meta-data for views for atom
-    let viewMeta = {}
+    let meta = {}
     let sendingMeta = false
 
     return new Plugin("flint-transform", {
@@ -262,12 +262,16 @@ export default function createPlugin(options) {
             const fullName = name + (subName ? `.${subName}` : '')
 
             currentView = fullName
-            viewMeta[currentView] = {}
+            meta[currentView] = {
+              data: { file: file.opts.filename },
+              styles: {},
+              els: {},
+            }
 
             if (!sendingMeta && options.onMeta) {
               sendingMeta = true
               setTimeout(() => {
-                options.onMeta({ viewMeta, type: 'meta' })
+                options.onMeta({ meta, type: 'meta' })
                 sendingMeta = false
               }, 100)
             }
@@ -422,7 +426,7 @@ export default function createPlugin(options) {
 
               let arr = [t.literal(name), t.literal(key)]
 
-              viewMeta[currentView][name + key] = el.loc.start
+              meta[currentView].els[name + key] = el.loc.end
 
               // safer, checks for file scope or view scope only
               if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
@@ -587,12 +591,12 @@ export default function createPlugin(options) {
 
             const isStyle = (
               // $variable = {}
-              node.left.name && node.left.name.indexOf('$') == 0 ||
-              // $.variable = {}
-              node.left.object && node.left.object.name == '$'
+              node.left.name && node.left.name.indexOf('$') == 0
             )
 
             if (!isStyle) return
+
+            meta[currentView].styles[node.left.name.substr(1)] = node.loc.start
 
             // styles
             return extractAndAssign(node)

@@ -17,8 +17,6 @@ import watchDeletes from './lib/watchDeletes'
 import { mkdir, recursiveRead } from './lib/fns'
 import path from 'path'
 
-
-
 // DONT RELEASE ME!
 // import memwatch from 'memwatch-next'
 // import heapdump from 'heapdump'
@@ -37,6 +35,7 @@ import path from 'path'
 
 process.on('SIGINT', cleanExit)
 process.on('SIGTERM', cleanExit)
+process.on('uncaughtException', cleanExit)
 
 let child
 

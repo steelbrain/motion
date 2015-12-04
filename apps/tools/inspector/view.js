@@ -55,7 +55,7 @@ view Inspector.View {
   })
 
   let hasKeys = o => o && Object.keys(o).length > 0
-  let edit = () => _DT.messageEditor({ type: 'editView', view: name })
+  let edit = () => _DT.messageEditor({ type: 'focus:element', view: name })
 
   <view class={{ active, highlight }}>
     <Close onClick={view.props.onClose} fontSize={20} size={35} />
