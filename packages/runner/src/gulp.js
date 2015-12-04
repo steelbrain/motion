@@ -113,7 +113,7 @@ export function buildScripts({ userStream, previousOut }) {
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
-    .pipe($.if(alreadyBuilt, $.ignore.exclude(true)))
+    // .pipe($.if(alreadyBuilt, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
