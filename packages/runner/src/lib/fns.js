@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import readdirp from 'readdirp'
 import mkdirp from 'mkdirp'
-import recursiveRead from 'recursive-readdir'
 import jf from 'jsonfile'
 import fs from 'fs'
 import rimraf from 'rimraf'
@@ -36,7 +35,6 @@ const writeFile = Promise.promisify(fs.writeFile)
 const touch = logWrap('touch', Promise.promisify(_touch))
 const copy = logWrap('copy', Promise.promisify(copyFile))
 const exists = logWrap('exists', Promise.promisify(fs.stat))
-const recursiveRead = logWrap('recursiveRead', Promise.promisify(recursiveRead))
 
 const p = path.join
 const recreateDir = (dir) =>
