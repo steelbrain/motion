@@ -14,7 +14,6 @@ let focusStyle = data => {
   //console.log('data ', data.view, data.key)
 }
 
-// bridge.on('focus:element', data => {
 bridge.on('editor', data => {
   let { type, key, el, view } = data
 
