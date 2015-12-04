@@ -12,7 +12,8 @@ export async function internalDir() {
 
 export async function outDir() {
   log(LOG, 'outDir')
-  await recreateDir(opts.get('outDir'))
+  // await recreateDir(opts.get('outDir'))
+  await mkdir(opts.get('outDir'))
 }
 
 export async function styles() {

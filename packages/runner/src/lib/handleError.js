@@ -26,6 +26,9 @@ export default function handleError(handle) {
 
     console.error((error && error.message || "Error:").bold.red)
 
+    if (Array.isArray(error))
+      console.log(...error)
+
     if (typeof error == 'string')
       console.log(error)
 

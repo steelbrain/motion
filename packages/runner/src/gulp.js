@@ -11,6 +11,7 @@ import cache from './cache'
 import copy from './builder/copy'
 import build from './builder/build'
 import unicodeToChar from './lib/unicodeToChar'
+import logError from './lib/logError'
 import superStream from './lib/superStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
@@ -250,23 +251,6 @@ function buildFinishedCheck() {
     }, 420)
   }
 }
-
-function logError(error, file) {
-  if (error.stack || error.codeFrame)
-    error.stack = unicodeToChar(error.stack || error.codeFrame);
-
-  if (error.plugin == 'gulp-babel') {
-    console.log(error.message.replace(OPTS.appDir, ''));
-    if (error.name != 'TypeError' && error.loc)
-      console.log('line: %s, col: %s', error.loc.line, error.loc.column);
-    console.log(newLine, error.stack.split("\n").splice(0, 7).join("\n"))
-  }
-  else {
-    // console.log('ERROR', "\n", JSON.stringify(error))
-    log('FILE', "\n", file.contents.toString())
-  }
-}
-
 
 /* FIRST BUILD STUFF */
 

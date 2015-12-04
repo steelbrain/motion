@@ -1,10 +1,7 @@
-import _ from 'lodash'
-import opts from './opts'
-import path from 'path'
-import log from './lib/log'
+import { writeState } from './internal'
+import { _, log, path, opts, writeJSON } from './lib/fns'
 
 const LOG = 'cache'
-
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>
@@ -16,10 +13,17 @@ type File = {
   error?: object
 }
 
-let files: { name: File } = {}
-let imports: ImportArray = []
-let baseDir = ''
+type CacheState = {
+  files: { name: File };
+  imports: ImportArray;
+}
 
+let cache: CacheState = {
+  files: {},
+  imports: []
+}
+
+let baseDir = ''
 let deleteFileCbs = []
 let deleteViewCbs = []
 
@@ -54,16 +58,16 @@ const Cache = {
   add(file: string) {
     if (!file) return
     const n = relative(file)
-    files[n] = files[n] || {}
-    return files[n]
+    cache.files[n] = cache.files[n] || {}
+    return cache.files[n]
   },
 
   get(file: string) {
-    return files[relative(file)]
+    return cache.files[relative(file)]
   },
 
   getAll() {
-    return files
+    return cache.files
   },
 
   onDeleteFile(cb) {
@@ -76,52 +80,52 @@ const Cache = {
 
   remove(file: string) {
     const name = relative(file)
-    const state = files[name]
+    const state = cache.files[name]
     log(LOG, 'remove', name)
-    delete files[name]
+    delete cache.files[name]
     onDeleteFile({ file, name, state })
   },
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
-    const cFile = files[relative(file)]
+    const cFile = cache.files[relative(file)]
     onDeleteViews(_.difference(cFile.views, views))
     cFile.views = views
-    log(LOG, 'setViews', files)
+    log(LOG, 'setViews', cache.files)
   },
 
   setImports(_imports: ImportArray) {
     log(LOG, 'setImports', _imports)
-    imports = _imports
+    cache.imports = _imports
   },
 
   isExported(file: string) {
-    const f = files[relative(file)]
+    const f = cache.files[relative(file)]
     return f && f.isExported
   },
 
   setIsExported(file: string, val: boolean) {
     const name = relative(file)
-    const f = files[name]
+    const f = cache.files[name]
 
     if (!f) return
 
     const isExported = f.isExported
-    files[name].isExported = val
+    cache.files[name].isExported = val
 
     if (isExported != val)
       onSetExported(name, val)
   },
 
   getExported() {
-    log(LOG, 'cache', 'getExported', files)
-    return Object.keys(files)
-      .map(name => files[name].isExported ? name : null)
+    log(LOG, 'cache', 'getExported', cache.files)
+    return Object.keys(cache.files)
+      .map(name => cache.files[name].isExported ? name : null)
       .filter(f => !!f)
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    log(LOG, 'setFileImports', file, imports);
+    log(LOG, 'setFileImports', file, cache.imports);
     let cacheFile = Cache.get(file)
 
     if (!cacheFile)
@@ -131,14 +135,14 @@ const Cache = {
   },
 
   getViews(file?: string) {
-    return files[relative(file)].views
+    return cache.files[relative(file)].views
   },
 
   getImports(file?: string) {
     if (!file) {
-      let allImports = [].concat(imports)
-      Object.keys(files).forEach(file => {
-        const _imports = files[file].imports
+      let allImports = [].concat(cache.imports)
+      Object.keys(cache.files).forEach(file => {
+        const _imports = cache.files[file].imports
         if (_imports && _imports.length)
           allImports = allImports.concat(_imports)
       })
@@ -146,22 +150,22 @@ const Cache = {
       return allImports
     }
 
-    return files[relative(file)].imports
+    return cache.files[relative(file)].imports
   },
 
   addError(file : string, error : object) {
-    if (files[relative(file)])
-      files[relative(file)].error = error
+    if (cache.files[relative(file)])
+      cache.files[relative(file)].error = error
   },
 
   removeError(file : string) {
-    if (files[relative(file)])
-      files[relative(file)].error = null
+    if (cache.files[relative(file)])
+      cache.files[relative(file)].error = null
   },
 
   getLastError() {
     let paths = Object.keys(files)
-    let errors = paths.map(p => files[p].error)
+    let errors = paths.map(p => cache.files[p].error)
     errors = errors.filter(e => !!e)
 
     if (errors.length) {
@@ -177,6 +181,13 @@ const Cache = {
 
     return null
   },
+
+  serialize() {
+    writeState((state, write) => {
+      state.cache = cache
+      write(state)
+    })
+  }
 
 }
 

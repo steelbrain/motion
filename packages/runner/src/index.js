@@ -68,11 +68,13 @@ export async function run(_opts = {}, isBuild) {
     log.setLogging()
     log('opts', OPTS)
 
+    // ensure dirs
     await clear.styles()
+    await clear.outDir()
+
+    // init
     cache.setBaseDir(OPTS.dir)
     compiler('init', OPTS)
-
-    // internals/externals
     await bundler.init()
     await internal.init()
 

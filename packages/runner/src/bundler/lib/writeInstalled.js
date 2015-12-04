@@ -5,7 +5,7 @@ import rmFlintExternals from './rmFlintExternals'
 import readFullPaths from './readFullPaths'
 import writeFullPaths from './writeFullPaths'
 import filterWithPath from './filterWithPath'
-import { readState, writeState } from '../../internal'
+import { writeState } from '../../internal'
 
 const LOG = 'externals'
 
@@ -16,21 +16,12 @@ export default async function writeInstalled(_packages, _paths) {
     const fullPaths = filterWithPath(_paths || cache.getImports(), _packages)
     log(LOG, 'writeInstalled', 'packages', packages, 'fullPaths', fullPaths)
 
-    const config = await readState()
+    await writeState((state, write) => {
+      state.installed = packages
+      write(state)
+    })
 
-    const oldState = config
-    const oldFullPaths = await readFullPaths()
-
-    try {
-      config.installed = packages
-      await writeState(config)
-      await writeFullPaths(fullPaths)
-    }
-    catch(e) {
-      console.log('Error writing new packages', e)
-      await writeState(oldState)
-      await writeFullPaths(oldFullPaths)
-    }
+    await writeFullPaths(fullPaths)
   }
   catch(e) {
     handleError(e)

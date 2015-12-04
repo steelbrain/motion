@@ -3,6 +3,7 @@ import wport from './lib/wport'
 import { log, handleError, readJSON, writeJSON } from './lib/fns'
 
 let OPTS
+const LOG = 'writeState'
 
 export async function readState() {
   try {
@@ -15,10 +16,45 @@ export async function readState() {
   }
 }
 
+let lock = null
+
+function getLock() {
+  log(LOG, 'lock', lock)
+  if (lock) return lock
+  else {
+    log(LOG, 'no lock, returning new')
+    let resolver
+    lock = new Promise(res => {
+      resolver = () => {
+        lock = null
+        res()
+      }
+    })
+    return resolver
+  }
+}
+
+function stateWriter(writer, state, unlock) {
+  return new Promise(res => {
+    log(LOG, 'calling writer')
+    writer(state, async next => {
+      log(LOG, 'next state', next)
+      await writeJSON(opts.get('stateFile'), next, { spaces: 2 })
+      log(LOG, 'unlocking')
+      unlock()
+      res()
+    })
+  })
+}
+
 // prompts for domain they want to use
-export async function writeState(state) {
+export async function writeState(writer) {
   try {
-    await writeJSON(opts.get('stateFile'), state, { spaces: 2 })
+    log(LOG, 'getting lock')
+    const unlock = getLock()
+    log(LOG, 'got lock')
+    const state = await readState()
+    await stateWriter(writer, state, unlock)
   }
   catch(e) {
     handleError(e)
@@ -30,7 +66,9 @@ export async function init() {
     await readState()
   }
   catch(e) {
-    await writeState({})
+    await writeState((state, write) => {
+      write({})
+    })
   }
 
   let config
@@ -47,10 +85,11 @@ export async function init() {
 }
 
 export async function setServerState() {
-  const state = await readState()
-  state.port = opts.get('port')
-  state.wport = wport()
-  await writeState(state)
+  await writeState((state, write) => {
+    state.port = opts.get('port')
+    state.wport = wport()
+    write(state)
+  })
 }
 
 export default { init, readState, writeState, setServerState }
