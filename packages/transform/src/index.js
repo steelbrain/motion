@@ -191,7 +191,7 @@ export default function createPlugin(options) {
     }
 
     function tracker(name, type = 'dec') {
-      return t.callExpression(t.identifier(`view.${type}`), [t.literal(name), t.identifier(name)])
+      return t.expressionStatement(t.callExpression(t.identifier(`view.${type}`), [t.literal(name), t.identifier(name)]))
     }
 
     function destructureTrackers(id, wrapType) {
