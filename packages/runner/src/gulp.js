@@ -165,6 +165,7 @@ export function buildScripts({ userStream, previousOut }) {
         return false
 
       cache.restorePrevious(file.path)
+      out.goodFile(file)
       return true
 
     // catch if file doesnt exist
