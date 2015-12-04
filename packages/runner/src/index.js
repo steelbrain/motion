@@ -109,6 +109,7 @@ export async function run(_opts = {}, isBuild) {
 
       // wait for build
       await waitForFirstBuild()
+      cache.serialize()
 
       // ensure we have clean packages before open
       await bundler.externals({ doInstall: true })

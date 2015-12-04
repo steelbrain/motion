@@ -231,6 +231,8 @@ export function buildScripts({ userStream, previousOut }) {
       log('gulp', 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && !file.isInternal && cacheHasFile) {
         cache.removeError(file.path)
+        cache.serialize()
+
         bridge.message('script:add', lastScript)
         bridge.message('compile:success', lastScript, 'error')
 

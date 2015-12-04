@@ -12,6 +12,7 @@ export async function readState() {
     return state
   }
   catch(e) {
+    console.log('error reading state', e)
     return {}
   }
 }
@@ -35,14 +36,19 @@ function getLock() {
 }
 
 function stateWriter(writer, state, unlock) {
-  return new Promise(res => {
+  return new Promise((res, rej) => {
     log(LOG, 'calling writer')
     writer(state, async next => {
-      log(LOG, 'next state', next)
-      await writeJSON(opts.get('stateFile'), next, { spaces: 2 })
-      log(LOG, 'unlocking')
-      unlock()
-      res()
+      try {
+        log(LOG, 'next state', next)
+        await writeJSON(opts.get('stateFile'), next, { spaces: 2 })
+        log(LOG, 'unlocking')
+        unlock()
+        res()
+      }
+      catch(e) {
+        rej(e)
+      }
     })
   })
 }
@@ -50,9 +56,11 @@ function stateWriter(writer, state, unlock) {
 // prompts for domain they want to use
 export async function writeState(writer) {
   try {
-    log(LOG, 'getting lock')
+    log(LOG, 'waiting...')
+    if (lock) await lock
+    log(LOG, 'get lock')
     const unlock = getLock()
-    log(LOG, 'got lock')
+    log(LOG, 'got lock', unlock)
     const state = await readState()
     await stateWriter(writer, state, unlock)
   }
