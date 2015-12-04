@@ -14,7 +14,7 @@ import build from './builder/build'
 import clear from './builder/clear'
 import copy from './builder/copy'
 import watchDeletes from './lib/watchDeletes'
-import { mkdir, recursiveRead } from './lib/fns'
+import { mkdir, readdir } from './lib/fns'
 import path from 'path'
 
 // DONT RELEASE ME!
@@ -78,7 +78,8 @@ export async function run(_opts = {}, isBuild) {
     // cache watching
     watchDeletes()
 
-    const previousOut = await recursiveRead(OPTS.outDir)
+    const previousOut = await readdir({ root: OPTS.outDir })
+    console.log('prev', previousOut)
 
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)
