@@ -12,7 +12,7 @@ export async function readState() {
     return state
   }
   catch(e) {
-    console.log('error reading state', e)
+    // console.log('error reading state', e)
     return {}
   }
 }
