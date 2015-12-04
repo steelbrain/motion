@@ -14,7 +14,7 @@ import build from './builder/build'
 import clear from './builder/clear'
 import copy from './builder/copy'
 import watchDeletes from './lib/watchDeletes'
-import { mkdir } from './lib/fns'
+import { mkdir, recursiveRead } from './lib/fns'
 import path from 'path'
 
 
@@ -79,13 +79,15 @@ export async function run(_opts = {}, isBuild) {
     // cache watching
     watchDeletes()
 
+    const previousOut = await recursiveRead(OPTS.outDir)
+
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)
       await clear.buildDir()
       copy.assets()
 
       // run our pipeline once manually
-      gulp.buildScripts()
+      gulp.buildScripts(previousOut)
       await waitForFirstBuild()
 
       if (OPTS.watch)
@@ -99,7 +101,7 @@ export async function run(_opts = {}, isBuild) {
       await clear.outDir()
       await server.run()
       bridge.start()
-      gulp.buildScripts()
+      gulp.buildScripts(previousOut)
 
       // wait for build
       await waitForFirstBuild()

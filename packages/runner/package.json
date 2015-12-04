@@ -48,6 +48,7 @@
     "raven": "^0.8.1",
     "readdirp": "^2.0.0",
     "reapp-object-assign": "^1.0.0",
+    "recursive-readdir": "^1.3.0",
     "regenerator": "^0.8.42",
     "replace-ext": "0.0.1",
     "rimraf": "^2.3.2",
