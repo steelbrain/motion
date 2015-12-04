@@ -36,8 +36,8 @@ function getLock() {
 }
 
 function stateWriter(writer, state, unlock) {
+  log(LOG, 'about to call writer...')
   return new Promise((res, rej) => {
-    log(LOG, 'calling writer')
     writer(state, async next => {
       try {
         log(LOG, 'next state', next)

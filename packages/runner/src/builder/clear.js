@@ -19,7 +19,7 @@ export async function outDir() {
 export async function styles() {
   log(LOG, 'outDir')
   // await recreateDir(opts.get('styleDir'))
-  await mkdir(opts.get('outDir'))
+  await mkdir(opts.get('styleDir'))
 }
 
 export async function buildDir() {

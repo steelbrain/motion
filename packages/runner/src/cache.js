@@ -83,9 +83,8 @@ const Cache = {
   },
 
   update(file: string) {
-    Cache.setWritten(file.path, Date.now())
-    Cache.removeError(file.path)
-    Cache.serialize()
+    Cache.setWritten(file, Date.now())
+    Cache.removeError(file)
   },
 
   get(file: string) {
@@ -218,13 +217,16 @@ const Cache = {
   },
 
   setWritten(file : string, time) {
-    console.log('set written', )
-    cache.files[relative(file)].writtenAt = time
+    const f = cache.files[relative(file)]
+    log(LOG, 'setWritten', f, time)
+    if (f) f.writtenAt = time
   },
 
   serialize() {
+    log(LOG, 'serialize')
     writeState((state, write) => {
       state.cache = cache
+      log(LOG, 'writing cache')
       write(state)
     })
   }

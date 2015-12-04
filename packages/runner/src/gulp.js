@@ -19,7 +19,7 @@ import babel from './lib/gulp-babel'
 import opts from './opts'
 import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
-import { p, rm, handleError, log } from './lib/fns'
+import { _, p, rm, handleError, log } from './lib/fns'
 
 const $ = loadPlugins()
 let lastSavedTimestamp = {}
@@ -33,6 +33,7 @@ const SCRIPTS_GLOB = [
   '!.flint{,/**}'
 ]
 
+const serializeCache = _.throttle(cache.serialize, 200)
 const hasFinished = () => {
   // console.log(opts.get('hasRunInitialBuild'), opts.get('hasRunInitialInstall'))
   return opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
@@ -249,6 +250,7 @@ export function buildScripts({ userStream, previousOut }) {
       log('gulp', 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && !file.isInternal && cacheHasFile) {
         cache.update(file.path)
+        serializeCache()
 
         bridge.message('script:add', lastScript)
         bridge.message('compile:success', lastScript, 'error')
