@@ -80,7 +80,6 @@ export async function run(_opts = {}, isBuild) {
     watchDeletes()
 
     const previousOut = await readdir({ root: OPTS.outDir })
-    console.log('prev', previousOut)
 
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)
