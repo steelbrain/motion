@@ -35,7 +35,6 @@ release_all() {
     release_package ${pkg}
   done
   release_tools
-  git commit -am 'vbump all'
 }
 
 if [ $1 = "all" ]; then
