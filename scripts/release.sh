@@ -14,7 +14,6 @@ release_package() {
     echo "building webpack"
   fi
 
-  npm version patch
   # VERSION=$(npm view flint version -loglevel silent)
   # git tag -a "v$VERSION" -m "`git log -1 --format=%s`"
   npm publish --tag beta
@@ -26,7 +25,6 @@ release_tools() {
   cd apps/tools
   flint build
   cd .flint
-	npm version patch
 	npm publish --tag beta
   cd ../..
 }
