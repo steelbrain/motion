@@ -78,8 +78,11 @@ export async function run(_opts = {}, isBuild) {
     // cache watching
     watchDeletes()
 
-    const previousOut = await readdir({ root: OPTS.outDir })
-    console.log('prev', previousOut)
+    const previousFiles = await readdir({ root: OPTS.outDir })
+    const previousOut = previousFiles
+      .files
+      .map(file => file.path)
+      .filter(path => path.slice(-4) !== '.map')
 
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)
@@ -87,7 +90,7 @@ export async function run(_opts = {}, isBuild) {
       copy.assets()
 
       // run our pipeline once manually
-      gulp.buildScripts(previousOut)
+      gulp.buildScripts({ previousOut })
       await waitForFirstBuild()
 
       if (OPTS.watch)
@@ -100,7 +103,7 @@ export async function run(_opts = {}, isBuild) {
     else {
       await server.run()
       bridge.start()
-      gulp.buildScripts(previousOut)
+      gulp.buildScripts({ previousOut })
 
       // wait for build
       await waitForFirstBuild()

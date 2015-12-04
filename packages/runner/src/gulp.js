@@ -94,7 +94,6 @@ function watchDeletes() {
 
 // userStream is optional for programmatic usage
 export function buildScripts({ userStream, previousOut }) {
-  console.log('previous out', previousOut);
   OPTS = opts.get()
   let lastScript, curFile, lastError
   let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
@@ -149,8 +148,7 @@ export function buildScripts({ userStream, previousOut }) {
     try {
       const outMTime = fs.statSync(outFile).mtime
       const srcMTime = fs.statSync(file.path).mtime
-      console.log('outStat', outMTime, 'srcStat', srcMTime)
-      return srcMTime > outMTime
+      return +srcMTime < +outMTime
     // catch if file doesnt exist
     } catch (e) { return false }
   }
