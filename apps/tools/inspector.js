@@ -1,6 +1,6 @@
 import { keys, onKey, onKeyDown } from './keys'
-
-import throttle from 'lodash.throttle'
+import inspecting from './lib/inspecting'
+import _ from 'underscore'
 
 const removeHead = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
@@ -120,32 +120,13 @@ function writeBack(path, writePath) {
   Int.inspectorRefreshing = null
 }
 
-// holds the hover el for editing purposes
-window.__activeEl = { key: null, active: null }
-let activeView = null
-let reactKey = null
-getReactKey = el =>
-  Object.keys(el).filter(k => k.indexOf('__reactInternalInst')==0)[0]
-
-let getReactId = el => {
-  if (!reactKey) reactKey = getReactKey(el)
-  if (!el[reactKey]) return
-  let current = el[reactKey]._currentElement
-  if (!current || !current.key) return null
-
-  let key = current.key
-  let split = key.split('$')
-  return split[split.length - 1]
-}
-
-
 view Inspector {
   let clickOff, hoverOff, lastTarget
   let hudActive = false
   let views = []
 
   on.mount(() => {
-    hoverOff = on.mousemove(window, throttle(mouseMove, 40))
+    hoverOff = on.mousemove(window, _.throttle(mouseMove, 40))
     if (highlighter) return
     highlighter = document.createElement('div')
     highlighter.className = "_flintHighlighter"
@@ -182,16 +163,13 @@ view Inspector {
 
   function mouseMove({ target }) {
     if (lastTarget != target) {
-      lastTarget = target
-      if (!target.classList.contains('internal')) {
-        __activeEl.key = getReactId(target)
-        __activeEl.view = target.classList.toString()
-          .split(' ')
-          .filter(s => s.substr(0,4) != 'View')
-          .filter(s => s.charAt(0).toUpperCase() == s.charAt(0))[0]
+      if (target.classList.contains('internal'))
+        return
 
-        if (hudActive) inspect(lastTarget)
-      }
+      lastTarget = target
+      inspecting.set(target)
+      if (hudActive)
+        inspect(lastTarget)
     }
   }
 

@@ -25,7 +25,7 @@ function broadcast(data) {
 function runQueue() {
   if (queue.length && wsServer) {
     queue.forEach(broadcast)
-    queue = [];
+    queue = []
   }
 }
 

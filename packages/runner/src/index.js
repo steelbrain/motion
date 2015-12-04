@@ -17,8 +17,6 @@ import watchDeletes from './lib/watchDeletes'
 import { mkdir, readdir } from './lib/fns'
 import path from 'path'
 
-
-
 // DONT RELEASE ME!
 // import memwatch from 'memwatch-next'
 // import heapdump from 'heapdump'
@@ -37,6 +35,7 @@ import path from 'path'
 
 process.on('SIGINT', cleanExit)
 process.on('SIGTERM', cleanExit)
+process.on('uncaughtException', cleanExit)
 
 let child
 
@@ -81,7 +80,11 @@ export async function run(_opts = {}, isBuild) {
     // cache watching
     watchDeletes()
 
-    const previousOut = await readdir({ root: OPTS.outDir })
+    const previousFiles = await readdir({ root: OPTS.outDir })
+    const previousOut = previousFiles
+      .files
+      .map(file => file.path)
+      .filter(path => path.slice(-4) !== '.map')
 
     if (OPTS.build) {
       await bundler.remakeInstallDir(true)
@@ -89,7 +92,7 @@ export async function run(_opts = {}, isBuild) {
       copy.assets()
 
       // run our pipeline once manually
-      gulp.buildScripts(previousOut)
+      gulp.buildScripts({ previousOut })
       await waitForFirstBuild()
 
       if (OPTS.watch)
@@ -100,10 +103,9 @@ export async function run(_opts = {}, isBuild) {
       process.exit()
     }
     else {
-      await clear.outDir()
       await server.run()
       bridge.start()
-      gulp.buildScripts(previousOut)
+      gulp.buildScripts({ previousOut })
 
       // wait for build
       await waitForFirstBuild()
