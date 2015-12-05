@@ -9,18 +9,14 @@ import { log, handleError } from '../lib/fns'
 
 export default async function build() {
   try {
-    if (!opts.get('hasRunInitialInstall'))
-      return setTimeout(build, 50)
-
-    if (opts.get('hasRunInitialBuild'))
-      await copy.assets()
-
-    log('Building extras, template...')
-    makeTemplate()
-
     log('Building extras, bundler...')
     await bundler.install()
     await bundler.internals()
+
+    await copy.assets()
+
+    log('Building extras, template...')
+    makeTemplate()
 
     log('Building extras, copy...')
     await *[

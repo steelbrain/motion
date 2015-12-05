@@ -183,8 +183,9 @@ export function finishedInstalling() {
 }
 
 function isDone() {
-  if (opts.get('build')) return !_isInstalling && opts.get('hasRunInitialInstall')
-  else return !_isInstalling
+  return opts.get('build')
+    ? !_isInstalling && opts.get('hasRunInitialInstall')
+    : !_isInstalling
 }
 
 function finishedInstallingLoop(res) {

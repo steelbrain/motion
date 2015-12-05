@@ -9,8 +9,7 @@ import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
-import copy from './builder/copy'
-import build from './builder/build'
+import builder from './builder'
 import logError from './lib/logError'
 import superStream from './lib/superStream'
 import compiler from './compiler'
@@ -22,16 +21,10 @@ import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, glob, readdir, p, rm, handleError, log } from './lib/fns'
 
 const $ = loadPlugins()
-let lastSavedTimestamp = {}
 let OPTS
 
-const newLine = "\n"
-
 const serializeCache = _.throttle(cache.serialize, 200)
-const hasFinished = () => {
-  // console.log(opts.get('hasRunInitialBuild'), opts.get('hasRunInitialInstall'))
-  return opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
-}
+const hasFinished = () => opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
 const relative = file => path.relative(opts.get('appDir'), file.path)
 const time = _ => _ ? ` - ${_}ms` : ''
 const out = {
@@ -118,6 +111,7 @@ export async function init() {
 export function buildScripts({ inFiles, outFiles, userStream }) {
   const outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
   let lastScript, curFile, lastError
+  let lastSavedTimestamp = {}
 
   // track inFiles files to determine when it's loaded
   let loaded = 0
@@ -166,6 +160,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    if (OPTS.build)
+      return false
+
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
 
     try {
@@ -234,7 +231,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function checkWriteable(file) {
     if (OPTS.build) {
-      copy.styles()
+      builder.copy.styles()
     }
 
     file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
@@ -273,7 +270,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     markDone(file)
 
     if (OPTS.build && OPTS.watch)
-      return build()
+      return builder.build()
 
     log('gulp', 'afterWrite', 'hasFinished', hasFinished())
     if (hasFinished()) {
@@ -317,6 +314,7 @@ function afterFirstBuild() {
 }
 
 function buildDone() {
+  // remove old files from out dir
   opts.set('hasRunInitialBuild', true)
   waitingForFirstBuild.forEach(res => res())
 }

@@ -3,15 +3,13 @@ import compiler from './compiler'
 import handleError from './lib/handleError'
 import server from './server'
 import bundler from './bundler'
+import builder from './builder'
 import opts from './opts'
 import internal from './internal'
 import gulp from './gulp'
 import cache from './cache'
 import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
-import build from './builder/build'
-import clear from './builder/clear'
-import copy from './builder/copy'
 import watchDeletes from './lib/watchDeletes'
 import logError from './lib/logError'
 import { path, log, mkdir, readdir } from './lib/fns'
@@ -64,7 +62,7 @@ export async function run(_opts = {}, isBuild) {
     log('opts', OPTS)
 
     // init, order important
-    await clear.init() // ensure directories
+    await builder.clear.init() // ensure directories
     await internal.init() // ensure state
     await opts.serialize() // write out opts to state
     await cache.init() // ensure cache
@@ -77,24 +75,19 @@ export async function run(_opts = {}, isBuild) {
     // pipeline
     let pre, post
 
-    let build = async () => {
-      gulp.init()
-      await gulp.afterFirstBuild()
-      await bundler.finishedInstalling()
-    }
-
     if (OPTS.build) {
       pre = async () => {
         await bundler.remakeInstallDir(true)
-        await clear.buildDir()
-        copy.assets()
+        await builder.clear.buildDir()
+        builder.copy.assets()
       }
 
       post = async () => {
         if (OPTS.watch)
           return gulp.watchForBuild()
-        else
-          await build()
+        else {
+          await builder.build()
+        }
 
         process.exit()
       }
@@ -121,7 +114,8 @@ export async function run(_opts = {}, isBuild) {
 
     // run!
     await pre()
-    await build()
+    await gulp.init()
+    await gulp.afterFirstBuild()
     await post()
   }
   catch(e) {
