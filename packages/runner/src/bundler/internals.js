@@ -55,30 +55,30 @@ export async function checkInternals(file, source) {
     bundleInternals()
 }
 
-function externalsPaths(externals) {
-  return externals.reduce((acc, cur) => {
+// let internals use externals
+export function webpackUserExternals() {
+  const imports = cache.getImports()
+  const externalsObj = imports.reduce((acc, cur) => {
     acc[cur] = `Flint.packages["${cur}"]`
     return acc
   }, {})
+
+  return externalsObj
 }
 
 function packInternals() {
   log(LOG, 'packInternals')
 
-  // TODO: #175, internal files arent getting scanned for their external requires
-  // so flint uninstalls their external deps
-
-  // make sure internals require the flint packed externals
-  let externals = externalsPaths(cache.getImports())
-  log(LOG, 'webpack externals', externals)
-
   return new Promise((resolve, reject) => {
-    webpack(Object.assign(webpackConfig(), {
+    const conf = webpackConfig({
       entry: opts.get('deps').internalsIn,
+      externals: webpackUserExternals(),
       output: {
         filename: opts.get('deps').internalsOut
       }
-    }), async (err, stats) => {
+    })
+
+    webpack(conf, (err, stats) => {
       handleWebpackErrors(err, stats, resolve, reject)
     })
   })

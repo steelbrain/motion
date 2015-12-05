@@ -46,7 +46,7 @@ export async function installExternals(file, source) {
 async function packExternals() {
   log(LOG, 'pack')
   return new Promise((resolve, reject) => {
-    const conf = Object.assign(webpackConfig(), {
+    const conf = webpackConfig({
       entry: opts.get('deps').externalsIn,
       output: {
         filename: opts.get('deps').externalsOut
@@ -55,7 +55,7 @@ async function packExternals() {
 
     log(LOG, 'webpackConfig', conf)
 
-    webpack(conf, async (err, stats) => {
+    webpack(conf, (err, stats) => {
       handleWebpackErrors(err, stats, resolve, reject)
     })
   })
