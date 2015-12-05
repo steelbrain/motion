@@ -125,7 +125,7 @@ const Cache = {
     const cFile = cache.files[relative(file)]
     onDeleteViews(_.difference(cFile.views, views))
     cFile.views = views
-    log(LOG, 'setViews', cache.files)
+    log(LOG, 'setViews', file, views)
   },
 
   setImports(_imports: ImportArray) {

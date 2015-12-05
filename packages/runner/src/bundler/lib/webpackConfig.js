@@ -11,7 +11,6 @@ function userExternals() {
     return acc
   }, {})
 
-  console.log(externalsObj)
   return externalsObj
 }
 

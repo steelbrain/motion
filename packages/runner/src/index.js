@@ -70,15 +70,13 @@ export async function run(_opts = {}, isBuild) {
     log.setLogging()
     log('opts', OPTS)
 
-    // ensure dirs
-    await clear.styles()
-    await clear.outDir()
-
-    // init
-    await cache.init()
-    compiler('init', OPTS)
-    await bundler.init()
-    await internal.init()
+    // init, order important
+    await clear.init() // ensure directories
+    await internal.init() // ensure state
+    await opts.serialize() // write out opts to state
+    await cache.init() // ensure cache
+    await bundler.init() // start bundler
+    compiler('init', OPTS) // start compiler
 
     // cache watching
     watchDeletes()

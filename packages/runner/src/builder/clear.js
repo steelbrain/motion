@@ -5,6 +5,12 @@ import opts from '../opts'
 
 const LOG = 'clear'
 
+export async function init() {
+  await mkdir(opts.get('internalDir'))
+  await mkdir(opts.get('styleDir'))
+  await mkdir(opts.get('outDir'))
+}
+
 export async function internalDir() {
   log(LOG, 'internalDir')
   await recreateDir(opts.get('internalDir'))
@@ -12,14 +18,12 @@ export async function internalDir() {
 
 export async function outDir() {
   log(LOG, 'outDir')
-  // await recreateDir(opts.get('outDir'))
-  await mkdir(opts.get('outDir'))
+  await recreateDir(opts.get('outDir'))
 }
 
 export async function styles() {
   log(LOG, 'outDir')
-  // await recreateDir(opts.get('styleDir'))
-  await mkdir(opts.get('styleDir'))
+  await recreateDir(opts.get('styleDir'))
 }
 
 export async function buildDir() {
@@ -28,4 +32,4 @@ export async function buildDir() {
   await mkdir(p(opts.get('buildDir'), '_'))
 }
 
-export default { outDir, buildDir, internalDir, styles }
+export default { init, outDir, buildDir, internalDir, styles }

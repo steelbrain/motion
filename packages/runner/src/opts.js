@@ -16,7 +16,7 @@ function get(key) {
   return key ? OPTS[key] : OPTS
 }
 
-async function setAll(opts) {
+function setAll(opts) {
   // from cli
   OPTS = {}
 
@@ -66,13 +66,15 @@ async function setAll(opts) {
   OPTS.name = folders[folders.length - 1]
   OPTS.url = OPTS.name + '.dev'
 
+  return OPTS
+}
+
+async function serialize() {
   await writeState((state, write) => {
     state.opts = { ...OPTS }
     delete state.opts.state // prevent circle
     write(state)
   })
-
-  return OPTS
 }
 
-export default { get, set, setAll }
+export default { get, set, setAll, serialize }
