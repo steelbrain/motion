@@ -162,8 +162,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
-    if (OPTS.build)
+    if (OPTS.build) {
+      finish()
       return false
+    }
 
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
 
@@ -201,7 +203,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return true
 
     // catch if file doesnt exist
-    } catch (e) { return false }
+    } catch (e) {
+      return false
+    }
   }
 
   function resetLastFile(file) {

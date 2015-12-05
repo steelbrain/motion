@@ -58,6 +58,7 @@ function sanitize(str) {
 export default {
   _,
   p,
+  fs,
   path,
   mkdir,
   rm,
