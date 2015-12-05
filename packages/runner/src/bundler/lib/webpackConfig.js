@@ -20,5 +20,12 @@ export default (config = {}) => deepmerge({
       { test: /\.css$/, loaders: ['style-loader', 'css-loader'] },
       { test: /\.json$/, loader: 'json-loader' }
     ]
+  },
+  resolveLoader: {
+    root: path.join(__dirname, '..', '..', '..', '..', 'node_modules')
+  },
+  resolve: {
+    root: opts.get('flintDir'),
+    extensions: ['', '.js']
   }
 }, config)

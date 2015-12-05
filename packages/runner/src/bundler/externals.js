@@ -50,13 +50,6 @@ async function packExternals() {
       entry: opts.get('deps').externalsIn,
       output: {
         filename: opts.get('deps').externalsOut
-      },
-      resolveLoader: {
-        root: path.join(__dirname, '..', '..', '..', 'node_modules')
-      },
-      resolve: {
-        root: opts.get('flintDir'),
-        extensions: ['', '.js']
       }
     })
 
