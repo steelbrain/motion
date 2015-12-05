@@ -39,6 +39,7 @@
     "lodash": "^3.10.1",
     "merge-stream": "^1.0.0",
     "mkdirp": "^0.5.0",
+    "multi-glob": "^1.0.1",
     "multipipe": "^0.2.1",
     "node-generator-detector": "^0.2.1",
     "nodejs-websocket": "^1.4.0",

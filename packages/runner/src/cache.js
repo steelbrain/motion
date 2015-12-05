@@ -155,7 +155,7 @@ const Cache = {
     log(LOG, 'cache', 'getExported', cache.files)
     return Object.keys(cache.files)
       .map(name => cache.files[name].isExported ? name : null)
-      .filter(f => !!f)
+      .filter(f => f != null)
   },
 
   setFileImports(file: string, imports: ImportArray) {

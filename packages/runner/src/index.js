@@ -4,7 +4,6 @@ import handleError from './lib/handleError'
 import server from './server'
 import bundler from './bundler'
 import opts from './opts'
-import log from './lib/log'
 import internal from './internal'
 import gulp from './gulp'
 import cache from './cache'
@@ -15,8 +14,7 @@ import clear from './builder/clear'
 import copy from './builder/copy'
 import watchDeletes from './lib/watchDeletes'
 import logError from './lib/logError'
-import { mkdir, readdir } from './lib/fns'
-import path from 'path'
+import { path, log, mkdir, readdir } from './lib/fns'
 
 // DONT RELEASE ME!
 // import memwatch from 'memwatch-next'
@@ -76,17 +74,11 @@ export async function run(_opts = {}, isBuild) {
     // cache watching
     watchDeletes()
 
-    const previousFiles = await readdir({ root: OPTS.outDir })
-    const previousOut = previousFiles
-      .files
-      .map(file => file.path)
-      .filter(path => path.slice(-4) !== '.map')
-
     // pipeline
     let pre, post
 
     let build = async () => {
-      gulp.buildScripts({ previousOut })
+      gulp.init()
       await gulp.afterFirstBuild()
       await bundler.finishedInstalling()
     }

@@ -18,19 +18,14 @@ import babel from './lib/gulp-babel'
 import opts from './opts'
 import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
-import { _, p, rm, handleError, log } from './lib/fns'
+import SCRIPTS_GLOB from './const/scriptsGlob'
+import { _, glob, readdir, p, rm, handleError, log } from './lib/fns'
 
 const $ = loadPlugins()
 let lastSavedTimestamp = {}
 let OPTS
 
 const newLine = "\n"
-const SCRIPTS_GLOB = [
-  '[Mm]ain.js',
-  '**/*.{js,jsf}',
-  '!node_modules{,/**}',
-  '!.flint{,/**}'
-]
 
 const serializeCache = _.throttle(cache.serialize, 200)
 const hasFinished = () => {
@@ -97,27 +92,47 @@ function watchDeletes() {
     })
 }
 
-// userStream is optional for programmatic usage
-export function buildScripts({ userStream, previousOut }) {
-  OPTS = opts.get()
-  let lastScript, curFile, lastError
-  let outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+export async function init() {
+  try {
+    OPTS = opts.get()
 
-  if (!opts.get('build')) {
-    watchDeletes()
-    superStream.init()
+    if (!opts.get('build')) {
+      watchDeletes()
+      superStream.init()
+    }
+
+    const inFiles = await glob(SCRIPTS_GLOB)
+    const _outFiles = await readdir({ root: OPTS.outDir })
+    const outFiles = _outFiles.files
+      .map(file => file.path)
+      .filter(path => path.slice(-4) !== '.map')
+
+    buildScripts({ inFiles, outFiles })
   }
+  catch(e) {
+    handleError(e)
+  }
+}
+
+// userStream is optional for programmatic usage
+export function buildScripts({ inFiles, outFiles, userStream }) {
+  const outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+  let lastScript, curFile, lastError
+
+  // track inFiles files to determine when it's loaded
+  let loaded = 0
+  let total = inFiles.length
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, { readDelay: 1 }, resetBuildWatch)))
+    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
 
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
-    .pipe($.if(buildSkip, $.ignore.exclude(true)))
+    .pipe($.if(buildCheck, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -140,15 +155,32 @@ export function buildScripts({ userStream, previousOut }) {
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
-  function resetBuildWatch(vinyl) {
-    if (!vinyl.event) buildFinishedCheck()
+  function markDone(file) {
+    // mark built
+    loaded++
+
+    // check if done
+    if (loaded == total)
+      buildDone()
   }
 
   // only do on first run
-  function buildSkip(file) {
-    // stat.mtime
+  function buildCheck(file) {
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
+
     try {
+      function finish() {
+        cache.restorePrevious(file.path)
+        out.goodFile(file)
+        markDone(file)
+      }
+
+      // if exported file, mark done and skip
+      if (cache.getPrevious(file.path).isExported) {
+        finish()
+        return false
+      }
+
       const outMTime = fs.statSync(outFile).mtime
       const srcMTime = fs.statSync(file.path).mtime
       const goodBuild = +outMTime > +srcMTime
@@ -166,8 +198,7 @@ export function buildScripts({ userStream, previousOut }) {
       if (!goodCache)
         return false
 
-      cache.restorePrevious(file.path)
-      out.goodFile(file)
+      finish()
       return true
 
     // catch if file doesnt exist
@@ -190,7 +221,6 @@ export function buildScripts({ userStream, previousOut }) {
     logError(error, curFile)
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error }, 'error')
-    buildFinishedCheck()
   }
 
   function setLastFile(file) {
@@ -203,8 +233,6 @@ export function buildScripts({ userStream, previousOut }) {
   }
 
   function checkWriteable(file) {
-    buildFinishedCheck()
-
     if (OPTS.build) {
       copy.styles()
     }
@@ -240,10 +268,12 @@ export function buildScripts({ userStream, previousOut }) {
   }
 
   function afterWrite(file) {
+    if (file.isSourceMap) return
+
+    markDone(file)
+
     if (OPTS.build && OPTS.watch)
       return build()
-
-    if (file.isSourceMap) return
 
     log('gulp', 'afterWrite', 'hasFinished', hasFinished())
     if (hasFinished()) {
@@ -277,31 +307,19 @@ export function buildWhileRunning() {
   });
 }
 
-let buildingTimeout
-function buildFinishedCheck() {
-  if (!opts.get('hasRunInitialBuild')) {
-    if (buildingTimeout) clearTimeout(buildingTimeout)
-    buildingTimeout = setTimeout(() => {
-      opts.set('hasRunInitialBuild', true)
-      runAfterFirstBuilds()
-    }, 420)
-  }
-}
-
-/* FIRST BUILD STUFF */
 
 let waitingForFirstBuild = []
-
-const afterFirstBuild = () =>
-  new Promise((res, rej) => {
+function afterFirstBuild() {
+  return new Promise((res, rej) => {
     if (hasFinished()) return res()
     else waitingForFirstBuild.push(res)
   })
+}
 
-const runAfterFirstBuilds = () =>
+function buildDone() {
+  opts.set('hasRunInitialBuild', true)
   waitingForFirstBuild.forEach(res => res())
-
-/* END FIRST BUILD STUFF */
+}
 
 
 function pipefn(fn) {
@@ -311,4 +329,4 @@ function pipefn(fn) {
   })
 }
 
-export default { buildScripts, afterFirstBuild, watchForBuild }
+export default { init, buildScripts, afterFirstBuild, watchForBuild }
