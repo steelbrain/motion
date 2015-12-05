@@ -1,6 +1,5 @@
 import bridge from './bridge'
 import compiler from './compiler'
-import handleError from './lib/handleError'
 import server from './server'
 import bundler from './bundler'
 import builder from './builder'
@@ -8,11 +7,9 @@ import opts from './opts'
 import internal from './internal'
 import gulp from './gulp'
 import cache from './cache'
-import openInBrowser from './lib/openInBrowser'
 import watchingMessage from './lib/watchingMessage'
 import watchDeletes from './lib/watchDeletes'
-import logError from './lib/logError'
-import { path, log, mkdir, readdir } from './lib/fns'
+import { logError, handleError, path, log } from './lib/fns'
 
 // DONT RELEASE ME!
 // import memwatch from 'memwatch-next'
@@ -68,8 +65,6 @@ export async function run(_opts = {}, isBuild) {
     await cache.init() // ensure cache
     await bundler.init() // start bundler
     compiler('init', OPTS) // start compiler
-
-    // cache watching
     watchDeletes()
 
     // pipeline
@@ -83,12 +78,8 @@ export async function run(_opts = {}, isBuild) {
       }
 
       post = async () => {
-        if (OPTS.watch)
-          return gulp.watchForBuild()
-        else {
-          await builder.build()
-        }
-
+        if (OPTS.watch) return gulp.watchForBuild()
+        await builder.build()
         process.exit()
       }
     }
@@ -101,13 +92,10 @@ export async function run(_opts = {}, isBuild) {
       post = async () => {
         // write out cache
         cache.serialize()
-
         // ensure we have clean packages before open
         await bundler.externals({ doInstall: true })
         await bundler.uninstall()
-
         console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
-
         watchingMessage()
       }
     }
@@ -119,8 +107,7 @@ export async function run(_opts = {}, isBuild) {
     await post()
   }
   catch(e) {
-    if (!e.silent)
-      handleError(e)
+    if (!e.silent) handleError(e)
   }
 }
 

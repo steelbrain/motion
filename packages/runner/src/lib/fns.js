@@ -12,6 +12,7 @@ import _touch from 'touch'
 import log from './log'
 import opts from '../opts'
 import handleError from './handleError'
+import logError from './logError'
 
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
@@ -73,6 +74,7 @@ export default {
   sanitize,
   log,
   handleError,
+  logError,
   opts,
   glob
 }

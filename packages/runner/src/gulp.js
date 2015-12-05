@@ -1,16 +1,13 @@
 import chokidar from 'chokidar'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
-import fs from 'fs'
 import flintTransform from 'flint-transform'
 import through from 'through2'
-import path from 'path'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
 import builder from './builder'
-import logError from './lib/logError'
 import superStream from './lib/superStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
@@ -18,7 +15,7 @@ import opts from './opts'
 import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
 import SCRIPTS_GLOB from './const/scriptsGlob'
-import { _, glob, readdir, p, rm, handleError, log } from './lib/fns'
+import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
 
 const $ = loadPlugins()
 let OPTS
@@ -99,6 +96,11 @@ export async function init() {
     const outFiles = _outFiles.files
       .map(file => file.path)
       .filter(path => path.slice(-4) !== '.map')
+
+    // cleanup out dir since last run
+    const deleted = _.difference(outFiles, inFiles)
+    const deletedPaths = deleted.map(f => p(opts.get('outDir'), f))
+    await* deletedPaths.map(f => rm(f))
 
     buildScripts({ inFiles, outFiles })
   }
