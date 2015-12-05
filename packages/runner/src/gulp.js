@@ -82,7 +82,7 @@ function watchDeletes() {
     .on('unlink', async (file) => {
       try {
         // ignore if in node_modules
-        if (file.indexOf(opts.get('nodeDir')) === 0)
+        if (file.indexOf('.flint') === 0)
           return
 
         log('gulp', 'unlink', file)
