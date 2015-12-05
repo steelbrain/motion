@@ -3,8 +3,6 @@ import path from 'path'
 import opts from '../../opts'
 import cache from '../../cache'
 
-let runnerDir = path.join(__dirname, '..', '..', '..', '..', 'node_modules')
-
 export default (config = {}) => deepmerge({
   externals: {
     react: 'React',
@@ -22,11 +20,5 @@ export default (config = {}) => deepmerge({
       { test: /\.css$/, loaders: ['style-loader', 'css-loader'] },
       { test: /\.json$/, loader: 'json-loader' }
     ]
-  },
-  resolveLoader: {
-    root: runnerDir
-  },
-  resolve: {
-    root: opts.get('flintDir')
   }
 }, config)

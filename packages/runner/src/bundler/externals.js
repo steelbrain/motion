@@ -8,7 +8,7 @@ import opts from '../opts'
 import cache from '../cache'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
-import { writeJSON, writeFile } from '../lib/fns'
+import { path, writeJSON, writeFile } from '../lib/fns'
 import getMatches from './lib/getMatches'
 import log from '../lib/log'
 
@@ -50,6 +50,13 @@ async function packExternals() {
       entry: opts.get('deps').externalsIn,
       output: {
         filename: opts.get('deps').externalsOut
+      },
+      resolveLoader: {
+        root: path.join(__dirname, '..', '..', '..', 'node_modules')
+      },
+      resolve: {
+        root: opts.get('flintDir'),
+        extensions: ['', '.js']
       }
     })
 

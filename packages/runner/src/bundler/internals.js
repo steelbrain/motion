@@ -28,11 +28,11 @@ export async function bundleInternals() {
 }
 
 async function writeInternalsIn() {
-  log(LOG, 'writeInternalsIn')
   const files = cache.getExported()
   const requireString = files.map(f =>
     depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')
 
+  log(LOG, 'writeInternalsIn', requireString)
   await writeFile(opts.get('deps').internalsIn, requireString)
 }
 
