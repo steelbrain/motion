@@ -110,7 +110,7 @@ export function buildScripts({ userStream, previousOut }) {
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, null, resetBuildWatch)))
+    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, { readDelay: 1 }, resetBuildWatch)))
 
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
@@ -139,8 +139,6 @@ export function buildScripts({ userStream, previousOut }) {
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-
-  // previousOut == ['previous', 'out', 'files']
 
   function resetBuildWatch(vinyl) {
     if (!vinyl.event) buildFinishedCheck()

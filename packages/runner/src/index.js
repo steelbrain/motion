@@ -56,11 +56,6 @@ export function setChild(_child) { child = _child }
 
 // RUN
 
-async function waitForFirstBuild() {
-  await gulp.afterFirstBuild()
-  await bundler.finishedInstalling()
-}
-
 export async function run(_opts = {}, isBuild) {
   try {
     console.log()
@@ -87,42 +82,55 @@ export async function run(_opts = {}, isBuild) {
       .map(file => file.path)
       .filter(path => path.slice(-4) !== '.map')
 
-    if (OPTS.build) {
-      await bundler.remakeInstallDir(true)
-      await clear.buildDir()
-      copy.assets()
+    // pipeline
+    let pre, post
 
-      // run our pipeline once manually
+    let build = async () => {
       gulp.buildScripts({ previousOut })
-      await waitForFirstBuild()
+      await gulp.afterFirstBuild()
+      await bundler.finishedInstalling()
+    }
 
-      if (OPTS.watch)
-        return gulp.watchForBuild()
-      else
-        await build()
+    if (OPTS.build) {
+      pre = async () => {
+        await bundler.remakeInstallDir(true)
+        await clear.buildDir()
+        copy.assets()
+      }
 
-      process.exit()
+      post = async () => {
+        if (OPTS.watch)
+          return gulp.watchForBuild()
+        else
+          await build()
+
+        process.exit()
+      }
     }
     else {
-      await server.run()
-      bridge.start()
-      gulp.buildScripts({ previousOut })
+      pre = async () => {
+        await server.run()
+        bridge.start()
+      }
 
-      // wait for build
-      await waitForFirstBuild()
-      cache.serialize()
+      post = async () => {
+        // write out cache
+        cache.serialize()
 
-      // ensure we have clean packages before open
-      await bundler.externals({ doInstall: true })
-      await bundler.uninstall()
+        // ensure we have clean packages before open
+        await bundler.externals({ doInstall: true })
+        await bundler.uninstall()
 
-      console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
+        console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
 
-      watchingMessage()
-      // openInBrowser()
+        watchingMessage()
+      }
     }
 
-    return opts.get()
+    // run!
+    await pre()
+    await build()
+    await post()
   }
   catch(e) {
     if (!e.silent)
