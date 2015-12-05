@@ -101,6 +101,7 @@ export async function init() {
     const deleted = _.difference(outFiles, inFiles)
     const deletedPaths = deleted.map(f => p(opts.get('outDir'), f))
     await* deletedPaths.map(f => rm(f))
+    log('gulp', 'deleted', deletedPaths)
 
     buildScripts({ inFiles, outFiles })
   }
@@ -126,6 +127,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
+
+  log('gulp', 'starting stream')
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
@@ -162,6 +165,12 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    function finish() {
+      cache.restorePrevious(file.path)
+      out.goodFile(file)
+      markDone(file)
+    }
+
     if (OPTS.build) {
       finish()
       return false
@@ -170,12 +179,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
 
     try {
-      function finish() {
-        cache.restorePrevious(file.path)
-        out.goodFile(file)
-        markDone(file)
-      }
-
       // if exported file, mark done and skip
       if (cache.getPrevious(file.path).isExported) {
         finish()
@@ -204,6 +207,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     // catch if file doesnt exist
     } catch (e) {
+      log('gulp', 'buildCheck', 'ERROR', e)
       return false
     }
   }
