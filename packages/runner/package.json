@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.4-beta",
+  "version": "1.4.5-beta",
   "description": "Run flint apps",
   "main": "entry.js",
   "scripts": {},
