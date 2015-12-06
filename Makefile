@@ -25,24 +25,24 @@ push:
 
 cli: ready
 	scripts/release.sh cli
-	push
+	make push
 
 flint.js: ready
 	scripts/release.sh flint.js
-	push
+	make push
 
 runner: ready
 	scripts/release.sh runner
-	push
+	make push
 
 transform: ready
 	scripts/release.sh transform
-	push
+	make push
 
 styles: ready
 	scripts/release.sh nice-styles
-	push
+	make push
 
 all: ready
 	scripts/release.sh all
-	push
+	make push
