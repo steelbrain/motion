@@ -1,5 +1,5 @@
 clean:
-	rm -rf packages/*/lib
+	-rm -rf packages/*/lib
 
 build: clean
 	./scripts/build.sh
