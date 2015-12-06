@@ -67,7 +67,6 @@ var colors = [
     "mediumturquoise",
     "mediumvioletred",
     "midnightblue",
-    "moccasin",
     "navy",
     "olive",
     "olivedrab",
@@ -112,4 +111,3 @@ var colors = [
 ]
 
 export default randomColor
-
