@@ -3,8 +3,13 @@ import log from './log'
 import unicodeToChar from './unicodeToChar'
 
 export default function logError(error, file) {
-  if (typeof error == 'string')
+  console.log('Error'.red.bold)
+
+  if (typeof error != 'object' || Array.isArray(error))
     console.log(error)
+
+  if (error.message)
+    console.log(error.message.red)
 
   if (error.stack || error.codeFrame)
     error.stack = unicodeToChar(error.stack || error.codeFrame);
@@ -16,7 +21,6 @@ export default function logError(error, file) {
     console.log("\n", error.stack.split("\n").splice(0, 7).join("\n"))
   }
   else {
-    // console.log('ERROR', "\n", JSON.stringify(error))
     if (file && typeof file == 'object')
       log('FILE', "\n", file.contents && file.contents.toString())
   }

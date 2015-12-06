@@ -17,6 +17,7 @@ import onMeta from './lib/onMeta'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
 
+const LOG = 'gulp'
 const $ = loadPlugins()
 let OPTS
 
@@ -70,7 +71,7 @@ function watchDeletes() {
         if (file.indexOf('.flint') === 0)
           return
 
-        log('gulp', 'unlink', file)
+        log(LOG, 'unlink', file)
         if (/jsf?/.test(path.extname(file))) {
           await rm(p(opts.get('outDir'), file))
           cache.remove(file)
@@ -101,7 +102,7 @@ export async function init() {
     const deleted = _.difference(outFiles, inFiles)
     const deletedPaths = deleted.map(f => p(opts.get('outDir'), f))
     await* deletedPaths.map(f => rm(f))
-    log('gulp', 'deleted', deletedPaths)
+    log(LOG, 'deleted', deletedPaths)
 
     buildScripts({ inFiles, outFiles })
   }
@@ -128,7 +129,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   const sourceStream = userStream || gulpSrcStream
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
 
-  log('gulp', 'starting stream')
+  log(LOG, 'starting stream')
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
@@ -165,7 +166,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    log(LOG, 'buildCheck', file.path)
+
     function finish() {
+      log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
       out.goodFile(file)
       markDone(file)
@@ -207,7 +211,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     // catch if file doesnt exist
     } catch (e) {
-      log('gulp', 'buildCheck', 'ERROR', e)
+      log(LOG, 'buildCheck', 'ERROR', e)
       return false
     }
   }
@@ -220,7 +224,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function catchError(error) {
-    log('gulp', 'catchError', error)
+    log(LOG, 'catchError', error)
     lastError = true
     out.badFile(curFile)
 
@@ -234,7 +238,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (OPTS.build) return
     let name = file.path.replace(OPTS.appDir, '')
     if (name.charAt(0) != '/') name = '/' + name
-    log('gulp', 'setLastFile', 'path', file.path, 'name', name)
+    log(LOG, 'setLastFile', 'path', file.path, 'name', name)
     lastScript = { name, compiledAt: file.startTime }
     curFile = file
   }
@@ -265,7 +269,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       file.startTime > lastSavedTimestamp[file.path]
     )
 
-    log('gulp', 'isNew', isNew)
+    log(LOG, 'isNew', isNew)
     if (isNew) {
       lastSavedTimestamp[file.path] = file.startTime
       return true
@@ -282,10 +286,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (OPTS.build && OPTS.watch)
       return builder.build()
 
-    log('gulp', 'afterWrite', 'hasFinished', hasFinished())
+    log(LOG, 'afterWrite', 'hasFinished', hasFinished())
     if (hasFinished()) {
       const cacheHasFile = cache.get(file.path)
-      log('gulp', 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
+      log(LOG, 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && !file.isInternal && cacheHasFile) {
         cache.update(file.path)
         serializeCache()

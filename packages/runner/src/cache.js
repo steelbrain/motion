@@ -59,6 +59,10 @@ const Cache = {
     catch(e) {
       handleError(e)
     }
+
+    previousCache = previousCache || {
+      files: {}
+    }
   },
 
   setBaseDir(dir : string) {
