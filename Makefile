@@ -15,25 +15,34 @@ link:
 	node scripts/links.js
 
 
-# release (npm patch)
+# easy release
 
 ready:
 	git pull --rebase
 
+push:
+	git push origin head
+
 cli: ready
 	scripts/release.sh cli
+	push
 
 flint.js: ready
 	scripts/release.sh flint.js
+	push
 
 runner: ready
 	scripts/release.sh runner
+	push
 
 transform: ready
 	scripts/release.sh transform
+	push
 
 styles: ready
 	scripts/release.sh nice-styles
+	push
 
 all: ready
 	scripts/release.sh all
+	push
