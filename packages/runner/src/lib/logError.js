@@ -13,7 +13,7 @@ export default function logError(error, file) {
     console.log(error.message.replace(opts.get('appDir'), ''));
     if (error.name != 'TypeError' && error.loc)
       console.log('line: %s, col: %s', error.loc.line, error.loc.column);
-    console.log(newLine, error.stack.split("\n").splice(0, 7).join("\n"))
+    console.log("\n", error.stack.split("\n").splice(0, 7).join("\n"))
   }
   else {
     // console.log('ERROR', "\n", JSON.stringify(error))

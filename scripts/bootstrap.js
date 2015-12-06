@@ -31,14 +31,6 @@ packageNames.forEach(function (loc) {
   });
 });
 
-// link in apps first
-['tools'].forEach(function(app) {
-  cd("apps/" + app + "/.flint")
-  exec("npm install --loglevel=error")
-  exec("npm link")
-  cd("../../..")
-})
-
 // create links
 packages.forEach(function (pkg) {
   console.log(pkg.name)

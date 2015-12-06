@@ -35,7 +35,6 @@ for f in packages/*; do
   fi
 done
 
-# extra stuff for watch
 if [ "$1" = "--watch" ]; then
   # relink cli
   echo "Watch CLI for relink"
@@ -51,17 +50,6 @@ if [ "$1" = "--watch" ]; then
       if [[ $chsum1 != $chsum2 ]] ; then
         npm link --loglevel=error
         chsum1=$chsum2
-
-        # watch tools after first build
-        if [ $hasLinkedOnce=='false' ] && [ "$2" != '--notools' ]; then
-          sleep 1
-          cd ../..
-          cd apps/tools
-          flint build --watch &
-          cd ../..
-          cd packages/cli
-        fi
-
         hasLinkedOnce='true'
       fi
     fi

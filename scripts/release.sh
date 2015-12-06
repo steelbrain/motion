@@ -20,27 +20,15 @@ release_package() {
   cd ../..
 }
 
-release_tools() {
-  echo "Tools"
-  cd apps/tools
-  flint build
-  cd .flint
-	npm publish
-  cd ../..
-}
-
 release_all() {
   for pkg in packages/*; do
     [ -d "${pkg}" ] || continue # if not a directory, skip
     release_package ${pkg}
   done
-  release_tools
 }
 
 if [ $1 = "all" ]; then
   release_all
-elif [ $1 = "tools" ]; then
-  release_tools
 else
   release_package packages/$1
 fi
