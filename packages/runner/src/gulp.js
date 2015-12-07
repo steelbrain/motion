@@ -159,6 +159,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     // mark built
     loaded++
 
+    log(LOG, 'markDone', loaded, total, file.path)
+
     // check if done
     if (loaded == total)
       buildDone()
@@ -181,14 +183,15 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     }
 
     const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
+    const prevFile = cache.getPrevious(file.path)
+
+    // if exported file, mark done and skip
+    if (prevFile && prevFile.isExported) {
+      finish()
+      return false
+    }
 
     try {
-      // if exported file, mark done and skip
-      if (cache.getPrevious(file.path).isExported) {
-        finish()
-        return false
-      }
-
       const outMTime = fs.statSync(outFile).mtime
       const srcMTime = fs.statSync(file.path).mtime
       const goodBuild = +outMTime > +srcMTime
@@ -212,6 +215,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     // catch if file doesnt exist
     } catch (e) {
       log(LOG, 'buildCheck', 'ERROR', e)
+      markDone(file)
       return false
     }
   }

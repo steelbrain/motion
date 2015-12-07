@@ -40,6 +40,8 @@ let _isInstalling = false
 
 export async function installAll(toInstall) {
   try {
+    log(LOG, 'installAll')
+
     if (!toInstall)
       toInstall = cache.getImports()
 
