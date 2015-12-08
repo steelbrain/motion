@@ -57,7 +57,7 @@ function transformKey(styles, key) {
   // when live coding we type "rc" then "rc()", but "rc" is a function and it breaks, so clear it
   if (typeof styles[key] == 'function') {
     styles[key] = null
-    console.warn(`Passed a function to a style property in view ${view.name} tag ${tag}`)
+    throw new Error(`Passed a function to a style property ${key}`)
   }
 
   // recurse into psuedos
