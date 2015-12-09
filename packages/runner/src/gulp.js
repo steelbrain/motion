@@ -303,6 +303,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function markLastFileSuccess() {
+    if (!lastScript) return
+
     log(LOG, 'markLastFileSuccess', lastScript)
 
     // update cache error / state
