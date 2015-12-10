@@ -4,7 +4,7 @@ import nodepath from 'path'
 import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
-import { _, log, readFile, handleError } from '../lib/fns'
+import { _, path, log, readFile, handleError } from '../lib/fns'
 
 const LOG = 'stream'
 
@@ -16,12 +16,16 @@ let internalTimeout
 let fileLoading = {}
 let scriptWaiting = {}
 
+function isFileType(_path, ext) {
+  return path.extname(_path) == `.${ext}`
+}
+
 function fileSend({ path, contents }) {
   log(LOG, '--- STREAM --- fileSend', path)
 
   // check if file actually in flint project
-  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0) {
-    log(LOG, 'file not in path, or in flint dir', basePath, flintPath, path)
+  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0 || !isFileType(path, 'js')) {
+    log(LOG, 'file no JS, not in path, or is in .flint dir', basePath, flintPath, path)
     return
   }
 
