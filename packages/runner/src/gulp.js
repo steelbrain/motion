@@ -169,6 +169,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    // already done with first build
+    if (opts.get('hasRunInitialBuild'))
+      return false
+
     log(LOG, 'buildCheck', file.path)
 
     function finish() {
