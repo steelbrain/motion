@@ -6,10 +6,13 @@ export default function logError(error, file) {
   console.log('Error'.red.bold)
 
   if (typeof error != 'object' || Array.isArray(error))
-    console.log(error)
+    return console.log(error)
 
   if (error.message)
     console.log(error.message.red)
+
+  if (error.stack)
+    console.log(error.stack)
 
   if (error.stack || error.codeFrame)
     error.stack = unicodeToChar(error.stack || error.codeFrame);
