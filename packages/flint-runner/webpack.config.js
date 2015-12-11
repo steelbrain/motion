@@ -3,15 +3,23 @@ var path = require('path')
 var fs = require('fs')
 var nodeModules = fs.readdirSync('node_modules')
 
+var banners = [
+  'var regeneratorRuntime = require("regenerator-runtime-only")',
+  'require("source-map-support").install();'
+].join("\n")
+
 module.exports = {
-  entry: './src/index.js',
+  entry: {
+    main: './src/index.js',
+    serverProcess: './src/serverProcess'
+  },
   target: 'node',
   devtool: 'sourcemap',
   output: {
     library: 'flint-runner',
     libraryTarget: 'umd',
     path: path.join(__dirname, 'dist'),
-    filename: 'runner.js'
+    filename: '[name].js'
   },
   node: {
     Buffer: false,
@@ -31,12 +39,8 @@ module.exports = {
     }
   ],
   plugins: [
-    new webpack.BannerPlugin('require("source-map-support").install();', {
-      raw: true,
-      entryOnly: false
-    })
+    new webpack.BannerPlugin(banners, { raw: true, entryOnly: false })
   ],
-  // devtool: 'sourcemap',
   module: {
     loaders: [
       {

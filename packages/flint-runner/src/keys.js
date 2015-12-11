@@ -1,4 +1,4 @@
-import runner from './index'
+import runner from './shutdown'
 import open from 'open'
 import keypress from 'keypress'
 

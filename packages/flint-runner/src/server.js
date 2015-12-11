@@ -3,18 +3,22 @@
 // which does heavy requesting
 
 import cp from 'child_process'
-import runner from './index'
+import { setChild } from './shutdown'
 import opts from './opts'
 import internal from './internal'
 
+import { p } from './lib/fns'
+import js from 'flint-js'
+const serverPath = p(js(), '..', 'flint-runner', 'dist', 'serverProcess')
+
 export function run() {
   return new Promise((res, rej) => {
-    let child = cp.fork(__dirname + '/serverProcess', '', {
+    let child = cp.fork(serverPath, '', {
       // for express to run quickly
       env: { NODE_ENV: 'production' }
     })
 
-    runner.setChild(child)
+    setChild(child)
 
     child.send(JSON.stringify(opts.get()))
 
