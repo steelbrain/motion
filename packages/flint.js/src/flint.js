@@ -178,14 +178,21 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     decorateViews: decorator => Internal.viewDecorator = decorator,
     preloaders: [], // async functions needed before loading app
 
+    preload(fn) {
+      Flint.preloaders.push(fn)
+    },
+
     // styles, TODO: move internal
     staticStyles,
     styleClasses: {},
     styleObjects: {},
 
     render() {
-      if (Flint.preloaders.length)
-        Promise.all(Flint.preloaders.map(loader => loader())).then(run)
+      if (Flint.preloaders.length) {
+        return Promise
+          .all(Flint.preloaders.map(loader => typeof loader == 'function' ? loader() : loader))
+          .then(run)
+      }
       else
         run()
 

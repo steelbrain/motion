@@ -596,7 +596,8 @@ export default function createPlugin(options) {
 
             if (!isStyle) return
 
-            meta[currentView].styles[node.left.name.substr(1)] = node.loc.start
+            if (currentView)
+              meta[currentView].styles[node.left.name.substr(1)] = node.loc.start
 
             // styles
             return extractAndAssign(node)

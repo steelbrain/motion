@@ -56,4 +56,4 @@ Program
   .command('run', 'run your flint app')
   .command('build', 'run your flint app');
 
-Program.parse(process.flintArgs || process.argv);
+Program.parse(process.flintArgs || process.argv)

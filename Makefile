@@ -32,7 +32,7 @@ flint.js: ready
 	make push
 
 runner: ready
-	scripts/release.sh runner
+	scripts/release.sh flint-runner
 	make push
 
 transform: ready

@@ -24,29 +24,6 @@ import { logError, handleError, path, log } from './lib/fns'
 // })
 // DONT RELEASE ME!
 
-
-// STOP
-
-process.on('SIGINT', cleanExit)
-process.on('SIGTERM', cleanExit)
-process.on('uncaughtException', cleanExit)
-
-let child
-
-function cleanExit(e) {
-  if (e) logError(e)
-
-  child && child.send('EXIT') // this seems to be required
-
-  setTimeout(() => {
-    child &&  child.kill('SIGINT')
-    process.exit(0)
-  })
-}
-
-export function stop() { cleanExit() }
-export function setChild(_child) { child = _child }
-
 // RUN
 
 export async function run(_opts = {}, isBuild) {
@@ -78,7 +55,9 @@ export async function run(_opts = {}, isBuild) {
       }
 
       post = async () => {
-        if (OPTS.watch) return gulp.watchForBuild()
+        if (OPTS.watch)
+          return gulp.watchForBuild()
+
         await builder.build()
         process.exit()
       }
@@ -111,4 +90,4 @@ export async function run(_opts = {}, isBuild) {
   }
 }
 
-export default { run, stop, setChild }
+export default { run }

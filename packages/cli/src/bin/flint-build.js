@@ -19,5 +19,5 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
 
   Program.version = require('../../../package.json').version
 
-  runner(Program, true);
+  runner.run(Program, true);
 })

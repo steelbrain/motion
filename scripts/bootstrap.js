@@ -9,7 +9,7 @@ exec("npm install --loglevel=error")
 var packages = [];
 
 // order important so they are linkable to each other
-var packageNames = ['transform', 'nice-styles', 'flint.js', 'runner', 'cli'];
+var packageNames = ['transform', 'nice-styles', 'flint.js', 'flint-runner', 'cli'];
 
 packageNames.forEach(function (loc) {
   var name = path.basename(loc);

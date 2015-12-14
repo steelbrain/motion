@@ -3,7 +3,7 @@ import log from './log'
 import unicodeToChar from './unicodeToChar'
 
 export default function logError(error, file) {
-  console.log('Error'.red.bold)
+  console.log('Error')
 
   if (typeof error != 'object' || Array.isArray(error))
     return console.log(error)
