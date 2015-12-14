@@ -89,6 +89,7 @@ echo
 if [[ "$reply" =~ ^[Yy]$ ]]; then
   rm -r ~/.atom/packages/flint
   git clone -b beta http://github.com/flintjs/atom ~/.atom/packages/flint
+  (cd ~/.atom/packages/flint && npm install)
 fi
 
 # Check sudo privelege on global node_modules
