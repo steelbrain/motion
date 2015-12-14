@@ -51,7 +51,7 @@ export async function installAll(toInstall) {
     if (toInstall.length)
       installingFullNames.push(toInstall)
     else {
-      if (opts.get('hasRunInitialBuild'))
+      if (!_isInstalling && opts.get('hasRunInitialBuild'))
         opts.set('hasRunInitialInstall', true)
 
       return
@@ -111,7 +111,9 @@ function runInstall(prevInstalled, toInstall) {
       onError(dep, e)
     }
     finally {
-      installing.shift() // remove
+      let installed = installing.shift()
+
+       // remove
       log(LOG, 'install, finally:', installing)
       next()
     }
@@ -127,7 +129,7 @@ function runInstall(prevInstalled, toInstall) {
   async function done() {
     const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
     let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
-    log(LOG, 'finalPaths', finalPaths)
+    log(LOG, 'DONE, finalPaths', finalPaths)
 
     // remove failed
     if (failed && failed.length)
@@ -145,7 +147,7 @@ function runInstall(prevInstalled, toInstall) {
     isDone = true
   }
 
-  return new Promise((res) => {
+  return new Promise(res => {
     // start
     installNext()
 
@@ -162,7 +164,7 @@ function runInstall(prevInstalled, toInstall) {
 // to ensure we wait for installs
 let finishedWatchers = []
 function finishedInstalls() {
-  return new Promise((res) => {
+  return new Promise(res => {
     finishedWatchers.push(() => {
       res()
     })

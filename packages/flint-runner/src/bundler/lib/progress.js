@@ -1,8 +1,10 @@
-import exec from '../../lib/exec'
+// import exec from '../../lib/exec'
 import { Spinner } from '../../lib/console'
 import opts from '../../opts'
 import log from '../../lib/log'
 import handleError from '../../lib/handleError'
+
+const LOG = 'externals'
 
 export default async function progress(label, cmd, name, index, total) {
   try {
@@ -41,9 +43,12 @@ function logProgress(tag, name, index, total) {
   }
 }
 
+let { exec } = require('child_process')
+
 function execPromise(name, cmd, dir, spinner) {
   return new Promise((res, rej) => {
-    exec(cmd, dir, (err, stdout, stderr) => {
+    log(LOG, 'exec', cmd, dir)
+    exec(cmd, { dir }, (err, stdout, stderr) => {
       if (spinner) spinner.stop()
       if (err) rej(err)
       else res(name)

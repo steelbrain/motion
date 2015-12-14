@@ -24,6 +24,7 @@ module.exports = {
   node: {
     Buffer: false,
     global: false,
+    exec: false,
     process: false,
     setImmediate: false,
     __filename: true,

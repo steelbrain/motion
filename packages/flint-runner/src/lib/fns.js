@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { glob as _glob } from 'multi-glob'
+import _glob from 'globby'
 import readdirp from 'readdirp'
 import mkdirp from 'mkdirp'
 import jf from 'jsonfile'
@@ -37,7 +37,7 @@ const writeFile = Promise.promisify(fs.writeFile)
 const touch = logWrap('touch', Promise.promisify(_touch))
 const copy = logWrap('copy', Promise.promisify(copyFile))
 const exists = logWrap('exists', Promise.promisify(fs.stat))
-const glob = logWrap('glob', Promise.promisify(_glob))
+const glob = logWrap('glob', _glob)
 
 const p = path.join
 const recreateDir = (dir) =>

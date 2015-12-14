@@ -55,7 +55,9 @@ export async function run(_opts = {}, isBuild) {
       }
 
       post = async () => {
-        if (OPTS.watch) return gulp.watchForBuild()
+        if (OPTS.watch)
+          return gulp.watchForBuild()
+
         await builder.build()
         process.exit()
       }

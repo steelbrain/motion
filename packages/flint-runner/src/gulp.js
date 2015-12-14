@@ -196,33 +196,42 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
     }
 
+    let outMTime, srcMTime
+
     try {
-      const outMTime = fs.statSync(outFile).mtime
-      const srcMTime = fs.statSync(file.path).mtime
-      const goodBuild = +outMTime > +srcMTime
+      srcMTime = fs.statSync(file.path).mtime
+    }
+    catch(e) {
+      log(LOG, 'buildCheck', 'src file removed')
+      return false
+    }
 
-      if (!goodBuild)
-        return false
-
-      const cached = cache.getPrevious(file.path)
-
-      if (!cached)
-        return false
-
-      const goodCache = cached.added > srcMTime
-
-      if (!goodCache)
-        return false
-
-      finish()
-      return true
-
-    // catch if file doesnt exist
-    } catch (e) {
-      log(LOG, 'buildCheck', 'ERROR', e)
+    try {
+      outMTime = fs.statSync(outFile).mtime
+    }
+    catch(e) {
+      log(LOG, 'buildCheck', 'out file removed')
       markDone(file)
       return false
     }
+
+    const goodBuild = +outMTime > +srcMTime
+
+    if (!goodBuild)
+      return false
+
+    const cached = cache.getPrevious(file.path)
+
+    if (!cached)
+      return false
+
+    const goodCache = cached.added > srcMTime
+
+    if (!goodCache)
+      return false
+
+    finish()
+    return true
   }
 
   function resetLastFile(file) {
