@@ -25,28 +25,29 @@ if (flintIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === '-'
   process.flintArgs.splice(flintIndex + 1, 0, 'run');
 }
 
+// DISABLE WHILE BETA
 // check flint version
-var path = require('path')
-var exec = require('child_process').exec
-var checkversion = 'npm view flint version -loglevel silent'
-exec(checkversion, (err, version) => {
-  if (err) return
-  if (version) {
-    let pkg = require(path.join('..', '..', '..', 'package.json'))
-
-    const getversion = v => (''+v).trim()
-    let curV = getversion(version)
-    let pkgV = getversion(pkg.version)
-
-    if (curV != pkgV) {
-      console.log(
-        `──────────────────────────────────\n`.yellow.bold +
-        ` Flint update available: v${curV.slice(-8)} \n`.bold +
-        `──────────────────────────────────`.yellow.bold
-      )
-    }
-  }
-})
+// var path = require('path')
+// var exec = require('child_process').exec
+// var checkversion = 'npm view flint version -loglevel silent'
+// exec(checkversion, (err, version) => {
+//   if (err) return
+//   if (version) {
+//     let pkg = require(path.join('..', '..', '..', 'package.json'))
+//
+//     const getversion = v => (''+v).trim()
+//     let curV = getversion(version)
+//     let pkgV = getversion(pkg.version)
+//
+//     if (curV != pkgV) {
+//       console.log(
+//         `──────────────────────────────────\n`.yellow.bold +
+//         ` Flint update available: v${curV.slice(-8)} \n`.bold +
+//         `──────────────────────────────────`.yellow.bold
+//       )
+//     }
+//   }
+// })
 
 Program
   .version(require('../../../package.json').version)
