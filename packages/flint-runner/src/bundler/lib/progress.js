@@ -45,10 +45,10 @@ function logProgress(tag, name, index, total) {
 
 let { exec } = require('child_process')
 
-function execPromise(name, cmd, dir, spinner) {
+function execPromise(name, cmd, cwd, spinner) {
   return new Promise((res, rej) => {
-    log(LOG, 'exec', cmd, dir)
-    exec(cmd, { dir }, (err, stdout, stderr) => {
+    log(LOG, 'exec', cmd, cwd)
+    exec(cmd, { cwd }, (err, stdout, stderr) => {
       if (spinner) spinner.stop()
       if (err) rej(err)
       else res(name)
