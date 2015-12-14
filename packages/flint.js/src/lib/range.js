@@ -1,4 +1,8 @@
 export default function(val) {
+  // hacked in support for .get() for now
+  if (typeof val == 'object' && val.get)
+    val = val.get()
+
   if (Array.isArray(val) || isIterable(val))
     return val
   if (typeof val == 'number')
