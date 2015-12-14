@@ -3,17 +3,6 @@ import exec from './exec'
 
 let meta = {}
 
-let focusEl = data => {
-  console.log('in focus el')
-  //console.log('data ', data.view, data.key)
-  //bridge.message('focus:element', { data })
-}
-
-let focusStyle = data => {
-  console.log('in focus style')
-  //console.log('data ', data.view, data.key)
-}
-
 bridge.on('editor', data => {
   let { type, key, el, view } = data
 
