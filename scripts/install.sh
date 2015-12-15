@@ -87,7 +87,7 @@ echo
 read -p "Would you like to install the beta atom plugin [y/n]? " reply
 echo
 if [[ "$reply" =~ ^[Yy]$ ]]; then
-  rm -r ~/.atom/packages/flint
+  sudo rm -r ~/.atom/packages/flint
   git clone -b beta http://github.com/flintjs/atom ~/.atom/packages/flint
   (cd ~/.atom/packages/flint && npm install)
 fi
