@@ -19,20 +19,23 @@ export async function readState() {
 }
 
 let lock = null
+let unlock = null
 
 function getLock() {
   log(LOG, 'lock', lock)
-  if (lock) return lock
+
+  if (lock)
+    return unlock
   else {
     log(LOG, 'no lock, returning new')
-    let resolver
     lock = new Promise(res => {
-      resolver = () => {
+      unlock = () => {
         lock = null
         res()
       }
     })
-    return resolver
+
+    return unlock
   }
 }
 
@@ -61,7 +64,6 @@ export async function writeState(writer) {
     if (lock) await lock
     log(LOG, 'get lock')
     const unlock = getLock()
-    log(LOG, 'got lock', unlock)
     const state = await readState()
     await stateWriter(writer, state, unlock)
   }
