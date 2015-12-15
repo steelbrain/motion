@@ -145,6 +145,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       multipipe(
         gulp.dest(p(OPTS.depsDir, 'internal')),
         pipefn(markLastFileSuccess),
+        pipefn(removeNewlyInternal),
         $.ignore.exclude(true)
       )
     ))
@@ -334,6 +335,18 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (!error) return
     log(LOG, 'cache last error', error)
     bridge.message('compile:error', { error }, 'error')
+  }
+
+  // ok so we start a file
+  // its built into .flint/out
+  // we then add an export
+  // now we need to remove it from .flint/out
+  function removeNewlyInternal(file) {
+    // resolve path from .flint/.internal/deps/internals/xyz.js back to xyz.js
+    const filePath = path.relative(p(opts.get('deps').dir, 'internal'), file.path)
+    // then resolve path to .flint/.internal/out/xyz.js
+    const outPath = p(opts.get('outDir'), filePath)
+    rm(outPath)
   }
 }
 

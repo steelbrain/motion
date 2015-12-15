@@ -17,6 +17,8 @@ import logError from './logError'
 import { Promise } from 'bluebird'
 Promise.longStackTraces()
 
+const p = path.join
+
 const LOG = 'file'
 const logWrap = (name, fn) => {
   return (...args) => {
@@ -39,7 +41,6 @@ const copy = logWrap('copy', Promise.promisify(copyFile))
 const exists = logWrap('exists', Promise.promisify(fs.stat))
 const glob = logWrap('glob', _glob)
 
-const p = path.join
 const recreateDir = (dir) =>
   new Promise((res, rej) => {
     rimraf(dir, err => {
