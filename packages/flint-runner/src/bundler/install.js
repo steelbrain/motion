@@ -25,8 +25,8 @@ export async function install(force) {
 
     if (force)
       await bundleInternals()
-
-  } catch(e) {
+  }
+  catch (e) {
     handleError(e)
     throw new Error(e)
   }

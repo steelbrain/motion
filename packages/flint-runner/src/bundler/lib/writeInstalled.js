@@ -13,7 +13,9 @@ export default async function writeInstalled(_packages, _paths) {
   try {
     log(LOG, 'writeInstalled')
     const packages = rmFlintExternals(normalize(_packages))
-    const fullPaths = filterWithPath(_paths || cache.getImports(), _packages)
+    const paths = _paths || cache.getImports()
+
+    const fullPaths = filterWithPath(paths, packages)
     log(LOG, 'writeInstalled', 'packages', packages, 'fullPaths', fullPaths)
 
     await writeState((state, write) => {

@@ -11,7 +11,7 @@ export default async function remakeInstallDir(redo) {
     await mkdir(deps.dir)
 
     if (redo) {
-      await writeInstalled([])
+      // await writeInstalled([])
       await* [
         rm(deps.externalsIn),
         rm(deps.externalsPaths),

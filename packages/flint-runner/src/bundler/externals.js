@@ -26,6 +26,7 @@ export async function bundleExternals(opts = {}) {
 
   const fullpaths = await readFullPaths()
   await writeFullPaths(fullpaths)
+
   log(LOG, 'bundleExternals', fullpaths)
   await packExternals()
 
