@@ -130,6 +130,18 @@ export default function createPlugin(options) {
       return t.callExpression(t.identifier('Object.freeze'), [node])
     }
 
+    function propChange(node) {
+      return t.expressionStatement(
+        t.callExpression(t.identifier('on.props'), [
+          t.functionExpression(null, [], t.blockStatement(
+            node.declarations.map(({ id: { name } }) =>
+              t.assignmentExpression('=', t.identifier(name), t.identifier(`view.props.${name}`))
+            )
+          ))
+        ])
+      )
+    }
+
     function wrapSetter(name, node, scope, postfix, method = 'set') {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
@@ -142,7 +154,6 @@ export default function createPlugin(options) {
 
       return node
     }
-
 
     function wrapDeclarator(name, node, scope) {
       return wrapSetter(name, node, scope, false, 'dec')
@@ -546,8 +557,9 @@ export default function createPlugin(options) {
 
         VariableDeclaration: {
           enter(node, parent, scope) {
-            if (node.kind == 'prop') {
+            if (node.kind == 'prop' && !node._flintPropParsed) {
               node.kind = 'const'
+              node._flintPropParsed = true
 
               node.declarations.map(dec => {
                 let name = dec.id.name
@@ -555,7 +567,7 @@ export default function createPlugin(options) {
                 return dec
               })
 
-              return node
+              return [ node, propChange(node) ]
             }
           },
 

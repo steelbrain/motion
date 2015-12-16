@@ -97,7 +97,6 @@ export function on(event, cb) {
 on('editor', msg => message('editor', msg))
 on('fromEditor', msg => message('fromEditor', msg))
 
-
 function runListeners(data) {
   log(LOG, '-[in]-', data)
 
