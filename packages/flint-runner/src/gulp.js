@@ -119,7 +119,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // track inFiles files to determine when it's loaded
   let loaded = 0
-  let total = inFiles.length
+  let total = inFiles && inFiles.length || 0
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)

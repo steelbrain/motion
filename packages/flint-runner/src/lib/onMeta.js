@@ -12,6 +12,8 @@ bridge.on('editor', data => {
   // the browser turns One.Two into One-Two
   view = view.replace(/\-/, '.')
 
+  if (!meta[view]) return
+
   const viewData = { name: view, file: meta[view].data.file }
 
   if (type == 'focus:style') {
