@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.0-beta.2",
+  "version": "1.4.0-beta.3",
   "main": "entry.js",
   "dependencies": {
     "flint-nice-styles": "^1.4.0-beta.1",
