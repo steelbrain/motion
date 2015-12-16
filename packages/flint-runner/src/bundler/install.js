@@ -59,10 +59,9 @@ export async function installAll(toInstall) {
 
     const _toInstall = normalize(toInstall)
     const prevInstalled = await readInstalled()
-    const _prevInstalled = normalize(prevInstalled)
-    const fresh = _.difference(_toInstall, _prevInstalled, installing)
+    const fresh = _.difference(_toInstall, prevInstalled, installing)
     log(LOG, 'installAll/fresh = ', fresh, ' = ')
-    log(LOG, '  =', _toInstall, '(toInstall) - ', _prevInstalled, '(prevInstalled) - ', installing, '(currently installing)')
+    log(LOG, '  =', _toInstall, '(toInstall) - ', prevInstalled, '(prevInstalled) - ', installing, '(currently installing)')
 
     // no new ones found
     if (!fresh.length) {

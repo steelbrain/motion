@@ -44,7 +44,7 @@ const $p = {
   babel: () => babel({
     jsxPragma: 'view.el',
     stage: 2,
-    blacklist: ['flow', 'es6.tailCall', 'strict'],
+    blacklist: ['es6.tailCall', 'strict'],
     retainLines: OPTS.pretty ? false : true,
     comments: true,
     optional: ['regenerator'],
