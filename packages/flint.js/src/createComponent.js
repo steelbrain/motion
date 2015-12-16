@@ -282,7 +282,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       // FLINT HELPERS
 
-      clone(el, props) {        
+      // property declarators
+      prop(name, defaultValue) {
+        return this.props[name] || defaultValue
+      },
+
+      clone(el, props) {
         return React.cloneElement(el, props)
       },
 

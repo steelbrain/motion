@@ -248,6 +248,11 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     out.badFile(curFile)
 
     error.timestamp = Date.now()
+
+    // dont output massive stacks
+    if (error.plugin == 'gulp-babel')
+      error.stack = ''
+
     logError(error, curFile)
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error }, 'error')

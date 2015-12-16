@@ -148,6 +148,9 @@ export default function createPlugin(options) {
       return wrapSetter(name, node, scope, false, 'dec')
     }
 
+    function wrapPropertyDeclarator(name, node, scope) {
+      return wrapSetter(name, node, scope, false, 'prop')
+    }
 
     function getter(name, val, ...args) {
       return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
@@ -542,6 +545,20 @@ export default function createPlugin(options) {
         },
 
         VariableDeclaration: {
+          enter(node, parent, scope) {
+            if (node.kind == 'prop') {
+              node.kind = 'const'
+
+              node.declarations.map(dec => {
+                let name = dec.id.name
+                dec.init = wrapPropertyDeclarator(name, dec.init || t.identifier('undefined'), scope)
+                return dec
+              })
+
+              return node
+            }
+          },
+
           exit(node, parent, scope, file) {
             if (node.isStyle || node._flintDeclarationParsed) return
             node._flintDeclarationParsed = true
