@@ -1,12 +1,13 @@
 import bundler from './bundler'
 import log from './lib/log'
-import findExports from './lib/findExports'
+import hasExports from './lib/hasExports'
 import cache from './cache'
 import gutil from 'gulp-util'
 import through from 'through2'
 
 let views = []
 let OPTS
+const LOG = 'gulp'
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
@@ -28,6 +29,8 @@ var Parser = {
   },
 
   post(file, source) {
+    log(LOG, 'compiler/post', file)
+
     // scan for imports/exports
     const bundle = () => bundler.scanFile(file, source)
 
@@ -40,7 +43,8 @@ var Parser = {
       debounce('removeOldImports', 3000, bundler.uninstall)
 
     // check internals
-    const isInternal = findExports(source)
+    const isInternal = hasExports(source)
+    log(LOG, 'ISINTERNAL'.yellow, isInternal)
 
     // wrap closure if not internal file
     if (!isInternal)

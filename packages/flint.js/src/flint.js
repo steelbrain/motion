@@ -137,9 +137,16 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const emitter = ee({})
 
+  // TODO: move this into file
   function require(name) {
-    if (name.charAt(0) == '.')
-      return Flint.internals[name.replace('./', '')]
+    if (name.charAt(0) == '.') {
+      let cleanName = name.replace('./', '')
+      return (
+        Flint.internals[cleanName]
+        // try /index for directory shorthand
+        || Flint.internals[`${cleanName}/index`]
+      )
+    }
 
     if (name == 'bluebird')
       return root._bluebird

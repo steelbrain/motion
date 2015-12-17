@@ -5,7 +5,7 @@ import webpackConfig from './lib/webpackConfig'
 import readInstalled from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import depRequireString from './lib/depRequireString'
-import findExports from '../lib/findExports'
+import hasExports from '../lib/hasExports'
 import bridge from '../bridge'
 import cache from '../cache'
 import opts from '../opts'
@@ -36,11 +36,13 @@ async function writeInternalsIn() {
   await writeFile(opts.get('deps').internalsIn, requireString)
 }
 
+let runningBundle = null
+
 // TODO: check this in babel to be more accurate
 export async function checkInternals(file, source) {
   log(LOG, 'checkInternals', file)
 
-  const isExporting = findExports(source)
+  const isExporting = hasExports(source)
   const alreadyExported = cache.isExported(file)
   log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported)
 
@@ -51,8 +53,12 @@ export async function checkInternals(file, source) {
     await writeInternalsIn()
   }
 
-  if (isExporting)
-    bundleInternals()
+  if (isExporting && !runningBundle) {
+    clearTimeout(runningBundle)
+    runningBundle = setTimeout(async () => {
+      await bundleInternals()
+    }, 100)
+  }
 }
 
 // let internals use externals

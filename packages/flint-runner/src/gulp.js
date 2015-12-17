@@ -114,7 +114,7 @@ export async function init() {
 // userStream is optional for programmatic usage
 export function buildScripts({ inFiles, outFiles, userStream }) {
   const outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
-  let lastScript, curFile, lastError
+  let lastScript, lastFile, curFile, lastError
   let lastSavedTimestamp = {}
 
   // track inFiles files to determine when it's loaded
@@ -238,8 +238,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function resetLastFile(file) {
     lastError = false
     curFile = file
-    lastScript = null
-    file.startTime = Date.now()
+    lastFile = file
+    lastScript = { startTime: Date.now() }
   }
 
   function catchError(error) {
@@ -263,7 +263,11 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     let name = file.path.replace(OPTS.appDir, '')
     if (name.charAt(0) != '/') name = '/' + name
     log(LOG, 'setLastFile', 'path', file.path, 'name', name)
-    lastScript = { name, path: file.path, compiledAt: file.startTime }
+
+    lastScript.name = name
+    lastScript.path = file.path
+    lastScript.compiledAt = file.startTime
+
     curFile = file
   }
 
@@ -281,9 +285,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
 
     const endTime = Date.now() - file.startTime
-
     out.goodFile(file, endTime)
-    log('build took ', endTime, 'ms')
 
     if (OPTS.build)
       return true
@@ -351,6 +353,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const filePath = path.relative(p(opts.get('deps').dir, 'internal'), file.path)
     // then resolve path to .flint/.internal/out/xyz.js
     const outPath = p(opts.get('outDir'), filePath)
+    log(LOG, 'remove newly internal', outPath)
     rm(outPath)
   }
 }

@@ -258,11 +258,14 @@ export default function createPlugin(options) {
 
           // this ensures all paths are relative to the root, not the current file
           if (isInternal) {
-            const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
-            const relImportPath = './' + relativePath(importPath)
-            node.source.value = relImportPath
-            node.source.rawValue = relImportPath
-            node.source.raw = `\'${relImportPath}\'`
+            // const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
+            // const relImportPath = '#./' + relativePath(importPath)
+            //
+            // console.log(node)
+            //
+            // node.source.value = relImportPath
+            // node.source.rawValue = relImportPath
+            // node.source.raw = `\'${relImportPath}\'`
           }
         },
 
@@ -854,10 +857,10 @@ export default function createPlugin(options) {
             if (!isBasicAssign) return
 
             // destructures
-            if (t.isObjectPattern(node.left)) {
+            if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {
               let destructNodes = destructureTrackers(node.left, 'set')
               node.flintTracked = true
-              return [node, ...destructNodes]
+              return [t.expressionStatement(node), ...destructNodes]
             }
 
             const isRender = hasObjWithProp(node, 'view', 'render')

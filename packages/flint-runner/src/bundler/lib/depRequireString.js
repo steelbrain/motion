@@ -1,12 +1,12 @@
 export default function depRequireString(name, onto, pathname = '') {
   return `
-    try {
+    // try {
       Flint.${onto}["${name}"] = require("${pathname}${name}")
-    }
-    catch(e) {
-      console.log('Error bundling package ${name}!')
-      console.error(e)
-      Flint.reportError(e)
-    };
+    // }
+    // catch(e) {
+    //   console.log('Error bundling package ${name}!')
+    //   console.error(e)
+    //   Flint.reportError(e)
+    // };
   `
 }
