@@ -28,7 +28,7 @@ export default function watchDeletes() {
     cache.onDeleteFile(async ({ name, file, state }) => {
       log('onDeleteFile', name, file, state)
 
-      if (state.isExported)
+      if (state.isInternal)
         await bundleInternals()
 
       await state.views.forEach(async view => {

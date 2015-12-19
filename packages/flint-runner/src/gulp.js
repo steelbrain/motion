@@ -27,7 +27,7 @@ const relative = file => path.relative(opts.get('appDir'), file.path)
 const time = _ => _ ? ` - ${_}ms` : ''
 const out = {
   badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}${time(ms)}`.bold)
+  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}${time(ms || (Date.now() - file.startTime))}`.bold)
 }
 
 gulp.task('build', buildScripts)
@@ -143,8 +143,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe($.if(file => file.isInternal,
       multipipe(
+        pipefn(markFileSuccess), // before writing to preserve path
         gulp.dest(p(OPTS.depsDir, 'internal')),
-        pipefn(markFileSuccess),
         pipefn(removeNewlyInternal),
         $.ignore.exclude(true)
       )
@@ -179,7 +179,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     function finish() {
       log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
-      out.goodFile(file)
+
+      if (!cache.isInternal(file.path))
+        out.goodFile(file)
+
       markDone(file)
     }
 
@@ -192,7 +195,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const prevFile = cache.getPrevious(file.path)
 
     // if exported file, mark done and skip
-    if (prevFile && prevFile.isExported) {
+    if (prevFile && prevFile.isInternal) {
       finish()
       return false
     }
@@ -288,8 +291,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (userStream || lastError)
       return false
 
-    const endTime = Date.now() - file.startTime
-    out.goodFile(file, endTime)
+    out.goodFile(file)
 
     if (OPTS.build)
       return true
@@ -329,6 +331,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function markFileSuccess(file) {
     log(LOG, 'markLastFileSuccess', file.path)
+    out.goodFile(file)
 
     // update cache error / state
     cache.update(file.path)

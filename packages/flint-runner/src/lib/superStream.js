@@ -74,7 +74,7 @@ function fileSend({ path, contents }) {
   }
 
   // internals debounce
-  if (cache.isExported(path)) {
+  if (cache.isInternal(path)) {
     log(LOG, 'is exported')
     clearTimeout(internalTimeout)
     internalTimeout = setTimeout(pushStream, 1000)

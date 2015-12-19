@@ -140,28 +140,28 @@ const Cache = {
     cache.imports = _imports
   },
 
-  isExported(file: string) {
+  isInternal(file: string) {
     const f = cache.files[relative(file)]
-    return f && f.isExported
+    return f && f.isInternal
   },
 
-  setIsExported(file: string, val: boolean) {
+  setIsInternal(file: string, val: boolean) {
     const name = relative(file)
     const f = cache.files[name]
 
     if (!f) return
 
-    const isExported = f.isExported
-    cache.files[name].isExported = val
+    const isInternal = f.isInternal
+    cache.files[name].isInternal = val
 
-    if (isExported != val)
+    if (isInternal != val)
       onSetExported(name, val)
   },
 
   getExported() {
     log(LOG, 'cache', 'getExported', cache.files)
     return Object.keys(cache.files)
-      .map(name => cache.files[name].isExported ? name : null)
+      .map(name => cache.files[name].isInternal ? name : null)
       .filter(f => f != null)
   },
 

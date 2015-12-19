@@ -43,10 +43,10 @@ export async function checkInternals(file, source) {
   log(LOG, 'checkInternals', file)
 
   const isExporting = hasExports(source)
-  const alreadyExported = cache.isExported(file)
+  const alreadyExported = cache.isInternal(file)
   log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported)
 
-  cache.setIsExported(file, isExporting)
+  cache.setIsInternal(file, isExporting)
 
   // needs to rewrite internalsIn.js?
   if (!alreadyExported && isExporting || alreadyExported && !isExporting) {
