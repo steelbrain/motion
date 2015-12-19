@@ -242,6 +242,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.props.__flint.onMount(this)
           this.setID()
         }
+
+        if (this.doRenderToRoot) {
+          this.handleRootRender()
+        }
       },
 
       componentWillUnmount() {
@@ -251,6 +255,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.runEvents('unmount')
         this.mounted = false
+
+        if (this.renderToRoot) {
+          ReactDOM.unmountComponentAtNode(this.node)
+          this.app.removeChild(this.node)
+        }
       },
 
       componentWillUpdate() {
@@ -277,6 +286,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         if (!process.env.production) {
           this.setID()
+        }
+
+        if (this.doRenderToRoot) {
+          this.handleRootRender()
         }
       },
 
@@ -357,6 +370,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
       //   this.state = { _context: obj }
       // },
 
+      // render to a "portal"
+      renderToRoot() {
+        this.doRenderToRoot = true
+
+        this.app = document.body
+        this.node = document.createElement('div')
+        this.node.setAttribute('data-portal', 'true')
+        this.app.appendChild(this.node)
+      },
+
+      handleRootRender() {
+        ReactDOM.render(this.renderResult, this.node)
+      },
+
       getWrapper(tags, props, numRenders) {
         const wrapperName = name.toLowerCase()
 
@@ -428,7 +455,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.path)]
       },
 
-      render() {
+      _render() {
         const self = this
 
         self.isRendering = true
@@ -485,6 +512,18 @@ export default function createComponent(Flint, Internal, name, view, options = {
           catch(e) {
             console.flint("Error rendering last version of view after error")
           }
+        }
+      },
+
+      render() {
+        let result = this._render.call(this)
+
+        if (this.doRenderToRoot) {
+          this.renderResult = result
+          return <noscript />
+        }
+        else {
+          return result
         }
       }
     })
