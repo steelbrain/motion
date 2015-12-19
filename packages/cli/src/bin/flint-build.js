@@ -15,6 +15,7 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     .option('-w, --watch', 'incremental builds')
     .option('-v, --debug [what]', 'output extra information for debugging')
     .option('-i, --isomorphic', 'render template isomorphic')
+    .option('--reset', 'reset all flint state before building')
     .parse(process.argv);
 
   Program.version = require('../../../package.json').version

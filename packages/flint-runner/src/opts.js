@@ -2,6 +2,7 @@ import path from 'path'
 import log from './lib/log'
 import { p, sanitize } from './lib/fns'
 import { writeState } from './internal'
+import util from 'util'
 
 let OPTS
 
@@ -26,6 +27,7 @@ function setAll(opts) {
   OPTS.host = opts.host
   OPTS.watch = opts.watch
   OPTS.pretty = opts.pretty
+  OPTS.reset = opts.reset
 
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
@@ -77,4 +79,8 @@ async function serialize() {
   })
 }
 
-export default { get, set, setAll, serialize }
+function debug() {
+  console.log(util.inspect(OPTS, false, 10))
+}
+
+export default { get, set, setAll, serialize, debug }

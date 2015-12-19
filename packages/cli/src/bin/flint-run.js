@@ -17,6 +17,7 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('-p, --port [number]', 'specify a port [number]')
     .option('-h, --host [host]', 'specify hostname')
     .option('--pretty', 'pretty print files')
+    .option('--reset', 'resets cache, internals, bundles')
     .parse(process.argv)
 
   Program.version = require('../../../package.json').version

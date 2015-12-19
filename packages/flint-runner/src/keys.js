@@ -8,6 +8,7 @@ import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
 import bundler from './bundler'
+import cache from './cache'
 
 const proc = process // cache for keypress
 
@@ -50,6 +51,13 @@ export function start() {
           break
         case 'u': // upload
           // build(true)
+          break
+        case 'd':
+          console.log("---------opts---------")
+          opts.debug()
+
+          console.log("\n---------cache---------")
+          cache.debug()
           break
       }
     }

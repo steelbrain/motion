@@ -9,7 +9,7 @@ const LOG = 'writeState'
 export async function readState() {
   try {
     const state = await readJSON(opts.get('stateFile'))
-    opts.set('state', state)
+    // opts.set('state', state)
     return state
   }
   catch(e) {

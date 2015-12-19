@@ -1,11 +1,12 @@
-import { p, recreateDir, mkdir } from '../lib/fns'
-import log from '../lib/log'
-import handleError from '../lib/handleError'
+import { p, log, handleError, recreateDir, mkdir } from '../lib/fns'
 import opts from '../opts'
 
 const LOG = 'clear'
 
 export async function init() {
+  if (opts.get('reset'))
+    await recreateDir(opts.get('internalDir'))
+
   await mkdir(opts.get('internalDir'))
   await mkdir(opts.get('styleDir'))
   await mkdir(opts.get('outDir'))

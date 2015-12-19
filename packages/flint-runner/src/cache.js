@@ -2,6 +2,7 @@ import { readState, writeState } from './internal'
 import handleError from './lib/handleError'
 import opts from './opts'
 import { _, log, path, writeJSON } from './lib/fns'
+import util from 'util'
 
 const LOG = 'cache'
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
@@ -49,15 +50,17 @@ function onDeleteViews(views) {
 
 const Cache = {
   async init() {
-    try {
-      // read in previous cache
-      const state = await readState()
-      previousCache = state.cache
+    if (!opts.get('reset')) {
+      try {
+        // read in previous cache
+        const state = await readState()
+        previousCache = state.cache
 
-      Cache.setBaseDir(opts.get('dir'))
-    }
-    catch(e) {
-      handleError(e)
+        Cache.setBaseDir(opts.get('dir'))
+      }
+      catch(e) {
+        handleError(e)
+      }
     }
 
     previousCache = previousCache || {
@@ -192,8 +195,12 @@ const Cache = {
   },
 
   addError(file : string, error : object) {
-    if (cache.files[relative(file)])
-      cache.files[relative(file)].error = error
+    let n = relative(file)
+
+    if (!cache.files[n])
+      cache.add(file)
+
+    cache.files[n].error = error
   },
 
   removeError(file : string) {
@@ -232,6 +239,10 @@ const Cache = {
       log(LOG, 'writing cache')
       write(state)
     })
+  },
+
+  debug() {
+    console.log(util.inspect(cache, false, 10))
   }
 
 }

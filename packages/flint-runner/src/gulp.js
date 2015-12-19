@@ -114,7 +114,7 @@ export async function init() {
 // userStream is optional for programmatic usage
 export function buildScripts({ inFiles, outFiles, userStream }) {
   const outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
-  let lastScript, lastFile, curFile, lastError
+  let curFile, lastError
   let lastSavedTimestamp = {}
 
   // track inFiles files to determine when it's loaded
@@ -144,7 +144,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(file => file.isInternal,
       multipipe(
         gulp.dest(p(OPTS.depsDir, 'internal')),
-        pipefn(markLastFileSuccess),
+        pipefn(markFileSuccess),
         pipefn(removeNewlyInternal),
         $.ignore.exclude(true)
       )
@@ -238,8 +238,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function resetLastFile(file) {
     lastError = false
     curFile = file
-    lastFile = file
-    lastScript = { startTime: Date.now() }
+    file.message = { startTime: Date.now() }
   }
 
   function catchError(error) {
@@ -254,6 +253,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       error.stack = ''
 
     logError(error, curFile)
+
     cache.addError(error.fileName, error)
     bridge.message('compile:error', { error }, 'error')
   }
@@ -264,9 +264,13 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (name.charAt(0) != '/') name = '/' + name
     log(LOG, 'setLastFile', 'path', file.path, 'name', name)
 
-    lastScript.name = name
-    lastScript.path = file.path
-    lastScript.compiledAt = file.startTime
+    // add to message
+    file.message = {
+      ...file.message,
+      name: name,
+      path: file.path,
+      compiledAt: file.startTime
+    }
 
     curFile = file
   }
@@ -317,25 +321,23 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       const cacheHasFile = cache.get(file.path)
       log(LOG, 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && !file.isInternal && cacheHasFile) {
-        bridge.message('script:add', lastScript)
-        markLastFileSuccess()
+        bridge.message('script:add', file.message)
+        markFileSuccess(file)
       }
     }
   }
 
-  function markLastFileSuccess() {
-    if (!lastScript) return
-
-    log(LOG, 'markLastFileSuccess', lastScript)
+  function markFileSuccess(file) {
+    log(LOG, 'markLastFileSuccess', file.path)
 
     // update cache error / state
-    cache.update(lastScript.path)
+    cache.update(file.path)
 
     // write cache state to disk
     serializeCache()
 
     // message browser of compile success
-    bridge.message('compile:success', lastScript, 'error')
+    bridge.message('compile:success', file.message, 'error')
 
     // check if other errors left still in queue
     const error = cache.getLastError()
