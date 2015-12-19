@@ -380,6 +380,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.app.appendChild(this.node)
       },
 
+      renderInlineStyles() {
+        this.doRenderInlineStyles = true
+      },
+
       handleRootRender() {
         ReactDOM.render(this.renderResult, this.node)
       },
