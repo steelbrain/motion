@@ -180,7 +180,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
 
-      if (!cache.isInternal(file.path))
+      if (!file.isInternal)
         out.goodFile(file)
 
       markDone(file)
@@ -291,7 +291,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (userStream || lastError)
       return false
 
-    if (!cache.isInternal(file))
+    if (!file.isInternal)
       out.goodFile(file)
 
     if (OPTS.build)
