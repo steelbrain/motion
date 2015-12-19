@@ -143,9 +143,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe($.if(file => file.isInternal,
       multipipe(
+        pipefn(removeNewlyInternal),
         pipefn(markFileSuccess), // before writing to preserve path
         gulp.dest(p(OPTS.depsDir, 'internal')),
-        pipefn(removeNewlyInternal),
         $.ignore.exclude(true)
       )
     ))
@@ -323,7 +323,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (hasFinished()) {
       const cacheHasFile = cache.get(file.path)
       log(LOG, 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
-      if (!lastError && !file.isInternal && cacheHasFile) {
+      if (!lastError && cacheHasFile) {
         bridge.message('script:add', file.message)
         markFileSuccess(file)
       }

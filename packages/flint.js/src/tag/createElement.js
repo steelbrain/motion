@@ -170,6 +170,7 @@ export default function createElement(viewName) {
     const view = this
     const Flint = view.Flint
     const { fullname, name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
+
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
 
     const styles = elementStyles(key, index, repeatItem, view, name, originalTag || tag, props)

@@ -44,7 +44,7 @@ export async function checkInternals(file, source) {
 
   const isExporting = hasExports(source)
   const alreadyExported = cache.isInternal(file)
-  log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported)
+  log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported, 'alreadyRunningBundle', runningBundle)
 
   cache.setIsInternal(file, isExporting)
 
@@ -57,6 +57,7 @@ export async function checkInternals(file, source) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {
       await bundleInternals()
+      runningBundle = null
     }, 100)
   }
 }
