@@ -291,7 +291,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (userStream || lastError)
       return false
 
-    out.goodFile(file)
+    if (!cache.isInternal(file))
+      out.goodFile(file)
 
     if (OPTS.build)
       return true
