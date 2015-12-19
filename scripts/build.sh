@@ -3,7 +3,7 @@
 set -e
 
 # kill bg tasks on exit
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
+trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
 # build
 for f in packages/*; do

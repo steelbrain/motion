@@ -118,7 +118,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   }
 
   if (props.yield)
-    props = Object.assign(props, viewProps, { style: props.style })
+    props = Object.assign(props, viewProps, props.style && { style: props.style })
 
   if (props.onClick) {
     const originalOnClick = props.onClick
