@@ -332,7 +332,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function markFileSuccess(file) {
     log(LOG, 'markLastFileSuccess', file.path)
-    out.goodFile(file)
+
+    // log files as we startup
+    if (!opts.get('hasRunInitialBuild'))
+      out.goodFile(file)
 
     // update cache error / state
     cache.update(file.path)

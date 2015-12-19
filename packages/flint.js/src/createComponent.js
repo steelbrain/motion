@@ -256,7 +256,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.runEvents('unmount')
         this.mounted = false
 
-        if (this.renderToRoot) {
+        if (this.doRenderToRoot) {
           ReactDOM.unmountComponentAtNode(this.node)
           this.app.removeChild(this.node)
         }
