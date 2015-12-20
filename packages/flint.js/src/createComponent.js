@@ -380,7 +380,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.app.appendChild(this.node)
       },
 
-      renderInlineStyles() {
+      inlineStyles() {
         this.doRenderInlineStyles = true
       },
 

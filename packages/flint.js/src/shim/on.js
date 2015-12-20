@@ -196,6 +196,14 @@ proto('mouseover')
 proto('mouseout')
 proto('mouseup')
 
+// touch
+proto('touchdown')
+proto('touchenter')
+proto('touchleave')
+proto('touchmove')
+proto('touchout')
+proto('touchup')
+
 // keyboard
 proto('keydown')
 proto('keypress')
