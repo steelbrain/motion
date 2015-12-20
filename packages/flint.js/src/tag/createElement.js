@@ -194,6 +194,6 @@ export default function createElement(viewName) {
     // if (!process.env.production)
     //   args = args.map(arg => arg && arg != null && !arg.$$typeof && !Array.isArray(arg) && (arg instanceof Object) ? JSON.stringify(arg) : arg)
 
-    return React.createElement(tag, props, ...args)
+    return React.createElement(props.tagName || tag, props, ...args)
   }
 }
