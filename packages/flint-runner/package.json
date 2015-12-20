@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.0-beta.30",
+  "version": "1.4.0-beta.31",
   "description": "Run flint apps",
   "main": "dist/main.js",
   "scripts": {},
@@ -20,7 +20,7 @@
     "deepmerge": "^0.2.10",
     "del": "^2.0.2",
     "express": "^4.12.3",
-    "flint-babel-core": "^5.8.25",
+    "flint-babel-core": "^5.9.0",
     "flint-js": "^1.4.0-beta.1",
     "flint-tools": "^1.4.0-beta.1",
     "flint-transform": "^1.4.0-beta.1",
