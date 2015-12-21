@@ -12,7 +12,7 @@ const LOG = 'gulp'
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
-const filePrefix = path => `!function(){Flint.file('${cache.name(path)}',function(exports){`
+const filePrefix = path => `!function(){Flint.file('${cache.name(path)}',function(require, exports){`
 const fileSuffix = `\n }) }();` // newline so it doesnt get commented out
 
 let debouncers = {}

@@ -18,6 +18,7 @@ import createComponent from './createComponent'
 import range from './lib/range'
 import iff from './lib/iff'
 import router from './lib/router'
+import requireFactory from './lib/requireFactory'
 import staticStyles from './lib/staticStyles'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -34,6 +35,11 @@ console.warn = (...args) => {
   if (args[0] && args[0].indexOf('Radium:') == 0) return
   originalWarn.call(console, ...args)
 }
+
+const folderFromFile = (filePath) =>
+  filePath.indexOf('/') == -1
+    ? ''
+    : filePath.substring(0, filePath.lastIndexOf('/'))
 
 /*
 
@@ -137,34 +143,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const emitter = ee({})
 
-  // TODO: move this into file
-  function require(name) {
-    if (name.charAt(0) == '.') {
-      let cleanName = name.replace('./', '')
-      return (
-        Flint.internals[cleanName]
-        // try /index for directory shorthand
-        || Flint.internals[`${cleanName}/index`]
-      )
-    }
-
-    if (name == 'bluebird')
-      return root._bluebird
-
-    let pkg = Flint.packages[name]
-
-    // we may be waiting for packages reload
-    if (!pkg) return
-
-    // may not export a default
-    if (!pkg.default)
-      pkg.default = pkg
-
-    return pkg
-  }
-
-  root.require = require
-
   let Flint = {
     // visible but used internally
     packages: {},
@@ -259,7 +237,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let fileExports = {}
 
       // run file
-      run(fileExports)
+      run(flintRequire.bind(null, folderFromFile(file)), fileExports)
 
       Flint.setExports(fileExports)
 
@@ -419,6 +397,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       setInspector(path)
     }
   }
+
+  // below Flint to pass it in
+  let flintRequire = requireFactory(Flint)
 
   // shim root view
   opts.namespace.view = {
