@@ -24,10 +24,10 @@ let OPTS
 const serializeCache = _.throttle(cache.serialize, 200)
 const hasFinished = () => opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
 const relative = file => path.relative(opts.get('appDir'), file.path)
-const time = _ => _ ? ` - ${_}ms` : ''
+const time = _ => typeof _ == 'number' ? ` - ${_}ms` : ''
 const out = {
   badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}${time(ms || (Date.now() - file.startTime))}`.bold)
+  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}`.bold) //${time(ms || (Date.now() - file.startTime) || 1)}
 }
 
 gulp.task('build', buildScripts)
@@ -159,13 +159,12 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function markDone(file) {
     // mark built
-    loaded++
-
+    loaded += 1
     log(LOG, 'markDone', loaded, total, file.path)
 
     // check if done
     if (loaded == total)
-      buildDone()
+      setTimeout(buildDone, 50)
   }
 
   // only do on first run
@@ -174,14 +173,18 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (opts.get('hasRunInitialBuild'))
       return false
 
+    // hide behind cached flag for now
+    if (!opts.get('cached')) {
+      finish()
+      return false
+    }
+
     log(LOG, 'buildCheck', file.path)
 
     function finish() {
       log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
-
-      if (!file.isInternal)
-        out.goodFile(file)
+      out.goodFile(file)
 
       markDone(file)
     }
@@ -241,7 +244,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function resetLastFile(file) {
     lastError = false
     curFile = file
-    file.message = { startTime: Date.now() }
+    file.startTime = Date.now()
+    file.message = { startTime: file.startTime }
   }
 
   function catchError(error) {
@@ -291,8 +295,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (userStream || lastError)
       return false
 
-    if (!file.isInternal)
-      out.goodFile(file)
+    out.goodFile(file)
 
     if (OPTS.build)
       return true
@@ -313,8 +316,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function afterWrite(file) {
     if (file.isSourceMap) return
-
-    markDone(file)
 
     if (OPTS.build && OPTS.watch)
       return builder.build()

@@ -4,6 +4,7 @@ import opts from '../opts'
 const LOG = 'clear'
 
 export async function init() {
+  // TODO: when cached startup works, re-enable reset flag
   if (opts.get('reset'))
     await recreateDir(opts.get('internalDir'))
 

@@ -28,6 +28,7 @@ function setAll(opts) {
   OPTS.watch = opts.watch
   OPTS.pretty = opts.pretty
   OPTS.reset = opts.reset
+  OPTS.cached = opts.cached
 
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
