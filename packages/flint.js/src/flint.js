@@ -179,6 +179,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     reportError,
     range,
     iff,
+    noop: function(){},
 
     // external API
     router,
