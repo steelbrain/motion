@@ -15,7 +15,6 @@
     "clone": "^1.0.2",
     "deep-equal": "^1.0.1",
     "event-emitter": "^0.3.4",
-    "events": "^1.1.0",
     "flint-nice-styles": "^1.4.0-beta",
     "hash-sum": "^1.0.2",
     "history": "^1.13.0",
@@ -25,7 +24,6 @@
     "react": "^0.14.2",
     "react-dom": "^0.14.0",
     "reapp-object-assign": "^1.0.0",
-    "regenerator": "^0.8.42",
     "route-parser": "0.0.4",
     "strip-ansi": "^3.0.0",
     "whatwg-fetch": "^0.10.0"
