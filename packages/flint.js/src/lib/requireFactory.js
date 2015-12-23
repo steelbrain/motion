@@ -13,11 +13,12 @@ export default function requireFactory(Flint) {
         }
 
         parentDirs.splice(-upDirs.length)
-
       }
 
       let parentPath = parentDirs.join('/')
-      let cleanName = parentPath + name.replace(/^(\.\.?\/)+/, '')
+
+      let cleanName = (parentPath ? parentPath + '/' : '')
+        + name.replace(/^(\.\.?\/)+/, '')
 
       return (
         Flint.internals[cleanName]
