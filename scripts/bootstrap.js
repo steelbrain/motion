@@ -39,7 +39,7 @@ packages.forEach(function (pkg) {
   // prune
   cd(pkgFolder)
   console.log('pruning...')
-  exec('npm prune --loglevel=error')
+  exec('rm -rf node_modules')
   cd('../..')
 
   mkdir("-p", nodeModulesLoc);
