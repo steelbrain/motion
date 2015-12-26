@@ -5,13 +5,18 @@ set -e
 # kill bg tasks on exit
 trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
+# order important so they build for each other
+packages=("nice-styles" "transform" "flint.js" "flint-runner" "cli")
+
 # build
-for f in packages/*; do
+for p in "${packages[@]}"; do
+  f="packages/$p"
+
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
     node node_modules/webpack/bin/webpack --config webpack.config.js $1 &
-    echo "running $f webpack for $file"
+    echo "running $f webpack for $f"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then

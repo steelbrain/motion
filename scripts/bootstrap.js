@@ -39,7 +39,8 @@ packages.forEach(function (pkg) {
   // prune
   cd(pkgFolder)
   console.log('pruning...')
-  exec('-rm -rf node_modules')
+  exec('npm prune --loglevel=error')
+  exec('(cd node_modules && find . -type d -name "flint*" -exec rm -r "{}" \\;)')
   cd('../..')
 
   mkdir("-p", nodeModulesLoc);
