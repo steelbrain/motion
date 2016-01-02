@@ -56,6 +56,16 @@ if [ "$1" = "--watch" ]; then
         npm link --loglevel=error
         chsum1=$chsum2
         hasLinkedOnce='true'
+
+        # watch tools after first build
+        if [ $hasLinkedOnce=='false' ] && [ "$2" != '--notools' ]; then
+          sleep 1
+          cd ../..
+          cd apps/tools
+          flint build --watch &
+          cd ../..
+          cd packages/cli
+        fi
       fi
     fi
     sleep 1
