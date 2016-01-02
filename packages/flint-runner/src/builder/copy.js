@@ -45,8 +45,6 @@ export async function app() {
       postTemplate(opts.get('saneName'))
     )
 
-    console.log('outoutout')
-
     // overwrite with full app code
     await writeFile(appFile, outStr)
 
