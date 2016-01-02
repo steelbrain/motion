@@ -13,13 +13,12 @@ export default async function build() {
     await bundler.install()
     await bundler.internals()
 
-    await copy.assets()
-
     log('Building extras, template...')
     makeTemplate()
 
     log('Building extras, copy...')
     await *[
+      copy.assets(),
       copy.flint(),
       copy.react(),
       copy.app()
