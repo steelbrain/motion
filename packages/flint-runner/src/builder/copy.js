@@ -1,9 +1,7 @@
 import webpack from 'webpack'
 import uglify from 'uglify-js'
 import gulp from 'gulp'
-import log from '../lib/log'
-import handleError from '../lib/handleError'
-import { p, copy, writeFile, readFile, readdir } from '../lib/fns'
+import { log, p, copy, writeFile, readFile, readdir, globCopy, handleError } from '../lib/fns'
 import opts from '../opts'
 import flintjs from 'flint-js'
 
@@ -11,7 +9,7 @@ async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
   catch(e) { console.log("Couldn't copy", file) }
   try { await copy(file + '.map', dest + '.map') }
-  catch(e) {}
+  catch(e) { handleError(e) }
 }
 
 export function flint() {
@@ -28,36 +26,43 @@ export function react() {
 
 // bundles together packages.js, internals.js and user app files
 export async function app() {
-  log('copy: app: reading packages + internals')
-  const buildDir = p(opts.get('buildDir'), '_')
-  const appFile = p(buildDir, opts.get('saneName') + '.js')
+  try {
+    log('copy: app: reading packages + internals')
+    const buildDir = p(opts.get('buildDir'), '_')
+    const appFile = p(buildDir, opts.get('saneName') + '.js')
 
-  const inFiles = await *[
-    readFile(opts.get('deps').externalsOut),
-    readFile(opts.get('deps').internalsOut),
-    readFile(appFile)
-  ]
+    const inFiles = await *[
+      readFile(opts.get('deps').externalsOut),
+      readFile(opts.get('deps').internalsOut),
+      readFile(appFile)
+    ]
 
-  const inFilesConcat = inFiles.join(";\n")
+    const inFilesConcat = inFiles.join(";\n")
 
-  const outStr = (
-    preTemplate(opts.get('saneName')) +
-    inFilesConcat +
-    postTemplate(opts.get('saneName'))
-  )
+    const outStr = (
+      preTemplate(opts.get('saneName')) +
+      inFilesConcat +
+      postTemplate(opts.get('saneName'))
+    )
 
-  // overwrite with full app code
-  await writeFile(appFile, outStr)
+    console.log('outoutout')
 
-  console.log("\n  Minifying".bold)
-  const minified = uglify.minify(outStr, {
-    fromString: true
-  })
+    // overwrite with full app code
+    await writeFile(appFile, outStr)
 
-  const final = minified.code
+    console.log("\n  Minifying".bold)
+    const minified = uglify.minify(outStr, {
+      fromString: true
+    })
 
-  const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
-  await writeFile(outFile, final)
+    const final = minified.code
+
+    const outFile = p(buildDir, opts.get('saneName') + '.prod.js')
+    await writeFile(outFile, final)
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 export async function styles() {
@@ -80,13 +85,12 @@ export async function styles() {
   }
 }
 
-export function assets() {
-  gulp.src('.flint/static/**')
-    .pipe(gulp.dest(p(opts.get('buildDir'), '_', 'static')))
-
-  var stream = gulp
-    .src(['*', '**/*', '!**/*.js' ], { dot: false })
-    .pipe(gulp.dest(p(opts.get('buildDir'))));
+export async function assets() {
+  // copy .flint/statics and assets in app dir
+  await* [
+    globCopy(['*', '**/*'], p(opts.get('buildDir'), '_', 'static'), { cwd: '.flint/static' }),
+    globCopy(['*', '**/*', '!**/*.js' ], opts.get('buildDir'))
+  ]
 }
 
 function preTemplate(name) {

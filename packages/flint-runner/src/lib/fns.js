@@ -1,13 +1,9 @@
 import _ from 'lodash'
 import _glob from 'globby'
 import readdirp from 'readdirp'
-import mkdirp from 'mkdirp'
 import jf from 'jsonfile'
-import fs from 'fs'
-import rimraf from 'rimraf'
-import copyFile from './copyFile'
 import path from 'path'
-import _touch from 'touch'
+import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile } from 'fs-extra'
 
 import log from './log'
 import opts from '../opts'
@@ -28,29 +24,34 @@ const logWrap = (name, fn) => {
 }
 
 // promisify
-const rm = logWrap('rm', Promise.promisify(rimraf))
-const mkdir = logWrap('mkdir', Promise.promisify(mkdirp))
+const rm = logWrap('rm', Promise.promisify(remove))
+const mkdir = logWrap('mkdir', Promise.promisify(mkdirs))
 const readdir = logWrap('readdir', Promise.promisify(readdirp))
 const readJSON = logWrap('readJSON', Promise.promisify(jf.readFile))
 const writeJSON = logWrap('writeJSON', Promise.promisify(jf.writeFile))
-const fsReadFile = logWrap('fsReadFile', Promise.promisify(fs.readFile))
-const readFile = logWrap('readFile', path => fsReadFile(path, 'utf-8'))
-const writeFile = Promise.promisify(fs.writeFile)
-const touch = logWrap('touch', Promise.promisify(_touch))
-const copy = logWrap('copy', Promise.promisify(copyFile))
-const exists = logWrap('exists', Promise.promisify(fs.stat))
+const _readFilePromise = Promise.promisify(readFile)
+const _readFile = logWrap('readFile', _ => _readFilePromise(_, 'utf-8'))
+const _writeFile = Promise.promisify(writeFile)
+const touch = logWrap('touch', Promise.promisify(ensureFile))
+const _copy = logWrap('copy', Promise.promisify(copy))
+const exists = logWrap('exists', Promise.promisify(stat))
 const glob = logWrap('glob', _glob)
 
 const recreateDir = (dir) =>
   new Promise((res, rej) => {
-    rimraf(dir, err => {
+    remove(dir, err => {
       if (err) return rej(err)
-      mkdirp(dir, err => {
+      mkdirs(dir, err => {
         if (err) return rej(err)
         res(dir)
       });
     })
   })
+
+async function globCopy(pattern, dest, opts = {}) {
+  const srcs = await glob(pattern, { dot: false, nodir: true, ...opts })
+  await* srcs.map(f => _copy(p(opts.cwd || '', f), p(dest, f)))
+}
 
 function sanitize(str) {
   return str.replace(/[^a-zA-Z]/, '')
@@ -63,14 +64,14 @@ export default {
   path,
   mkdir,
   rm,
-  copy,
   recreateDir,
   readdir,
   readJSON,
   writeJSON,
-  readFile,
-  writeFile,
-  copyFile,
+  readFile: _readFile,
+  writeFile: _writeFile,
+  copy: _copy,
+  globCopy,
   touch,
   exists,
   sanitize,
