@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.0-beta.33",
+  "version": "1.4.0-beta.35",
   "description": "Run flint apps",
   "main": "dist/main.js",
   "scripts": {},
@@ -9,7 +9,6 @@
   "repository": "https://github.com/flintjs/runner",
   "dependencies": {
     "autoprefixer": "^6.1.0",
-    "babel-core": "^5.8.34",
     "babel-loader": "^5.3.3",
     "babel-runtime": "^5.8.29",
     "bluebird": "^2.10.2",
@@ -63,6 +62,5 @@
     "vinyl": "^1.1.0",
     "vinyl-sourcemaps-apply": "^0.2.0",
     "webpack": "^1.12.2"
-  },
-  "devDependencies": {}
+  }
 }

@@ -150,9 +150,11 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       )
     ))
     .pipe($.if(!OPTS.build, $.sourcemaps.write('.')))
+    .pipe($.if(isSourceMap, $.ignore.exclude(true)))
     .pipe($.if(OPTS.build,
       $.concat(`${OPTS.saneName}.js`)
     ))
+    .pipe(pipefn(markFileSuccess))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -184,7 +186,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     function finish() {
       log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
-      out.goodFile(file)
+
+      // out.goodFile(file)
 
       markDone(file)
     }
@@ -282,20 +285,19 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     curFile = file
   }
 
+  function isSourceMap(file) {
+    return file.path.slice(file.path.length - 3, file.path.length) === 'map'
+  }
+
   function checkWriteable(file) {
     if (OPTS.build) {
       builder.copy.styles()
     }
 
-    file.isSourceMap = file.path.slice(file.path.length - 3, file.path.length) === 'map'
-
-    if (file.isSourceMap)
-      return true
-
     if (userStream || lastError)
       return false
 
-    out.goodFile(file)
+    // out.goodFile(file)
 
     if (OPTS.build)
       return true
@@ -315,8 +317,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function afterWrite(file) {
-    if (file.isSourceMap) return
-
     if (OPTS.build && OPTS.watch)
       return builder.build()
 
@@ -326,17 +326,17 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       log(LOG, 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
       if (!lastError && cacheHasFile) {
         bridge.message('script:add', file.message)
-        markFileSuccess(file)
       }
     }
   }
 
   function markFileSuccess(file) {
+    if (file.isSourceMap) return
+
     log(LOG, 'markLastFileSuccess', file.path)
 
     // log files as we startup
-    if (!opts.get('hasRunInitialBuild'))
-      out.goodFile(file)
+    out.goodFile(file)
 
     // update cache error / state
     cache.update(file.path)

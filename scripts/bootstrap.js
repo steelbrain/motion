@@ -40,6 +40,7 @@ packages.forEach(function (pkg) {
   cd(pkgFolder)
   console.log('pruning...')
   exec('npm prune --loglevel=error')
+  exec('(cd node_modules && find . -type d -name "flint*" -exec rm -r "{}" \\;)')
   cd('../..')
 
   mkdir("-p", nodeModulesLoc);

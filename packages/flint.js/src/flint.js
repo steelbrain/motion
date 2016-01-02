@@ -401,6 +401,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   // below Flint to pass it in
   let flintRequire = requireFactory(Flint)
 
+  root.require = flintRequire
+
   // shim root view
   opts.namespace.view = {
     update: () => {},
