@@ -112,7 +112,12 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
       view.props.className.split(' ').forEach(className => {
         if (!isLowerCase(className[0])) return
         const key = `${prefix}${className}`
-        result = mergeStyles(result, parentStyles[key], parentStylesStatic[key])
+        // merge in styles
+        result = mergeStyles(
+          result,
+          parentStyles && parentStyles[key],
+          parentStylesStatic && parentStylesStatic[key]
+        )
       })
     }
 
