@@ -47,7 +47,7 @@ const $p = {
     blacklist: ['es6.tailCall', 'strict'],
     retainLines: OPTS.pretty ? false : true,
     comments: true,
-    optional: ['regenerator'],
+    optional: ['regenerator', 'runtime'],
     plugins: [flintTransform({
       log,
       basePath: OPTS.dir,

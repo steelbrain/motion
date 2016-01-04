@@ -7,7 +7,7 @@ export default (config = {}) => deepmerge({
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
-    bluebird: '_bluebird',
+    bluebird: '_bluebird'
   },
   devtool: 'source-map',
   node: {
