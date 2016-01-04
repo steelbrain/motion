@@ -30,7 +30,7 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
     }
     catch(e) {
       // console.log('error reading state', e)
-      return {}
+      return null
     }
   }
 
