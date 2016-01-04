@@ -1,103 +1,30 @@
 import opts from './opts'
 import wport from './lib/wport'
+import safeWrite from './lib/safeWrite'
 import handleError from './lib/handleError'
-import { log, readJSON, writeJSON } from './lib/fns'
 
-let OPTS
-const LOG = 'writeState'
+let read, write
 
-export async function readState() {
-  try {
-    const state = await readJSON(opts.get('stateFile'))
-    // opts.set('state', state)
-    return state
-  }
-  catch(e) {
-    // console.log('error reading state', e)
-    return {}
-  }
-}
-
-let lock = null
-let unlock = null
-
-function getLock() {
-  log(LOG, 'lock', lock)
-
-  if (lock)
-    return unlock
-  else {
-    log(LOG, 'no lock, returning new')
-    lock = new Promise(res => {
-      unlock = () => {
-        lock = null
-        res()
-      }
-    })
-
-    return unlock
-  }
-}
-
-function stateWriter(writer, state, unlock) {
-  log(LOG, 'about to call writer...')
-  return new Promise((res, rej) => {
-    writer(state, async next => {
-      try {
-        log(LOG, 'next state', next)
-        await writeJSON(opts.get('stateFile'), next, { spaces: 2 })
-        log(LOG, 'unlocking')
-        unlock()
-        res()
-      }
-      catch(e) {
-        rej(e)
-      }
-    })
-  })
-}
-
-// prompts for domain they want to use
-export async function writeState(writer) {
-  try {
-    log(LOG, 'waiting...')
-    if (lock) await lock
-    log(LOG, 'get lock')
-    const unlock = getLock()
-    const state = await readState()
-    await stateWriter(writer, state, unlock)
-  }
-  catch(e) {
-    handleError(e)
-  }
-}
+export function readState() { return read() }
+export function writeState(writer) { return write(writer) }
 
 export async function init() {
-  try {
-    await readState()
-  }
+  ({ read, write } = safeWrite(opts.get('stateFile'), { debug: 'writeState' }))
+
+  try { await readState() }
   catch(e) {
-    try {
-      await writeState((state, write) => {
-        write({})
-      })
-    }
-    catch(e) {
-      handleError(e)
-    }
+    try { await writeState((state, write) => write({})) }
+    catch(e) { handleError(e) }
   }
 
-  let config
-  try {
-    config = await readJSON(opts.get('configFile'))
-  }
-  catch(e) {
-    config = {}
-    await writeJSON(opts.get('configFile'), config)
-  }
-  finally {
-    opts.set('config', config)
-  }
+  initConfig()
+}
+
+async function initConfig() {
+  let config = {}
+  try { config = await readJSON(opts.get('configFile')) }
+  catch(e) { await writeJSON(opts.get('configFile'), config) }
+  finally { opts.set('config', config) }
 }
 
 export async function setServerState() {
