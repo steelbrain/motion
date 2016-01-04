@@ -11,21 +11,6 @@ import watchingMessage from './lib/watchingMessage'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
 
-// DONT RELEASE ME!
-// import memwatch from 'memwatch-next'
-// import heapdump from 'heapdump'
-// memwatch.on('leak', function(info) {
-//  console.error(info)
-//  var file = '/tmp/myapp-' + process.pid + '-' + Date.now() + '.heapsnapshot'
-//  heapdump.writeSnapshot(file, function(err){
-//    if (err) console.error(err)
-//    else console.error('Wrote snapshot: ' + file)
-//   })
-// })
-// DONT RELEASE ME!
-
-// RUN
-
 export async function run(_opts = {}, isBuild) {
   try {
     console.log()

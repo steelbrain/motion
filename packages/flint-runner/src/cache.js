@@ -1,4 +1,4 @@
-import { readState, writeState } from './internal'
+import internal from './internal'
 import handleError from './lib/handleError'
 import opts from './opts'
 import { _, log, path, writeJSON } from './lib/fns'
@@ -53,7 +53,7 @@ const Cache = {
     if (!opts.get('reset')) {
       try {
         // read in previous cache
-        const state = await readState()
+        const state = await internal.state.read()
         previousCache = state.cache
 
         Cache.setBaseDir(opts.get('dir'))
@@ -234,7 +234,7 @@ const Cache = {
 
   serialize() {
     log(LOG, 'serialize')
-    writeState((state, write) => {
+    internal.state.write((state, write) => {
       state.cache = cache
       log(LOG, 'writing cache')
       write(state)

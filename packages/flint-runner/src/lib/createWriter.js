@@ -1,15 +1,31 @@
-import { handleError, log, readJSON, writeJSON } from './fns'
+import { handleError, log, readJSON, writeJSON, writeFile, readFile } from './fns'
 
 // uses a simple lock to ensure reads and writes are done safely
 
-export default function factory(filePath, { debug = 'safeWrite' }) {
+export default async function createWriter(filePath, { debug = 'safeWrite', json = false }) {
 
-  // return read/write
+  let doRead = json ? readJSON : readFile
+  let doWrite = json ? (a, b) => writeJSON(a, b, { spaces: 2 }) : writeFile
+
+  // init file
+  try {
+    await read()
+  }
+  catch(e) {
+    try {
+      await write((_, write) => write({}))
+    }
+    catch(e) {
+      handleError(e)
+    }
+  }
+
+  // return API
   return { read, write }
 
   async function read() {
     try {
-      const state = await readJSON(filePath)
+      const state = await doRead(filePath)
       return state
     }
     catch(e) {
@@ -61,7 +77,7 @@ export default function factory(filePath, { debug = 'safeWrite' }) {
       writer(state, async next => {
         try {
           log(debug, 'next state', next)
-          await writeJSON(filePath, next, { spaces: 2 })
+          await doWrite(filePath, next)
           log(debug, 'unlocking')
           unlock()
           res()

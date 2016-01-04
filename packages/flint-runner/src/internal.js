@@ -1,35 +1,50 @@
 import opts from './opts'
 import wport from './lib/wport'
-import safeWrite from './lib/safeWrite'
-import handleError from './lib/handleError'
-
-let read, write
-
-export function readState() { return read() }
-export function writeState(writer) { return write(writer) }
+import { handleError, log, readJSON, writeJSON } from './lib/fns'
+import createWriter from './lib/createWriter'
 
 export async function init() {
-  ({ read, write } = safeWrite(opts.get('stateFile'), { debug: 'writeState' }))
-
-  try { await readState() }
-  catch(e) {
-    try { await writeState((state, write) => write({})) }
-    catch(e) { handleError(e) }
-  }
-
-  initConfig()
+  await createWriters()
+  await ensureConfigFile()
 }
 
-async function initConfig() {
-  let config = {}
-  try { config = await readJSON(opts.get('configFile')) }
-  catch(e) { await writeJSON(opts.get('configFile'), config) }
-  finally { opts.set('config', config) }
+let writers = {
+  externalsPaths: {
+    read: () => writers.pathsWriter.read(),
+    write: (a) => writers.pathsWriter.write(a)
+  },
+
+  externals: {
+    read: () => writers.externalsWriter.read(),
+    write: (a) => writers.externalsWriter.write(a)
+  },
+
+  state: {
+    read: () => writers.stateWriter.read(),
+    write: (a) => writers.stateWriter.write(a),
+  }
+}
+
+async function createWriters() {
+  writers.stateWriter = await createWriter(opts.get('stateFile'), { debug: 'writeState', json: true })
+  writers.pathsWriter = await createWriter(opts.get('deps').externalsPaths, { debug: 'writeExternalsPaths', json: true })
+  writers.externalsWriter = await createWriter(opts.get('deps').externalsIn, { debug: 'writeExternals' })
+}
+
+async function ensureConfigFile() {
+  try {
+    let config = await readJSON(opts.get('configFile'))
+    opts.set('config', config)
+  }
+  catch(e) {
+    // write empty config on error
+    await writeJSON(opts.get('configFile'), {})
+  }
 }
 
 export async function setServerState() {
   try {
-    await writeState((state, write) => {
+    await writers.state.write((state, write) => {
       state.port = opts.get('port')
       state.wport = wport()
       write(state)
@@ -40,4 +55,8 @@ export async function setServerState() {
   }
 }
 
-export default { init, readState, writeState, setServerState }
+export default {
+  init,
+  ...writers,
+  setServerState
+}

@@ -1,7 +1,7 @@
 import path from 'path'
 import log from './lib/log'
 import { p, sanitize } from './lib/fns'
-import { writeState } from './internal'
+import internal from './internal'
 import util from 'util'
 
 let OPTS
@@ -73,9 +73,9 @@ function setAll(opts) {
 }
 
 async function serialize() {
-  await writeState((state, write) => {
+  await internal.state.write((state, write) => {
     state.opts = { ...OPTS }
-    delete state.opts.state // prevent circle
+    delete state.opts.state // prevent circular structure
     write(state)
   })
 }

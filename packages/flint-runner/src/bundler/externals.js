@@ -2,36 +2,25 @@ import webpack from 'webpack'
 import { Promise } from 'bluebird'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
-import readFullPaths from './lib/readFullPaths'
-import depRequireString from './lib/depRequireString'
+import internal from '../internal'
 import opts from '../opts'
 import cache from '../cache'
+import depRequireString from './lib/depRequireString'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
-import { path, writeJSON, writeFile } from '../lib/fns'
+import { log, path, writeJSON, writeFile } from '../lib/fns'
 import getMatches from './lib/getMatches'
-import log from '../lib/log'
 
 const LOG = 'externals'
 
-const findRequires = source =>
-  getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-
-const findExternalRequires = source =>
-  findRequires(source).filter(x => x.charAt(0) != '.')
+const findRequires = source => getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
+const findExternalRequires = source => findRequires(source).filter(x => x.charAt(0) != '.')
 
 export async function bundleExternals(opts = {}) {
-  if (opts.doInstall)
-    await installAll()
-
-  const fullpaths = await readFullPaths()
-  await writeFullPaths(fullpaths)
-
-  log(LOG, 'bundleExternals', fullpaths)
+  if (opts.doInstall) await installAll()
+  await externalsPathsToIn()
   await packExternals()
-
-  if (!opts.silent)
-    onInstalled()
+  if (!opts.silent) onInstalled()
 }
 
 export async function installExternals(file, source) {
@@ -42,6 +31,15 @@ export async function installExternals(file, source) {
 
   if (opts.get('build') || opts.get('hasRunInitialBuild'))
     installAll(found)
+}
+
+// read in fullpaths
+// write out require string
+async function externalsPathsToIn() {
+  const fullpaths = await internal.externalsPaths.read()
+  const requireString = fullpaths.map(name => depRequireString(name, 'packages')).join('')
+  console.log('requirestring', requireString)
+  await internal.externals.write((_, write) => write(requireString))
 }
 
 async function packExternals() {
@@ -60,12 +58,4 @@ async function packExternals() {
       handleWebpackErrors(err, stats, resolve, reject)
     })
   })
-}
-
-async function writeFullPaths(deps = []) {
-  log(LOG, 'writeFullPaths:', deps)
-  const requireString = deps.map(name => {
-    return depRequireString(name, 'packages')
-  }).join('')
-  await writeFile(opts.get('deps').externalsIn, requireString)
 }

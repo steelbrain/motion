@@ -1,10 +1,10 @@
 import handleError from '../../lib/handleError'
 import log from '../../lib/log'
-import { readState } from '../../internal'
+import internal from '../../internal'
 
 export default async function readInstalled() {
   try {
-    const state = await readState()
+    const state = await internal.state.read()
     const installed = state.installed || []
     log('externals', 'readInstalled()', installed)
     return installed
