@@ -2,7 +2,7 @@ import webpack from 'webpack'
 import { Promise } from 'bluebird'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
-import internal from '../internal'
+import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
 import depRequireString from './lib/depRequireString'
@@ -36,10 +36,9 @@ export async function installExternals(file, source) {
 // read in fullpaths
 // write out require string
 async function externalsPathsToIn() {
-  const fullpaths = await internal.externalsPaths.read()
+  const fullpaths = await disk.externalsPaths.read()
   const requireString = fullpaths.map(name => depRequireString(name, 'packages')).join('')
-  console.log('requirestring', requireString)
-  await internal.externals.write((_, write) => write(requireString))
+  await disk.externalsIn.write((_, write) => write(requireString))
 }
 
 async function packExternals() {

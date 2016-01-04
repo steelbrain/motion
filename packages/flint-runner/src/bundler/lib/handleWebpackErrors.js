@@ -1,4 +1,4 @@
-import log from '../../lib/log'
+import { log, _ } from '../../lib/fns'
 
 export default function handleWebpackErrors(err, stats, resolve, reject) {
   if (err)
@@ -7,8 +7,13 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
   const jsonStats = stats.toJson()
 
   if (jsonStats.errors.length) {
-    err = jsonStats.errors.join("\n")
-    return reject(err)
+    // take first three lines of error
+    let take = s => _.take(s, 3)
+    let split = s => s.split("\n")
+    let join = s => s.join("\n")
+    let messages = jsonStats.errors.map(split).map(take).map(join).join("\n")
+    let message = 'Webpack: '.yellow + messages
+    return reject(message)
   }
 
   if (jsonStats.warnings.length) {

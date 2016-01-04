@@ -1,4 +1,4 @@
-import internal from './internal'
+import disk from './disk'
 import handleError from './lib/handleError'
 import opts from './opts'
 import { _, log, path, writeJSON } from './lib/fns'
@@ -53,7 +53,7 @@ const Cache = {
     if (!opts.get('reset')) {
       try {
         // read in previous cache
-        const state = await internal.state.read()
+        const state = await disk.state.read()
         previousCache = state.cache
 
         Cache.setBaseDir(opts.get('dir'))
@@ -234,7 +234,7 @@ const Cache = {
 
   serialize() {
     log(LOG, 'serialize')
-    internal.state.write((state, write) => {
+    disk.state.write((state, write) => {
       state.cache = cache
       log(LOG, 'writing cache')
       write(state)

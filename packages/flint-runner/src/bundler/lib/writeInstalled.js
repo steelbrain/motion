@@ -3,7 +3,7 @@ import cache from '../../cache'
 import { log, handleError } from '../../lib/fns'
 import rmFlintExternals from './rmFlintExternals'
 import filterWithPath from './filterWithPath'
-import internal from '../../internal'
+import disk from '../../disk'
 
 const LOG = 'externals'
 
@@ -14,7 +14,7 @@ export default async function writeInstalled(_packages, _paths) {
     const paths = _paths || cache.getImports()
 
     // write state.installed
-    await internal.state.write((state, write) => {
+    await disk.state.write((state, write) => {
       state.installed = packages
       write(state)
     })
@@ -22,7 +22,7 @@ export default async function writeInstalled(_packages, _paths) {
     // write full paths
     const fullPaths = filterWithPath(paths, packages)
     log(LOG, 'writeInstalled', 'packages', packages, 'fullPaths', fullPaths)
-    await internal.externalsPaths.write((_, write) => write(fullPaths))
+    await disk.externalsPaths.write((_, write) => write(fullPaths))
   }
   catch(e) {
     handleError(e)

@@ -4,7 +4,7 @@ import server from './server'
 import bundler from './bundler'
 import builder from './builder'
 import opts from './opts'
-import internal from './internal'
+import disk from './disk'
 import gulp from './gulp'
 import cache from './cache'
 import watchingMessage from './lib/watchingMessage'
@@ -21,8 +21,8 @@ export async function run(_opts = {}, isBuild) {
     log('opts', OPTS)
 
     // init, order important
-    await builder.clear.init() // ensure directories
-    await internal.init() // ensure state
+    await builder.clear.init()
+    await disk.init()
     await opts.serialize() // write out opts to state
     await cache.init() // ensure cache
     await bundler.init() // start bundler

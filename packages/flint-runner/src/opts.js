@@ -1,7 +1,7 @@
 import path from 'path'
 import log from './lib/log'
 import { p, sanitize } from './lib/fns'
-import internal from './internal'
+import disk from './disk'
 import util from 'util'
 
 let OPTS
@@ -73,7 +73,7 @@ function setAll(opts) {
 }
 
 async function serialize() {
-  await internal.state.write((state, write) => {
+  await disk.state.write((state, write) => {
     state.opts = { ...OPTS }
     delete state.opts.state // prevent circular structure
     write(state)

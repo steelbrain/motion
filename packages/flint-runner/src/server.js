@@ -5,7 +5,7 @@
 import cp from 'child_process'
 import { setChild } from './shutdown'
 import opts from './opts'
-import internal from './internal'
+import disk from './disk'
 
 import { p } from './lib/fns'
 import js from 'flint-js'
@@ -28,7 +28,7 @@ export function run() {
       opts.set('port', port)
       opts.set('host', host)
 
-      internal.setServerState()
+      disk.writeServerState()
 
       res()
     })

@@ -9,3 +9,7 @@ export async function save(name, index, total) {
 export async function unsave(name, index, total) {
   await progress('Uninstalling', 'npm uninstall --save ' + name, name, index, total)
 }
+
+export default {
+  save, unsave
+}

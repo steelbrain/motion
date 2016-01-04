@@ -5,7 +5,7 @@ import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
 import { onStart, onFinish, onError } from './lib/messages'
-import { save } from './lib/npm'
+import npm from './lib/npm'
 import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
@@ -98,7 +98,7 @@ function runInstall(prevInstalled, toInstall) {
     onStart(dep)
 
     try {
-      await save(dep)
+      await npm.save(dep)
       log(LOG, 'install', 'succces, saved', dep)
       successful.push(dep)
       onFinish(dep)

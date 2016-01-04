@@ -3,7 +3,7 @@ import opts from '../opts'
 import readInstalled from './lib/readInstalled'
 import normalize from './lib/normalize'
 import { bundleExternals } from './externals'
-import { unsave } from './lib/npm'
+import npm from './lib/npm'
 import writeInstalled from './lib/writeInstalled'
 import filterWithPath from './lib/filterWithPath'
 import { _, log, handleError } from '../lib/fns'
@@ -36,7 +36,7 @@ export async function uninstall(rebundle) {
     // do uninstalls
     const attempted = await* toUninstall.map(async dep => {
       try {
-        await unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
+        await npm.unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
         console.log(`  ✘ ${dep}`.red)
         return dep
       }

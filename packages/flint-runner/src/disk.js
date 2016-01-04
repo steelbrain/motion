@@ -14,7 +14,7 @@ let writers = {
     write: (a) => writers.pathsWriter.write(a)
   },
 
-  externals: {
+  externalsIn: {
     read: () => writers.externalsWriter.read(),
     write: (a) => writers.externalsWriter.write(a)
   },
@@ -42,7 +42,7 @@ async function ensureConfigFile() {
   }
 }
 
-export async function setServerState() {
+export async function writeServerState() {
   try {
     await writers.state.write((state, write) => {
       state.port = opts.get('port')
@@ -58,5 +58,5 @@ export async function setServerState() {
 export default {
   init,
   ...writers,
-  setServerState
+  writeServerState
 }

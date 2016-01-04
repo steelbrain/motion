@@ -12,8 +12,7 @@ export default (config = {}) => deepmerge({
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
-    bluebird: '_bluebird',
-    'babel-runtime': '_babelRuntime'
+    bluebird: '_bluebird'
   },
   devtool: 'source-map',
   node: {
@@ -25,7 +24,7 @@ export default (config = {}) => deepmerge({
   resolve: {
     root: [
       opts.get('flintDir'), // search for user modules in .flint
-      // modulesDirectories // search for babel-runtime in runner
+      modulesDirectories // search for babel-runtime in runner
     ],
     extensions: ['', '.js', '.jsx', '.scss']
   },
