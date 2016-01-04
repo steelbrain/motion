@@ -28,7 +28,7 @@ module.exports = {
     process: false,
     setImmediate: false,
     __filename: true,
-    __dirname: true
+    __dirname: false
   },
   externals: [
     function(context, request, callback) {

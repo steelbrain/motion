@@ -4,6 +4,9 @@ clean:
 build: clean
 	./scripts/build.sh
 
+watch-core: clean
+	scripts/build.sh --watch --notools
+
 watch: clean
 	scripts/build.sh --watch
 

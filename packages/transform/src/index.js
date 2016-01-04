@@ -447,9 +447,23 @@ export default function createPlugin(options) {
 
               meta[currentView].els[name + key] = el.loc.end
 
+              /*
+                checks whether user is referencing variable or view
+                check root to see if the variable exists
+                  Modal.Footer would have a root of Modal
+              */
               // safer, checks for file scope or view scope only
-              if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
-                arr = [t.identifier(name)].concat(arr)
+              let [rootName, ...children] = name.split('.')
+              let isVariable = (scope.hasOwnBinding(rootName) || file.scope.hasOwnBinding(rootName)) && isUpperCase(rootName)
+
+              // either gives <Modal> or <Modal.Header>
+              const getVar = (rootName, name) =>
+                rootName == name ?
+                  t.identifier(name) :
+                  t.memberExpression(t.identifier(rootName), t.identifier(children.join('.')))
+
+              if (isVariable)
+                arr = [getVar(rootName, name)].concat(arr)
 
               el.name = t.arrayExpression(arr)
 
