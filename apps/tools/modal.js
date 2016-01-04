@@ -1,4 +1,4 @@
-view Modal {
+view FlintModal {
   view.pause()
 
   let children, title, open
@@ -17,11 +17,9 @@ view Modal {
     view.update()
   }
 
-  <modal>
-    <Close size={25} />
-    <title if={title}>{title}</title>
-    <message if={children}>{children}</message>
-  </modal>
+  <Close size={25} />
+  <title if={title}>{title}</title>
+  <message if={children}>{children}</message>
 
   $ = {
     position: 'fixed',
