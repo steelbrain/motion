@@ -6,15 +6,18 @@ export default async function readFullPaths() {
 
   const hasFiles = await exists(pathsFile)
 
-  if (hasFiles)
+  if (hasFiles) {
     try {
       const paths = await readJSON(pathsFile)
       log('externals', 'readFullPaths()', paths)
       return paths
     }
     catch(e) {
+      log('externals', "ERROR".red, 'reading full paths')
       handleError(e)
+      // return []
     }
+  }
   else
     return []
 }

@@ -151,6 +151,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     ))
     .pipe($.if(!OPTS.build, $.sourcemaps.write('.')))
     .pipe($.if(isSourceMap, $.ignore.exclude(true)))
+    .pipe(pipefn(out.goodFile))
     .pipe($.if(OPTS.build,
       $.concat(`${OPTS.saneName}.js`)
     ))
@@ -186,8 +187,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     function finish() {
       log(LOG, 'buildCheck finish')
       cache.restorePrevious(file.path)
-
-      // out.goodFile(file)
 
       markDone(file)
     }
@@ -297,8 +296,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (userStream || lastError)
       return false
 
-    // out.goodFile(file)
-
     if (OPTS.build)
       return true
 
@@ -334,9 +331,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (file.isSourceMap) return
 
     log(LOG, 'markLastFileSuccess', file.path)
-
-    // log files as we startup
-    out.goodFile(file)
 
     // update cache error / state
     cache.update(file.path)

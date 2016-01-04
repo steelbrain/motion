@@ -3,7 +3,8 @@ import path from 'path'
 import opts from '../../opts'
 import cache from '../../cache'
 
-let runnerRoot = path.join(__dirname, '..')
+// __dirname == flint-runner/dist directory (because we webpack this)
+let runnerRoot = path.resolve(path.join(__dirname, '..'))
 let modulesDirectories = path.join(runnerRoot, 'node_modules')
 
 export default (config = {}) => deepmerge({
@@ -11,7 +12,8 @@ export default (config = {}) => deepmerge({
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
-    bluebird: '_bluebird'
+    bluebird: '_bluebird',
+    // 'babel-runtime': '_babelRuntime'
   },
   devtool: 'source-map',
   node: {
@@ -21,7 +23,10 @@ export default (config = {}) => deepmerge({
   },
   resolveLoader: { root: modulesDirectories },
   resolve: {
-    root: opts.get('flintDir'),
+    root: [
+      opts.get('flintDir'), // search for user modules in .flint
+      modulesDirectories // search for babel-runtime in runner
+    ],
     extensions: ['', '.js', '.jsx', '.scss']
   },
   module: {
