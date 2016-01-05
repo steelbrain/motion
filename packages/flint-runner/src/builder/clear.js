@@ -4,9 +4,13 @@ import opts from '../opts'
 const LOG = 'clear'
 
 export async function init() {
-  // TODO: when cached startup works, re-enable reset flag
+  // TODO when cached startup works, re-enable reset flag
   if (opts.get('reset'))
     await recreateDir(opts.get('internalDir'))
+
+  // TODO may want to recreate all of depsDir?
+  // recreate assets on re-run
+  await recreateDir(opts.get('deps').assetsDir)
 
   await mkdir(opts.get('internalDir'))
   await mkdir(opts.get('styleDir'))

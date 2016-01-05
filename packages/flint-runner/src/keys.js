@@ -12,7 +12,31 @@ import cache from './cache'
 
 const proc = process // cache for keypress
 
-export function start() {
+export function init() {
+  start()
+  banner()
+}
+
+export function banner() {
+  const newLine = "\n"
+  const userEditor = (process.env.VISUAL || process.env.EDITOR)
+
+  const prefix = '•'
+
+  console.log(
+    `${prefix} `+'O'.cyan.bold + 'pen     '.cyan +
+      `${prefix} `+'V'.bold + 'erbose log' + newLine +
+    (userEditor
+      ? (`${prefix} `+'E'.cyan.bold + 'ditor   '.cyan)
+      : '           ') +
+        `${prefix} `+'R'.bold+'efresh packages' + newLine
+    // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
+  )
+
+  resume()
+}
+
+function start() {
   let OPTS = opts.get()
 
   if (!proc.stdin.isTTY || OPTS.isBuild)
@@ -27,6 +51,10 @@ export function start() {
 
     try {
       switch(key.name) {
+        case 'return': // show banner again
+          console.log()
+          banner()
+          break
         case 'o': // open browser
           openInBrowser(true)
           break
@@ -85,4 +113,9 @@ export function stop() {
   proc.stdin.pause()
 }
 
-export default { start, resume, stop }
+export default {
+  init,
+  banner,
+  resume,
+  stop
+}

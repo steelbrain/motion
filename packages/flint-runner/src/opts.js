@@ -48,6 +48,7 @@ function setAll(opts) {
   // deps dirs
   OPTS.deps = {}
   OPTS.deps.dir = p(OPTS.internalDir, 'deps')
+  OPTS.deps.assetsDir = p(OPTS.deps.dir, 'assets')
   OPTS.deps.internalsIn = p(OPTS.deps.dir, 'internals.in.js')
   OPTS.deps.internalsOut = p(OPTS.deps.dir, 'internals.js')
   OPTS.deps.externalsIn = p(OPTS.deps.dir, 'externals.in.js')

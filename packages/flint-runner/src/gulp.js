@@ -167,7 +167,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     // check if done
     if (loaded == total)
-      setTimeout(buildDone, 50)
+      setTimeout(buildDone, 20)
   }
 
   // only do on first run

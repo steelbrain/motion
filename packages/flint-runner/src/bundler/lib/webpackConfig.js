@@ -2,16 +2,26 @@ import deepmerge from 'deepmerge'
 import path from 'path'
 import opts from '../../opts'
 import cache from '../../cache'
+import flintjs from 'flint-js'
 
 // __dirname == flint-runner/dist directory (because we webpack this)
 let runnerRoot = path.resolve(path.join(__dirname, '..'))
-let modulesDirectories = path.join(runnerRoot, 'node_modules')
+let runnerModules = path.join(runnerRoot, 'node_modules')
 
-export default (config = {}) => deepmerge({
+let flintRoot = flintjs()
+let flintModules = path.join(flintRoot, 'node_modules')
+
+// copy styles into .flint/static/styles
+let styleFileLoader = 'file?name=assets/[name]-[hash].css'
+
+export default (fileName, config = {}) => deepmerge({
   context: runnerRoot,
   output: {
-    path: opts.get('deps').dir
+    // app/.flint/.internal/deps
+    path: opts.get('deps').dir,
+    fileName
   },
+  // come from flint.js
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
@@ -23,33 +33,35 @@ export default (config = {}) => deepmerge({
     Buffer: false,
     setImmediate: false
   },
-  resolveLoader: { root: modulesDirectories },
+  resolveLoader: { root: runnerModules },
   resolve: {
     root: [
-      opts.get('flintDir'), // search for user modules in .flint
-      modulesDirectories // search for babel-runtime in runner
+      opts.get('flintDir'), // user modules in app/.flint
+      runnerModules, // babel-runtime in runner
+      flintModules // react, react-dom, bluebird in flint.js
     ],
     extensions: ['', '.js', '.jsx', '.scss']
   },
   module: {
     loaders: [
-      { test: /\.css$/, loaders: ['style', 'css'] },
+      { test: /\.css$/, loaders: [styleFileLoader, 'css'] },
+      { test: /\.(ttf|eot|woff|svg)$/, loader: 'file?name=[name][name].[ext]' },
+      { test: /\.json$/, loader: 'json' },
+      { test: /\.jsx$/, loader: 'babel' },
+
       {
         test: /\.(png|jpg|gif)$/,
         loader: 'url?limit=8192&name=[name]-[hash].[ext]'
       },
+
       {
         test: /\.scss$/,
-        // Query parameters are passed to node-sass
-        loader: 'file?name=styles/[name].css!resolve-url!sass?sourceMap&outputStyle=expanded&' +
-            'includePaths[]=' + (path.resolve(runnerRoot, './node_modules'))
-      },
-      {
-        test: /\.(ttf|eot|woff|svg)$/,
-        loader: 'file?name=[name][name].[ext]'
-      },
-      { test: /\.json$/, loader: 'json' },
-      { test: /\.jsx$/, loader: 'babel' }
+        loaders: [
+          styleFileLoader,
+          'resolve-url',
+          'sass?sourceMap&outputStyle=expanded&includePaths[]=' + (path.resolve(runnerRoot, './node_modules'))
+        ]
+      }
     ]
   }
 }, config)

@@ -2,6 +2,7 @@ import bundler from './bundler'
 import log from './lib/log'
 import hasExports from './lib/hasExports'
 import cache from './cache'
+import opts from './opts'
 import gutil from 'gulp-util'
 import through from 'through2'
 
@@ -32,11 +33,14 @@ var Parser = {
     log(LOG, 'compiler/post', file)
 
     // scan for imports/exports
-    const bundle = () => bundler.scanFile(file, source)
+    const scan = () => bundler.scanFile(file, source)
 
-    // debounce installs when running
-    if (OPTS.build) bundle()
-    else debounce(file, 400, bundle)
+    // scan immediately during startup
+    if (OPTS.build || !opts.get('hasRunInitialBuild'))
+      scan()
+    // debounce installs while coding
+    else
+      debounce(file, 400, scan)
 
     // debounce a lot to uninstall
     if (!OPTS.build)

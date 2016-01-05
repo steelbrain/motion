@@ -43,9 +43,8 @@ async function externalsPathsToIn() {
 async function packExternals() {
   log(LOG, 'pack')
   return new Promise((resolve, reject) => {
-    const conf = webpackConfig({
+    const conf = webpackConfig('externals.js', {
       entry: opts.get('deps').externalsIn,
-      output: { filename: 'externals.js' }
     })
 
     log(LOG, 'webpackConfig', conf)

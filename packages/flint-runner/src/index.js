@@ -7,7 +7,7 @@ import opts from './opts'
 import disk from './disk'
 import gulp from './gulp'
 import cache from './cache'
-import watchingMessage from './lib/watchingMessage'
+import keys from './keys'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
 
@@ -60,7 +60,7 @@ export async function run(_opts = {}, isBuild) {
         await bundler.externals({ doInstall: true })
         await bundler.uninstall()
         console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
-        watchingMessage()
+        keys.init()
       }
     }
 

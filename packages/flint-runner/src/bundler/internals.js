@@ -77,10 +77,9 @@ function packInternals() {
   log(LOG, 'packInternals')
 
   return new Promise((resolve, reject) => {
-    const conf = webpackConfig({
+    const conf = webpackConfig('internals.js', {
       entry: opts.get('deps').internalsIn,
-      externals: webpackUserExternals(),
-      output: { filename: 'internals.js' }
+      externals: webpackUserExternals()
     })
 
     webpack(conf, (err, stats) => {
