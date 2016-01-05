@@ -14,12 +14,12 @@ let flintModules = path.join(flintRoot, 'node_modules')
 // copy styles into .flint/static/styles
 let styleFileLoader = 'file?name=assets/[name]-[hash].css'
 
-export default (fileName, config = {}) => deepmerge({
+export default (filename, config = {}) => deepmerge({
   context: runnerRoot,
   output: {
     // app/.flint/.internal/deps
     path: opts.get('deps').dir,
-    fileName
+    filename
   },
   // come from flint.js
   externals: {
@@ -45,7 +45,7 @@ export default (fileName, config = {}) => deepmerge({
   module: {
     loaders: [
       { test: /\.css$/, loaders: [styleFileLoader, 'css'] },
-      { test: /\.(ttf|eot|woff|svg)$/, loader: 'file?name=[name][name].[ext]' },
+      { test: /\.(ttf|eot|woff|svg)$/, loader: 'file?name=assets/[name][name].[ext]' },
       { test: /\.json$/, loader: 'json' },
       { test: /\.jsx$/, loader: 'babel' },
 

@@ -34,13 +34,10 @@ var Parser = {
 
     // scan for imports/exports
     const scan = () => bundler.scanFile(file, source)
+    const scanImmediate = OPTS.build || !opts.get('hasRunInitialBuild')
 
-    // scan immediately during startup
-    if (OPTS.build || !opts.get('hasRunInitialBuild'))
-      scan()
-    // debounce installs while coding
-    else
-      debounce(file, 400, scan)
+    if (scanImmediate) scan()
+    else debounce(file, 400, scan)
 
     // debounce a lot to uninstall
     if (!OPTS.build)

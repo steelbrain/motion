@@ -13,20 +13,22 @@ export async function save(name, index, total) {
 
 // TODO: only do this if npm 3 `exec('npm -v').charAt(0) == 3`
 async function installPeerDeps(name) {
-  console.log(`  Installing ${name} peerDependencies`.bold)
   // instead of using npm view we just read package.json, safer
   const pkg = await readJSON(p(opts.get('flintDir'), 'node_modules', name, 'package.json'))
   const peers = pkg.peerDependencies
-  const peersArr = normalize(Object.keys(peers))
 
   // install peerdeps
   if (peers && typeof peers == 'object') {
-    const peersFull = peersArr.map(name => `${name}@${peers[name]}`)
-    await* peersFull.map(full => execPromise(`npm install --save ${full}`, opts.get('flintDir')))
-    console.log('  ✓'.green, peersArr.join(', '))
-  }
+    const peersArr = normalize(Object.keys(peers))
 
-  return peersArr
+    if (peersArr.length) {
+      console.log(`  Installing ${name} peerDependencies`.bold)
+      const peersFull = peersArr.map(name => `${name}@${peers[name]}`)
+      await* peersFull.map(full => execPromise(`npm install --save ${full}`, opts.get('flintDir')))
+      console.log('  ✓'.green, peersArr.join(', '))
+      return peersArr
+    }
+  }
 }
 
 // npm uninstall --save 'name'
