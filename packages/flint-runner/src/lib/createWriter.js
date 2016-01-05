@@ -2,7 +2,7 @@ import { handleError, log, readJSON, writeJSON, writeFile, readFile } from './fn
 
 // uses a simple lock to ensure reads and writes are done safely
 
-export default async function createWriter(filePath, { debug = 'safeWrite', json = false }) {
+export default async function createWriter(filePath, { debug = 'safeWrite', json = false, defaultValue = '' }) {
 
   let doRead = json ? readJSON : readFile
   let doWrite = json ? (a, b) => writeJSON(a, b, { spaces: 2 }) : writeFile
@@ -13,7 +13,7 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
   }
   catch(e) {
     try {
-      await write((_, write) => write({}))
+      await write((_, write) => write(defaultValue))
     }
     catch(e) {
       handleError(e)
@@ -30,7 +30,7 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
     }
     catch(e) {
       log(debug, 'read error'.red, e)
-      return null
+      return defaultValue
     }
   }
 

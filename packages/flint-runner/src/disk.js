@@ -26,9 +26,21 @@ let writers = {
 }
 
 async function createWriters() {
-  writers.stateWriter = await createWriter(opts.get('stateFile'), { debug: 'writeState', json: true })
-  writers.pathsWriter = await createWriter(opts.get('deps').externalsPaths, { debug: 'writeExternalsPaths', json: true })
-  writers.externalsWriter = await createWriter(opts.get('deps').externalsIn, { debug: 'writeExternals' })
+  writers.stateWriter = await createWriter(opts.get('stateFile'), {
+    debug: 'writeState',
+    json: true,
+    defaultValue: {}
+  })
+
+  writers.pathsWriter = await createWriter(opts.get('deps').externalsPaths, {
+    debug: 'writeExternalsPaths',
+    json: true,
+    defaultValue: []
+  })
+
+  writers.externalsWriter = await createWriter(opts.get('deps').externalsIn, {
+    debug: 'writeExternals'
+  })
 }
 
 async function ensureConfigFile() {
