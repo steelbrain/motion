@@ -90,12 +90,27 @@ async function getScripts({ disableTools }) {
   }
 }
 
+const stylesheetLink = (name) => `<link rel="stylesheet" href="/__/${name}" />`
+
+async function getPathsInDir(root) {
+  const dir = await readdir({ root })
+  if (!dir.files || !dir.files.length) return []
+  return dir.files.map(file => file.path).sort()
+}
+
 async function getStyles() {
-  const dir = await readdir({ root: OPTS.styleDir })
-  const names = dir.files.map(file => file.path).sort()
-  return names
-    .map(name => `<link rel="stylesheet" href="/__/styles/${name}" />`)
-    .join(newLine)
+  const styles = await getPathsInDir(OPTS.styleDir)
+  return styles.map(p => stylesheetLink(`styles/${p}`)).join(newLine)
+}
+
+async function getExternalStyles() {
+  try {
+    const styles = await getPathsInDir(p(OPTS.deps.assetsDir, 'styles'))
+    return styles.map(p => stylesheetLink(`externalStyles/${p}`)).join(newLine)
+  }
+  catch(e) {
+    return []
+  }
 }
 
 async function makeTemplate(req) {
@@ -105,9 +120,11 @@ async function makeTemplate(req) {
     const disableTools = devToolsDisabled(req)
     const scripts = await getScripts({ disableTools })
     const styles = await getStyles()
+    const externalStyles = await getExternalStyles()
 
     return template
       .replace('<!-- STYLES -->', styles)
+      .replace('<!-- EXTERNAL STYLES -->', externalStyles)
       .replace('<!-- SCRIPTS -->', scripts)
   }
   catch(e) {
@@ -142,6 +159,7 @@ function run() {
     // INTERNAL files
     server.use('/__', express.static('.flint/.internal/deps'))
     server.use('/__/styles', express.static('.flint/.internal/styles'))
+    server.use('/__/externalStyles', express.static('.flint/.internal/deps/assets/styles'))
 
     // tools.js
     server.use('/__/tools', express.static(p(flinttools(), 'build', '_')))

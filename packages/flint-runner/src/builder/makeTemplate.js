@@ -10,11 +10,13 @@ export default async function makeTemplate() {
     log('makeTemplate()')
     OPTS = opts.get()
 
-    const out = p(OPTS.buildDir, 'index.html')
-    const data = await readFile(p(OPTS.flintDir, 'index.html'))
-    let template = data
+    const outFile = p(OPTS.buildDir, 'index.html')
+    const indexFile = await readFile(p(OPTS.flintDir, 'index.html'))
+
+    let template = indexFile
       .replace(/\/static/g, '/_/static')
       .replace('<!-- STYLES -->', '<link rel="stylesheet" href="/_/styles.css" />')
+      // .replace('<!-- EXTERNAL STYLES -->', externalStyles)
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.prod.js"></script>',
         '  <script src="/_/flint.prod.js"></script>',
@@ -22,8 +24,9 @@ export default async function makeTemplate() {
         `  <script>window.Flint = flintRun_${OPTS.saneName}("_flintapp", { app: "${OPTS.saneName}" });</script>`
       ].join("\n"))
 
-    log('makeTemplate', out, template)
-    await writeFile(out, template)
+    log('makeTemplate', outFile, template)
+
+    await writeFile(outFile, template)
   }
   catch(e) {
     handleError(e)
