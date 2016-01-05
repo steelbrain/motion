@@ -1,22 +1,19 @@
-// import exec from '../../lib/exec'
+import execPromise from '../../lib/execPromise'
 import { Spinner } from '../../lib/console'
 import opts from '../../opts'
-import log from '../../lib/log'
-import handleError from '../../lib/handleError'
+import { log, handleError } from '../../lib/fns'
 
 const LOG = 'externals'
 
 export default async function progress(label, cmd, name, index, total) {
   try {
     const spinner = logProgress(label, name, index, total)
-    await execPromise(name, cmd, opts.get('flintDir'), spinner)
+    await execPromise(cmd, opts.get('flintDir'))
+    spinner.stop()
   }
   catch(e) {
-    if (e.code == 1) {
-      return handleError({
-        message: `NPM command ${cmd} failed`
-      })
-    }
+    if (e.code == 1)
+      return handleError({ message: `NPM command ${cmd} failed` })
 
     handleError(e)
   }
@@ -41,17 +38,4 @@ function logProgress(tag, name, index, total) {
     spinner.start({ fps: 30 })
     return spinner
   }
-}
-
-let { exec } = require('child_process')
-
-function execPromise(name, cmd, cwd, spinner) {
-  return new Promise((res, rej) => {
-    log(LOG, 'exec', cmd, cwd)
-    exec(cmd, { cwd }, (err, stdout, stderr) => {
-      if (spinner) spinner.stop()
-      if (err) rej(err)
-      else res(name)
-    })
-  })
 }

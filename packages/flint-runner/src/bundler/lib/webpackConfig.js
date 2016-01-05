@@ -9,6 +9,9 @@ let modulesDirectories = path.join(runnerRoot, 'node_modules')
 
 export default (config = {}) => deepmerge({
   context: runnerRoot,
+  output: {
+    path: opts.get('deps').dir
+  },
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
@@ -38,12 +41,12 @@ export default (config = {}) => deepmerge({
       {
         test: /\.scss$/,
         // Query parameters are passed to node-sass
-        loader: 'style!css!resolve-url!sass?sourceMap&outputStyle=expanded&' +
+        loader: 'file?name=styles/[name].css!resolve-url!sass?sourceMap&outputStyle=expanded&' +
             'includePaths[]=' + (path.resolve(runnerRoot, './node_modules'))
       },
       {
         test: /\.(ttf|eot|woff|svg)$/,
-        loader: 'file?name=[name]-[hash].[ext]'
+        loader: 'file?name=[name][name].[ext]'
       },
       { test: /\.json$/, loader: 'json' },
       { test: /\.jsx$/, loader: 'babel' }

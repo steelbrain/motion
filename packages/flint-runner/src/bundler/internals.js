@@ -80,9 +80,7 @@ function packInternals() {
     const conf = webpackConfig({
       entry: opts.get('deps').internalsIn,
       externals: webpackUserExternals(),
-      output: {
-        filename: opts.get('deps').internalsOut
-      }
+      output: { filename: 'internals.js' }
     })
 
     webpack(conf, (err, stats) => {

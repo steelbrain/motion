@@ -6,7 +6,6 @@ import path from 'path'
 import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile } from 'fs-extra'
 
 import log from './log'
-import opts from '../opts'
 import handleError from './handleError'
 import logError from './logError'
 
@@ -78,6 +77,5 @@ export default {
   log,
   handleError,
   logError,
-  opts,
   glob
 }

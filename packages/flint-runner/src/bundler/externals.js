@@ -45,9 +45,7 @@ async function packExternals() {
   return new Promise((resolve, reject) => {
     const conf = webpackConfig({
       entry: opts.get('deps').externalsIn,
-      output: {
-        filename: opts.get('deps').externalsOut
-      }
+      output: { filename: 'externals.js' }
     })
 
     log(LOG, 'webpackConfig', conf)
