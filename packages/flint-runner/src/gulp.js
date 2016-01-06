@@ -27,7 +27,7 @@ const relative = file => path.relative(opts.get('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` - ${_}ms` : ''
 const out = {
   badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-  goodFile: (file, ms) => console.log(` ✓ ${relative(file)}`.bold) //${time(ms || (Date.now() - file.startTime) || 1)}
+  goodFile: (file, ms) => console.log(` ✓ ${relative(file)} ${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.bold) //${time(ms || (Date.now() - file.startTime) || 1)}
 }
 
 gulp.task('build', buildScripts)

@@ -51,7 +51,7 @@ async function packExternals() {
     log(LOG, 'webpackConfig', conf)
 
     webpack(conf, (err, stats) => {
-      handleWebpackErrors(err, stats, resolve, reject)
+      handleWebpackErrors('externals', err, stats, resolve, reject)
     })
   })
 }

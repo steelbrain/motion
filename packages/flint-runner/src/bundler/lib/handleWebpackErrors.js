@@ -3,7 +3,7 @@ import { log, _ } from '../../lib/fns'
 
 const LOG = 'webpack'
 
-export default function handleWebpackErrors(err, stats, resolve, reject) {
+export default function handleWebpackErrors(where, err, stats, resolve, reject) {
   if (err)
     return reject(err)
 
@@ -18,16 +18,23 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
   }
 
   // check errors
-  if (jsonStats.errors.length) {
-    // debug output everything
-    log(LOG, 'webpackErrors', jsonStats.errors)
+  let errors = jsonStats.errors
 
-    // take first three lines of error
-    let take = s => _.take(s, 3)
+  if (errors.length) {
+    // debug output everything
+    log(LOG, 'webpackErrors', errors)
+
+    let second = ls => ls[1]
     let split = s => s.split("\n")
     let join = s => s.join("\n")
-    let messages = jsonStats.errors.map(split).map(take).map(join).join("\n")
-    let message = 'Webpack: '.yellow + messages
+
+    let messages = errors.map(split).map(second).join(`\n  `)
+    let whereMsg = where == 'externals' ? 'NPM modules' : 'imported local modules'
+
+    let message =
+      `Webpack: ${whereMsg}\n`.yellow
+      + `  ${messages}`.grey
+
     return reject(message)
   }
 

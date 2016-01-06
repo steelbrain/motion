@@ -83,7 +83,7 @@ function packInternals() {
     })
 
     webpack(conf, (err, stats) => {
-      handleWebpackErrors(err, stats, resolve, reject)
+      handleWebpackErrors('internals', err, stats, resolve, reject)
     })
   })
 }

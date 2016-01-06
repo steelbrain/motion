@@ -24,7 +24,7 @@ export default function handleError(handle) {
   else {
     const error = handle
 
-    console.error((error && error.message || "Error:").bold.red)
+    console.error((error && error.message || "\nEncountered an internal error").bold.red)
 
     if (Array.isArray(error))
       console.log(...error)
