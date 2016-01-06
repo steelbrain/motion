@@ -16,6 +16,7 @@ let styleFileLoader = 'file?name=assets/styles/[name]-[hash].css'
 
 export default (filename, config = {}) => deepmerge({
   context: runnerRoot,
+  debug: opts.get('debug'),
   output: {
     // app/.flint/.internal/deps
     path: opts.get('deps').dir,

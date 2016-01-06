@@ -1,10 +1,20 @@
+import opts from '../../opts'
 import { log, _ } from '../../lib/fns'
+
+const LOG = 'webpack'
 
 export default function handleWebpackErrors(err, stats, resolve, reject) {
   if (err)
     return reject(err)
 
-  const jsonStats = stats.toJson()
+  const jsonStats = stats.toJson({
+    source: false
+  })
+
+  if (opts.get('debug')) {
+    log(LOG, '--- webpack output ---')
+    log(LOG, jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
+  }
 
   if (jsonStats.errors.length) {
     // take first three lines of error
@@ -20,6 +30,6 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
     console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
   }
 
-  log('bundler', 'webpack finished')
+  log(LOG, 'webpack finished')
   return resolve()
 }
