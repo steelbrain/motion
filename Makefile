@@ -47,6 +47,10 @@ styles: ready
 	scripts/release.sh nice-styles
 	make push
 
+tools: ready
+	scripts/release.sh tools
+	make push
+
 all: ready
 	scripts/release.sh all
 	make push
