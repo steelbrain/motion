@@ -459,6 +459,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.path)]
       },
 
+      // TODO once this works better in 0.15
+      // unstable_handleError(e) {
+      //   reportError(e)
+      // },
+
       _render() {
         const self = this
 
