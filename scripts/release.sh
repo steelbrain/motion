@@ -22,10 +22,9 @@ release_package() {
 
 release_tools() {
   echo "Tools"
-  cd apps/tools
-  cd .flint
+  cd apps/tools/.flint
 	npm publish --tag=beta
-  cd ../..
+  cd ../../..
 }
 
 release_all() {
@@ -38,6 +37,8 @@ release_all() {
 
 if [ $1 = "all" ]; then
   release_all
+elif [ $1 = "tools" ]; then
+  release_tools
 else
   release_package packages/$1
 fi
