@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.0-beta.21",
+  "version": "1.4.0-beta.22",
   "description": "An amazing way to build apps with React",
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
     "flint": "./entry/flint",
     "flint-new": "./entry/flint-new",
     "flint-run": "./entry/flint-run",
-    "flint-build": "./entry/flint-build"
+    "flint-build": "./entry/flint-build",
+    "flint-update": "./entry/flint-update"
   }
 }
