@@ -44,10 +44,17 @@ export default (filename, config = {}) => deepmerge({
   },
   module: {
     loaders: [
-      { test: /\.css$/, loaders: [styleFileLoader, 'css'] },
       { test: /\.(ttf|eot|woff|svg)$/, loader: 'file?name=assets/files/[name]-[hash].[ext]' },
       { test: /\.json$/, loader: 'json' },
       { test: /\.jsx$/, loader: 'babel' },
+
+      {
+        test: /\.css$/,
+        loaders: [
+          styleFileLoader,
+          'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
+        ]
+      },
 
       {
         test: /\.(png|jpg|gif)$/,
@@ -58,8 +65,10 @@ export default (filename, config = {}) => deepmerge({
         test: /\.scss$/,
         loaders: [
           styleFileLoader,
-          'resolve-url',
-          'sass?sourceMap&outputStyle=expanded&includePaths[]=' + (path.resolve(runnerRoot, './node_modules'))
+          // 'resolve-url',
+          // 'style',
+          'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+          'sass?sourceMap'
         ]
       }
     ]
