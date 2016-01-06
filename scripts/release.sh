@@ -20,11 +20,22 @@ release_package() {
   cd ../..
 }
 
+release_tools() {
+  echo "Tools"
+  cd apps/tools
+  flint build
+  cd .flint
+	npm version patch
+	npm publish --tag=beta
+  cd ../..
+}
+
 release_all() {
   for pkg in packages/*; do
     [ -d "${pkg}" ] || continue # if not a directory, skip
     release_package ${pkg}
   done
+  release_tools
 }
 
 if [ $1 = "all" ]; then
