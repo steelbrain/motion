@@ -36,12 +36,10 @@ export default (filename, config = {}) => deepmerge({
   },
   resolveLoader: { root: runnerModules },
   resolve: {
-    root: [
-      opts.get('flintDir'), // user modules in app/.flint
-      runnerModules, // babel-runtime in runner
-      flintModules // react, react-dom, bluebird in flint.js
-    ],
-    extensions: ['', '.js', '.jsx', '.scss']
+    root: opts.get('flintDir'),
+    modulesDirectories: ['node_modules'],
+    extensions: ['', '.js', '.jsx', '.scss'],
+    fallback: [ runnerModules, /* babel-runtime */ ]
   },
   module: {
     loaders: [

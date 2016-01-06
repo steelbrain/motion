@@ -11,12 +11,19 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
     source: false
   })
 
+  // debug
   if (opts.get('debug')) {
     log(LOG, '--- webpack output ---')
     log(LOG, jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
   }
 
+  // check errors
   if (jsonStats.errors.length) {
+    // debug output everything
+    if (opts.get('debug')) {
+      return reject(jsonStats.errors)
+    }
+
     // take first three lines of error
     let take = s => _.take(s, 3)
     let split = s => s.split("\n")
@@ -26,6 +33,7 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
     return reject(message)
   }
 
+  // check warnings
   if (jsonStats.warnings.length) {
     console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
   }
