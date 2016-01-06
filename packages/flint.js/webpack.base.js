@@ -67,7 +67,8 @@ module.exports = function(opts) {
           test: /\.js$/,
           loader: 'babel-loader',
           query: {
-            stage: 2
+            stage: 2,
+            optional: ['runtime']
           },
           include: [path.resolve(__dirname, 'src')],
           exclude: [path.resolve(__dirname, 'src', 'vendor')]

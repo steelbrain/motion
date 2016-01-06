@@ -20,9 +20,7 @@ export default function handleWebpackErrors(err, stats, resolve, reject) {
   // check errors
   if (jsonStats.errors.length) {
     // debug output everything
-    if (opts.get('debug')) {
-      return reject(jsonStats.errors)
-    }
+    log(LOG, 'webpackErrors', jsonStats.errors)
 
     // take first three lines of error
     let take = s => _.take(s, 3)
