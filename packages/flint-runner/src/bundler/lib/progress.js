@@ -9,7 +9,7 @@ export default async function progress(label, cmd, name, index, total) {
   try {
     const spinner = logProgress(label, name, index, total)
     await execPromise(cmd, opts.get('flintDir'))
-    spinner.stop()
+    spinner && spinner.stop()
   }
   catch(e) {
     if (e.code == 1)
