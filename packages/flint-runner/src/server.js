@@ -8,8 +8,7 @@ import opts from './opts'
 import disk from './disk'
 
 import { p } from './lib/fns'
-import js from 'flint-js'
-const serverPath = p(js(), '..', 'flint-runner', 'dist', 'serverProcess')
+const serverPath = p(__dirname, 'serverProcess')
 
 export function run() {
   return new Promise((res, rej) => {
