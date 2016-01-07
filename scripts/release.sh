@@ -16,7 +16,7 @@ release_package() {
 
   npm shrinkwrap
 
-  if [ "$1" = "--patch" ]; then
+  if [ "$2" = "--patch" ]; then
     npm version patch
   fi
 
@@ -28,7 +28,7 @@ release_tools() {
   echo "Tools"
   cd apps/tools/.flint
 
-  if [ "$1" = "--patch" ]; then
+  if [ "$2" = "--patch" ]; then
     npm version patch
   fi
 
