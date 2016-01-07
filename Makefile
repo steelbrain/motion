@@ -25,6 +25,7 @@ ready:
 	git pull --rebase
 
 push:
+	git commit -am 'version bumps'
 	git push origin head
 
 cli: ready
