@@ -1,6 +1,6 @@
 {
   "name": "flint-nice-styles",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "",
   "main": "lib/compat/index.js",
   "scripts": {
