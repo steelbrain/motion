@@ -9,8 +9,15 @@ async function init() {
   await remakeInstallDir()
 }
 
+async function all() {
+  await bundleInternals()
+  await bundleExternals({ doInstall: true })
+  await uninstall()
+}
+
 export default {
   init,
+  all,
   install,
   installAll,
   uninstall,

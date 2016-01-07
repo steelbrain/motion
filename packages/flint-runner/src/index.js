@@ -59,9 +59,7 @@ export async function run(_opts = {}, isBuild) {
       post = async () => {
         // write out cache
         cache.serialize()
-        // ensure we have clean packages before open
-        await bundler.externals({ doInstall: true })
-        await bundler.uninstall()
+        await bundler.all()
         console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
         keys.init()
       }
