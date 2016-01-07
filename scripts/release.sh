@@ -5,6 +5,11 @@ if [ $# -eq 0 ]; then
   exit 0
 fi
 
+doPatch=false
+if [ "$2" = "--patch" ]; then
+  doPatch=true
+fi
+
 release_package() {
   cd $1
   echo $1
@@ -16,7 +21,7 @@ release_package() {
 
   npm shrinkwrap
 
-  if [ "$2" = "--patch" ]; then
+  if [ "$doPatch" = true ]; then
     npm version patch
   fi
 
@@ -28,7 +33,7 @@ release_tools() {
   echo "Tools"
   cd apps/tools/.flint
 
-  if [ "$2" = "--patch" ]; then
+  if [ "$doPatch" = true ]; then
     npm version patch
   fi
 
