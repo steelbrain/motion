@@ -46,11 +46,15 @@ export default { init, outDir, buildDir, internalDir, styles }
 async function differentFlintVersion() {
   const version = opts.get('version')
   const state = await disk.state.read()
-  const isSame = state && state.opts && version == state.opts.version
-  const isDifferent = !isSame
+  const stateVersion = state && state.opts && state.opts.version
 
-  if (isDifferent)
-    console.log(`New flint version, resetting internals\n`.grey)
+  if (!stateVersion)
+    return true
 
-  return isDifferent
+  const isDiff = version != stateVersion
+
+  if (isDiff)
+    console.log(`New flint version, updating...\n`.grey)
+
+  return isDiff
 }
