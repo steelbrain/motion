@@ -25,8 +25,8 @@ ready:
 	git pull --rebase
 
 push:
-	git commit -am 'version bumps'
-	git push origin head
+	git commit -am 'versions' --quiet
+	git push origin head --quiet
 
 cli: ready
 	scripts/release.sh cli --patch
