@@ -52,5 +52,5 @@ tools: ready
 	make push
 
 all: ready
-	scripts/release.sh all
+	scripts/release.sh all --patch
 	make push
