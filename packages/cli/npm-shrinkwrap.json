@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "dependencies": {
     "balanced-match": {
       "version": "0.3.0",
