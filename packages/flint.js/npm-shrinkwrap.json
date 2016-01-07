@@ -521,7 +521,7 @@
       "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-2.2.3.tgz"
     },
     "flint-nice-styles": {
-      "version": "1.4.1"
+      "version": "1.4.2"
     },
     "for-in": {
       "version": "0.1.4",
@@ -1784,10 +1784,10 @@
       }
     },
     "react": {
-      "version": "0.15.0-alpha"
+      "version": "0.14.2"
     },
     "react-dom": {
-      "version": "0.15.0-alpha"
+      "version": "0.14.0"
     },
     "readable-stream": {
       "version": "2.0.4",
