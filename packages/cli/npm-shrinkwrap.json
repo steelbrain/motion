@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "dependencies": {
     "balanced-match": {
       "version": "0.3.0",
@@ -213,7 +213,7 @@
       "resolved": "https://registry.npmjs.org/event-emitter/-/event-emitter-0.3.4.tgz"
     },
     "flint-runner": {
-      "version": "1.4.1",
+      "version": "1.4.3",
       "dependencies": {
         "abbrev": {
           "version": "1.0.7",
@@ -1792,7 +1792,7 @@
           }
         },
         "flint-js": {
-          "version": "1.4.1",
+          "version": "1.4.4",
           "dependencies": {
             "acorn": {
               "version": "1.2.2",
@@ -2313,7 +2313,7 @@
               "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-2.2.3.tgz"
             },
             "flint-nice-styles": {
-              "version": "1.4.1"
+              "version": "1.4.2"
             },
             "for-in": {
               "version": "0.1.4",
@@ -3576,10 +3576,10 @@
               }
             },
             "react": {
-              "version": "0.15.0-alpha"
+              "version": "0.14.2"
             },
             "react-dom": {
-              "version": "0.15.0-alpha"
+              "version": "0.14.0"
             },
             "readable-stream": {
               "version": "2.0.4",
@@ -3945,7 +3945,7 @@
           }
         },
         "flint-tools": {
-          "version": "1.4.2",
+          "version": "1.4.3",
           "dependencies": {
             "clone": {
               "version": "1.0.2",
@@ -3980,7 +3980,7 @@
           }
         },
         "flint-transform": {
-          "version": "1.4.1",
+          "version": "1.4.2",
           "dependencies": {
             "amdefine": {
               "version": "1.0.0",
@@ -4018,7 +4018,7 @@
               "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.6.0.tgz"
             },
             "flint-nice-styles": {
-              "version": "1.4.1"
+              "version": "1.4.2"
             },
             "flint-stilr": {
               "version": "1.2.3",
