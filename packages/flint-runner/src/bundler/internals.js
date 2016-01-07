@@ -42,18 +42,10 @@ let runningBundle = null
 export async function checkInternals(file, source) {
   log(LOG, 'checkInternals', file)
 
-  const isExporting = hasExports(source)
-  const alreadyExported = cache.isInternal(file)
-  log(LOG, 'checkInternals: found', isExporting, 'already', alreadyExported, 'alreadyRunningBundle', runningBundle)
+  const isInternal = hasExports(source)
+  cache.setIsInternal(file, isInternal)
 
-  cache.setIsInternal(file, isExporting)
-
-  // needs to rewrite internalsIn.js?
-  if (!alreadyExported && isExporting || alreadyExported && !isExporting) {
-    await writeInternalsIn()
-  }
-
-  if (isExporting && !runningBundle) {
+  if (opts.get('hasRunInitialBuild') && isInternal && !runningBundle) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {
       await bundleInternals()
