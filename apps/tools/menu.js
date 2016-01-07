@@ -1,43 +1,82 @@
 import { keys, onKey } from './keys'
+import inspecting from './lib/inspecting'
+
+const Tools = _DT
+const toEditor = Tools.messageEditor
 
 view Menu {
   let active = false
   let top, left
+  let elements = []
 
-  on.event('contextmenu', e => {
-    const mode = keys.alt
-    if (!mode) return
-
-    e.preventDefault()
-
-    const { pageX, pageY } = e
-
-    left = pageX
-    top = pageY
-    active = true
+  // prevent select and show custom cursor when ready for context
+  let focused
+  on.keydown(() => {
+    if (keys.alt && keys.command) {
+      document.body.classList.add('__flintfocus')
+      focused = true
+    }
   })
-
-  let edit = () => {
-    _DT.message({ type: 'focus:element', key: __activeEl.key, view: __activeEl.view })
-  }
+  on.keyup(() => {
+    if (focused) {
+      document.body.classList.remove('__flintfocus')
+      focused = false
+    }
+  })
 
   on.click(window, e => {
     if (active) {
       e.stopPropagation()
       e.preventDefault()
       active = false
+      return
     }
+
+    const mode = keys.alt && keys.command
+    if (!mode) return
+
+    e.preventDefault()
+
+    const { clientX, clientY } = e
+
+    left = clientX
+    top = clientY
+    active = true
+    elements = inspecting.all()
   })
 
+  function focusElement(el) {
+    return function() {
+      toEditor({ type: 'focus:element', key: el.key, view: el.view })
+    }
+  }
+
+  function focusStyle(el) {
+    return function() {
+      toEditor({ type: 'focus:style', el: el.el, view: el.view })
+    }
+  }
+
   <menu class={{ internal: true, active }}>
-    <item class="internal" onClick={edit}>Edit</item>
+    <item
+      repeat={elements.filter(i => !!i.view)}
+      class={{
+        first: _index == 0,
+        last: _index == elements.length - 1
+      }}
+    >
+      <main class="hl" onClick={focusElement(_)}>{_.view}</main>
+      <sub class="hl" onClick={focusStyle(_)}>$</sub>
+    </item>
   </menu>
 
+  const rad = 5
+
   $menu = {
-    borderRadius: 5,
+    borderRadius: rad,
     border: '1px solid #ddd',
     boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-    position: 'fixed',
+    position: 'absolute',
     top,
     left,
     background: '#fff',
@@ -56,12 +95,32 @@ view Menu {
   }
 
   $item = {
-    padding: [4, 8],
     minWidth: 120,
     cursor: 'pointer',
+    flexFlow: 'row',
+  }
+
+  $first = {
+    borderTopLeftRadius: rad,
+    borderTopRightRadius: rad,
+    overflow: 'hidden'
+  }
+
+  $last = {
+    borderBottomLeftRadius: rad,
+    borderBottomRightRadius: rad,
+    overflow: 'hidden'
+  }
+
+  $hl = {
+    padding: [4, 8],
 
     hover: {
       background: [0,0,0,0.1]
     }
+  }
+
+  $main = {
+    flexGrow: 1
   }
 }

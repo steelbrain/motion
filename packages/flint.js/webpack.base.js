@@ -19,6 +19,7 @@ module.exports = function(opts) {
   // split react if not node
   if (opts.target != 'node') {
     splitReact(opts.name)
+    // splitBabelRuntime(opts.name)
   }
 
   // if node, shim fetch
@@ -39,11 +40,14 @@ module.exports = function(opts) {
     plugins.push(new webpack.optimize.DedupePlugin())
 
   function splitReact(name) {
-    plugins.push(
-      new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js')
-    )
+    plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js'))
     entry.react = ['react', 'react-dom']
   }
+
+  // function splitBabelRuntime(name) {
+  //   plugins.push(new webpack.optimize.CommonsChunkPlugin('babel-runtime', 'babel-runtime.'+name+'.js'))
+  //   entry['babel-runtime'] = ['babel-runtime']
+  // }
 
   return {
     target: opts.target || 'web',
@@ -63,7 +67,8 @@ module.exports = function(opts) {
           test: /\.js$/,
           loader: 'babel-loader',
           query: {
-            stage: 2
+            stage: 2,
+            optional: ['runtime']
           },
           include: [path.resolve(__dirname, 'src')],
           exclude: [path.resolve(__dirname, 'src', 'vendor')]

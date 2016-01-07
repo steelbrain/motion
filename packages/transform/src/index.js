@@ -130,6 +130,20 @@ export default function createPlugin(options) {
       return t.callExpression(t.identifier('Object.freeze'), [node])
     }
 
+    function propChange(node) {
+      return t.expressionStatement(
+        t.callExpression(t.identifier('on.props'), [
+          t.functionExpression(null, [], t.blockStatement(
+            node.declarations.map(({ id: { name } }) =>
+              t.assignmentExpression('=', t.identifier(name),
+                t.identifier(`view.props.${name} || ${name}`)
+              )
+            )
+          ))
+        ])
+      )
+    }
+
     function wrapSetter(name, node, scope, postfix, method = 'set') {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
@@ -143,11 +157,13 @@ export default function createPlugin(options) {
       return node
     }
 
-
     function wrapDeclarator(name, node, scope) {
       return wrapSetter(name, node, scope, false, 'dec')
     }
 
+    function wrapPropertyDeclarator(name, node, scope) {
+      return wrapSetter(name, node, scope, false, 'prop')
+    }
 
     function getter(name, val, ...args) {
       return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
@@ -213,7 +229,7 @@ export default function createPlugin(options) {
     let viewStyleNames = {} // prevent duplicate style names
 
     // meta-data for views for atom
-    let viewMeta = {}
+    let meta = {}
     let sendingMeta = false
 
     return new Plugin("flint-transform", {
@@ -244,11 +260,14 @@ export default function createPlugin(options) {
 
           // this ensures all paths are relative to the root, not the current file
           if (isInternal) {
-            const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
-            const relImportPath = './' + relativePath(importPath)
-            node.source.value = relImportPath
-            node.source.rawValue = relImportPath
-            node.source.raw = `\'${relImportPath}\'`
+            // const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
+            // const relImportPath = '#./' + relativePath(importPath)
+            //
+            // console.log(node)
+            //
+            // node.source.value = relImportPath
+            // node.source.rawValue = relImportPath
+            // node.source.raw = `\'${relImportPath}\'`
           }
         },
 
@@ -262,12 +281,16 @@ export default function createPlugin(options) {
             const fullName = name + (subName ? `.${subName}` : '')
 
             currentView = fullName
-            viewMeta[currentView] = {}
+            meta[currentView] = {
+              data: { file: file.opts.filename },
+              styles: {},
+              els: {},
+            }
 
             if (!sendingMeta && options.onMeta) {
               sendingMeta = true
               setTimeout(() => {
-                options.onMeta({ viewMeta, type: 'meta' })
+                options.onMeta({ meta, type: 'meta' })
                 sendingMeta = false
               }, 100)
             }
@@ -422,11 +445,25 @@ export default function createPlugin(options) {
 
               let arr = [t.literal(name), t.literal(key)]
 
-              viewMeta[currentView][name + key] = el.loc.start
+              meta[currentView].els[name + key] = el.loc.end
 
+              /*
+                checks whether user is referencing variable or view
+                check root to see if the variable exists
+                  Modal.Footer would have a root of Modal
+              */
               // safer, checks for file scope or view scope only
-              if ((scope.hasOwnBinding(name) || file.scope.hasOwnBinding(name)) && isUpperCase(name))
-                arr = [t.identifier(name)].concat(arr)
+              let [rootName, ...children] = name.split('.')
+              let isVariable = (scope.hasOwnBinding(rootName) || file.scope.hasOwnBinding(rootName)) && isUpperCase(rootName)
+
+              // either gives <Modal> or <Modal.Header>
+              const getVar = (rootName, name) =>
+                rootName == name ?
+                  t.identifier(name) :
+                  t.memberExpression(t.identifier(rootName), t.identifier(children.join('.')))
+
+              if (isVariable)
+                arr = [getVar(rootName, name)].concat(arr)
 
               el.name = t.arrayExpression(arr)
 
@@ -538,6 +575,21 @@ export default function createPlugin(options) {
         },
 
         VariableDeclaration: {
+          enter(node, parent, scope) {
+            if (node.kind == 'prop' && !node._flintPropParsed) {
+              node.kind = 'const'
+              node._flintPropParsed = true
+
+              node.declarations.map(dec => {
+                let name = dec.id.name
+                dec.init = wrapPropertyDeclarator(name, dec.init || t.identifier('undefined'), scope)
+                return dec
+              })
+
+              return [ node, propChange(node) ]
+            }
+          },
+
           exit(node, parent, scope, file) {
             if (node.isStyle || node._flintDeclarationParsed) return
             node._flintDeclarationParsed = true
@@ -587,12 +639,13 @@ export default function createPlugin(options) {
 
             const isStyle = (
               // $variable = {}
-              node.left.name && node.left.name.indexOf('$') == 0 ||
-              // $.variable = {}
-              node.left.object && node.left.object.name == '$'
+              node.left.name && node.left.name.indexOf('$') == 0
             )
 
             if (!isStyle) return
+
+            if (currentView)
+              meta[currentView].styles[node.left.name.substr(1)] = node.loc.start
 
             // styles
             return extractAndAssign(node)
@@ -820,10 +873,10 @@ export default function createPlugin(options) {
             if (!isBasicAssign) return
 
             // destructures
-            if (t.isObjectPattern(node.left)) {
+            if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {
               let destructNodes = destructureTrackers(node.left, 'set')
               node.flintTracked = true
-              return [node, ...destructNodes]
+              return [t.expressionStatement(node), ...destructNodes]
             }
 
             const isRender = hasObjWithProp(node, 'view', 'render')

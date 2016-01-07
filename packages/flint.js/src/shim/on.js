@@ -46,7 +46,13 @@ function addListener({ root, scope, name, number, cb, uid }) {
   }
 
   const target = (scope || root)
-  const listener = target.addEventListener(name, cb)
+  // detail key is used by CustomEvent to pass data
+  const listener = target.addEventListener(name, (...args) => {
+    if (typeof args[0] == 'object' && args[0].detail)
+      cb(args[0].detail)
+    else
+      cb(...args)
+  })
   const removeListener = target.removeEventListener.bind(null, name, cb)
 
   return removeListener
@@ -154,8 +160,8 @@ const proto = name => {
 // custom events
 On.prototype.event = function(name, scope, cb, number) {
   // firing
-  if (typeof scope == 'undefined') {
-    let event = new Event(name)
+  if (typeof scope == 'undefined' || typeof scope == 'object') {
+    let event = new CustomEvent(name, scope ? { detail: scope } : null)
     return window.dispatchEvent(event)
   }
 
@@ -195,6 +201,14 @@ proto('mousemove')
 proto('mouseover')
 proto('mouseout')
 proto('mouseup')
+
+// touch
+proto('touchdown')
+proto('touchenter')
+proto('touchleave')
+proto('touchmove')
+proto('touchout')
+proto('touchup')
 
 // keyboard
 proto('keydown')

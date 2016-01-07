@@ -5,6 +5,9 @@ var runner = require('flint-runner')
 var colors = require('colors')
 var fs = require('fs')
 
+let lastArg = process.argv[process.argv.length - 1]
+
+
 fs.stat(process.cwd() + '/.flint', function(err,res) {
   if (err || !res) {
     console.log()
@@ -17,7 +20,11 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('-p, --port [number]', 'specify a port [number]')
     .option('-h, --host [host]', 'specify hostname')
     .option('--pretty', 'pretty print files')
+    .option('--reset', 'resets cache, internals, bundles')
+    .option('--cached', 'run from cache for speedup (may break)')
     .parse(process.argv)
 
-  runner(Program)
+  Program.version = require('../../../package.json').version
+
+  runner.run(Program)
 })

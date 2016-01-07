@@ -15,7 +15,11 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     .option('-w, --watch', 'incremental builds')
     .option('-v, --debug [what]', 'output extra information for debugging')
     .option('-i, --isomorphic', 'render template isomorphic')
+    .option('--reset', 'resets cache, internals, bundles')
+    .option('--cached', 'run from cache for speedup (may break)')
     .parse(process.argv);
 
-  runner(Program, true);
+  Program.version = require('../../../package.json').version
+
+  runner.run(Program, true);
 })

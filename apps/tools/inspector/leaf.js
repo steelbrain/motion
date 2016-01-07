@@ -26,6 +26,11 @@ view Leaf {
     // originally was stream of ||s, but 0 was turning into false
     data = view.props.data
 
+    // multiline strings
+    if (typeof data === 'string' && data.indexOf('\n') > -1) {
+      data = data.split('\n')
+    }
+
     if (data)
       dataKeys = Object.keys(data).sort()
 

@@ -1,9 +1,9 @@
 {
   "name": "flint-transform",
-  "version": "1.3.137",
+  "version": "1.4.0",
   "main": "entry.js",
   "dependencies": {
-    "flint-nice-styles": "^1.0.0",
+    "flint-nice-styles": "^1.4.0",
     "flint-stilr": "^1.2.1",
     "hash-sum": "^1.0.2"
   }

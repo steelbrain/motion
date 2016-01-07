@@ -1,3 +1,4 @@
 {
-  "selectorPrefix": "#_flintdevtools "
+  "selectorPrefix": "#_flintdevtools ",
+  "tools": "false"
 }

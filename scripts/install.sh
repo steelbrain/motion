@@ -82,6 +82,16 @@ EOF
   exit 1
 fi
 
+# atom beta plugin
+echo
+read -p "Would you like to install the beta atom plugin [y/n]? " reply
+echo
+if [[ "$reply" =~ ^[Yy]$ ]]; then
+  sudo rm -r ~/.atom/packages/flint
+  git clone -b beta http://github.com/flintjs/atom ~/.atom/packages/flint
+  (cd ~/.atom/packages/flint && npm install)
+fi
+
 # Check sudo privelege on global node_modules
 if [ -w "$NODE_MODULES" ] && [ -w "$NODE_MODULES_BIN" ]; then
   echo_good "Checking global node_modules permissions... ✓"

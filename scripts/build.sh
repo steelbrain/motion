@@ -1,17 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
 # kill bg tasks on exit
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+trap 'kill $(jobs -pr)' SIGINT SIGTERM
+
+# order important so they build for each other
+packages=("nice-styles" "transform" "flint.js" "flint-runner" "cli")
 
 # build
-for f in packages/*; do
+for p in "${packages[@]}"; do
+  f="packages/$p"
+
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
     node node_modules/webpack/bin/webpack --config webpack.config.js $1 &
-    echo "running $f webpack for $file"
+    echo "running $f webpack for $f"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
@@ -35,7 +40,6 @@ for f in packages/*; do
   fi
 done
 
-# extra stuff for watch
 if [ "$1" = "--watch" ]; then
   # relink cli
   echo "Watch CLI for relink"
@@ -51,6 +55,7 @@ if [ "$1" = "--watch" ]; then
       if [[ $chsum1 != $chsum2 ]] ; then
         npm link --loglevel=error
         chsum1=$chsum2
+        hasLinkedOnce='true'
 
         # watch tools after first build
         if [ $hasLinkedOnce=='false' ] && [ "$2" != '--notools' ]; then
@@ -61,8 +66,6 @@ if [ "$1" = "--watch" ]; then
           cd ../..
           cd packages/cli
         fi
-
-        hasLinkedOnce='true'
       fi
     fi
     sleep 1

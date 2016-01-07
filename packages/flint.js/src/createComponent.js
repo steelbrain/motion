@@ -242,6 +242,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.props.__flint.onMount(this)
           this.setID()
         }
+
+        if (this.doRenderToRoot) {
+          this.handleRootRender()
+        }
       },
 
       componentWillUnmount() {
@@ -251,6 +255,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
         this.runEvents('unmount')
         this.mounted = false
+
+        if (this.doRenderToRoot) {
+          ReactDOM.unmountComponentAtNode(this.node)
+          this.app.removeChild(this.node)
+        }
       },
 
       componentWillUpdate() {
@@ -278,11 +287,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
         if (!process.env.production) {
           this.setID()
         }
+
+        if (this.doRenderToRoot) {
+          this.handleRootRender()
+        }
       },
 
       // FLINT HELPERS
 
-      clone(el, props) {        
+      // property declarators
+      prop(name, defaultValue) {
+        return this.props[name] || defaultValue
+      },
+
+      clone(el, props) {
         return React.cloneElement(el, props)
       },
 
@@ -351,6 +369,24 @@ export default function createComponent(Flint, Internal, name, view, options = {
       //   console.log(this, name, 'set', obj)
       //   this.state = { _context: obj }
       // },
+
+      // render to a "portal"
+      renderToRoot() {
+        this.doRenderToRoot = true
+
+        this.app = document.body
+        this.node = document.createElement('div')
+        this.node.setAttribute('data-portal', 'true')
+        this.app.appendChild(this.node)
+      },
+
+      inlineStyles() {
+        this.doRenderInlineStyles = true
+      },
+
+      handleRootRender() {
+        ReactDOM.render(this.renderResult, this.node)
+      },
 
       getWrapper(tags, props, numRenders) {
         const wrapperName = name.toLowerCase()
@@ -423,7 +459,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return Internal.lastWorkingRenders[pathWithoutProps(this.props.__flint.path)]
       },
 
-      render() {
+      // TODO once this works better in 0.15
+      // unstable_handleError(e) {
+      //   reportError(e)
+      // },
+
+      _render() {
         const self = this
 
         self.isRendering = true
@@ -480,6 +521,18 @@ export default function createComponent(Flint, Internal, name, view, options = {
           catch(e) {
             console.flint("Error rendering last version of view after error")
           }
+        }
+      },
+
+      render() {
+        let result = this._render.call(this)
+
+        if (this.doRenderToRoot) {
+          this.renderResult = result
+          return <noscript />
+        }
+        else {
+          return result
         }
       }
     })

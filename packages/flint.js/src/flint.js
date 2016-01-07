@@ -18,6 +18,7 @@ import createComponent from './createComponent'
 import range from './lib/range'
 import iff from './lib/iff'
 import router from './lib/router'
+import requireFactory from './lib/requireFactory'
 import staticStyles from './lib/staticStyles'
 import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
@@ -34,6 +35,11 @@ console.warn = (...args) => {
   if (args[0] && args[0].indexOf('Radium:') == 0) return
   originalWarn.call(console, ...args)
 }
+
+const folderFromFile = (filePath) =>
+  filePath.indexOf('/') == -1
+    ? ''
+    : filePath.substring(0, filePath.lastIndexOf('/'))
 
 /*
 
@@ -137,27 +143,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   const emitter = ee({})
 
-  function require(name) {
-    if (name.charAt(0) == '.')
-      return Flint.internals[name.replace('./', '')]
-
-    if (name == 'bluebird')
-      return root._bluebird
-
-    let pkg = Flint.packages[name]
-
-    // we may be waiting for packages reload
-    if (!pkg) return
-
-    // may not export a default
-    if (!pkg.default)
-      pkg.default = pkg
-
-    return pkg
-  }
-
-  root.require = require
-
   let Flint = {
     // visible but used internally
     packages: {},
@@ -172,11 +157,16 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     reportError,
     range,
     iff,
+    noop: function(){},
 
     // external API
     router,
     decorateViews: decorator => Internal.viewDecorator = decorator,
     preloaders: [], // async functions needed before loading app
+
+    preload(fn) {
+      Flint.preloaders.push(fn)
+    },
 
     // styles, TODO: move internal
     staticStyles,
@@ -184,8 +174,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     styleObjects: {},
 
     render() {
-      if (Flint.preloaders.length)
-        Promise.all(Flint.preloaders.map(loader => loader())).then(run)
+      if (Flint.preloaders.length) {
+        return Promise
+          .all(Flint.preloaders.map(loader => typeof loader == 'function' ? loader() : loader))
+          .then(run)
+      }
       else
         run()
 
@@ -244,7 +237,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       let fileExports = {}
 
       // run file
-      run(fileExports)
+      run(flintRequire.bind(null, folderFromFile(file)), fileExports)
 
       Flint.setExports(fileExports)
 
@@ -281,7 +274,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
             setTimeout(() => emitter.emit('render:done'))
           })
-        })
+        }, 0)
       }
     },
 
@@ -404,6 +397,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       setInspector(path)
     }
   }
+
+  // below Flint to pass it in
+  let flintRequire = requireFactory(Flint)
+
+  root.require = flintRequire
 
   // shim root view
   opts.namespace.view = {

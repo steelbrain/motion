@@ -56,13 +56,14 @@ view Installer {
     }
   }
 
-  <Modal
+  // was <modal but collided with bootstrap
+  <FlintModal
     open={state > 0}
     onClose={closeModal}
     title={title(state)}>
     <InstallerLoading if={false && state < 2} />
     {body(state)}
-  </Modal>
+  </FlintModal>
 }
 
 view Versions {

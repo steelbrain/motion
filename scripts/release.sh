@@ -14,7 +14,6 @@ release_package() {
     echo "building webpack"
   fi
 
-  npm version patch
   # VERSION=$(npm view flint version -loglevel silent)
   # git tag -a "v$VERSION" -m "`git log -1 --format=%s`"
   npm publish --tag=latest
@@ -23,12 +22,9 @@ release_package() {
 
 release_tools() {
   echo "Tools"
-  cd apps/tools
-  flint build
-  cd .flint
-	npm version patch
-	npm publish
-  cd ../..
+  cd apps/tools/.flint
+	npm publish --tag=latest
+  cd ../../..
 }
 
 release_all() {
@@ -37,7 +33,6 @@ release_all() {
     release_package ${pkg}
   done
   release_tools
-  git commit -am 'vbump all'
 }
 
 if [ $1 = "all" ]; then

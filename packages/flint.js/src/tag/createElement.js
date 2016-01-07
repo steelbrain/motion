@@ -117,8 +117,9 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
     }
   }
 
-  if (props.yield)
-    props = Object.assign(props, viewProps, { style: props.style })
+  if (props.yield) {
+    props = Object.assign(props, viewProps, props.style && { style: props.style })
+  }
 
   if (props.onClick) {
     const originalOnClick = props.onClick
@@ -169,8 +170,11 @@ export default function createElement(viewName) {
     const view = this
     const Flint = view.Flint
     const { fullname, name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, viewName, Flint.getView)
+
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
-    props.style = elementStyles(key, index, repeatItem, view, name, originalTag || tag, props)
+
+    const styles = elementStyles(key, index, repeatItem, view, name, originalTag || tag, props)
+    if (styles) props.style = styles
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {
@@ -190,6 +194,6 @@ export default function createElement(viewName) {
     // if (!process.env.production)
     //   args = args.map(arg => arg && arg != null && !arg.$$typeof && !Array.isArray(arg) && (arg instanceof Object) ? JSON.stringify(arg) : arg)
 
-    return React.createElement(tag, props, ...args)
+    return React.createElement(props.tagName || tag, props, ...args)
   }
 }

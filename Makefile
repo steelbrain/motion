@@ -4,48 +4,53 @@ clean:
 build: clean
 	./scripts/build.sh
 
-watch: clean
-	scripts/build.sh --watch
-
 watch-core: clean
 	scripts/build.sh --watch --notools
+
+watch: clean
+	scripts/build.sh --watch
 
 bootstrap:
 	npm install
 	node scripts/bootstrap.js
+	scripts/build.sh
 
 link:
 	node scripts/links.js
 
 
-# release (npm patch)
+# easy release
 
 ready:
 	git pull --rebase
 
+push:
+	git push origin head
+
 cli: ready
 	scripts/release.sh cli
-	git commit -am 'vbump cli'
+	make push
 
 flint.js: ready
 	scripts/release.sh flint.js
-	git commit -am 'vbump flint.js'
+	make push
 
 runner: ready
-	scripts/release.sh runner
-	git commit -am 'vbump runner'
+	scripts/release.sh flint-runner
+	make push
 
 transform: ready
 	scripts/release.sh transform
-	git commit -am 'vbump transform'
+	make push
 
 styles: ready
 	scripts/release.sh nice-styles
-	git commit -am 'vbump styles'
+	make push
 
 tools: ready
 	scripts/release.sh tools
-	git commit -am 'vbump tools'
+	make push
 
 all: ready
 	scripts/release.sh all
+	make push

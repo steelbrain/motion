@@ -1,0 +1,48 @@
+{
+  "opts": {
+    "version": "1.4.0-beta.21",
+    "hasRunInitialBuild": false,
+    "defaultPort": 4000,
+    "appDir": "/Users/nw/flint/packages/cli",
+    "dir": "/Users/nw/flint/packages/cli",
+    "flintDir": "/Users/nw/flint/packages/cli/.flint",
+    "nodeDir": "/Users/nw/flint/packages/cli/.flint/node_modules",
+    "internalDir": "/Users/nw/flint/packages/cli/.flint/.internal",
+    "depsDir": "/Users/nw/flint/packages/cli/.flint/.internal/deps",
+    "template": ".flint/index.html",
+    "buildDir": "/Users/nw/flint/packages/cli/.flint/build",
+    "deps": {
+      "dir": "/Users/nw/flint/packages/cli/.flint/.internal/deps",
+      "assetsDir": "/Users/nw/flint/packages/cli/.flint/.internal/deps/assets",
+      "internalsIn": "/Users/nw/flint/packages/cli/.flint/.internal/deps/internals.in.js",
+      "internalsOut": "/Users/nw/flint/packages/cli/.flint/.internal/deps/internals.js",
+      "externalsIn": "/Users/nw/flint/packages/cli/.flint/.internal/deps/externals.in.js",
+      "externalsOut": "/Users/nw/flint/packages/cli/.flint/.internal/deps/externals.js",
+      "externalsPaths": "/Users/nw/flint/packages/cli/.flint/.internal/deps/externals.paths.js"
+    },
+    "configFile": "/Users/nw/flint/packages/cli/.flint/flint.json",
+    "stateFile": "/Users/nw/flint/packages/cli/.flint/.internal/state.json",
+    "outDir": "/Users/nw/flint/packages/cli/.flint/.internal/out",
+    "styleDir": "/Users/nw/flint/packages/cli/.flint/.internal/styles",
+    "styleOutDir": "/Users/nw/flint/packages/cli/.flint/build/_/styles.css",
+    "config": {},
+    "name": "cli",
+    "saneName": "cli",
+    "url": "cli.dev"
+  },
+  "port": 4001,
+  "wport": 6284,
+  "cache": {
+    "files": {
+      "src/colors.js": {
+        "added": 1452118703092,
+        "views": [],
+        "isInternal": true,
+        "imports": [],
+        "writtenAt": 1452118703175,
+        "error": null
+      }
+    },
+    "imports": []
+  }
+}

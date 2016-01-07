@@ -26,12 +26,6 @@ packageNames.forEach(function (loc) {
   });
 });
 
-['tools'].forEach(function(app) {
-  cd("apps/" + app + "/.flint")
-  exec("npm link")
-  cd("../../..")
-})
-
 packages.forEach(function (pkg) {
   cd("packages/" + pkg.folder)
   exec("npm link")
