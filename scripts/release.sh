@@ -19,7 +19,7 @@ release_package() {
     echo "building webpack"
   fi
 
-  npm shrinkwrap
+  npm shrinkwrap --loglevel=error
 
   if [ "$doPatch" = true ]; then
     npm version patch
@@ -37,7 +37,7 @@ release_tools() {
     npm version patch
   fi
 
-  npm shrinkwrap
+  npm shrinkwrap --loglevel=error
 	npm publish --tag=latest
   cd ../../..
 }
