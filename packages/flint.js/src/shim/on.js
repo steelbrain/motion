@@ -46,7 +46,8 @@ function addListener({ root, scope, name, number, cb, uid }) {
   }
 
   const target = (scope || root)
-  const listener = target.addEventListener(name, cb)
+  // detail key is used by CustomEvent to pass data
+  const listener = target.addEventListener(name, data => cb(data.detail))
   const removeListener = target.removeEventListener.bind(null, name, cb)
 
   return removeListener
@@ -154,8 +155,8 @@ const proto = name => {
 // custom events
 On.prototype.event = function(name, scope, cb, number) {
   // firing
-  if (typeof scope == 'undefined') {
-    let event = new Event(name)
+  if (typeof scope == 'undefined' || typeof scope == 'object') {
+    let event = new CustomEvent(name, scope ? { detail: scope } : null)
     return window.dispatchEvent(event)
   }
 
