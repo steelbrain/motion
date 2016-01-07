@@ -14,9 +14,12 @@ release_package() {
     echo "building webpack"
   fi
 
-  # VERSION=$(npm view flint version -loglevel silent)
-  # git tag -a "v$VERSION" -m "`git log -1 --format=%s`"
   npm shrinkwrap
+
+  if [ "$1" = "--patch" ]; then
+    npm version patch
+  fi
+
   npm publish --tag=latest
   cd ../..
 }
@@ -24,6 +27,11 @@ release_package() {
 release_tools() {
   echo "Tools"
   cd apps/tools/.flint
+
+  if [ "$1" = "--patch" ]; then
+    npm version patch
+  fi
+
   npm shrinkwrap
 	npm publish --tag=latest
   cd ../../..

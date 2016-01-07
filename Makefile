@@ -28,27 +28,27 @@ push:
 	git push origin head
 
 cli: ready
-	scripts/release.sh cli
+	scripts/release.sh cli --patch
 	make push
 
 flint.js: ready
-	scripts/release.sh flint.js
+	scripts/release.sh flint.js --patch
 	make push
 
 runner: ready
-	scripts/release.sh flint-runner
+	scripts/release.sh flint-runner --patch
 	make push
 
 transform: ready
-	scripts/release.sh transform
+	scripts/release.sh transform --patch
 	make push
 
 styles: ready
-	scripts/release.sh nice-styles
+	scripts/release.sh nice-styles --patch
 	make push
 
 tools: ready
-	scripts/release.sh tools
+	scripts/release.sh tools --patch
 	make push
 
 all: ready
