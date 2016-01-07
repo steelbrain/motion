@@ -24,7 +24,7 @@ if (flintIndex === process.argv.length - 1 || (firstFlag && firstFlag[0] === '-'
 // check flint version
 let path = require('path')
 let exec = require('child_process').exec
-let checkversion = 'npm view flint version -loglevel silent'
+let checkversion = 'npm view flint@latest version -loglevel silent'
 
 let pkg = require(path.join('..', '..', 'package.json'))
 const getversion = v => (''+v).trim()
