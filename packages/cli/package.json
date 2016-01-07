@@ -13,7 +13,6 @@
   },
   "homepage": "https://flintjs.com",
   "dependencies": {
-    "babel-runtime": "^5.8.25",
     "cli-color": "^1.0.0",
     "clui": "^0.3.1",
     "colors": "^1.0.3",

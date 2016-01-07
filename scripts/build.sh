@@ -22,15 +22,7 @@ for p in "${packages[@]}"; do
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
 
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib/compat" \
-      --stage 0 \
-      --loose all \
-      --blacklist es6.tailCall \
-      --optional runtime \
-      --blacklist strict \
-      --copy-files $1 &
-
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib/modern" \
+    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" \
       --stage 0 \
       --loose all \
       --optional asyncToGenerator \

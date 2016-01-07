@@ -24,7 +24,7 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('--cached', 'run from cache for speedup (may break)')
     .parse(process.argv)
 
-  Program.version = require('../../../package.json').version
+  Program.version = require('../../package.json').version
 
   runner.run(Program)
 })

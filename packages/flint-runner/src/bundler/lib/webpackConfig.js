@@ -8,7 +8,7 @@ import flintjs from 'flint-js'
 let runnerRoot = path.resolve(path.join(__dirname, '..'))
 let runnerModules = path.join(runnerRoot, 'node_modules')
 
-let flintRoot = flintjs()
+let flintRoot = path.resolve(path.join(__dirname, '..'))
 let flintModules = path.join(flintRoot, 'node_modules')
 
 // copy styles into .flint/static/styles
@@ -39,7 +39,7 @@ export default (filename, config = {}) => deepmerge({
     root: opts.get('flintDir'),
     modulesDirectories: ['node_modules'],
     extensions: ['', '.js', '.jsx', '.scss'],
-    fallback: [ runnerModules, /* babel-runtime */ ]
+    fallback: [ runnerModules, flintModules, /* babel-runtime may be in either depending on npm */ ]
   },
   module: {
     loaders: [
