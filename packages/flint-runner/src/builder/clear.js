@@ -1,11 +1,13 @@
 import { p, log, handleError, recreateDir, mkdir } from '../lib/fns'
 import opts from '../opts'
+import disk from '../disk'
 
 const LOG = 'clear'
 
 export async function init() {
-  // TODO when cached startup works, re-enable reset flag
-  if (opts.get('reset'))
+  let isDiffVersion = await differentFlintVersion()
+
+  if (opts.get('reset') || isDiffVersion)
     await recreateDir(opts.get('internalDir'))
 
   // TODO may want to recreate all of depsDir?
@@ -39,3 +41,16 @@ export async function buildDir() {
 }
 
 export default { init, outDir, buildDir, internalDir, styles }
+
+
+async function differentFlintVersion() {
+  const version = opts.get('version')
+  const state = await disk.state.read()
+  const isSame = state && state.opts && version == state.opts.version
+  const isDifferent = !isSame
+
+  if (isDifferent)
+    console.log(`New flint version, resetting internals\n`.grey)
+
+  return isDifferent
+}

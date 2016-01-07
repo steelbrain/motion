@@ -21,12 +21,15 @@ export async function run(_opts = {}, isBuild) {
     log('opts', OPTS)
 
     // init, order important
-    await builder.clear.init()
-    await disk.init()
-    await opts.serialize() // write out opts to state
-    await cache.init() // ensure cache
-    await bundler.init() // start bundler
-    compiler('init', OPTS) // start compiler
+    await disk.init() // reads versions and sets up readers/writers
+    await builder.clear.init() // ensures internal directories set up
+    await opts.serialize() // write out opts to state file
+    await* [
+      cache.init(),
+      bundler.init()
+    ]
+
+    compiler('init', OPTS)
     watchDeletes()
 
     // pipeline

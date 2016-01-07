@@ -9,11 +9,15 @@ export default function(val) {
     // TODO: make this use view.range() and then we can throw nicer errors with view name
 }
 
-function isIterable(obj){
+function isIterable(obj) {
   if (obj === undefined || obj === null) {
     return false
   }
   else {
-    return typeof Symbol != 'undefined' && obj[Symbol.iterator] !== undefined
+    // detect iterable
+    return (
+      typeof Symbol != 'undefined' && obj[Symbol.iterator] !== undefined
+      || obj['@@iterator']
+    )
   }
 }
