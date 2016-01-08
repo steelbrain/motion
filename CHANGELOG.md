@@ -42,7 +42,9 @@ view Main {
 
 - Building assets bugfixes
 
-- <tag repeat={} /> takes iterables
+- `<tag repeat={} />` takes iterables
+
+- `on.event` custom events can pass objects: `on.event('custom', { some: 'obj' })`
 
 - flint --cached (for faster startup time, broken atm)
 
