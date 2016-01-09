@@ -235,12 +235,16 @@ function reloadAllScripts() {
 
   _Flint.resetViewState()
 
-  ;[].forEach.call(scripts, script => {
-    replaceTag(script, 'src')
-  })
+  let scriptLoaders = []
 
-  // TODO: this should wait for all tags to be done loading
-  setTimeout(Flint.render, 10)
+  ;[].forEach.call(scripts, script =>
+    scriptLoaders.push(new Promise(resolve => replaceTag(script, 'src', resolve)))
+  )
+
+  Promise.all(scriptLoaders)
+    .then(() => {
+      Flint.render()
+    })
 }
 
 let renderAttempts = 0
