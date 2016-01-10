@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# exit on error
+set -e
+
 if [ $# -eq 0 ]; then
   echo 'Please specify package to release'
   exit 0
