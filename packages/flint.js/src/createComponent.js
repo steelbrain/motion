@@ -414,15 +414,19 @@ export default function createComponent(Flint, Internal, name, view, options = {
         else if (numRenders == 1) {
           tags = this.renders[0].call(this)
 
-          addWrapper = (
-            Array.isArray(tags) ||
-            !tags.props
-          )
+          const hasMultipleTags = Array.isArray(tags)
 
-          if (!Array.isArray(tags) && tags.props && tags.props.__flint && tags.props.__flint.tagName != name.toLowerCase()) {
-            addWrapper = true
-            tags = [tags]
+          addWrapper = hasMultipleTags || !tags.props
+
+          if (!hasMultipleTags && tags.props && !tags.props.root) {
+            // if tag name == view name
+            if (tags.props.__flint && tags.props.__flint.tagName != name.toLowerCase()) {
+              addWrapper = true
+              tags = [tags]
+            }
           }
+
+
         }
 
         else if (numRenders > 1) {
