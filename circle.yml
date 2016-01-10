@@ -1,4 +1,3 @@
 test:
   pre:
     - make bootstrap
-    - make build
