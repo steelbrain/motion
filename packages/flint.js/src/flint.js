@@ -101,6 +101,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     removeView(key) {
       delete Internal.views[key]
+      delete Internal.mountedViews[key]
+      delete Internal.lastWorkingViews[key]
     },
 
     // devtools
@@ -246,8 +248,8 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         const views = Internal.viewsInFile[file]
 
         // remove Internal.viewsInFile that werent made
-        const removed = arrayDiff(cached, views)
-        removed.map(Internal.removeView)
+        const removedViews = arrayDiff(cached, views)
+        removedViews.map(Internal.removeView)
 
         Internal.currentHotFile = null
         Internal.viewCache[file] = Internal.viewsInFile[file]
@@ -256,11 +258,13 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           return
 
         setTimeout(() => {
-          const added = arrayDiff(views, cached)
+          const isNewFile = !cached.length
+          const addedViews = arrayDiff(views, cached)
 
-          // if removed, just root
-          if (removed.length || added.length)
+          // safe re-render
+          if (isNewFile || removedViews.length || addedViews.length) {
             return Flint.render()
+          }
 
           Internal.changedViews.forEach(name => {
             if (!Internal.mountedViews[name]) return
@@ -276,6 +280,14 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           })
         }, 0)
       }
+    },
+
+    removeFile(file) {
+      const viewsFromFile = Internal.viewsInFile[file]
+      viewsFromFile.forEach(Internal.removeView)
+
+      delete Internal.viewCache[file]
+      delete Internal.viewsInFile[file]
     },
 
     view(name, body) {

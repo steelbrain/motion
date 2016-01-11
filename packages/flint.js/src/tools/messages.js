@@ -36,6 +36,7 @@ export default function run(browser, opts) {
     'internals:reload': reloadScript('__flintInternals', { reloadAll: true }),
 
     'file:delete': ({ name }) => {
+      if (!Flint) return // if attempting before initial load
       let views = Flint.getFile(name)
       views.map(removeSheet)
       removeScript(name)
@@ -116,18 +117,15 @@ function addScript(src) {
   let start = Date.now()
   socket.send('script:load', { path })
   scrLoad(src, (lastTag, done) => {
-    lastTag = lastTag || document.querySelector(scriptSelector(src))
+    let script = lastTag
+      || document.querySelector(scriptSelector(src))
+      || createScript(src)
 
-    if (!lastTag)
-      replaceTag(createScript(src), 'src', finish)
-    else
-      replaceTag(lastTag, 'src', finish)
-
-    function finish() {
+    replaceTag(script, 'src', function finish() {
       // console.log('script load took', Date.now() - start)
       socket.send('script:done', { path })
       done()
-    }
+    })
   })
 }
 
@@ -318,6 +316,8 @@ function removeSheet(name) {
 
 function removeScript(name) {
   let tag = findScript(name.replace('.js', ''))
-  if (tag && tag.parentNode)
+  if (tag && tag.parentNode) {
     tag.parentNode.removeChild(tag)
+    Flint.removeFile(name)
+  }
 }

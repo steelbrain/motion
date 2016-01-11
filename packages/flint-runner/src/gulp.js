@@ -172,6 +172,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    // BUGFIX gulp sends deleted files through here, this filters them
+    if (!file.contents)
+      return true
+
     // already done with first build
     if (opts.get('hasRunInitialBuild'))
       return false
@@ -330,7 +334,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function markFileSuccess(file) {
     if (file.isSourceMap) return
 
-    log(LOG, 'markLastFileSuccess', file.path)
+    log(LOG, 'markFileSuccess', file.path)
 
     // update cache error / state
     cache.update(file.path)
