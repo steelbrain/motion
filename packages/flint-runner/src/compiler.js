@@ -44,6 +44,8 @@ var Parser = {
       debounce('removeOldImports', 3000, bundler.uninstall)
 
     // check internals
+    // TODO: for json files eventually || path.extname(file) == 'json'
+
     const isInternal = hasExports(source)
     log(LOG, 'ISINTERNAL'.yellow, isInternal)
 
