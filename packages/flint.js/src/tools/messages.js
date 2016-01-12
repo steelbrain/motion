@@ -51,9 +51,8 @@ export default function run(browser, opts) {
 
     // coming from editor to browser
 
-    fromEditor: ({ key, val }) => {
-      browser.editor = browser.editor || {}
-      browser.editor[key] = val
+    'editor:state': state => {
+      browser.editor = state
       browser.emitter.emit('editor:state')
     }
   })

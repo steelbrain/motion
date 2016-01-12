@@ -13,7 +13,7 @@ let connections = []
 let queue = []
 
 // cache to send on reconnects
-// type : ' => key : ' => messages : []
+// type : str => key : str => messages : arr
 let messageCache = {}
 
 function broadcast(data) {
@@ -95,7 +95,8 @@ export function on(event, cb) {
 
 // passes messages from/to browser/editor
 on('editor', msg => message('editor', msg))
-on('fromEditor', msg => message('fromEditor', msg))
+on('editor:state', msg => message('editor:state', msg, 'editor:state'))
+on('browser', msg => message('browser', msg))
 
 function runListeners(data) {
   log(LOG, '-[in]-', data)
