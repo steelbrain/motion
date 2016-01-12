@@ -22,11 +22,16 @@ release_package() {
     echo "building webpack"
   fi
 
+  # prune and shrinkwrap before to detect errors before patching version
+  npm prune
+  npm shrinkwrap --loglevel=error
+
   if [ "$doPatch" = true ]; then
     npm version patch
+    # catch up to patch
+    npm shrinkwrap --loglevel=error
   fi
 
-  npm shrinkwrap --loglevel=error
   npm publish --tag=latest
   cd ../..
 }
@@ -35,11 +40,16 @@ release_tools() {
   echo "Tools"
   cd apps/tools/.flint
 
+  # prune and shrinkwrap before to detect errors before patching version
+  npm prune
+  npm shrinkwrap --loglevel=error
+
   if [ "$doPatch" = true ]; then
     npm version patch
+    # catch up to patch
+    npm shrinkwrap --loglevel=error
   fi
 
-  npm shrinkwrap --loglevel=error
 	npm publish --tag=latest
   cd ../../..
 }
