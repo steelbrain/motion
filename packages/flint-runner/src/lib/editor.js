@@ -8,7 +8,7 @@ module.exports = function (file, opts, cb) {
     if (!opts) opts = {};
 
     var ed = /^win/.test(process.platform) ? 'notepad' : 'vim';
-    var editor = opts.editor || process.env.VISUAL || process.env.EDITOR || ed;
+    var editor = opts.editor || process.env.EDITOR || process.env.VISUAL || ed;
     var args = editor.split(/\s+/);
     var bin = args.shift();
 
