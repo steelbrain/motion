@@ -1,6 +1,8 @@
 const browser = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 
+const isLive = () => browser.editor && browser.editor.live
+
 function showFlintErrorDiv() {
   setTimeout(() => {
     const errors = document.querySelectorAll('.__flintError')
@@ -211,7 +213,7 @@ view ErrorMessage {
 
   <Debounce
     // delay more during live typing
-    delay={browser.editor.live ? 2000 : 1000}
+    delay={isLive() ? 2000 : 1000}
     force={hasError === false}
     showKey={fullStack || error && error.message}
     onUpdate={showFlintErrorDiv}
