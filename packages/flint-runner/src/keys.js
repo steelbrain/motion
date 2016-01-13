@@ -16,6 +16,8 @@ const surge = Surge({ platform: 'flint.love' })
 
 const proc = process // cache for keypress
 
+let stopped = false
+
 export function init() {
   start()
   banner()
@@ -50,6 +52,8 @@ function start() {
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
+    if (stopped) return
+
     log('keypress', key.name)
 
     try {
@@ -89,7 +93,7 @@ function start() {
               console.log('🚀🚀🚀🚀')
               resume()
             }
-          })
+          })({})
           break
         case 'd':
           console.log("---------opts---------")
@@ -117,11 +121,13 @@ export function resume() {
   // listen for keys
   proc.stdin.setRawMode(true)
   proc.stdin.resume()
+  stopped = false
 }
 
 export function stop() {
   proc.stdin.setRawMode(false)
   proc.stdin.pause()
+  stopped = true
 }
 
 export default {

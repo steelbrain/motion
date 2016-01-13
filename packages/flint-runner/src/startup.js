@@ -47,7 +47,6 @@ let gulpStarted = false
 async function runGulp(opts) {
   await gulp.init(opts)
   await gulp.afterBuild()
-  console.log('after build')
 }
 
 //
