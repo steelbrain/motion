@@ -14,7 +14,8 @@ import cache from './cache'
 const proc = process // cache for keypress
 
 import Surge from 'surge'
-const surge = Surge({ platform: 'flint.love', stdin: proc.stdin })
+const out = proc.stdout
+const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: out })
 
 let stopped = false
 
@@ -88,12 +89,14 @@ function start() {
           await build({ once: true })
           console.log(`\n  Publishing to surge...`)
           stop()
+          out.isTTY = false
           surge.publish({
             postPublish() {
               console.log('🚀🚀🚀🚀')
               resume()
             }
           })({})
+          out.isTTY = true
           break
         case 'd':
           console.log("---------opts---------")
