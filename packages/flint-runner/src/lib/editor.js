@@ -1,25 +1,15 @@
-var spawn = require('child_process').spawn;
+import { execSync } from 'child_process'
 
-module.exports = function (file, opts, cb) {
-    if (typeof opts === 'function') {
-        cb = opts;
-        opts = {};
-    }
-    if (!opts) opts = {};
-
-    var ed = /^win/.test(process.platform) ? 'notepad' : 'vim';
-    var editor = opts.editor || process.env.EDITOR || process.env.VISUAL || ed;
-    var args = editor.split(/\s+/);
-    var bin = args.shift();
-
-    try {
-      var ps = spawn(bin, args.concat([ file ]), { stdio: 'inherit' });
-    }
-    catch(e) {
-      console.log("Error running editor command", e)
-    }
-
-    ps.on('exit', function (code, sig) {
-        if (typeof cb === 'function') cb(code, sig)
-    });
-};
+export default function editor(file, cb) {
+  try {
+    let result = execSync(`atom ${file}`, { stdio: 'inherit' })
+    cb && cb(result)
+  }
+  catch(e) {
+    console.log(
+      `Error running atom, install at https://atom.io`,
+      `\n  be sure to run "Atom > Install Shell Commands"`,
+      e
+    )
+  }
+}
