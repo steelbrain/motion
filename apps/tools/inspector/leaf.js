@@ -142,7 +142,7 @@ view Leaf {
     position: 'relative',
     color: 'rgba(0,0,0,0.8)',
     opacity: 1,
-    alignItems: 'center'
+    alignItems: 'baseline'
   }]
 
   $helper = { color: '#ffff05' }
@@ -174,7 +174,7 @@ view Leaf {
 
   $value = [row, {
     position: 'relative',
-    margin: [0, 4]
+    margin: [0, 4, 0]
   }]
 
   $children = {
