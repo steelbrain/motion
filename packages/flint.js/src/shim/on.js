@@ -47,11 +47,12 @@ function addListener({ root, scope, name, number, cb, uid }) {
 
   const target = (scope || root)
   // detail key is used by CustomEvent to pass data
-  const listener = target.addEventListener(name, (...args) => {
-    if (typeof args[0] == 'object' && args[0].detail)
-      cb(args[0].detail)
+  const listener = target.addEventListener(name, (e) => {
+    // custom events pass data
+    if (typeof e == 'object' && typeof e.detail == 'object')
+      cb(e.detail)
     else
-      cb(...args)
+      cb(e)
   })
   const removeListener = target.removeEventListener.bind(null, name, cb)
 

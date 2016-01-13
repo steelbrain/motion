@@ -191,6 +191,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
           catch(e) {
             Internal.caughtRuntimeErrors++
+            console.log('reporting error from getInitialState')
             reportError(e)
             console.error(e.stack || e)
             this.recoveryRender = true
@@ -465,6 +466,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       // TODO once this works better in 0.15
       // unstable_handleError(e) {
+      //   console.log('ERR', e)
       //   reportError(e)
       // },
 
@@ -490,15 +492,17 @@ export default function createComponent(Flint, Internal, name, view, options = {
           Internal.caughtRuntimeErrors++
 
           const err = cloneError(e)
+          const errorDelay = Internal.isLive() ? 1000 : 200
 
           // console warn, with debounce
           viewErrorDebouncers[self.props.__flint.path] = setTimeout(() => {
             console.groupCollapsed(`Render error in view ${name} (${err.message})`)
             console.error(err.stack || err)
             console.groupEnd()
-          }, 500)
 
-          reportError(e)
+            // if not in debouncer it shows even after fixing
+            reportError(e)
+          }, errorDelay)
 
           const lastRender = self.getLastGoodRender()
 

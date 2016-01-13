@@ -105,6 +105,10 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       delete Internal.lastWorkingViews[key]
     },
 
+    isLive() {
+      return Internal.editor && Internal.editor.live
+    },
+
     // devtools
     inspector: {},
     viewsAtPath: {},
