@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",
@@ -3732,7 +3732,7 @@
       }
     },
     "flint-tools": {
-      "version": "1.4.3",
+      "version": "1.4.4",
       "dependencies": {
         "clone": {
           "version": "1.0.2",
