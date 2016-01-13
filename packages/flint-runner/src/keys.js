@@ -11,10 +11,10 @@ import bundler from './bundler'
 import { build } from './startup'
 import cache from './cache'
 
-import Surge from 'surge'
-const surge = Surge({ platform: 'flint.love' })
-
 const proc = process // cache for keypress
+
+import Surge from 'surge'
+const surge = Surge({ platform: 'flint.love', stdin: proc.stdin })
 
 let stopped = false
 
