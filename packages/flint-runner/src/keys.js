@@ -8,7 +8,11 @@ import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
 import bundler from './bundler'
+import { build } from './startup'
 import cache from './cache'
+
+import Surge from 'surge'
+const surge = Surge({ platform: 'flint.love' })
 
 const proc = process // cache for keypress
 
@@ -20,12 +24,11 @@ export function init() {
 export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
-
   const prefix = '  •'
 
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
-      `${prefix} `+'V'.bold + 'erbose log' + newLine +
+      `${prefix} `+'U'.bold + 'pload     ' + newLine +
     (userEditor
       ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
       : '         ') +
@@ -78,7 +81,15 @@ function start() {
           console.log(opts.get('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
-          // build(true)
+          await build({ once: true })
+          console.log(`\n  Publishing to surge...`)
+          stop()
+          surge.publish({
+            postPublish() {
+              console.log('🚀🚀🚀🚀')
+              resume()
+            }
+          })
           break
         case 'd':
           console.log("---------opts---------")
@@ -97,19 +108,19 @@ function start() {
     if (key.ctrl && key.name == 'c') {
       runner.stop()
     }
-  });
+  })
 
   resume()
 }
 
 export function resume() {
   // listen for keys
-  proc.stdin.setRawMode(true);
-  proc.stdin.resume();
+  proc.stdin.setRawMode(true)
+  proc.stdin.resume()
 }
 
 export function stop() {
-  proc.stdin.setRawMode(false);
+  proc.stdin.setRawMode(false)
   proc.stdin.pause()
 }
 
