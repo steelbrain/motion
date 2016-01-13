@@ -33,9 +33,8 @@ function logProgress(tag, name, index, total) {
   if (opts.get('build'))
     console.log(out)
   else {
-    console.log()
     let spinner = new Spinner(out)
-    spinner.start({ fps: 30 })
+    spinner.start({ fps: 15 })
     return spinner
   }
 }

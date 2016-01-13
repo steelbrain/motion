@@ -1,5 +1,16 @@
-const tools = window._DT
+const browser = window._DT
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
+
+function showFlintErrorDiv() {
+  setTimeout(() => {
+    const errors = document.querySelectorAll('.__flintError')
+    if (!errors.length) return
+    // add active class to show them
+    ;[].forEach.call(errors, error => {
+      error.className += ' active'
+    })
+  })
+}
 
 function niceRuntimeError(err) {
   if (err.file)
@@ -124,29 +135,29 @@ view Errors {
     view.update()
   }
 
-  tools.on('compile:error', () => {
-    compileError = tools.data.error
+  browser.on('compile:error', () => {
+    compileError = browser.data.error
     setError()
   })
 
-  tools.on('runtime:error', () => {
+  browser.on('runtime:error', () => {
     // if (runtimeError) return // prefer first error
-    runtimeError = tools.data
+    runtimeError = browser.data
     setError()
   })
 
-  tools.on('npm:error', () => {
-    npmError = niceNpmError(tools.data.error)
+  browser.on('npm:error', () => {
+    npmError = niceNpmError(browser.data.error)
     view.update()
   })
 
-  tools.on('runtime:success', () => {
+  browser.on('runtime:success', () => {
     runtimeError = null
     npmError = null
     setError()
   })
 
-  tools.on('compile:success', () => {
+  browser.on('compile:success', () => {
     compileError = null
     npmError = null
     setError()
@@ -195,19 +206,12 @@ view ErrorMessage {
     }
   })
 
-  function showFlintErrorDiv() {
-    setTimeout(() => {
-      const errors = document.querySelectorAll('.__flintError')
-      if (!errors.length) return
-      // add active class to show them
-      ;[].forEach.call(errors, error => {
-        error.className += ' active'
-      })
-    })
-  }
+  // update on editor state
+  browser.emitter.on('editor:state', () => setTimeout(view.update))
 
   <Debounce
-    delay={1000}
+    // delay more during live typing
+    delay={browser.editor.live ? 2000 : 1000}
     force={hasError === false}
     showKey={fullStack || error && error.message}
     onUpdate={showFlintErrorDiv}

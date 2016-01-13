@@ -59,8 +59,9 @@ export async function run(_opts = {}, isBuild) {
       post = async () => {
         // write out cache
         cache.serialize()
+        console.log() // space before install
         await bundler.all()
-        console.log(`\nReady ⇢ ${server.url()}\n`.bold.green)
+        console.log(`    Ready! ⇢  ` + `${server.url()}\n`.bold.green)
         keys.init()
       }
     }

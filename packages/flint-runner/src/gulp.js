@@ -166,8 +166,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     log(LOG, 'markDone', loaded, total, file.path)
 
     // check if done
-    if (loaded == total)
-      setTimeout(buildDone, 20)
+    if (loaded == total) {
+      // add some delay to allow building last file TODO improve
+      setTimeout(buildDone, 100)
+    }
   }
 
   // only do on first run

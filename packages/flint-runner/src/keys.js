@@ -21,15 +21,15 @@ export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
 
-  const prefix = '•'
+  const prefix = '  •'
 
   console.log(
-    `${prefix} `+'O'.cyan.bold + 'pen     '.cyan +
+    `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
       `${prefix} `+'V'.bold + 'erbose log' + newLine +
     (userEditor
-      ? (`${prefix} `+'E'.cyan.bold + 'ditor   '.cyan)
-      : '           ') +
-        `${prefix} `+'R'.bold+'efresh packages' + newLine
+      ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
+      : '         ') +
+        `${prefix} `+'R'.bold+'ebundle packages' + newLine
     // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
   )
 

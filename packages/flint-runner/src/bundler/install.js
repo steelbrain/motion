@@ -172,7 +172,6 @@ function finishedInstalls() {
 
 function logInstalled(deps) {
   if (!deps.length) return
-  console.log()
   console.log(`  Installed ${deps.length} packages`.bold)
   deps.forEach(dep => console.log(`  ✓ ${dep}`.green))
   console.log()
