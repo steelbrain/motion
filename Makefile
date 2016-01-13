@@ -36,7 +36,7 @@ ready:
 # TODO adding nice version numbers to this commit messages
 
 push:
-	git commit -am 'versions' --quiet
+	git commit -am 'publish' --quiet
 	git push origin head --quiet
 
 # all the things! (in the right order)
