@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",
@@ -1579,7 +1579,7 @@
       }
     },
     "flint-js": {
-      "version": "1.4.7",
+      "version": "1.4.8",
       "dependencies": {
         "acorn": {
           "version": "1.2.2",
@@ -2100,7 +2100,7 @@
           "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-2.2.3.tgz"
         },
         "flint-nice-styles": {
-          "version": "1.4.2"
+          "version": "1.4.3"
         },
         "for-in": {
           "version": "0.1.4",
@@ -3732,7 +3732,7 @@
       }
     },
     "flint-tools": {
-      "version": "1.4.4",
+      "version": "1.4.5",
       "dependencies": {
         "clone": {
           "version": "1.0.2",
@@ -3767,7 +3767,7 @@
       }
     },
     "flint-transform": {
-      "version": "1.4.2",
+      "version": "1.4.3",
       "dependencies": {
         "amdefine": {
           "version": "1.0.0",
@@ -3805,7 +3805,7 @@
           "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.6.0.tgz"
         },
         "flint-nice-styles": {
-          "version": "1.4.2"
+          "version": "1.4.3"
         },
         "flint-stilr": {
           "version": "1.2.3",

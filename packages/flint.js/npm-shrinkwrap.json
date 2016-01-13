@@ -1,6 +1,6 @@
 {
   "name": "flint-js",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "dependencies": {
     "acorn": {
       "version": "1.2.2",
@@ -521,7 +521,7 @@
       "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-2.2.3.tgz"
     },
     "flint-nice-styles": {
-      "version": "1.4.2"
+      "version": "1.4.3"
     },
     "for-in": {
       "version": "0.1.4",
