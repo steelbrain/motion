@@ -45,10 +45,15 @@ toRelease = toRelease.concat('cli')
 console.log("\n", 'Releasing (in order):', toRelease.join(", "), '...', "\n")
 
 toRelease.forEach(project => {
-  exec('./release.sh ' + project + ' --patch')
+  var result = exec('./release.sh ' + project + ' --patch')
+
+  if (result.code != 0) {
+    console.log("Error releasing", project)
+    process.exit()
+  }
 })
 
-ex("git commit -am 'publish' --quiet")
-ex("git push origin head --quiet")
+// ex("git commit -am 'publish' --quiet")
+// ex("git push origin head --quiet")
 
 console.log('All released!')
