@@ -39,6 +39,7 @@ if (!all.length) {
 }
 
 function checkAlright(path) {
+  console.log('checking if shrinkwrappable: ' + path)
   var cwd = pwd()
   cd(path)
   ex('npm prune')
