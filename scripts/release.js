@@ -38,9 +38,17 @@ if (!all.length) {
   process.exit()
 }
 
+function checkAlright(path) {
+  var cwd = pwd()
+  cd(path)
+  ex('npm prune')
+  ex('npm shrinkwrap')
+  cd(cwd)
+}
+
 // ensure they are all shrinkwrappable before trying to release
-packages.forEach(pkg => cd('packages/' + pkg) && ex('npm shrinkwrap'))
-apps.forEach(pkg => cd('apps/' + pkg + '/.flint') && ex('npm shrinkwrap'))
+packages.forEach(pkg => checkAlright('packages/' + pkg))
+apps.forEach(pkg => checkAlright('apps/' + pkg + '/.flint'))
 
 var releaseOrder = [
   'nice-styles',

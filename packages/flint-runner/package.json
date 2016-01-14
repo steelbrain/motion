@@ -53,7 +53,7 @@
     "raven": "0.9.0",
     "readdirp": "2.0.0",
     "reapp-object-assign": "1.0.0",
-    "regenerator-runtime-only": "0.8.0",
+    "regenerator-runtime-only": "0.8.38",
     "replace-ext": "0.0.1",
     "resolve-url-loader": "1.4.3",
     "sass-loader": "3.1.2",
