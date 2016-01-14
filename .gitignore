@@ -10,3 +10,4 @@ build/
 deps/
 out/
 .tmp
+npm-shrinkwrap.json
