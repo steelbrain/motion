@@ -39,6 +39,9 @@ push:
 	git commit -am 'publish' --quiet
 	git push origin head --quiet
 
+new: ready
+	scripts/release.js
+
 # all the things! (in the right order)
 all: ready
 	scripts/release.sh nice-styles --patch
