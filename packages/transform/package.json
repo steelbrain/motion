@@ -1,10 +1,10 @@
 {
   "name": "flint-transform",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "main": "lib/index.js",
   "dependencies": {
     "flint-nice-styles": "^1.4.0",
     "flint-stilr": "^1.2.1",
-    "hash-sum": "^1.0.2"
+    "hash-sum": "1.0.2"
   }
 }

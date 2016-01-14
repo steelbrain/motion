@@ -7,11 +7,11 @@
   "main": "index.js",
   "scripts": {},
   "dependencies": {
-    "clone": "https://registry.npmjs.org/clone/-/clone-1.0.2.tgz",
-    "ellipsize": "https://registry.npmjs.org/ellipsize/-/ellipsize-0.0.2.tgz",
-    "keycode": "https://registry.npmjs.org/keycode/-/keycode-2.1.0.tgz",
-    "md5-o-matic": "https://registry.npmjs.org/md5-o-matic/-/md5-o-matic-0.1.1.tgz",
-    "mouse-event-offset": "https://registry.npmjs.org/mouse-event-offset/-/mouse-event-offset-3.0.2.tgz",
-    "underscore": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
+    "clone": "1.0.2",
+    "ellipsize": "0.0.2",
+    "keycode": "2.1.0",
+    "md5-o-matic": "0.1.1",
+    "mouse-event-offset": "3.0.2",
+    "underscore": "1.8.3"
   }
 }
