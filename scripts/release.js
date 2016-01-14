@@ -56,11 +56,6 @@ toRelease.forEach(project => {
   console.log("Releasing...", cmd)
 
   var result = ex(cmd)
-
-  if (result.code != 0) {
-    console.log("Error releasing", project)
-    process.exit()
-  }
 })
 
 console.log('Pushing...')
