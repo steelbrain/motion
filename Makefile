@@ -34,4 +34,4 @@ ready:
 	git pull --rebase
 
 patch: ready
-	scripts/release.js --patch
+	node scripts/release.js --patch
