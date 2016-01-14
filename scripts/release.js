@@ -3,7 +3,7 @@ var _ = require('lodash')
 require("shelljs/global")
 
 var ex = function(cmd) {
-  let result = exec(cmd, { silent: true })
+  var result = exec(cmd, { silent: true })
   if (result.code != 0) {
     console.log('error', result.output)
     process.exit()
