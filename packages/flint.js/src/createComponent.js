@@ -169,6 +169,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.styles = { _static: {} }
         this.events = { mount: u, unmount: u, change: u, props: u }
         this.path = null
+        this.instance = this
 
         // scope on() to view
         this.on = viewOn(this)
@@ -296,6 +297,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       // FLINT HELPERS
+      // view.element('foo') -> <foo>
+      element(selector) {
+        return ReactDOM.findDOMNode(this).querySelector(selector)
+      },
+      elements(selector) {
+        const els = ReactDOM.findDOMNode(this).querySelectorAll(selector)
+        return Array.prototype.slice.call(els, 0)
+      },
 
       // property declarators
       getProp(name) {
