@@ -162,6 +162,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         let u = null
 
         this.state = {}
+        this.propDefaults = {}
         this.queuedUpdate = false
         this.firstRender = true
         this.isUpdating = true
@@ -213,10 +214,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       componentWillReceiveProps(nextProps) {
         // set timeout becuase otherwise props is mutated before shouldUpdate is run
-        setTimeout(() => {
+        // setTimeout(() => {
           this.props = nextProps
           this.runEvents('props', [this.props])
-        })
+        // })
       },
 
       componentWillMount() {
@@ -297,8 +298,15 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // FLINT HELPERS
 
       // property declarators
+      getProp(name) {
+        return typeof this.props[name] === 'undefined' ?
+               this.propDefaults[name] :
+               this.props[name]
+      },
+
       prop(name, defaultValue) {
-        return this.props[name] || defaultValue
+        this.propDefaults[name] = defaultValue
+        return this.getProp(name)
       },
 
       clone(el, props) {
