@@ -19,7 +19,8 @@ if (!newCommits.length) {
   process.exit()
 }
 
-console.log(newCommits.length, 'new commits')
+console.log('New commits:', newCommits.length)
+console.log('Last published:', lastPublish)
 
 var changedFiles = ex('git diff --name-only '+lastPublish+'..HEAD').split("\n")
 
@@ -60,7 +61,7 @@ toRelease.forEach(project => {
   var result = ex(cmd)
 })
 
-console.log('Pushing...')
+console.log("\n", 'Pushing...')
 ex("git commit -am 'publish' --quiet")
 ex("git push origin head --quiet")
 
