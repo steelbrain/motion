@@ -25,7 +25,7 @@ console.log('Last published:', lastPublish)
 var changedFiles = ex('git diff --name-only '+lastPublish+'..HEAD').split("\n")
 
 function filterByName(paths, parent) {
-  return _.uniq(paths.filter(x => x.indexOf(parent) == 0)).map(x => x.split('/')[1])
+  return _.uniq(paths.filter(x => x.indexOf(parent) == 0).map(x => x.split('/')[1]))
 }
 
 var packages = filterByName(changedFiles, 'packages')
@@ -38,6 +38,7 @@ if (!all.length) {
   process.exit()
 }
 
+// ensure prune/shrinkwrap
 function checkAlright(path) {
   console.log('checking if shrinkwrappable: ' + path)
   var cwd = pwd()
@@ -61,7 +62,7 @@ var releaseOrder = [
 ]
 
 // right order for release
-var toRelease =  _.sortBy(changedProjects.map(x => ({ project: x, index: releaseOrder.indexOf(x) })), 'index')
+var toRelease =  _.sortBy(all.map(x => ({ project: x, index: releaseOrder.indexOf(x) })), 'index')
   .map(x => x.project)
   .filter(x => x !== 'cli')
 
