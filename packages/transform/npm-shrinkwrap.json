@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "dependencies": {
     "amdefine": {
       "version": "1.0.0",

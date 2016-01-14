@@ -2,7 +2,14 @@ var _ = require('lodash')
 
 require("shelljs/global")
 
-var ex = function(cmd) { return exec(cmd, { silent: true }).output }
+var ex = function(cmd) {
+  let result = exec(cmd, { silent: true })
+  if (result.code != 0) {
+    console.log('error', result.output)
+    process.exit()
+  }
+  return result.output
+}
 
 var lastPublish = ex('git log --all --grep="publish" --max-count=1 --format=format:%H')
 var newCommits = ex('git log '+ lastPublish +'..HEAD --format=format:%H').split("\n")
@@ -45,7 +52,10 @@ toRelease = toRelease.concat('cli')
 console.log("\n", 'Releasing (in order):', toRelease.join(", "), '...', "\n")
 
 toRelease.forEach(project => {
-  var result = exec('./release.sh ' + project + ' --patch')
+  var cmd = './scripts/release.sh ' + project + ' --patch'
+  console.log("Releasing...", cmd)
+
+  var result = ex(cmd)
 
   if (result.code != 0) {
     console.log("Error releasing", project)
@@ -53,7 +63,8 @@ toRelease.forEach(project => {
   }
 })
 
-// ex("git commit -am 'publish' --quiet")
-// ex("git push origin head --quiet")
+console.log('Pushing...')
+ex("git commit -am 'publish' --quiet")
+ex("git push origin head --quiet")
 
-console.log('All released!')
+console.log("\n", 'All done!', "\n")
