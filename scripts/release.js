@@ -24,17 +24,23 @@ console.log('Last published:', lastPublish)
 
 var changedFiles = ex('git diff --name-only '+lastPublish+'..HEAD').split("\n")
 
-var changedProjects =
-  _.uniq(
-    changedFiles
-      .filter(x => x.indexOf('packages') == 0 || x.indexOf('apps') == 0)
-      .map(x => x.split('/')[1])
-  )
+function filterByName(paths, parent) {
+  return _.uniq(paths.filter(x => x.indexOf(parent) == 0)).map(x => x.split('/')[1])
+}
 
-if (!changedProjects.length) {
-  console.log('No projects updated since last publish')
+var packages = filterByName(changedFiles, 'packages')
+var apps = filterByName(changedFiles, 'apps')
+var all = [].concat(apps, packages)
+
+// something to update
+if (!all.length) {
+  console.log('Nothing updated since last publish!')
   process.exit()
 }
+
+// ensure they are all shrinkwrappable before trying to release
+packages.forEach(pkg => cd('packages/' + pkg) && ex('npm shrinkwrap'))
+apps.forEach(pkg => cd('apps/' + pkg + '/.flint') && ex('npm shrinkwrap'))
 
 var releaseOrder = [
   'nice-styles',
