@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "dependencies": {
     "amdefine": {
       "version": "1.0.0",
@@ -42,7 +42,7 @@
     },
     "flint-stilr": {
       "version": "1.2.3",
-      "from": "flint-stilr@>=1.2.1 <2.0.0",
+      "from": "flint-stilr@1.2.3",
       "dependencies": {
         "babel-runtime": {
           "version": "5.8.34",
