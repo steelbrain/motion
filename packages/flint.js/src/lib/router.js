@@ -55,7 +55,7 @@ const router = {
     location = path
 
     if (!dontPush)
-      history.pushState(null, path)
+      history.push(path)
 
     router.next()
     router.recognize()
