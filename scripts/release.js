@@ -19,6 +19,8 @@ if (!newCommits.length) {
   process.exit()
 }
 
+console.log(newCommits.length, 'new commits')
+
 var changedFiles = ex('git diff --name-only '+lastPublish+'..HEAD').split("\n")
 
 var changedProjects =
