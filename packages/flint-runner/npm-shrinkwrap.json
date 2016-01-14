@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.15",
+  "version": "1.4.16",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",
@@ -1631,7 +1631,7 @@
       }
     },
     "flint-js": {
-      "version": "1.4.13",
+      "version": "1.4.14",
       "dependencies": {
         "acorn": {
           "version": "1.2.2",
@@ -4605,7 +4605,7 @@
       }
     },
     "flint-tools": {
-      "version": "1.4.8",
+      "version": "1.4.9",
       "dependencies": {
         "clone": {
           "version": "1.0.2",
@@ -4640,7 +4640,7 @@
       }
     },
     "flint-transform": {
-      "version": "1.4.10",
+      "version": "1.4.11",
       "dependencies": {
         "amdefine": {
           "version": "1.0.0",
