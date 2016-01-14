@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.2",
+  "version": "1.4.6",
   "dependencies": {
     "amdefine": {
       "version": "1.0.0",
@@ -38,7 +38,7 @@
       "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.6.0.tgz"
     },
     "flint-nice-styles": {
-      "version": "1.4.2"
+      "version": "1.4.3"
     },
     "flint-stilr": {
       "version": "1.2.3",

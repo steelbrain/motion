@@ -136,7 +136,7 @@ export default function createPlugin(options) {
           t.functionExpression(null, [], t.blockStatement(
             node.declarations.map(({ id: { name } }) =>
               t.assignmentExpression('=', t.identifier(name),
-                t.identifier(`view.props.${name} || ${name}`)
+                t.identifier(`view.getProp('${name}')`)
               )
             )
           ))

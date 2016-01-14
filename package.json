@@ -14,5 +14,7 @@
     "shelljs": "^0.5.1",
     "webpack": "^1.12.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^4.0.0"
+  }
 }

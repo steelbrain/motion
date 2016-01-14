@@ -23,6 +23,7 @@ body.__flintfocus {
   opacity: 0;
   background: rgba(255,0,0,0.03);
   transition: all ease-in 1000ms;
+  transition-delay: 1000ms;
 }
 
 .__flintError.active {

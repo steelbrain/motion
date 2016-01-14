@@ -27,15 +27,15 @@ export function init() {
 export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
-  const prefix = '  •'
+  const prefix = '  ›'
 
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
-      `${prefix} `+'U'.bold + 'pload     ' + newLine +
+      `${prefix} `.dim+'U'.bold.dim + 'pload'.dim + newLine +
     (userEditor
       ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
       : '         ') +
-        `${prefix} `+'R'.bold+'ebundle packages' + newLine
+        `${prefix} `.dim+'R'.bold.dim+'ebundle'.dim + newLine
     // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
   )
 
@@ -76,7 +76,7 @@ function start() {
 
           break
         case 'r': // bundler
-          console.log('Checking packages to install...')
+          console.log('Re-bundling internals and npm packages...')
           await bundler.install(true)
           console.log(`Done!\n`)
           break

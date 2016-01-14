@@ -44,12 +44,13 @@ const router = {
   go(path, dontPush) {
     if (!render) return
 
+    // query changes
+    if (path[0] === '?')
+      path = location + path
+
     // ensure prefixed with /
     if (path[0] !== '/')
       path = '/' + path
-
-    if (path == location)
-      return // already at this route
 
     location = path
 
