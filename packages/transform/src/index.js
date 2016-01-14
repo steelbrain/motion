@@ -894,10 +894,14 @@ export default function createPlugin(options) {
                 name = findObjectName(node.left.object)
                 post = t.identifier(name)
               }
-              else if (t.isJSXExpressionContainer(node.left))
-                name = node.left.expression.name
-              else
+              else if (t.isJSXExpressionContainer(node.left)) {
+                const { expression } = node.left
+                name = expression.object ?
+                       findObjectName(expression.object) :
+                       expression.name
+              } else {
                 name = node.left.name
+              }
 
               if (isViewState(name, scope)) {
                 sett = node => wrapSetter(name, node, scope, post)
