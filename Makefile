@@ -23,3 +23,18 @@ patch: ready
 
 patch-tools:
 	node scripts/release.js --patch tools
+
+patch-cli:
+	node scripts/release.js --patch cli
+
+patch-runner:
+	node scripts/release.js --patch runner
+
+patch-flint.js:
+	node scripts/release.js --patch cli
+
+patch-transform:
+	node scripts/release.js --patch runner
+
+patch-nice-styles:
+	node scripts/release.js --patch runner
