@@ -1,5 +1,4 @@
-var execSync = require('child_process').execSync
+require('shelljs/global')
 
-var result = execSync('webpack --config webpack.config.release.js')
-
-console.log(result.toString())
+cd(__dirname)
+console.log(exec('webpack --config webpack.config.release.js').output)

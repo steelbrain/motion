@@ -3,7 +3,7 @@ import ee from 'event-emitter'
 import React from 'react'
 import raf from 'raf'
 import ReactDOM from 'react-dom'
-import { StyleRoot } from 'radium'
+import { StyleRoot, keyframes } from 'radium'
 import clone from 'clone'
 import regeneratorRuntime from './vendor/regenerator'
 import Bluebird, { Promise } from 'bluebird'
@@ -167,6 +167,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     noop: function(){},
 
     // external API
+    keyframes,
     router,
     decorateViews: decorator => Internal.viewDecorator = decorator,
     preloaders: [], // async functions needed before loading app
