@@ -3,6 +3,7 @@ import ee from 'event-emitter'
 import React from 'react'
 import raf from 'raf'
 import ReactDOM from 'react-dom'
+import { StyleRoot } from 'radium'
 import clone from 'clone'
 import regeneratorRuntime from './vendor/regenerator'
 import Bluebird, { Promise } from 'bluebird'
@@ -209,7 +210,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
           if (window.__isDevingDevTools)
             browserNode = '_flintdevtools'
 
-          ReactDOM.render(<Main />, document.getElementById(browserNode))
+          ReactDOM.render(
+            <StyleRoot>
+              <Main />
+            </StyleRoot>,
+            document.getElementById(browserNode)
+          )
         }
 
         Internal.lastWorkingViews.Main = Main
