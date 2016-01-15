@@ -18,8 +18,10 @@ view Debounce {
 
   on.props(() => {
     // override
-    if (view.props.force)
+    if (view.props.force) {
+      showKey = Math.random()
       return show()
+    }
 
     if (view.props.showKey && view.props.showKey == showKey)
       return

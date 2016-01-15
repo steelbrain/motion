@@ -230,7 +230,7 @@ view ErrorMessage {
     showKey={fullStack || error && error.message}
     onUpdate={showFlintErrorDiv}
   >
-    <bar class={{ hasError }}>
+    <bar>
       <Close onClick={view.props.close} size={35} />
 
       <inner if={npmError}>
@@ -276,7 +276,7 @@ view ErrorMessage {
     background: red,
     position: 'fixed',
     left: 0,
-    bottom: -100,
+    bottom: hasError ? 0 : -100,
     transition: 'all 200ms ease-in',
     right: 0,
     fontFamily: '-apple-system, "San Francisco", Roboto, "Segou UI", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -288,10 +288,6 @@ view ErrorMessage {
     overflow: 'scroll',
     zIndex: 2147483647,
     boxShadow: '0 -6px 12px rgba(0,0,0,0.06)',
-  }
-
-  $hasError = {
-    bottom: 0
   }
 
   $inner = {
