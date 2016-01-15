@@ -146,6 +146,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($p.babel())
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
+    // is internal
     .pipe($.if(file => file.isInternal,
       multipipe(
         pipefn(removeNewlyInternal),
@@ -155,12 +156,14 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       )
     ))
     .pipe($.if(!OPTS.build, $.sourcemaps.write('.')))
-    .pipe($.if(isSourceMap, $.ignore.exclude(true)))
-    .pipe(pipefn(out.goodFile))
-    .pipe($.if(OPTS.build,
-      $.concat(`${OPTS.saneName}.js`)
+    // not sourcemap
+    .pipe($.if(file => !isSourceMap(file),
+      multipipe(
+        pipefn(out.goodFile),
+        $.if(OPTS.build, $.concat(`${OPTS.saneName}.js`)),
+        pipefn(markFileSuccess)
+      )
     ))
-    .pipe(pipefn(markFileSuccess))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -296,7 +299,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function isSourceMap(file) {
-    return file.path.slice(file.path.length - 3, file.path.length) === 'map'
+    return path.extname(file.path) === '.map'
   }
 
   function checkWriteable(file) {
