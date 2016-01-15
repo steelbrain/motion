@@ -11,9 +11,9 @@ watch: clean
 	scripts/build.sh --watch
 
 bootstrap:
-	npm install
+	# npm install
 	node scripts/bootstrap.js
-	scripts/build.sh
+	# scripts/build.sh
 
 ready:
 	git pull --rebase

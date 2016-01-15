@@ -60,7 +60,8 @@ view Installer {
   <FlintModal
     open={state > 0}
     onClose={closeModal}
-    title={title(state)}>
+    title={title(state)}
+    titleColor={state == 3 ? "#8c1919" : "#0f8c3c"}>
     <InstallerLoading if={false && state < 2} />
     {body(state)}
   </FlintModal>

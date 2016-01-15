@@ -9,9 +9,10 @@ function showFlintErrorDiv() {
     if (!errors.length) return
     // add active class to show them
     ;[].forEach.call(errors, error => {
-      error.className += ' active'
+      if (error.className.indexOf('active') == -1)
+        error.className += ' active'
     })
-  })
+  }, isLive() ? 1000 : 0)
 }
 
 function niceRuntimeError(err) {
@@ -107,6 +108,11 @@ const niceStack = err => {
   return err
 }
 
+const log = (...args) => {
+  if (localStorage.getItem('debugTools') === 'true')
+    console.log(...args)
+}
+
 view Errors {
   view.pause()
 
@@ -126,6 +132,7 @@ view Errors {
       error = null
     }
 
+    log('tools: view.update()')
     view.update()
   }
 
@@ -138,6 +145,7 @@ view Errors {
   }
 
   browser.on('compile:error', () => {
+    log('compile:error')
     compileError = browser.data.error
     setError()
   })
@@ -145,21 +153,25 @@ view Errors {
   browser.on('runtime:error', () => {
     // if (runtimeError) return // prefer first error
     runtimeError = browser.data
+    log('runtime:error', runtimeError)
     setError()
   })
 
   browser.on('npm:error', () => {
     npmError = niceNpmError(browser.data.error)
+    log('npm:error', npmError)
     view.update()
   })
 
   browser.on('runtime:success', () => {
+    log('runtime:success')
     runtimeError = null
     npmError = null
     setError()
   })
 
   browser.on('compile:success', () => {
+    log('compile:success')
     compileError = null
     npmError = null
     setError()

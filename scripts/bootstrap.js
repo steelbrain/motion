@@ -52,7 +52,7 @@ packages.forEach(function (pkg) {
   exec('(cd node_modules && find . -name "flint*" -exec rm -r "{}" \\;)')
   cd('../..')
 
-  mkdir("-p", nodeModulesLoc);
+  mkdir("-p", nodeModulesLoc)
 
   cd("packages/" + pkg.folder)
   console.log('installing...')
@@ -68,6 +68,7 @@ packages.forEach(function (pkg) {
   })
 
   console.log('linking in other flint packages...')
+
   links.forEach(function(link) {
     console.log(link)
     exec("npm link " + link + " --loglevel=error")
@@ -75,7 +76,18 @@ packages.forEach(function (pkg) {
 
   exec("npm link --loglevel=error")
 
-  cd("../..");
-});
+  cd("../..")
+})
+
+console.log('Running prepublish scripts...')
+packages.forEach(function(pkg) {
+  var script = 'packages/' + pkg.folder + '/prepublish.js'
+  if (test('-f', script)) {
+    cd('packages/' + pkg.folder)
+    console.log("Running prepublish scripts for", pkg.name)
+    exec('node prepublish.js')
+    cd('../..')
+  }
+})
 
 console.log("Done bootstrapping!")

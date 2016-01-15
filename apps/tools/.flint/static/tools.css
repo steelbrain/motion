@@ -19,15 +19,16 @@ body.__flintfocus {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000000000;
+  z-index: 2147483646;
   opacity: 0;
   background: rgba(255,0,0,0.03);
-  transition: all ease-in 1000ms;
-  transition-delay: 1000ms;
+  transition: all linear 1000ms;
+  transition-delay: 500ms;
 }
 
 .__flintError.active {
   opacity: 1;
+  transition-delay: 0;
 }
 
 ._flintdevtools {

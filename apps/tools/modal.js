@@ -26,11 +26,11 @@ view FlintModal {
     top: open ? 0 : -140,
     right: 0,
     minWidth: 80,
-    padding: [10, 10],
+    padding: [7, 5],
     margin: 20,
     background: '#fff',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-    border: '2px solid #e80967',
+    boxShadow: '0 5px 26px rgba(0,0,0,0.13)',
+    border: '1px solid #dadada',
     fontSize: 14,
     transition: 'all ease-in 200ms',
     textAlign: 'center',
@@ -39,7 +39,7 @@ view FlintModal {
   }
 
   $title = {
-    color: '#222',
+    color: view.props.titleColor || '#222',
     fontWeight: 500,
     fontSize: 15,
     margin: [0, 20]
