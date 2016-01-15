@@ -95,11 +95,13 @@ function addClassName(props, name) {
 }
 
 function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTag, key, index, isView) {
-  if (props)
+  if (props) {
     props = niceProps(props)
+  }
 
-  if (props && props.className)
+  if (props && props.className) {
     props.className = classnames(props.className)
+  }
 
   props = props || {}
 
@@ -118,7 +120,14 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   }
 
   if (props.yield) {
-    props = Object.assign(props, viewProps, props.style && { style: props.style })
+    props = Object.assign(
+      props,
+      viewProps,
+      // take parent style
+      props.style && { style: props.style },
+      // merge parent classname
+      props.className && { className: classnames(props.className, viewProps.className) }
+    )
   }
 
   if (props.onClick) {
