@@ -20,3 +20,6 @@ ready:
 
 patch: ready
 	node scripts/release.js --patch
+
+patch-tools:
+	node scripts/release.js --patch tools

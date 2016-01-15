@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.19",
+  "version": "1.4.20",
   "dependencies": {
     "balanced-match": {
       "version": "0.3.0",
@@ -213,7 +213,7 @@
       "resolved": "https://registry.npmjs.org/event-emitter/-/event-emitter-0.3.4.tgz"
     },
     "flint-runner": {
-      "version": "1.4.17",
+      "version": "1.4.18",
       "dependencies": {
         "abbrev": {
           "version": "1.0.7",
@@ -4877,7 +4877,7 @@
           }
         },
         "flint-tools": {
-          "version": "1.4.10",
+          "version": "1.4.11",
           "dependencies": {
             "clone": {
               "version": "1.0.2",
