@@ -62,23 +62,21 @@ var releaseOrder = [
 ]
 
 // right order for release
-var toRelease =  _.sortBy(all.map(x => ({ project: x, index: releaseOrder.indexOf(x) })), 'index')
-  .map(x => x.project)
-  .filter(x => x !== 'cli')
-
-toRelease = toRelease.concat('cli')
+var lowestRelease = _.find(releaseOrder, x => x.indexOf(all) != -1)
+var lowestReleaseIndex = releaseOrder.indexOf()
+var toRelease = _.slice(lowestReleaseIndex)
 
 console.log("\n", 'Releasing (in order):', toRelease.join(", "), '...', "\n")
 
-toRelease.forEach(project => {
-  var cmd = './scripts/release.sh ' + project + ' --patch'
-  console.log("Releasing...", cmd)
-
-  var result = ex(cmd)
-})
-
-console.log("\n", 'Pushing...')
-ex("git commit -am 'publish' --quiet")
-ex("git push origin head --quiet")
+// toRelease.forEach(project => {
+//   var cmd = './scripts/release.sh ' + project + ' --patch'
+//   console.log("Releasing...", cmd)
+//
+//   var result = ex(cmd)
+// })
+//
+// console.log("\n", 'Pushing...')
+// ex("git commit -am 'publish' --quiet")
+// ex("git push origin head --quiet")
 
 console.log("\n", 'All done!', "\n")
