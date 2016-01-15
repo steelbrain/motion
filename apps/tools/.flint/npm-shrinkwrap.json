@@ -1,6 +1,6 @@
 {
   "name": "flint-tools",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "dependencies": {
     "clone": {
       "version": "1.0.2",
