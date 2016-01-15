@@ -44,8 +44,10 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     }
 
     // TODO: shouldnt be in styles
-    if (view.props.className) {
-      addClassName(view.props.className)
+    let viewClassName = view.props.className || view.props.class
+
+    if (viewClassName) {
+      addClassName(viewClassName)
     }
   }
 
@@ -108,17 +110,25 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     }
 
     // parent class styles
-    if (deservesRootStyles && view.props.className) {
-      view.props.className.split(' ').forEach(className => {
-        if (!isLowerCase(className[0])) return
-        const key = `${prefix}${className}`
-        // merge in styles
-        result = mergeStyles(
-          result,
-          parentStyles && parentStyles[key],
-          parentStylesStatic && parentStylesStatic[key]
-        )
-      })
+    if (deservesRootStyles) {
+      let viewClassName = view.props.className || view.props.class
+
+      if (viewClassName) {
+        viewClassName.split(' ').forEach(className => {
+          if (!isLowerCase(className[0])) return
+          const key = `${prefix}${className}`
+
+          // merge in styles
+          result = mergeStyles(
+            result,
+            parentStyles && (
+              parentStyles[className] && parentStyles[className](repeatItem, index)
+            ),
+            parentStylesStatic && parentStylesStatic[key]
+          )
+        })
+      }
+
     }
 
     // merge styles [] into {}

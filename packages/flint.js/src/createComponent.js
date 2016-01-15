@@ -318,6 +318,14 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       clone(el, props) {
+        // move the parent styles source to the cloned view
+        if (el.props.__flint) {
+          let fprops = el.props.__flint
+
+          fprops.parentName = this.name
+          fprops.parentStyles = this.styles
+        }
+
         return React.cloneElement(el, props)
       },
 
