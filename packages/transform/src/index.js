@@ -118,10 +118,12 @@ export default function createPlugin(options) {
         return node.object.name + node.property.name
       if (t.isArrayExpression(node))
         return node.elements.reduce((acc, cur) => acc + nodeToStr(cur), '')
-      if (t.isObjectExpression(node))
-        return node.properties.reduce((acc, cur) => acc
-          + cur.key.name
-          + nodeToStr(cur.value), '')
+      if (t.isObjectExpression(node)) {
+        return node.properties.reduce((acc, cur) => {
+          return acc + typeof cur.key == 'object' && cur.key.name + nodeToStr(cur.value)
+        }
+        , '')
+      }
 
       return node.value
     }
@@ -704,7 +706,10 @@ export default function createPlugin(options) {
                 const dynKeys = viewDynamicStyleKeys
 
                 statics.forEach(n => statKeys[n.key.name] = nodeToStr(n.value))
-                dynamics.forEach(n => dynKeys[n.key.name] = nodeToStr(n.value))
+                dynamics.forEach(n => {
+                  if (!t.isSpreadProperty(n))
+                    dynKeys[n.key.name] = nodeToStr(n.value)
+                })
 
                 let hasStatics = statics.length
                 let hasDynamics = dynamics.length
@@ -766,6 +771,12 @@ export default function createPlugin(options) {
               let duplicate = {}
 
               for (let prop of node.properties) {
+                if (t.isSpreadProperty(prop)) {
+                  // TODO: make work
+                  dynamics.push(prop)
+                  continue
+                }
+
                 if (duplicate[prop.key.name])
                   throw file.errorWithNode(prop, `Duplicate style prop! view ${inView} { ${name}.${prop.key.name} }`)
 
@@ -810,7 +821,11 @@ export default function createPlugin(options) {
 
             // $["name"] = ...
             function dynamicStyleStatement(node, dynamics) {
-              return exprStatement(styleAssign(node, t.isArrayExpression(dynamics) ? dynamics : t.objectExpression(dynamics)))
+              return exprStatement(
+                styleAssign(node, t.isArrayExpression(dynamics)
+                  ? dynamics
+                  : t.objectExpression(dynamics))
+              )
             }
 
             function styleLeft(node, isStatic) {
