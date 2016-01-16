@@ -1,6 +1,6 @@
 {
   "name": "flint-runner",
-  "version": "1.4.21",
+  "version": "1.4.22",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",
@@ -1631,7 +1631,7 @@
       }
     },
     "flint-js": {
-      "version": "1.4.17",
+      "version": "1.4.18",
       "dependencies": {
         "acorn": {
           "version": "1.2.2",
@@ -4664,7 +4664,7 @@
       }
     },
     "flint-tools": {
-      "version": "1.4.14",
+      "version": "1.4.15",
       "dependencies": {
         "clone": {
           "version": "1.0.2",
