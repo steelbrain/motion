@@ -51,7 +51,7 @@ else {
   packages = packages.filter(p => p != 'cli' && p != 'flint-runner')
 }
 
-let all = [].concat(apps, packages)
+var all = [].concat(apps, packages)
 
 // release
 if (!all.length) {
