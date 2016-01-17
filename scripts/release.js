@@ -11,7 +11,7 @@ require("shelljs/global")
 function ex(cmd) {
   var result = exec(cmd, { silent: true })
   if (result.code != 0) {
-    console.log('error', result.output)
+    console.log(cmd, 'error', result.output)
     process.exit()
   }
   return result.output
@@ -127,7 +127,7 @@ function release(name, dir) {
     }
 
     // TODO only patch if given option
-    ex('npm patch')
+    ex('npm version patch')
     ex('npm publish --tag=latest')
   })
 }
