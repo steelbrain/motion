@@ -6,8 +6,8 @@ import replace from 'replace'
 import mkdirp from 'mkdirp'
 import ncp from 'ncp'
 import fetch from 'node-fetch'
-import { Spinner } from '../ui'
-import randomColor from '../colors'
+import { Spinner } from './ui'
+import randomColor from './colors'
 
 const p = path.join
 

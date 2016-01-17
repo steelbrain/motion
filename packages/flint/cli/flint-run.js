@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var Program = require('commander')
-var runner = require('flint-runner')
+var runner = require('../runner')
 var colors = require('colors')
 var fs = require('fs')
 

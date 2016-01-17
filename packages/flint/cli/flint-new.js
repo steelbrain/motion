@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Program from 'commander'
-import flintNew from '../lib/new'
+import flintNew from './lib/new'
 
 Program
   .option('-n, --nocache', 'dont use local cache of latest flint scaffold')

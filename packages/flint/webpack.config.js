@@ -11,7 +11,7 @@ var banners = [
 module.exports = {
   entry: {
     // runner
-    runner: './runner/index.js',
+    index: './runner/index.js',
     serverProcess: './runner/serverProcess',
 
     // cli
