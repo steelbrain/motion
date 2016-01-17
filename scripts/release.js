@@ -49,10 +49,7 @@ else {
 }
 
 // release
-
-var all = [].concat(apps, packages)
-
-if (!all.length) {
+if (![].concat(apps, packages).length) {
   console.log('Nothing updated since last publish!')
   process.exit()
 }
