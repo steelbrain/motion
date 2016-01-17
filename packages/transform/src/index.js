@@ -137,8 +137,10 @@ export default function createPlugin(options) {
         t.callExpression(t.identifier('on.props'), [
           t.functionExpression(null, [], t.blockStatement(
             node.declarations.map(({ id: { name } }) =>
-              t.assignmentExpression('=', t.identifier(name),
-                t.identifier(`view.getProp('${name}')`)
+              t.expressionStatement(
+                t.assignmentExpression('=', t.identifier(name),
+                  t.identifier(`view.getProp('${name}')`)
+                )
               )
             )
           ))
