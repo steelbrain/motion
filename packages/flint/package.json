@@ -17,11 +17,8 @@
   "dependencies": {
     "colors": "1.1.2",
     "commander": "2.9.0",
-    "mkdirp": "0.5.1",
-    "ncp": "2.0.0",
     "node-fetch": "1.3.3",
     "replace": "0.3.0",
-    "rimraf": "2.5.0",
     "autoprefixer": "6.2.3",
     "babel-runtime": "5.8.29",
     "chokidar": "1.4.2",

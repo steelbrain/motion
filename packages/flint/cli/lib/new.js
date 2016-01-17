@@ -1,10 +1,7 @@
 import colors from 'colors'
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
-import rimraf from 'rimraf'
 import replace from 'replace'
-import mkdirp from 'mkdirp'
-import ncp from 'ncp'
 import fetch from 'node-fetch'
 import { Spinner } from './ui'
 import randomColor from './colors'
@@ -75,8 +72,8 @@ export default function run({ name, use, nocache, debug }) {
   function makeFolder() {
     return new Promise(function(resolve, reject) {
       log('makeFolder', FLINT.dest)
-      mkdirp(FLINT.scaffoldDir, function(err) {
-        mkdirp(FLINT.dest, function(err) {
+      fs.mkdirs(FLINT.scaffoldDir, function(err) {
+        fs.mkdirs(FLINT.dest, function(err) {
           if (err) reject(err)
           else resolve()
         })
@@ -97,8 +94,8 @@ export default function run({ name, use, nocache, debug }) {
           copyScaffold().then(() => res())
         })
 
-      var next =  mkdirp.bind(null, FLINT.scaffoldDir, err => {
-        log('mkdirp err', err)
+      var next =  fs.mkdirs.bind(null, FLINT.scaffoldDir, err => {
+        log('fs.mkdirs err', err)
         const isCloningExample = repo != scaffoldRepo
 
         if (err || isCloningExample)
@@ -132,8 +129,8 @@ export default function run({ name, use, nocache, debug }) {
         if (!needsNew) return resolve(true)
 
         // remove old scaffold
-        rimraf(FLINT.scaffoldDir, function(err) {
-          log('rimraf err?', err)
+        fs.remove(FLINT.scaffoldDir, function(err) {
+          log('fs.remove err?', err)
           if (err) return resolve(false)
 
           // clone new scaffold
@@ -183,7 +180,7 @@ export default function run({ name, use, nocache, debug }) {
     return new Promise(function(resolve, reject) {
       log('Remove .git folder')
       // delete git dir
-      rimraf(p(dir, '/.git'), function(err) {
+      fs.remove(p(dir, '/.git'), function(err) {
         log('after remove .git err?:', err)
         if (err) return reject(err)
         resolve()
@@ -213,7 +210,7 @@ export default function run({ name, use, nocache, debug }) {
   function copyScaffold() {
     log('Copy new scaffold', FLINT.scaffoldDir, FLINT.dest)
     return new Promise((res, rej) => {
-      ncp(FLINT.scaffoldDir, FLINT.dest, function(err) {
+      fs.copy(FLINT.scaffoldDir, FLINT.dest, function(err) {
         if (err) {
           console.log("Error, couldn't copy scaffold folder".red)
           console.log(FLINT.scaffoldDir, FLINT.dest)
