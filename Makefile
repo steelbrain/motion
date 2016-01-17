@@ -31,10 +31,10 @@ patch-runner:
 	node scripts/release.js --patch runner
 
 patch-flint.js:
-	node scripts/release.js --patch cli
+	node scripts/release.js --patch flint.js
 
 patch-transform:
-	node scripts/release.js --patch runner
+	node scripts/release.js --patch transform
 
 patch-nice-styles:
-	node scripts/release.js --patch runner
+	node scripts/release.js --patch nice-styles
