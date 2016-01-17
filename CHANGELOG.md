@@ -1,3 +1,7 @@
+## 1.4.26
+
+- Big internal refactor to cleanup number of requires, should greatly reduce install time
+
 ## 1.4.0
 
 - Releases are now shrinkwrapped. This should mean much more consistently working releases as well as
