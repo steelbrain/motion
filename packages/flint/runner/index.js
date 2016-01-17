@@ -1,3 +1,6 @@
+import regeneratorRuntime from 'regenerator-runtime-only'
+global.regeneratorRuntime = regeneratorRuntime
+
 import bridge from './bridge'
 import compiler from './compiler'
 import server from './server'

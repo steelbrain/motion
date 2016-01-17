@@ -4,7 +4,6 @@ var fs = require('fs')
 var nodeModules = fs.readdirSync('node_modules')
 
 var banners = [
-  'var regeneratorRuntime = require("regenerator-runtime-only")',
   'require("source-map-support").install();'
 ].join("\n")
 
@@ -15,10 +14,10 @@ module.exports = {
 
     // cli
     flint: './cli/flint',
-    flintBuild: './cli/flint-build',
-    flintNew: './cli/flint-new',
-    flintRun: './cli/flint-run',
-    flintUpdate: './cli/flint-update',
+    'flint-build': './cli/flint-build',
+    'flint-new': './cli/flint-new',
+    'flint-run': './cli/flint-run',
+    'flint-update': './cli/flint-update',
   },
   target: 'node',
   devtool: 'sourcemap',
