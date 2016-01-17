@@ -15,14 +15,14 @@ for p in "${packages[@]}"; do
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
-    node node_modules/webpack/bin/webpack --config webpack.config.js $1 &
+    node ../../node_modules/webpack/bin/webpack --config webpack.config.js $1 &
     echo "running $f webpack for $f"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
 
-    node node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" \
+    node ./node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" \
       --stage 0 \
       --loose all \
       --optional asyncToGenerator \
