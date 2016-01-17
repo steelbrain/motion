@@ -46,6 +46,9 @@ else {
 
   packages = filterByName(changedFiles, 'packages')
   apps = filterByName(changedFiles, 'apps')
+
+  // remove cli as we transition
+  packages = packages.filter(p => p != 'cli')
 }
 
 // release
