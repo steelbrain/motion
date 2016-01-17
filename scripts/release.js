@@ -48,7 +48,7 @@ else {
   apps = filterByName(changedFiles, 'apps')
 
   // remove cli as we transition
-  packages = packages.filter(p => p != 'cli')
+  packages = packages.filter(p => p != 'cli' && p != 'flint-runner')
 }
 
 // release
