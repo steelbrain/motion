@@ -8,7 +8,17 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flintjs/flint.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/flintjs/flint.js/issues"
+  },
+  "homepage": "https://flintjs.com",
+  "devDependencies": {
+    "node-fetch": "1.3.3",
     "babel-runtime": "5.8.34",
     "bluebird": "3.1.1",
     "classnames": "2.2.3",
@@ -27,23 +37,5 @@
     "whatwg-fetch": "0.10.1",
     "react": "0.14.2",
     "react-dom": "0.14.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/flintjs/flint.js.git"
-  },
-  "bugs": {
-    "url": "https://github.com/flintjs/flint.js/issues"
-  },
-  "homepage": "https://flintjs.com",
-  "devDependencies": {
-    "babel": "5.8.34",
-    "babel-core": "5.8.34",
-    "babel-loader": "5.3.1",
-    "exports-loader": "0.6.2",
-    "imports-loader": "0.6.5",
-    "node-fetch": "1.3.3",
-    "node-libs-browser": "0.5.3",
-    "webpack": "1.12.11"
   }
 }

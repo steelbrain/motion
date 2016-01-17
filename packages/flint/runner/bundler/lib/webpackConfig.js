@@ -12,7 +12,7 @@ let flintRoot = path.resolve(path.join(__dirname, '..'))
 let flintModules = path.join(flintRoot, 'node_modules')
 
 // copy styles into .flint/static/styles
-let styleFileLoader = 'file?name=assets/styles/[name]-[hash].css'
+let fileStyleFolder = 'file?name=assets/styles/[name]-[hash].css'
 
 export default (filename, config = {}) => deepmerge({
   context: runnerRoot,
@@ -45,12 +45,11 @@ export default (filename, config = {}) => deepmerge({
     loaders: [
       { test: /\.(ttf|eot|woff|svg)$/, loader: 'file?name=assets/files/[name]-[hash].[ext]' },
       { test: /\.json$/, loader: 'json' },
-      { test: /\.jsx$/, loader: 'babel' },
 
       {
         test: /\.css$/,
         loaders: [
-          styleFileLoader,
+          fileStyleFolder,
           'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
         ]
       },
@@ -60,16 +59,16 @@ export default (filename, config = {}) => deepmerge({
         loader: 'url?limit=8192&name=[name]-[hash].[ext]'
       },
 
-      {
-        test: /\.scss$/,
-        loaders: [
-          styleFileLoader,
-          // 'resolve-url',
-          // 'style',
-          'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
-          'sass?sourceMap'
-        ]
-      }
+      // let users config this
+      // {
+      //   test: /\.scss$/,
+      //   loaders: [
+      //     fileStyleFolder,
+      //     'style',
+      //     'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+      //     // 'sass?sourceMap'
+      //   ]
+      // }
     ]
   }
 }, config)

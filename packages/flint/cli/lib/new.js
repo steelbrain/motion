@@ -6,14 +6,10 @@ import replace from 'replace'
 import mkdirp from 'mkdirp'
 import ncp from 'ncp'
 import fetch from 'node-fetch'
-import raven from 'raven'
-import { Promise } from 'es6-promise'
 import { Spinner } from '../ui'
 import randomColor from '../colors'
 
 const p = path.join
-
-const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
 
 export default function run({ name, use, nocache, debug }) {
   try {
@@ -361,6 +357,5 @@ export default function run({ name, use, nocache, debug }) {
 
   } catch(e) {
     console.log(e.stack)
-    errorClient.captureException(e)
   }
 }
