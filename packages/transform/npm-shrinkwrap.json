@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "dependencies": {
     "amdefine": {
       "version": "1.0.0",
@@ -43,6 +43,7 @@
     "flint-stilr": {
       "version": "1.2.3",
       "from": "flint-stilr@1.2.3",
+      "resolved": "https://registry.npmjs.org/flint-stilr/-/flint-stilr-1.2.3.tgz",
       "dependencies": {
         "babel-runtime": {
           "version": "5.8.34",
@@ -53,7 +54,7 @@
     },
     "hash-sum": {
       "version": "1.0.2",
-      "from": "hash-sum@*",
+      "from": "hash-sum@>=1.0.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/hash-sum/-/hash-sum-1.0.2.tgz"
     },
     "js-tokens": {
