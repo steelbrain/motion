@@ -51,8 +51,10 @@ else {
   packages = packages.filter(p => p != 'cli' && p != 'flint-runner')
 }
 
+let all = [].concat(apps, packages)
+
 // release
-if (![].concat(apps, packages).length) {
+if (!all.length) {
   console.log('Nothing updated since last publish!')
   process.exit()
 }
