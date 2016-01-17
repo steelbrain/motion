@@ -24,11 +24,8 @@ patch: ready
 patch-tools:
 	node scripts/release.js --patch tools
 
-patch-cli:
-	node scripts/release.js --patch cli
-
-patch-runner:
-	node scripts/release.js --patch runner
+patch-flint:
+	node scripts/release.js --patch flint
 
 patch-flint.js:
 	node scripts/release.js --patch flint.js

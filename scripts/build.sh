@@ -36,7 +36,7 @@ if [ "$1" = "--watch" ]; then
   # relink cli
   echo "Watch CLI for relink"
   chsum1=""
-  cd packages/cli
+  cd packages/flint
 
   sleep 1
   hasLinkedOnce='false'

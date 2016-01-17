@@ -25,7 +25,7 @@ let exec = require('child_process').exec
 let checkversion = 'npm view flint@latest version -loglevel silent'
 
 // TODO use json reader
-let pkg = require(path.join('..', 'package.json'))
+let pkg = require('../package.json')
 const getversion = v => (''+v).trim()
 let pkgV = getversion(pkg.version)
 
@@ -45,7 +45,7 @@ exec(checkversion, (err, version) => {
 })
 
 Program
-  .version(require('../package.json').version)
+  .version(pkgV)
   .command('new [name] [template]', 'start a new Flint app')
   .command('run', 'run your flint app')
   .command('build', 'run your flint app')
