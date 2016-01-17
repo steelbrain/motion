@@ -82,15 +82,12 @@ var releaseOrder = [
   'flint',
 ]
 
-// get earliest in chain
-var lowestRelease = _.find(releaseOrder, x => x.indexOf(all) != -1)
-var lowestReleaseIndex = releaseOrder.indexOf(lowestRelease)
-var toRelease = _.slice(releaseOrder, lowestReleaseIndex)
+var sortedRelease = _.sortBy(all, x => releaseOrder.indexOf(x))
 
-console.log("\n", 'Releasing (in order):', toRelease.join(", "), '...', "\n")
+console.log("\n", 'Releasing (in order):', sortedRelease.join(", "), '...', "\n")
 
 // release
-toRelease.forEach(project => {
+sortedRelease.forEach(project => {
   var cmd = './scripts/release.sh ' + project + ' --patch'
   console.log("Releasing...", cmd)
 

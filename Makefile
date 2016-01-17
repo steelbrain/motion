@@ -21,17 +21,17 @@ ready:
 patch: ready
 	node scripts/release.js --patch
 
-patch-tools:
+patch-tools: ready
 	node scripts/release.js --patch tools
 
-patch-flint:
+patch-flint: ready
 	node scripts/release.js --patch flint
 
-patch-flint.js:
+patch-flint.js: ready
 	node scripts/release.js --patch flint.js
 
-patch-transform:
+patch-transform: ready
 	node scripts/release.js --patch transform
 
-patch-nice-styles:
+patch-nice-styles: ready
 	node scripts/release.js --patch nice-styles
