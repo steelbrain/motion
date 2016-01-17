@@ -51,7 +51,7 @@ module.exports = {
     new webpack.BannerPlugin(banners, { raw: true, entryOnly: false })
   ],
   // resolve babel-loader, json-loader, webpack from root to avoid install time
-  resolveLoader: { root: path.join(__dirname, '..', '..') },
+  resolveLoader: { root: path.join(__dirname, '..', '..', 'node_modules') },
   module: {
     loaders: [
       {

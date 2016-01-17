@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 var Program = require('commander');
 var runner = require('../runner');
 var colors = require('colors');

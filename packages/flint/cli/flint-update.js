@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 console.log(`\nUpdating flint...\n`)
 
 var colors = require('colors')
