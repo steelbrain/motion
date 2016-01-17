@@ -3,6 +3,11 @@ var path = require('path')
 
 require("shelljs/global")
 
+//
+// fns
+//
+
+// safe exec
 function ex(cmd) {
   var result = exec(cmd, { silent: true })
   if (result.code != 0) {
@@ -12,11 +17,50 @@ function ex(cmd) {
   return result.output
 }
 
-var lastArg = process.argv[process.argv.length - 1]
+function cdTo(where, execute) {
+  var cwd = pwd()
+  cd(where)
+  execute(where)
+  cd(cwd)
+}
+
+// ensure prune/shrinkwrap
+function shrinkwrap(where) {
+  // skipShinkwrap option
+  if (test('-f', 'skipShrinkwrap')) {
+    console.log('dont shrinkwrap', where)
+    return
+  }
+
+  console.log('shrinkwrapping... ', where)
+  ex('npm prune')
+  ex('npm shrinkwrap')
+}
+
+//
+// init
+//
+
+// determines order of release
+var releaseOrder = [
+  'nice-styles',
+  'transform',
+  'flint.js',
+  'tools',
+  'flint',
+]
 
 var apps = []
 var packages = []
 
+var sortByReleaseOrder = ls => _.sortBy(ls, x => releaseOrder.indexOf(x))
+var projectPath = n => path.join('packages', n)
+var appPath = n => path.join('apps', n, '.flint')
+
+// options
+var lastArg = process.argv[process.argv.length - 1]
+
+// release one
 if (lastArg.indexOf('--') == -1) {
   console.log("Just releasing", lastArg)
 
@@ -27,7 +71,7 @@ if (lastArg.indexOf('--') == -1) {
     packages.push(lastArg)
 }
 
-// auto release
+// auto release, find which to release
 else {
   var lastPublish = ex('git log --all --grep="publish" --max-count=1 --format=format:%H')
   var newCommits = ex('git log '+ lastPublish +'..HEAD --format=format:%H').split("\n")
@@ -46,59 +90,53 @@ else {
     return _.uniq(paths.filter(x => x.indexOf(parent) == 0).map(x => x.split('/')[1]))
   }
 
-  packages = filterByName(changedFiles, 'packages')
-  apps = filterByName(changedFiles, 'apps')
-
-  // remove cli as we transition
-  packages = packages.filter(p => p != 'cli' && p != 'flint-runner')
+  packages = sortByReleaseOrder(filterByName(changedFiles, 'packages'))
+  apps = sortByReleaseOrder(filterByName(changedFiles, 'apps'))
 }
 
-var all = [].concat(apps, packages)
+// always release flint & always last
+if (!_.has(packages, 'flint'))
+  packages.push('flint')
 
 // release
-if (!all.length) {
+if (!packages.length && !apps.length) {
   console.log('Nothing updated since last publish!')
   process.exit()
 }
 
-// ensure prune/shrinkwrap
-function checkShrinkwrap(where) {
-  // skipShinkwrap option
-  if (test('-f', path.join(where, 'skipShrinkwrap'))) return
-
-  console.log('checking if shrinkwrappable: ' + where)
-  var cwd = pwd()
-  cd(where)
-  ex('npm prune')
-  ex('npm shrinkwrap')
-  cd(cwd)
-}
-
 // ensure they are all shrinkwrappable before trying to release
-packages.forEach(pkg => checkShrinkwrap(path.join('packages', pkg)))
-apps.forEach(pkg => checkShrinkwrap(path.join('apps', pkg, '.flint')))
+// (prevents unnecessary patches)
+apps.forEach(name => cdTo(appPath(name), shrinkwrap))
+packages.forEach(name => cdTo(projectPath(name), shrinkwrap))
 
-// determines chain of release
-var releaseOrder = [
-  'nice-styles',
-  'transform',
-  'flint.js',
-  'tools',
-  'flint',
-]
-
-var sortedRelease = _.sortBy(all, x => releaseOrder.indexOf(x))
-
-console.log("\n", 'Releasing (in order):', sortedRelease.join(", "), '...', "\n")
+console.log(
+  "\nReleasing (in order):", apps, packages, '...', "\n"
+)
 
 // release
-sortedRelease.forEach(project => {
-  var cmd = './scripts/release.sh ' + project + ' --patch'
-  console.log("Releasing...", cmd)
+function release(name, dir) {
+  console.log("Releasing...", name)
 
-  var result = ex(cmd)
-})
+  cdTo(dir, function() {
+    if (!test('-f', 'skipShinkwrap'))
+      shrinkwrap(dir)
 
+    if (test('-f', 'prepublish.js')) {
+      console.log('running prepublish for', name)
+      ex('node prepublish.js')
+    }
+
+    // TODO only patch if given option
+    ex('npm patch')
+    ex('npm publish --tag=latest')
+  })
+}
+
+// do release
+apps.forEach(name => release(name, appPath(name)))
+packages.forEach(name => release(name, projectPath(name)))
+
+// push it up
 console.log("\n", 'Pushing...')
 ex("git commit -am 'publish' --quiet")
 ex("git push origin head --quiet")
