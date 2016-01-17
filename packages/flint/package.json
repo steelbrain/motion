@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.25",
+  "version": "1.4.26",
   "description": "Run flint apps",
   "main": "dist/main.js",
   "scripts": {},
@@ -22,7 +22,6 @@
     "autoprefixer": "6.2.3",
     "babel-runtime": "5.8.29",
     "chokidar": "1.4.2",
-    "colors": "1.1.2",
     "cors": "2.7.1",
     "css-loader": "0.23.1",
     "deepmerge": "0.2.10",
