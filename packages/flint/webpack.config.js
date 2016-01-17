@@ -10,8 +10,16 @@ var banners = [
 
 module.exports = {
   entry: {
-    main: './src/index.js',
-    serverProcess: './src/serverProcess'
+    // runner
+    runner: './runner/index.js',
+    serverProcess: './runner/serverProcess',
+
+    // cli
+    flint: './cli/flint',
+    flintBuild: './cli/flint-build',
+    flintNew: './cli/flint-new',
+    flintRun: './cli/flint-run',
+    flintUpdate: './cli/flint-update',
   },
   target: 'node',
   devtool: 'sourcemap',
