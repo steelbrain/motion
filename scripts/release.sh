@@ -13,6 +13,21 @@ if [ "$2" = "--patch" ]; then
   doPatch=true
 fi
 
+do_shrinkwrap() {
+  if [ ! -f "skipShinkwrap" ]; then
+    # prune and shrinkwrap before to detect errors before patching version
+    npm prune
+    npm shrinkwrap --loglevel=error
+  fi
+}
+
+do_patch() {
+  if [ "$doPatch" = true ]; then
+    npm version patch
+    do_shrinkwrap # catch up to patch
+  fi
+}
+
 release_package() {
   cd $1
   echo $1
@@ -22,15 +37,8 @@ release_package() {
     echo "building webpack"
   fi
 
-  # prune and shrinkwrap before to detect errors before patching version
-  npm prune
-  npm shrinkwrap --loglevel=error
-
-  if [ "$doPatch" = true ]; then
-    npm version patch
-    # catch up to patch
-    npm shrinkwrap --loglevel=error
-  fi
+  do_shrinkwrap
+  do_patch
 
   npm publish --tag=latest
   cd ../..
@@ -40,15 +48,8 @@ release_tools() {
   echo "Tools"
   cd apps/tools/.flint
 
-  # prune and shrinkwrap before to detect errors before patching version
-  npm prune
-  npm shrinkwrap --loglevel=error
-
-  if [ "$doPatch" = true ]; then
-    npm version patch
-    # catch up to patch
-    npm shrinkwrap --loglevel=error
-  fi
+  do_shinkwrap
+  do_patch
 
 	npm publish --tag=latest
   cd ../../..

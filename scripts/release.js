@@ -1,4 +1,6 @@
 var _ = require('lodash')
+var path = require('path')
+
 require("shelljs/global")
 
 function ex(cmd) {
@@ -60,18 +62,21 @@ if (!all.length) {
 }
 
 // ensure prune/shrinkwrap
-function checkAlright(path) {
-  console.log('checking if shrinkwrappable: ' + path)
+function checkShrinkwrap(where) {
+  // skipShinkwrap option
+  if (test('-f', path.join(where, 'skipShrinkwrap'))) return
+
+  console.log('checking if shrinkwrappable: ' + where)
   var cwd = pwd()
-  cd(path)
+  cd(where)
   ex('npm prune')
   ex('npm shrinkwrap')
   cd(cwd)
 }
 
 // ensure they are all shrinkwrappable before trying to release
-packages.forEach(pkg => checkAlright('packages/' + pkg))
-apps.forEach(pkg => checkAlright('apps/' + pkg + '/.flint'))
+packages.forEach(pkg => checkShrinkwrap(path.join('packages', pkg)))
+apps.forEach(pkg => checkShrinkwrap(path.join('apps', pkg, '.flint')))
 
 // determines chain of release
 var releaseOrder = [
