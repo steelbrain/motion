@@ -315,10 +315,10 @@ export default function run({ name, use, nocache, debug }) {
     spinner.stop()
 
     wait().then(function() {
-      console.log('Done! ⇢'.green.bold)
-      console.log('  cd %s', name)
-      console.log('  flint')
-      console.log()
+      console.log(
+        '  Done! ⇢'.green.bold,
+        ` ${name}\n`
+      )
       process.exit()
     })
   }

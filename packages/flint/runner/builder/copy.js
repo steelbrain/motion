@@ -48,7 +48,7 @@ export async function app() {
     // overwrite with full app code
     await writeFile(appFile, outStr)
 
-    console.log("\n  Minifying".bold)
+    console.log("\n  Minifying...".dim)
     const minified = uglify.minify(outStr, {
       fromString: true
     })

@@ -24,7 +24,7 @@ export default async function build() {
       copy.app()
     ]
 
-    console.log("\nDone! ⇢  .flint/build\n".green.bold)
+    console.log(`\n  Done! ⇢`.green.bold + `  .flint/build\n`)
   }
   catch(e) {
     handleError(e)
