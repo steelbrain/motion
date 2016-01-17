@@ -10,8 +10,7 @@ var banners = [
 
 module.exports = {
   entry: {
-    // runner
-    index: './runner/index.js',
+    // runner server separate
     serverProcess: './runner/serverProcess',
 
     // cli
