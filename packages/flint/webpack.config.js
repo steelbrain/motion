@@ -23,7 +23,7 @@ module.exports = {
   target: 'node',
   devtool: 'sourcemap',
   output: {
-    library: 'flint-runner',
+    library: 'flint',
     libraryTarget: 'umd',
     path: path.join(__dirname, 'dist'),
     filename: '[name].js'

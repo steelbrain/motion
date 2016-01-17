@@ -74,8 +74,7 @@ var releaseOrder = [
   'transform',
   'flint.js',
   'tools',
-  'flint-runner',
-  'cli'
+  'flint',
 ]
 
 // get earliest in chain

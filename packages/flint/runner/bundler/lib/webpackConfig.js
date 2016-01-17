@@ -4,7 +4,7 @@ import opts from '../../opts'
 import cache from '../../cache'
 import flintjs from 'flint-js'
 
-// __dirname == flint-runner/dist directory (because we webpack this)
+// __dirname == flint/dist directory (because we webpack this)
 let runnerRoot = path.resolve(path.join(__dirname, '..'))
 let runnerModules = path.join(runnerRoot, 'node_modules')
 
