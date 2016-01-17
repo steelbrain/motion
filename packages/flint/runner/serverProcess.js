@@ -1,3 +1,6 @@
+import regeneratorRuntime from 'regenerator-runtime-only'
+global.regeneratorRuntime = regeneratorRuntime
+
 import express from 'express'
 import cors from 'cors'
 import portfinder from 'portfinder'

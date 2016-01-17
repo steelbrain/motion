@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../../dist/cli/flint-build')
+require('../../dist/flint-build')

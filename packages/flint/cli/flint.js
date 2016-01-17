@@ -36,9 +36,9 @@ exec(checkversion, (err, version) => {
 
     if (curV != pkgV) {
       console.log(
-        `──────────────────────────────────\n`.yellow.bold +
+        `\n──────────────────────────────────\n`.yellow.bold +
         ` Flint update available: v${curV} \n`.bold +
-        `──────────────────────────────────`.yellow.bold
+        `──────────────────────────────────\n`.yellow.bold
       )
     }
   }

@@ -8,11 +8,11 @@
   "license": "MIT",
   "repository": "https://github.com/flintjs/runner",
   "bin": {
-    "flint": "./dist/cli/flint",
-    "flint-new": "./dist/cli/flint-new",
-    "flint-run": "./dist/cli/flint-run",
-    "flint-build": "./dist/cli/flint-build",
-    "flint-update": "./dist/cli/flint-update"
+    "flint": "./cli/entry/flint",
+    "flint-new": "./cli/entry/flint-new",
+    "flint-run": "./cli/entry/flint-run",
+    "flint-build": "./cli/entry/flint-build",
+    "flint-update": "./cli/entry/flint-update"
   },
   "dependencies": {
     "colors": "1.1.2",
