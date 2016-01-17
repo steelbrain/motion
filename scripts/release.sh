@@ -24,12 +24,12 @@ release_package() {
 
   # prune and shrinkwrap before to detect errors before patching version
   npm prune
-  npm shrinkwrap --loglevel=error
+  npm shrinkwrap --dev --loglevel=error
 
   if [ "$doPatch" = true ]; then
     npm version patch
     # catch up to patch
-    npm shrinkwrap --loglevel=error
+    npm shrinkwrap --dev --loglevel=error
   fi
 
   npm publish --tag=latest
@@ -42,12 +42,12 @@ release_tools() {
 
   # prune and shrinkwrap before to detect errors before patching version
   npm prune
-  npm shrinkwrap --loglevel=error
+  npm shrinkwrap --dev --loglevel=error
 
   if [ "$doPatch" = true ]; then
     npm version patch
     # catch up to patch
-    npm shrinkwrap --loglevel=error
+    npm shrinkwrap --dev --loglevel=error
   fi
 
 	npm publish --tag=latest

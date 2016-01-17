@@ -63,7 +63,7 @@ function checkAlright(path) {
   var cwd = pwd()
   cd(path)
   ex('npm prune')
-  ex('npm shrinkwrap')
+  ex('npm shrinkwrap --dev')
   cd(cwd)
 }
 
