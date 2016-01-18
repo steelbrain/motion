@@ -55,7 +55,7 @@ var Parser = {
       if (!isInternal)
         source = filePrefix(file) + source + fileSuffix
 
-      console.log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'isInstalling', isInstalling)
+      log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'isInstalling', isInstalling)
       next(source, { isInternal, isInstalling })
     }
     catch(e) {
