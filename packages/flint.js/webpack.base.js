@@ -86,7 +86,8 @@ module.exports = function(opts) {
     plugins: plugins,
 
     resolve: {
-      root: path.resolve(__dirname, 'node_modules')
+      // resolve from our deps folder, weird but necessary, see flintjs-deps/readme
+      root: path.resolve(__dirname, '..', '..', 'flintjs-deps', 'node_modules')
     }
   }
 }

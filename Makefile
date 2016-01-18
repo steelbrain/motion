@@ -12,6 +12,7 @@ watch: clean
 
 bootstrap:
 	npm install
+	(cd flintjs-deps && npm install)
 	node scripts/bootstrap.js
 	scripts/build.sh
 
