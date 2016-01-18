@@ -37,11 +37,10 @@ export default function run({ name, use, nocache, debug }) {
 
   var spinner, fps = 60
   let FLINT = {}
-  FLINT.dir = __dirname
-  FLINT.scaffoldDir = p(getUserHome(), '/.flint/scaffold')
+  FLINT.scaffoldDir = p(getUserHome(), '.flint', 'scaffold')
   FLINT.scaffoldRepo = `https://github.com/${org}/${repo}`
-  FLINT.scaffoldSHA = p(getUserHome(), '/.flint/scaffoldSHA')
-  FLINT.dest = process.cwd() + '/' + name
+  FLINT.scaffoldSHA = p(getUserHome(), '.flint', 'scaffoldSHA')
+  FLINT.dest = p(process.cwd(), name)
 
   if (fs.existsSync(FLINT.dest)) {
     console.log("Error! Directory %s already exists\n".red, FLINT.dest)

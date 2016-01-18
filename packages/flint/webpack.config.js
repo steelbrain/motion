@@ -33,7 +33,7 @@ module.exports = {
     exec: false,
     process: false,
     setImmediate: false,
-    __filename: true,
+    __filename: false,
     __dirname: false
   },
   externals: [
