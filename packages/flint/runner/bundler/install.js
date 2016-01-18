@@ -21,7 +21,7 @@ export async function install(force) {
   try {
     await remakeInstallDir(force)
     await uninstall()
-    await installAll(cache.getImports())
+    await installAll()
     await bundleExternals()
 
     if (force)
@@ -52,7 +52,6 @@ export async function willInstall(source) {
 
 // finds the new externals to install
 export async function getNew(requires, installed) {
-  const prevInstalled = installed || await readInstalled()
   const names = normalize(requires)
   const fresh = _.difference(names, installed, installing)
   log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
@@ -62,8 +61,10 @@ export async function getNew(requires, installed) {
 export async function installAll(requires) {
   log(LOG, 'installAll')
   try {
+    if (!requires) requires = cache.getImports()
+
     // nothing to install
-    if (!requires || !requires.length) {
+    if (!requires.length) {
       if (!_isInstalling && opts.get('hasRunInitialBuild'))
         opts.set('hasRunInitialInstall', true)
     }
@@ -72,6 +73,9 @@ export async function installAll(requires) {
     const installed = await readInstalled()
     const fresh = await getNew(requires, installed)
 
+    log(LOG, 'installAll requires', requires, 'installed', installed, 'fresh', fresh)
+
+    // nothing new
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
       await writeInstalled(installed)
