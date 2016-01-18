@@ -3,8 +3,8 @@ import log from './lib/log'
 import hasExports from './lib/hasExports'
 import cache from './cache'
 import opts from './opts'
-import gutil from 'gulp-util'
 import through from 'through2'
+import handleError from './lib/handleError'
 
 let views = []
 let OPTS
@@ -29,34 +29,42 @@ var Parser = {
     OPTS = opts || {}
   },
 
-  post(file, source) {
-    log(LOG, 'compiler/post', file)
+  async post(file, source, next) {
+    try {
+      log(LOG, 'compiler///post', file)
 
-    // scan for imports/exports
-    const scan = () => bundler.scanFile(file, source)
-    const scanImmediate = OPTS.build || !opts.get('hasRunInitialBuild')
+      // used to prevent hot reloads while importing new things
+      const isInstalling = await bundler.willInstall(source)
 
-    if (scanImmediate) scan()
-    else debounce(file, 400, scan)
+      // scan for imports/exports
+      const scan = () => bundler.scanFile(file, source)
+      const scanImmediate = OPTS.build || !opts.get('hasRunInitialBuild')
 
-    // debounce a lot to uninstall
-    if (!OPTS.build)
-      debounce('removeOldImports', 3000, bundler.uninstall)
+      // debounced installs
+      if (scanImmediate) scan()
+      else debounce(file, 400, scan)
 
-    // check internals
-    // TODO: for json files eventually || path.extname(file) == 'json'
+      // debounce more for uninstall
+      if (!OPTS.build)
+        debounce('removeOldImports', 3000, bundler.uninstall)
 
-    const isInternal = hasExports(source)
-    log(LOG, 'ISINTERNAL'.yellow, isInternal)
+      // check internals
+      const isInternal = hasExports(source)
 
-    // wrap closure if not internal file
-    if (!isInternal)
-      source = filePrefix(file) + source + fileSuffix
+      // wrap closure if not internal file
+      if (!isInternal)
+        source = filePrefix(file) + source + fileSuffix
 
-    return { source, isInternal }
+      console.log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'isInstalling', isInstalling)
+      next(source, { isInternal, isInstalling })
+    }
+    catch(e) {
+      handleError(e)
+      next()
+    }
   },
 
-  pre(file, source) {
+  pre(file, source, next) {
     let inView = false
     let viewNames = []
 
@@ -90,7 +98,7 @@ var Parser = {
     cache.add(file)
     cache.setViews(file, viewNames)
 
-    return { source }
+    next(source)
   }
 }
 
@@ -105,23 +113,18 @@ function compile(type, opts = {}) {
     }
 
     try {
-      let res = Parser[type](file.path, file.contents.toString(), opts)
-      file.contents = new Buffer(res.source || '')
-
-      file.isInternal = res.isInternal
-
-      this.push(file)
+      let res = Parser[type](file.path, file.contents.toString(), (source, fileProps = {}) => {
+        file.contents = new Buffer(source || '')
+        // add fileprops coming from compilers
+        Object.assign(file, fileProps)
+        this.push(file)
+        next()
+      })
     }
     catch (err) {
-      this.emit('error',
-        new gutil.PluginError('flint', err, {
-          fileName: file.path,
-          showProperties: false
-        })
-      )
+      this.emit('error', err)
+      next()
     }
-
-    next()
   })
 }
 

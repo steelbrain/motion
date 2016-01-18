@@ -1,4 +1,4 @@
-import { install, installAll, isInstalling, finishedInstalling } from './install'
+import { install, installAll, isInstalling, finishedInstalling, willInstall } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
 import { bundleInternals } from './internals'
@@ -26,5 +26,6 @@ export default {
   internals: bundleInternals,
   isInstalling,
   finishedInstalling,
-  remakeInstallDir
+  remakeInstallDir,
+  willInstall
 }

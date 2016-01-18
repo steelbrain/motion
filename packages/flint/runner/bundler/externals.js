@@ -6,15 +6,12 @@ import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
 import depRequireString from './lib/depRequireString'
+import { findExternalRequires } from './lib/findRequires'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, path, writeJSON, writeFile } from '../lib/fns'
-import getMatches from './lib/getMatches'
 
 const LOG = 'externals'
-
-const findRequires = source => getMatches(source, /require\(\s*['"]([^\'\"]+)['"]\s*\)/g, 1) || []
-const findExternalRequires = source => findRequires(source).filter(x => x.charAt(0) != '.')
 
 export async function bundleExternals(opts = {}) {
   if (opts.doInstall) await installAll()
@@ -47,8 +44,6 @@ async function packExternals() {
     const conf = webpackConfig('externals.js', {
       entry: opts.get('deps').externalsIn,
     })
-
-    log(LOG, 'webpackConfig', conf)
 
     webpack(conf, (err, stats) => {
       handleWebpackErrors('externals', err, stats, resolve, reject)

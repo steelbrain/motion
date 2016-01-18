@@ -8,6 +8,7 @@ import loadPlugins from 'gulp-load-plugins'
 import bridge from './bridge'
 import cache from './cache'
 import builder from './builder'
+import bundler from './bundler'
 import superStream from './lib/superStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
@@ -69,23 +70,24 @@ const $p = {
 
 // gulp doesnt send unlink events for files in deleted folders, so we do our own
 function watchDeletes() {
-  chokidar.watch('.', {ignored: /[\/\\]\./})
-    .on('unlink', async (file) => {
-      try {
-        // ignore if in node_modules
-        if (file.indexOf('.flint') === 0)
-          return
+  chokidar.watch('.', {ignored: /[\/\\]\./}).on('unlink', handleDelete)
 
-        log(LOG, 'unlink', file)
-        if (/jsf?/.test(path.extname(file))) {
-          await rm(p(opts.get('outDir'), file))
-          cache.remove(file)
-        }
+  async function handleDelete(file) {
+    try {
+      // ignore if in node_modules
+      if (file.indexOf('.flint') === 0)
+        return
+
+      log(LOG, 'unlink', file)
+      if (/jsf?/.test(path.extname(file))) {
+        await rm(p(opts.get('outDir'), file))
+        cache.remove(file)
       }
-      catch(e) {
-        handleError(e)
-      }
-    })
+    }
+    catch(e) {
+      handleError(e)
+    }
+  }
 }
 
 export async function init() {
@@ -129,12 +131,12 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
+    // ignore unlinks in pipeline
+    .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
   const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
-
-  log(LOG, 'starting stream')
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
@@ -328,17 +330,25 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function afterWrite(file) {
-    if (OPTS.build && OPTS.watch)
-      return builder.build()
-
-    log(LOG, 'afterWrite', 'hasFinished', hasFinished())
-    if (hasFinished()) {
-      const cacheHasFile = cache.get(file.path)
-      log(LOG, 'afterWrite', 'lastError', lastError, 'file.isInternal', file.isInternal, 'cacheHasFile', cacheHasFile)
-      if (!lastError && cacheHasFile) {
-        bridge.message('script:add', file.message)
-      }
+    if (OPTS.build && OPTS.watch) {
+      builder.build()
+      return
     }
+
+    // avoid during initial build
+    if (!hasFinished()) return
+
+    // avoid ?? todo: figure out why this is necessary
+    if (!cache.get(file.path)) return
+
+    // avoid if error
+    if (lastError) return
+
+    // avoid if installing
+    if (bundler.isInstalling()) return
+
+    // ADD
+    bridge.message('script:add', file.message)
   }
 
   function markFileSuccess(file) {

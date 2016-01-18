@@ -11,6 +11,7 @@ import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
 import { bundleExternals } from './externals'
 import { bundleInternals } from './internals'
+import { findExternalRequires } from './lib/findRequires'
 
 const LOG = 'externals'
 
@@ -20,7 +21,7 @@ export async function install(force) {
   try {
     await remakeInstallDir(force)
     await uninstall()
-    await installAll()
+    await installAll(cache.getImports())
     await bundleExternals()
 
     if (force)
@@ -38,52 +39,59 @@ let installingFullNames = []
 let installing = []
 let _isInstalling = false
 
-export async function installAll(toInstall) {
+function getToInstall(requires) {
+  return requires
+}
+
+// used to quickly check if a file will trigger an install
+export async function willInstall(source) {
+  const requires = findExternalRequires(source)
+  const fresh = await getNew(requires)
+  return !!fresh.length
+}
+
+// finds the new externals to install
+export async function getNew(requires, installed) {
+  const prevInstalled = installed || await readInstalled()
+  const names = normalize(requires)
+  const fresh = _.difference(names, installed, installing)
+  log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
+  return fresh
+}
+
+export async function installAll(requires) {
+  log(LOG, 'installAll')
   try {
-    log(LOG, 'installAll')
-
-    if (!toInstall)
-      toInstall = cache.getImports()
-
-    log(LOG, 'toInstall', toInstall)
-
-    // full names keeps paths like 'babel/runtime/etc'
-    if (toInstall.length)
-      installingFullNames.push(toInstall)
-    else {
+    // nothing to install
+    if (!requires || !requires.length) {
       if (!_isInstalling && opts.get('hasRunInitialBuild'))
         opts.set('hasRunInitialInstall', true)
-
-      return
     }
 
-    const _toInstall = normalize(toInstall)
-    const prevInstalled = await readInstalled()
-    const fresh = _.difference(_toInstall, prevInstalled, installing)
-    log(LOG, 'installAll/fresh = ', fresh, ' = ')
-    log(LOG, '  =', _toInstall, '(toInstall) - ', prevInstalled, '(prevInstalled) - ', installing, '(currently installing)')
+    // determine whats new
+    const installed = await readInstalled()
+    const fresh = await getNew(requires, installed)
 
-    // no new ones found
     if (!fresh.length) {
-      if (!_isInstalling)
-        opts.set('hasRunInitialInstall', true)
-
-      await writeInstalled(prevInstalled)
+      if (!_isInstalling) opts.set('hasRunInitialInstall', true)
+      await writeInstalled(installed)
       await bundleExternals({ silent: true })
       return
     }
 
+    // track full require paths "babel-runtime/interop/etc"
+    installingFullNames = installingFullNames.concat(requires)
+
     // push installing
     installing = installing.concat(fresh)
 
-    // check if installed running
-    if (_isInstalling) {
+    // check if already installing stuff
+    if (_isInstalling)
       return await finishedInstalls()
-    }
 
+    // install!
     _isInstalling = true
-
-    await runInstall(prevInstalled)
+    await runInstall(installed)
   }
   catch(e) {
     handleError(e)
@@ -175,6 +183,11 @@ function logInstalled(deps) {
   console.log(`  Installed ${deps.length} packages`.bold)
   deps.forEach(dep => console.log(`  ✓ ${dep}`.green))
   console.log()
+}
+
+export function isInstalling() {
+  log(LOG, 'isInstalling()', _isInstalling)
+  return _isInstalling
 }
 
 // check for install finish
