@@ -212,7 +212,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
             browserNode = '_flintdevtools'
 
           ReactDOM.render(
-            <StyleRoot>
+            <StyleRoot className="__flintRoot">
               <Main />
             </StyleRoot>,
             document.getElementById(browserNode)
