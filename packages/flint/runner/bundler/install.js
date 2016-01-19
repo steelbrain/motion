@@ -61,13 +61,11 @@ export async function getNew(requires, installed) {
 export async function installAll(requires) {
   log(LOG, 'installAll')
   try {
-    if (!requires) requires = cache.getImports()
+    requires = requires || cache.getImports()
 
     // nothing to install
-    if (!requires.length) {
-      if (!_isInstalling && opts.get('hasRunInitialBuild'))
-        opts.set('hasRunInitialInstall', true)
-    }
+    if (!requires.length && !_isInstalling && opts.get('hasRunInitialBuild'))
+      opts.set('hasRunInitialInstall', true)
 
     // determine whats new
     const installed = await readInstalled()
