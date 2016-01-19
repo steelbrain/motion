@@ -1,7 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
 import React from 'react'
 import raf from 'raf'
-import Radium from 'flint-radium'
+import Radium from './lib/radium'
 
 import phash from './lib/phash'
 import cloneError from './lib/cloneError'
