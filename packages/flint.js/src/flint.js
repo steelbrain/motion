@@ -360,7 +360,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
     inspect(path, cb) {
       Internal.inspector[path] = cb
-      setInspector(path)
+      Internal.setInspector(path)
     }
   }
 

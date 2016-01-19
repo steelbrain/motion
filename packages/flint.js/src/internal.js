@@ -5,14 +5,6 @@
 let internals = {}
 
 export function init(name) {
-  function setInspector(path) {
-    if (Internal.inspector[path]) {
-      let props = Internal.viewsAtPath[path].props
-      const state = Internal.getCache[path]
-      Internal.inspector[path](props, state)
-    }
-  }
-
   const Internal = internals[name] = {
     opts: window.__flintopts, // sent from runner
     views: {},
@@ -51,6 +43,14 @@ export function init(name) {
       return Internal.editor && Internal.editor.live
     },
 
+    setInspector(path) {
+      if (Internal.inspector[path]) {
+        let props = Internal.viewsAtPath[path].props
+        const state = Internal.getCache[path]
+        Internal.inspector[path](props, state)
+      }
+    },
+
     // devtools
     inspector: {},
     viewsAtPath: {},
@@ -62,7 +62,7 @@ export function init(name) {
     setCache(path, name, val) {
       Internal.getCache[path][name] = val
       // when devtools inspecting
-      setInspector(path)
+      Internal.setInspector(path)
     }
   }
 
