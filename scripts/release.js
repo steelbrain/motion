@@ -95,7 +95,7 @@ else {
 }
 
 // always release flint & always last
-if (!_.has(packages, 'flint'))
+if (packages.indexOf('flint') < 0)
   packages.push('flint')
 
 // release
