@@ -1,5 +1,4 @@
 import webpack from 'webpack'
-import { Promise } from 'bluebird'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import readInstalled from './lib/readInstalled'

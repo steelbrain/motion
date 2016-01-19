@@ -1,4 +1,3 @@
-import { Promise } from 'bluebird'
 import readInstalled from './lib/readInstalled'
 import writeInstalled from './lib/writeInstalled'
 import { _, log, handleError } from '../lib/fns'

@@ -9,9 +9,6 @@ import log from './log'
 import handleError from './handleError'
 import logError from './logError'
 
-import { Promise } from 'bluebird'
-Promise.longStackTraces()
-
 const p = path.join
 
 const LOG = 'file'
@@ -23,17 +20,17 @@ const logWrap = (name, fn) => {
 }
 
 // promisify
-const rm = logWrap('rm', Promise.promisify(remove))
-const mkdir = logWrap('mkdir', Promise.promisify(mkdirs))
-const readdir = logWrap('readdir', Promise.promisify(readdirp))
-const readJSON = logWrap('readJSON', Promise.promisify(jf.readFile))
-const writeJSON = logWrap('writeJSON', Promise.promisify(jf.writeFile))
-const _readFilePromise = Promise.promisify(readFile)
+const rm = logWrap('rm', promisify(remove))
+const mkdir = logWrap('mkdir', promisify(mkdirs))
+const readdir = logWrap('readdir', promisify(readdirp))
+const readJSON = logWrap('readJSON', promisify(jf.readFile))
+const writeJSON = logWrap('writeJSON', promisify(jf.writeFile))
+const _readFilePromise = promisify(readFile)
 const _readFile = logWrap('readFile', _ => _readFilePromise(_, 'utf-8'))
-const _writeFile = Promise.promisify(writeFile)
-const touch = logWrap('touch', Promise.promisify(ensureFile))
-const _copy = logWrap('copy', Promise.promisify(copy))
-const exists = logWrap('exists', Promise.promisify(stat))
+const _writeFile = promisify(writeFile)
+const touch = logWrap('touch', promisify(ensureFile))
+const _copy = logWrap('copy', promisify(copy))
+const exists = logWrap('exists', promisify(stat))
 const glob = logWrap('glob', _glob)
 
 const recreateDir = (dir) =>
@@ -56,6 +53,32 @@ function sanitize(str) {
   return str.replace(/[^a-zA-Z]/, '')
 }
 
+function promisify(callback){
+  return function promisified(){
+    const parameters = arguments
+    const parametersLength = arguments.length + 1
+    return new Promise((resolve, reject) => {
+      Array.prototype.push.call(parameters, function(error, data) {
+        if (error) {
+          reject(error)
+        } else resolve(data)
+      })
+      if (parametersLength === 1) {
+        callback.call(this, parameters[0])
+      } else if (parametersLength === 2) {
+        callback.call(this, parameters[0], parameters[1])
+      } else if (parametersLength === 3) {
+        callback.call(this, parameters[0], parameters[1], parameters[2])
+      } else if (parametersLength === 4) {
+        callback.call(this, parameters[0], parameters[1], parameters[2], parameters[3])
+      } else {
+        callback.apply(this, parameters)
+      }
+    })
+  }
+}
+
+
 export default {
   _,
   p,
@@ -77,5 +100,6 @@ export default {
   log,
   handleError,
   logError,
-  glob
+  glob,
+  promisify
 }

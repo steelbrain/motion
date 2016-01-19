@@ -1,5 +1,4 @@
 import webpack from 'webpack'
-import { Promise } from 'bluebird'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import disk from '../disk'
