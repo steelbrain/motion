@@ -13,6 +13,7 @@ import './lib/bluebirdErrorHandle'
 import './shim/root'
 import './shim/on'
 import './shim/partial'
+import internal from './internal'
 import log from './shim/log'
 import onError from './shim/flint'
 import createComponent from './createComponent'
@@ -71,59 +72,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
-  // flints internal state
-  const Internal = root._Flint = {
-    views: {},
-    opts: window.__flintopts, // sent from runner
-
-    isRendering: 0,
-    firstRender: true,
-    isDevTools: opts.app == 'devTools',
-
-    paths: {}, // cache hotreload paths
-    viewCache: {}, // map of views in various files
-    viewsInFile: {}, // current build up of running hot insertion
-    currentFileViews: null, // tracks views as file loads, for hot reloading
-    currentHotFile: null, // current file that is running
-    getCache: {}, // stores { path: { name: val } } for use in view.get()
-    getCacheInit: {}, // stores the vars after a view is first run
-
-    changedViews: [],
-    getInitialStates: [],
-    mountedViews: {},
-    lastWorkingViews: {},
-    lastWorkingRenders: {},
-
-    resetViewState() {
-      Internal.views = {}
-      Internal.mountedViews = {}
-      Internal.lastWorkingViews = {}
-    },
-
-    removeView(key) {
-      delete Internal.views[key]
-      delete Internal.mountedViews[key]
-      delete Internal.lastWorkingViews[key]
-    },
-
-    isLive() {
-      return Internal.editor && Internal.editor.live
-    },
-
-    // devtools
-    inspector: {},
-    viewsAtPath: {},
-    editor: {},
-
-    lastFileLoad: null,
-    runtimeErrors: 0,
-
-    setCache(path, name, val) {
-      Internal.getCache[path][name] = val
-      // when devtools inspecting
-      setInspector(path)
-    }
-  }
+  // init Internal
+  internal.init(opts.app)
+  let Internal = root._Flint = internal.get(opts.app)
 
   // internals
   const Tools = root._DT
@@ -140,14 +91,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
   log(Internal, Tools)
   const LastWorkingMain = LastWorkingMainFactory(Internal)
 
-  function setInspector(path) {
-    if (Internal.inspector[path]) {
-      let props = Internal.viewsAtPath[path].props
-      const state = Internal.getCache[path]
-      Internal.inspector[path](props, state)
-    }
-  }
-
   const emitter = ee({})
 
   let Flint = {
@@ -156,7 +99,7 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     internals: {},
 
     init() {
-      router.init({ onChange: Flint.render })
+      router.init(opts.app, { onChange: Flint.render })
       Flint.render()
     },
 

@@ -215,14 +215,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentWillReceiveProps(nextProps) {
         // set timeout becuase otherwise props is mutated before shouldUpdate is run
         // setTimeout(() => {
+
+        // main doesnt get props
+        if (name != 'Main') {
           this.props = nextProps
           this.runEvents('props', [this.props])
+        }
         // })
       },
 
       componentWillMount() {
         // run props before mount
-        this.runEvents('props', [this.props])
+        if (name != 'Main') {
+          this.runEvents('props', [this.props])
+        }
       },
 
       componentDidMount() {

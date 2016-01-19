@@ -1,6 +1,8 @@
 import Route from 'route-parser'
 import { createHistory } from 'history'
+import internal from '../internal'
 
+let Internal
 let history, render
 let activeID = 1
 let routes = {}
@@ -16,13 +18,15 @@ function runListeners(location) {
 }
 
 const router = {
-  init({ onChange }) {
+  init(appName, { onChange }) {
+    Internal = internal.get(appName)
     render = onChange
     history = createHistory()
 
     // router updates
     history.listen(location => {
-      router.go(location.pathname, true)
+      if (Internal.firstRender) return
+      router.go(location.pathname, { dontPush: true })
       runListeners(location)
     })
   },
@@ -41,7 +45,9 @@ const router = {
   back() { history.goBack() },
   forward() {history.goForward() },
 
-  go(path, dontPush) {
+  go(path, opts = {}) {
+    // wait for after first render
+    if (Internal.firstRender) return setTimeout(() => router.go(path, opts))
     if (!render) return
 
     // query changes
@@ -54,13 +60,10 @@ const router = {
 
     location = path
 
-    if (!dontPush)
-      history.push(path)
-
+    if (!opts.dontPush) history.push(path)
     router.next()
     router.recognize()
-    render()
-    return new Promise((res) => setTimeout(res))
+    if (!opts.dontRender) render()
   },
 
   isActive(path) {
