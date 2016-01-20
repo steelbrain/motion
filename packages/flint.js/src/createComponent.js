@@ -340,11 +340,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
         return React.cloneElement(el, props)
       },
 
-      mapChildren(children, cb) {
+      mapElements(children, cb) {
         return React.Children.map(children, cb)
       },
 
-      getTagName(child) {
+      getName(child) {
         const name = child.props && child.props.__flint && child.props.__flint.tagName
 
         // TODO does this always work, what about with react components
