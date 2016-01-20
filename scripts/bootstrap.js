@@ -3,6 +3,30 @@ require("shelljs/global")
 var path = require("path")
 var fs   = require("fs")
 
+// ensure proper npm global permissions
+var canWrite = true
+
+try {
+  var npmroot = exec('npm root -g').output.replace(/\s+/,'')
+  var testpath = path.join(npmroot, 'test123')
+  console.log('testpath', testpath)
+  fs.writeFileSync(testpath)
+  fs.unlinkSync(testpath)
+}
+catch(e) {
+  canWrite = false
+}
+
+// fix if not good
+if (!canWrite) {
+  console.log("Need to fix your global npm permissions to be owned by user... (sudo required)")
+  exec('sudo chown -R $(whoami) ~/.npm')
+  exec('sudo chown -R $(whoami) $(npm root -g)')
+  exec('sudo chown -R $(whoami) $(npm bin -g)')
+}
+
+// SETUP PACKAGES
+
 // get packages
 var packages = []
 
