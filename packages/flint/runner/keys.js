@@ -30,7 +30,8 @@ export function banner() {
 
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
-      `${prefix} `.dim+'U'.bold.dim + 'pload'.dim + newLine +
+      `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim
+    + newLine +
     (userEditor
       ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
       : '         ') +
@@ -85,17 +86,17 @@ function start() {
           console.log(opts.get('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
-          await build({ once: true })
-          console.log(`\n  Publishing to surge...`)
-          stop()
-          proc.stdout.isTTY = false
-          surge.publish({
-            postPublish() {
-              console.log('🚀🚀🚀🚀')
-              resume()
-            }
-          })({})
-          proc.stdout.isTTY = true
+          // await build({ once: true })
+          // console.log(`\n  Publishing to surge...`)
+          // stop()
+          // proc.stdout.isTTY = false
+          // surge.publish({
+          //   postPublish() {
+          //     console.log('🚀🚀🚀🚀')
+          //     resume()
+          //   }
+          // })({})
+          // proc.stdout.isTTY = true
           break
         case 'd':
           console.log("---------opts---------")
