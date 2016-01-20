@@ -20,10 +20,15 @@ import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from '.
 
 const LOG = 'gulp'
 const $ = loadPlugins()
+
 let OPTS
+let hasRunCurrentBuild = true
+let buildingOnce = false
 
 const serializeCache = _.throttle(cache.serialize, 200)
-const hasFinished = () => opts.get('hasRunInitialBuild') && opts.get('hasRunInitialInstall')
+const isBuilding = () => buildingOnce || opts.get('build')
+const hasBuilt = () => hasRunCurrentBuild && opts.get('hasRunInitialBuild')
+const hasFinished = () => hasBuilt() && opts.get('hasRunInitialInstall')
 const relative = file => path.relative(opts.get('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 const out = {
@@ -57,7 +62,7 @@ const $p = {
     plugins: [flintTransform({
       log,
       basePath: OPTS.dir,
-      production: OPTS.build,
+      production: isBuilding(),
       selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
       writeStyle,
       onMeta,
@@ -90,11 +95,18 @@ function watchDeletes() {
   }
 }
 
-export async function init() {
+export async function init({ once = false } = {}) {
   try {
     OPTS = opts.get()
 
-    if (!opts.get('build')) {
+    buildingOnce = once
+
+    // if manually running a once
+    if (once) {
+      hasRunCurrentBuild = false
+    }
+
+    if (!isBuilding()) {
       watchDeletes()
       superStream.init()
     }
@@ -120,7 +132,7 @@ export async function init() {
 
 // userStream is optional for programmatic usage
 export function buildScripts({ inFiles, outFiles, userStream }) {
-  const outDest = OPTS.build ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
+  const outDest = () => isBuilding() ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
   let curFile, lastError
   let lastSavedTimestamp = {}
 
@@ -130,13 +142,14 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
-    .pipe($.if(!OPTS.build, $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
+    .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     // ignore unlinks in pipeline
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
+
   // either user or gulp stream
   const sourceStream = userStream || gulpSrcStream
-  const stream = OPTS.build ? sourceStream : merge(sourceStream, superStream.stream)
+  const stream = isBuilding() ? sourceStream : merge(sourceStream, superStream.stream)
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
@@ -157,12 +170,12 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
         $.ignore.exclude(true)
       )
     ))
-    .pipe($.if(!OPTS.build, $.sourcemaps.write('.')))
+    .pipe($.if(() => !isBuilding(), $.sourcemaps.write('.')))
     // not sourcemap
     .pipe($.if(file => !isSourceMap(file),
       multipipe(
         pipefn(out.goodFile),
-        $.if(OPTS.build, $.concat(`${OPTS.saneName}.js`)),
+        $.if(isBuilding, $.concat(`${OPTS.saneName}.js`)),
         pipefn(markFileSuccess)
       )
     ))
@@ -189,7 +202,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return true
 
     // already done with first build
-    if (opts.get('hasRunInitialBuild'))
+    if (hasBuilt())
       return false
 
     // hide behind cached flag for now
@@ -207,7 +220,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       markDone(file)
     }
 
-    if (OPTS.build) {
+    if (isBuilding()) {
       finish()
       return false
     }
@@ -284,7 +297,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function setLastFile(file) {
-    if (OPTS.build) return
+    if (isBuilding()) return
     let name = file.path.replace(OPTS.appDir, '')
     if (name.charAt(0) != '/') name = '/' + name
     log(LOG, 'setLastFile', 'path', file.path, 'name', name)
@@ -305,14 +318,14 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function checkWriteable(file) {
-    if (OPTS.build) {
+    if (isBuilding()) {
       builder.copy.styles()
     }
 
     if (userStream || lastError)
       return false
 
-    if (OPTS.build)
+    if (isBuilding())
       return true
 
     const isNew = (
@@ -330,7 +343,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function afterWrite(file) {
-    if (OPTS.build && OPTS.watch) {
+    if (isBuilding() && OPTS.watch) {
       builder.build()
       return
     }
@@ -400,7 +413,7 @@ export function buildWhileRunning() {
 }
 
 let waitingForFirstBuild = []
-function afterFirstBuild() {
+function afterBuild() {
   return new Promise((res, rej) => {
     if (hasFinished()) return res()
     else waitingForFirstBuild.push(res)
@@ -410,6 +423,8 @@ function afterFirstBuild() {
 function buildDone() {
   // remove old files from out dir
   opts.set('hasRunInitialBuild', true)
+  hasRunCurrentBuild = true
+  buildingOnce = false
   waitingForFirstBuild.forEach(res => res())
 }
 
@@ -421,4 +436,4 @@ function pipefn(fn) {
   })
 }
 
-export default { init, buildScripts, afterFirstBuild, watchForBuild }
+export default { init, buildScripts, afterBuild, watchForBuild }

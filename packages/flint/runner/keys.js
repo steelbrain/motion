@@ -8,9 +8,15 @@ import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
 import bundler from './bundler'
+import { build } from './startup'
 import cache from './cache'
 
 const proc = process // cache for keypress
+
+import Surge from 'surge'
+const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: proc.stdout })
+
+let stopped = false
 
 export function init() {
   start()
@@ -20,12 +26,11 @@ export function init() {
 export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
-
   const prefix = '  ›'
 
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
-      `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim + newLine +
+      `${prefix} `.dim+'U'.bold.dim + 'pload'.dim + newLine +
     (userEditor
       ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
       : '         ') +
@@ -47,6 +52,8 @@ function start() {
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
     if (!key) return
+    if (stopped) return
+
     log('keypress', key.name)
 
     try {
@@ -78,7 +85,17 @@ function start() {
           console.log(opts.get('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
-          // build(true)
+          await build({ once: true })
+          console.log(`\n  Publishing to surge...`)
+          stop()
+          proc.stdout.isTTY = false
+          surge.publish({
+            postPublish() {
+              console.log('🚀🚀🚀🚀')
+              resume()
+            }
+          })({})
+          proc.stdout.isTTY = true
           break
         case 'd':
           console.log("---------opts---------")
@@ -97,20 +114,22 @@ function start() {
     if (key.ctrl && key.name == 'c') {
       runner.stop()
     }
-  });
+  })
 
   resume()
 }
 
 export function resume() {
   // listen for keys
-  proc.stdin.setRawMode(true);
-  proc.stdin.resume();
+  proc.stdin.setRawMode(true)
+  proc.stdin.resume()
+  stopped = false
 }
 
 export function stop() {
-  proc.stdin.setRawMode(false);
+  proc.stdin.setRawMode(false)
   proc.stdin.pause()
+  stopped = true
 }
 
 export default {

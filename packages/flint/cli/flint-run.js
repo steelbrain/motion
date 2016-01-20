@@ -22,7 +22,14 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     .option('--cached', 'run from cache for speedup (may break)')
     .parse(process.argv)
 
-  Program.version = require('../package.json').version
+  let opts = {
+    version: require('../package.json').version,
+    debug: Program.debug,
+    port: Program.port,
+    host: Program.host,
+    pretty: Program.pretty,
+    cached: Program.cached,
+  }
 
   runner.run(Program)
 })
