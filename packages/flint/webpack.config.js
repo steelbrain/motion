@@ -1,7 +1,19 @@
 var webpack = require('webpack')
 var path = require('path')
 var fs = require('fs')
+var _ = require('lodash')
+
 var nodeModules = fs.readdirSync('node_modules')
+
+// let inline a few of the node modules for performance
+// TODO this can be done but has to be very careful (ex commander is bad, would be included in multiple)
+// once done we can move these to "devDependendencies"
+// var nodeModules = _.difference(nodeModules, [
+//   'deepmerge',
+//   'cors',
+//   'globby',
+//   'replace-ext',
+// ])
 
 var banners = [
   'require("source-map-support").install();'
@@ -18,6 +30,7 @@ module.exports = {
     'flint-new': './cli/flint-new',
     'flint-run': './cli/flint-run',
     'flint-update': './cli/flint-update',
+    'flint-up': './cli/flint-up',
   },
   target: 'node',
   devtool: 'sourcemap',

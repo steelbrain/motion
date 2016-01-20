@@ -324,8 +324,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       clone(el, props) {
+        if (typeof el !== 'object')
+          throw new Error(`You're attempting to clone something that isn't a tag! In view ${this.name}. Attempted to clone: ${el}`)
+
         // move the parent styles source to the cloned view
-        if (el.props.__flint) {
+        if (el.props && el.props.__flint) {
           let fprops = el.props.__flint
 
           fprops.parentName = this.name
