@@ -1,6 +1,6 @@
 {
   "name": "flint-js",
-  "version": "1.4.28",
+  "version": "1.4.29",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.release.js",
