@@ -324,6 +324,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       clone(el, props) {
+        // TODO better checks and warnings, ie if they dont pass in element just props
         if (!el) return el
         if (typeof el !== 'object')
           throw new Error(`You're attempting to clone something that isn't a tag! In view ${this.name}. Attempted to clone: ${el}`)
@@ -337,6 +338,17 @@ export default function createComponent(Flint, Internal, name, view, options = {
         }
 
         return React.cloneElement(el, props)
+      },
+
+      mapChildren(children, cb) {
+        return React.Children.map(children, cb)
+      },
+
+      getTagName(child) {
+        const name = child.props && child.props.__flint && child.props.__flint.tagName
+
+        // TODO does this always work, what about with react components
+        return name
       },
 
       // helpers for controlling re-renders
