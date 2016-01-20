@@ -324,6 +324,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       clone(el, props) {
+        if (!el) return el
         if (typeof el !== 'object')
           throw new Error(`You're attempting to clone something that isn't a tag! In view ${this.name}. Attempted to clone: ${el}`)
 
