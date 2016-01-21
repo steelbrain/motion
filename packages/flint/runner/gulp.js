@@ -17,6 +17,7 @@ import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
+import wrapJS from 'gulp-wrap-js'
 
 const LOG = 'gulp'
 const $ = loadPlugins()
@@ -190,6 +191,11 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = ${wrapFnName}
 }`
 
+  // function viewFileTemplate(location, contents) {
+  //   // preserve line numbers
+  //   return `!function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}();`
+  // }
+
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
@@ -197,25 +203,23 @@ if (typeof module !== 'undefined' && module.exports) {
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
     .pipe($p.flint.pre())
-    .pipe($.wrap((data, ...args) => {
-      const location = cache.name(data.file.path)
-      const contents = data.contents.toString('utf8')
-
-      // preserve line numbers
-      return `!function(){ Flint.file('${location}',function(require, exports){ ${contents}
-  })
-}();`
+    .pipe($.sourcemaps.init())
+    .pipe($p.babel())
+    // wrap views in own scope (Flint.file)
+    .pipe(pipefn(file => {
+      console.log(file.contents.toString())
     }))
+    // .pipe($.if(file => !file.isInternal,
+    //   wrapJS(`!function(){ Flint.file("<%= file.relative %>",function(require, exports){ {%= body %}\n  })\n}();`)
+    // ))
+    .pipe($p.flint.post())
+    .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe($.if(isBuilding,
       multipipe(
         $.concat(`${name}.js`),
         $.wrap(wrapTemplate)
       )
     ))
-    .pipe($.sourcemaps.init())
-    .pipe($p.babel())
-    .pipe($p.flint.post())
-    .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     // is internal
     .pipe($.if(file => file.isInternal,
       multipipe(
@@ -346,7 +350,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
     logError(error, curFile)
 
-    cache.addError(error.fileName, error)
+    cache.addError(error.fileName || '', error)
     bridge.message('compile:error', { error }, 'error')
   }
 
@@ -485,8 +489,15 @@ function buildDone() {
 
 function pipefn(fn) {
   return through.obj(function(file, enc, next) {
-    fn && fn(file)
-    next(null, file);
+    let result = fn && fn(file)
+
+    if (typeof result == 'string') {
+      file.contents = new Buffer(result)
+      next(null, file)
+      return
+    }
+
+    next(null, file)
   })
 }
 

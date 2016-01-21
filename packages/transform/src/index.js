@@ -238,19 +238,41 @@ export default function createPlugin(options) {
 
     return new Plugin("flint-transform", {
       visitor: {
-        // Program: {
-        //   exit(node, parent, scope, file) {
-        //     const path = relativePath(file.opts.filename)
-        //
-        //      // add prefix / suffix
-        //      console.log(node)
-        //      node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
-        //      node.body.push(t.identifier(fileSuffix))
-        //   }
-        // },
+        // program = file because we pass in one at a time
+        Program: {
+          enter() {
+            hasView = false
+          },
 
-        File() {
-          hasView = false
+          exit(node, parent, scope, file) {
+            const location = relativePath(file.opts.filename)
+
+             // add prefix / suffix
+             console.log(node.body)
+
+             if (hasView) {
+              //  !function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}();
+
+                console.log('has view')
+
+
+
+                node.body = [t.expressionStatement(
+                  t.callExpression(t.functionExpression(null, [], t.blockStatement([
+                    t.callExpression(t.identifier('Flint.file'), [t.literal(location),
+                      t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
+                        t.blockStatement([
+                          node.body[0]
+                        ])
+                      )
+                    ])
+                  ])), [])
+                )]
+             }
+
+            //  node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
+            //  node.body.push(t.identifier(fileSuffix))
+          }
         },
 
         ExportDeclaration() {
@@ -277,7 +299,7 @@ export default function createPlugin(options) {
 
         ViewStatement: {
           enter(node, parent, scope, file) {
-            // hasView = true
+            hasView = true
             keyBase = {}
 
             const name = node.name.name
