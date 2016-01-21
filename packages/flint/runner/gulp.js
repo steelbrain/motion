@@ -151,7 +151,7 @@ export function bundleApp() {
     appFile
   ]
 
-  const isMinifying = !opts.get('nominify')
+  const isMinifying = !opts.get('nomin')
   if (isMinifying) console.log('  Minifying...'.dim)
 
   return new Promise((resolve, reject) => {

@@ -24,7 +24,7 @@ export default function FlintApp({ name }) {
             node.body = [t.expressionStatement(
               // window.flintRun_app = function(){}
               t.assignmentExpression('=',
-                t.identifier(`window.${wrapFnName}`),
+                t.identifier(`exports["${wrapFnName}"]`),
                 //wrapFnName
                 t.functionExpression(null, [t.identifier('node'), t.identifier('runtime'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
                   // var Flint = runtime(node, opts, cb)

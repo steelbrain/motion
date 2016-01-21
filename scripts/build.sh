@@ -54,7 +54,7 @@ if [ "$1" = "--watch" ]; then
           sleep 1
           cd ../..
           cd apps/tools
-          flint build --watch --nominify &
+          flint build --watch --nomin &
           cd ../..
           cd packages/cli
         fi

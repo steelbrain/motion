@@ -1,5 +1,5 @@
-import { compileError, compileSuccess } from './errors';
-import removeFlintExt from '../lib/flintExt';
+import { compileError, compileSuccess } from './errors'
+import removeFlintExt from '../client/lib/flintExt'
 import socket from './socket'
 
 export default function run(browser, opts) {

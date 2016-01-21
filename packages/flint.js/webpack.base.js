@@ -3,8 +3,8 @@ var path = require('path');
 
 module.exports = function(opts) {
   var entry = {
-    flint: './src/main',
-    devtools: './src/tools/main',
+    flint: './client/flint',
+    devtools: './tools/index',
   }
 
   var plugins = [
@@ -49,6 +49,8 @@ module.exports = function(opts) {
   //   entry['babel-runtime'] = ['babel-runtime']
   // }
 
+  var target = opts.libraryTarget || 'commonjs'
+
   return {
     target: opts.target || 'web',
     entry: opts.entry || entry,
@@ -70,8 +72,8 @@ module.exports = function(opts) {
             stage: 2,
             optional: ['runtime']
           },
-          include: [path.resolve(__dirname, 'src')],
-          exclude: [path.resolve(__dirname, 'src', 'vendor')]
+          include: [path.resolve(__dirname, 'client'), path.resolve(__dirname, 'tools')],
+          exclude: [path.resolve(__dirname, 'client', 'vendor')]
         },
         { test: /\.json$/, loader: 'json-loader' },
       ]
@@ -79,8 +81,8 @@ module.exports = function(opts) {
 
     output: {
       path: path.join(__dirname, 'dist'),
-      filename: opts.name ? '[name].'+opts.name+'.js' : '[name].js'
-      // libraryTarget: opts.libraryTarget
+      filename: opts.name ? '[name].'+opts.name+'.js' : '[name].js',
+      // libraryTarget: target || opts.libraryTarget
     },
 
     plugins: plugins,

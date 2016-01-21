@@ -72,6 +72,12 @@ async function getScripts({ disableTools }) {
       '<script src="/__/flint.dev.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/__/devtools.dev.js"></script>',
+      `<script>
+        var Flint = exports['flint']
+        Flint.init()
+      </script>
+      `,
+
       // devtools
       disableTools ? '' : [
         '<script src="/__/tools/externals.js"></script>',
@@ -82,7 +88,11 @@ async function getScripts({ disableTools }) {
       // user files
       newLine,
       '<!-- APP -->',
-      `<script>window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })</script>`,
+      `<script>
+        var Flint = exports['flint']
+        Flint.init()
+        window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })
+      </script>`,
       '<script src="/__/externals.js" id="__flintExternals"></script>',
       '<script src="/__/internals.js" id="__flintInternals"></script>',
       scriptTags(files),

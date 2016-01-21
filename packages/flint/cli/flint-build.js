@@ -16,7 +16,7 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     // .option('-i, --isomorphic', 'render template isomorphic')
     .option('--reset', 'resets cache, internals, bundles')
     .option('--cached', 'run from cache for speedup (may break)')
-    .option('--nominify', 'avoid minification')
+    .option('--nomin', 'avoid minification')
     .parse(process.argv)
 
   let opts = {
@@ -26,7 +26,7 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     debug: Program.debug,
     reset: Program.reset,
     cached: Program.cached,
-    nominify: Program.nominify,
+    nomin: Program.nomin,
     pretty: true,
   }
 

@@ -32,7 +32,7 @@ function setAll(opts) {
   OPTS.pretty = opts.pretty
   OPTS.reset = opts.reset
   OPTS.cached = opts.cached
-  OPTS.nominify = opts.nominify
+  OPTS.nomin = opts.nomin
 
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
