@@ -21,7 +21,8 @@ type CacheState = {
     name: File;
     time: Date;
   };
-  imports: ImportArray;
+  externals: ImportArray;
+  internals: ImportArray;
 }
 
 let previousCache: CacheState
@@ -176,20 +177,20 @@ const Cache = {
   },
 
   _getFileKeys(key) {
-    const result = Object.keys(cache.files).map(file => cache.files[file][key]).filter(x => !!x)
-    log(LOG, '_getFileKeys: ', allImports)
+    const result = _.flatten(Object.keys(cache.files).map(file => cache.files[file][key])).filter(x => !!x)
+    log(LOG, '_getFileKeys: ', result)
     return result
   },
 
   // npm
   getExternals(file?: string) {
-    if (!file) return cache._getFileKeys('externals')
+    if (!file) return Cache._getFileKeys('externals')
     return cache.files[relative(file)].externals
   },
 
   // ./local
   getInternals(file?: string) {
-    if (!file) return cache._getFileKeys('internals')
+    if (!file) return Cache._getFileKeys('internals')
     return cache.files[relative(file)].internals
   },
 

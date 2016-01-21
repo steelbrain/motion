@@ -1,5 +1,6 @@
 import bridge from '../../bridge'
 import opts from '../../opts'
+import cache from '../../cache'
 import log from '../../lib/log'
 
 // messaging
@@ -38,5 +39,9 @@ export function onInstalled() {
 
 export function onInternalInstalled() {
   if (avoid()) return
-  bridge.message('internals:reload', {})
+
+  const importers = cache.getInternals()
+  console.log('importers', importers)
+
+  bridge.message('internals:reload', { importers })
 }
