@@ -1,3 +1,12 @@
+## 1.4.39
+
+- Another big internal refactor that brings big upgrades to Flint's structure. No longer is it doing
+  a ton of stuff on window. Now all flint apps and flint itself use commonjs to run in the browser.
+
+- This makes sourcemaps work in production
+
+- Also makes sourcemaps for external files and internals work in development
+
 ## 1.4.26
 
 - Big internal refactor to cleanup number of requires, should greatly reduce install time
