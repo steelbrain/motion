@@ -27,8 +27,8 @@ function logProgress(tag, name, index, total) {
   log('bundler', 'logProgress', tag, name)
 
   const out = total
-    ? ` ${index+1} of ${total}: ${name}`
-    : `${tag}: ${name}`
+    ? `  ${index+1} of ${total}: ${name}`
+    : `  ${tag}: ${name}`
 
   if (opts.get('build'))
     console.log(out)

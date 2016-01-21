@@ -1,7 +1,8 @@
-var Program = require('commander')
-var runner = require('../runner')
-var colors = require('colors')
-var fs = require('fs')
+import Program from 'commander'
+import colors from 'colors'
+import fs from 'fs'
+import runner from '../runner'
+import { name, version } from '../package.json'
 
 fs.stat(process.cwd() + '/.flint', function(err, res) {
   if (err || !res) {
@@ -19,7 +20,8 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     .parse(process.argv)
 
   let opts = {
-    version: require('../package.json').version,
+    name,
+    version,
     watch: Program.watch,
     debug: Program.debug,
     reset: Program.reset,

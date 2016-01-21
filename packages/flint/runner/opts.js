@@ -21,6 +21,7 @@ function setAll(opts) {
   // from cli
   OPTS = {}
 
+  OPTS.name = opts.name || path.basename(process.cwd())
   OPTS.version = opts.version
   OPTS.debug = opts.debug
   OPTS.port = opts.port
@@ -31,6 +32,7 @@ function setAll(opts) {
   OPTS.cached = opts.cached
   OPTS.nominify = opts.nominify
 
+  OPTS.saneName = sanitize(OPTS.name)
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
 
@@ -63,9 +65,6 @@ function setAll(opts) {
   OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
 
   OPTS.config = {}
-
-  OPTS.name = path.basename(process.cwd())
-  OPTS.saneName = sanitize(OPTS.name)
 
   var folders = OPTS.dir.split('/')
   OPTS.name = folders[folders.length - 1]

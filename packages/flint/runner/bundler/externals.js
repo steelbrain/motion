@@ -4,7 +4,7 @@ import handleWebpackErrors from './lib/handleWebpackErrors'
 import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
-import depRequireString from './lib/depRequireString'
+import requireString from './lib/requireString'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, path, writeJSON, writeFile } from '../lib/fns'
@@ -31,14 +31,7 @@ export async function installExternals(filePath, source) {
 // read externals.path => write externals.in
 async function externalsPathsToIn() {
   const fullpaths = await disk.externalsPaths.read()
-  const requireString = `
-    var packages = {
-      ${fullpaths.map(name => depRequireString(name, 'packages')).join('')}
-    }
-
-    module.exports = packages
-  `
-  await disk.externalsIn.write((_, write) => write(requireString))
+  await disk.externalsIn.write((_, write) => write(requireString(fullpaths)))
 }
 
 async function packExternals() {

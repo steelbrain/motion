@@ -142,34 +142,37 @@ export async function init({ once = false } = {}) {
 // used for build
 export function bundleApp() {
   const buildDir = p(opts.get('buildDir'), '_')
+  const appFile = p(buildDir, `${OPTS.saneName}.js`)
   const deps = opts.get('deps')
 
   const inFiles = [
     deps.internalsOut,
     deps.externalsOut,
-    p(buildDir, `${OPTS.saneName}.js`),
+    appFile
   ]
+
+  const isMinifying = !opts.get('nominify')
+  if (isMinifying) console.log('  Minifying...'.dim)
 
   return new Promise((resolve, reject) => {
     gulp.src(inFiles)
       // sourcemap
       .pipe($.sourcemaps.init())
-      .pipe($.order(inFiles))
-      // babel wrap in app closure
-      .pipe($.concat(`${OPTS.saneName}.prod.js`))
-      .pipe(pipefn(() => {
-        console.log('  Minifying...'.dim)
-      }))
-      .pipe(babel({
-        whitelist: [],
-        retainLines: true,
-        comments: true,
-        plugins: [flintTransform.app({ name: opts.get('saneName') })],
-        extra: { production: process.env.production },
-        compact: true
-      }))
+      // wrap app in closure
+      .pipe($.if(file => {
+          return file.path == appFile
+        }, babel({
+          whitelist: [],
+          retainLines: true,
+          comments: true,
+          plugins: [flintTransform.app({ name: opts.get('saneName') })],
+          extra: { production: process.env.production },
+          compact: true
+        })
+      ))
+
       // uglify
-      .pipe($.if(!opts.get('nominify'), $.uglify()))
+      .pipe($.if(isMinifying, $.uglify()))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(buildDir))
       .on('end', resolve)

@@ -3,7 +3,7 @@ import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import readInstalled from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
-import depRequireString from './lib/depRequireString'
+import requireString from './lib/requireString'
 import hasExports from '../lib/hasExports'
 import bridge from '../bridge'
 import cache from '../cache'
@@ -28,16 +28,7 @@ export async function bundleInternals() {
 
 async function writeInternalsIn() {
   const files = cache.getExported()
-  const requireString = `
-    var packages = {
-      ${files.map(f => depRequireString(f.replace(/\.js$/, ''), 'internals', './internal/')).join('')}
-    }
-
-    module.exports = packages
-  `
-
-  log(LOG, 'writeInternalsIn', requireString)
-  await writeFile(opts.get('deps').internalsIn, requireString)
+  await writeFile(opts.get('deps').internalsIn, requireString(files, './internal/'))
 }
 
 let runningBundle = null
@@ -62,7 +53,7 @@ export async function checkInternals(file, source) {
 export function webpackUserExternals() {
   const imports = cache.getImports()
   const externalsObj = imports.reduce((acc, cur) => {
-    acc[cur] = `Flint.packages["${cur}"]`
+    acc[cur] = cur
     return acc
   }, {})
 
