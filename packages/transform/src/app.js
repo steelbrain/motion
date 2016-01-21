@@ -28,7 +28,7 @@ export default function FlintApp({ name }) {
                         [].concat(
                           node.body,
                           t.expressionStatement(
-                            t.callExpression(t.identifier('Flint.init'), [])
+                            t.callExpression(t.identifier('Flint.start'), [])
                           )
                         )
                       ) // end blockStatement
