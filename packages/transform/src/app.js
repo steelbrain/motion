@@ -25,10 +25,23 @@ export default function FlintApp({ name }) {
       Program: {
         exit(node) {
           node.body = [t.expressionStatement(
+            // window.flintRun_app = function(){}
             t.assignmentExpression('=',
               t.identifier(`window.${wrapFnName}`),
-              t.functionExpression(wrapFnName, [t.identifier('node'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
+              t.functionExpression(wrapFnName, [t.identifier('node'), t.identifier('runtime'), t.idenfitier('opts'), t.identifier('cb')], t.blockStatement([
+                // var Flint = runtime(node, opts, cb)
+                t.assignmentExpression('=', t.identifier('Flint'), t.callExpression(t.idenfitier('runtime'), [
+                  t.idenfitier('node'), t.idenfitier('opts'), t.idenfitier('cb')
+                ])),
 
+                // closure (function(Flint) {})(Flint)
+                t.callExpression(
+                  t.functionExpression(null,
+                    [t.identifier('Flint')],
+                    t.blockStatement(node.body)
+                  ),
+                  [t.idenfitier('Flint')]
+                )
               ]))
             )
           )]
