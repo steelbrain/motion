@@ -72,11 +72,12 @@ async function getScripts({ disableTools }) {
       '<script src="/__/flint.dev.js"></script>',
       '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/__/devtools.dev.js"></script>',
-      `<script>
-        var Flint = exports['flint']
-        Flint.init()
-      </script>
-      `,
+`
+  <script>
+    var Flint = exports['flint']
+    Flint.init()
+  </script>
+`,
 
       // devtools
       disableTools ? '' : [
@@ -94,8 +95,8 @@ async function getScripts({ disableTools }) {
       '<!-- APP -->',
 `
   <script>
-    // set up for dev mode, essentially faking a closure on window scope
-    Flint = Flint.run(window.renderToID || "_flintapp")
+    // set up for dev mode, essentially faking a closure on window
+    Flint = Flint.run(`${OPTS.saneName}`)
   </script>
 `,
       '<script src="/__/externals.js" id="__flintExternals"></script>',

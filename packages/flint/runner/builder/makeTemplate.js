@@ -20,10 +20,21 @@ export default async function makeTemplate() {
       .replace('<!-- SCRIPTS -->', [
         '<script src="/_/react.prod.js"></script>',
         '  <script src="/_/flint.prod.js"></script>',
-        `  <script>var Flint = flintRun_${OPTS.saneName}("_flintapp", runFlint, { app: "${OPTS.saneName}" });</script>`,
+`
+  <script>
+    var Flint = exports['flint']
+    Flint.init()
+  </script>
+`,
         '  <script src="/_/externals.js"></script>',
         '  <script src="/_/internals.js"></script>',
         '  <script src="/_/'+OPTS.saneName+'.js"></script>',
+
+`
+  <script>
+    Flint.run("${OPTS.saneName}")
+  </script>
+`
       ].join("\n"))
 
     log('makeTemplate', outFile, template)

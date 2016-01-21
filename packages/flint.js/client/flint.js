@@ -90,11 +90,16 @@ const Flint = {
   },
 
   // run an app
-  run(browserNode, app, afterRenderCb) {
+  run(name, _opts, afterRenderCb) {
+    // default opts
+    const opts = Object.assign({
+      node: '_flintapp'
+    }, _opts)
+
     const ID = ''+Math.random()
 
     // init require
-    root.require.setApp(ID)
+    root.require.setApp(name)
     // init Internal
     internal.init(ID)
     let Internal = root._Flint = internal.get(ID)
@@ -149,7 +154,7 @@ const Flint = {
       styleClasses: {},
       styleObjects: {},
 
-      render(app, node) {
+      render() {
         if (Flint.preloaders.length) {
           return Promise
             .all(Flint.preloaders.map(loader => typeof loader == 'function' ? loader() : loader))
@@ -162,27 +167,28 @@ const Flint = {
           Internal.isRendering++
           if (Internal.isRendering > 3) return
 
+          // find Main
           let Main = Internal.views.Main && Internal.views.Main.component
-
           if (!Main && Internal.lastWorkingRenders.Main)
             Main = LastWorkingMain
-
           if (!Main)
             Main = MainErrorView
 
-          if (!browserNode) {
+          // server render
+          if (!opts.node) {
             Flint.renderedToString = React.renderToString(<Main />)
             afterRenderCb && afterRenderCb(Flint.renderedToString)
           }
+          // browser render
           else {
             if (window.__isDevingDevTools)
-              browserNode = '_flintdevtools'
+              opts.node = '_flintdevtools'
 
             ReactDOM.render(
               <StyleRoot className="__flintRoot">
                 <Main />
               </StyleRoot>,
-              document.getElementById(browserNode)
+              document.getElementById(opts.node)
             )
           }
 
@@ -370,6 +376,12 @@ const Flint = {
 
     // prevent overwriting
     Object.freeze(Flint)
+
+    // if given an app, run it
+    if (name && root.exports[name]) {
+      const app = root.exports[name]
+      app(Flint, opts)
+    }
 
     return Flint
   }

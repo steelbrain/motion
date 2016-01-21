@@ -11,16 +11,14 @@ export default function FlintApp({ name }) {
               t.assignmentExpression('=',
                 t.identifier(`exports["${name}"]`),
                 //wrapFnName
-                t.functionExpression(null, [t.identifier('node'), t.identifier('runtime'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
+                t.functionExpression(null, [t.identifier('Flint'), t.identifier('opts')], t.blockStatement([
                   // var Flint = runtime(node, opts, cb)
-                  t.variableDeclaration('var', [
-                    t.variableDeclarator(
-                      t.identifier('Flint'),
-                      t.callExpression(t.identifier('runtime'), [
-                        t.identifier('node'), t.identifier('opts'), t.identifier('cb')
-                      ])
-                    )
-                  ]),
+                  // t.variableDeclaration('var', [
+                  //   t.variableDeclarator(
+                  //     t.identifier('Flint'),
+                  //     t.identifier('opts.Flint')
+                  //   )
+                  // ]),
 
                   // closure (function(Flint) {})(Flint)
                   t.callExpression(

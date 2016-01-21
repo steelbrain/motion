@@ -6,15 +6,13 @@ export default function depRequireString(names, prefix = '') {
   // set them in a try/catch so if one fails they all dont fail
 
   return `
-    var packages = {}
+  var packages = {}
 
-    ${cleanNames.map(name => {
-      return `
-      packages["${name}"] = require("${prefix}${name}")
-      `
-    }).join("\n")}
+  ${cleanNames.map(name => {
+    return `  packages["${name}"] = require("${prefix}${name}");\n`
+  }).join('')}
 
-    window.require.setApp("${opts.get('saneName')}")
-    module.exports = packages
+  window.require.setApp("${opts.get('saneName')}")
+  module.exports = packages
   `
 }
