@@ -20,7 +20,7 @@ export async function bundleExternals(opts = {}) {
 
 export async function installExternals(filePath, source) {
   const found = cache.getImports(filePath)
-  console.log(LOG, 'installExternals', filePath, 'found', found)
+  log(LOG, 'installExternals', filePath, 'found', found)
 
   cache.setFileImports(filePath, found)
 

@@ -52,7 +52,7 @@ export async function willInstall(filePath) {
 export async function getNew(requires, installed) {
   const names = normalize(requires)
   const fresh = _.difference(names, installed, installing)
-  console.log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
+  log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
   return fresh
 }
 

@@ -210,8 +210,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       let imports = fileImports[file.path]
       let all = [].concat(babelExternals, imports)
 
-      console.log('BABEL_EXTERNSALS', babelExternals, 'IMPORTS', imports)
-
       cache.setFileImports(file.path, all)
     }))
     .pipe($p.flint.post())

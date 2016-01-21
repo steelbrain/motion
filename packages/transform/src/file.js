@@ -224,6 +224,7 @@ export default function createPlugin(options) {
     let inJSX = false
     let inView = null // track current view name
     let hasView = false // if file has a view
+    let hasExports = false
     let viewHasChildWithClass = false // if view calls for a child view
     let viewStyles = {} // store styles from views to be extracted
     let viewDynamicStyleKeys = {}
@@ -244,6 +245,7 @@ export default function createPlugin(options) {
         Program: {
           enter() {
             hasView = false
+            hasExports = false
             fileImports = []
           },
 
@@ -252,23 +254,27 @@ export default function createPlugin(options) {
               options.onImports(file.opts.filename, fileImports)
             }
 
-            const location = relativePath(file.opts.filename)
+            if (!hasExports) {
+              const location = relativePath(file.opts.filename)
 
-            // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
-            node.body = [t.expressionStatement(
-              // closure
-              t.callExpression(t.functionExpression(null, [], t.blockStatement([
-                t.callExpression(t.identifier('Flint.file'), [t.literal(location),
-                  t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
-                    t.blockStatement(node.body)
-                  )
-                ])
-              ])), [])
-            )]
+              // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
+              node.body = [t.expressionStatement(
+                // closure
+                t.callExpression(t.functionExpression(null, [], t.blockStatement([
+                  t.callExpression(t.identifier('Flint.file'), [t.literal(location),
+                    t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
+                      t.blockStatement(node.body)
+                    )
+                  ])
+                ])), [])
+              )]
+            }
           }
         },
 
         ExportDeclaration() {
+          hasExports = true
+
           if (hasView)
             throw new Error("Views don't need to be exported! Put your exports into files without views.")
         },

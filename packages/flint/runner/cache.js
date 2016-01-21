@@ -176,7 +176,6 @@ const Cache = {
     let externals = imports.filter(i => i.charAt(0) != '.')
 
     // we only care about externals
-    console.log('setting imports', externals)
     cacheFile.imports = externals
   },
 
