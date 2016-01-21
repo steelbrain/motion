@@ -105,9 +105,7 @@ var colors = [
     "tomato",
     "turquoise",
     "violet",
-    "wheat",
-    "yellow",
-    "yellowgreen"
+    "wheat"
 ]
 
 export default randomColor
