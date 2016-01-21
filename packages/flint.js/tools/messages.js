@@ -240,7 +240,8 @@ function reloadAllScripts() {
 
   Promise.all(scriptLoaders)
     .then(() => {
-      Flint.render()
+      debugger
+      // Flint.render()
     })
 }
 

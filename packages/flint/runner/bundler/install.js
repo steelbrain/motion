@@ -43,7 +43,7 @@ function getToInstall(requires) {
 
 // used to quickly check if a file will trigger an install
 export async function willInstall(filePath) {
-  const required = cache.getImports(filePath)
+  const required = cache.getExternals(filePath)
   const fresh = await getNew(required)
   return !!fresh.length
 }
@@ -62,7 +62,7 @@ export async function getNew(requires, installed) {
 export async function installAll(requires) {
   log(LOG, 'installAll')
   try {
-    requires = requires || cache.getImports()
+    requires = requires || cache.getExternals()
 
     // nothing to install
     if (!requires.length && !_isInstalling && opts.get('hasRunInitialBuild'))

@@ -16,7 +16,7 @@ export async function uninstall(rebundle) {
 
     // get full paths
     const installed = await readInstalled()
-    const importedPaths = cache.getImports()
+    const importedPaths = cache.getExternals()
     const imported = normalize(importedPaths)
 
     // difference, uniq

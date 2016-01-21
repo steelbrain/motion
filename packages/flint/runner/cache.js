@@ -135,11 +135,6 @@ const Cache = {
     log(LOG, 'setViews', file, views)
   },
 
-  setImports(_imports: ImportArray) {
-    log(LOG, 'setImports', _imports)
-    cache.imports = _imports
-  },
-
   isInternal(file: string) {
     const f = cache.files[relative(file)]
     return f && f.isInternal
@@ -166,36 +161,41 @@ const Cache = {
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    log(LOG, 'setFileExternals', file, cache.imports)
     let cacheFile = Cache.get(file)
+    if (!cacheFile) cacheFile = Cache.add(file)
 
-    if (!cacheFile)
-      cacheFile = Cache.add(file)
+    let externals = imports
+    let internals = _.remove(externals, n => n.charAt(0) == '.')
 
-
-    let externals = imports.filter(i => i.charAt(0) != '.')
-
-    // we only care about externals
-    cacheFile.imports = externals
+    cacheFile.externals = externals
+    cacheFile.internals = internals
   },
 
   getViews(file?: string) {
     return cache.files[relative(file)].views
   },
 
-  getImports(file?: string) {
-    if (!file) {
-      let allImports = [].concat(cache.imports)
-      Object.keys(cache.files).forEach(file => {
-        const _imports = cache.files[file].imports
-        if (_imports && _imports.length)
-          allImports = allImports.concat(_imports)
-      })
-      log(LOG, 'getImports: ', allImports)
-      return allImports
-    }
+  _getFileKeys(key) {
+    const result = Object.keys(cache.files).map(file => cache.files[file][key]).filter(x => !!x)
+    log(LOG, '_getFileKeys: ', allImports)
+    return result
+  },
 
-    return cache.files[relative(file)].imports
+  // npm
+  getExternals(file?: string) {
+    if (!file) return cache._getFileKeys('externals')
+    return cache.files[relative(file)].externals
+  },
+
+  // ./local
+  getInternals(file?: string) {
+    if (!file) return cache._getFileKeys('internals')
+    return cache.files[relative(file)].internals
+  },
+
+  // npm + local
+  getImports(file?: string) {
+    return [].concat(cache.getInterals(file), cache.getExternals(file))
   },
 
   addError(file : string, error : object) {

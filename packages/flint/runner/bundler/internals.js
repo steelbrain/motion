@@ -51,7 +51,7 @@ export async function checkInternals(file, source) {
 
 // let internals use externals
 export function webpackUserExternals() {
-  const imports = cache.getImports()
+  const imports = cache.getExternals()
   const externalsObj = imports.reduce((acc, cur) => {
     acc[cur] = cur
     return acc
