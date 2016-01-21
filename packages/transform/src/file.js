@@ -252,26 +252,19 @@ export default function createPlugin(options) {
 
              if (hasView) {
               //  !function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}();
-
-                console.log('has view')
-
-
-
-                node.body = [t.expressionStatement(
-                  t.callExpression(t.functionExpression(null, [], t.blockStatement([
-                    t.callExpression(t.identifier('Flint.file'), [t.literal(location),
-                      t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
-                        t.blockStatement([
-                          node.body[0]
-                        ])
-                      )
-                    ])
-                  ])), [])
-                )]
+              node.body = [t.expressionStatement(
+                // closure
+                t.callExpression(t.functionExpression(null, [], t.blockStatement([
+                  t.callExpression(t.identifier('Flint.file'), [t.literal(location),
+                    t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
+                      t.blockStatement([
+                        node.body[0]
+                      ])
+                    )
+                  ])
+                ])), [])
+              )]
              }
-
-            //  node.body.unshift(t.expressionStatement(t.identifier(filePrefix(path))));
-            //  node.body.push(t.identifier(fileSuffix))
           }
         },
 

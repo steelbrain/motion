@@ -1,21 +1,17 @@
-const name = OPTS.saneName
-
-const wrapTemplate = `
-
-window.${wrapFnName} = function ${wrapFnName}(node, opts, cb) {
-  var FlintInstace = opts.Flint || runFlint;
-  var Flint = FlintInstace(node, opts, cb);
-
-  (function(Flint) {
-    <%= contents %>
-
-    ;Flint.init()
-  })(Flint);
-  }
-
-  if (typeof module !== 'undefined' && module.exports) {
-  module.exports = ${wrapFnName}
-}`
+// window.${wrapFnName} = function ${wrapFnName}(node, opts, cb) {
+//   var FlintInstace = opts.Flint || runFlint;
+//   var Flint = FlintInstace(node, opts, cb);
+//
+//   (function(Flint) {
+//     <%= contents %>
+//
+//     ;Flint.init()
+//   })(Flint);
+// }
+//
+// if (typeof module !== 'undefined' && module.exports) {
+//   module.exports = ${wrapFnName}
+// }
 
 export default function FlintApp({ name }) {
   const wrapFnName = `flintRun_${name}`
@@ -38,7 +34,14 @@ export default function FlintApp({ name }) {
                 t.callExpression(
                   t.functionExpression(null,
                     [t.identifier('Flint')],
-                    t.blockStatement(node.body)
+                    t.blockStatement(
+                      [].concat(
+                        node.body,
+                        t.expressionStatement(
+                          t.callExpression(t.idenfitier('Flint', [t.idenfitier('init')]))
+                        )
+                      )
+                    )
                   ),
                   [t.idenfitier('Flint')]
                 )
