@@ -86,7 +86,7 @@ const $p = {
   flintApp: () => babel({
     stage: 2,
     blacklist: ['es6.tailCall', 'strict', 'flow'],
-    retainLines: OPTS.pretty ? false : true,
+    retainLines: true,
     comments: true,
     plugins: [flintTransform.app({
       name: opts.get('saneName')
@@ -152,22 +152,31 @@ export async function init({ once = false } = {}) {
   }
 }
 
-// used for production builds
+// used for build
 export function bundleApp() {
   const buildDir = p(opts.get('buildDir'), '_')
-  const appFile = p(buildDir, `${OPTS.saneName}.js`)
   const deps = opts.get('deps')
 
+  const inFiles = [
+    deps.internalsOut,
+    deps.externalsOut,
+    p(buildDir, `${OPTS.saneName}.js`),
+  ]
+
+  console.log('infiles', inFiles)
+
   return new Promise((resolve, reject) => {
-    gulp.src([appFile])
+    gulp.src(inFiles)
       // sourcemap
       .pipe($.sourcemaps.init())
+      .pipe($.order(inFiles))
       // babel wrap in app closure
+      .pipe($.concat(`${OPTS.saneName}.concat.js`))
       .pipe($p.flintApp())
-      // concat
-      .pipe($.concat(`${OPTS.saneName}.prod.js`))
+      // rename
+      .pipe($.rename({ extname: '.prod.js' }))
       // uglify
-      .pipe($.if(() => !opts.get('nominify'), $.uglify()))
+      .pipe($.if(!opts.get('nominify'), $.uglify()))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(buildDir))
       .on('end', resolve)
@@ -213,7 +222,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     }))
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-    .pipe($.if(isBuilding, $.concat(`${OPTS.saneName}.js`)))
     // is internal
     .pipe($.if(file => file.isInternal,
       multipipe(
@@ -230,6 +238,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
         pipefn(markFileSuccess)
       )
     ))
+    .pipe($.if(isBuilding, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.sourcemaps.write('.'))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
