@@ -51,6 +51,7 @@ const folderFromFile = (filePath) =>
 // }
 
 const Flint = {
+  // set up flint shims
   init() {
     const originalWarn = console.warn
     // filter radium warnings for now
@@ -88,22 +89,16 @@ const Flint = {
     root.require = requireFactory(root)
   },
 
-  run(app, browserNode, userOpts, afterRenderCb) {
-    const opts = Object.assign({
-      namespace: {},
-      entry: 'Main'
-    }, userOpts)
-
-    const App = app()
+  // run an app
+  run(browserNode, app, afterRenderCb) {
+    const ID = ''+Math.random()
 
     // init require
-    root.require.setApp(opts.app)
-
+    root.require.setApp(ID)
     // init Internal
-    internal.init(opts.app)
-    let Internal = root._Flint = internal.get(opts.app)
-
-    // internals
+    internal.init(ID)
+    let Internal = root._Flint = internal.get(ID)
+    // tools bridge
     const Tools = root._DT
 
     if (!process.env.production && Tools) {
@@ -119,14 +114,17 @@ const Flint = {
 
     const emitter = ee({})
 
+    //
     // begin the flintception
+    //
+
     const Flint = {
       // visible but used internally
       packages: {},
       internals: {},
 
       start() {
-        router.init(opts.app, { onChange: Flint.render })
+        router.init(ID, { onChange: Flint.render })
         Flint.render()
       },
 

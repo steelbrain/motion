@@ -83,20 +83,25 @@ async function getScripts({ disableTools }) {
         '<script src="/__/tools/externals.js"></script>',
         '<script src="/__/tools/internals.js"></script>',
         '<script src="/__/tools/flinttools.js"></script>',
-        '<script>flintRun_flinttools("_flintdevtools", runFlint, { app: "flinttools" })</script>'
+`
+  <script>
+    Flint.run("_flintdevtools", exports["flinttools"])
+  </script>
+`
       ].join(newLine),
       // user files
       newLine,
       '<!-- APP -->',
-      `<script>
-        var Flint = exports['flint']
-        Flint.init()
-        window.Flint = runFlint(window.renderToID || "_flintapp", { app: "${OPTS.name}" })
-      </script>`,
+`
+  <script>
+    // set up for dev mode, essentially faking a closure on window scope
+    Flint = Flint.run(window.renderToID || "_flintapp")
+  </script>
+`,
       '<script src="/__/externals.js" id="__flintExternals"></script>',
       '<script src="/__/internals.js" id="__flintInternals"></script>',
       scriptTags(files),
-      '<script>Flint.init()</script>',
+      '<script>Flint.start()</script>',
       '<!-- END APP -->'
     ].join(newLine)
   }

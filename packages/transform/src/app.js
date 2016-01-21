@@ -1,30 +1,15 @@
-// window.${wrapFnName} = function ${wrapFnName}(node, opts, cb) {
-//   var FlintInstace = opts.Flint || runFlint;
-//   var Flint = FlintInstace(node, opts, cb);
-//
-//   (function(Flint) {
-//     <%= contents %>
-//
-//     ;Flint.init()
-//   })(Flint);
-// }
-//
-// if (typeof module !== 'undefined' && module.exports) {
-//   module.exports = ${wrapFnName}
-// }
+// wraps your app in closure / export
 
 export default function FlintApp({ name }) {
-  const wrapFnName = `flintRun_${name}`
-
   return function FlintAppPlugin({ Plugin, types: t }) {
     return new Plugin("flint-transform-app", {
       visitor: {
         Program: {
           exit(node) {
             node.body = [t.expressionStatement(
-              // window.flintRun_app = function(){}
+              // exports["name"] = function(){}
               t.assignmentExpression('=',
-                t.identifier(`exports["${wrapFnName}"]`),
+                t.identifier(`exports["${name}"]`),
                 //wrapFnName
                 t.functionExpression(null, [t.identifier('node'), t.identifier('runtime'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
                   // var Flint = runtime(node, opts, cb)
