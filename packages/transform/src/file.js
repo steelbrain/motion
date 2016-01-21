@@ -231,40 +231,40 @@ export default function createPlugin(options) {
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
     let viewStyleNames = {} // prevent duplicate style names
+    let fileImports = []
 
     // meta-data for views for atom
     let meta = {}
     let sendingMeta = false
 
     return new Plugin("flint-transform", {
+      metadata: {group: 'builtin-trailing'},
       visitor: {
         // program = file because we pass in one at a time
         Program: {
           enter() {
             hasView = false
+            fileImports = []
           },
 
           exit(node, parent, scope, file) {
+            if (options.onImports) {
+              options.onImports(file.opts.filename, fileImports)
+            }
+
             const location = relativePath(file.opts.filename)
 
-             // add prefix / suffix
-             console.log(node.body)
-
-             if (hasView) {
-              //  !function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}();
-              node.body = [t.expressionStatement(
-                // closure
-                t.callExpression(t.functionExpression(null, [], t.blockStatement([
-                  t.callExpression(t.identifier('Flint.file'), [t.literal(location),
-                    t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
-                      t.blockStatement([
-                        node.body[0]
-                      ])
-                    )
-                  ])
-                ])), [])
-              )]
-             }
+            // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
+            node.body = [t.expressionStatement(
+              // closure
+              t.callExpression(t.functionExpression(null, [], t.blockStatement([
+                t.callExpression(t.identifier('Flint.file'), [t.literal(location),
+                  t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
+                    t.blockStatement(node.body)
+                  )
+                ])
+              ])), [])
+            )]
           }
         },
 
@@ -275,19 +275,22 @@ export default function createPlugin(options) {
 
         // transform local import paths
         ImportDeclaration(node, parent, scope, file) {
-          const isInternal = node.source.value.charAt(0) == '.'
+          const importPath = node.source.value
+
+          fileImports.push(importPath)
 
           // this ensures all paths are relative to the root, not the current file
-          if (isInternal) {
-            // const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
-            // const relImportPath = '#./' + relativePath(importPath)
-            //
-            // console.log(node)
-            //
-            // node.source.value = relImportPath
-            // node.source.rawValue = relImportPath
-            // node.source.raw = `\'${relImportPath}\'`
-          }
+          // const isInternal = importPath.charAt(0) == '.'
+          // if (isInternal) {
+          //   // const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
+          //   // const relImportPath = '#./' + relativePath(importPath)
+          //   //
+          //   // console.log(node)
+          //   //
+          //   // node.source.value = relImportPath
+          //   // node.source.rawValue = relImportPath
+          //   // node.source.raw = `\'${relImportPath}\'`
+          // }
         },
 
         ViewStatement: {

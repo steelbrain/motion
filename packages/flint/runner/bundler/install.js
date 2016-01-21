@@ -10,7 +10,6 @@ import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
 import { bundleExternals } from './externals'
 import { bundleInternals } from './internals'
-import { findExternalRequires } from './lib/findRequires'
 
 const LOG = 'externals'
 
@@ -43,8 +42,8 @@ function getToInstall(requires) {
 }
 
 // used to quickly check if a file will trigger an install
-export async function willInstall(source) {
-  const requires = findExternalRequires(source)
+export async function willInstall(filePath) {
+  const requires = cache.getImports(filePath)
   const fresh = await getNew(requires)
   return !!fresh.length
 }
@@ -53,7 +52,7 @@ export async function willInstall(source) {
 export async function getNew(requires, installed) {
   const names = normalize(requires)
   const fresh = _.difference(names, installed, installing)
-  log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
+  console.log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
   return fresh
 }
 

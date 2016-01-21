@@ -5,7 +5,6 @@ import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
 import depRequireString from './lib/depRequireString'
-import { findExternalRequires } from './lib/findRequires'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, path, writeJSON, writeFile } from '../lib/fns'
@@ -19,11 +18,11 @@ export async function bundleExternals(opts = {}) {
   if (!opts.silent) onInstalled()
 }
 
-export async function installExternals(file, source) {
-  const found = findExternalRequires(source)
-  log(LOG, 'installExternals', file, 'found', found)
+export async function installExternals(filePath, source) {
+  const found = cache.getImports(filePath)
+  console.log(LOG, 'installExternals', filePath, 'found', found)
 
-  cache.setFileImports(file, found)
+  cache.setFileImports(filePath, found)
 
   if (opts.get('build') || opts.get('hasRunInitialBuild'))
     installAll(found)

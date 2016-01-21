@@ -26,20 +26,20 @@ var Parser = {
     OPTS = opts || {}
   },
 
-  async post(file, source, next) {
+  async post(filePath, source, next) {
     try {
-      log(LOG, 'compiler///post', file)
+      log(LOG, 'compiler///post', filePath)
 
       // used to prevent hot reloads while importing new things
-      const isInstalling = await bundler.willInstall(source)
+      const isInstalling = await bundler.willInstall(filePath)
 
       // scan for imports/exports
-      const scan = () => bundler.scanFile(file, source)
+      const scan = () => bundler.scanFile(filePath, source)
       const scanImmediate = OPTS.build || !opts.get('hasRunInitialBuild')
 
       // debounced installs
       if (scanImmediate) scan()
-      else debounce(file, 400, scan)
+      else debounce(filePath, 400, scan)
 
       // debounce more for uninstall
       if (!OPTS.build)
@@ -57,7 +57,7 @@ var Parser = {
     }
   },
 
-  pre(file, source, next) {
+  pre(filePath, source, next) {
     let inView = false
     let viewNames = []
 
@@ -88,8 +88,8 @@ var Parser = {
       })
       .join("\n")
 
-    cache.add(file)
-    cache.setViews(file, viewNames)
+    cache.add(filePath)
+    cache.setViews(filePath, viewNames)
 
     next(source)
   }

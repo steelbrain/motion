@@ -166,13 +166,18 @@ const Cache = {
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    log(LOG, 'setFileImports', file, cache.imports);
+    log(LOG, 'setFileExternals', file, cache.imports)
     let cacheFile = Cache.get(file)
 
     if (!cacheFile)
       cacheFile = Cache.add(file)
 
-    cacheFile.imports = imports
+
+    let externals = imports.filter(i => i.charAt(0) != '.')
+
+    // we only care about externals
+    console.log('setting imports', externals)
+    cacheFile.imports = externals
   },
 
   getViews(file?: string) {

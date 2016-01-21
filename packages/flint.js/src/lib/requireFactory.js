@@ -2,6 +2,12 @@ const parentFolderMatch = s => s.match(/\.\.\//g)
 
 export default function requireFactory(Flint) {
   return function require(folder, name) {
+    // babel places its helpers outside Program scope, which means require is no longer bound to folder
+    if (!name) {
+      name = folder
+      folder = ''
+    }
+
     if (name.charAt(0) == '.') {
       let parentDirs = folder.split('/')
       let upDirs = parentFolderMatch(name)

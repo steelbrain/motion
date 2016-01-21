@@ -15,6 +15,7 @@ import babel from './lib/gulp-babel'
 import opts from './opts'
 import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
+import { findBabelRuntimeRequires } from './lib/findRequires'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
 import wrapJS from 'gulp-wrap-js'
@@ -48,6 +49,9 @@ export function watchForBuild() {
   return gulp.watch(SCRIPTS_GLOB, ['build'])
 }
 
+// TODO bad practice
+let fileImports = {}
+
 const $p = {
   flint: {
     pre: () => compiler('pre'),
@@ -69,6 +73,9 @@ const $p = {
       selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
       writeStyle,
       onMeta,
+      onImports(file, imports) {
+        fileImports[file] = imports
+      }
     })],
     extra: {
       production: process.env.production
@@ -198,6 +205,15 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($p.flint.pre())
     .pipe($.sourcemaps.init())
     .pipe($p.flintFile())
+    .pipe(pipefn(file => {
+      let babelExternals = findBabelRuntimeRequires(file.contents.toString())
+      let imports = fileImports[file.path]
+      let all = [].concat(babelExternals, imports)
+
+      console.log('BABEL_EXTERNSALS', babelExternals, 'IMPORTS', imports)
+
+      cache.setFileImports(file.path, all)
+    }))
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe($.if(isBuilding, $.concat(`${OPTS.saneName}.js`)))
@@ -312,6 +328,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function resetLastFile(file) {
+    fileImports[file] = false
     lastError = false
     curFile = file
     file.startTime = Date.now()
