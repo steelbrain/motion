@@ -76,7 +76,7 @@ async function getScripts({ disableTools }) {
       disableTools ? '' : [
         '<script src="/__/tools/externals.js"></script>',
         '<script src="/__/tools/internals.js"></script>',
-        '<script src="/__/tools/tools.js"></script>',
+        '<script src="/__/tools/flint-tools.js"></script>',
         '<script>flintRun_tools("_flintdevtools", runFlint, { app: "devTools" })</script>'
       ].join(newLine),
       // user files

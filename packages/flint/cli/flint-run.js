@@ -4,12 +4,9 @@ import fs from 'fs'
 import runner from '../runner'
 import { name, version } from './info'
 
-let lastArg = process.argv[process.argv.length - 1]
-
-fs.stat(process.cwd() + '/.flint', function(err,res) {
+fs.stat(process.cwd() + '/.flint', function(err, res) {
   if (err || !res) {
-    console.log()
-    console.log("Run 'flint' in a flint repo to start your development server.".green.bold)
+    console.log("\nRun 'flint' in a flint repo to start your development server.".green.bold)
     process.argv.push('--help')
   }
 
@@ -32,5 +29,5 @@ fs.stat(process.cwd() + '/.flint', function(err,res) {
     cached: Program.cached,
   }
 
-  runner.run(Program)
+  runner.run(opts)
 })

@@ -22,6 +22,8 @@ function setAll(opts) {
   OPTS = {}
 
   OPTS.name = opts.name || path.basename(process.cwd())
+  OPTS.saneName = sanitize(opts.name)
+
   OPTS.version = opts.version
   OPTS.debug = opts.debug
   OPTS.port = opts.port
@@ -32,7 +34,6 @@ function setAll(opts) {
   OPTS.cached = opts.cached
   OPTS.nominify = opts.nominify
 
-  OPTS.saneName = sanitize(opts.name)
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
 
