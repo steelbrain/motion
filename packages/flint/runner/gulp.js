@@ -130,6 +130,27 @@ export async function init({ once = false } = {}) {
   }
 }
 
+// used for production builds
+export function bundleApp() {
+  const buildDir = p(opts.get('buildDir'), '_')
+  const appFile = p(buildDir, `${OPTS.saneName}.js`)
+  const deps = opts.get('deps')
+
+  return new Promise((resolve, reject) => {
+    gulp.src([ deps.externalsOut, deps.internalsOut, appFile ])
+      // sourcemap
+      .pipe($.sourcemaps.init())
+      // concat
+      .pipe($.concat(`${OPTS.saneName}.prod.js`))
+      // uglify
+      .pipe($.if(() => !opts.get('nominify'), $.uglify()))
+      .pipe($.sourcemaps.write('.'))
+      .pipe(gulp.dest(buildDir))
+      .on('end', resolve)
+      .on('error', reject)
+  })
+}
+
 // userStream is optional for programmatic usage
 export function buildScripts({ inFiles, outFiles, userStream }) {
   const outDest = () => isBuilding() ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
@@ -151,12 +172,46 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   const sourceStream = userStream || gulpSrcStream
   const stream = isBuilding() ? sourceStream : merge(sourceStream, superStream.stream)
 
+  const name = OPTS.saneName
+  const wrapFnName = `flintRun_${name}`
+  const wrapTemplate = `
+window.${wrapFnName} = function ${wrapFnName}(node, opts, cb) {
+  var FlintInstace = opts.Flint || runFlint;
+  var Flint = FlintInstace(node, opts, cb);
+
+  (function(Flint) {
+    <%= contents %>
+
+    ;Flint.init()
+  })(Flint);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ${wrapFnName}
+}`
+
+
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
     .pipe($p.flint.pre())
+    .pipe($.wrap((data, ...args) => {
+      const location = cache.name(data.file.path)
+      const contents = data.contents.toString('utf8')
+
+      // preserve line numbers
+      return `!function(){ Flint.file('${location}',function(require, exports){ ${contents}
+  })
+}();`
+    }))
+    .pipe($.if(isBuilding,
+      multipipe(
+        $.concat(`${name}.js`),
+        $.wrap(wrapTemplate)
+      )
+    ))
     .pipe($.sourcemaps.init())
     .pipe($p.babel())
     .pipe($p.flint.post())
@@ -170,15 +225,14 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
         $.ignore.exclude(true)
       )
     ))
-    .pipe($.if(() => !isBuilding(), $.sourcemaps.write('.')))
     // not sourcemap
     .pipe($.if(file => !isSourceMap(file),
       multipipe(
         pipefn(out.goodFile),
-        $.if(isBuilding, $.concat(`${OPTS.saneName}.js`)),
         pipefn(markFileSuccess)
       )
     ))
+    .pipe($.sourcemaps.write('.'))
     .pipe($.if(checkWriteable, gulp.dest(outDest)))
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -436,4 +490,4 @@ function pipefn(fn) {
   })
 }
 
-export default { init, buildScripts, afterBuild, watchForBuild }
+export default { init, buildScripts, bundleApp, afterBuild, watchForBuild }

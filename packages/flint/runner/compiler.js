@@ -13,9 +13,6 @@ const LOG = 'gulp'
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
-const filePrefix = path => `!function(){Flint.file('${cache.name(path)}',function(require, exports){`
-const fileSuffix = `\n }) }();` // newline so it doesnt get commented out
-
 let debouncers = {}
 function debounce(key, time, cb) {
   if (debouncers[key])
@@ -50,10 +47,6 @@ var Parser = {
 
       // check internals
       const isInternal = hasExports(source)
-
-      // wrap closure if not internal file
-      if (!isInternal)
-        source = filePrefix(file) + source + fileSuffix
 
       log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'isInstalling', isInstalling)
       next(source, { isInternal, isInstalling })

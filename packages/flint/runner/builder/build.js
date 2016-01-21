@@ -16,12 +16,12 @@ export default async function build() {
     log('Building extras, template...')
     makeTemplate()
 
-    log('Building extras, copy...')
+    log('Building app...')
     await *[
       copy.assets(),
       copy.flint(),
       copy.react(),
-      copy.app()
+      gulp.bundleApp()
     ]
 
     console.log(`\n  Done! ⇢`.green.bold + `  .flint/build\n`)

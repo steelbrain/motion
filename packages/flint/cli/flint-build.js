@@ -15,6 +15,7 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     // .option('-i, --isomorphic', 'render template isomorphic')
     .option('--reset', 'resets cache, internals, bundles')
     .option('--cached', 'run from cache for speedup (may break)')
+    .option('--nominify', 'avoid minification')
     .parse(process.argv)
 
   let opts = {
