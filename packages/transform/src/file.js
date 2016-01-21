@@ -576,6 +576,12 @@ export default function createPlugin(options) {
 
         CallExpression: {
           exit(node, parent, scope) {
+            // track require() statements
+            if (node.callee && node.callee.name && node.callee.name == 'require') {
+              const arg = node.arguments && node.arguments.length && node.arguments[0].value
+              fileImports.push(arg)
+            }
+
             // mutative array methods
             if (isInView(scope)) {
               if (isMutativeArrayFunc(node)) {
