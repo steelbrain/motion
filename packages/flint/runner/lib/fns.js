@@ -50,7 +50,7 @@ async function globCopy(pattern, dest, opts = {}) {
 }
 
 function sanitize(str) {
-  return str.replace(/[^a-zA-Z]/, '')
+  return str.replace(/[^a-z-A-Z]/, '')
 }
 
 function promisify(callback){

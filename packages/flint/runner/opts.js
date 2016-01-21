@@ -32,7 +32,7 @@ function setAll(opts) {
   OPTS.cached = opts.cached
   OPTS.nominify = opts.nominify
 
-  OPTS.saneName = sanitize(OPTS.name)
+  OPTS.saneName = sanitize(opts.name)
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
 

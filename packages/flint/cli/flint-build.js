@@ -2,7 +2,7 @@ import Program from 'commander'
 import colors from 'colors'
 import fs from 'fs'
 import runner from '../runner'
-import { name, version } from '../package.json'
+import { name, version } from './info'
 
 fs.stat(process.cwd() + '/.flint', function(err, res) {
   if (err || !res) {
