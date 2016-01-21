@@ -11,7 +11,7 @@ export function init(name) {
 
     isRendering: 0,
     firstRender: true,
-    isDevTools: name == 'devTools',
+    isDevTools: name == 'flinttools',
 
     paths: {}, // cache hotreload paths
     viewCache: {}, // map of views in various files
