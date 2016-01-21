@@ -413,7 +413,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (lastError) return
 
     // avoid if installing
-    if (bundler.isInstalling()) return
+    if (bundler.isInstalling() || file.isInstalling) return
 
     // ADD
     bridge.message('script:add', file.message)
