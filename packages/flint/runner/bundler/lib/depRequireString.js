@@ -1,5 +1,5 @@
 export default function depRequireString(name, onto, pathname = '') {
-  return `Flint.${onto}["${name}"] = require("${pathname}${name}");\n`
+  return `"${name}": require("${pathname}${name}"),\n`
 }
 
 // try {

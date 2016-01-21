@@ -31,7 +31,13 @@ export async function installExternals(filePath, source) {
 // read externals.path => write externals.in
 async function externalsPathsToIn() {
   const fullpaths = await disk.externalsPaths.read()
-  const requireString = fullpaths.map(name => depRequireString(name, 'packages')).join('')
+  const requireString = `
+    var packages = {
+      ${fullpaths.map(name => depRequireString(name, 'packages')).join('')}
+    }
+
+    module.exports = packages
+  `
   await disk.externalsIn.write((_, write) => write(requireString))
 }
 

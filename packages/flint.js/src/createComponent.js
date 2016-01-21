@@ -573,7 +573,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
             )
           }
           catch(e) {
-            console.flint("Error rendering last version of view after error")
+            console.log("Error rendering last version of view after error")
           }
         }
       },

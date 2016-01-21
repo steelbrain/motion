@@ -14,7 +14,6 @@ import './shim/root'
 import './shim/on'
 import './shim/partial'
 import internal from './internal'
-import log from './shim/log'
 import onError from './shim/flint'
 import createComponent from './createComponent'
 import range from './lib/range'
@@ -22,7 +21,6 @@ import iff from './lib/iff'
 import router from './lib/router'
 import requireFactory from './lib/requireFactory'
 import staticStyles from './lib/staticStyles'
-import assignToGlobal from './lib/assignToGlobal'
 import safeRun from './lib/safeRun'
 import reportError from './lib/reportError'
 import arrayDiff from './lib/arrayDiff'
@@ -66,6 +64,10 @@ root.on = on
 root.module = {}
 root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
+// for loading apps
+root.exports = {}
+root.require = requireFactory(root)
+
 export default function run(browserNode, userOpts, afterRenderCb) {
   const opts = Object.assign({
     namespace: {},
@@ -88,7 +90,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
   // setup shims that use Internal
   onError(Internal, Tools)
-  log(Internal, Tools)
   const LastWorkingMain = LastWorkingMainFactory(Internal)
 
   const emitter = ee({})
@@ -135,7 +136,6 @@ export default function run(browserNode, userOpts, afterRenderCb) {
 
       function run() {
         Internal.isRendering++
-        console.flint('render', `Internal.isRendering(${Internal.isRendering})`)
         if (Internal.isRendering > 3) return
 
         let Main = Internal.views.Main && Internal.views.Main.component
@@ -189,13 +189,12 @@ export default function run(browserNode, userOpts, afterRenderCb) {
         Internal.lastFileLoad = Date.now()
       }
 
-      // capture exports
-      let fileExports = {}
+      // set up require for file that resolves relative paths
+      const fileFolder = folderFromFile(file)
+      const scopedRequire = pkg => root.require(pkg, fileFolder)
 
-      // run file
-      run(flintRequire.bind(null, folderFromFile(file)), fileExports)
-
-      Flint.setExports(fileExports)
+      // run file!
+      run(scopedRequire)
 
       if (!process.env.production) {
         const cached = Internal.viewCache[file] || Internal.viewsInFile[file]
@@ -339,35 +338,11 @@ export default function run(browserNode, userOpts, afterRenderCb) {
       return router.getParams(path)
     },
 
-    // export globals
-    setExports(_exports) {
-      if (!_exports) return
-      Object.freeze(_exports)
-      const names = Object.keys(_exports)
-
-      if (names.length) {
-        names.forEach(name => {
-          if (name === 'default') {
-            Object.keys(_exports.default).forEach(key => {
-              assignToGlobal(key, _exports.default[key])
-            })
-          }
-
-          assignToGlobal(name, _exports[name])
-        })
-      }
-    },
-
     inspect(path, cb) {
       Internal.inspector[path] = cb
       Internal.setInspector(path)
     }
   }
-
-  // below Flint to pass it in
-  let flintRequire = requireFactory(Flint)
-
-  root.require = flintRequire
 
   // shim root view
   opts.namespace.view = {

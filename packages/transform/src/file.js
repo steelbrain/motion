@@ -262,7 +262,7 @@ export default function createPlugin(options) {
                 // closure
                 t.callExpression(t.functionExpression(null, [], t.blockStatement([
                   t.callExpression(t.identifier('Flint.file'), [t.literal(location),
-                    t.functionExpression(null, [t.identifier('require'), t.identifier('exports')],
+                    t.functionExpression(null, [t.identifier('require')],
                       t.blockStatement(node.body)
                     )
                   ])

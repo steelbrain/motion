@@ -1,13 +1,9 @@
 const parentFolderMatch = s => s.match(/\.\.\//g)
 
-export default function requireFactory(Flint) {
-  return function require(folder, name) {
-    // babel places its helpers outside Program scope, which means require is no longer bound to folder
-    if (!name) {
-      name = folder
-      folder = ''
-    }
+export default function requireFactory(root) {
+  let app = ''
 
+  function require(name, folder) {
     if (name.charAt(0) == '.') {
       let parentDirs = folder.split('/')
       let upDirs = parentFolderMatch(name)
@@ -26,17 +22,18 @@ export default function requireFactory(Flint) {
       let cleanName = (parentPath ? parentPath + '/' : '')
         + name.replace(/^(\.\.?\/)+/, '')
 
-      return (
-        Flint.internals[cleanName]
-        // try /index for directory shorthand
-        || Flint.internals[`${cleanName}/index`]
-      )
+      let pkg = root.exports[`${app}-internals`]
+
+      // try /index for directory shorthand
+      return pkg[cleanName] || pkg[`${cleanName}/index`]
     }
 
+    // todo this looks jank
     if (name == 'bluebird')
       return root._bluebird
 
-    let pkg = Flint.packages[name]
+    // get pkg
+    let pkg = root.exports[`${app}-externals`][name]
 
     // we may be waiting for packages reload
     if (!pkg) return
@@ -47,4 +44,10 @@ export default function requireFactory(Flint) {
 
     return pkg
   }
+
+  require.setApp = (appname) => {
+    app = appname
+  }
+
+  return require
 }

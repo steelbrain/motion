@@ -21,7 +21,9 @@ export default function webpackConfig(filename, config = {}) {
     output: {
       // app/.flint/.internal/deps
       path: opts.get('deps').dir,
-      filename
+      filename,
+      library: `${opts.get('saneName')}-${filename.replace('.js', '')}`,
+      libraryTarget: 'commonjs'
     },
     // come from flint.js
     externals: {

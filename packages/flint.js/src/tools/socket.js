@@ -24,7 +24,6 @@ socket.send = function send(type, obj) {
 }
 
 function open() {
-  console.flint('socket', 'open', 'isOpening', isOpening)
   if (isOpening) return
   isOpening = true
 
@@ -44,7 +43,7 @@ function onOpen() {
 function onMessage(message) {
   message = JSON.parse(message.data)
   if (!message) return
-  console.flint('socket', 'onMessage', 'message', message._type, message)
+  // console.flint('socket', 'onMessage', 'message', message._type, message)
 
   const action = actions[message._type]
   if (action) action(message)
