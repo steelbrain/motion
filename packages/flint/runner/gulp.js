@@ -18,7 +18,6 @@ import onMeta from './lib/onMeta'
 import { findBabelRuntimeRequires } from './lib/findRequires'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
-import wrapJS from 'gulp-wrap-js'
 
 const LOG = 'gulp'
 const $ = loadPlugins()
