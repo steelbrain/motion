@@ -28,7 +28,7 @@ export default function FlintApp({ name }) {
                 //wrapFnName
                 t.functionExpression(null, [t.identifier('node'), t.identifier('runtime'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
                   // var Flint = runtime(node, opts, cb)
-                  t.variableDeclaration('let', [
+                  t.variableDeclaration('var', [
                     t.variableDeclarator(
                       t.identifier('Flint'),
                       t.callExpression(t.identifier('runtime'), [

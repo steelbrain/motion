@@ -79,19 +79,6 @@ const $p = {
     extra: {
       production: process.env.production
     }
-  }),
-
-  // for parsing entire apps
-  // TODO this is a lot of work just to keep sourcemaps for wrapping simple closure
-  flintApp: () => babel({
-    stage: 2,
-    blacklist: ['es6.tailCall', 'strict', 'flow'],
-    retainLines: true,
-    comments: true,
-    plugins: [flintTransform.app({
-      name: opts.get('saneName')
-    })],
-    extra: { production: process.env.production }
   })
 }
 
@@ -163,18 +150,24 @@ export function bundleApp() {
     p(buildDir, `${OPTS.saneName}.js`),
   ]
 
-  console.log('infiles', inFiles)
-
   return new Promise((resolve, reject) => {
     gulp.src(inFiles)
       // sourcemap
       .pipe($.sourcemaps.init())
       .pipe($.order(inFiles))
       // babel wrap in app closure
-      .pipe($.concat(`${OPTS.saneName}.concat.js`))
-      .pipe($p.flintApp())
-      // rename
-      .pipe($.rename({ extname: '.prod.js' }))
+      .pipe($.concat(`${OPTS.saneName}.prod.js`))
+      .pipe(pipefn(() => {
+        console.log('  Minifying...'.dim)
+      }))
+      .pipe(babel({
+        whitelist: [],
+        retainLines: true,
+        comments: true,
+        plugins: [flintTransform.app({ name: opts.get('saneName') })],
+        extra: { production: process.env.production },
+        compact: true
+      }))
       // uglify
       .pipe($.if(!opts.get('nominify'), $.uglify()))
       .pipe($.sourcemaps.write('.'))
