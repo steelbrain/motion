@@ -1,7 +1,7 @@
 import chokidar from 'chokidar'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
-import flintTransform from 'flint-transform'
+import { app, file } from 'flint-transform'
 import through from 'through2'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
@@ -53,14 +53,16 @@ const $p = {
     pre: () => compiler('pre'),
     post: () => compiler('post')
   },
-  babel: () => babel({
+
+  // for parsing single file
+  flintFile: () => babel({
     jsxPragma: 'view.el',
     stage: 2,
     blacklist: ['es6.tailCall', 'strict'],
     retainLines: OPTS.pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],
-    plugins: [flintTransform({
+    plugins: [file({
       log,
       basePath: OPTS.dir,
       production: isBuilding(),
@@ -71,6 +73,19 @@ const $p = {
     extra: {
       production: process.env.production
     }
+  }),
+
+  // for parsing entire apps
+  // TODO this is a lot of work just to keep sourcemaps for wrapping simple closure
+  flintApp: () => babel({
+    stage: 2,
+    blacklist: ['es6.tailCall', 'strict', 'flow'],
+    retainLines: OPTS.pretty ? false : true,
+    comments: true,
+    plugins: [app({
+      name: opts.get('saneName')
+    })],
+    extra: { production: process.env.production }
   })
 }
 
@@ -173,30 +188,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   const sourceStream = userStream || gulpSrcStream
   const stream = isBuilding() ? sourceStream : merge(sourceStream, superStream.stream)
 
-  const name = OPTS.saneName
-  const wrapFnName = `flintRun_${name}`
-  const wrapTemplate = `
-window.${wrapFnName} = function ${wrapFnName}(node, opts, cb) {
-  var FlintInstace = opts.Flint || runFlint;
-  var Flint = FlintInstace(node, opts, cb);
-
-  (function(Flint) {
-    <%= contents %>
-
-    ;Flint.init()
-  })(Flint);
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = ${wrapFnName}
-}`
-
-  // function viewFileTemplate(location, contents) {
-  //   // preserve line numbers
-  //   return `!function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}();`
-  // }
-
-
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
     .pipe(pipefn(resetLastFile))
@@ -204,14 +195,7 @@ if (typeof module !== 'undefined' && module.exports) {
     .pipe(pipefn(setLastFile))
     .pipe($p.flint.pre())
     .pipe($.sourcemaps.init())
-    .pipe($p.babel())
-    // wrap views in own scope (Flint.file)
-    .pipe(pipefn(file => {
-      console.log(file.contents.toString())
-    }))
-    // .pipe($.if(file => !file.isInternal,
-    //   wrapJS(`!function(){ Flint.file("<%= file.relative %>",function(require, exports){ {%= body %}\n  })\n}();`)
-    // ))
+    .pipe($p.flintFile())
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     .pipe($.if(isBuilding,
