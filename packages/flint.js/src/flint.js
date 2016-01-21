@@ -74,6 +74,9 @@ export default function run(browserNode, userOpts, afterRenderCb) {
     entry: 'Main'
   }, userOpts)
 
+  // init require
+  root.require.setApp(opts.app)
+
   // init Internal
   internal.init(opts.app)
   let Internal = root._Flint = internal.get(opts.app)
