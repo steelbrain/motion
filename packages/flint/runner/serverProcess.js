@@ -86,7 +86,7 @@ async function getScripts({ disableTools }) {
         '<script src="/__/tools/flinttools.js"></script>',
 `
   <script>
-    Flint.run("_flintdevtools", exports["flinttools"])
+    Flint.run("flinttools", { node: "_flintdevtools" })
   </script>
 `
       ].join(newLine),
@@ -96,7 +96,7 @@ async function getScripts({ disableTools }) {
 `
   <script>
     // set up for dev mode, essentially faking a closure on window
-    Flint = Flint.run(`${OPTS.saneName}`)
+    Flint = Flint.run("${OPTS.saneName}")
   </script>
 `,
       '<script src="/__/externals.js" id="__flintExternals"></script>',
