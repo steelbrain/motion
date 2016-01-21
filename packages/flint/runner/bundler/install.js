@@ -43,16 +43,19 @@ function getToInstall(requires) {
 
 // used to quickly check if a file will trigger an install
 export async function willInstall(filePath) {
-  const requires = cache.getImports(filePath)
-  const fresh = await getNew(requires)
+  const required = cache.getImports(filePath)
+  const fresh = await getNew(required)
   return !!fresh.length
 }
 
 // finds the new externals to install
 export async function getNew(requires, installed) {
+  // get all installed
+  installed = installed || await readInstalled()
+
   const names = normalize(requires)
   const fresh = _.difference(names, installed, installing)
-  log(LOG, 'getNew():', fresh, ' = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
+  log(LOG, 'getNew():', fresh, '(fresh) = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
   return fresh
 }
 
