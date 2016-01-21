@@ -1,7 +1,7 @@
 import chokidar from 'chokidar'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
-import { app, file } from 'flint-transform'
+import flintTransform from 'flint-transform'
 import through from 'through2'
 import gulp from 'gulp'
 import loadPlugins from 'gulp-load-plugins'
@@ -62,7 +62,7 @@ const $p = {
     retainLines: OPTS.pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],
-    plugins: [file({
+    plugins: [flintTransform.file({
       log,
       basePath: OPTS.dir,
       production: isBuilding(),
@@ -82,7 +82,7 @@ const $p = {
     blacklist: ['es6.tailCall', 'strict', 'flow'],
     retainLines: OPTS.pretty ? false : true,
     comments: true,
-    plugins: [app({
+    plugins: [flintTransform.app({
       name: opts.get('saneName')
     })],
     extra: { production: process.env.production }
@@ -153,9 +153,11 @@ export function bundleApp() {
   const deps = opts.get('deps')
 
   return new Promise((resolve, reject) => {
-    gulp.src([ deps.externalsOut, deps.internalsOut, appFile ])
+    gulp.src([appFile])
       // sourcemap
       .pipe($.sourcemaps.init())
+      // babel wrap in app closure
+      .pipe($p.flintApp())
       // concat
       .pipe($.concat(`${OPTS.saneName}.prod.js`))
       // uglify
@@ -198,12 +200,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($p.flintFile())
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-    .pipe($.if(isBuilding,
-      multipipe(
-        $.concat(`${name}.js`),
-        $.wrap(wrapTemplate)
-      )
-    ))
+    .pipe($.if(isBuilding, $.concat(`${OPTS.saneName}.js`)))
     // is internal
     .pipe($.if(file => file.isInternal,
       multipipe(

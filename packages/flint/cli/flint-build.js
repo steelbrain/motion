@@ -24,7 +24,8 @@ fs.stat(process.cwd() + '/.flint', function(err, res) {
     debug: Program.debug,
     reset: Program.reset,
     cached: Program.cached,
-    pretty: true
+    nominify: Program.nominify,
+    pretty: true,
   }
 
   runner.build(opts)

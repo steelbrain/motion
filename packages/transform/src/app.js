@@ -16,40 +16,47 @@
 export default function FlintApp({ name }) {
   const wrapFnName = `flintRun_${name}`
 
-  return new Plugin("flint-transform-app", {
-    visitor: {
-      Program: {
-        exit(node) {
-          node.body = [t.expressionStatement(
-            // window.flintRun_app = function(){}
-            t.assignmentExpression('=',
-              t.identifier(`window.${wrapFnName}`),
-              t.functionExpression(wrapFnName, [t.identifier('node'), t.identifier('runtime'), t.idenfitier('opts'), t.identifier('cb')], t.blockStatement([
-                // var Flint = runtime(node, opts, cb)
-                t.assignmentExpression('=', t.identifier('Flint'), t.callExpression(t.idenfitier('runtime'), [
-                  t.idenfitier('node'), t.idenfitier('opts'), t.idenfitier('cb')
-                ])),
-
-                // closure (function(Flint) {})(Flint)
-                t.callExpression(
-                  t.functionExpression(null,
-                    [t.identifier('Flint')],
-                    t.blockStatement(
-                      [].concat(
-                        node.body,
-                        t.expressionStatement(
-                          t.callExpression(t.idenfitier('Flint', [t.idenfitier('init')]))
-                        )
-                      )
+  return function FlintAppPlugin({ Plugin, types: t }) {
+    return new Plugin("flint-transform-app", {
+      visitor: {
+        Program: {
+          exit(node) {
+            node.body = [t.expressionStatement(
+              // window.flintRun_app = function(){}
+              t.assignmentExpression('=',
+                t.identifier(`window.${wrapFnName}`),
+                //wrapFnName
+                t.functionExpression(null, [t.identifier('node'), t.identifier('runtime'), t.identifier('opts'), t.identifier('cb')], t.blockStatement([
+                  // var Flint = runtime(node, opts, cb)
+                  t.variableDeclaration('let', [
+                    t.variableDeclarator(
+                      t.identifier('Flint'),
+                      t.callExpression(t.identifier('runtime'), [
+                        t.identifier('node'), t.identifier('opts'), t.identifier('cb')
+                      ])
                     )
-                  ),
-                  [t.idenfitier('Flint')]
-                )
-              ]))
-            )
-          )]
+                  ]),
+
+                  // closure (function(Flint) {})(Flint)
+                  t.callExpression(
+                    t.functionExpression(null,
+                      [t.identifier('Flint')],
+                      t.blockStatement(
+                        [].concat(
+                          node.body,
+                          t.expressionStatement(
+                            t.callExpression(t.identifier('Flint.init'), [])
+                          )
+                        )
+                      ) // end blockStatement
+                    ) // end functionExpression
+                  , [t.identifier('Flint')]) // end callExpression
+                ]))
+              )
+            )]
+          }
         }
       }
-    }
-  })
+    })
+  }
 }
