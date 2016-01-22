@@ -22,6 +22,9 @@ ready:
 patch: ready
 	node scripts/release.js --patch
 
+patch-verbose:
+	node scripts/release.js --patch --verbose
+
 patch-tools: ready
 	node scripts/release.js --patch tools
 

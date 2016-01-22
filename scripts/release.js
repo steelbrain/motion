@@ -9,11 +9,18 @@ require("shelljs/global")
 
 // safe exec
 function ex(cmd) {
+  if (process.argv.indexOf('--verbose'))
+    console.log('running:', cmd)
+
   var result = exec(cmd, { silent: true })
   if (result.code != 0) {
     console.log(cmd, 'error', result.output)
     process.exit()
   }
+
+  if (process.argv.indexOf('--verbose'))
+    console.log(result.output)
+
   return result.output
 }
 
