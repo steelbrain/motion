@@ -29,7 +29,6 @@ export default function webpackConfig(filename, config = {}) {
     externals: {
       react: 'React',
       'react-dom': 'ReactDOM',
-      bluebird: '_bluebird'
     },
     devtool: 'source-map',
     node: {

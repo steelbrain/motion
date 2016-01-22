@@ -29,8 +29,6 @@ export default function requireFactory(root) {
     }
 
     // todo this looks jank
-    if (name == 'bluebird')
-      return root._bluebird
     if (name == 'React')
       return root.React
     if (name == 'ReactDOM')

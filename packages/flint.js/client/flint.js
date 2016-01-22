@@ -8,10 +8,9 @@ import ReactDOM from 'react-dom'
 import { StyleRoot, keyframes } from 'flint-radium'
 import clone from 'clone'
 import regeneratorRuntime from './vendor/regenerator'
-import Bluebird, { Promise } from 'bluebird'
 
 import 'reapp-object-assign'
-import './lib/bluebirdErrorHandle'
+import './lib/promiseErrorHandle'
 import './shim/root'
 import './shim/on'
 import './shim/partial'
@@ -70,13 +69,10 @@ const Flint = {
       rafBatch.inject()
     }
 
-    Promise.longStackTraces()
-
     // GLOBALS
     root.global = root // for radium
     root.regeneratorRuntime = regeneratorRuntime
     root._history = history // for imported modules to use
-    root._bluebird = Bluebird // for imported modules to use
     root.Promise = Promise // for modules to use
     root.React = React
     root.ReactDOM = ReactDOM

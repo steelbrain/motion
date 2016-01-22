@@ -2,7 +2,6 @@ const externals = [
   'flint-js',
   'react',
   'react-dom',
-  'bluebird',
   'babel-runtime',
   ''
 ]

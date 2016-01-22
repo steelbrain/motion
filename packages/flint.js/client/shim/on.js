@@ -14,7 +14,7 @@ const viewEvents = ['mount', 'unmount', 'change', 'render', 'props']
 // starts a listener
 // returns the off event to remove the listener
 // TODO split this into individual functions for each type
-function addListener({ root, scope, name, number, cb, uid }) {
+function addListener({ rootNode, scope, name, number, cb, uid }) {
   if (name == 'delay') { // on('delay', 400, cb)
     let timer = setTimeout(cb, number)
     return () => clearTimeout(timer)
@@ -35,7 +35,7 @@ function addListener({ root, scope, name, number, cb, uid }) {
     return () => active = false
   }
 
-  const target = (scope || root)
+  const target = (scope || rootNode || window)
 
   // this will pass data automatically for custom on.event
   const smartCb = (e) => {
@@ -72,8 +72,8 @@ function onEventInit({ view, scope, name, number, cb }) {
   let result
 
   let eventFn = uid => {
-    let root = getRoot(view)
-    removeByUids[uid] = addListener({ scope, root, name, number, cb: finish })
+    let rootNode = getRoot(view)
+    removeByUids[uid] = addListener({ scope, rootNode, name, number, cb: finish })
     return removeByUids[uid]
   }
 
