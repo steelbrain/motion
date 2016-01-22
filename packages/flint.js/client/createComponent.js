@@ -210,8 +210,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       runEvents(name, args) {
         const queue = this.events
 
-        console.log('runEvents', this.name, name, args, queue[name])
-
         if (queue[name] && queue[name].length) {
           queue[name].forEach(event => {
             event.apply(this, args)
