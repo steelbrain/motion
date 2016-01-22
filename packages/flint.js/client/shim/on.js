@@ -1,28 +1,28 @@
 import ReactDOM from 'react-dom'
 
 // ok delayed attempt to make sense of this
-// start from bottom and read to top
-
+// this file needs refactor love
+// start from bottom and read to top:
 // function On()
 //   => this.run
 //   => finish
 //   => onEventInit
+//   => addListener
 
 const viewEvents = ['mount', 'unmount', 'change', 'render', 'props']
 
+// starts a listener
+// returns the off event to remove the listener
+// TODO split this into individual functions for each type
 function addListener({ root, scope, name, number, cb, uid }) {
   if (name == 'delay') { // on('delay', 400, cb)
     let timer = setTimeout(cb, number)
-    let clearTimer = () => clearTimeout(timer)
-    onUnmount(scope, clearTimer)
-    return clearTimer
+    return () => clearTimeout(timer)
   }
 
   if (name == 'every') { // on('every', 20, cb)
     let interval = setInterval(cb, number)
-    let clearInterval = () => clearInterval(interval)
-    onUnmount(scope, clearInterval)
-    return clearInterval
+    return () => clearInterval(interval)
   }
 
   if (name == 'frame') {
@@ -32,9 +32,7 @@ function addListener({ root, scope, name, number, cb, uid }) {
       if (active) loop()
     })
     loop()
-    let clearFrame = () => active = false
-    onUnmount(scope, clearFrame)
-    return clearFrame
+    return () => active = false
   }
 
   const target = (scope || root)
@@ -87,10 +85,6 @@ function onEventInit({ view, scope, name, number, cb }) {
     events.mount.push(() => eventFn(uid))
     result = unlistenFromUid(uid)
   }
-
-  // number events we push unmount in addListener
-  if (typeof number != 'undefined')
-    return result
 
   // unmount push
   events.unmount.push(result)
@@ -222,12 +216,6 @@ export default on
 
 // helpers
 
-function onUnmount(scope, cb) {
-  if (!scope || !scope.events) return
-  if (!scope.events.unmount) scope.events.unmount = []
-  scope.events.unmount.push(cb)
-}
-
 let removeByUids = {}
 let uid = 0
 function getUid() { return uid++ % Number.MAX_VALUE }
@@ -238,11 +226,6 @@ function unlistenFromUid(uid) {
     }
     delete removeByUids[uid]
   }
-}
-
-function removeListener({ scope, name, cb }) {
-  if (scope.removeEventListener)
-    scope.removeEventListener(name, cb)
 }
 
 function ensureQueue(where, ...names) {
