@@ -293,7 +293,7 @@ const Flint = {
         const hash = hashsum(body)
 
         function setView(name, component) {
-          Internal.views[name] = { hash, component }
+          Internal.views[name] = { hash, component, file: Internal.currentHotFile }
         }
 
         // set view in cache

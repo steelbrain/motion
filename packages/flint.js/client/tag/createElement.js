@@ -1,6 +1,7 @@
 import React from 'react'
 import classnames from 'classnames'
 import elementStyles from './styles'
+import reportError from '../lib/reportError'
 import tags from './tags'
 
 // tags that shouldn't map out to real names
@@ -199,9 +200,32 @@ export default function createElement(viewName) {
       }
     }
 
+    // TODO option to disable object stringifying
     // convert object to string for debugging in dev mode only
-    // if (!process.env.production)
-    //   args = args.map(arg => arg && arg != null && !arg.$$typeof && !Array.isArray(arg) && (arg instanceof Object) ? JSON.stringify(arg) : arg)
+    if (!process.env.production) {
+      args = args.map(arg => {
+        const type = typeof arg
+
+        if (arg && type != 'string' && !Array.isArray(arg) && !React.isValidElement(arg)) {
+          const isObj = String(arg) === '[object Object]'
+
+          if (isObj) {
+            // stringify for error
+            let str = ''
+            try { str = JSON.stringify(arg) } catch(e) {}
+
+            reportError({
+              message: `You passed an object to ${viewName} <${name}>. In production this will error! Object: ${str}`,
+              fileName: _Flint.views[viewName] && _Flint.views[viewName].file
+            })
+
+            return str || '{}'
+          }
+        }
+
+        return arg
+      })
+    }
 
     return React.createElement(props.tagName || tag, props, ...args)
   }
