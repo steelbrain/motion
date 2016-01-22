@@ -7,10 +7,11 @@ require("shelljs/global")
 // fns
 //
 
+const VERBOSE = process.argv.indexOf('--verbose') > 0
+
 // safe exec
 function ex(cmd) {
-  if (process.argv.indexOf('--verbose'))
-    console.log('running:', cmd)
+  if (VERBOSE) console.log('running:', cmd)
 
   var result = exec(cmd, { silent: true })
   if (result.code != 0) {
@@ -18,9 +19,7 @@ function ex(cmd) {
     process.exit()
   }
 
-  if (process.argv.indexOf('--verbose'))
-    console.log(result.output)
-
+  if (VERBOSE) console.log(result.output)
   return result.output
 }
 
