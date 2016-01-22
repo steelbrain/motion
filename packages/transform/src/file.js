@@ -473,7 +473,10 @@ export default function createPlugin(options) {
 
               let arr = [t.literal(name), t.literal(key)]
 
-              meta[currentView].els[name + key] = el.loc.end
+              // track meta
+              if (meta[currentView]) {
+                meta[currentView].els[name + key] = el.loc.end
+              }
 
               /*
                 checks whether user is referencing variable or view
