@@ -341,6 +341,15 @@ export default function createComponent(Flint, Internal, name, view, options = {
           fprops.parentStyles = this.styles
         }
 
+        // ok so there was a bug with cloning a view that removes all the view root nodes classes
+        // this works around it
+        // TODO this should only be done when dealing with flint views, avoid this for tags
+        if (props.class || props.className) {
+          props.__flintAddClass = props.class || props.className
+          delete props.class
+          delete props.className
+        }
+
         return React.cloneElement(el, props)
       },
 
@@ -476,19 +485,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
               tags = [tags]
             }
           }
-
-
         }
 
         else if (numRenders > 1) {
           tags = this.renders.map(r => r.call(this))
         }
-
-        // if $ = false, unwrap if possible
-        // if (this.styles._static && this.styles._static.$ == false && tags.length == 1) {
-        //   addWrapper = false
-        //   tags = tags[0]
-        // }
 
         // top level tag returned false
         if (!tags)
@@ -501,12 +502,19 @@ export default function createComponent(Flint, Internal, name, view, options = {
         const cleanName = name.replace('.', '-')
         const viewClassName = `View${cleanName}`
         const parentClassName = wrappedTags.props.className
-        const className = parentClassName
+        const withParentClass = parentClassName
           ? `${viewClassName} ${parentClassName}`
           : viewClassName
 
-        const withClass = React.cloneElement(wrappedTags, { className })
+        // view.clone (see above) avoids mutating classname until here
+        // fixes bug: if view.clone(Child, { className: xyz }), would overwrite classes in Child
+        let clonedClass
+        if (wrappedTags.props.__flintAddClass) {
+          clonedClass = `${withParentClass} ${wrappedTags.props.__flintAddClass}`
+        }
 
+        const className = clonedClass || withParentClass
+        const withClass = React.cloneElement(wrappedTags, { className })
         return withClass
       },
 

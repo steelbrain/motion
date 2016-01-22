@@ -174,6 +174,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
 
 export default function createElement(viewName) {
   return function el(identifier, props, ...args) {
+    // TODO remove
     if (props && props.skipFlint)
       return React.createElement(identifier[1], props, ...args)
 
