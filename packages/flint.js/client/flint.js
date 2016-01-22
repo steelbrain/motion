@@ -96,7 +96,6 @@ const Flint = {
     }
 
     // for loading apps
-    root.exports = {}
     root.require = requireFactory(root)
   },
 

@@ -33,6 +33,8 @@ export default function requireFactory(root) {
       return root._bluebird
     if (name == 'React')
       return root.React
+    if (name == 'ReactDOM')
+      return root.ReactDOM
 
     // get pkg
     let pkg = root.exports[`${app}-externals`][name]
