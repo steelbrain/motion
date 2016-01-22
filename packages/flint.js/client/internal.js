@@ -27,16 +27,24 @@ export function init(name) {
     lastWorkingViews: {},
     lastWorkingRenders: {},
 
-    resetViewState() {
+    resetViewsInFile(file) {
+      const views = Internal.viewsInFile[file]
+
+      if (views && views.length) {
+        views.forEach(Internal.removeView)
+      }
+    },
+
+    resetViewState(views) {
       Internal.views = {}
       Internal.mountedViews = {}
       Internal.lastWorkingViews = {}
     },
 
-    removeView(key) {
-      delete Internal.views[key]
-      delete Internal.mountedViews[key]
-      delete Internal.lastWorkingViews[key]
+    removeView(name) {
+      delete Internal.views[name]
+      delete Internal.mountedViews[name]
+      delete Internal.lastWorkingViews[name]
     },
 
     isLive() {

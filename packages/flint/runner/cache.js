@@ -199,6 +199,13 @@ const Cache = {
     return [].concat(cache.getInterals(file), cache.getExternals(file))
   },
 
+  getInternalImporters() {
+    return Object.keys(cache.files).map(file => {
+      let data = cache.files[file]
+      return data.internals && data.internals.length && file
+    }).filter(x => !!x)
+  },
+
   addError(file : string, error : object) {
     if (!n) return
 

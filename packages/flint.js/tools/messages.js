@@ -208,11 +208,11 @@ function removeTag(tag, parent, cb, opts = {}) {
 }
 
 function reloadScript(id, opts = {}) {
-  return () => {
+  return (data) => {
     const el = document.getElementById(id)
     if (!el) return
 
-    const finish = opts.reloadAll ? reloadAllScripts : renderFlint
+    const finish = opts.reloadAll ? () => reloadImportScripts(data) : renderFlint
     const tag = replaceTag(el, 'src', finish)
   }
 }
@@ -222,15 +222,26 @@ function replaceScript({ name, timestamp, src }, cb) {
   addScript(src || `/_${jsName}`)
 }
 
-function reloadAllScripts() {
-  const scripts = document.querySelectorAll('.__flintScript')
+let getScriptsByPaths = paths =>
+  paths.map(path => document.querySelector(`.__flintScript[src*="${path}"]`))
+
+function reloadImportScripts({ importers } = {}) {
+  // only reload stuff thats changed with imports, if possible
+  const removeByImporter = importers && importers.length
+
+  let scripts = removeByImporter
+    ? getScriptsByPaths(importers)
+    : document.querySelectorAll('.__flintScript')
 
   if (!scripts.length)
     return
 
   let total = scripts.length
 
-  _Flint.resetViewState()
+  if (removeByImporter)
+    importers.forEach(_Flint.resetViewsInFile)
+  else
+    _Flint.resetViewState()
 
   let scriptLoaders = []
 
@@ -240,8 +251,7 @@ function reloadAllScripts() {
 
   Promise.all(scriptLoaders)
     .then(() => {
-      debugger
-      // Flint.render()
+      Flint.render()
     })
 }
 

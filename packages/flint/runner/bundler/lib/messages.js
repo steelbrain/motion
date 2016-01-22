@@ -39,9 +39,7 @@ export function onInstalled() {
 
 export function onInternalInstalled() {
   if (avoid()) return
-
-  const importers = cache.getInternals()
-  console.log('importers', importers)
-
-  bridge.message('internals:reload', { importers })
+  bridge.message('internals:reload', {
+    importers: cache.getInternalImporters()
+  })
 }
