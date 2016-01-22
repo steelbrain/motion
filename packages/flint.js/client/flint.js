@@ -84,17 +84,6 @@ const Flint = {
     root.module = {}
     root.fetch.json = (...args) => fetch(...args).then(res => res.json())
 
-    // view shim (TODO freeze)
-    root.view = {
-      el(info, props, ...children) {
-        if (typeof info[0] === 'string' && info[0].charAt(0).toUpperCase() === info[0].charAt(0)) {
-          return React.createElement(Flint.getView(info[0]), props)
-        }
-
-        return React.createElement(info[0], props, ...children);
-      }
-    }
-
     // for loading apps
     root.require = requireFactory(root)
   },
@@ -381,6 +370,17 @@ const Flint = {
       inspect(path, cb) {
         Internal.inspector[path] = cb
         Internal.setInspector(path)
+      }
+    }
+
+    // view shim (TODO freeze)
+    root.view = {
+      el(info, props, ...children) {
+        if (typeof info[0] === 'string' && info[0].charAt(0).toUpperCase() === info[0].charAt(0)) {
+          return React.createElement(Flint.getView(info[0]), props)
+        }
+
+        return React.createElement(info[0], props, ...children);
       }
     }
 
