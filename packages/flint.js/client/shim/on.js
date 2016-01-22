@@ -1,22 +1,14 @@
 import ReactDOM from 'react-dom'
 
-function onUnmount(scope, cb) {
-  if (!scope || !scope.events) return
-  if (!scope.events.unmount) scope.events.unmount = []
-  scope.events.unmount.push(cb)
-}
+// ok delayed attempt to make sense of this
+// start from bottom and read to top
 
-let removeByUids = {}
-let uid = 0
-function getUid() { return uid++ % Number.MAX_VALUE }
-function unlistenFromUid(uid) {
-  return () => {
-    if (removeByUids[uid]) {
-      removeByUids[uid]()
-    }
-    delete removeByUids[uid]
-  }
-}
+// function On()
+//   => this.run
+//   => finish
+//   => onEventInit
+
+const viewEvents = ['mount', 'unmount', 'change', 'render', 'props']
 
 function addListener({ root, scope, name, number, cb, uid }) {
   if (name == 'delay') { // on('delay', 400, cb)
@@ -46,41 +38,20 @@ function addListener({ root, scope, name, number, cb, uid }) {
   }
 
   const target = (scope || root)
-  // detail key is used by CustomEvent to pass data
-  const listener = target.addEventListener(name, (e) => {
-    // custom events pass data
-    if (typeof e == 'object' && typeof e.detail == 'object')
-      cb(e.detail)
-    else
-      cb(e)
-  })
-  const removeListener = target.removeEventListener.bind(null, name, cb)
 
-  return removeListener
+  // this will pass data automatically for custom on.event
+  const smartCb = (e) => {
+    const isCustom = typeof e == 'object' && typeof e.detail == 'object'
+    cb(isCustom ? e.detail : e)
+  }
+
+  target.addEventListener(name, smartCb)
+
+  // return off event
+  return () => target.removeEventListener(name, smartCb)
 }
 
-function removeListener({ scope, name, cb }) {
-  if (scope.removeEventListener)
-    scope.removeEventListener(name, cb)
-}
-
-function ensureQueue(where, ...names) {
-  names.forEach(name => {
-    where[name] = where[name] || []
-  })
-}
-
-function getRoot(scope) {
-  return ReactDOM.findDOMNode(scope)
-}
-
-function hasEvents(events) {
-  return events && typeof events.mount != 'undefined' && typeof events.unmount != 'undefined'
-}
-
-const viewEvents = ['mount', 'unmount', 'change', 'render', 'props']
-
-function onCb({ view, scope, name, number, cb }) {
+function onEventInit({ view, scope, name, number, cb }) {
   const finish = (...fargs) => cb && cb(...fargs)
   const events = view && view.events
 
@@ -92,41 +63,39 @@ function onCb({ view, scope, name, number, cb }) {
     }
   }
 
-  // if inside parent with mount/unmount events, do auto
-  if (hasEvents(events)) {
-    ensureQueue(events, 'mount', 'unmount')
-
-    let listener
-    let eventFn = uid => {
-      let root = getRoot(view)
-      return removeByUids[uid] = addListener({ scope, root, name, number, cb: finish })
-    }
-
-    // attach to mount depending
-    if (view.mounted)
-      listener = eventFn()
-    else {
-      let uid = getUid()
-      listener = unlistenFromUid(uid)
-      events.mount.push(() => eventFn(uid))
-    }
-
-    // number = setTimeout = we just push unmount event right in addListener
-    if (typeof number == 'undefined') {
-      events.unmount.push(() => {
-        let root = getRoot(view)
-        removeListener({ scope, root, name, cb: finish })
-      })
-    }
-
-    return listener
+  // if not in view
+  if (!hasEvents(events)) {
+    return addListener({ scope, name, cb: finish })
   }
 
-  return addListener({ scope, name, cb: finish })
-}
+  // if inside view
+  ensureQueue(events, 'mount', 'unmount')
+  // to return
+  let result
 
-function finish(opts) {
-  return opts.cb ? onCb(opts) : new Promise(resolve => onCb({ ...opts, cb: resolve }))
+  let eventFn = uid => {
+    let root = getRoot(view)
+    removeByUids[uid] = addListener({ scope, root, name, number, cb: finish })
+    return removeByUids[uid]
+  }
+
+  // attach to mount depending
+  if (view.mounted)
+    result = eventFn()
+  else {
+    let uid = getUid()
+    events.mount.push(() => eventFn(uid))
+    result = unlistenFromUid(uid)
+  }
+
+  // number events we push unmount in addListener
+  if (typeof number != 'undefined')
+    return result
+
+  // unmount push
+  events.unmount.push(result)
+
+  return result
 }
 
 function On(view) {
@@ -140,7 +109,7 @@ function On(view) {
     // callback with no scope
     else if (typeof scope == 'function') {
       cb = scope
-      scope = root
+      scope = null
     }
 
     if (typeof name != 'string')
@@ -148,9 +117,16 @@ function On(view) {
 
     return finish({ scope, name, cb, view })
   }
+
+  function finish(opts) {
+    return opts.cb
+      ? onEventInit(opts)
+      : new Promise(resolve => onEventInit({ ...opts, cb: resolve }))
+  }
 }
 
-root.On = On//TODO
+// TODO not on global
+root.On = On
 
 const proto = name => {
   On.prototype[name] = function(scope, cb, number) {
@@ -238,4 +214,47 @@ const on = new On()
 // TODO shim this outside this file
 root.on = on
 
+
+
 export default on
+
+
+
+// helpers
+
+function onUnmount(scope, cb) {
+  if (!scope || !scope.events) return
+  if (!scope.events.unmount) scope.events.unmount = []
+  scope.events.unmount.push(cb)
+}
+
+let removeByUids = {}
+let uid = 0
+function getUid() { return uid++ % Number.MAX_VALUE }
+function unlistenFromUid(uid) {
+  return () => {
+    if (removeByUids[uid]) {
+      removeByUids[uid]()
+    }
+    delete removeByUids[uid]
+  }
+}
+
+function removeListener({ scope, name, cb }) {
+  if (scope.removeEventListener)
+    scope.removeEventListener(name, cb)
+}
+
+function ensureQueue(where, ...names) {
+  names.forEach(name => {
+    where[name] = where[name] || []
+  })
+}
+
+function getRoot(scope) {
+  return ReactDOM.findDOMNode(scope)
+}
+
+function hasEvents(events) {
+  return events && Object.keys(events).length
+}

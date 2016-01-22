@@ -7,7 +7,6 @@ import phash from './lib/phash'
 import cloneError from './lib/cloneError'
 import hotCache from './mixins/hotCache'
 import reportError from './lib/reportError'
-import runEvents from './lib/runEvents'
 import createElement from './tag/createElement'
 import viewOn from './lib/viewOn'
 
@@ -209,7 +208,15 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       runEvents(name, args) {
-        runEvents(this.events, name, args)
+        const queue = this.events
+
+        console.log('runEvents', this.name, name, args, queue[name])
+
+        if (queue[name] && queue[name].length) {
+          queue[name].forEach(event => {
+            event.apply(this, args)
+          })
+        }
       },
 
       componentWillReceiveProps(nextProps) {
@@ -257,12 +264,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillUnmount() {
-        // fixes unmount errors github.com/flintjs/flint/issues/60
-        if (!process.env.production)
-          this.render()
-
         this.runEvents('unmount')
         this.mounted = false
+
+        // fixes unmount errors github.com/flintjs/flint/issues/60
+        if (!process.env.production) this.render()
 
         if (this.doRenderToRoot) {
           ReactDOM.unmountComponentAtNode(this.node)

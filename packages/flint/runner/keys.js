@@ -34,7 +34,7 @@ export function banner() {
     + newLine +
     (userEditor
       ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
-      : '         ') +
+      : '           ') +
         `${prefix} `.dim+'R'.bold.dim+'ebundle'.dim + newLine
     // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
   )
