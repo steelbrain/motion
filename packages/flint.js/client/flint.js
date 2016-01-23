@@ -334,13 +334,8 @@ const Flint = {
       getView(name, parentName) {
         let result
 
-        // View.SubView
-        const subName = `${parentName}.${name}`
-        if (Internal.views[subName]) {
-          result = Internal.views[subName].component
-        }
         // regular view
-        else if (Internal.views[name]) {
+        if (Internal.views[name]) {
           result = Internal.views[name].component
         }
         else {

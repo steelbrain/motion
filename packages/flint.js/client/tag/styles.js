@@ -29,8 +29,8 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
   const Flint = view.Flint
   const isRootName = view.name && view.name.toLowerCase() == name
   const hasOneRender = view.renders.length <= 1
-  const isWrapper = props && (props.isWrapper || props.root)
-  const deservesRootStyles = (isRootName && hasOneRender || isWrapper)
+  const isWrapperOrRoot = props && (props.__flintIsWrapper || props.root)
+  const deservesRootStyles = (isRootName && hasOneRender || isWrapperOrRoot)
 
   function addClassName(name) {
     props.className = props.className ? `${props.className} ${name}` : name

@@ -451,9 +451,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       getWrapper(tags, props, numRenders) {
         const wrapperName = name.toLowerCase()
 
-        let tagProps = Object.assign({
-          isWrapper: true
-        }, props)
+        let tagProps = Object.assign({ __flintIsWrapper: true }, props)
 
         return this.el(`view.${name}`, tagProps, ...tags)
       },
