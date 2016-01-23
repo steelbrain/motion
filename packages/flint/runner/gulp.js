@@ -225,6 +225,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     // is internal
     .pipe($.if(file => file.isInternal,
       multipipe(
+        pipefn(out.goodFile),
         pipefn(removeNewlyInternal),
         pipefn(markFileSuccess), // before writing to preserve path
         gulp.dest(p(OPTS.depsDir, 'internal')),
