@@ -156,7 +156,7 @@ export function bundleApp() {
   ]
 
   const isMinifying = !opts.get('nomin')
-  if (isMinifying) console.log('  Minifying...'.dim)
+  if (isMinifying) console.log(`  Minifying...`.dim)
 
   return new Promise((resolve, reject) => {
     gulp.src(inFiles)
@@ -421,7 +421,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (lastError) return
 
     // avoid if installing
-    if (bundler.isInstalling() || file.isInstalling) return
+    if (bundler.isInstalling() || file.willInstall) return
 
     // ADD
     bridge.message('script:add', file.message)

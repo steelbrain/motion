@@ -35,11 +35,10 @@ let runningBundle = null
 
 // TODO: check this in babel to be more accurate
 export async function checkInternals(file, source) {
-  log(LOG, 'checkInternals', file)
-
   const isInternal = hasExports(source)
   cache.setIsInternal(file, isInternal)
 
+  // not on build
   if (opts.get('hasRunInitialBuild') && isInternal && !runningBundle) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {

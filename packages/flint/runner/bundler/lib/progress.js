@@ -28,7 +28,7 @@ function logProgress(tag, name, index, total) {
 
   const out = total
     ? `  ${index+1} of ${total}: ${name}`
-    : `  ${tag}: ${name}`
+    : `  ${tag}: ${name}`.dim
 
   if (opts.get('build'))
     console.log(out)

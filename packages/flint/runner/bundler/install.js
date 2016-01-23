@@ -21,9 +21,6 @@ export async function install(force) {
     await uninstall()
     await installAll()
     await bundleExternals()
-
-    if (force)
-      await bundleInternals()
   }
   catch (e) {
     handleError(e)
@@ -77,8 +74,8 @@ export async function installAll(requires) {
     // nothing new
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
-      await writeInstalled(installed)
-      await bundleExternals({ silent: true })
+      // await writeInstalled(installed)
+      // await bundleExternals({ silent: true })
       return
     }
 
@@ -130,10 +127,8 @@ function runInstall(prevInstalled, toInstall) {
   }
 
   function next() {
-    if (installing.length)
-      installNext()
-    else
-      done()
+    log(LOG, 'next #', installing.length)
+    return installing.length ? installNext() : done()
   }
 
   async function done() {
@@ -183,7 +178,7 @@ function finishedInstalls() {
 
 function logInstalled(deps) {
   if (!deps.length) return
-  console.log(`  Installed ${deps.length} packages`.bold)
+  console.log(`\n  Installed ${deps.length} packages`.bold)
   deps.forEach(dep => console.log(`  ✓ ${dep}`.green))
   console.log()
 }

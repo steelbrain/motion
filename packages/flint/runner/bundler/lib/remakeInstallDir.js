@@ -1,17 +1,15 @@
-import { rm, touch, mkdir, log, writeJSON } from '../../lib/fns'
-import writeInstalled from './writeInstalled'
-import handleError from '../../lib/handleError'
+import { handleError, rm, touch, mkdir, log, writeJSON } from '../../lib/fns'
 import opts from '../../opts'
+import disk from '../../disk'
 
-export default async function remakeInstallDir(redo) {
-  log('bundler', 'remakeInstallDir', redo)
+export default async function remakeInstallDir(reset) {
+  log('bundler', 'remakeInstallDir')
   const deps = opts.get('deps')
 
   try {
     await mkdir(deps.dir)
 
-    if (redo) {
-      // await writeInstalled([])
+    if (reset) {
       await* [
         rm(deps.externalsIn),
         rm(deps.externalsPaths),
@@ -26,10 +24,8 @@ export default async function remakeInstallDir(redo) {
       touch(deps.externalsOut),
       touch(deps.internalsIn),
       touch(deps.internalsOut),
-      writeJSON(deps.externalsPaths, [])
+      // disk.externalsPaths.write((_, write) => write([]))
     ]
-
-    log('bundler', 'remakeInstallDir done')
   }
   catch(e) {
     handleError(e)

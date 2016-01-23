@@ -28,28 +28,30 @@ var Parser = {
 
   async post(filePath, source, next) {
     try {
-      log(LOG, 'compiler///post', filePath)
+      // scans
+      const isInternal = hasExports(source)
+      const scan = () => bundler.scanFile(filePath, source)
+      const scanNow = OPTS.build || !opts.get('hasRunInitialBuild')
+
+      // scan immediate on startup or building
+      if (scanNow) scan()
+      // debounce scan during run
+      else debounce(filePath, 500, scan)
+
+      // building, done
+      if (OPTS.build) {
+        next(source, { isInternal })
+        return
+      }
 
       // used to prevent hot reloads while importing new things
-      const isInstalling = await bundler.willInstall(filePath)
+      const willInstall = await bundler.willInstall(filePath)
 
-      // scan for imports/exports
-      const scan = () => bundler.scanFile(filePath, source)
-      const scanImmediate = OPTS.build || !opts.get('hasRunInitialBuild')
+      // debounced uninstall
+      debounce('removeOldImports', 3000, bundler.uninstall)
 
-      // debounced installs
-      if (scanImmediate) scan()
-      else debounce(filePath, 400, scan)
-
-      // debounce more for uninstall
-      if (!OPTS.build)
-        debounce('removeOldImports', 3000, bundler.uninstall)
-
-      // check internals
-      const isInternal = hasExports(source)
-
-      log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'isInstalling', isInstalling)
-      next(source, { isInternal, isInstalling })
+      log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'willInstall', willInstall)
+      next(source, { isInternal, willInstall })
     }
     catch(e) {
       handleError(e)

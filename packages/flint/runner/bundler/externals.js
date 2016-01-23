@@ -21,9 +21,7 @@ export async function bundleExternals(opts = {}) {
 export async function installExternals(filePath, source) {
   const found = cache.getExternals(filePath)
   log(LOG, 'installExternals', filePath, 'found', found)
-
-  if (opts.get('build') || opts.get('hasRunInitialBuild'))
-    installAll(found)
+  if (opts.get('hasRunInitialBuild')) installAll(found)
 }
 
 // read externals.path => write externals.in

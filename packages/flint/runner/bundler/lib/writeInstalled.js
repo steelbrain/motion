@@ -9,7 +9,7 @@ const LOG = 'externals'
 
 export default async function writeInstalled(_packages, _paths) {
   try {
-    log(LOG, 'writeInstalled')
+    log(LOG, 'writeInstalled', '_packages', _packages, '_paths', _paths)
     const packages = rmFlintExternals(normalize(_packages))
     const paths = _paths || cache.getExternals()
 

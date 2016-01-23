@@ -15,7 +15,7 @@ import { logError, handleError, path, log } from './lib/fns'
 
 let started = false
 
-async function startup(_opts = {}, isBuild) {
+async function startup(_opts = {}) {
   if (started) return
   started = true
 
@@ -23,7 +23,7 @@ async function startup(_opts = {}, isBuild) {
 
   // opts
   const appDir = _opts.appDir || path.normalize(process.cwd());
-  const OPTS = await opts.setAll({ ..._opts, appDir, isBuild })
+  const OPTS = await opts.setAll({ ..._opts, appDir })
 
   // log
   log.setLogging()
@@ -55,8 +55,8 @@ async function runGulp(opts) {
 
 export async function build(opts = {}) {
   try {
-    await startup(opts, true)
-    await bundler.remakeInstallDir(true)
+    await startup({ ...opts, isBuild: true })
+    await bundler.remakeInstallDir()
     await builder.clear.buildDir()
     builder.copy.assets()
     await runGulp({ once: opts.once })

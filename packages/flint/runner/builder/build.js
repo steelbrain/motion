@@ -10,12 +10,14 @@ import { log, handleError } from '../lib/fns'
 export default async function build() {
   try {
     log('Building extras, bundler...')
+    console.log()
     await bundler.install()
     await bundler.internals()
 
     log('Building extras, template...')
     makeTemplate()
 
+    console.log('  Copying assets...'.dim)
     log('Building app...')
     await *[
       copy.assets(),
