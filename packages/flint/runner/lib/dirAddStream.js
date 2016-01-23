@@ -22,16 +22,11 @@ function init(baseDir) {
         directoryFilter: [ '!.git', '!node_modules', '!.flint', '!.*' ]
       })
 
-      const sources = await* files.map(async file => await readFile(file.fullPath))
-
-      // sources
-      sources.forEach((source, i) => {
-        // put together vinyl
-        const location = path.relative(baseDir, files[i].fullPath)
-        const file = new File(vinyl(dir, location, new Buffer(source)))
-
-        // push
-        stream.push(file)
+      // push
+      files.forEach(async ({ fullPath }) => {
+        const source = await readFile(fullPath)
+        const toStream = new File(vinyl(baseDir, fullPath, new Buffer(source)))
+        stream.push(toStream)
       })
     }
     catch(e) {

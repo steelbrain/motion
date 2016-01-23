@@ -29,7 +29,7 @@ export function banner() {
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
   const prefix = '  ›'
 
-  console.log(`  ${server.url()}\n`.bold.green)
+  console.log(`\n  ${server.url()}\n`.bold.green)
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
       `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim
