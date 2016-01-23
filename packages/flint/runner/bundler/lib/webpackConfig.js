@@ -40,8 +40,12 @@ export default function webpackConfig(filename, config = {}) {
     resolve: {
       root: opts.get('flintDir'),
       modulesDirectories: ['node_modules'],
-      extensions: ['', '.js', '.jsx', '.scss'],
-      fallback: [ runnerModules, flintModules, /* babel-runtime may be in either depending on npm */ ]
+      extensions: ['', '.js', '.jsx', '.css'],
+      fallback: [
+        runnerModules,
+        flintModules, /* babel-runtime may be in either depending on npm */
+        // path.join(flintRoot, '..') // fallback to app root for import css
+      ]
     },
     module: {
       loaders: [
@@ -52,7 +56,7 @@ export default function webpackConfig(filename, config = {}) {
           test: /\.css$/,
           loaders: [
             fileStyleFolder,
-            'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
+            'css?module&importLoaders=1'
           ]
         },
 
@@ -67,7 +71,7 @@ export default function webpackConfig(filename, config = {}) {
         //   loaders: [
         //     fileStyleFolder,
         //     'style',
-        //     'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+        //     'css?sourceMap&module&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
         //     // 'sass?sourceMap'
         //   ]
         // }

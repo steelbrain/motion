@@ -59,8 +59,9 @@ const $p = {
 
   // for parsing single file
   flintFile: () => babel({
+    breakConfig: true,
     jsxPragma: 'view.el',
-    stage: 2,
+    stage: 1,
     blacklist: ['es6.tailCall', 'strict'],
     retainLines: OPTS.pretty ? false : true,
     comments: true,
@@ -81,6 +82,7 @@ const $p = {
     }
   })
 }
+
 
 // gulp doesnt send unlink events for files in deleted folders, so we do our own
 function watchDeletes() {
@@ -189,6 +191,12 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   // track inFiles files to determine when it's loaded
   let loaded = 0
   let total = inFiles && inFiles.length || 0
+
+  // TODO copying a directory of files over is broken in gulp 3 / gulp-watch
+  // make this watch and push dirs into stream (or try gulp 4)
+  // chokidar.watch('.', {ignored: /[\/\\]\./, ignoreInitial: true}).on('addDir', (...args) => {
+  //   console.log('adding', ...args)
+  // })
 
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
