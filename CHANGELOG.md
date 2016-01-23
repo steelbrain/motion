@@ -1,3 +1,8 @@
+## 1.4.53
+
+- Big fixes in installs that should also speed up builds in general. May cause some bugs installing.
+  Should avoid re-installing as often as it was.
+
 ## 1.4.39
 
 - Another big internal refactor that brings big upgrades to Flint's structure. No longer is it doing

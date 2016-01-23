@@ -134,7 +134,7 @@ function release(name, dir) {
 
     // TODO only patch if given option
     ex('npm version patch')
-    ex('npm publish --tag=latest')
+    console.log(ex('npm publish --tag=latest'))
   })
 }
 
