@@ -6,45 +6,53 @@ const PATH_PREFIX = '.root.'
 const contains = (string, substring) => string.indexOf(substring) !== -1
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 
+let noop = () => {}
+
 view Leaf {
+  prop isExpanded, data, prefix, query, label, id, editable
+  prop getOriginal = noop, onSet = noop, onClick = noop
+
   view.pause()
 
-  let rootPath, path, data, type, key, original, expanded
+  let rootPath, path, _data, type, key, original, expanded
   let dataKeys = []
-  let prefix = ''
-  let query = ''
+  let _query = ''
 
   const isInitiallyExpanded = () =>
     view.props.root ||
-    !query && view.props.isExpanded(path, data) ||
-    !contains(path, query) && (typeof view.props.getOriginal === 'function')
+    !_query && isExpanded(path, data) ||
+    !contains(path, _query) && (typeof getOriginal === 'function')
+
+  const transformData = (data = {}) => {
+    data = Object.keys(_data).sort()
+  }
 
   on.props(() => {
-    rootPath = `${view.props.prefix}.${view.props.label}`
-    key = view.props.label.toString()
+    rootPath = `${prefix}.${label}`
+    key = label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
     // originally was stream of ||s, but 0 was turning into false
-    data = view.props.data
+    _data = data
 
     // multiline strings
-    if (typeof data === 'string' && data.indexOf('\n') > -1) {
-      data = data.split('\n')
+    if (typeof _data === 'string' && _data.indexOf('\n') > -1) {
+      _data = _data.split('\n')
     }
 
-    if (data)
-      dataKeys = Object.keys(data).sort()
+    if (_data)
+      dataKeys = Object.keys(_data).sort()
 
-    if (data === undefined) data = view.props.data
-    if (data === undefined) data = {}
-    type = getType(data)
-    query = view.props.query || ''
+    if (_data === undefined) _data = data
+    if (_data === undefined) _data = {}
+    type = getType(_data)
+    _query = query || ''
 
     if (view.props.root)
       expanded = true
-    else if (query)
-      expanded = !contains(view.props.label, query)
+    else if (_query)
+      expanded = !contains(label, _query)
 
-    if (view.props.query && !query)
+    if (query && !_query)
       expanded = isInitiallyExpanded()
 
     view.update()
@@ -55,7 +63,7 @@ view Leaf {
       expanded = !expanded
 
     view.update()
-    view.props.onClick && view.props.onClick(data)
+    onClick(_data)
     e.stopPropagation()
   }
 
@@ -64,7 +72,7 @@ view Leaf {
     (key + '[' + getType(value) + ']')
 
   const format = key => (
-    <Highlighter string={key} highlight={query} />
+    <Highlighter string={key} highlight={_query} />
   )
 
   const fnParams = fn => fn.toString()
@@ -72,58 +80,58 @@ view Leaf {
     .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
     .split(/,/)
 
-  const label = (type, val, sets, editable) => (
+  const getLabel = (type, val, sets, editable) => (
     <Label
       val={val}
       editable={editable}
-      onSet={_ => view.props.onSet([sets, _])}
+      onSet={_ => onSet([sets, _])}
     />
   )
 
   <leaf class={rootPath}>
-    <label if={!view.props.root} htmlFor={view.props.id} onClick={toggle}>
+    <label if={!view.props.root} htmlFor={id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>
-        {label('key', key, key, false)}
+        {getLabel('key', key, key, false)}
       </key>
       <colon>:</colon>
       <expand class="function" if={type == 'Function'}>
-        <i>fn ({fnParams(data).join(', ')})</i>
+        <i>fn ({fnParams(_data).join(', ')})</i>
       </expand>
 
       <expand if={type == 'Array'}>
-        <type>Array[{data.length}]</type>
+        <type>Array[{_data.length}]</type>
       </expand>
       <expand if={type == 'Object'}>
         <type>{'{}   ' + dataKeys.length + ' keys'}</type>
       </expand>
       <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
         <str if={type.toLowerCase() == 'string'}>
-          {format(ellipsize(String(data), 25))}
+          {format(ellipsize(String(_data), 25))}
         </str>
         <else if={type.toLowerCase() != 'string'}>
-          {format(String(data))}
+          {format(String(_data))}
         </else>
-        {label('val', data, key, view.props.editable)}
+        {getLabel('val', _data, key, editable)}
       </value>
     </label>
     <children>
       <child
-        if={expanded && !isPrimitive(data)}
+        if={expanded && !isPrimitive(_data)}
         repeat={dataKeys}>
         <Leaf
           if={_.indexOf('__') == -1}
-          key={getLeafKey(_, data[_])}
-          onSet={(...args) => view.props.onSet(key, ...args)}
-          data={data[_]}
-          editable={view.props.editable}
+          key={getLeafKey(_, _data[_])}
+          onSet={(...args) => onSet(key, ...args)}
+          data={_data[_]}
+          editable={editable}
           label={_}
           prefix={rootPath}
-          onClick={view.props.onClick}
-          id={view.props.id}
-          query={query}
-          getOriginal={original ? null : view.props.getOriginal}
-          isExpanded={view.props.isExpanded}
+          onClick={onClick}
+          id={id}
+          query={_query}
+          getOriginal={original ? null : getOriginal}
+          isExpanded={isExpanded}
         />
       </child>
     </children>

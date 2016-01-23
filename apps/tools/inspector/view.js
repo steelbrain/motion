@@ -1,14 +1,15 @@
 import clone from 'clone'
-import _ from 'underscore'
+import { omit } from 'lodash'
 
 function pathToName(path) {
+  console.log('path is', path)
   let p = path.split(',')
-  return p[p.length - 1].split('.')[0].split('-')[0]
+  return p[p.length - 1].split('-')[0]
 }
 
 function filterProps(props) {
-  let omit = ['if', 'repeat', 'style', 'yield', '__flint']
-  return _.omit.apply(null, [props].concat(omit))
+  let leaveOut = ['if', 'repeat', 'style', 'yield', '__flint']
+  return omit.apply(null, [props].concat(leaveOut))
 }
 
 view Inspector.View {

@@ -17,6 +17,11 @@
       "from": "keycode@>=2.1.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/keycode/-/keycode-2.1.0.tgz"
     },
+    "lodash": {
+      "version": "4.0.0",
+      "from": "lodash@*",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.0.0.tgz"
+    },
     "md5-o-matic": {
       "version": "0.1.1",
       "from": "md5-o-matic@>=0.1.1 <0.2.0",
@@ -26,11 +31,6 @@
       "version": "3.0.2",
       "from": "mouse-event-offset@>=3.0.2 <4.0.0",
       "resolved": "https://registry.npmjs.org/mouse-event-offset/-/mouse-event-offset-3.0.2.tgz"
-    },
-    "underscore": {
-      "version": "1.8.3",
-      "from": "underscore@>=1.8.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
     }
   }
 }

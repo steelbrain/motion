@@ -1,16 +1,20 @@
+import { isNumber, isBoolean } from 'lodash'
+
 view Label {
+  prop val, editable, onSet
+
   let input = null
   let focus, newVal
 
   on.props(() => {
-    newVal = view.props.val
+    if (!focus) newVal = val
   })
 
   const onFocus = e => {
-    if (!view.props.editable) return
+    if (!editable) return
+    if (isBoolean(val)) return onSet(!val)
     focus = true
     e.stopPropagation()
-    e.target.select()
   }
 
   const onBlur = e => {
@@ -20,26 +24,30 @@ view Label {
   const onChange = e => {
     newVal = e.target.value
 
+    if (isNumber(val)) {
+      // dont let them change from num to str
+      if (newVal === '' || isNaN(newVal)) return
+    }
+
     // todo: debate
     if (newVal === 'false') newVal = false
     if (newVal === 'true') newVal = true
-    view.props.onSet(newVal)
+    onSet(newVal)
   }
 
   let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}
 
   <input
-    defaultValue={String(view.props.val)}
-    sync={newVal}
+    defaultValue={val.toString()}
+    value={newVal}
     class={{ focus }}
-    size={Math.max(4, view.props.val && view.props.val.length || 0)}
+    size={Math.max(4, val && val.length || 0)}
     spellCheck={false}
-    onMouseUp={onFocus}
+    onMouseDown={onFocus}
     onFocus={onFocus}
     onEnter={onBlur}
-    onBlur={onBlur}
-    onChange={onChange}
-    {...tabIndex(view.props.editable)}
+    {...tabIndex(editable)}
+    {...{ onFocus, onBlur, onChange }}
   />
 
   $input = {
@@ -52,6 +60,8 @@ view Label {
     width: 140,
     outline: 'none',
     border: 'none',
+    // nice cursor on boolean toggle
+    cursor: isBoolean(val) ? 'pointer' : 'auto',
     opacity: 0,
     boxShadow: '1px 1px 2px rgba(0,0,0,0.4)'
   }

@@ -2,8 +2,15 @@ import offset from 'mouse-event-offset'
 
 view StateTests {
   <Tests.Name />
+  <Tests.Boolean />
   <Tests.Counter />
   <Tests.Circles />
+}
+
+view Tests.Boolean {
+  let dead = false 
+  <h1>is tupac dead? {dead.toString()}</h1>
+  <button onClick={() => dead = !dead}>toggle</button>
 }
 
 view Tests.Counter {
