@@ -119,10 +119,6 @@ const Flint = {
     //
 
     const Flint = {
-      // visible but used internally
-      packages: {},
-      internals: {},
-
       start() {
         router.init(ID, { onChange: Flint.render })
         Flint.render()
