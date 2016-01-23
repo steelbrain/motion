@@ -87,7 +87,6 @@ export async function run(opts) {
     cache.serialize() // write out cache
     console.log() // space before install
     await bundler.all()
-    console.log(`  ${server.url()}\n`.bold.green)
     keys.init()
   }
   catch(e) {

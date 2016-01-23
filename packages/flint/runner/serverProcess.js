@@ -32,8 +32,8 @@ function devToolsDisabled(req) {
 
 async function readScripts() {
   try {
-    const dir = await readdir({ root: OPTS.outDir })
-    const files = dir.files.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
+    const dir = await readdir(OPTS.outDir)
+    const files = dir.filter(f => /\.jsf?$/.test(f.name)) // filter sourcemaps
     const hasFiles = files.length
 
     let paths = []
@@ -113,10 +113,10 @@ async function getScripts({ disableTools }) {
 
 const stylesheetLink = (name) => `<link rel="stylesheet" href="/__/${name}" />`
 
-async function getPathsInDir(root) {
-  const dir = await readdir({ root })
-  if (!dir.files || !dir.files.length) return []
-  return dir.files.map(file => file.path).sort()
+async function getPathsInDir(_dir) {
+  const dir = await readdir(_dir)
+  if (!dir || !dir.length) return []
+  return dir.map(file => file.path).sort()
 }
 
 async function getStyles() {

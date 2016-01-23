@@ -10,6 +10,7 @@ import cache from './cache'
 import builder from './builder'
 import bundler from './bundler'
 import superStream from './lib/superStream'
+import dirAddStream from './lib/dirAddStream'
 import compiler from './compiler'
 import babel from './lib/gulp-babel'
 import opts from './opts'
@@ -59,7 +60,7 @@ const $p = {
 
   // for parsing single file
   flintFile: () => babel({
-    breakConfig: true,
+    breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'view.el',
     stage: 1,
     blacklist: ['es6.tailCall', 'strict'],
@@ -71,7 +72,7 @@ const $p = {
       basePath: OPTS.dir,
       production: isBuilding(),
       selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
-      writeStyle,
+      writeStyle: writeStyle.write,
       onMeta,
       onImports(file, imports) {
         fileImports[file] = imports
@@ -82,7 +83,6 @@ const $p = {
     }
   })
 }
-
 
 // gulp doesnt send unlink events for files in deleted folders, so we do our own
 function watchDeletes() {
@@ -110,6 +110,8 @@ export async function init({ once = false } = {}) {
   try {
     OPTS = opts.get()
 
+    writeStyle.init()
+
     buildingOnce = once
 
     // if manually running a once
@@ -123,8 +125,8 @@ export async function init({ once = false } = {}) {
     }
 
     const inFiles = await glob(SCRIPTS_GLOB)
-    const _outFiles = await readdir({ root: OPTS.outDir })
-    const outFiles = _outFiles.files
+    const _outFiles = await readdir(OPTS.outDir)
+    const outFiles = _outFiles
       .map(file => file.path)
       .filter(path => path.slice(-4) !== '.map')
 
@@ -192,22 +194,16 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   let loaded = 0
   let total = inFiles && inFiles.length || 0
 
-  // TODO copying a directory of files over is broken in gulp 3 / gulp-watch
-  // make this watch and push dirs into stream (or try gulp 4)
-  // chokidar.watch('.', {ignored: /[\/\\]\./, ignoreInitial: true}).on('addDir', (...args) => {
-  //   console.log('adding', ...args)
-  // })
-
   // gulp src stream
   const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     // ignore unlinks in pipeline
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
-
   // either user or gulp stream
+  const dirStream = dirAddStream(opts.get('appDir'))
   const sourceStream = userStream || gulpSrcStream
-  const stream = isBuilding() ? sourceStream : merge(sourceStream, superStream.stream)
+  const stream = isBuilding() ? sourceStream : merge(sourceStream, dirStream, superStream.stream)
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))

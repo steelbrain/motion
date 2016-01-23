@@ -26,8 +26,8 @@ export async function styles() {
     let source = ''
 
     try {
-      const dir = await readdir({ root: opts.get('styleDir') })
-      const sources = await* dir.files.map(async file => await readFile(file.fullPath))
+      const files = await readdir(opts.get('styleDir'))
+      const sources = await* files.map(async file => await readFile(file.fullPath))
       source = sources.join("\n\n")
     }
     catch(e) {

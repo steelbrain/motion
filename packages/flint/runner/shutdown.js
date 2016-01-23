@@ -19,7 +19,7 @@ function cleanExit(e) {
   })
 }
 
-export function stop() { cleanExit() }
+export function now() { cleanExit() }
 export function setChild(_child) { child = _child }
 
-export default { stop, setChild }
+export default { now, setChild }

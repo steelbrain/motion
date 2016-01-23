@@ -22,7 +22,8 @@ const logWrap = (name, fn) => {
 // promisify
 const rm = logWrap('rm', promisify(remove))
 const mkdir = logWrap('mkdir', promisify(mkdirs))
-const readdir = logWrap('readdir', promisify(readdirp))
+const _readdir = promisify(readdirp)
+const readdir = logWrap('readdir', (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files))
 const readJSON = logWrap('readJSON', promisify(jf.readFile))
 const writeJSON = logWrap('writeJSON', promisify(jf.writeFile))
 const _readFilePromise = promisify(readFile)
@@ -78,6 +79,11 @@ function promisify(callback){
   }
 }
 
+function vinyl(basePath, path, contents) {
+  const cwd = '/'
+  const base = basePath + '/'
+  return { cwd, base, path, contents }
+}
 
 export default {
   _,
@@ -101,5 +107,6 @@ export default {
   handleError,
   logError,
   glob,
-  promisify
+  promisify,
+  vinyl
 }

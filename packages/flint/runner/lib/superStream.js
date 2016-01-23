@@ -4,7 +4,7 @@ import nodepath from 'path'
 import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
-import { _, path, log, readFile, handleError } from '../lib/fns'
+import { _, path, log, readFile, handleError, vinyl } from '../lib/fns'
 
 const LOG = 'stream'
 
@@ -31,7 +31,7 @@ function fileSend({ path, contents }) {
 
   // write to stream
   const rPath = nodepath.relative(basePath, path)
-  const file = new File(vinyl(path, new Buffer(contents)))
+  const file = new File(vinyl(basePath, path, new Buffer(contents)))
 
   log(LOG, 'rpath', rPath)
 
@@ -107,12 +107,6 @@ function init() {
   let fileSender = _.throttle(fileSend, 22, { leading: true })
 
   bridge.on('live:save', fileSender)
-}
-
-function vinyl(path, contents) {
-  const cwd = '/'
-  const base = basePath + '/'
-  return { cwd, base, path, contents }
 }
 
 export default { init, stream }

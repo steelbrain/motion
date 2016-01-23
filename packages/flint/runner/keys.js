@@ -1,4 +1,5 @@
-import runner from './shutdown'
+import server from './server'
+import shutdown from './shutdown'
 import open from 'open'
 import keypress from 'keypress'
 
@@ -28,6 +29,7 @@ export function banner() {
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
   const prefix = '  ›'
 
+  console.log(`  ${server.url()}\n`.bold.green)
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
       `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim
@@ -113,7 +115,7 @@ function start() {
 
     // exit
     if (key.ctrl && key.name == 'c') {
-      runner.stop()
+      shutdown.now()
     }
   })
 

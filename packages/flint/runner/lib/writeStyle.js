@@ -4,24 +4,25 @@ import { writeFile, log, handleError, path } from './fns'
 import bridge from '../bridge'
 import opts from '../opts'
 
-export default async function writeStyle(view, sheet) {
-  try {
-    log('styles', 'view', view, 'sheet', sheet)
+let STYLE_DIR
 
-    const file = path.join(opts.get('dir'), '.flint', '.internal', 'styles', view + '.css')
+export function init() {
+  STYLE_DIR = path.join(opts.get('dir'), '.flint', '.internal', 'styles')
+}
+
+export async function write(view, sheet) {
+  try {
+    const file = path.join(STYLE_DIR, `${view}.css`)
     const prefixed = await postcss([ autoprefixer ]).process(sheet)
     let final = prefixed.css
 
-    log('styles', `writing... ${file}`)
-
     await writeFile(file, final)
-
-    if (opts.get('hasRunInitialBuild'))
-      setTimeout(() => {
-        bridge.message('stylesheet:add', { view, file })
-      })
+    if (!opts.get('hasRunInitialBuild')) return
+    bridge.message('stylesheet:add', { view, file })
   }
   catch(e) {
     handleError(e)
   }
 }
+
+export default { write, init }
