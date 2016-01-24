@@ -308,10 +308,10 @@ export default function createComponent(Flint, Internal, name, view, options = {
       // FLINT HELPERS
       // view.element('foo') -> <foo>
       element(selector) {
-        const viewNode = ReactDOM.findDOMNode(this);
+        const viewNode = ReactDOM.findDOMNode(this)
 
         // Returns itself if a selector is not specified
-        if (!selector) return viewNode;
+        if (!selector) return viewNode
         return viewNode.querySelector(selector)
       },
 
