@@ -1,5 +1,5 @@
 import Program from 'commander'
-import flintNew from './lib/new'
+import create from './lib/new'
 
 Program
   .option('-n, --nocache', 'dont use local cache of latest flint scaffold')
@@ -10,13 +10,13 @@ Program
 const args = Program.args
 
 if (!args.length) {
-  console.log('Must give a name (flint new myname)'.red)
+  console.log('\nTry giving a name "flint new amazingapp"'.green)
   process.exit(1)
 }
 
-const name = args[0]
-const use = Program.use || args[1]
-const nocache = Program.nocache
-const debug = Program.debug
-
-flintNew({ name, use, nocache, debug })
+create({
+  name: args[0],
+  use: Program.use || args[1],
+  nocache: Program.nocache,
+  debug: Program.debug
+})

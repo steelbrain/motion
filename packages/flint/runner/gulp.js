@@ -343,7 +343,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function catchError(error) {
-    log(LOG, 'catchError', error)
+    console.log(LOG, 'catchError', error)
     lastError = true
     out.badFile(curFile)
 
