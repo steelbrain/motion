@@ -331,7 +331,7 @@ const Flint = {
         Flint.render()
       },
 
-      getView(name, parentName) {
+      getView(name) {
         let result
 
         // regular view

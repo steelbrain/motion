@@ -34,7 +34,8 @@ export default function createElement(viewName) {
 
     const view = this
     const Flint = view.Flint
-    const { name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, props && props.tagName, viewName, Flint.getView)
+
+    const { name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, view, props, viewName, Flint.getView)
 
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
 
@@ -87,7 +88,7 @@ export default function createElement(viewName) {
 }
 
 // tagName comes directly from <el tagName="" />
-function getElement(identifier, tagName, viewName, getView) {
+function getElement(identifier, view, props, viewName, getView) {
   let name, key, index, tag, isView, repeatItem
 
   // used directly by user
@@ -116,7 +117,20 @@ function getElement(identifier, tagName, viewName, getView) {
     let isHTMLElement = name[0].toLowerCase() == name[0]
 
     if (isHTMLElement) {
-      tag = name
+      const tagName = (
+        // yield isnt merged in at this point so we check for it
+        view.props && view.props.yield && view.props.tagName
+        // otherwise use prop tagname
+        || props && props.tagName
+      )
+
+      if (tagName) {
+        originalTag = tag
+        tag = tagName
+      }
+      else {
+        tag = name
+      }
 
       if (divWhitelist.indexOf(tag) >= 0) {
         originalTag = tag
@@ -126,12 +140,9 @@ function getElement(identifier, tagName, viewName, getView) {
     // find a view
     else if (!tag) {
       isView = true
-      tag = getView(name, viewName)
+      tag = getView(name)
     }
   }
-
-  // <p tagName="z" /> == z
-  tag = tagName || tag
 
   return { name, key, index, repeatItem, tag, originalTag, isView }
 }

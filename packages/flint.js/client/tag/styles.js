@@ -32,6 +32,9 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
   const isWrapperOrRoot = props && (props.__flintIsWrapper || props.root)
   const deservesRootStyles = (isRootName && hasOneRender || isWrapperOrRoot)
 
+  if (tag == 'row')
+    console.log(view.name, name)
+
   function addClassName(name) {
     props.className = props.className ? `${props.className} ${name}` : name
   }
@@ -128,7 +131,6 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
           )
         })
       }
-
     }
 
     // merge styles [] into {}
