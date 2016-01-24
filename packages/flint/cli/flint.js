@@ -6,9 +6,9 @@ import { version } from '../package.json'
 
 let [ node, flint, cmd = 'run', ...flags ] = process.argv
 
-// pass flags to run
-if (cmd[0] == '-' && cmd != '--help') {
-  flags = [].concat(cmd, flags)
+// flint --debug
+if (cmd && cmd[0] == '-' && cmd != '--help') {
+  flags = [cmd, ...flags]
   cmd = 'run'
 }
 
