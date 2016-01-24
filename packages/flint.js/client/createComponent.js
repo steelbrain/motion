@@ -165,7 +165,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.queuedUpdate = false
         this.firstRender = true
         this.isUpdating = true
-        this.styles = { _static: {} }
+        this.styles = {}
         this.events = { mount: u, unmount: u, change: u, props: u }
         this.path = null
 

@@ -43,6 +43,10 @@ function isInView(scope) {
   return scope.hasBinding("view")
 }
 
+function getTagName(JSXElement) {
+  return JSXElement.openingElement.name.elements[0].value
+}
+
 const mutativeFuncs = ['push', 'reverse', 'splice', 'shift', 'pop', 'unshift', 'sort']
 
 function isMutativeArrayFunc(node) {
@@ -234,6 +238,10 @@ export default function createPlugin(options) {
     let viewStyleNames = {} // prevent duplicate style names
     let fileImports = []
 
+    function getRootTagName() {
+      return getTagName(viewRootNodes[0])
+    }
+
     // meta-data for views for atom
     let meta = {}
     let sendingMeta = false
@@ -348,13 +356,9 @@ export default function createPlugin(options) {
 
               // check if child tag is direct root
               const numRoots = viewRootNodes.length
-
               let shouldStyleTagnameAsRoot = numRoots == 0
-
               if (numRoots == 1) {
-                const tagName = inView.toLowerCase()
-                const rootTagName = viewRootNodes[0].openingElement.name.elements[0].value
-                shouldStyleTagnameAsRoot = rootTagName == tagName
+                shouldStyleTagnameAsRoot = getRootTagName() == inView.toLowerCase()
               }
 
               const viewName = inView
@@ -423,7 +427,8 @@ export default function createPlugin(options) {
                 }, [])
               )
 
-              const expr = t.expressionStatement(
+              // Flint.staticStyles('ViewName', {}, ``)
+              const staticStyleExpr = t.expressionStatement(
                 t.callExpression(t.identifier('Flint.staticStyles'), [
                   t.literal(viewName),
                   classNamesObject,
@@ -431,7 +436,12 @@ export default function createPlugin(options) {
                 ])
               )
 
-              return [ expr, node ]
+              // Flint.viewRoots["Name"] = "RootElementName"
+              const viewRootNodeExpr = t.expressionStatement(
+                t.assignmentExpression('=', t.identifier(`Flint.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
+              )
+
+              return [ staticStyleExpr, viewRootNodeExpr, node ]
             }
           }
         },
@@ -786,10 +796,6 @@ export default function createPlugin(options) {
                 return result
               }
 
-              else if (t.isLiteral(node.right) && node.right.value === false) {
-                return staticStyleStatement(node, node.right)
-              }
-
               else {
                 return styleAssign(node)
               }
@@ -847,13 +853,6 @@ export default function createPlugin(options) {
               }
             }
 
-            // $._static["name"] = ...
-            function staticStyleStatement(node, statics) {
-              let result = exprStatement(t.assignmentExpression(node.operator, styleLeft(node, true), statics))
-              result.expression.isStyle = true
-              return result
-            }
-
             // $["name"] = ...
             function dynamicStyleStatement(node, dynamics) {
               return exprStatement(
@@ -863,16 +862,10 @@ export default function createPlugin(options) {
               )
             }
 
-            function styleLeft(node, isStatic) {
-              const prefix = isStatic ? '$._static' : '$'
+            function styleLeft(node) {
+              const prefix = '$'
 
               if (node.left.object) {
-                if (isStatic) {
-                  const object = t.identifier(prefix)
-                  const props = node.left.properties || [node.left.property]
-                  return t.memberExpression(object, ...props)
-                }
-
                 return node.left
               }
 

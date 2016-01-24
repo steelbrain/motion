@@ -142,6 +142,7 @@ const Flint = {
 
       // styles, TODO: move internal
       staticStyles,
+      viewRoots: {},
       styleClasses: {},
       styleObjects: {},
 

@@ -209,6 +209,7 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   if (isView || typeof tag != 'function') {
     props.__flint = {
       parentStyles: view.styles,
+      parentStylesStatic: Flint.styleObjects[viewName],
       parentName: viewName,
       key,
       index,

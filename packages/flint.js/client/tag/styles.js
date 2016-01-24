@@ -23,17 +23,14 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
   if (typeof name !== 'string') return
 
   let styles
-  let parentStyles, parentStylesStatic, parentStylesStaticView
+  let parentStyles, parentStylesStatic, parentStylesStaticView, parentStylesRoot
 
   // attach view styles from $ to element matching view name lowercase
   const Flint = view.Flint
   const isRootName = view.name && view.name.toLowerCase() == name
   const hasOneRender = view.renders.length <= 1
   const isWrapperOrRoot = props && (props.__flintIsWrapper || props.root)
-  const deservesRootStyles = (isRootName && hasOneRender || isWrapperOrRoot)
-
-  if (tag == 'row')
-    console.log(view.name, name)
+  const deservesRootStyles = !!(isRootName && hasOneRender || isWrapperOrRoot)
 
   function addClassName(name) {
     props.className = props.className ? `${props.className} ${name}` : name
@@ -41,9 +38,19 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
   if (deservesRootStyles) {
     if (view.props.__flint) {
+      const parentName = view.props.__flint.parentName
       parentStyles = view.props.__flint.parentStyles
-      parentStylesStatic = Flint.styleObjects[view.props.__flint.parentName]
+      parentStylesStatic = Flint.styleObjects[parentName]
       parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
+
+      const parentRoot = Flint.viewRoots[parentName]
+
+      // parent $={} styles pass to child
+      //    view Main { <Child root />  $ = { background: 'red' }  }   <-- makes these styles work!
+      //    view Child { <child /> $ = { background: 'yellow' } }
+      if (parentRoot === view.name) {
+        parentStylesRoot = parentStylesStatic && parentStylesStatic.$
+      }
     }
 
     // TODO: shouldnt be in styles
@@ -75,12 +82,14 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
       deservesRootStyles && viewStyle,
       // passed down styles
       parentStyles && parentStyles[`${prefix}${view.name}`],
+      // passed down styles using $
+      parentStylesRoot
     )
 
     // for use in className loop
     const viewStaticStyles = Flint.styleObjects[view.name]
 
-    if (view.doRenderToRoot || view.doRenderInlineStyles || window.location.search == '?inlineStyles') {
+    if (view.doRenderToRoot || view.doRenderInlineStyles) {
       result = mergeStyles(result,
         diffName && viewStaticStyles && viewStaticStyles[`${prefix}${name}`],
         hasTag && viewStaticStyles && viewStaticStyles[`${prefix}${tag}`],
