@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import replace from 'replace'
 import fetch from 'node-fetch'
-import { Spinner } from './ui'
+import { Spinner } from '../../shared/console'
 import randomColor from './colors'
 
 const p = path.join
