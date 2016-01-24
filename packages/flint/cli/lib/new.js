@@ -35,7 +35,7 @@ export default function run({ name, use, nocache, debug }) {
     process.exit(1)
   }
 
-  var spinner, fps = 60
+  var spinner
   let FLINT = {}
   FLINT.scaffoldDir = p(getUserHome(), '.flint', 'scaffold')
   FLINT.scaffoldRepo = `https://github.com/${org}/${repo}`
@@ -48,7 +48,7 @@ export default function run({ name, use, nocache, debug }) {
   else {
     console.log()
     spinner = new Spinner('Creating app...  ')
-    spinner.start({ fps })
+    spinner.start()
     start()
   }
 

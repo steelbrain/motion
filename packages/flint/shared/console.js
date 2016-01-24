@@ -16,7 +16,7 @@ var helpers = {
 
       function play(arr, interval) {
         var len = arr.length, i = 0;
-        interval = interval || 300;
+        interval = interval || 100;
 
         var drawTick = function () {
           var str = arr[i++ % len];
@@ -30,7 +30,7 @@ var helpers = {
         return sprintf('  \u001b[96m%s ', c);
       });
 
-      play(frames, opts.fps || 40);
+      play(frames, opts.fps || 50)
     };
 
     this.message = function (message) {
