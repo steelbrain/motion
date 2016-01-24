@@ -1,5 +1,5 @@
 import execPromise from '../../lib/execPromise'
-import { Spinner } from '../../lib/console'
+import { Spinner } from '../../../shared/console'
 import opts from '../../opts'
 import { log, handleError } from '../../lib/fns'
 

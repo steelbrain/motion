@@ -7,12 +7,9 @@ import findIndex from 'lodash/findIndex'
 import { version } from '../package.json'
 
 let args = process.argv // ['...node', '...flint', 'cmd', '--flag', ...]
-let cmd = args[2]
 
 // flint == flint run
-if (cmd != '--help') {
-  args[2] = `run`
-}
+args[2] = args[2] || 'run'
 
 // async check for new versions
 exec('npm view flint@latest version -loglevel silent', (err, current) => {

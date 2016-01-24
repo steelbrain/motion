@@ -1,5 +1,5 @@
-var Surge = require('surge')
-var hooks = require('./hooks')
+import Surge from 'surge'
+import hooks from './hooks'
 
 var surge = Surge({ platform: 'roguemont.com' })
 
