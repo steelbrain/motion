@@ -34,7 +34,7 @@ export default function createElement(viewName) {
 
     const view = this
     const Flint = view.Flint
-    const { fullname, name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, props && props.tagName, viewName, Flint.getView)
+    const { name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, props && props.tagName, viewName, Flint.getView)
 
     props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
 
@@ -115,10 +115,8 @@ function getElement(identifier, tagName, viewName, getView) {
   else {
     let isHTMLElement = name[0].toLowerCase() == name[0]
 
-    // get tag type and name of tag
     if (isHTMLElement) {
-      // props.tagName
-      tag = tagName || name
+      tag = name
 
       if (divWhitelist.indexOf(tag) >= 0) {
         originalTag = tag
@@ -131,6 +129,9 @@ function getElement(identifier, tagName, viewName, getView) {
       tag = getView(name, viewName)
     }
   }
+
+  // <p tagName="z" /> == z
+  tag = tagName || tag
 
   return { name, key, index, repeatItem, tag, originalTag, isView }
 }
