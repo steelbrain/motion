@@ -247,7 +247,12 @@ export default function createPlugin(options) {
       const numRoots = viewRootNodes.length
       let result = numRoots == 0
       if (numRoots == 1) {
-        result = getRootTagName() == inView.toLowerCase()
+        const hasRootProp = viewRootNodes[0].openingElement.attributes.filter(x => x.name && x.name.name === 'root').length
+
+        result = (
+          hasRootProp ||
+          getRootTagName() == inView.toLowerCase()
+        )
       }
       return result
     }
