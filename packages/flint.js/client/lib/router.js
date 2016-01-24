@@ -94,11 +94,11 @@ const router = {
     }
   },
 
-  setActive(path, params) {
-    if (params) delete params._ // ??
+  setActive(path, newParams) {
+    if (params) delete newParams._ // ??
     routes[path] = activeID
-    params[path] = params
-    router.params = params
+    params[path] = newParams
+    router.params = newParams
   },
 
   add(path) {
