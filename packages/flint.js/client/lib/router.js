@@ -95,7 +95,7 @@ const router = {
   },
 
   setActive(path, newParams) {
-    if (params) delete newParams._ // ??
+    if (newParams) delete newParams._ // ??
     routes[path] = activeID
     params[path] = newParams
     router.params = newParams
