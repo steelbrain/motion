@@ -239,7 +239,17 @@ export default function createPlugin(options) {
     let fileImports = []
 
     function getRootTagName() {
+      if (!viewRootNodes.length) return ''
       return getTagName(viewRootNodes[0])
+    }
+
+    function shouldStyleAsRoot() {
+      const numRoots = viewRootNodes.length
+      let result = numRoots == 0
+      if (numRoots == 1) {
+        result = getRootTagName() == inView.toLowerCase()
+      }
+      return result
     }
 
     // meta-data for views for atom
@@ -352,15 +362,8 @@ export default function createPlugin(options) {
             if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
               node._flintViewParsed = true
 
-              let rootTag = '$'
-
               // check if child tag is direct root
-              const numRoots = viewRootNodes.length
-              let shouldStyleTagnameAsRoot = numRoots == 0
-              if (numRoots == 1) {
-                shouldStyleTagnameAsRoot = getRootTagName() == inView.toLowerCase()
-              }
-
+              const shouldStyleTagnameAsRoot = shouldStyleAsRoot()
               const viewName = inView
               const styles = viewStyles[viewName]
 
@@ -416,8 +419,6 @@ export default function createPlugin(options) {
                 options.writeStyle(viewName, StyleSheet.render())
 
               StyleSheet.clear()
-              inView = false
-              viewStyles[viewName] = {}
 
               // inline the static styles as js object for use when needing to override dynamics
               const stylesObject = t.objectExpression(
@@ -437,11 +438,18 @@ export default function createPlugin(options) {
               )
 
               // Flint.viewRoots["Name"] = "RootElementName"
-              const viewRootNodeExpr = t.expressionStatement(
-                t.assignmentExpression('=', t.identifier(`Flint.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
-              )
+              if (shouldStyleAsRoot()) {
+                const viewRootNodeExpr = t.expressionStatement(
+                  t.assignmentExpression('=', t.identifier(`Flint.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
+                )
+                return [ staticStyleExpr, viewRootNodeExpr, node ]
+              }
 
-              return [ staticStyleExpr, viewRootNodeExpr, node ]
+              // reset
+              inView = false
+              viewStyles[viewName] = {}
+
+              return [ staticStyleExpr, node ]
             }
           }
         },
