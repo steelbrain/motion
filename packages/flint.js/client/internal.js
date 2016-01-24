@@ -27,6 +27,10 @@ export function init(name) {
     lastWorkingViews: {},
     lastWorkingRenders: {},
 
+    // Flint.decorateView & Flint.onViewInstance
+    viewDecorator: {},
+    instanceDecorator: {},
+
     resetViewsInFile(file) {
       const views = Internal.viewsInFile[file]
 

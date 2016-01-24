@@ -124,16 +124,23 @@ const Flint = {
         Flint.render()
       },
 
-      // semi private API
+      // private API
       reportError,
       range,
       iff,
       noop: function(){},
 
+      // alpha
+      _onViewInstance: (name, decorator) => !decorator
+        ? Internal.instanceDecorator.all = name
+        : Internal.instanceDecorator[name] = decorator,
+      _decorateView: (name, decorator) => !decorator
+        ? Internal.viewDecorator.all = name
+        : Internal.viewDecorator[name] = decorator,
+
       // external API
       keyframes,
       router,
-      decorateViews: decorator => Internal.viewDecorator = decorator,
       preloaders: [], // async functions needed before loading app
 
       preload(fn) {

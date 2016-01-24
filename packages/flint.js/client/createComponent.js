@@ -23,12 +23,22 @@ export default function createComponent(Flint, Internal, name, view, options = {
   const el = createElement(name)
   let isChanged = options.changed
 
-  if (process.env.production)
-    return createViewComponent()
-
-  if (options.changed) {
-    views[name] = createViewComponent()
+  // wrap decorators
+  const wrapComponent = (component) => {
+    if (Internal.viewDecorator[name])
+      component = Internal.viewDecorator[name](component)
+    if (Internal.viewDecorator.all)
+      component = Internal.viewDecorator.all(component)
+    return component
   }
+
+  // production
+  if (process.env.production)
+    return wrapComponent(createViewComponent())
+
+  // development
+  if (options.changed)
+    views[name] = createViewComponent()
 
   // once rendered, isChanged is used to prevent
   // unnecessary props hashing, for faster hot reloads
@@ -36,7 +46,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
     isChanged = false
   })
 
-  return createProxyComponent()
+  return wrapComponent(createProxyComponent())
 
   // proxy components handle hot reloads
   function createProxyComponent() {
@@ -201,8 +211,11 @@ export default function createComponent(Flint, Internal, name, view, options = {
         // reset original render
         this.render = flintRender
 
-        if (Internal.viewDecorator)
-          Internal.viewDecorator(this)
+        // Flint._onViewInstance
+        if (Internal.instanceDecorator[name])
+          Internal.instanceDecorator[name](this)
+        if (Internal.instanceDecorator.all)
+          Internal.instanceDecorator.all(this)
 
         return null
       },
