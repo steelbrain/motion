@@ -1,4 +1,4 @@
-import webpack from 'webpack'
+import { webpack } from '../lib/require'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import disk from '../disk'
@@ -38,7 +38,7 @@ async function packExternals() {
       entry: opts.get('deps').externalsIn,
     })
 
-    webpack(conf, (err, stats) => {
+    webpack()(conf, (err, stats) => {
       handleWebpackErrors('externals', err, stats, resolve, reject)
     })
   })

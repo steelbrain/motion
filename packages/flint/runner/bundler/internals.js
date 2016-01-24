@@ -1,4 +1,4 @@
-import webpack from 'webpack'
+import { webpack } from '../lib/require'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import readInstalled from './lib/readInstalled'
@@ -68,7 +68,7 @@ function packInternals() {
       externals: webpackUserExternals()
     })
 
-    webpack(conf, (err, stats) => {
+    webpack()(conf, (err, stats) => {
       handleWebpackErrors('internals', err, stats, resolve, reject)
     })
   })

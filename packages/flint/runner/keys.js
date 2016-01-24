@@ -29,7 +29,7 @@ export function banner() {
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
   const prefix = '  ›'
 
-  console.log(`\n  http://${server.url()}\n`.bold.green)
+  console.log(`  http://${server.url()}\n`.bold.green)
   console.log(
     `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
       `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim
@@ -62,7 +62,6 @@ function start() {
     try {
       switch(key.name) {
         case 'return': // show banner again
-          console.log()
           banner()
           break
         case 'o': // open browser

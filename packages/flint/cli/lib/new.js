@@ -309,26 +309,12 @@ export default function run({ name, use, nocache, debug }) {
   function finish() {
     message('Done!')
     spinner.stop()
-
-    wait().then(function() {
-      console.log(
-        '  Done! ⇢'.green.bold,
-        ` ${name}\n`
-      )
-      process.exit()
-    })
+    console.log('  Done! ⇢'.green.bold, ` cd ${name}\n`)
+    process.exit()
   }
 
   function message(str) {
     spinner.message(str)
-  }
-
-  function wait() {
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve()
-      }, fps)
-    })
   }
 
   function log(...args) {

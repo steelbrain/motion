@@ -1,15 +1,18 @@
 import Program from 'commander'
 import colors from 'colors'
-import path from 'path'
 import { exec } from 'child_process'
 import cmp from 'semver-compare'
-import findIndex from 'lodash/findIndex'
 import { version } from '../package.json'
 
-let args = process.argv // ['...node', '...flint', 'cmd', '--flag', ...]
+let [ node, flint, cmd = 'run', ...flags ] = process.argv
 
-// flint == flint run
-args[2] = args[2] || 'run'
+// pass flags to run
+if (cmd[0] == '-' && cmd != '--help') {
+  flags = [].concat(cmd, flags)
+  cmd = 'run'
+}
+
+let args = [ node, flint, cmd, ...flags ]
 
 // async check for new versions
 exec('npm view flint@latest version -loglevel silent', (err, current) => {

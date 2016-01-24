@@ -1,8 +1,8 @@
-var gutil = require('gulp-util');
-var through = require('through2');
-var applySourceMap = require('vinyl-sourcemaps-apply');
-var replaceExt = require('replace-ext');
-var babel = require('flint-babel-core');
+import gutil from 'gulp-util'
+import through from 'through2'
+import applySourceMap from 'vinyl-sourcemaps-apply'
+import replaceExt from 'replace-ext'
+import { babel } from './require'
 
 module.exports = function (opts) {
 	opts = opts || {};
@@ -25,7 +25,7 @@ module.exports = function (opts) {
 				sourceMap: Boolean(file.sourceMap)
 			});
 
-			var res = babel.transform(file.contents.toString(), fileOpts);
+			var res = babel().transform(file.contents.toString(), fileOpts);
 
 			if (file.sourceMap && res.map) {
 				res.map.file = replaceExt(res.map.file, '.js');
