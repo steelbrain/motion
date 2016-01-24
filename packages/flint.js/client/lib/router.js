@@ -78,15 +78,27 @@ const router = {
   },
 
   recognize() {
+    let matches = 0
+
     routesList.forEach(({ route, path }) => {
       let routeParams = route.match(location)
       if (routeParams) {
-        delete routeParams._
-        routes[path] = activeID
-        params[path] = routeParams
-        router.params = routeParams
+        matches++
+        router.setActive(path, routeParams)
       }
     })
+
+    // 404
+    if (!matches && routes[404]) {
+      router.setActive(404)
+    }
+  },
+
+  setActive(path, params) {
+    if (params) delete params._ // ??
+    routes[path] = activeID
+    params[path] = params
+    router.params = params
   },
 
   add(path) {
