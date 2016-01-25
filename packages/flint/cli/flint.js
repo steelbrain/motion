@@ -4,12 +4,24 @@ import { exec } from 'child_process'
 import cmp from 'semver-compare'
 import { version } from '../package.json'
 
+const commands = [
+  'run',
+  'new',
+  'build',
+  'update'
+]
+
 let [ node, flint, cmd = 'run', ...flags ] = process.argv
 
 // flint --debug
 if (cmd && cmd[0] == '-' && cmd != '--help') {
   flags = [cmd, ...flags]
   cmd = 'run'
+}
+
+// bad command
+if (cmd && commands.indexOf(cmd) === -1) {
+  cmd = '--help'
 }
 
 let args = [ node, flint, cmd, ...flags ]
