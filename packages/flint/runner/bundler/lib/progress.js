@@ -12,8 +12,10 @@ export default async function progress(label, cmd, name, index, total) {
     spinner && spinner.stop()
   }
   catch(e) {
+    spinner && spinner.stop()
+
     if (e.code == 1)
-      return handleError({ message: `NPM command ${cmd} failed` })
+      return handleError({ message: `${cmd} failed` })
 
     handleError(e)
   }
