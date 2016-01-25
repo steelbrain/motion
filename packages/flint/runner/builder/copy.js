@@ -11,13 +11,13 @@ async function copyWithSourceMap(file, dest) {
 
 export function flint() {
   var read = p(flintjs(), 'dist', 'flint.prod.js');
-  var write = p(opts.get('buildDir'), '_', 'flint.prod.js');
+  var write = p(opts('buildDir'), '_', 'flint.prod.js');
   return copyWithSourceMap(read, write)
 }
 
 export function react() {
   var read = p(flintjs(), 'dist', 'react.prod.js');
-  var write = p(opts.get('buildDir'), '_', 'react.prod.js');
+  var write = p(opts('buildDir'), '_', 'react.prod.js');
   return copyWithSourceMap(read, write)
 }
 
@@ -26,7 +26,7 @@ export async function styles() {
     let source = ''
 
     try {
-      const files = await readdir(opts.get('styleDir'))
+      const files = await readdir(opts('styleDir'))
       const sources = await* files.map(async file => await readFile(file.fullPath))
       source = sources.join("\n\n")
     }
@@ -34,7 +34,7 @@ export async function styles() {
       // no styles, thats ok
     }
 
-    await writeFile(opts.get('styleOutDir'), source)
+    await writeFile(opts('styleOutDir'), source)
   }
   catch(e) {
     handleError(e)
@@ -44,8 +44,8 @@ export async function styles() {
 export async function assets() {
   // copy .flint/statics and assets in app dir
   await* [
-    globCopy(['*', '**/*'], p(opts.get('buildDir'), '_', 'static'), { cwd: '.flint/static' }),
-    globCopy(['*', '**/*', '!**/*.js' ], opts.get('buildDir'))
+    globCopy(['*', '**/*'], p(opts('buildDir'), '_', 'static'), { cwd: '.flint/static' }),
+    globCopy(['*', '**/*', '!**/*.js' ], opts('buildDir'))
   ]
 }
 

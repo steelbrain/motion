@@ -3,16 +3,15 @@ import 'whatwg-fetch'
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'
 import React from 'react'
-import rafBatch from './lib/reactRaf'
 import ReactDOM from 'react-dom'
+import rafBatch from './lib/reactRaf'
 import { StyleRoot, keyframes } from 'flint-radium'
-import clone from 'clone'
 import regeneratorRuntime from './vendor/regenerator'
 
-import './lib/promiseErrorHandle'
 import './shim/root'
+import './shim/exports'
 import './shim/on'
-import './shim/partial'
+import './lib/promiseErrorHandle'
 import internal from './internal'
 import onError from './shim/flint'
 import createComponent from './createComponent'
@@ -68,18 +67,13 @@ const Flint = {
       rafBatch.inject()
     }
 
-    // GLOBALS
-    root.global = root // for radium
-    root.regeneratorRuntime = regeneratorRuntime
-    root._history = history // for imported modules to use
-    root.Promise = Promise // for modules to use
+    // shims
     root.React = React
     root.ReactDOM = ReactDOM
+    root.global = root // for radium
+    root.regeneratorRuntime = regeneratorRuntime
     root.on = on
-    root.module = {}
-    root.fetch.json = (...args) => fetch(...args).then(res => res.json())
-
-    // for loading apps
+    root.fetch.json = (a, b, c) => fetch(a, b, c).then(res => res.json())
     root.require = requireFactory(root)
   },
 
@@ -393,5 +387,4 @@ const Flint = {
   }
 }
 
-root.exports = root.exports || {}
-root.exports["flint"] = Flint
+root.exports.flint = Flint

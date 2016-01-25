@@ -31,7 +31,7 @@ function runQueue() {
 
 function sendInitialMessages(conn) {
   conn.sendText(makeMessage('flint:baseDir', { dir: intCache.baseDir() }))
-  conn.sendText(makeMessage('flint:opts', opts.get()))
+  conn.sendText(makeMessage('flint:opts', opts()))
 
   // send cached stuff on connect
   Object.keys(messageCache).forEach(cat => {

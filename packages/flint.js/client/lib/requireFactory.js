@@ -4,6 +4,7 @@ export default function requireFactory(root) {
   let app = ''
 
   function require(name, folder) {
+    if (!name) return
     if (name.charAt(0) == '.') {
       let parentDirs = folder.split('/')
       let upDirs = parentFolderMatch(name)
@@ -28,11 +29,9 @@ export default function requireFactory(root) {
       return pkg[cleanName] || pkg[`${cleanName}/index`]
     }
 
-    // todo this looks jank
-    if (name == 'React')
-      return root.React
-    if (name == 'ReactDOM')
-      return root.ReactDOM
+    // exports
+    if (name.indexOf('exports.') == 0)
+      return root.exports[name.replace('exports.', '')]
 
     // get pkg
     let pkg = root.exports[`${app}-externals`][name]

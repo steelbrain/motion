@@ -7,7 +7,7 @@ import opts from '../opts'
 let STYLE_DIR
 
 export function init() {
-  STYLE_DIR = path.join(opts.get('dir'), '.flint', '.internal', 'styles')
+  STYLE_DIR = path.join(opts('dir'), '.flint', '.internal', 'styles')
 }
 
 export async function write(view, sheet) {
@@ -17,7 +17,7 @@ export async function write(view, sheet) {
     let final = prefixed.css
 
     await writeFile(file, final)
-    if (!opts.get('hasRunInitialBuild')) return
+    if (!opts('hasRunInitialBuild')) return
     bridge.message('stylesheet:add', { view, file })
   }
   catch(e) {

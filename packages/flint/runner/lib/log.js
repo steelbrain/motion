@@ -16,5 +16,5 @@ export default function log(...args) {
 }
 
 log.setLogging = function() {
-  debug = opts.get('debug')
+  debug = opts('debug')
 }

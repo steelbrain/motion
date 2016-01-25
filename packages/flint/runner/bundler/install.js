@@ -1,4 +1,4 @@
-import readInstalled from './lib/readInstalled'
+import { readInstalled } from './lib/readInstalled'
 import writeInstalled from './lib/writeInstalled'
 import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
@@ -62,7 +62,7 @@ export async function installAll(requires) {
     requires = requires || cache.getExternals()
 
     // nothing to install
-    if (!requires.length && !_isInstalling && opts.get('hasRunInitialBuild'))
+    if (!requires.length && !_isInstalling && opts('hasRunInitialBuild'))
       opts.set('hasRunInitialInstall', true)
 
     // determine whats new
@@ -74,8 +74,13 @@ export async function installAll(requires) {
     // nothing new
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
-      // await writeInstalled(installed)
-      // await bundleExternals({ silent: true })
+
+      // new flint excluded require like babel-runtime, see rmFlintExternals
+      // TODO this, getNew, normalize all need refactor -- in fact probably most of this file does :)
+      if (_.difference(requires, installed, installing).length) {
+        await writeInstalled(installed)
+        await bundleExternals({ silent: true })
+      }
       return
     }
 
@@ -193,8 +198,8 @@ export function finishedInstalling() {
 }
 
 function isDone() {
-  return opts.get('build')
-    ? !_isInstalling && opts.get('hasRunInitialInstall')
+  return opts('build')
+    ? !_isInstalling && opts('hasRunInitialInstall')
     : !_isInstalling
 }
 

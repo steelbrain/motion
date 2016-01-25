@@ -21,7 +21,7 @@ export async function bundleExternals(opts = {}) {
 export async function installExternals(filePath, source) {
   const found = cache.getExternals(filePath)
   log(LOG, 'installExternals', filePath, 'found', found)
-  if (opts.get('hasRunInitialBuild')) installAll(found)
+  if (opts('hasRunInitialBuild')) installAll(found)
 }
 
 // read externals.path => write externals.in
@@ -35,7 +35,7 @@ async function packExternals() {
 
   return new Promise((resolve, reject) => {
     const conf = webpackConfig('externals.js', {
-      entry: opts.get('deps').externalsIn,
+      entry: opts('deps').externalsIn,
     })
 
     webpack()(conf, (err, stats) => {

@@ -8,7 +8,7 @@ let OPTS
 export default async function makeTemplate() {
   try {
     log('makeTemplate()')
-    OPTS = opts.get()
+    OPTS = opts()
 
     const outFile = p(OPTS.buildDir, 'index.html')
     const indexFile = await readFile(p(OPTS.flintDir, 'index.html'))

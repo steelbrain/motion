@@ -17,18 +17,19 @@ let fileStyleFolder = 'file?name=assets/styles/[name]-[hash].css'
 export default function webpackConfig(filename, config = {}) {
   const conf = deepmerge({
     context: runnerRoot,
-    debug: opts.get('debug'),
+    debug: opts('debug'),
     output: {
       // app/.flint/.internal/deps
-      path: opts.get('deps').dir,
+      path: opts('deps').dir,
       filename,
-      library: `${opts.get('saneName')}-${filename.replace('.js', '')}`,
+      library: `${opts('saneName')}-${filename.replace('.js', '')}`,
       libraryTarget: 'commonjs'
     },
     // come from flint.js
     externals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
+      react: 'exports.React',
+      'react-dom': 'exports.ReactDOM',
+      history: 'exports.history'
     },
     devtool: 'source-map',
     node: {
@@ -38,7 +39,7 @@ export default function webpackConfig(filename, config = {}) {
     },
     resolveLoader: { root: runnerModules },
     resolve: {
-      root: opts.get('flintDir'),
+      root: opts('flintDir'),
       modulesDirectories: ['node_modules'],
       extensions: ['', '.js', '.jsx', '.css'],
       fallback: [

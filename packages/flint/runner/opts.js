@@ -13,7 +13,7 @@ function set(key, val) {
 }
 
 function get(key) {
-  // if (key != 'deps') log('opts.get'.bold.green, key, OPTS[key])
+  // if (key != 'deps') log('opts'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 
@@ -43,7 +43,7 @@ function setAll(opts) {
   OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')
-  OPTS.nodeDir = p(OPTS.flintDir, 'node_modules')
+  OPTS.modulesDir = p(OPTS.flintDir, 'node_modules')
   OPTS.internalDir = p(OPTS.flintDir, '.internal')
   OPTS.depsDir = p(OPTS.internalDir, 'deps')
   OPTS.template = OPTS.template || '.flint/index.html'
@@ -86,4 +86,15 @@ function debug() {
   console.log(util.inspect(OPTS, false, 10))
 }
 
-export default { get, set, setAll, serialize, debug }
+
+function opts(name) {
+  return get(key)
+}
+
+opts = get
+opts.set = set
+opts.setAll = setAll
+opts.serialize = serialize
+opts.debug = debug
+
+export default opts

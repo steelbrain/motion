@@ -4,7 +4,7 @@ import disk from '../../disk'
 
 export default async function remakeInstallDir(reset) {
   log('bundler', 'remakeInstallDir')
-  const deps = opts.get('deps')
+  const deps = opts('deps')
 
   try {
     await mkdir(deps.dir)

@@ -98,8 +98,8 @@ function initScriptWait() {
 }
 
 function init() {
-  basePath = opts.get('appDir')
-  flintPath = opts.get('flintDir')
+  basePath = opts('appDir')
+  flintPath = opts('flintDir')
 
   initScriptWait()
 
