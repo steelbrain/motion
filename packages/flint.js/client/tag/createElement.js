@@ -1,4 +1,4 @@
-import React from 'flint-react'
+import React from 'react'
 import classnames from 'classnames'
 import elementStyles from './styles'
 import reportError from '../lib/reportError'

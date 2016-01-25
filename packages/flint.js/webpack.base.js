@@ -41,7 +41,7 @@ module.exports = function(opts) {
 
   function splitReact(name) {
     plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js'))
-    entry.react = ['flint-react', 'flint-react-dom']
+    entry.react = ['react', 'react-dom']
   }
 
   // function splitBabelRuntime(name) {

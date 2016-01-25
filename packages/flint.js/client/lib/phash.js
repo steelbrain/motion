@@ -1,4 +1,4 @@
-import React from 'flint-react'
+import React from 'react'
 import hashsum from 'hash-sum'
 import opts from './opts'
 
