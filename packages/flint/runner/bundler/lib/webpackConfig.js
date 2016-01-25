@@ -27,8 +27,9 @@ export default function webpackConfig(filename, config = {}) {
     },
     // come from flint.js
     externals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
+      react: 'exports.React',
+      'react-dom': 'exports.ReactDOM',
+      history: 'exports.history'
     },
     devtool: 'source-map',
     node: {

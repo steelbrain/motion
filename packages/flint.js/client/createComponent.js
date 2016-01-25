@@ -1,4 +1,5 @@
 import ReactDOMServer from 'react-dom/server'
+import ReactDOM from 'react-dom'
 import React from 'react'
 import raf from 'raf'
 import Radium from './lib/radium'

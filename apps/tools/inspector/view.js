@@ -1,4 +1,3 @@
-import clone from 'clone'
 import { omit } from 'lodash'
 
 function pathToName(path) {

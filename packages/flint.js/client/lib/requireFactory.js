@@ -28,11 +28,9 @@ export default function requireFactory(root) {
       return pkg[cleanName] || pkg[`${cleanName}/index`]
     }
 
-    // todo this looks jank
-    if (name == 'React')
-      return root.React
-    if (name == 'ReactDOM')
-      return root.ReactDOM
+    // exports
+    if (name.indexOf('exports.') == 0)
+      return root.exports[name]
 
     // get pkg
     let pkg = root.exports[`${app}-externals`][name]
