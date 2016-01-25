@@ -23,6 +23,7 @@ view Label {
 
   const onChange = e => {
     newVal = e.target.value
+    view.update({ immediate: true })
 
     if (isNumber(val)) {
       // dont let them change from num to str
