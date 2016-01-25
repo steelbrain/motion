@@ -37,8 +37,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
     return wrapComponent(createViewComponent())
 
   // development
-  if (options.changed)
-    views[name] = createViewComponent()
+  views[name] = createViewComponent()
 
   // once rendered, isChanged is used to prevent
   // unnecessary props hashing, for faster hot reloads

@@ -239,33 +239,30 @@ const Flint = {
           if (Internal.firstRender)
             return
 
-          setTimeout(() => {
-            const isNewFile = !cached.length
-            const addedViews = arrayDiff(views, cached)
+          const isNewFile = !cached.length
+          const addedViews = arrayDiff(views, cached)
 
-            // safe re-render
-            if (isNewFile || removedViews.length || addedViews.length) {
-              return Flint.render()
-            }
+          // safe re-render
+          if (isNewFile || removedViews.length || addedViews.length)
+            return Flint.render()
 
-            // if no views update in file, update all of them
-            if (!Internal.changedViews.length) {
-              Internal.changedViews = Internal.viewsInFile[file]
-            }
+          // if no views update in file, update all of them
+          if (!Internal.changedViews.length) {
+            Internal.changedViews = Internal.viewsInFile[file]
+          }
 
-            Internal.changedViews.forEach(name => {
-              if (!Internal.mountedViews[name]) return
+          Internal.changedViews.forEach(name => {
+            if (!Internal.mountedViews[name]) return
 
-              Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
-                if (view.isMounted()) {
-                  view.forceUpdate()
-                  return view
-                }
-              }).filter(x => !!x)
+            Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
+              if (view.isMounted()) {
+                view.forceUpdate()
+                return view
+              }
+            }).filter(x => !!x)
 
-              setTimeout(() => emitter.emit('render:done'))
-            })
-          }, 0)
+            setTimeout(() => emitter.emit('render:done'))
+          })
         }
       },
 
@@ -315,7 +312,7 @@ const Flint = {
 
           // if unchanged
           if (Internal.views[name].hash == hash) {
-            setView(name, comp({ hash, unchanged: true }))
+            setView(name, comp({ hash }))
             return
           }
 
