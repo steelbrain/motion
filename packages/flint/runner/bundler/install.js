@@ -74,8 +74,13 @@ export async function installAll(requires) {
     // nothing new
     if (!fresh.length) {
       if (!_isInstalling) opts.set('hasRunInitialInstall', true)
-      // await writeInstalled(installed)
-      // await bundleExternals({ silent: true })
+
+      // new flint excluded require like babel-runtime, see rmFlintExternals
+      // TODO this, getNew, normalize all need refactor -- in fact probably most of this file does :)
+      if (_.difference(requires, installed, installing).length) {
+        await writeInstalled(installed)
+        await bundleExternals({ silent: true })
+      }
       return
     }
 
