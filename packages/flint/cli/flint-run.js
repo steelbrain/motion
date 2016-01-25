@@ -3,7 +3,8 @@ import Program from 'commander'
 import colors from 'colors'
 import fs from 'fs'
 import { run } from '../runner'
-import { name, version } from './info'
+import name from './lib/appName'
+import version from './lib/flintVersion'
 
 Program
   .option('-d, --debug [what]', 'output extra information for debugging')

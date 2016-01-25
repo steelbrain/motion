@@ -2,7 +2,7 @@ import Program from 'commander'
 import colors from 'colors'
 import { exec } from 'child_process'
 import cmp from 'semver-compare'
-import { version } from './info'
+import version from './lib/flintVersion'
 
 const commands = [
   'run',

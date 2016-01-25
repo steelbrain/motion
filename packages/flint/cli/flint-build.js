@@ -2,7 +2,8 @@ import './lib/checkForApp'
 import Program from 'commander'
 import colors from 'colors'
 import { build } from '../runner'
-import { name, version } from './info'
+import name from './lib/appName'
+import version from './lib/flintVersion'
 
 Program
   .option('-w, --watch', 'incremental builds')
