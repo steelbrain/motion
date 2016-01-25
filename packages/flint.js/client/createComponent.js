@@ -239,6 +239,16 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.props = nextProps
           this.runEvents('props', [this.props])
         }
+
+        if (!process.env.production) {
+          const path = nextProps.__flint.path
+          const fn = Internal.inspector[path]
+          const state = _Flint.getCache[nextProps.__flint.path]
+          // send to inspector if inspecting
+          fn && fn(nextProps, state)
+        }
+
+
         // })
       },
 
