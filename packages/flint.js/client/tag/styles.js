@@ -2,14 +2,20 @@ import reportError from '../lib/reportError'
 import niceStyles from 'flint-nice-styles'
 
 const isLowerCase = s => s.toLowerCase() == s
-
+/**
+ * TODO!
+ *
+ * - spread objects slow. Create a faster internal func
+ * - this isArray check is slow. Use 'x.constructor === Array;'
+ */
 const mergeStyles = (obj, ...styles)  => {
   return styles.reduce((acc, style) => {
     if (Array.isArray(style))
+   // NOTE! Native .map is terrible slow.
       style.map(s => acc = mergeStyles(acc, s))
     else if (typeof style === 'object' && style !== null) {
       if (!acc) acc = {}
-      Object.assign(acc, style)
+      Object.assign(acc, style) // Better way then Object.assign? Ref.: https://jsperf.com/object-assign-vs-assign/6
     }
 
     return acc
@@ -110,7 +116,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
         if (viewStaticStyles) {
           const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
           if (staticClassStyles) {
-            Object.keys(staticClassStyles).forEach(key => {
+            Object.keys(staticClassStyles).forEach(key => { // TODO! This is runtime? Swap out forEach with native iteration loop. Ref.: https://jsperf.com/for-vs-foreach/422
               // check if already in styles, and rewrite to class style
               if (typeof result[key] != 'undefined') {
                 result[key] = staticClassStyles[key]
@@ -126,7 +132,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
       let viewClassName = view.props.className || view.props.class
 
       if (viewClassName) {
-        viewClassName.split(' ').forEach(className => {
+        viewClassName.split(' ').forEach(className => { // Todo! Use native for iteration loop
           if (!isLowerCase(className[0])) return
           const key = `${prefix}${className}`
 
@@ -144,7 +150,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
     // merge styles [] into {}
     if (Array.isArray(result))
-      result = mergeStyles(...result)
+      result = mergeStyles(...result) // Todo! Avoid object spread
 
     // add view external props.style
     if (deservesRootStyles && view.props.style)
@@ -166,7 +172,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
   if (parentStylesStaticView) {
     let pssv = niceStyles.object(parentStylesStaticView)
 
-    Object.keys(pssv).forEach(key => {
+    Object.keys(pssv).forEach(key => { // TODO! Get rid of forEach
       styles[key] = pssv[key]
     })
   }
@@ -180,7 +186,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     const body = document.body
     const bg = props.style && (props.style.background || props.style.backgroundColor)
 
-    if (!bg)
+    if (!bg) // TODO! Sure this works? Avoid browser issues, use a loose equalent. == null.
       body.style.background = ''
 
     if (bg && body) {

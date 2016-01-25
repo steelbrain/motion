@@ -1,5 +1,27 @@
 // from https://github.com/facebook/react/blob/401e6f10587b09d4e725763984957cf309dfdc30/src/isomorphic/classic/element/ReactDOMFactories.js
 
+/* TODO! What is the purpose? Native array is faster, or for V8 use switch on length
+
+  llustrated below is the fastest method. Second method is to use array, else the slow on - current
+
+  Example:
+  function getTagName(tag) {
+
+ switch ( tag.length) {
+    case 4: return tag === 'abbr' || tag === 'area'
+    case 5: return tag === 'aside'
+   }
+ }
+
+  Usage:
+
+   let tag = 'abbr';
+
+   if ( getTagName(tag)) { // Will match 'abbr'
+    // Do your stuff...
+   }
+
+ */
 export default {
   a: true,
   abbr: true,
@@ -135,5 +157,7 @@ export default {
   svg: true,
   text: true,
   tspan: true,
+
+ // TODO! What about MATHML ?
 
 }
