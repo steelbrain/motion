@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'flint-react'
 
 export default function LastWorkingMainFactory(Internal) {
   return React.createClass({
