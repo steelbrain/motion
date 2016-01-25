@@ -4,9 +4,9 @@ import clone from 'clone'
 export default function hotCache({ Internal, options, name }) {
   return {
     // on assign
-    set(name, val, result, useResult) { // result = val after mutation, use that instead of val
+    set(name, val, result, useResult, updateOpts = { soft: true }) { // result = val after mutation, use that instead of val
       if (process.env.production) {
-        this.update(true)
+        this.update(updateOpts)
         return val
       }
 
@@ -16,8 +16,12 @@ export default function hotCache({ Internal, options, name }) {
         Internal.getCache[path] = {}
 
       Internal.setCache(path, name, useResult ? result : val)
-      this.update(true)
+      this.update(updateOpts)
       return val
+    },
+
+    setImmediate(name, val) {
+      this.set(name, val, null, null, { soft: true, immediate: true })
     },
 
     // on declaration

@@ -54,7 +54,7 @@ async function differentFlintVersion() {
   const isDiff = version != stateVersion
 
   if (isDiff)
-    console.log(`New flint version, updating...\n`.grey)
+    console.log(`  New flint version, updating...\n`.dim)
 
   return isDiff
 }

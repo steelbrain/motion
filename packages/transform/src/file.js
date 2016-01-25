@@ -590,7 +590,7 @@ export default function createPlugin(options) {
                 t.JSXAttribute(t.literal('__flintValue'), node.value),
                 t.JSXAttribute(t.literal('__flintOnChange'), t.functionExpression(null, [t.identifier('e')],
                   t.blockStatement([
-                    t.assignmentExpression('=', node.value, t.identifier('e.target.value'))
+                    t.assignmentExpression('_=_', node.value, t.identifier('e.target.value')),
                   ])
                 )),
               ]
@@ -925,6 +925,10 @@ export default function createPlugin(options) {
             // non-styles
             if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
 
+            // this is used internally to make setImmediate on sync
+            const isImmediateAssign = node.operator === '_=_'
+            if (isImmediateAssign) node.operator = '='
+
             const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
             if (!isBasicAssign) return
 
@@ -960,7 +964,7 @@ export default function createPlugin(options) {
               }
 
               if (isViewState(name, scope)) {
-                sett = node => wrapSetter(name, node, scope, post)
+                sett = node => wrapSetter(name, node, scope, post, isImmediateAssign ? 'setImmediate' : 'set')
                 added = true
               }
             }

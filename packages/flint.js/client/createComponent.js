@@ -138,6 +138,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       Flint,
       el,
 
+      // set() get() dec()
       mixins: [hotCache({ Internal, options, name })],
 
       // TODO: shouldComponentUpdate based on hot load for perf
@@ -394,7 +395,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       // soft = view.set()
-      update(soft) {
+      update({ soft, immediate } = {}) {
         // view.set respects paused
         if (soft && this.isPaused)
           return
@@ -419,11 +420,16 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
         }
 
-        // setTimeout fixes issues with forceUpdate during previous transition in React
-        // batch changes at end of setTimeout
-        if (this.queuedUpdate) return
-        this.queuedUpdate = true
-        setTimeout(doUpdate)
+        if (immediate) {
+          doUpdate()
+        }
+        else {
+          // setTimeout fixes issues with forceUpdate during previous transition in React
+          // batch changes at end of setTimeout
+          if (this.queuedUpdate) return
+          this.queuedUpdate = true
+          setTimeout(doUpdate)
+        }
       },
 
       // childContextTypes: {
