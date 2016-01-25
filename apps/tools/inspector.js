@@ -162,8 +162,10 @@ view Inspector {
   }
 
   function mouseMove({ target }) {
+    const inspector = ReactDOM.findDOMNode(view)
+
     if (lastTarget != target) {
-      if (target.classList.contains('internal'))
+      if (inspector.contains(target))
         return
 
       lastTarget = target
@@ -187,8 +189,11 @@ view Inspector {
     })
   }
 
-  function glue(e) {
-    views = toggleView(removeTemp(views), findPath(e.target))
+  function glue({ target }) {
+    const inspector = ReactDOM.findDOMNode(view)
+    if (inspector.contains(target)) return
+
+    views = toggleView(removeTemp(views), findPath(target))
     return false
   }
 
