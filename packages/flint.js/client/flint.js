@@ -2,7 +2,7 @@ import 'whatwg-fetch'
 
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'
-import React from 'react'
+import React from 'flint-react'
 import rafBatch from './lib/reactRaf'
 import ReactDOM from 'react-dom'
 import { StyleRoot, keyframes } from 'flint-radium'

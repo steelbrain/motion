@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'flint-react'
 
 export default React.createClass({
   render() {

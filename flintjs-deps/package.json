@@ -16,7 +16,7 @@
     "route-parser": "0.0.4",
     "strip-ansi": "3.0.0",
     "whatwg-fetch": "0.10.1",
-    "react": "0.14.2",
-    "react-dom": "0.14.0"
+    "flint-react": "0.15.0-alpha.1",
+    "flint-react-dom": "0.15.0-alpha.3"
   }
 }

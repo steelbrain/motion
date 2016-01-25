@@ -1,5 +1,5 @@
 import ReactDOMServer from 'react-dom/server'
-import React from 'react'
+import React from 'flint-react'
 import raf from 'raf'
 import Radium from './lib/radium'
 
