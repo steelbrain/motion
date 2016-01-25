@@ -2,20 +2,15 @@ import reportError from '../lib/reportError'
 import niceStyles from 'flint-nice-styles'
 
 const isLowerCase = s => s.toLowerCase() == s
-/**
- * TODO!
- *
- * - spread objects slow. Create a faster internal func
- * - this isArray check is slow. Use 'x.constructor === Array;'
- */
+
 const mergeStyles = (obj, ...styles)  => {
   return styles.reduce((acc, style) => {
-    if (Array.isArray(style))
-   // NOTE! Native .map is terrible slow.
-      style.map(s => acc = mergeStyles(acc, s))
+    if (style && style.constructor === Array)
+     for (var i = 0; i < style.length; i++)
+       acc = mergeStyles(acc, style[i])
     else if (typeof style === 'object' && style !== null) {
       if (!acc) acc = {}
-      Object.assign(acc, style) // Better way then Object.assign? Ref.: https://jsperf.com/object-assign-vs-assign/6
+      Object.assign(acc, style)
     }
 
     return acc
@@ -105,26 +100,33 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
     // add class styles
     if (props.className) {
-      props.className.split(' ').forEach(className => {
-        if (!isLowerCase(className[0])) return
+      let classes = props.className.split(' ')
 
-        if (view.styles[className]) {
-          result = mergeStyles(result, view.styles[className](index))
-        }
+      for (let i = 0; i < classes.length; i++) {
+        let className = classes[i]
 
-        // ensure static class styles overwrite dynamic tag/name styles
-        if (viewStaticStyles) {
-          const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
-          if (staticClassStyles) {
-            Object.keys(staticClassStyles).forEach(key => { // TODO! This is runtime? Swap out forEach with native iteration loop. Ref.: https://jsperf.com/for-vs-foreach/422
-              // check if already in styles, and rewrite to class style
-              if (typeof result[key] != 'undefined') {
-                result[key] = staticClassStyles[key]
+        if (isLowerCase(className[0])) {
+          if (view.styles[className]) {
+            result = mergeStyles(result, view.styles[className](index))
+          }
+
+          // ensure static class styles overwrite dynamic tag/name styles
+          if (viewStaticStyles) {
+            const staticClassStyles = viewStaticStyles[`${prefix}${className}`]
+            if (staticClassStyles) {
+              let styles = Object.keys(staticClassStyles)
+
+              for (let j = 0; j < styles.length; j++) {
+                let key = styles[j]
+                // check if already in styles, and rewrite to class style
+                if (typeof result[key] != 'undefined') {
+                  result[key] = staticClassStyles[key]
+                }
               }
-            })
+            }
           }
         }
-      })
+      }
     }
 
     // parent class styles
@@ -132,8 +134,11 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
       let viewClassName = view.props.className || view.props.class
 
       if (viewClassName) {
-        viewClassName.split(' ').forEach(className => { // Todo! Use native for iteration loop
-          if (!isLowerCase(className[0])) return
+        let classes = viewClassName.split(' ')
+
+        for (let i = 0; i < classes.length; i++) {
+          let className = classes[i]
+          if (!isLowerCase(className[0])) continue
           const key = `${prefix}${className}`
 
           // merge in styles
@@ -144,13 +149,13 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
             ),
             parentStylesStatic && parentStylesStatic[key]
           )
-        })
+        }
       }
     }
 
     // merge styles [] into {}
     if (Array.isArray(result))
-      result = mergeStyles(...result) // Todo! Avoid object spread
+      result = mergeStyles({}, result)
 
     // add view external props.style
     if (deservesRootStyles && view.props.style)
@@ -186,8 +191,8 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
     const body = document.body
     const bg = props.style && (props.style.background || props.style.backgroundColor)
 
-    if (!bg) // TODO! Sure this works? Avoid browser issues, use a loose equalent. == null.
-      body.style.background = ''
+    if (!bg)
+      body.style.background = null
 
     if (bg && body) {
       body.style.background = bg

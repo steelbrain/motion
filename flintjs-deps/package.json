@@ -13,7 +13,6 @@
     "history": "2.0.0-rc2",
     "lodash.isequal": "4.0.0",
     "raf": "3.1.0",
-    "reapp-object-assign": "1.0.0",
     "route-parser": "0.0.4",
     "strip-ansi": "3.0.0",
     "whatwg-fetch": "0.10.1",

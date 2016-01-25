@@ -4,26 +4,17 @@ import opts from './opts'
 
 export default function phash(_props) {
   if (opts() && opts().config.disablePropsHashing)
-    return hashsum(Math.random())
+    return `${Math.random()}`
 
-  const props = Object.keys(_props).reduce((acc, key) => {
+  let hash = Object.keys(_props).reduce((acc, key) => {
     const prop = _props[key]
 
-    if (key == '__flint')
-      return acc
+    if (key == '__flint') return acc + prop.key
+    if (prop instanceof Object && prop.hashCode) return acc + prop.hashCode()
+    if (React.isValidElement(prop)) return acc + prop.key
 
-    if (prop instanceof Object && prop.hashCode)
-      acc[key] = prop.hashCode()
+    return acc + hashsum(prop)
+  }, '')
 
-    // TODO: traverse children
-    else if (React.isValidElement(prop))
-      acc[key] = prop.key
-
-    else
-      acc[key] = prop
-
-    return acc
-  }, {})
-
-  return hashsum(props)
+  return hash
 }

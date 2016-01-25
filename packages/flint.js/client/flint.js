@@ -9,7 +9,6 @@ import { StyleRoot, keyframes } from 'flint-radium'
 import clone from 'clone'
 import regeneratorRuntime from './vendor/regenerator'
 
-import 'reapp-object-assign'
 import './lib/promiseErrorHandle'
 import './shim/root'
 import './shim/on'
