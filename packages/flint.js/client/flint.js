@@ -248,6 +248,11 @@ const Flint = {
               return Flint.render()
             }
 
+            // if no views update in file, update all of them
+            if (!Internal.changedViews.length) {
+              Internal.changedViews = Internal.viewsInFile[file]
+            }
+
             Internal.changedViews.forEach(name => {
               if (!Internal.mountedViews[name]) return
 

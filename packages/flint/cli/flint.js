@@ -2,7 +2,7 @@ import Program from 'commander'
 import colors from 'colors'
 import { exec } from 'child_process'
 import cmp from 'semver-compare'
-import { version } from '../package.json'
+import { version } from './info'
 
 const commands = [
   'run',
