@@ -4,13 +4,32 @@ view StateTests {
   <Tests.Name />
   <Tests.Boolean />
   <Tests.Counter />
+  <Tests.Props />
   <Tests.Circles />
 }
 
 view Tests.Boolean {
-  let dead = false 
+  let dead = false
   <h1>is tupac dead? {dead.toString()}</h1>
   <button onClick={() => dead = !dead}>toggle</button>
+}
+
+view Tests.Props {
+  let name = 'a string'
+
+  <input sync={name} />
+  <Test.PropsChild name={name} />
+
+  $ = { marginTop: 20 }
+}
+
+view Test.PropsChild {
+  prop name
+  let count = 0
+
+  <h1>my name is {name}</h1>
+  <h4>counter to test state {count}</h4>
+  <button onClick={() => count++}>up</button>
 }
 
 view Tests.Counter {

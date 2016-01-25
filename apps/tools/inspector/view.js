@@ -12,8 +12,10 @@ function filterProps(props) {
 }
 
 view Inspector.View {
+  prop highlight, closing, path, onClose
+
   const inspect = window.Flint.inspect
-  let name, path, closing, highlight
+  let name
   let active = false
   let state = {}
   let props = null
@@ -28,37 +30,32 @@ view Inspector.View {
   })
 
   on.unmount(() => {
-    delete window._Flint.inspector[view.props.path]
+    delete window._Flint.inspector[path]
   })
 
   on.props(() => {
-    highlight = view.props.highlight
-    closing = view.props.closing
-    path = view.props.path
-
     if (closing === true) active = false
-
     if (!path) return
 
     name = pathToName(path)
 
     // if not inspecting, inspect
-    if (!_Flint.inspector[view.props.path]) {
+    if (!_Flint.inspector[path]) {
       inspect(path, (_props, _state, _wb) => {
+        console.log('props are', _props)
         props = filterProps(_props || {})
         state = _state || {}
         writeBack = _wb
         view.update()
       })
     }
-
   })
 
   let hasKeys = o => o && Object.keys(o).length > 0
   let edit = () => _DT.messageEditor({ type: 'focus:element', view: name })
 
   <view class={{ active, highlight }}>
-    <Close onClick={view.props.onClose} fontSize={20} size={35} />
+    <Close onClick={onClose} fontSize={20} size={35} />
     <top>
       <name>{name}</name>
       <edit if={false} onClick={edit}>edit</edit>
