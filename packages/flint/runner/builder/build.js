@@ -26,7 +26,7 @@ export default async function build() {
       gulp.bundleApp()
     ]
 
-    console.log(`\n  Done! ⇢`.green.bold + `  .flint/build\n`)
+    console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build\n`)
   }
   catch(e) {
     handleError(e)

@@ -1,14 +1,17 @@
+import chalk from 'chalk'
 import server from './server'
 import shutdown from './shutdown'
 import open from 'open'
 import keypress from 'keypress'
 
+import { _ } from './lib/fns'
 import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
 import handleError from './lib/handleError'
 import editor from './lib/editor'
 import opts from './opts'
 import bundler from './bundler'
+import builder from './builder'
 import { build } from './startup'
 import cache from './cache'
 
@@ -24,22 +27,33 @@ export function init() {
   banner()
 }
 
+function promptItem(message, color) {
+  return chalk.bold(message[0]) + message.slice(1)
+}
+
+let starts = (a, b) => a % b == 0
+
+function promptLayout(messages, { perLine = 2, prefix = '  ›', pad = 16 }) {
+  let item = str => promptItem(_.padEnd(`${prefix} ${str}`, pad))
+
+  return messages.map((message, i) =>
+    starts(i, perLine) ? chalk.cyan(`\n${item(message)}`) : item(message)
+  ).join('')
+}
+
 export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
-  const prefix = '  ›'
 
-  console.log(`\n  http://${server.url()}\n`.bold.green)
-  console.log(
-    `${prefix} `+'O'.cyan.bold + 'pen   '.cyan +
-      `${prefix} `.dim+'V'.bold.dim + 'erbose'.dim
-    + newLine +
-    (userEditor
-      ? (`${prefix} `+'E'.cyan.bold + 'ditor '.cyan)
-      : '           ') +
-        `${prefix} `.dim+'R'.bold.dim+'ebundle'.dim + newLine
-    // `${prefix} `+'U'.blue.bold + 'pload'.blue + newLine
-  )
+  console.log(`\n  http://${server.url()}`.bold.green)
+
+  const messages = [
+    'Open', 'Verbose', 'Build',
+    'Editor', 'Rebundle'
+  ]
+
+  console.log(promptLayout(messages, { perLine: 3 }))
+  console.log()
 
   resume()
 }
@@ -64,6 +78,11 @@ function start() {
         case 'return': // show banner again
           banner()
           break
+        case 'b':
+          console.log('\n  Building...'.dim)
+          builder.copy.assets()
+          await builder.build()
+          break
         case 'o': // open browser
           openInBrowser(true)
           break
@@ -77,9 +96,9 @@ function start() {
 
           break
         case 'r': // bundler
-          console.log('Re-bundling internals and npm packages...')
+          console.log('  Bundling internals / npm packages...'.dim)
           await bundler.install(true)
-          console.log(`Done!\n`)
+          console.log(`  Bundled!\n`.green.bold)
           break
         case 'v': // verbose logging
           opts.set('debug', !opts.get('debug'))

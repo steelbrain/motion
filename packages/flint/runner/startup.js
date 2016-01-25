@@ -15,7 +15,7 @@ import { logError, handleError, path, log } from './lib/fns'
 
 let started = false
 
-async function startup(_opts = {}) {
+export async function startup(_opts = {}) {
   if (started) return
   started = true
 
@@ -80,7 +80,7 @@ export async function build(opts = {}) {
 
 export async function run(opts) {
   try {
-    await startup(opts, false)
+    await startup(opts)
     await server.run()
     bridge.start()
     await runGulp()
