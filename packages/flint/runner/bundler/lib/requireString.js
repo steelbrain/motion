@@ -12,7 +12,7 @@ export default function depRequireString(names, prefix = '') {
     return `  packages["${name}"] = require("${prefix}${name}");\n`
   }).join('')}
 
-  window.require.setApp("${opts.get('saneName')}")
+  window.require.setApp("${opts('saneName')}")
   module.exports = packages
   `
 }

@@ -28,10 +28,10 @@ let hasRunCurrentBuild = true
 let buildingOnce = false
 
 const serializeCache = _.throttle(cache.serialize, 200)
-const isBuilding = () => buildingOnce || opts.get('build')
-const hasBuilt = () => hasRunCurrentBuild && opts.get('hasRunInitialBuild')
-const hasFinished = () => hasBuilt() && opts.get('hasRunInitialInstall')
-const relative = file => path.relative(opts.get('appDir'), file.path)
+const isBuilding = () => buildingOnce || opts('build')
+const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
+const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
+const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 const out = {
   badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
@@ -71,7 +71,7 @@ const $p = {
       log,
       basePath: OPTS.dir,
       production: isBuilding(),
-      selectorPrefix: opts.get('config').selectorPrefix || '#_flintapp ',
+      selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
       writeStyle: writeStyle.write,
       onMeta,
       onImports(file, imports) {
@@ -96,7 +96,7 @@ function watchDeletes() {
 
       log(LOG, 'unlink', file)
       if (/jsf?/.test(path.extname(file))) {
-        await rm(p(opts.get('outDir'), file))
+        await rm(p(opts('outDir'), file))
         cache.remove(file)
       }
     }
@@ -108,7 +108,7 @@ function watchDeletes() {
 
 export async function init({ once = false } = {}) {
   try {
-    OPTS = opts.get()
+    OPTS = opts()
 
     writeStyle.init()
 
@@ -132,7 +132,7 @@ export async function init({ once = false } = {}) {
 
     // cleanup out dir since last run
     const deleted = _.difference(outFiles, inFiles)
-    const deletedPaths = deleted.map(f => p(opts.get('outDir'), f))
+    const deletedPaths = deleted.map(f => p(opts('outDir'), f))
     await* deletedPaths.map(f => rm(f))
     log(LOG, 'deleted', deletedPaths)
 
@@ -145,9 +145,9 @@ export async function init({ once = false } = {}) {
 
 // used for build
 export function bundleApp() {
-  const buildDir = p(opts.get('buildDir'), '_')
+  const buildDir = p(opts('buildDir'), '_')
   const appFile = p(buildDir, `${OPTS.saneName}.js`)
-  const deps = opts.get('deps')
+  const deps = opts('deps')
 
   const inFiles = [
     deps.internalsOut,
@@ -155,7 +155,7 @@ export function bundleApp() {
     appFile
   ]
 
-  const isMinifying = !opts.get('nomin')
+  const isMinifying = !opts('nomin')
   if (isMinifying) console.log(`  Minifying...`.dim)
 
   return new Promise((resolve, reject) => {
@@ -169,7 +169,7 @@ export function bundleApp() {
           whitelist: [],
           retainLines: true,
           comments: true,
-          plugins: [flintTransform.app({ name: opts.get('saneName') })],
+          plugins: [flintTransform.app({ name: opts('saneName') })],
           extra: { production: process.env.production },
           compact: true
         })
@@ -201,7 +201,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
   // either user or gulp stream
-  const dirStream = dirAddStream(opts.get('appDir'))
+  const dirStream = dirAddStream(opts('appDir'))
   const sourceStream = userStream || gulpSrcStream
   const stream = isBuilding() ? sourceStream : merge(sourceStream, dirStream, superStream.stream)
 
@@ -268,7 +268,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
 
     // hide behind cached flag for now
-    if (!opts.get('cached')) {
+    if (!opts('cached')) {
       finish()
       return false
     }
@@ -454,9 +454,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   // now we need to remove it from .flint/out
   function removeNewlyInternal(file) {
     // resolve path from .flint/.internal/deps/internals/xyz.js back to xyz.js
-    const filePath = path.relative(p(opts.get('deps').dir, 'internal'), file.path)
+    const filePath = path.relative(p(opts('deps').dir, 'internal'), file.path)
     // then resolve path to .flint/.internal/out/xyz.js
-    const outPath = p(opts.get('outDir'), filePath)
+    const outPath = p(opts('outDir'), filePath)
     log(LOG, 'remove newly internal', outPath)
     rm(outPath)
   }

@@ -18,7 +18,7 @@ export default function logError(error, file) {
     error.stack = unicodeToChar(error.stack || error.codeFrame);
 
   if (error.plugin == 'gulp-babel') {
-    console.log(error.message.replace(opts.get('appDir'), ''));
+    console.log(error.message.replace(opts('appDir'), ''));
     if (error.name != 'TypeError' && error.loc)
       console.log('line: %s, col: %s', error.loc.line, error.loc.column);
     console.log("\n", error.stack.split("\n").splice(0, 7).join("\n"))

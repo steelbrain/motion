@@ -12,7 +12,7 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
   })
 
   // debug
-  if (opts.get('debug')) {
+  if (opts('debug')) {
     log(LOG, '--- webpack output ---')
     log(LOG, jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
   }

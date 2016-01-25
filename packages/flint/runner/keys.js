@@ -59,7 +59,7 @@ export function banner() {
 }
 
 function start() {
-  let OPTS = opts.get()
+  let OPTS = opts()
 
   if (!proc.stdin.isTTY || OPTS.isBuild)
     return
@@ -101,9 +101,9 @@ function start() {
           console.log(`  Bundled!\n`.green.bold)
           break
         case 'v': // verbose logging
-          opts.set('debug', !opts.get('debug'))
+          opts.set('debug', !opts('debug'))
           log.setLogging()
-          console.log(opts.get('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
+          console.log(opts('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
           // await build({ once: true })

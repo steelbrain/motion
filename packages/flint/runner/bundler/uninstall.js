@@ -1,21 +1,24 @@
 import cache from '../cache'
+import disk from '../disk'
 import opts from '../opts'
-import readInstalled from './lib/readInstalled'
+import { readPackageJSON, readInstalled } from './lib/readInstalled'
 import normalize from './lib/normalize'
 import { bundleExternals } from './externals'
 import npm from './lib/npm'
 import writeInstalled from './lib/writeInstalled'
 import filterWithPath from './lib/filterWithPath'
-import { _, log, handleError } from '../lib/fns'
+import { rm, p, _, log, handleError, readJSON, writeJSON } from '../lib/fns'
 
 const LOG = 'externals'
 
 export async function uninstall(rebundle) {
   try {
-    if (!opts.get('hasRunInitialBuild')) return
+    if (!opts('hasRunInitialBuild')) return
 
-    // get full paths
+    // get installed
     const installed = await readInstalled()
+
+    // get imported
     const importedPaths = cache.getExternals()
     const imported = normalize(importedPaths)
 
@@ -41,8 +44,18 @@ export async function uninstall(rebundle) {
         return dep
       }
       catch(e) {
-        console.log('Failed to uninstall', dep)
-        return false
+        try {
+          // manual uninstall
+          await rm(p(opts('modulesDir'), dep))
+          await disk.packageJSON.write((current, write) => {
+            delete current.dependencies[dep]
+            write(current)
+          })
+        }
+        catch(e) {
+          handleError(e)
+          return false
+        }
       }
     })
 

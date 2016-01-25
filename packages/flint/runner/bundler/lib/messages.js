@@ -6,12 +6,12 @@ import log from '../../lib/log'
 // messaging
 
 function avoid() {
-  if (opts.get('build'))
+  if (opts('build'))
     return true
 
   return (
-    !opts.get('hasRunInitialInstall') ||
-    !opts.get('hasRunInitialBuild')
+    !opts('hasRunInitialInstall') ||
+    !opts('hasRunInitialBuild')
   )
 }
 

@@ -19,7 +19,7 @@ export function run() {
 
     setChild(child)
 
-    child.send(JSON.stringify(opts.get()))
+    child.send(JSON.stringify(opts()))
 
     child.once('message', message => {
       let { port, host } = JSON.parse(message)
@@ -34,8 +34,8 @@ export function run() {
 
     // send opts after first build complete
     let sendOpts = setInterval(() => {
-      if (opts.get('hasRunInitialBuild')) {
-        child.send(JSON.stringify(opts.get()))
+      if (opts('hasRunInitialBuild')) {
+        child.send(JSON.stringify(opts()))
         clearInterval(sendOpts)
       }
     }, 150)
@@ -43,8 +43,8 @@ export function run() {
 }
 
 export function url() {
-  const host = opts.get('host')
-  const port = opts.get('port')
+  const host = opts('host')
+  const port = opts('port')
   return host + (port && port !== 80 ? ':' + port : '')
 }
 

@@ -12,7 +12,7 @@ async function deleteJS(view) {
 }
 
 async function deleteStyle(view) {
-  const file = p(opts.get('styleDir'), view + '.css')
+  const file = p(opts('styleDir'), view + '.css')
   log('delete style', file)
   await rm(file)
 }

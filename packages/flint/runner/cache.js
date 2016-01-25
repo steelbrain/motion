@@ -51,13 +51,13 @@ function onDeleteViews(views) {
 
 const Cache = {
   async init() {
-    if (!opts.get('reset')) {
+    if (!opts('reset')) {
       try {
         // read in previous cache
         const state = await disk.state.read()
         previousCache = state.cache
 
-        Cache.setBaseDir(opts.get('dir'))
+        Cache.setBaseDir(opts('dir'))
       }
       catch(e) {
         handleError(e)

@@ -1,7 +1,7 @@
 import { webpack } from '../lib/require'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
-import readInstalled from './lib/readInstalled'
+import { readInstalled } from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import requireString from './lib/requireString'
 import hasExports from '../lib/hasExports'
@@ -28,7 +28,7 @@ export async function bundleInternals() {
 
 async function writeInternalsIn() {
   const files = cache.getExported()
-  await writeFile(opts.get('deps').internalsIn, requireString(files, './internal/'))
+  await writeFile(opts('deps').internalsIn, requireString(files, './internal/'))
 }
 
 let runningBundle = null
@@ -39,7 +39,7 @@ export async function checkInternals(file, source) {
   cache.setIsInternal(file, isInternal)
 
   // not on build
-  if (opts.get('hasRunInitialBuild') && isInternal && !runningBundle) {
+  if (opts('hasRunInitialBuild') && isInternal && !runningBundle) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {
       await bundleInternals()
@@ -64,7 +64,7 @@ function packInternals() {
 
   return new Promise((resolve, reject) => {
     const conf = webpackConfig('internals.js', {
-      entry: opts.get('deps').internalsIn,
+      entry: opts('deps').internalsIn,
       externals: webpackUserExternals()
     })
 

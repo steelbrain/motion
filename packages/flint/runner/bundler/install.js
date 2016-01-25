@@ -1,4 +1,4 @@
-import readInstalled from './lib/readInstalled'
+import { readInstalled } from './lib/readInstalled'
 import writeInstalled from './lib/writeInstalled'
 import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
@@ -62,7 +62,7 @@ export async function installAll(requires) {
     requires = requires || cache.getExternals()
 
     // nothing to install
-    if (!requires.length && !_isInstalling && opts.get('hasRunInitialBuild'))
+    if (!requires.length && !_isInstalling && opts('hasRunInitialBuild'))
       opts.set('hasRunInitialInstall', true)
 
     // determine whats new
@@ -198,8 +198,8 @@ export function finishedInstalling() {
 }
 
 function isDone() {
-  return opts.get('build')
-    ? !_isInstalling && opts.get('hasRunInitialInstall')
+  return opts('build')
+    ? !_isInstalling && opts('hasRunInitialInstall')
     : !_isInstalling
 }
 
