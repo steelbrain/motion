@@ -380,18 +380,16 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     let all = [].concat(babelExternals, imports)
     cache.setFileImports(file.path, all)
 
-    // meta/src detect changed ops
-    // meta has been set already by onMeta
-
+    // meta
     let meta = cache.getFileMeta(file.path)
-
     if (opts('hasRunInitialBuild'))
       bridge.message('file:meta', { meta })
 
+    // outside changed detection
     sendOutsideChanged(meta, file)
   }
 
-  // detects if a file has changed not inside views for hot reloads
+  // detects if a file has changed not inside views for hot reloads correctness
   function sendOutsideChanged(meta, file) {
     let changed = false
 
