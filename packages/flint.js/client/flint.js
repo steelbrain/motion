@@ -40,13 +40,6 @@ const folderFromFile = (filePath) =>
     and exposing the public Flint functions
 */
 
-// // shim root view
-// opts.namespace.view = {
-//   update: () => {},
-//   el: createElement('_'),
-//   Flint
-// }
-
 const Flint = {
   // set up flint shims
   init() {
@@ -157,6 +150,8 @@ const Flint = {
         hasLogged: false,
         done(view) {
           const timing = Flint.timer.timing[view]
+          if (!time) return
+
           const time = +(Date.now()) - timing.start
           if (timing) {
             Flint.timer.lastTimes[view] = time
@@ -285,11 +280,9 @@ const Flint = {
               }
             }).filter(x => !!x)
 
-            setTimeout(() => {
-              emitter.emit('render:done')
-              views.map(Flint.timer.done)
-              Flint.timer.lastMsgInfo = null
-            })
+            emitter.emit('render:done')
+            views.map(Flint.timer.done)
+            Flint.timer.lastMsgInfo = null
           })
         }
       },

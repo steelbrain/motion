@@ -109,8 +109,7 @@ const niceStack = err => {
 }
 
 const log = (...args) => {
-  if (localStorage.getItem('debugTools') === 'true')
-    console.log(...args)
+  if (false) console.log(...args)
 }
 
 view Errors {
