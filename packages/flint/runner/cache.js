@@ -11,9 +11,11 @@ type ViewArray = Array<string>
 type ImportArray = Array<string>
 
 type File = {
-  views?: ViewArray,
-  imports?: ImportArray,
-  error?: object
+  views?: ViewArray;
+  imports?: ImportArray;
+  error?: object;
+  src: string;
+  meta: object;
 }
 
 type CacheState = {
@@ -28,7 +30,8 @@ type CacheState = {
 let previousCache: CacheState
 let cache: CacheState = {
   files: {},
-  imports: []
+  imports: [],
+  fileMeta: {}
 }
 
 let baseDir = ''
@@ -50,6 +53,8 @@ function onDeleteViews(views) {
 }
 
 const Cache = {
+  relative,
+
   async init() {
     if (!opts('reset')) {
       try {
@@ -136,6 +141,18 @@ const Cache = {
     log(LOG, 'setViews', file, views)
   },
 
+  setFileMeta(file: string, meta: object) {
+    cache.files[relative(file)].meta = meta
+  },
+
+  getFileMeta(file: string) {
+    return cache.files[relative(file)].meta
+  },
+
+  setFileSrc(file: string, src: string) {
+    cache.files[relative(file)].src = src
+  },
+
   isInternal(file: string) {
     const f = cache.files[relative(file)]
     return f && f.isInternal
@@ -170,6 +187,10 @@ const Cache = {
 
     cacheFile.externals = externals
     cacheFile.internals = internals
+  },
+
+  getFile(file:? string) {
+    return cache.files[relative(file)]
   },
 
   getViews(file?: string) {

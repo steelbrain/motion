@@ -21,6 +21,7 @@ export function init(name) {
     getCache: {}, // stores { path: { name: val } } for use in view.get()
     getCacheInit: {}, // stores the vars after a view is first run
 
+    fileChanged: {},
     changedViews: [],
     getInitialStates: [],
     mountedViews: {},
@@ -49,6 +50,10 @@ export function init(name) {
       delete Internal.views[name]
       delete Internal.mountedViews[name]
       delete Internal.lastWorkingViews[name]
+    },
+
+    getFile(name) {
+      return Internal.viewsInFile[name] || []
     },
 
     isLive() {

@@ -214,13 +214,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($p.flint.pre())
     .pipe($.sourcemaps.init())
     .pipe($p.flintFile())
-    .pipe(pipefn(file => {
-      let babelExternals = findBabelRuntimeRequires(file.contents.toString())
-      let imports = fileImports[file.path]
-      let all = [].concat(babelExternals, imports)
-
-      cache.setFileImports(file.path, all)
-    }))
+    .pipe(pipefn(updateCache)) // right after babel
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     // is internal
@@ -379,7 +373,46 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       compiledAt: file.startTime
     }
 
+    file.src = file.contents.toString()
+
     curFile = file
+  }
+
+  // update cache: meta/src/imports
+  function updateCache(file) {
+    //  babel externals, set imports for willInstall detection
+    let babelExternals = findBabelRuntimeRequires()
+    let imports = fileImports[file.path]
+    let all = [].concat(babelExternals, imports)
+    cache.setFileImports(file.path, all)
+
+    // meta
+    let meta = cache.getFileMeta(file.path)
+    if (opts('hasRunInitialBuild'))
+      bridge.message('file:meta', { meta })
+
+    // outside changed detection
+    sendOutsideChanged(meta, file)
+  }
+
+  // detects if a file has changed not inside views for hot reloads correctness
+  function sendOutsideChanged(meta, file) {
+    let changed = false
+
+    const viewLocs = Object.keys(meta).map(view => meta[view].location)
+
+    if (viewLocs.length) {
+      // slice out all code not in views
+      const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
+      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src.split("\n")).join('')
+      const cacheFile = cache.getFile(file.path)
+      const prevOutsideSrc = cacheFile.outsideSrc
+      cacheFile.outsideSrc = outsideSrc // update
+      changed = prevOutsideSrc !== outsideSrc
+    }
+
+    if (opts('hasRunInitialBuild'))
+      bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
   }
 
   function isSourceMap(file) {

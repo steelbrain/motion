@@ -38,11 +38,15 @@ export default function run(browser, opts) {
 
     'file:delete': ({ name }) => {
       if (!Flint) return // if attempting before initial load
-      let views = Flint.getFile(name)
+      let views = _Flint.getFile(name)
       views.map(removeSheet)
       removeScript(name)
 
       Flint.deleteFile(name)
+    },
+
+    'file:outsideChange': ({ name, changed }) => {
+      _Flint.fileChanged[name] = changed
     },
 
     'flint:opts': opts => {

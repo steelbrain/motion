@@ -42,8 +42,10 @@ function onOpen() {
 
 function onMessage(message) {
   message = JSON.parse(message.data)
+  if (localStorage.getItem('__flintLog'))
+    console.log('socket', 'onMessage', 'message', message && message._type, message)
+
   if (!message) return
-  // console.flint('socket', 'onMessage', 'message', message._type, message)
 
   const action = actions[message._type]
   if (action) action(message)
