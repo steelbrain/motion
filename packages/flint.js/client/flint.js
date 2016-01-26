@@ -150,9 +150,10 @@ const Flint = {
         hasLogged: false,
         done(view) {
           const timing = Flint.timer.timing[view]
-          if (!time) return
 
           const time = +(Date.now()) - timing.start
+          if (!time) return
+          
           if (timing) {
             Flint.timer.lastTimes[view] = time
             delete Flint.timer.timing[view]
@@ -281,7 +282,7 @@ const Flint = {
             }).filter(x => !!x)
 
             emitter.emit('render:done')
-            views.map(Flint.timer.done)
+            views.map(view => Flint.timer.done(view))
             Flint.timer.lastMsgInfo = null
           })
         }

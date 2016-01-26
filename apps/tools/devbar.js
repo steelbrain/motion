@@ -1,5 +1,6 @@
 const avg = xs => {
   let sum = 0
+  if (xs.length === 0) return 0
   for (var i = 0; i < xs.length; i++){
     sum += parseInt(xs[i], 10)
   }
@@ -13,11 +14,17 @@ view DevBar {
   let avgTime = 0
 
   let pinned = localStorage.getItem('devbar') === 'true'
+
+  let setAvg = () => {
+    console.log('times are', times, 'avg is', avg(times))
+    avgTime = avg(times)
+    fps = avgTime === 0 ? 0 : (1000 / avgTime)
+  }
+
   on.event('hot:finished', ({ time }) => {
     if (pinned) {
       times.push(time)
-      avgTime = avg(times)
-      fps = 1000 / avgTime
+      setAvg()
     }
   })
 
@@ -31,7 +38,7 @@ view DevBar {
   <bar if={hud || pinned}>
     <fps>
       <label>Live: {(''+fps).substr(0, 6)} FPS</label>
-      <button onClick={() => times = []}>reset</button>
+      <button onClick={() => { times = []; setAvg() }}>reset</button>
     </fps>
     {/*<pin onClick={togglePin }>Pin</pin>*/}
   </bar>
@@ -42,9 +49,11 @@ view DevBar {
     bottom: 0,
     left: 0,
     right: 0,
+    background: 'white',
     height: 50,
     border: [1, 'solid', '#ccc'],
     padding: [10, 15],
+    pointerEvents: 'all',
   }
 
   $pin = {
