@@ -517,7 +517,6 @@ function afterBuild() {
 }
 
 function buildDone() {
-  // remove old files from out dir
   opts.set('hasRunInitialBuild', true)
   hasRunCurrentBuild = true
   buildingOnce = false

@@ -142,13 +142,13 @@ function start() {
 
 export function resume() {
   // listen for keys
-  proc.stdin.setRawMode(true)
+  if (proc.stdin.setRawMode) proc.stdin.setRawMode(true)
   proc.stdin.resume()
   stopped = false
 }
 
 export function stop() {
-  proc.stdin.setRawMode(false)
+  if (proc.stdin.setRawMode) proc.stdin.setRawMode(false)
   proc.stdin.pause()
   stopped = true
 }
