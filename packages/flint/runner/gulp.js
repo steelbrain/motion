@@ -213,13 +213,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     .pipe($p.flint.pre())
     .pipe($.sourcemaps.init())
     .pipe($p.flintFile())
-    .pipe(pipefn(file => {
-      let babelExternals = findBabelRuntimeRequires(file.contents.toString())
-      let imports = fileImports[file.path]
-      let all = [].concat(babelExternals, imports)
-
-      cache.setFileImports(file.path, all)
-    }))
+    .pipe(pipefn(updateCache)) // right after babel
     .pipe($p.flint.post())
     .pipe($.if(!userStream, $.rename({ extname: '.js' })))
     // is internal
@@ -373,7 +367,36 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       compiledAt: file.startTime
     }
 
+    file.src = file.contents.toString()
+
     curFile = file
+  }
+
+  // update cache: meta/src/imports
+  function updateCache(file) {
+    //  babel externals, set imports for willInstall detection
+    let babelExternals = findBabelRuntimeRequires()
+    let imports = fileImports[file.path]
+    let all = [].concat(babelExternals, imports)
+    cache.setFileImports(file.path, all)
+
+    // meta/src detect changed ops
+    // meta has been set already by onMeta
+
+    let meta = cache.getFileMeta(file.path)
+    bridge.message('file:meta', { meta })
+
+    // slice out all code not in views
+    const src = file.src.split("\n")
+    const viewLocs = Object.keys(meta).map(view => meta[view].location)
+    const outerSlice = (arr, start, end) => src.slice(0, start).concat(src.slice(end))
+    const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src).join('')
+    const cacheFile = cache.getFile(file.path)
+    const prevOutsideSrc = cacheFile.outsideSrc
+    cacheFile.outsideSrc = outsideSrc // update
+
+    const changed = prevOutsideSrc !== outsideSrc
+    bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
   }
 
   function isSourceMap(file) {

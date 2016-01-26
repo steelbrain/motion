@@ -88,9 +88,11 @@ const Flint = {
 
     // init require
     root.require.setApp(name)
+
     // init Internal
-    internal.init(ID)
-    let Internal = root._Flint = internal.get(ID)
+    const Internal = internal.init(ID)
+    root._Flint = Internal
+
     // tools bridge
     const Tools = root._DT
 
@@ -239,8 +241,8 @@ const Flint = {
           if (isNewFile || removedViews.length || addedViews.length)
             return Flint.render()
 
-          // if no views update in file, update all of them
-          if (!Internal.changedViews.length) {
+          // if outside of views the FILE changed, refresh all views in file
+          if (!Internal.changedViews.length && Internal.fileChanged[file]) {
             Internal.changedViews = Internal.viewsInFile[file]
           }
 
@@ -316,10 +318,6 @@ const Flint = {
           // this resets tool errors
           window.onViewLoaded()
         }
-      },
-
-      getFile(name) {
-        return Internal.viewsInFile[name] || []
       },
 
       deleteFile(name) {

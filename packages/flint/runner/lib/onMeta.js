@@ -1,4 +1,5 @@
 import bridge from '../bridge'
+import cache from '../cache'
 import exec from './exec'
 
 let meta = {}
@@ -35,8 +36,10 @@ bridge.on('editor', data => {
   exec(`osascript -e 'activate application "Atom"'`)
 })
 
-export default data => {
-  Object.keys(data.meta).map(view => {
-    meta[view] = data.meta[view]
+export default ({ file, views }) => {
+  cache.setFileMeta(file, views)
+
+  Object.keys(views).map(view => {
+    meta[view] = views[view]
   })
 }

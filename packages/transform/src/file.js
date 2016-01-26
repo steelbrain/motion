@@ -258,8 +258,7 @@ export default function createPlugin(options) {
     }
 
     // meta-data for views for atom
-    let meta = {}
-    let sendingMeta = false
+    let meta
 
     return new Plugin("flint-transform", {
       metadata: {group: 'builtin-trailing'},
@@ -270,6 +269,7 @@ export default function createPlugin(options) {
             hasView = false
             hasExports = false
             fileImports = []
+            meta = { file: null, views: {} }
           },
 
           exit(node, parent, scope, file) {
@@ -277,9 +277,14 @@ export default function createPlugin(options) {
               options.onImports(file.opts.filename, fileImports)
             }
 
-            if (!hasExports) {
-              const location = relativePath(file.opts.filename)
+            const location = relativePath(file.opts.filename)
+            meta.file = location
 
+            if (options.onMeta) {
+              options.onMeta(meta)
+            }
+
+            if (!hasExports) {
               // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
               node.body = [t.expressionStatement(
                 // closure
@@ -299,27 +304,13 @@ export default function createPlugin(options) {
           hasExports = true
 
           if (hasView)
-            throw new Error("Views don't need to be exported! Put your exports into files without views.")
+            throw new Error("Views shouldn't be exported! Put your exports into files without views.")
         },
 
         // transform local import paths
         ImportDeclaration(node, parent, scope, file) {
           const importPath = node.source.value
-
           fileImports.push(importPath)
-
-          // this ensures all paths are relative to the root, not the current file
-          // const isInternal = importPath.charAt(0) == '.'
-          // if (isInternal) {
-          //   // const importPath = path.join(path.dirname(file.opts.filename), node.source.value)
-          //   // const relImportPath = '#./' + relativePath(importPath)
-          //   //
-          //   // console.log(node)
-          //   //
-          //   // node.source.value = relImportPath
-          //   // node.source.rawValue = relImportPath
-          //   // node.source.raw = `\'${relImportPath}\'`
-          // }
         },
 
         ViewStatement: {
@@ -332,18 +323,11 @@ export default function createPlugin(options) {
             const fullName = name + (subName ? `.${subName}` : '')
 
             currentView = fullName
-            meta[currentView] = {
-              data: { file: file.opts.filename },
+            meta.views[currentView] = {
+              location: node.loc,
+              file: file.opts.filename,
               styles: {},
               els: {},
-            }
-
-            if (!sendingMeta && options.onMeta) {
-              sendingMeta = true
-              setTimeout(() => {
-                options.onMeta({ meta, type: 'meta' })
-                sendingMeta = false
-              }, 100)
             }
 
             inView = fullName
@@ -357,7 +341,7 @@ export default function createPlugin(options) {
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
             )
-          },
+          }
         },
 
         Statement: {
@@ -497,8 +481,8 @@ export default function createPlugin(options) {
               let arr = [t.literal(name), t.literal(key)]
 
               // track meta
-              if (meta[currentView]) {
-                meta[currentView].els[name + key] = el.loc.end
+              if (meta.views[currentView]) {
+                meta.views[currentView].els[name + key] = el.loc.end
               }
 
               /*
@@ -705,7 +689,7 @@ export default function createPlugin(options) {
             if (!isStyle) return
 
             if (currentView)
-              meta[currentView].styles[node.left.name.substr(1)] = node.loc.start
+              meta.views[currentView].styles[node.left.name.substr(1)] = node.loc.start
 
             // styles
             return extractAndAssign(node)
