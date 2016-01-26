@@ -1,8 +1,3 @@
-// hack to detect devtool
-if (!process.stdin.setRawMode) {
-  console.profile('devtoolprofile')
-}
-
 import Program from 'commander'
 import colors from 'colors'
 import { exec } from 'child_process'
