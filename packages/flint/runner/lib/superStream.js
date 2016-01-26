@@ -6,7 +6,7 @@ import cache from '../cache'
 import bridge from '../bridge'
 import { _, path, log, readFile, handleError, vinyl } from '../lib/fns'
 
-const LOG = 'stream'
+const debug = log.bind(null, { name: 'stream', icon: '🚀' })
 
 let basePath, flintPath
 let stream = new Readable({ objectMode: true })
@@ -21,11 +21,11 @@ function isFileType(_path, ext) {
 }
 
 function fileSend({ path, contents }) {
-  log(LOG, '--- STREAM --- fileSend', path)
+  debug(path)
 
   // check if file actually in flint project
   if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0 || !isFileType(path, 'js')) {
-    log(LOG, 'file no JS, not in path, or is in .flint dir', basePath, flintPath, path)
+    debug('  file no JS, not in path, or is in .flint dir', basePath, flintPath, path)
     return
   }
 
@@ -33,10 +33,10 @@ function fileSend({ path, contents }) {
   const rPath = nodepath.relative(basePath, path)
   const file = new File(vinyl(basePath, path, new Buffer(contents)))
 
-  log(LOG, 'rpath', rPath)
+  debug('SIN', rPath)
 
   function pushStream() {
-    log(LOG, 'pushStream()', path, rPath)
+    debug('SOUT', rPath)
     stream.push(file)
   }
 
@@ -50,14 +50,12 @@ function fileSend({ path, contents }) {
       scriptWaiting[rPath] = true
     }
 
-    log(LOG, 'checkPushStream', 'rPath', rPath, 'fileLoading', fileLoading[rPath])
+    debug('RELOAD', fileLoading[rPath])
     // loop waiting for browser to finish loading
     if (fileLoading[rPath]) {
-      log(LOG, 'checkPushStream', 'fileLoading = true', rPath)
-
       if (++attempts > 50) {
         // ceil attempts to avoid locks
-        log(LOG, 'ATTEMPTS > 50!!')
+        debug('ATTEMPTS > 50!!')
         fileLoading[rPath] = false
         scriptWaiting[rPath] = false
       }
@@ -75,7 +73,7 @@ function fileSend({ path, contents }) {
 
   // internals debounce
   if (cache.isInternal(path)) {
-    log(LOG, 'is exported')
+    debug('is exported!')
     clearTimeout(internalTimeout)
     internalTimeout = setTimeout(pushStream, 1000)
   }
@@ -86,13 +84,13 @@ function fileSend({ path, contents }) {
 
 // ignore stream when loading file in browser
 function initScriptWait() {
-  // bridge.on('script:load', ({ path }) => {
-  //   log(LOG, 'script:load', path)
-  //   // fileLoading[path] = true
-  // })
+  bridge.on('script:load', ({ path }) => {
+    debug('IN', 'browser loading', path)
+    fileLoading[path] = true
+  })
 
   bridge.on('script:done', ({ path }) => {
-    log(LOG, 'script:done', path)
+    debug('OUT', 'browser done', path)
     fileLoading[path] = false
   })
 }

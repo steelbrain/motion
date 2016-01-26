@@ -2,17 +2,49 @@ import opts from '../opts'
 
 let debug = false
 
-export default function log(...args) {
+const subIcons = {
+  IN: '⇠',
+  OUT: '⇢',
+  SIN: '⇜',
+  SOUT: '⇝',
+  RELOAD: '↺',
+  STAR: '★',
+  PIPE: '|',
+  CHECK: '✓',
+  X: '✖',
+  PLUS: '✚',
+  ASTERISK: '✺',
+  HAPPY: '☺',
+  SAD: '☹',
+  RELOAD: '↺',
+  WRITE: '✍',
+  DOWN: '↓',
+  UP: '↑'
+}
+
+export default function log(info, subIcon, ...args) {
   if (!debug) return
 
-  if (typeof debug == 'string')
-    if (typeof args[0] == 'string' && args[0].indexOf(debug) >= 0) {
-      args.shift()
-      return console.log(...args)
-    }
-    else return
+  const isStr = typeof info == 'string'
+  let name, icon
+  if (isStr) name = info
+  else ({ name, icon } = info)
 
-  console.log(...args)
+  const subi = subIcons[subIcon]
+  const subiout = subi ? ` ${subi} `.bold.green : `     ${subIcon}`
+  const doLog = () => console.log(`  ${icon || ''}`, subiout, ...colorArgs(args))
+
+  // all
+  if (!debug.length) return doLog()
+  // filtered
+  if (name && debug.indexOf(name) >= 0) doLog()
+}
+
+function colorArgs(args) {
+  return args.map(arg =>
+    typeof arg === 'boolean' ? !!arg ? `${arg}`.bold.green : `${arg}`.bold.red
+    : arg
+  )
 }
 
 log.setLogging = function() {

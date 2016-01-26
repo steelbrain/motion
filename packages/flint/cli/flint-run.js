@@ -6,8 +6,10 @@ import { run } from '../runner'
 import name from './lib/appName'
 import version from './lib/flintVersion'
 
+const list = v => v && v.split(',')
+
 Program
-  .option('-d, --debug [what]', 'output extra information for debugging')
+  .option('-d, --debug <what>', 'output extra information for debugging', list)
   .option('-p, --port [number]', 'specify a port [number]')
   .option('-h, --host [host]', 'specify hostname')
   .option('--pretty', 'pretty print files')

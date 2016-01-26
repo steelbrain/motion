@@ -1,5 +1,4 @@
 import bundler from './bundler'
-import log from './lib/log'
 import hasExports from './lib/hasExports'
 import cache from './cache'
 import opts from './opts'
@@ -8,7 +7,6 @@ import handleError from './lib/handleError'
 
 let views = []
 let OPTS
-const LOG = 'gulp'
 
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
@@ -50,7 +48,6 @@ var Parser = {
       // debounced uninstall
       debounce('removeOldImports', 3000, bundler.uninstall)
 
-      log(LOG, 'compiler:post'.yellow, 'isInternal', isInternal, 'willInstall', willInstall)
       next(source, { isInternal, willInstall })
     }
     catch(e) {

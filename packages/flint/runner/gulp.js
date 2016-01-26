@@ -21,6 +21,8 @@ import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
 
 const LOG = 'gulp'
+const debug = log.bind(null, { name: 'gulp', icon: '👇' })
+
 const $ = loadPlugins()
 
 let OPTS
@@ -94,7 +96,7 @@ function watchDeletes() {
       if (file.indexOf('.flint') === 0)
         return
 
-      log(LOG, 'unlink', file)
+      debug('unlink', file)
       if (/jsf?/.test(path.extname(file))) {
         await rm(p(opts('outDir'), file))
         cache.remove(file)
@@ -134,7 +136,7 @@ export async function init({ once = false } = {}) {
     const deleted = _.difference(outFiles, inFiles)
     const deletedPaths = deleted.map(f => p(opts('outDir'), f))
     await* deletedPaths.map(f => rm(f))
-    log(LOG, 'deleted', deletedPaths)
+    debug('deleted', deletedPaths)
 
     buildScripts({ inFiles, outFiles })
   }
@@ -251,7 +253,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function markDone(file) {
     // mark built
     loaded += 1
-    log(LOG, 'markDone', loaded, total, file.path)
+    debug('markDone', loaded, total, file.path)
 
     // check if done
     if (loaded == total) {
@@ -276,10 +278,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
     }
 
-    log(LOG, 'buildCheck', file.path)
+    debug('buildCheck', file.path)
 
     function finish() {
-      log(LOG, 'buildCheck finish')
+      debug('buildCheck finish')
       cache.restorePrevious(file.path)
 
       markDone(file)
@@ -305,7 +307,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       srcMTime = fs.statSync(file.path).mtime
     }
     catch(e) {
-      log(LOG, 'buildCheck', 'src file removed')
+      debug('buildCheck', 'src file removed')
       return false
     }
 
@@ -313,7 +315,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       outMTime = fs.statSync(outFile).mtime
     }
     catch(e) {
-      log(LOG, 'buildCheck', 'out file removed')
+      debug('buildCheck', 'out file removed')
       markDone(file)
       return false
     }
@@ -346,7 +348,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function catchError(error) {
-    log(LOG, 'catchError', error)
+    debug('catchError', error)
     lastError = true
     out.badFile(curFile)
 
@@ -362,7 +364,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (isBuilding()) return
     let name = file.path.replace(OPTS.appDir, '')
     if (name.charAt(0) != '/') name = '/' + name
-    log(LOG, 'setLastFile', 'path', file.path, 'name', name)
+    debug(name)
 
     // add to message
     file.message = {
@@ -431,7 +433,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       file.startTime > lastSavedTimestamp[file.path]
     )
 
-    log(LOG, 'isNew', isNew)
     if (isNew) {
       lastSavedTimestamp[file.path] = file.startTime
       return true
@@ -472,7 +473,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function markFileSuccess(file) {
     if (isSourceMap(file.path)) return
 
-    log(LOG, 'markFileSuccess', file.path)
+    debug('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall, file.path)
 
     // update cache error / state
     cache.update(file.path)
@@ -486,7 +487,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     // check if other errors left still in queue
     const error = cache.getLastError()
     if (!error) return
-    log(LOG, 'cache last error', error)
+    debug('cache last error', error)
     bridge.message('compile:error', { error }, 'error')
   }
 
@@ -499,7 +500,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const filePath = path.relative(p(opts('deps').dir, 'internal'), file.path)
     // then resolve path to .flint/.internal/out/xyz.js
     const outPath = p(opts('outDir'), filePath)
-    log(LOG, 'remove newly internal', outPath)
+    debug('remove newly internal', outPath)
     rm(outPath)
   }
 }
