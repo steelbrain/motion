@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.4.77",
+  "version": "1.4.78",
   "description": "Run flint apps",
   "main": "dist/main.js",
   "scripts": {},
