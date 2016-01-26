@@ -24,12 +24,12 @@ function init() {
 // ignore stream when loading file in browser
 function watchForBrowserLoading() {
   bridge.on('script:load', ({ path }) => {
-    debug('IN', 'browser loading', path)
+    debug('IN', 'browser', 'loading'.red, path)
     browserLoading[path] = true
   })
 
   bridge.on('script:done', ({ path }) => {
-    debug('IN', 'browser done', path)
+    debug('IN', 'browser', 'done'.green, path)
     browserLoading[path] = false
     loadWaiting(path)
   })
@@ -43,14 +43,13 @@ let queue = {}
 
 function fileSend({ path, contents }) {
   // check if file actually in flint project
-  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) >= 0 || !isFileType(path, 'js')) {
+  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0 || !isFileType(path, 'js')) {
     debug('  file not js || not in path || in .flint', path)
     return
   }
 
   // write to stream
   const relative = relPath(path)
-  const file = new File(vinyl(basePath, path, new Buffer(contents)))
   debug('SIN', relative)
 
   // internals debounce // TODO watch for export finish
@@ -64,21 +63,26 @@ function fileSend({ path, contents }) {
   pushStreamRun(relative, () => {
     debug('SOUT', relative)
     queue[relative] = false
+    // why? because we may get another stream before browser even starts loading
+    browserLoading[relative] = true
+    const file = new File(vinyl(basePath, path, new Buffer(contents)))
     stream.push(file)
   })
 }
 
 function pushStreamRun(relative, finish) {
-  // wait for previous load
+  // waiting for script load
   if (browserLoading[relative]) {
-    let checkTimeout
+    // only queue once
+    if (queue[relative]) return
     queue[relative] = finish
     // ensure upper limit on wait
-    checkTimeout = setTimeout(() => {
+    setTimeout(() => {
       if (!queue[relative]) return
+      debug('upper limit! finish'.yellow)
       browserLoading[relative] = false
       finish()
-    }, 200)
+    }, 400)
   }
   else {
     finish()
