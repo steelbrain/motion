@@ -1,5 +1,24 @@
 import keycode from 'keycode'
+
 window.___keycode = keycode
+
+const keysCorrect = ({ altKey, metaKey }) => altKey && !metaKey
+
+let offAlt = null
+function checkInspect(e) {
+  if (keysCorrect(e)) {
+    // wait a little so were not toooo eager
+    offAlt = on.delay(180, () => {
+      if (keysCorrect(e)) { on.event('hud:show') }
+    })
+  } else {
+    offAlt && offAlt()
+    on.event('hud:hide')
+  }
+}
+
+on.keydown(window, checkInspect)
+on.keyup(window, checkInspect)
 
 view Main {
   const internal = window.__isDevingDevTools
@@ -10,6 +29,7 @@ view Main {
 
   <Errors />
   <Installer />
+  <DevBar />
   <Menu if={showInspector} />
   <Inspector if={showInspector} />
   <StateTests if={internal} />

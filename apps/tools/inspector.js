@@ -1,5 +1,5 @@
-import { keys, onKey, onKeyDown } from './keys'
 import inspecting from './lib/inspecting'
+import { keys, onKey, onKeyDown } from './keys'
 import { throttle } from 'lodash'
 
 const removeHead = ([l, ...ls]) => ls
@@ -133,27 +133,11 @@ view Inspector {
     document.body.appendChild(highlighter)
   })
 
+  on.event('hud:show', showInspect)
+  on.event('hud:hide', hideInspect)
+
   // key events
   onKeyDown('esc', closeLast)
-
-  let offAlt
-
-  const keysCorrect = ({ altKey, metaKey }) => altKey && !metaKey
-
-  function checkInspect(e) {
-    if (keysCorrect(e)) {
-      // wait a little so were not toooo eager
-      offAlt = on.delay(180, () => {
-        if (keysCorrect(e)) { showInspect() }
-      })
-    } else {
-      offAlt && offAlt()
-      hideInspect()
-    }
-  }
-
-  on.keydown(window, checkInspect)
-  on.keyup(window, checkInspect)
 
   function inspect(target) {
     internal().isInspecting = true

@@ -157,13 +157,15 @@ const Flint = {
         hasLogged: false,
         done(view) {
           const timing = Flint.timer.timing[view]
+          const time = +(Date.now()) - timing.start
           if (timing) {
-            Flint.timer.lastTimes[view] = +(Date.now()) - timing.start
+            Flint.timer.lastTimes[view] = time
             delete Flint.timer.timing[view]
           }
           if (!Flint.timer.hasLogged) {
-            console.log(`Finished ${view} in ${Flint.timer.lastTimes[view]}ms`)
             setTimeout(() => Flint.timer.hasLogged = false)
+            Flint.timer.lastTimes[view] = +(Date.now()) - timing.start
+            on.event('hot:finished', { time })
           }
           Flint.timer.hasLogged = true
         },
