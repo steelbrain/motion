@@ -375,7 +375,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   // update cache: meta/src/imports
   function updateCache(file) {
     //  babel externals, set imports for willInstall detection
-    let babelExternals = findBabelRuntimeRequires()
+    let babelExternals = findBabelRuntimeRequires(file.contents.toString())
     let imports = fileImports[file.path]
     let all = [].concat(babelExternals, imports)
     cache.setFileImports(file.path, all)

@@ -7,6 +7,8 @@ import disk from '../../disk'
 
 const LOG = 'externals'
 
+// this writes the full paths to all installed packages
+
 export default async function writeInstalled(_packages, _paths) {
   try {
     log(LOG, 'writeInstalled', '_packages', _packages, '_paths', _paths)
