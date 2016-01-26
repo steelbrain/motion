@@ -343,10 +343,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     error.timestamp = Date.now()
 
-    // dont output massive stacks
-    if (error.plugin == 'gulp-babel')
-      error.stack = ''
-
     logError(error, curFile)
 
     cache.addError(error.fileName || '', error)
@@ -367,13 +363,13 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       compiledAt: file.startTime
     }
 
-    file.src = file.contents.toString()
-
     curFile = file
   }
 
   // update cache: meta/src/imports
   function updateCache(file) {
+    file.src = file.contents.toString()
+
     //  babel externals, set imports for willInstall detection
     let babelExternals = findBabelRuntimeRequires(file.contents.toString())
     let imports = fileImports[file.path]
@@ -398,6 +394,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (viewLocs.length) {
       // slice out all code not in views
       const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
+
       const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src.split("\n")).join('')
       const cacheFile = cache.getFile(file.path)
       const prevOutsideSrc = cacheFile.outsideSrc

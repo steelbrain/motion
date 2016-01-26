@@ -40,13 +40,6 @@ const folderFromFile = (filePath) =>
     and exposing the public Flint functions
 */
 
-// // shim root view
-// opts.namespace.view = {
-//   update: () => {},
-//   el: createElement('_'),
-//   Flint
-// }
-
 const Flint = {
   // set up flint shims
   init() {

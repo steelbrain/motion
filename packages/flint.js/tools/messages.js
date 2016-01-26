@@ -134,12 +134,7 @@ function addScript(src) {
 
 function addSheet(name) {
   cssLoad(name, (lastTag, done) => {
-    lastTag = lastTag || findSheet(name)
-
-    if (!lastTag)
-      replaceTag(createSheet(sheetUrl(name)), 'href', done)
-    else
-      replaceTag(lastTag, 'href', done)
+    replaceTag(lastTag || findSheet(name) || createSheet(sheetUrl(name)), 'href', done)
   })
 }
 
@@ -149,7 +144,7 @@ function getParent(tag) {
   else return document.head
 }
 
-function replaceTag(tag, attr, after) {
+function replaceTag(tag, attr, after = () => {}) {
   if (!tag) return
 
   let parent = getParent(tag)
@@ -161,11 +156,7 @@ function replaceTag(tag, attr, after) {
     if (already) return
     clearTimeout(cielTimeout)
     already = true
-    setTimeout(() => {
-      removeTag(tag, parent, () => {
-        after && after(clone)
-      })
-    }, 4)
+    removeTag(tag, parent, () => after(clone))
   }
 
   clone.onerror = afterFinish
@@ -176,16 +167,13 @@ function replaceTag(tag, attr, after) {
   cielTimeout = setTimeout(() => {
     if (already) return
     removeTag(tag, tag.parentNode, afterFinish, { leftover: 1 })
-  }, 200)
+  }, 120)
 }
 
-function removeTag(tag, parent, cb, opts = {}) {
-  let { leftover } = opts
-  leftover = typeof leftover == 'number' ? leftover : 2 // how many tags to leave
-
+function removeTag(tag, parent, cb, { leftover = 2 } = {}) {
   try {
     parent.removeChild(tag)
-    setTimeout(cb, 2)
+    setTimeout(cb)
   }
   catch(e) {
     const isScript = tag.nodeName == 'SCRIPT'
