@@ -249,7 +249,7 @@ const Flint = {
               }
             }).filter(x => !!x)
 
-            setTimeout(() => emitter.emit('render:done'))
+            emitter.emit('render:done')
           })
         }
       },
