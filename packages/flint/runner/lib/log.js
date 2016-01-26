@@ -3,23 +3,23 @@ import opts from '../opts'
 let debug = false
 
 const subIcons = {
-  IN: '⇠',
-  OUT: '⇢',
-  SIN: '⇜',
-  SOUT: '⇝',
-  RELOAD: '↺',
-  STAR: '★',
-  PIPE: '|',
-  CHECK: '✓',
-  X: '✖',
-  PLUS: '✚',
-  ASTERISK: '✺',
-  HAPPY: '☺',
-  SAD: '☹',
-  RELOAD: '↺',
-  WRITE: '✍',
-  DOWN: '↓',
-  UP: '↑'
+  IN: ' ⇠ '.blue,
+  OUT: ' ⇢ '.bold.green,
+  SIN: ' ⇜ '.magenta,
+  SOUT: ' ⇝ '.bold.yellow,
+  RELOAD: ' ↺ '.yellow,
+  STAR: ' ★ '.yellow,
+  PIPE: ' | '.gray,
+  CHECK: ' ✓ ',
+  X: ' ✖ ',
+  PLUS: ' ✚ ',
+  ASTERISK: ' ✺ ',
+  HAPPY: ' ☺ ',
+  SAD: ' ☹ ',
+  RELOAD: ' ↺ ',
+  WRITE: ' ✍ ',
+  DOWN: ' ↓ ',
+  UP: ' ↑ ',
 }
 
 export default function log(info, subIcon, ...args) {
@@ -31,8 +31,8 @@ export default function log(info, subIcon, ...args) {
   else ({ name, icon } = info)
 
   const subi = subIcons[subIcon]
-  const subiout = subi ? ` ${subi} `.bold.green : `     ${subIcon}`
-  const doLog = () => console.log(`  ${icon || ''}`, subiout, ...colorArgs(args))
+  const subiout = subi ? subi : `     ${subIcon}`
+  const doLog = () => console.log(icon, subiout, ...colorArgs(args))
 
   // all
   if (!debug.length) return doLog()

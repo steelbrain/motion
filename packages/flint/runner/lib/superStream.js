@@ -6,6 +6,9 @@ import cache from '../cache'
 import bridge from '../bridge'
 import { _, path, log, readFile, handleError, vinyl } from '../lib/fns'
 
+// time we wait for browser load before we just force push
+const UPPER_WAIT_LIMIT = 2000
+
 const isFileType = (_path, ext) => path.extname(_path) == `.${ext}`
 const debug = log.bind(null, { name: 'stream', icon: '🚀' })
 
@@ -23,16 +26,18 @@ function init() {
 
 // ignore stream when loading file in browser
 function watchForBrowserLoading() {
-  bridge.on('script:load', ({ path }) => {
-    debug('IN', 'browser', 'loading'.red, path)
-    browserLoading[path] = true
-  })
+  bridge.on('script:load', setBrowserLoading)
 
   bridge.on('script:done', ({ path }) => {
     debug('IN', 'browser', 'done'.green, path)
     browserLoading[path] = false
     loadWaiting(path)
   })
+}
+
+function setBrowserLoading({ path }) {
+  debug('IN', 'browser', 'loading'.red, path)
+  browserLoading[path] = true
 }
 
 let stream = new Readable({ objectMode: true })
@@ -64,7 +69,7 @@ function fileSend({ path, contents }) {
     debug('SOUT', relative)
     queue[relative] = false
     // why? because we may get another stream before browser even starts loading
-    browserLoading[relative] = true
+    setBrowserLoading({ path: relative })
     const file = new File(vinyl(basePath, path, new Buffer(contents)))
     stream.push(file)
   })
@@ -82,7 +87,7 @@ function pushStreamRun(relative, finish) {
       debug('upper limit! finish'.yellow)
       browserLoading[relative] = false
       finish()
-    }, 400)
+    }, UPPER_WAIT_LIMIT)
   }
   else {
     finish()
