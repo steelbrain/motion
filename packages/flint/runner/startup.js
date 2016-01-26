@@ -58,14 +58,8 @@ export async function build(opts = {}) {
     await startup({ ...opts, isBuild: true })
     await bundler.remakeInstallDir()
     await builder.clear.buildDir()
-    builder.copy.assets()
     await runGulp({ once: opts.once })
-
-    if (opts.watch)
-      return gulp.watchForBuild()
-
     await builder.build()
-
     if (opts.once) return
     process.exit()
   }
@@ -87,6 +81,8 @@ export async function run(opts) {
     cache.serialize() // write out cache
     console.log() // space before install
     await bundler.all()
+    if (opts.buildWatch)
+      await builder.build()
     keys.init()
   }
   catch(e) {

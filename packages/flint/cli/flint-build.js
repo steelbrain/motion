@@ -1,7 +1,7 @@
 import './lib/checkForApp'
 import Program from 'commander'
 import colors from 'colors'
-import { build } from '../runner'
+import { build, run } from '../runner'
 import name from './lib/appName'
 import version from './lib/flintVersion'
 
@@ -14,7 +14,7 @@ Program
   .option('--nomin', 'avoid minification')
   .parse(process.argv)
 
-build({
+const opts = {
   name,
   version,
   watch: Program.watch,
@@ -23,4 +23,9 @@ build({
   cached: Program.cached,
   nomin: Program.nomin,
   pretty: true,
-})
+}
+
+if (opts.watch)
+  run({ buildWatch: true, ...opts })
+else
+  build(opts)

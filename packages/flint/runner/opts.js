@@ -36,6 +36,7 @@ function setAll(opts) {
 
   OPTS.hasRunInitialBuild = false
   OPTS.build = opts.isBuild
+  OPTS.buildWatch = opts.buildWatch
 
   OPTS.defaultPort = 4000
 

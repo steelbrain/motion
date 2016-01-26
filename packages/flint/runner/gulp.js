@@ -436,8 +436,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function afterWrite(file) {
-    if (isBuilding() && OPTS.watch) {
-      builder.build()
+    if (isSourceMap(file)) return
+
+    if (opts('buildWatch') && hasBuilt()) {
+      builder.build({ bundle: false })
       return
     }
 
@@ -458,7 +460,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function markFileSuccess(file) {
-    if (file.isSourceMap) return
+    if (isSourceMap(file)) return
 
     log(LOG, 'markFileSuccess', file.path)
 
