@@ -1,4 +1,4 @@
-import StyleSheet from 'flint-stilr'
+import StyleSheet from './stilr/index'
 import niceStyles from 'flint-nice-styles'
 import hash from 'hash-sum'
 import path from 'path'

@@ -32,7 +32,7 @@ let writers = {
 
 async function createWriters() {
   writers.package = await createWriter(p(opts('flintDir'), 'package.json'), {
-    debug: 'writeState',
+    debug: 'writePackageJSON',
     json: true,
     defaultValue: {}
   })
