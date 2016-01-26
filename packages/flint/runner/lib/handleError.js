@@ -23,6 +23,7 @@ export default function handleError(handle) {
   // if used in try/catch
   else {
     const error = handle
+    errorClient.captureException(error)
 
     console.error((error && error.message || "\nEncountered an internal error").bold.red)
 
@@ -34,8 +35,6 @@ export default function handleError(handle) {
 
     if (error.stack)
       console.log(error.stack)
-
-    errorClient.captureException(error)
 
     bridge.message('compile:error', { error }, 'error')
   }
