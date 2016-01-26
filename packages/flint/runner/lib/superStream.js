@@ -20,7 +20,7 @@ function isFileType(_path, ext) {
   return path.extname(_path) == `.${ext}`
 }
 
-function fileSend({ path, contents }) {
+function fileSend({ path, startTime, contents }) {
   log(LOG, '--- STREAM --- fileSend', path)
 
   // check if file actually in flint project
@@ -32,6 +32,13 @@ function fileSend({ path, contents }) {
   // write to stream
   const rPath = nodepath.relative(basePath, path)
   const file = new File(vinyl(basePath, path, new Buffer(contents)))
+
+  const stackTime = [{
+    name: 'fileSend',
+    time: +(Date.now()) - startTime
+  }]
+
+  Object.assign(file, { startTime, stackTime })
 
   log(LOG, 'rpath', rPath)
 
@@ -57,7 +64,7 @@ function fileSend({ path, contents }) {
 
       if (++attempts > 50) {
         // ceil attempts to avoid locks
-        log(LOG, 'ATTEMPTS > 50!!')
+        log(LOG, 'ATTEMPTS > 50')
         fileLoading[rPath] = false
         scriptWaiting[rPath] = false
       }

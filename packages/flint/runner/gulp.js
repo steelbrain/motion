@@ -207,6 +207,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   return stream
     .pipe($.if(buildCheck, $.ignore.exclude(true)))
+    .pipe(pipefn(setStartTimeIfNone))
     .pipe(pipefn(resetLastFile))
     .pipe($.plumber(catchError))
     .pipe(pipefn(setLastFile))
@@ -334,11 +335,16 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     return true
   }
 
+  function setStartTimeIfNone(file) {
+    if (file.startTime) return file
+    file.startTime = +Date.now()
+    return file
+  }
+
   function resetLastFile(file) {
     fileImports[file] = false
     lastError = false
     curFile = file
-    file.startTime = Date.now()
     file.message = { startTime: file.startTime }
   }
 

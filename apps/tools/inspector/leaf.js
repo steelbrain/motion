@@ -2,11 +2,19 @@ import md5 from 'md5-o-matic'
 import getType from '../lib/getType'
 import ellipsize from 'ellipsize'
 
+import { isString, isFunction,
+         isArray, isNumber, isObject } from 'lodash'
+
 const PATH_PREFIX = '.root.'
 const contains = (string, substring) => string.indexOf(substring) !== -1
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
 
 let noop = () => {}
+
+const fnParams = fn => fn.toString()
+  .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
+  .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+  .split(/,/)
 
 view Leaf {
   prop isExpanded, data, prefix, query, label, id, editable
@@ -14,7 +22,7 @@ view Leaf {
 
   view.pause()
 
-  let rootPath, path, _data, type, key, original, expanded
+  let rootPath, path, _data, key, original, expanded
   let dataKeys = []
   let _query = ''
 
@@ -44,7 +52,6 @@ view Leaf {
 
     if (_data === undefined) _data = data
     if (_data === undefined) _data = {}
-    type = getType(_data)
     _query = query || ''
 
     if (view.props.root)
@@ -75,11 +82,6 @@ view Leaf {
     <Highlighter string={key} highlight={_query} />
   )
 
-  const fnParams = fn => fn.toString()
-    .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
-    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
-    .split(/,/)
-
   const getLabel = (type, val, sets, editable) => (
     <Label
       val={val}
@@ -88,31 +90,44 @@ view Leaf {
     />
   )
 
+  let is = {}, type;
+
+  on.change(() => {
+    is.function = isFunction(_data)
+    is.array = isArray(_data)
+    is.object = isObject(_data)
+    is.string = isString(_data)
+    is.number = isNumber(_data)
+    is.nested = is.function || is.object || is.array
+    is.literal = !is.nested
+    type = typeof _data
+  })
+
   <leaf class={rootPath}>
     <label if={!view.props.root} htmlFor={id} onClick={toggle}>
       <key>
         <name>{format(key)}</name>
-        {getLabel('key', key, key, false)}
       </key>
       <colon>:</colon>
-      <expand class="function" if={type == 'Function'}>
-        <i>fn ({fnParams(_data).join(', ')})</i>
-      </expand>
-
-      <expand if={type == 'Array'}>
-        <type>Array[{_data.length}]</type>
-      </expand>
-      <expand if={type == 'Object'}>
-        <type>{'{}   ' + dataKeys.length + ' keys'}</type>
-      </expand>
-      <value if={['Array', 'Object', 'Function'].indexOf(type) == -1} class={type.toLowerCase()}>
-        <str if={type.toLowerCase() == 'string'}>
-          {format(ellipsize(String(_data), 25))}
-        </str>
-        <else if={type.toLowerCase() != 'string'}>
-          {format(String(_data))}
-        </else>
-        {getLabel('val', _data, key, editable)}
+      <value>
+        <fn class="function" if={is.function}>
+          <i>fn ({fnParams(_data).join(', ')})</i>
+        </fn>
+        <array if={is.array}>
+          <type>Array[{_data.length}]</type>
+        </array>
+        <obj if={is.object}>
+          <type>{'{}   ' + dataKeys.length + ' keys'}</type>
+        </obj>
+        <nested if={is.nested} class={type.toLowerCase()}>
+          <str if={is.string}>
+            {format(ellipsize(String(_data), 25))}
+          </str>
+          <else if={!is.string && is.literal}>
+            {format(String(_data))}
+          </else>
+          {getLabel('val', _data, key, editable)}
+        </nested>
       </value>
     </label>
     <children>

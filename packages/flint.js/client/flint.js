@@ -145,6 +145,30 @@ const Flint = {
       viewRoots: {},
       styleClasses: {},
       styleObjects: {},
+      timer: {
+        // received info through script:add so we can time
+        lastMsgInfo: null,
+
+        //maps views to original time
+        timing: {},
+        lastTimes: {},
+        hasLogged: false,
+        done(view) {
+          const timing = Flint.timer.timing[view]
+          if (timing) {
+            Flint.timer.lastTimes[view] = +(Date.now()) - timing.start
+            delete Flint.timer.timing[view]
+          }
+          if (!Flint.timer.hasLogged) {
+            console.log(`Finished ${view} in ${Flint.timer.lastTimes[view]}ms`)
+            setTimeout(() => Flint.timer.hasLogged = false)
+          }
+          Flint.timer.hasLogged = true
+        },
+        time(view, info) {
+          Flint.timer.timing[view] = info
+        },
+      },
 
       render() {
         if (Flint.preloaders.length) {
@@ -221,6 +245,9 @@ const Flint = {
         if (!process.env.production) {
           const cached = Internal.viewCache[file] || Internal.viewsInFile[file]
           const views = Internal.viewsInFile[file]
+          views.map(view => {
+            Flint.timer.time(view, Flint.timer.lastMsgInfo)
+          })
 
           // remove Internal.viewsInFile that werent made
           const removedViews = arrayDiff(cached, views)
@@ -254,7 +281,11 @@ const Flint = {
               }
             }).filter(x => !!x)
 
-            setTimeout(() => emitter.emit('render:done'))
+            setTimeout(() => {
+              emitter.emit('render:done')
+              views.map(Flint.timer.done)
+              Flint.timer.lastMsgInfo = null
+            })
           })
         }
       },

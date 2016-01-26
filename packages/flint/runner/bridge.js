@@ -52,7 +52,6 @@ function cleanError(obj) {
 function makeMessage(type, obj) {
   obj = obj || {}
   obj._type = type
-  obj.timestamp = Date.now()
 
   // formatting
   switch(type) {
