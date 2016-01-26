@@ -45,7 +45,6 @@ export default function run(browser, opts) {
     },
 
     'file:outsideChange': ({ name, changed }) => {
-      console.log('..............................set file changed', name, changed)
       _Flint.fileChanged[name] = changed
     },
 

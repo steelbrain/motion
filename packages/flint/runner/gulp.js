@@ -384,19 +384,31 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     // meta has been set already by onMeta
 
     let meta = cache.getFileMeta(file.path)
-    bridge.message('file:meta', { meta })
 
-    // slice out all code not in views
-    const src = file.src.split("\n")
+    if (opts('hasRunInitialBuild'))
+      bridge.message('file:meta', { meta })
+
+    sendOutsideChanged(meta, file)
+  }
+
+  // detects if a file has changed not inside views for hot reloads
+  function sendOutsideChanged(meta, file) {
+    let changed = false
+
     const viewLocs = Object.keys(meta).map(view => meta[view].location)
-    const outerSlice = (arr, start, end) => src.slice(0, start).concat(src.slice(end))
-    const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src).join('')
-    const cacheFile = cache.getFile(file.path)
-    const prevOutsideSrc = cacheFile.outsideSrc
-    cacheFile.outsideSrc = outsideSrc // update
 
-    const changed = prevOutsideSrc !== outsideSrc
-    bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
+    if (viewLocs.length) {
+      // slice out all code not in views
+      const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
+      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src.split("\n")).join('')
+      const cacheFile = cache.getFile(file.path)
+      const prevOutsideSrc = cacheFile.outsideSrc
+      cacheFile.outsideSrc = outsideSrc // update
+      changed = prevOutsideSrc !== outsideSrc
+    }
+
+    if (opts('hasRunInitialBuild'))
+      bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
   }
 
   function isSourceMap(file) {
