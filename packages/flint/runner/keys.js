@@ -80,7 +80,6 @@ function start() {
           break
         case 'b':
           console.log('\n  Building...'.dim)
-          builder.copy.assets()
           await builder.build()
           break
         case 'o': // open browser
