@@ -28,6 +28,8 @@ let hasRunCurrentBuild = true
 let buildingOnce = false
 
 const serializeCache = _.throttle(cache.serialize, 200)
+const isSourceMap = file => path.extname(file) === '.map'
+const isProduction = () => isBuilding() || opts('buildWatch')
 const isBuilding = () => buildingOnce || opts('build')
 const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
@@ -70,7 +72,7 @@ const $p = {
     plugins: [flintTransform.file({
       log,
       basePath: OPTS.dir,
-      production: isBuilding(),
+      production: isProduction(),
       selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
       writeStyle: writeStyle.write,
       onMeta,
@@ -78,9 +80,7 @@ const $p = {
         fileImports[file] = imports
       }
     })],
-    extra: {
-      production: process.env.production
-    }
+    extra: { production: isProduction() }
   })
 }
 
@@ -144,41 +144,51 @@ export async function init({ once = false } = {}) {
 }
 
 // used for build
-export function bundleApp() {
-  const buildDir = p(opts('buildDir'), '_')
-  const appFile = p(buildDir, `${OPTS.saneName}.js`)
-  const deps = opts('deps')
+export async function bundleApp() {
+  try {
+    const dest = p(opts('buildDir'), '_')
+    const deps = opts('deps')
+    const minify = !opts('nomin')
 
-  const inFiles = [
-    deps.internalsOut,
-    deps.externalsOut,
-    appFile
-  ]
+    let appFiles = await readdir(OPTS.outDir)
+    appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()
 
-  const isMinifying = !opts('nomin')
-  if (isMinifying) console.log(`  Minifying...`.dim)
+    if (minify)
+      console.log(`  Minifying...`.dim)
 
+    // build parallel
+    await* [
+      buildForDeploy(deps.internalsOut, { dest, minify }),
+      buildForDeploy(deps.externalsOut, { dest, minify }),
+      buildForDeploy(appFiles, { dest, minify, combine: true, wrap: true })
+    ]
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
+
+const concat = (src, dest, name) => new Promise(res => gulp.src(src).pipe($.concat(name)).pipe(gulp.dest(dest)).on('end', res))
+
+function buildForDeploy(src, { dest, combine, minify, wrap }) {
   return new Promise((resolve, reject) => {
-    gulp.src(inFiles)
-      // sourcemap
+    gulp.src(src)
       .pipe($.sourcemaps.init())
-      // wrap app in closure
-      .pipe($.if(file => {
-          return file.path == appFile
-        }, babel({
+      // .pipe($.if(combine, $.order(src)))
+      .pipe($.if(combine, $.concat(`${opts('saneName')}.js`)))
+      .pipe($.if(wrap,
+        babel({
           whitelist: [],
           retainLines: true,
           comments: true,
           plugins: [flintTransform.app({ name: opts('saneName') })],
-          extra: { production: process.env.production },
-          compact: true
+          compact: true,
+          extra: { production: isProduction() }
         })
       ))
-
-      // uglify
-      .pipe($.if(isMinifying, $.uglify()))
+      .pipe($.if(minify, $.uglify()))
       .pipe($.sourcemaps.write('.'))
-      .pipe(gulp.dest(buildDir))
+      .pipe(gulp.dest(dest))
       .on('end', resolve)
       .on('error', reject)
   })
@@ -186,7 +196,6 @@ export function bundleApp() {
 
 // userStream is optional for programmatic usage
 export function buildScripts({ inFiles, outFiles, userStream }) {
-  const outDest = () => isBuilding() ? p(OPTS.buildDir, '_') : OPTS.outDir || '.'
   let curFile, lastError
   let lastSavedTimestamp = {}
 
@@ -223,19 +232,19 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
         pipefn(removeNewlyInternal),
         pipefn(markFileSuccess), // before writing to preserve path
         gulp.dest(p(OPTS.depsDir, 'internal')),
+        pipefn(afterBuildWatch),
         $.ignore.exclude(true)
       )
     ))
     // not sourcemap
-    .pipe($.if(file => !isSourceMap(file),
+    .pipe($.if(file => !isSourceMap(file.path),
       multipipe(
         pipefn(out.goodFile),
         pipefn(markFileSuccess)
       )
     ))
-    .pipe($.if(isBuilding, $.concat(`${OPTS.saneName}.js`)))
     .pipe($.sourcemaps.write('.'))
-    .pipe($.if(checkWriteable, gulp.dest(outDest)))
+    .pipe($.if(checkWriteable, gulp.dest(OPTS.outDir)))
     .pipe(pipefn(afterWrite))
     .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
@@ -406,10 +415,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
   }
 
-  function isSourceMap(file) {
-    return path.extname(file.path) === '.map'
-  }
-
   function checkWriteable(file) {
     if (isBuilding()) {
       builder.copy.styles()
@@ -436,12 +441,10 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function afterWrite(file) {
-    if (isSourceMap(file)) return
+    if (isSourceMap(file.path)) return
 
-    if (opts('buildWatch') && hasBuilt()) {
-      builder.build({ bundle: false })
-      return
-    }
+    // run stuff after each change on build --watch
+    if (afterBuildWatch()) return
 
     // avoid during initial build
     if (!hasFinished()) return
@@ -459,8 +462,15 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     bridge.message('script:add', file.message)
   }
 
+  function afterBuildWatch() {
+    if (opts('buildWatch') && hasBuilt()) {
+      builder.build({ bundle: false })
+      return true
+    }
+  }
+
   function markFileSuccess(file) {
-    if (isSourceMap(file)) return
+    if (isSourceMap(file.path)) return
 
     log(LOG, 'markFileSuccess', file.path)
 

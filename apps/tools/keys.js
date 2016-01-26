@@ -1,21 +1,23 @@
+import keycode from 'keycode'
+
 export let keys = {}
 let listeners = {}
 let pressListeners = {}
 
 on.keydown(window, e => {
-  const code = ___keycode(e.keyCode)
+  const code = keycode(e.keyCode)
   keys[code] = true
   keyDown(code)
 })
 
 on.keyup(window, e => {
-  const code = ___keycode(e.keyCode)
+  const code = keycode(e.keyCode)
   keys[code] = false
   keyUp(code)
 })
 
 on.keypress(window, e => {
-  const code = ___keycode(e.keyCode)
+  const code = keycode(e.keyCode)
   const queue = pressListeners[code]
   queue && queue.forEach(listener => listener())
 })

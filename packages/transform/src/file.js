@@ -448,17 +448,6 @@ export default function createPlugin(options) {
       )
 
       assignment.isStyle = true
-
-      // attempt to make $circles as a variable
-      // let result = t.variableDeclaration('let', [
-      //   t.variableDeclarator(
-      //     t.identifier(node.left.name),
-      //     assignment
-      //   ),
-      // ])
-      //
-      // result.isStyle = true
-
       return assignment
 
       // (_index) => {}

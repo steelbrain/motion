@@ -1,6 +1,3 @@
-import keycode from 'keycode'
-window.___keycode = keycode
-
 view Main {
   const internal = window.__isDevingDevTools
   let showInspector = true

@@ -81,8 +81,7 @@ export async function run(opts) {
     cache.serialize() // write out cache
     console.log() // space before install
     await bundler.all()
-    if (opts.buildWatch)
-      await builder.build()
+    if (opts.watch) await builder.build()
     keys.init()
   }
   catch(e) {

@@ -6,20 +6,13 @@ export default function FlintApp({ name }) {
       visitor: {
         Program: {
           exit(node) {
+            // wrap program in commonjs + iife
             node.body = [t.expressionStatement(
               // exports["name"] = function(){}
               t.assignmentExpression('=',
                 t.identifier(`exports["${name}"]`),
                 //wrapFnName
                 t.functionExpression(null, [t.identifier('Flint'), t.identifier('opts')], t.blockStatement([
-                  // var Flint = runtime(node, opts, cb)
-                  // t.variableDeclaration('var', [
-                  //   t.variableDeclarator(
-                  //     t.identifier('Flint'),
-                  //     t.identifier('opts.Flint')
-                  //   )
-                  // ]),
-
                   // closure (function(Flint) {})(Flint)
                   t.callExpression(
                     t.functionExpression(null,
