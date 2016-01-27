@@ -129,7 +129,7 @@ export default function createPlugin(options) {
         , '')
       }
 
-      return node.value
+      return node && node.value
     }
 
     function frozen(node) {
