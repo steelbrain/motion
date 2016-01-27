@@ -3,8 +3,14 @@ const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1
 
 const isLive = () => browser.editor && browser.editor.live
 
+// TODO make beautiful
+let CUR_ERROR
+
 function showFlintErrorDiv() {
   setTimeout(() => {
+    // avoid showing if error fixed in meantime
+    if (!CUR_ERROR) return
+
     const errors = document.querySelectorAll('.__flintError')
     if (!errors.length) return
     // add active class to show them
@@ -12,7 +18,7 @@ function showFlintErrorDiv() {
       if (error.className.indexOf('active') == -1)
         error.className += ' active'
     })
-  }, isLive() ? 1000 : 0)
+  }, isLive() ? 1000 : 100)
 }
 
 function niceRuntimeError(err) {
@@ -130,6 +136,8 @@ view Errors {
     else {
       error = null
     }
+
+    CUR_ERROR = error
 
     log('tools: view.update()')
     view.update()

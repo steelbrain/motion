@@ -22,13 +22,12 @@ body.__flintfocus {
   z-index: 2147483646;
   opacity: 0;
   background: rgba(255,0,0,0.03);
-  transition: all linear 100ms;
-  transition-delay: 20ms;
+  transition: all linear 100ms 1000ms;
 }
 
 .__flintError.active {
   opacity: 1;
-  transition-delay: 2000ms;
+  transition: all linear 100ms 0ms;
 }
 
 ._flintdevtools {
