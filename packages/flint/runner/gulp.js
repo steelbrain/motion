@@ -383,9 +383,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     // meta
     let meta = cache.getFileMeta(file.path)
-    if (opts('hasRunInitialBuild'))
-      bridge.message('file:meta', { meta })
-
     // outside changed detection
     sendOutsideChanged(meta, file)
   }

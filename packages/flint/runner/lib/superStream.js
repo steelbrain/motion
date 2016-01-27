@@ -11,7 +11,7 @@ import { _, path, log, readFile, handleError, vinyl } from '../lib/fns'
 const UPPER_WAIT_LIMIT = 2000
 
 const isFileType = (_path, ext) => path.extname(_path) == `.${ext}`
-const debug = log.bind(null, { name: 'stream', icon: '🚀' })
+const debug = log.bind(null, { name: 'stream', icon: '🎏' })
 
 let basePath, flintPath, relPath
 let internalTimeout

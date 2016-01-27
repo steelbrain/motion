@@ -37,6 +37,7 @@ let cache: CacheState = {
 let baseDir = ''
 let deleteFileCbs = []
 let deleteViewCbs = []
+let addViewCbs = []
 
 function onSetExported(file) {
   // debugger // TODO: remove from either out or add to out
@@ -47,10 +48,14 @@ function onDeleteFile({ name, file, state }) {
 }
 
 function onDeleteViews(views) {
-  views.forEach(view => {
-    deleteViewCbs.forEach(cb => cb(view))
-  })
+  views.forEach(view => deleteViewCbs.forEach(cb => cb(view)))
 }
+
+function onAddViews(views) {
+  views.forEach(view => addViewCbs.forEach(cb => cb(view)))
+}
+
+const files = file => cache.files[relative(file)]
 
 const Cache = {
   relative,
@@ -101,7 +106,7 @@ const Cache = {
   },
 
   get(file: string) {
-    return cache.files[relative(file)]
+    return files(file)
   },
 
   getAll() {
@@ -125,6 +130,10 @@ const Cache = {
     deleteViewCbs.push(cb)
   },
 
+  onAddView(cb) {
+    addViewCbs.push(cb)
+  },
+
   remove(file: string) {
     const name = relative(file)
     const state = cache.files[name]
@@ -135,26 +144,27 @@ const Cache = {
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
-    const cFile = cache.files[relative(file)]
+    const cFile = files(file)
     onDeleteViews(_.difference(cFile.views, views))
+    // onAddViews(_.difference(views, cFile.views))
     cFile.views = views
     log(LOG, 'setViews', file, views)
   },
 
   setFileMeta(file: string, meta: object) {
-    cache.files[relative(file)].meta = meta
+    files(file).meta = meta
   },
 
   getFileMeta(file: string) {
-    return cache.files[relative(file)].meta
+    return files(file).meta
   },
 
   setFileSrc(file: string, src: string) {
-    cache.files[relative(file)].src = src
+    files(file).src = src
   },
 
   isInternal(file: string) {
-    const f = cache.files[relative(file)]
+    const f = files(file)
     return f && f.isInternal
   },
 
@@ -190,11 +200,11 @@ const Cache = {
   },
 
   getFile(file:? string) {
-    return cache.files[relative(file)]
+    return files(file)
   },
 
   getViews(file?: string) {
-    return cache.files[relative(file)].views
+    return files(file).views
   },
 
   _getFileKeys(key) {
@@ -206,13 +216,13 @@ const Cache = {
   // npm
   getExternals(file?: string) {
     if (!file) return Cache._getFileKeys('externals')
-    return cache.files[relative(file)].externals
+    return files(file).externals
   },
 
   // ./local
   getInternals(file?: string) {
     if (!file) return Cache._getFileKeys('internals')
-    return cache.files[relative(file)].internals
+    return files(file).internals
   },
 
   // npm + local
@@ -238,8 +248,8 @@ const Cache = {
   },
 
   removeError(file : string) {
-    if (cache.files[relative(file)])
-      cache.files[relative(file)].error = null
+    if (files(file))
+      files(file).error = null
   },
 
   getLastError() {
@@ -261,7 +271,7 @@ const Cache = {
   },
 
   setWritten(file : string, time) {
-    const f = cache.files[relative(file)]
+    const f = files(file)
     log(LOG, 'setWritten', f, time)
     if (f) f.writtenAt = time
   },

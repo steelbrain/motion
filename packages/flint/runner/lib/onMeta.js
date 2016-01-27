@@ -2,11 +2,32 @@ import bridge from '../bridge'
 import cache from '../cache'
 import exec from './exec'
 
-let meta = {}
+type Meta = {
+  file: string;
+  views: {
+    location: Location;
+    file: string;
+    styles: {};
+    els: {}
+  }
+}
 
-bridge.on('editor', data => {
-  let { type, key, el, view } = data
+let meta: Meta = {}
 
+export default function setMeta({ file, views }) {
+  cache.setFileMeta(file, views)
+  bridge.message('file:meta', { file, views })
+  Object.keys(views).map(view => {
+    meta[view] = views[view]
+  })
+}
+
+// send messages for view adds and deletes
+// cache.onAddView(view => bridge.message('view:add', { view, meta: meta[view] }))
+// cache.onDeleteView(view => bridge.message('view:delete', { view, meta: meta[view] }))
+
+
+bridge.on('editor', ({ type, key, el, view }) => {
   if (type.substr(0, 6) != 'focus:') return
 
   if (view === undefined) return
@@ -35,11 +56,3 @@ bridge.on('editor', data => {
   //todo dont focus escape every time
   exec(`osascript -e 'activate application "Atom"'`)
 })
-
-export default ({ file, views }) => {
-  cache.setFileMeta(file, views)
-
-  Object.keys(views).map(view => {
-    meta[view] = views[view]
-  })
-}

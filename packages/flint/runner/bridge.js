@@ -5,7 +5,7 @@ import wport from './lib/wport'
 import intCache from './cache'
 import opts from './opts'
 
-const LOG = 'bridge'
+const debug = log.bind(null, { name: 'bridge', icon: '🚃' })
 
 let wsServer
 let connected = false
@@ -67,14 +67,13 @@ function makeMessage(type, obj) {
 }
 
 export function cache(name, key, obj) {
-  log(LOG, 'cache', key, name, obj)
   messageCache[name] = messageCache[name] || {}
   messageCache[name][key] = messageCache[name][key] || []
   messageCache[name][key] = obj
 }
 
 export function message(type, obj, cacheKey) {
-  log(LOG, type)
+  debug('OUT', type)
 
   if (cacheKey)
     cache(cacheKey, 'last', { type, obj })
@@ -99,7 +98,7 @@ on('editor:state', msg => message('editor:state', msg, 'editor:state'))
 on('browser', msg => message('browser', msg))
 
 function runListeners(data) {
-  log(LOG, '-[in]-', data)
+  debug('IN', data)
 
   let obj
 
