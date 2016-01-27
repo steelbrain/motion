@@ -389,8 +389,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   // detects if a file has changed not inside views for hot reloads correctness
   function sendOutsideChanged(meta, file) {
-    let changed = false
+    if (!meta) return
 
+    let changed = false
     const viewLocs = Object.keys(meta).map(view => meta[view].location)
 
     if (viewLocs.length) {

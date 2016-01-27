@@ -29,7 +29,8 @@ export default function webpackConfig(filename, config = {}) {
     externals: {
       react: 'exports.React',
       'react-dom': 'exports.ReactDOM',
-      history: 'exports.history'
+      history: 'exports.history',
+      radium: 'exports.radium',
     },
     devtool: 'source-map',
     node: {

@@ -3,6 +3,8 @@ const externals = [
   'react',
   'react-dom',
   'babel-runtime',
+  'history',
+  'radium',
   ''
 ]
 

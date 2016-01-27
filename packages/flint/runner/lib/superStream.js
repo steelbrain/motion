@@ -57,15 +57,7 @@ function fileSend({ path, contents }) {
   const relative = relPath(path)
   debug('SIN', relative)
 
-  // internals debounce // TODO watch for export finish
-  if (cache.isInternal(path)) {
-    debug('is exported!')
-    clearTimeout(internalTimeout)
-    internalTimeout = setTimeout(pushStream, 300)
-    return
-  }
-
-  pushStreamRun(relative, () => {
+  const finish = () => pushStreamRun(relative, () => {
     debug('SOUT', relative)
     queue[relative] = false
     // we may get another stream in before browser even starts loading
@@ -73,6 +65,16 @@ function fileSend({ path, contents }) {
     const file = new File(vinyl(basePath, path, new Buffer(contents)))
     stream.push(file)
   })
+
+  // internals debounce // TODO watch for export finish
+  if (cache.isInternal(path)) {
+    debug('is exported!')
+    clearTimeout(internalTimeout)
+    internalTimeout = setTimeout(finish, 300)
+    return
+  }
+
+  finish()
 }
 
 function pushStreamRun(relative, finish) {

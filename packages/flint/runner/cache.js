@@ -193,7 +193,7 @@ const Cache = {
     if (!cacheFile) cacheFile = Cache.add(file)
 
     let externals = imports
-    let internals = _.remove(externals, n => n.charAt(0) == '.')
+    let internals = _.remove(externals, n => n && n.charAt(0) == '.')
 
     cacheFile.externals = externals
     cacheFile.internals = internals

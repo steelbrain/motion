@@ -1,6 +1,6 @@
 export default [
   '[Mm]ain.js',
-  '**/*.{js,jsf}',
+  '**/*.{js,jsf,jsx}',
   '!node_modules{,/**}',
   '!.flint{,/**}'
 ]
