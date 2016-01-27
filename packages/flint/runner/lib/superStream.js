@@ -55,45 +55,35 @@ function fileSend({ path, contents }) {
 
   // write to stream
   const relative = relPath(path)
+  const sendImmediate = cache.isInternal(path)
+
   debug('SIN', relative)
 
-  const finish = () => pushStreamRun(relative, () => {
+  pushStreamRun(relative, () => {
     debug('SOUT', relative)
     queue[relative] = false
     // we may get another stream in before browser even starts loading
     setBrowserLoading(relative, true)
     const file = new File(vinyl(basePath, path, new Buffer(contents)))
     stream.push(file)
-  })
-
-  // internals debounce // TODO watch for export finish
-  if (cache.isInternal(path)) {
-    debug('is exported!')
-    clearTimeout(internalTimeout)
-    internalTimeout = setTimeout(finish, 300)
-    return
-  }
-
-  finish()
+  }, sendImmediate)
 }
 
-function pushStreamRun(relative, finish) {
+function pushStreamRun(relative, finish, sendImmediate) {
   // waiting for script load
-  if (browserLoading[relative]) {
-    // only queue once
-    if (queue[relative]) return
-    queue[relative] = finish
-    // ensure upper limit on wait
-    setTimeout(() => {
-      if (!queue[relative]) return
-      debug('upper limit! finish'.yellow)
-      browserLoading[relative] = false
-      finish()
-    }, UPPER_WAIT_LIMIT)
-  }
-  else {
+  if (!browserLoading[relative] || sendImmediate)
+    return finish()
+
+  // only queue once
+  if (queue[relative]) return
+  queue[relative] = finish
+  // ensure upper limit on wait
+  setTimeout(() => {
+    if (!queue[relative]) return
+    debug('upper limit! finish'.yellow)
+    browserLoading[relative] = false
     finish()
-  }
+  }, UPPER_WAIT_LIMIT)
 }
 
 // load waiting

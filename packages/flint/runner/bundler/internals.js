@@ -1,3 +1,4 @@
+import { finishedInstalling } from './install'
 import { webpack } from '../lib/require'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
@@ -12,11 +13,10 @@ import log from '../lib/log'
 import handleError from '../lib/handleError'
 import { writeFile } from '../lib/fns'
 
-const LOG = 'internals'
-
 export async function bundleInternals() {
   try {
-    log(LOG, 'bundleInternals')
+    log.internals('bundleInternals')
+    await finishedInstalling()
     await writeInternalsIn()
     await packInternals()
     onInternalInstalled()
@@ -60,7 +60,7 @@ export function webpackUserExternals() {
 }
 
 function packInternals() {
-  log(LOG, 'packInternals')
+  log.internals('packInternals')
 
   return new Promise((resolve, reject) => {
     const conf = webpackConfig('internals.js', {

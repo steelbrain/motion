@@ -98,8 +98,6 @@ on('editor:state', msg => message('editor:state', msg, 'editor:state'))
 on('browser', msg => message('browser', msg))
 
 function runListeners(data) {
-  debug('IN', data)
-
   let obj
 
   try {
@@ -111,6 +109,7 @@ function runListeners(data) {
   }
 
   const { ...args, _type } = obj
+  debug('IN', _type)
   const ls = listeners[_type]
   if (!ls || !ls.length) return
   ls.forEach(l => l(args))

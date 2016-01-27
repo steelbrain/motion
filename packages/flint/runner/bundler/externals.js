@@ -9,8 +9,6 @@ import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, path, writeJSON, writeFile } from '../lib/fns'
 
-const LOG = 'externals'
-
 export async function bundleExternals(opts = {}) {
   if (opts.doInstall) await installAll()
   await externalsPathsToIn()
@@ -20,7 +18,7 @@ export async function bundleExternals(opts = {}) {
 
 export async function installExternals(filePath, source) {
   const found = cache.getExternals(filePath)
-  log(LOG, 'installExternals', filePath, 'found', found)
+  log.externals('installExternals', found)
   if (opts('hasRunInitialBuild')) installAll(found)
 }
 
@@ -31,7 +29,7 @@ async function externalsPathsToIn() {
 }
 
 async function packExternals() {
-  log(LOG, 'pack externals')
+  log.externals('pack externals')
 
   return new Promise((resolve, reject) => {
     const conf = webpackConfig('externals.js', {

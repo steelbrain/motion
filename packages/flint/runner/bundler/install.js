@@ -11,8 +11,6 @@ import { uninstall } from './uninstall'
 import { bundleExternals } from './externals'
 import { bundleInternals } from './internals'
 
-const LOG = 'externals'
-
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
   log('bundler', 'install')
@@ -52,12 +50,14 @@ export async function getNew(requires, installed) {
 
   const names = normalize(requires)
   const fresh = _.difference(names, installed, installing)
-  log(LOG, 'getNew():', fresh, '(fresh) = ', names, '(names) -', installed, '(installed) -', installing, '(installing)')
+  log.externals('DOWN', '  ', names)
+  log.externals('DOWN', '- ', installed)
+  log.externals('DOWN', '- ', installing)
+  log.externals('DOWN', '= ', fresh)
   return fresh
 }
 
 export async function installAll(requires) {
-  log(LOG, 'installAll')
   try {
     requires = requires || cache.getExternals()
 
@@ -69,7 +69,7 @@ export async function installAll(requires) {
     const installed = await readInstalled()
     const fresh = await getNew(requires, installed)
 
-    log(LOG, 'installAll requires', requires, 'installed', installed, 'fresh', fresh)
+    log.externals('installAll fresh', fresh)
 
     // nothing new
     if (!fresh.length) {
@@ -112,34 +112,34 @@ function runInstall(prevInstalled, toInstall) {
 
     try {
       await npm.save(dep)
-      log(LOG, 'install', 'succces, saved', dep)
+      log.externals('install', 'succces, saved', dep)
       successful.push(dep)
       onFinish(dep)
     }
     catch(e) {
       console.error(`Error installing ${dep}`, e.message)
       failed.push(dep)
-      log(LOG, 'package install failed', dep, e.message, e.stack)
+      log.externals('package install failed', dep, e.message, e.stack)
       onError(dep, e)
     }
     finally {
       let installed = installing.shift()
 
        // remove
-      log(LOG, 'install, finally:', installing)
+      log.externals('install, finally:', installing)
       next()
     }
   }
 
   function next() {
-    log(LOG, 'next #', installing.length)
+    log.externals('next #', installing.length)
     return installing.length ? installNext() : done()
   }
 
   async function done() {
     const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
     let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
-    log(LOG, 'DONE, finalPaths', finalPaths)
+    log.externals('DONE, finalPaths', finalPaths)
 
     // remove failed
     if (failed && failed.length)
@@ -188,7 +188,7 @@ function logInstalled(deps) {
 }
 
 export function isInstalling() {
-  log(LOG, 'isInstalling()', _isInstalling)
+  log.externals('isInstalling()', _isInstalling)
   return _isInstalling
 }
 

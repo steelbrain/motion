@@ -40,6 +40,9 @@ export default function log(info, subIcon, ...args) {
   if (name && debug.indexOf(name) >= 0) doLog()
 }
 
+log.externals = log.bind(null, { name: 'externals', icon: '🚀' })
+log.internals = log.bind(null, { name: 'internals', icon: '🏠' })
+
 function colorArgs(args) {
   return args.map(arg =>
     typeof arg === 'boolean' ? !!arg ? `${arg}`.bold.green : `${arg}`.bold.red

@@ -3,6 +3,8 @@ import raven from 'raven'
 
 const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
 
+// TODO: document error shape
+
 export default function handleError(handle) {
   if (!handle) {
     throw new Error('Null error returned')
@@ -36,6 +38,7 @@ export default function handleError(handle) {
     if (error.stack)
       console.log(error.stack)
 
+    console.log(error)
     bridge.message('compile:error', { error }, 'error')
   }
 }
