@@ -1,7 +1,8 @@
 import opts from '../../opts'
 
-export default function depRequireString(names, prefix = '') {
-  const cleanNames = names.map(str => str.charAt(0) == '.' ? str.replace(/\.js$/, '') : str)
+export default function requireString(names, { prefix = '', removeExt = false } = {}) {
+  if (removeExt)
+    names = names.map(str => str.replace(/\.js[xf]?$/, ''))
 
   // if you put them in a try/catch you get:
   //   + no big breakage if try and install bad package
@@ -10,7 +11,7 @@ export default function depRequireString(names, prefix = '') {
   return `
   var packages = {}
 
-  ${cleanNames.map(name => {
+  ${names.map(name => {
     return `  packages["${name}"] = require("${prefix}${name}");\n`
   }).join('')}
 

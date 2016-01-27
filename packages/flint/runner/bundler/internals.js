@@ -28,7 +28,10 @@ export async function bundleInternals() {
 
 async function writeInternalsIn() {
   const files = cache.getExported()
-  await writeFile(opts('deps').internalsIn, requireString(files, './internal/'))
+  await writeFile(opts('deps').internalsIn, requireString(files, {
+    prefix: './internal/',
+    removeExt: true
+  }))
 }
 
 let runningBundle = null
