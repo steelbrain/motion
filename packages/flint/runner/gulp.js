@@ -37,21 +37,10 @@ const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
-const out = {
-  badFile: (file, err) => console.log(` ◆ ${relative(file)}`.red),
-  goodFile: (file, ms) => console.log(
-    // name
-    ` ✓ ${relative(file)}`.bold
-    // time
-    + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim
-  )
-}
-
-gulp.task('build', buildScripts)
-
-export function watchForBuild() {
-  return gulp.watch(SCRIPTS_GLOB, ['build'])
-}
+let out = {}
+out.badFile = (file, err) => console.log(` ◆ ${relative(file)}`.red),
+out.goodFile = (file, ms) => console.log(` ✓ ${relative(file)}`.bold
+    + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim)
 
 // TODO bad practice
 let fileImports = {}
@@ -93,8 +82,7 @@ function watchDeletes() {
   async function handleDelete(file) {
     try {
       // ignore if in node_modules
-      if (file.indexOf('.flint') === 0)
-        return
+      if (file.indexOf('.flint') === 0) return
 
       debug('unlink', file)
       if (/jsf?/.test(path.extname(file))) {
@@ -102,9 +90,7 @@ function watchDeletes() {
         cache.remove(file)
       }
     }
-    catch(e) {
-      handleError(e)
-    }
+    catch(e) { handleError(e) }
   }
 }
 
@@ -113,7 +99,6 @@ export async function init({ once = false } = {}) {
     OPTS = opts()
 
     writeStyle.init()
-
     buildingOnce = once
 
     // if manually running a once
@@ -194,6 +179,14 @@ function buildForDeploy(src, { dest, combine, minify, wrap }) {
       .on('end', resolve)
       .on('error', reject)
   })
+}
+
+// listen to gulp events
+let listeners = {}
+event.run = (name, file, data) => listeners[name] && listeners[name].forEach(cb => cb(file, data))
+export function event(name, cb) {
+  listeners[name] = listeners[name] || []
+  listeners[name].push(cb)
 }
 
 // userStream is optional for programmatic usage
@@ -356,6 +349,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     logError(error, curFile)
 
+    event.run('error', curFile, error)
     cache.addError(error.fileName || '', error)
     bridge.message('compile:error', { error }, 'error')
   }
@@ -548,4 +542,4 @@ function pipefn(fn) {
   })
 }
 
-export default { init, buildScripts, bundleApp, afterBuild, watchForBuild }
+export default { init, buildScripts, bundleApp, afterBuild, event }
