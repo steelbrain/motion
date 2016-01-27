@@ -1,6 +1,6 @@
 {
   "name": "flint-transform",
-  "version": "1.4.25",
+  "version": "1.4.26",
   "main": "lib/index.js",
   "dependencies": {
     "flint-nice-styles": "^1.4.0",
