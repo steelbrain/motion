@@ -106,7 +106,7 @@ export default function elementStyles(el, view, props) {
 
         if (isLowerCase(className[0])) {
           if (view.styles[className]) {
-            result = mergeStyles(result, view.styles[className](el.index))
+            result = mergeStyles(result, view.styles[className](el.repeatItem, el.index))
           }
 
           // ensure static class styles overwrite dynamic tag/name styles
