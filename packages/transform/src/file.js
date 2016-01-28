@@ -153,6 +153,30 @@ export default function createPlugin(options) {
       )
     }
 
+    function stateTrack(node) {
+      if (node.flintView) return
+      if (node.blockTracked) return
+      node.blockTracked = true
+
+      const wrapper = (body) => {
+        const updateState = t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
+        if (!Array.isArray(body)) body = [].concat(t.expressionStatement(body), updateState)
+        else body.push(updateState)
+        return body
+      }
+
+      if (node.hasSetter) {
+        if (t.isArrowFunctionExpression(node) && node.body.body) {
+          node.body.body = wrapper(node.body.body)
+        }
+        else {
+          node.body = wrapper(node.body)
+        }
+      }
+
+      return node
+    }
+
     function wrapSetter(name, node, scope, postfix, method = 'set') {
       if (node.hasSetter) return
       if (scope.hasBinding('view')) {
@@ -160,6 +184,13 @@ export default function createPlugin(options) {
         if (postfix) args = args.concat([postfix, t.identifier('true')])
         const expr = t.callExpression(t.identifier(`view.${method}`), args)
         node.hasSetter = true
+
+        // TODO this is too specifically targeted
+        if (t.isArrowFunctionExpression(scope.block))
+          scope.block.hasSetter = true
+        else
+          scope.block.body.hasSetter = true
+
         return expr
       }
 
@@ -236,7 +267,6 @@ export default function createPlugin(options) {
     let viewStaticStyleKeys = {}
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
-    let viewBlockHasState = false
     let viewStyleNames = {} // prevent duplicate style names
     let fileImports = []
 
@@ -464,22 +494,6 @@ export default function createPlugin(options) {
       return t.expressionStatement(node)
     }
 
-    function stateTrack(node) {
-      if (viewBlockHasState) {
-        const updateState = t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
-
-        viewBlockHasState = false
-
-        if (!Array.isArray(node.body))
-          node.body = [].concat(t.expressionStatement(node.body), updateState)
-        else
-          node.body.push(updateState)
-      }
-
-      // node.blockTracked = true
-      return node
-    }
-
 
 
     // meta-data for views for atom
@@ -558,11 +572,12 @@ export default function createPlugin(options) {
             inView = fullName
             viewRootNodes = []
             viewState = {}
-            viewBlockHasState = false
             viewStyleNames = {}
             viewDynamicStyleKeys = {}
             viewStaticStyleKeys = {}
             viewHasChildWithClass = false
+
+            node.block.flintView = true
 
             return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
               t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
@@ -800,7 +815,7 @@ export default function createPlugin(options) {
                 t.JSXAttribute(t.literal('__flintValue'), node.value),
                 t.JSXAttribute(t.literal('__flintOnChange'), t.functionExpression(null, [t.identifier('__flintval__')],
                   t.blockStatement([
-                    t.assignmentExpression('=', node.value, t.identifier('__flintval__')),
+                    t.expressionStatement(t.assignmentExpression('=', node.value, t.identifier('__flintval__'))),
                   ])
                 )),
               ]
@@ -811,14 +826,14 @@ export default function createPlugin(options) {
         },
 
         ArrowFunctionExpression: {
-          exit(node) {
-            return stateTrack(node)
+          exit(node, scope) {
+            return stateTrack(node, scope)
           }
         },
 
         BlockStatement: {
-          exit(node) {
-            return stateTrack(node)
+          exit(node, scope) {
+            return stateTrack(node, scope)
           }
         },
 
@@ -853,6 +868,8 @@ export default function createPlugin(options) {
                   return wrapSetter(name, node, scope)
               }
             }
+
+            // return stateTrack(node)
           }
         },
 
@@ -891,7 +908,6 @@ export default function createPlugin(options) {
 
                 let name = dec.id.name
                 viewState[name] = true
-                viewBlockHasState = true
 
                 // avoid wrapping in production
                 if (options.production)
@@ -976,7 +992,6 @@ export default function createPlugin(options) {
               if (isViewState(name, scope)) {
                 sett = node => wrapSetter(name, node, scope, post, 'set')
                 added = true
-                viewBlockHasState = true
               }
             }
 
