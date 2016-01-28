@@ -235,6 +235,7 @@ export default function createPlugin(options) {
     let viewStaticStyleKeys = {}
     let viewRootNodes = [] // track root JSX elements
     let viewState = {} // track which state to wrap
+    let viewBlockHasState = false
     let viewStyleNames = {} // prevent duplicate style names
     let fileImports = []
 
@@ -540,6 +541,7 @@ export default function createPlugin(options) {
             inView = fullName
             viewRootNodes = []
             viewState = {}
+            viewBlockHasState = false
             viewStyleNames = {}
             viewDynamicStyleKeys = {}
             viewStaticStyleKeys = {}
@@ -860,6 +862,7 @@ export default function createPlugin(options) {
 
                 let name = dec.id.name
                 viewState[name] = true
+                viewBlockHasState = true
 
                 // avoid wrapping in production
                 if (options.production)
