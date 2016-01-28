@@ -117,6 +117,8 @@ export default function createPlugin(options) {
 
     // plugin helpers
 
+    const updateState = t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
+
     // return unique string based on value of node
     function nodeToStr(node) {
       if (t.isMemberExpression(node))
@@ -159,13 +161,12 @@ export default function createPlugin(options) {
       node.blockTracked = true
 
       const wrapper = (body) => {
-        const updateState = t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
         if (!Array.isArray(body)) body = [].concat(t.expressionStatement(body), updateState)
         else body.push(updateState)
         return body
       }
 
-      if (node.hasSetter) {
+      if (node.hasSetter && !node.hasReturnStatement) {
         if (t.isArrowFunctionExpression(node) && node.body.body) {
           node.body.body = wrapper(node.body.body)
         }
@@ -826,14 +827,29 @@ export default function createPlugin(options) {
         },
 
         ArrowFunctionExpression: {
-          exit(node, scope) {
-            return stateTrack(node, scope)
+          exit(node) {
+            return stateTrack(node)
           }
         },
 
         BlockStatement: {
-          exit(node, scope) {
-            return stateTrack(node, scope)
+          exit(node) {
+            return stateTrack(node)
+          }
+        },
+
+        ReturnStatement: {
+          exit(node, parent, scope) {
+            // view.update() before return
+            if (node.flintReturnTracked) return
+            node.flintReturnTracked = true
+
+            const block = scope.block.body
+
+            if (block.hasSetter) {
+              parent.hasReturnStatement = true
+              return [updateState, node]
+            }
           }
         },
 

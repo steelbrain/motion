@@ -14,7 +14,6 @@ view FlintModal {
 
     title = view.props.title
     children = view.props.children
-    view.update()
   }
 
   <Close size={25} />

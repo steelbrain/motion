@@ -9,7 +9,7 @@ view Main {
   <Installer />
   <Menu if={showInspector} />
   <Inspector if={showInspector} />
-  <StateTests if={false} />
+  <StateTests if={internal} />
 
   $ = {
     position: 'fixed',
