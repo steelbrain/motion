@@ -41,7 +41,6 @@ view Inspector.View {
     // if not inspecting, inspect
     if (!_Flint.inspector[path]) {
       inspect(path, (_props, _state, _wb) => {
-        console.log('props are', _props)
         props = filterProps(_props || {})
         state = _state || {}
         writeBack = _wb

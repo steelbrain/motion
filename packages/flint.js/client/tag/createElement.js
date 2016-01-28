@@ -6,6 +6,18 @@ import elementStyles from './styles'
 import elementProps from './props'
 import stringifyObjects from './stringifyObjects'
 
+/*
+
+  Shim around React.createElement, that adds in our:
+
+     - tag helpers (sync, yield, repeat, if, ...)
+     - styling (radium, css classes, ...)
+     - object to string
+
+*/
+
+const DIV = 'div'
+
 export default function createElement(identifier : Identifier, _props, ...args) {
   // TODO remove or document
   if (_props && _props.__skipFlint)
@@ -16,14 +28,13 @@ export default function createElement(identifier : Identifier, _props, ...args) 
 
   const el: Element = getElement(identifier, view, _props, Flint.getView)
   const props = elementProps(el, view, Flint, _props)
-  const styles = elementStyles(el, view, props)
-
-  if (styles)
-    props.style = styles
+  props.style = elementStyles(el, view, props)
 
   // TODO option to disable object stringifying
   if (!process.env.production)
     args = stringifyObjects(el, args, view)
 
-  return React.createElement(el.component || el.name, props, ...args)
+  const tag = el.whitelisted ? DIV : el.component || el.name
+
+  return React.createElement(tag, props, ...args)
 }

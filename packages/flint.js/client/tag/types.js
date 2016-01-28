@@ -8,10 +8,11 @@ export type Identifier = [
 
 export type Element = {
   name: string;
+  tagName: string;
   key: number;
   index: number;
   repeatItem: any;
   component: Function;
-  originalName: string;
+  whitelisted: boolean;
   isView: boolean;
 }

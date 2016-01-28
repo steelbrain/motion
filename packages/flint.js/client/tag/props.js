@@ -16,7 +16,7 @@ function niceProps(props) {
   return props
 }
 
-export default function elementProps({ name, originalName, key, index, isView }, view, Flint, props) {
+export default function elementProps({ name, whitelisted, key, index, isView }, view, Flint, props) {
   if (props) {
     props = niceProps(props)
   }
@@ -102,12 +102,9 @@ export default function elementProps({ name, originalName, key, index, isView },
     }
   }
 
-  // lowercase tags
-  if (name[0] == name[0].toLowerCase()) {
-    // also add component to class if its whitelisted
-    if (typeof name == 'string' && name != originalName) {
-      props.className = addClassName(props, name)
-    }
+  // ensure styles for whitelisted
+  if (whitelisted) {
+    props.className = addClassName(props, name)
   }
 
   return props
