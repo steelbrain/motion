@@ -30,7 +30,11 @@ let args = [ node, flint, cmd, ...flags ]
 exec('npm view flint@latest version -loglevel silent', (err, current) => {
   const outdated = (a, b) => cmp(a, b) == -1
   if (!err && version && outdated(version.trim(), current.trim()))
-      console.log(` Update available: v${current} \n`.bold)
+      console.log(
+        `  Flint update available:`.yellow
+        + ` v${version.trim()} -> v${current.trim()}`.dim
+        + ` (flint update)`.dim
+      )
 })
 
 Program

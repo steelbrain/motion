@@ -28,13 +28,13 @@ export function init() {
 }
 
 function promptItem(message, color) {
-  return chalk.bold(message[0]) + message.slice(1)
+  return `${message.slice(0, 4)}${chalk.bold(message[4])}${message.slice(5)}`
 }
 
 let starts = (a, b) => a % b == 0
 
-function promptLayout(messages, { perLine = 2, prefix = '  ›', pad = 16 }) {
-  let item = str => promptItem(_.padEnd(`${prefix} ${str}`, pad))
+function promptLayout(messages, { perLine = 2, prefix = '  › ', pad = 12 }) {
+  let item = (str, color) => promptItem(_.padEnd(`${prefix}${str}`, pad))
 
   return messages.map((message, i) =>
     starts(i, perLine) ? chalk.cyan(`\n${item(message)}`) : item(message)
@@ -45,13 +45,14 @@ export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
 
-  console.log(`\n  http://${server.url()}`.bold.green)
+  console.log(`\n  http://${server.url()}`.green)
 
   const messages = [
     'Open', 'Verbose', 'Build',
     'Editor', 'Rebundle'
   ]
 
+  // console.log('  Shortcuts')
   console.log(promptLayout(messages, { perLine: 3 }))
   console.log()
 

@@ -38,8 +38,8 @@ const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 let out = {}
-out.badFile = (file, err) => console.log(` ◆ ${relative(file)}`.red),
-out.goodFile = (file, ms) => console.log(` ✓ ${relative(file)}`.bold
+out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
+out.goodFile = (file, ms) => console.log(`  ✓ ${relative(file)}`.bold
     + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim)
 
 // TODO bad practice
