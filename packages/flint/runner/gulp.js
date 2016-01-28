@@ -398,7 +398,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       // slice out all code not in views
       const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
 
-      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc.start.line - 1, loc.end.line), file.src.split("\n")).join('')
+      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
       const cacheFile = cache.getFile(file.path)
       const prevOutsideSrc = cacheFile.outsideSrc
       cacheFile.outsideSrc = outsideSrc // update
