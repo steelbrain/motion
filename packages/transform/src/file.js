@@ -464,6 +464,22 @@ export default function createPlugin(options) {
       return t.expressionStatement(node)
     }
 
+    function stateTrack(node) {
+      if (viewBlockHasState) {
+        const updateState = t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
+
+        viewBlockHasState = false
+
+        if (!Array.isArray(node.body))
+          node.body = [].concat(t.expressionStatement(node.body), updateState)
+        else
+          node.body.push(updateState)
+      }
+
+      // node.blockTracked = true
+      return node
+    }
+
 
 
     // meta-data for views for atom
@@ -794,19 +810,15 @@ export default function createPlugin(options) {
           }
         },
 
+        ArrowFunctionExpression: {
+          exit(node) {
+            return stateTrack(node)
+          }
+        },
+
         BlockStatement: {
           exit(node) {
-            if (!node.blockTracked && viewBlockHasState) {
-              viewBlockHasState = false
-
-              node.body.push(t.expressionStatement(
-                t.callExpression(t.identifier('view.update'), [])
-              ))
-
-              return node
-            }
-
-            node.blockTracked = true
+            return stateTrack(node)
           }
         },
 
@@ -964,6 +976,7 @@ export default function createPlugin(options) {
               if (isViewState(name, scope)) {
                 sett = node => wrapSetter(name, node, scope, post, 'set')
                 added = true
+                viewBlockHasState = true
               }
             }
 
