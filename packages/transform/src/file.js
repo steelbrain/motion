@@ -2,6 +2,7 @@ import StyleSheet from './stilr/index'
 import niceStyles from 'flint-nice-styles'
 import hash from 'hash-sum'
 import path from 'path'
+import {normalizeLocation} from './helpers'
 
 function isUpperCase(str) {
   return str.charAt(0) == str.charAt(0).toUpperCase()
@@ -532,10 +533,10 @@ export default function createPlugin(options) {
 
             currentView = fullName
             meta.views[currentView] = {
-              location: node.loc,
+              location: normalizeLocation(node.loc),
               file: file.opts.filename,
               styles: {},
-              els: {},
+              els: {}
             }
 
             inView = fullName
@@ -691,7 +692,7 @@ export default function createPlugin(options) {
 
               // track meta
               if (meta.views[currentView]) {
-                meta.views[currentView].els[name] = { location: el.loc, key }
+                meta.views[currentView].els[name] = { location: normalizeLocation(el.loc), key }
               }
 
               /*
@@ -913,7 +914,7 @@ export default function createPlugin(options) {
             if (!isStyle) return
 
             if (currentView) {
-              meta.views[currentView].styles[node.left.name.substr(1)] = { location: node.loc }
+              meta.views[currentView].styles[node.left.name.substr(1)] = { location: normalizeLocation(node.loc) }
             }
 
             // styles
