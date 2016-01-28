@@ -36,21 +36,25 @@ bridge.on('editor', ({ type, key, el, view }) => {
 
   if (!meta[view]) return
 
-  const viewData = { name: view, file: meta[view].data.file }
+  const data = meta[view].data
 
-  if (type == 'focus:style') {
-    bridge.message('editor:style', {
-      view: viewData,
-      position: meta[view].styles[el]
-    }, 'focus')
-  }
+  if (data) {
+    const viewData = { name: view, file: data.file }
 
-  if (type == 'focus:element') {
-    if (!view || !key) return
-    bridge.message('editor:element', {
-      view: viewData,
-      position: meta[view].els[key]
-    }, 'focus')
+    if (type == 'focus:style') {
+      bridge.message('editor:style', {
+        view: viewData,
+        position: meta[view].styles[el]
+      }, 'focus')
+    }
+
+    if (type == 'focus:element') {
+      if (!view || !key) return
+      bridge.message('editor:element', {
+        view: viewData,
+        position: meta[view].els[key]
+      }, 'focus')
+    }
   }
 
   //todo dont focus escape every time
