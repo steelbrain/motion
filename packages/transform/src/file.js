@@ -793,6 +793,20 @@ export default function createPlugin(options) {
           }
         },
 
+        BlockStatement: {
+          exit(node) {
+            if (!node.blockTracked && viewBlockHasState) {
+              viewBlockHasState = false
+
+              console.log(node.body)
+
+              return node
+            }
+
+            node.blockTracked = true
+          }
+        },
+
         CallExpression: {
           exit(node, parent, scope) {
             // track require() statements
