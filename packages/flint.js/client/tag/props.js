@@ -1,4 +1,5 @@
 import classnames from 'classnames'
+import reportError from '../lib/reportError'
 import { niceAttrs } from './constants'
 
 function addClassName(props, name) {
@@ -15,7 +16,7 @@ function niceProps(props) {
   return props
 }
 
-export default function elementProps({ name, tag, originalName, key, index, isView }, view, Flint, props) {
+export default function elementProps({ name, originalName, key, index, isView }, view, Flint, props) {
   if (props) {
     props = niceProps(props)
   }
@@ -63,16 +64,24 @@ export default function elementProps({ name, tag, originalName, key, index, isVi
   // sync
   if (props.__flintOnChange) {
     let userOnChange = props.onChange
+    let type = props.type
+    let attr = (
+      (!type && name == 'input') || type == 'input' || type == 'textarea' ? 'value'
+      : type == 'checkbox' || type == 'radio' ? 'checked'
+      : false
+    )
+
+    if (!attr) {
+      reportError({ message: 'sync attribute not supported on this input type yet', fileName: `${view.name}, <${name}>` })
+    }
 
     props.onChange = function(e) {
       if (userOnChange) userOnChange.call(this, e)
-
-      // TODO: handle checkbox/radio/select differently
-      props.__flintOnChange(e)
+      props.__flintOnChange(e.target[attr])
     }
 
-    if (props.__flintValue) {
-      props.value = props.__flintValue
+    if (typeof props.__flintValue != 'undefined') {
+      props[attr] = props.__flintValue
     }
   }
 

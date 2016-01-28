@@ -1,4 +1,5 @@
 import React from 'react'
+import reportError from '../lib/reportError'
 
 // convert object to string for debugging
 export default function(el, args, view) {
