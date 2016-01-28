@@ -795,15 +795,17 @@ export default function createPlugin(options) {
 
         BlockStatement: {
           exit(node) {
-            // if (!node.blockTracked && viewBlockHasState) {
-            //   viewBlockHasState = false
-            //
-            //   console.log(node.body)
-            //
-            //   return node
-            // }
-            //
-            // node.blockTracked = true
+            if (!node.blockTracked && viewBlockHasState) {
+              viewBlockHasState = false
+
+              node.body.push(t.expressionStatement(
+                t.callExpression(t.identifier('view.update'), [])
+              ))
+
+              return node
+            }
+
+            node.blockTracked = true
           }
         },
 
