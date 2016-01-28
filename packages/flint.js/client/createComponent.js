@@ -403,41 +403,27 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.update()
       },
 
-      // soft = view.set()
-      update({ soft, immediate } = {}) {
+      // view.set()
+      update(hard) {
         // view.set respects paused
-        if (soft && this.isPaused)
-          return
+        if (!hard && this.isPaused) return
 
-        let doUpdate = () => {
-          // if during a render, wait
-          if (this.isRendering || this.isUpdating || !this.mounted || Internal.firstRender) {
-            this.queuedUpdate = true
-          }
-          else {
-            // tools run into weird bug where if error in app on initial render, react gets
-            // mad that you are trying to re-render tools during app render TODO: strip in prod
-            // check for isRendering so it shows if fails to render
-            if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
-              return setTimeout(this.update)
-
-            this.isUpdating = true
-            this.queuedUpdate = false
-
-            // rather than setState because we want to skip shouldUpdate calls
-            this.forceUpdate()
-          }
-        }
-
-        if (immediate) {
-          doUpdate()
+        // if during a render, wait
+        if (this.isRendering || this.isUpdating || !this.mounted || Internal.firstRender) {
+          this.queuedUpdate = true
         }
         else {
-          // setTimeout fixes issues with forceUpdate during previous transition in React
-          // batch changes at end of setTimeout
-          if (this.queuedUpdate) return
-          this.queuedUpdate = true
-          setTimeout(doUpdate)
+          // tools run into weird bug where if error in app on initial render, react gets
+          // mad that you are trying to re-render tools during app render TODO: strip in prod
+          // check for isRendering so it shows if fails to render
+          if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
+            return setTimeout(this.update)
+
+          this.isUpdating = true
+          this.queuedUpdate = false
+
+          // rather than setState because we want to skip shouldUpdate calls
+          this.forceUpdate()
         }
       },
 
