@@ -19,16 +19,18 @@ const mergeStyles = (obj, ...styles)  => {
 
 const prefix = '$'
 
-// <name-tag />
-export default function elementStyles(key, index, repeatItem, view, name, tag, props) {
-  if (typeof name !== 'string') return
+// TODO remove <name-tag />
+// originalTag || tag
+// key, index, repeatItem, name, tag
+export default function elementStyles(el, view, props) {
+  if (typeof el.name !== 'string') return
 
-  let styles
-  let parentStyles, parentStylesStatic, parentStylesStaticView, parentStylesRoot
+  let styles, parentStyles, parentStylesStatic, parentStylesStaticView, parentStylesRoot
 
   // attach view styles from $ to element matching view name lowercase
+  const tag = el.originalTag || el.tag
   const Flint = view.Flint
-  const isRootName = view.name && view.name.toLowerCase() == name
+  const isRootName = view.name && view.name.toLowerCase() == el.name
   const hasOneRender = view.renders.length <= 1
   const isWrapperOrRoot = props && (props.__flintIsWrapper || props.root)
   const deservesRootStyles = !!(isRootName && hasOneRender || isWrapperOrRoot)
@@ -56,21 +58,18 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
     // TODO: shouldnt be in styles
     let viewClassName = view.props.className || view.props.class
-
-    if (viewClassName) {
-      addClassName(viewClassName)
-    }
+    if (viewClassName) addClassName(viewClassName)
   }
 
   if (view.styles || parentStylesStatic || parentStylesStaticView) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
-    const diffName = name !== tag
+    const diffName = el.name !== tag
     const hasTag = typeof tag == 'string'
-    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](repeatItem, index)
+    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](el.repeatItem, el.index)
 
     const classes = Flint.styleClasses[view.name]
-    const viewStyle = view.styles[prefix] && view.styles[prefix](index)
-    const nameStyle = diffName && view.styles[name] && view.styles[name](repeatItem, index)
+    const viewStyle = view.styles[prefix] && view.styles[prefix](el.index)
+    const nameStyle = diffName && view.styles[el.name] && view.styles[el.name](el.repeatItem, el.index)
 
     // merge styles
 
@@ -92,7 +91,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
     if (view.doRenderToRoot || view.doRenderInlineStyles) {
       result = mergeStyles(result,
-        diffName && viewStaticStyles && viewStaticStyles[`${prefix}${name}`],
+        diffName && viewStaticStyles && viewStaticStyles[`${prefix}${el.name}`],
         hasTag && viewStaticStyles && viewStaticStyles[`${prefix}${tag}`],
         deservesRootStyles && viewStaticStyles && viewStaticStyles[prefix]
       )
@@ -107,7 +106,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
 
         if (isLowerCase(className[0])) {
           if (view.styles[className]) {
-            result = mergeStyles(result, view.styles[className](index))
+            result = mergeStyles(result, view.styles[className](el.index))
           }
 
           // ensure static class styles overwrite dynamic tag/name styles
@@ -117,10 +116,10 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
               let styles = Object.keys(staticClassStyles)
 
               for (let j = 0; j < styles.length; j++) {
-                let key = styles[j]
+                const styleKey = styles[j]
                 // check if already in styles, and rewrite to class style
-                if (typeof result[key] != 'undefined') {
-                  result[key] = staticClassStyles[key]
+                if (typeof result[styleKey] != 'undefined') {
+                  result[styleKey] = staticClassStyles[styleKey]
                 }
               }
             }
@@ -139,15 +138,15 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
         for (let i = 0; i < classes.length; i++) {
           let className = classes[i]
           if (!isLowerCase(className[0])) continue
-          const key = `${prefix}${className}`
+          const classKey = `${prefix}${className}`
 
           // merge in styles
           result = mergeStyles(
             result,
             parentStyles && (
-              parentStyles[className] && parentStyles[className](repeatItem, index)
+              parentStyles[className] && parentStyles[className](el.repeatItem, el.index)
             ),
-            parentStylesStatic && parentStylesStatic[key]
+            parentStylesStatic && parentStylesStatic[classKey]
           )
         }
       }
@@ -185,7 +184,7 @@ export default function elementStyles(key, index, repeatItem, view, name, tag, p
   // set body bg to Main view bg
   if (
     view.name == 'Main' &&
-    name == 'view.Main' &&
+    el.name == 'view.Main' &&
     typeof document != 'undefined'
   ) {
     const body = document.body

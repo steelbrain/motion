@@ -70,7 +70,7 @@ module.exports = function(opts) {
           loader: 'babel-loader',
           query: {
             stage: 2,
-            optional: ['runtime']
+            optional: ['runtime', 'flow']
           },
           include: [path.resolve(__dirname, 'client'), path.resolve(__dirname, 'tools')],
           exclude: [path.resolve(__dirname, 'client', 'vendor')]

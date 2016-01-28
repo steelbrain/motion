@@ -3,92 +3,44 @@ import classnames from 'classnames'
 import elementStyles from './styles'
 import reportError from '../lib/reportError'
 import tags from './tags'
+import stringifyObjects from './stringifyObjects'
+import { whitelist, niceAttrs } from './constants'
 
-// tags that shouldn't map out to real names
-const divWhitelist = [
-  'title',
-  'meta',
-  'head',
-  'circle',
-  'col',
-  'body'
-]
-
-const niceAttrs = {
-  class: 'className',
-  for: 'htmlFor',
-  srcset: 'srcSet',
-  novalidate: 'noValidate',
-  autoplay: 'autoPlay',
-  frameborder: 'frameBorder',
-  allowfullscreen: 'allowFullScreen',
-  tabindex: 'tabIndex',
+type Element = {
+  name: string;
+  key: number;
+  index: number;
+  repeatItem: any;
+  tag: string | Function;
+  originalTag: string;
+  isView: boolean;
 }
 
-export default function createElement(viewName) {
-  // identifier = [id, name]
-  return function el(identifier, props, ...args) {
-    // TODO remove or make official
-    if (props && props.skipFlint)
-      return React.createElement(identifier[1], props, ...args)
+export default function createElement() {
+  return function elementCreator(identifier, _props, ...args) {
+    // TODO remove or document
+    if (_props && _props.__skipFlint) return React.createElement(identifier[1], _props, ...args)
 
     const view = this
     const Flint = view.Flint
 
-    const { name, key, index, repeatItem, tag, originalTag, isView } = getElement(identifier, view, props, viewName, Flint.getView)
+    const el: Element = getElement(identifier, view, _props, Flint.getView)
+    const props = getProps(el, view, Flint, _props)
+    const styles = elementStyles(el, view, props) // key, index, repeatItem, view, name, originalTag || tag, props
 
-    props = getProps(view, viewName, Flint, props, view.props, name, tag, originalTag, key, index, isView)
-
-    const styles = elementStyles(key, index, repeatItem, view, name, originalTag || tag, props)
-    if (styles) props.style = styles
-
-    // only for tags
-    if (name[0] == name[0].toLowerCase()) {
-      // this switches the name onto the classname, when you
-      // do tags like <name-h2>, so styles still attach
-      if (typeof tag == 'string' && tag !== name) {
-        props.className = addClassName(props, name)
-      }
-
-      // also add tag to class if its whitelisted
-      if (typeof tag == 'string' && tag != originalTag) {
-        props.className = addClassName(props, tag)
-      }
-    }
+    if (styles)
+      props.style = styles
 
     // TODO option to disable object stringifying
-    // convert object to string for debugging in dev mode only
-    if (!process.env.production) {
-      args = args.map(arg => {
-        const type = typeof arg
+    if (!process.env.production)
+      args = stringifyObjects(el, args, view)
 
-        if (arg && type != 'string' && !Array.isArray(arg) && !React.isValidElement(arg)) {
-          const isObj = String(arg) === '[object Object]'
-
-          if (isObj) {
-            // stringify for error
-            let str = ''
-            try { str = JSON.stringify(arg) } catch(e) {}
-
-            reportError({
-              message: `You passed an object to ${viewName} <${name}>. In production this will error! Object: ${str}`,
-              fileName: _Flint.views[viewName] && _Flint.views[viewName].file
-            })
-
-            return str || '{}'
-          }
-        }
-
-        return arg
-      })
-    }
-
-    return React.createElement(tag, props, ...args)
+    return React.createElement(el.tag, props, ...args)
   }
 }
 
 // tagName comes directly from <el tagName="" />
-function getElement(identifier, view, props, viewName, getView) {
+function getElement(identifier, view, props, getView) {
   let name, key, index, tag, isView, repeatItem
 
   // used directly by user
@@ -132,7 +84,7 @@ function getElement(identifier, view, props, viewName, getView) {
         tag = name
       }
 
-      if (divWhitelist.indexOf(tag) >= 0) {
+      if (whitelist.indexOf(tag) >= 0) {
         originalTag = tag
         tag = 'div'
       }
@@ -147,7 +99,7 @@ function getElement(identifier, view, props, viewName, getView) {
   return { name, key, index, repeatItem, tag, originalTag, isView }
 }
 
-function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTag, key, index, isView) {
+function getProps({ name, tag, originalTag, key, index, isView }, view, Flint, props) {
   if (props) {
     props = niceProps(props)
   }
@@ -175,11 +127,11 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
   if (props.yield) {
     props = Object.assign(
       props,
-      viewProps,
+      view.props,
       // take parent style
       props.style && { style: props.style },
       // merge parent classname
-      props.className && { className: classnames(props.className, viewProps.className) }
+      props.className && { className: classnames(props.className, view.props.className) }
     )
   }
 
@@ -198,19 +150,22 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
 
     props.onChange = function(e) {
       if (userOnChange) userOnChange.call(this, e)
+
+      // TODO: handle checkbox/radio/select differently
       props.__flintOnChange(e)
     }
 
-    if (props.__flintValue)
+    if (props.__flintValue) {
       props.value = props.__flintValue
+    }
   }
 
   // if not external component
   if (isView || typeof tag != 'function') {
     props.__flint = {
       parentStyles: view.styles,
-      parentStylesStatic: Flint.styleObjects[viewName],
-      parentName: viewName,
+      parentStylesStatic: Flint.styleObjects[view.name],
+      parentName: view.name,
       key,
       index,
       tagName: name
@@ -218,7 +173,22 @@ function getProps(view, viewName, Flint, props, viewProps, name, tag, originalTa
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {
-      props.className = addClassName(props, viewName.replace('.', '-'))
+      props.className = addClassName(props, view.name.replace('.', '-'))
+    }
+  }
+
+  // lowercase tags
+  if (name[0] == name[0].toLowerCase()) {
+    // TODO remove
+    // this switches the name onto the classname, when you
+    // do tags like <name-h2>, so styles still attach
+    if (typeof tag == 'string' && tag !== name) {
+      props.className = addClassName(props, name)
+    }
+
+    // also add tag to class if its whitelisted
+    if (typeof tag == 'string' && tag != originalTag) {
+      props.className = addClassName(props, tag)
     }
   }
 

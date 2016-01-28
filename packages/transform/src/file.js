@@ -781,9 +781,9 @@ export default function createPlugin(options) {
             if (node.name.name == 'sync') {
               return [
                 t.JSXAttribute(t.literal('__flintValue'), node.value),
-                t.JSXAttribute(t.literal('__flintOnChange'), t.functionExpression(null, [t.identifier('e')],
+                t.JSXAttribute(t.literal('__flintOnChange'), t.functionExpression(null, [t.identifier('__flintval__')],
                   t.blockStatement([
-                    t.assignmentExpression('_=_', node.value, t.identifier('e.target.value')),
+                    t.assignmentExpression('_=_', node.value, t.identifier('__flintval__')),
                   ])
                 )),
               ]
