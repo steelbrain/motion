@@ -34,7 +34,7 @@ export default function createElement(identifier : Identifier, _props, ...args) 
   if (!process.env.production)
     args = stringifyObjects(el, args, view)
 
-  const tag = el.whitelisted ? DIV : el.component || el.name
+  const tag = props.tagName || (el.whitelisted ? DIV : el.component || el.name)
 
   return React.createElement(tag, props, ...args)
 }
