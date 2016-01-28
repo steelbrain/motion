@@ -28,7 +28,7 @@ export default function elementStyles(el, view, props) {
   let styles, parentStyles, parentStylesStatic, parentStylesStaticView, parentStylesRoot
 
   // attach view styles from $ to element matching view name lowercase
-  const tag = el.originalTag || el.tag
+  const tag = el.originalTag || el.name
   const Flint = view.Flint
   const isRootName = view.name && view.name.toLowerCase() == el.name
   const hasOneRender = view.renders.length <= 1

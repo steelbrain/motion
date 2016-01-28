@@ -21,7 +21,6 @@ let views = {}
 let viewErrorDebouncers = {}
 
 export default function createComponent(Flint, Internal, name, view, options = {}) {
-  const el = createElement(name)
   let isChanged = options.changed
 
   // wrap decorators
@@ -136,7 +135,7 @@ export default function createComponent(Flint, Internal, name, view, options = {
       displayName: name,
       name,
       Flint,
-      el,
+      el: createElement,
 
       // set() get() dec()
       mixins: [hotCache({ Internal, options, name })],
