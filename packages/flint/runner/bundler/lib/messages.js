@@ -17,29 +17,29 @@ function avoid() {
 
 export function onStart(name) {
   if (avoid()) return
-  bridge.message('package:install', { name })
+  bridge.broadcast('package:install', { name })
 }
 
 export function onError(name, error) {
   if (avoid()) return
-  bridge.message('package:error', { name, error })
-  bridge.message('npm:error', { error })
+  bridge.broadcast('package:error', { name, error })
+  bridge.broadcast('npm:error', { error })
 }
 
 export function onFinish(name) {
   if (avoid()) return
   log('bundler', 'onPackageFinish: ', name)
-  bridge.message('package:installed', { name })
+  bridge.broadcast('package:installed', { name })
 }
 
 export function onInstalled() {
   if (avoid()) return
-  bridge.message('packages:reload', {})
+  bridge.broadcast('packages:reload', {})
 }
 
 export function onInternalInstalled() {
   if (avoid()) return
-  bridge.message('internals:reload', {
+  bridge.broadcast('internals:reload', {
     importers: cache.getInternalImporters()
   })
 }

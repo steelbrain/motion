@@ -421,7 +421,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
-    bridge.message('compile:error', { error }, 'error')
+    bridge.broadcast('compile:error', { error })
   }
 
   function setLastFile(file) {
@@ -476,7 +476,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     }
 
     if (opts('hasRunInitialBuild'))
-      bridge.message('file:outsideChange', { name: cache.relative(file.path), changed })
+      bridge.broadcast('file:outsideChange', { name: cache.relative(file.path), changed })
   }
 
   function checkWriteable(file) {
@@ -522,7 +522,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (bundler.isInstalling() || file.willInstall) return
 
     // ADD
-    bridge.message('script:add', file.message)
+    bridge.broadcast('script:add', file.message)
   }
 
   function buildDone(file) {
@@ -559,13 +559,13 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       serializeCache()
 
     // message browser of compile success
-    bridge.message('compile:success', file.message, 'error')
+    bridge.broadcast('compile:success', file.message)
 
     // check if other errors left still in queue
     const error = cache.getLastError()
     if (!error) return
     debug('cache last error', error)
-    bridge.message('compile:error', { error }, 'error')
+    bridge.broadcast('compile:error', { error })
   }
 
   // ok so we start a file

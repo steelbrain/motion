@@ -27,7 +27,7 @@ function init() {
   watchForBrowserLoading()
 
   // watch, throttle the stream a bit
-  bridge.on('live:save', _.throttle(fileSend, 22, { leading: true }))
+  bridge.onMessage('live:save', _.throttle(fileSend, 22, { leading: true }))
 
   // reset loading on errors in pipeline
   gulp.event('error', ({ path }) => setBrowserLoading(relPath(path), false))
@@ -35,8 +35,8 @@ function init() {
 
 // ignore stream when loading file in browser
 function watchForBrowserLoading() {
-  bridge.on('script:load', ({ path }) => setBrowserLoading(path, true))
-  bridge.on('script:done', ({ path }) => setBrowserLoading(path, false))
+  bridge.onMessage('script:load', ({ path }) => setBrowserLoading(path, true))
+  bridge.onMessage('script:done', ({ path }) => setBrowserLoading(path, false))
 }
 
 function setBrowserLoading(path, isLoading) {

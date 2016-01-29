@@ -16,7 +16,7 @@ let meta: Meta = {}
 
 export default function setMeta({ file, views }) {
   cache.setFileMeta(file, views)
-  bridge.message('file:meta', { file, views })
+  bridge.broadcast('file:meta', { file, views })
   Object.keys(views).map(view => {
     meta[view] = views[view]
   })
@@ -27,7 +27,7 @@ export default function setMeta({ file, views }) {
 // cache.onDeleteView(view => bridge.message('view:delete', { view, meta: meta[view] }))
 
 
-bridge.on('editor', ({ type, key, el, view }) => {
+bridge.onMessage('editor', ({ type, key, el, view }) => {
   if (type.substr(0, 6) != 'focus:') return
 
   if (view === undefined) return
@@ -42,18 +42,18 @@ bridge.on('editor', ({ type, key, el, view }) => {
     const viewData = { name: view, file: data.file }
 
     if (type == 'focus:style') {
-      bridge.message('editor:style', {
+      bridge.broadcast('editor:style', {
         view: viewData,
         position: meta[view].styles[el]
-      }, 'focus')
+      })
     }
 
     if (type == 'focus:element') {
       if (!view || !key) return
-      bridge.message('editor:element', {
+      bridge.broadcast('editor:element', {
         view: viewData,
         position: meta[view].els[key]
-      }, 'focus')
+      })
     }
   }
 

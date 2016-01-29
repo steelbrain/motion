@@ -18,7 +18,7 @@ export async function write(view, sheet) {
 
     await writeFile(file, final)
     if (!opts('hasRunInitialBuild')) return
-    bridge.message('stylesheet:add', { view, file })
+    bridge.broadcast('stylesheet:add', { view, file })
   }
   catch(e) {
     handleError(e)

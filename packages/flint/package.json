@@ -60,6 +60,7 @@
     "regenerator-runtime-only": "0.8.38",
     "replace": "0.3.0",
     "replace-ext": "0.0.1",
+    "sb-event-kit": "^1.0.2",
     "semver": "5.1.0",
     "semver-compare": "1.0.0",
     "source-map-support": "0.4.0",
@@ -70,6 +71,7 @@
     "url-loader": "0.5.7",
     "vinyl": "1.1.0",
     "vinyl-sourcemaps-apply": "0.2.1",
-    "webpack": "1.12.11"
+    "webpack": "1.12.11",
+    "ws": "^1.0.1"
   }
 }

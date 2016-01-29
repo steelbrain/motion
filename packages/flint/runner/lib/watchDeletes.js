@@ -22,7 +22,7 @@ export default function watchDeletes() {
     cache.onDeleteView(async view => {
       log('onDeleteView', view)
       await deleteStyle(view)
-      bridge.message('stylesheet:remove', { view })
+      bridge.broadcast('stylesheet:remove', { view })
     })
 
     cache.onDeleteFile(async ({ name, file, state }) => {
@@ -36,7 +36,7 @@ export default function watchDeletes() {
         await deleteJS(view)
       })
 
-      bridge.message('file:delete', { name })
+      bridge.broadcast('file:delete', { name })
     })
   }
 
