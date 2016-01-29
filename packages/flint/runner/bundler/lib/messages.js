@@ -6,7 +6,7 @@ import log from '../../lib/log'
 // messaging
 
 function avoid() {
-  if (opts('build'))
+  if (opts('build') && !opts('watch'))
     return true
 
   return (

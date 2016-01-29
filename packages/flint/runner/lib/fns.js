@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import _glob from 'globby'
 import readdirp from 'readdirp'
-import jf from 'jsonfile'
 import path from 'path'
 import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile } from 'fs-extra'
 
@@ -24,11 +23,11 @@ const rm = logWrap('rm', promisify(remove))
 const mkdir = logWrap('mkdir', promisify(mkdirs))
 const _readdir = promisify(readdirp)
 const readdir = logWrap('readdir', (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files))
-const readJSON = logWrap('readJSON', promisify(jf.readFile))
-const writeJSON = logWrap('writeJSON', promisify(jf.writeFile))
 const _readFilePromise = promisify(readFile)
-const _readFile = logWrap('readFile', _ => _readFilePromise(_, 'utf-8'))
+const _readFile = logWrap('readFile', file => _readFilePromise(file, 'utf-8'))
 const _writeFile = promisify(writeFile)
+const readJSON = logWrap('readJSON', file => _readFile(file).then(res => JSON.parse(res)))
+const writeJSON = logWrap('writeJSON', (path, str) => _writeFile(path, JSON.stringify(str)))
 const touch = logWrap('touch', promisify(ensureFile))
 const _copy = logWrap('copy', promisify(copy))
 const exists = logWrap('exists', promisify(stat))

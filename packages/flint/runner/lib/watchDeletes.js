@@ -2,7 +2,7 @@ import path from 'path'
 import opts from '../opts'
 import cache from '../cache'
 import bridge from '../bridge'
-import { bundleInternals } from '../bundler/internals'
+import { internals } from '../bundler/internals'
 import { p, rm, log, handleError } from './fns'
 
 async function deleteJS(view) {
@@ -29,7 +29,7 @@ export default function watchDeletes() {
       log('onDeleteFile', name, file, state)
 
       if (state.isInternal)
-        await bundleInternals()
+        await internals()
 
       await state.views.forEach(async view => {
         await deleteStyle(view)

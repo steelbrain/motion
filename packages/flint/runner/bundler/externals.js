@@ -9,7 +9,7 @@ import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, path, writeJSON, writeFile } from '../lib/fns'
 
-export async function bundleExternals(opts = {}) {
+export async function externals(opts = {}) {
   if (opts.doInstall) await installAll()
   await externalsPathsToIn()
   await packExternals()

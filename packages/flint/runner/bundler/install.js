@@ -8,8 +8,7 @@ import npm from './lib/npm'
 import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
-import { bundleExternals } from './externals'
-import { bundleInternals } from './internals'
+import { externals } from './externals'
 
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
@@ -18,7 +17,7 @@ export async function install(force) {
     await remakeInstallDir(force)
     await uninstall()
     await installAll()
-    await bundleExternals()
+    await externals()
   }
   catch (e) {
     handleError(e)
@@ -79,7 +78,7 @@ export async function installAll(requires) {
       // TODO this, getNew, normalize all need refactor -- in fact probably most of this file does :)
       if (requires.length) {
         await writeInstalled(installed)
-        await bundleExternals({ silent: true })
+        await externals({ silent: true })
       }
       return
     }
@@ -147,7 +146,7 @@ function runInstall(prevInstalled, toInstall) {
 
     logInstalled(successful)
     await writeInstalled(finalPaths, toInstall)
-    await bundleExternals()
+    await externals()
 
     // reset
     installingFullNames = []
@@ -199,7 +198,7 @@ export function finishedInstalling() {
 }
 
 function isDone() {
-  return opts('build')
+  return (opts('build') && !opts('watch'))
     ? !_isInstalling && opts('hasRunInitialInstall')
     : !_isInstalling
 }

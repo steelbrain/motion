@@ -33,10 +33,9 @@ function setAll(opts) {
   OPTS.reset = opts.reset
   OPTS.cached = opts.cached
   OPTS.nomin = opts.nomin
+  OPTS.build = opts.build
 
   OPTS.hasRunInitialBuild = false
-  OPTS.build = opts.isBuild
-  OPTS.buildWatch = opts.buildWatch
 
   OPTS.defaultPort = 4000
 

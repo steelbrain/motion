@@ -31,15 +31,15 @@ let buildingOnce = false
 
 const serializeCache = _.throttle(cache.serialize, 200)
 const isSourceMap = file => path.extname(file) === '.map'
-const isProduction = () => isBuilding() || opts('buildWatch')
-const isBuilding = () => buildingOnce || opts('build')
+const isProduction = () => opts('build')
+const isBuilding = () => buildingOnce || (opts('build') && !opts('watch'))
 const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 let out = {}
 out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
-out.goodFile = (file, ms) => console.log(`  ✓ ${relative(file)}`.bold
+out.goodFile = symbol => (file, ms) => console.log(`  ${symbol} ${relative(file)}`.bold
     + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim)
 
 // TODO bad practice
@@ -130,6 +130,36 @@ export async function init({ once = false } = {}) {
   }
 }
 
+// ||
+// ||  ASSETS
+// ||
+
+export async function assets() {
+  const _staticsDir = p(opts('flintDir'), 'static', '*')
+  const staticsGlob = ['*', '**/*'].map(g => p(_staticsDir, g))
+  const staticsOut = p(opts('buildDir'), '_', 'static')
+
+  const assetsGlob = ['*', '**/*', '!**/*.js', , '!**/*.js.map', '!.flint{,/**}' ]
+  const assetsOut = opts('buildDir')
+
+  gulp.src(assetsGlob)
+      .pipe($.plumber())
+      .pipe($.watch(assetsGlob, { readDelay: 1 }))
+      .pipe(pipefn(out.goodFile('⇢')))
+      .pipe(gulp.dest(assetsOut))
+
+  gulp.src(staticsGlob)
+      .pipe($.plumber())
+      .pipe($.watch(scriptsGlob, { readDelay: 1 }))
+      .pipe(pipefn(out.goodFile('⇢')))
+      .pipe(gulp.dest(staticsOut))
+}
+
+
+// ||
+// ||  BUILD
+// ||
+
 // used for build
 export async function bundleApp() {
   try {
@@ -141,7 +171,7 @@ export async function bundleApp() {
     appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()
 
     if (minify)
-      console.log(`  Minifying...`.dim)
+      console.log(`\n  Minifying...`.dim)
 
     // build parallel
     await* [
@@ -154,8 +184,6 @@ export async function bundleApp() {
     handleError(e)
   }
 }
-
-const concat = (src, dest, name) => new Promise(res => gulp.src(src).pipe($.concat(name)).pipe(gulp.dest(dest)).on('end', res))
 
 function buildForDeploy(src, { dest, combine, minify, wrap }) {
   return new Promise((resolve, reject) => {
@@ -189,59 +217,58 @@ export function event(name, cb) {
   listeners[name].push(cb)
 }
 
-// userStream is optional for programmatic usage
+
+
+// ||
+// ||  RUN / BUILD WATCH
+// ||
+
 export function buildScripts({ inFiles, outFiles, userStream }) {
   let curFile, lastError
   let lastSavedTimestamp = {}
-
-  // track inFiles files to determine when it's loaded
   let loaded = 0
   let total = inFiles && inFiles.length || 0
 
-  // gulp src stream
-  const gulpSrcStream = gulp.src(SCRIPTS_GLOB)
+  let scripts = userStream || gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
-    // ignore unlinks in pipeline
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
-  // either user or gulp stream
-  const dirStream = dirAddStream(opts('appDir'))
-  const sourceStream = userStream || gulpSrcStream
-  const stream = isBuilding() ? sourceStream : merge(sourceStream, dirStream, superStream.stream)
-
-  return stream
-    .pipe($.if(buildCheck, $.ignore.exclude(true)))
-    .pipe(pipefn(resetLastFile))
-    .pipe($.plumber(catchError))
-    .pipe(pipefn(setLastFile))
-    .pipe($p.flint.pre())
-    .pipe($.sourcemaps.init())
-    .pipe($p.flintFile())
-    .pipe(pipefn(updateCache)) // right after babel
-    .pipe($p.flint.post())
-    .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-    // is internal
-    .pipe($.if(file => file.isInternal,
-      multipipe(
-        pipefn(out.goodFile),
-        pipefn(removeNewlyInternal),
-        pipefn(markFileSuccess), // before writing to preserve path
-        gulp.dest(p(OPTS.depsDir, 'internal')),
-        pipefn(afterBuildWatch),
-        $.ignore.exclude(true)
-      )
-    ))
-    // not sourcemap
-    .pipe($.if(file => !isSourceMap(file.path),
-      multipipe(
-        pipefn(out.goodFile),
-        pipefn(markFileSuccess)
-      )
-    ))
-    .pipe($.sourcemaps.write('.'))
-    .pipe($.if(checkWriteable, gulp.dest(OPTS.outDir)))
-    .pipe(pipefn(afterWrite))
-    .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
+  return (isBuilding() ?
+    scripts :
+    merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
+  )
+      .pipe($.if(buildCheck, $.ignore.exclude(true)))
+      .pipe(pipefn(resetLastFile))
+      .pipe($.plumber(catchError))
+      .pipe(pipefn(setLastFile))
+      .pipe($p.flint.pre())
+      .pipe($.sourcemaps.init())
+      .pipe($p.flintFile())
+      .pipe(pipefn(updateCache)) // right after babel
+      .pipe($p.flint.post())
+      .pipe($.if(!userStream, $.rename({ extname: '.js' })))
+      // is internal
+      .pipe($.if(file => file.isInternal,
+        multipipe(
+          pipefn(out.goodFile('▻')),
+          pipefn(removeNewlyInternal),
+          pipefn(markFileSuccess), // before writing to preserve path
+          gulp.dest(p(OPTS.depsDir, 'internal')),
+          pipefn(afterBuildWatch),
+          $.ignore.exclude(true)
+        )
+      ))
+      // not sourcemap
+      .pipe($.if(file => !isSourceMap(file.path),
+        multipipe(
+          pipefn(out.goodFile('▻')),
+          pipefn(markFileSuccess)
+        )
+      ))
+      .pipe($.sourcemaps.write('.'))
+      .pipe($.if(checkWriteable, gulp.dest(OPTS.outDir)))
+      .pipe(pipefn(afterWrite))
+      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
 
   function markDone(file) {
     // mark built
@@ -540,4 +567,4 @@ function pipefn(fn) {
   })
 }
 
-export default { init, buildScripts, bundleApp, afterBuild, event }
+export default { init, buildScripts, bundleApp, afterBuild, event, assets }

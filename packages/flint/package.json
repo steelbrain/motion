@@ -45,7 +45,6 @@
     "gulp-util": "3.0.7",
     "gulp-watch": "4.3.5",
     "json-loader": "0.5.4",
-    "jsonfile": "2.2.3",
     "keypress": "0.2.1",
     "lodash": "4.0.0",
     "merge-stream": "1.0.0",

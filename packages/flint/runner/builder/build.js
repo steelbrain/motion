@@ -20,10 +20,8 @@ export default async function build({ bundle = true } = {}) {
 
     makeTemplate()
 
-    console.log('  Copying assets...'.dim)
     await *[
       gulp.bundleApp(),
-      copy.assets(),
       copy.flint(),
       copy.react()
     ]

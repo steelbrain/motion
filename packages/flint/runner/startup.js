@@ -55,7 +55,7 @@ async function runGulp(opts) {
 
 export async function build(opts = {}) {
   try {
-    await startup({ ...opts, isBuild: true })
+    await startup({ ...opts, build: true })
     await bundler.remakeInstallDir()
     await builder.clear.buildDir()
     await runGulp({ once: opts.once })
@@ -75,6 +75,7 @@ export async function build(opts = {}) {
 export async function run(opts) {
   try {
     await startup(opts)
+    if (opts.watch) gulp.assets()
     await server.run()
     bridge.start()
     await runGulp()

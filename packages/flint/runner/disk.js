@@ -57,11 +57,17 @@ async function createWriters() {
 async function ensureConfigFile() {
   try {
     let config = await readJSON(opts('configFile'))
+
+    // set config in opts
     opts.set('config', config)
+
+    // set specific
+    let conf = (opts('build') ? config.build : config.run) || {}
+    opts.set('nomin', conf.minify === 'false')
+
   }
   catch(e) {
-    // write empty config on error
-    await writeJSON(opts('configFile'), {})
+    handleError({ message: 'Error parsing config file: .flint/flint.json', stack: e.stack })
   }
 }
 

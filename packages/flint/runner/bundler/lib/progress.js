@@ -33,7 +33,7 @@ function logProgress(tag, name, index, total) {
     ? `  ${index+1} of ${total}: ${name}`
     : `  ${tag}: ${name}`.dim
 
-  if (opts('build'))
+  if (opts('build') && !opts('watch'))
     console.log(out)
   else {
     let spinner = new Spinner(out)

@@ -26,6 +26,6 @@ const opts = {
 }
 
 if (opts.watch)
-  run({ buildWatch: true, ...opts })
+  run({ build: true, watch: true, ...opts })
 else
   build(opts)
