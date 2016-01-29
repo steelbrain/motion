@@ -52,6 +52,9 @@ export function banner() {
     'Editor', 'Rebundle'
   ]
 
+  if (opts('build') && opts('watch'))
+    messages.push('Upload')
+
   // console.log('  Shortcuts')
   console.log(promptLayout(messages, { perLine: 3 }))
   console.log()
@@ -66,6 +69,8 @@ function start() {
     return
 
   keypress(proc.stdin)
+
+  let building = false
 
   // listen for the "keypress" event
   proc.stdin.on('keypress', async function (ch, key) {
@@ -106,8 +111,16 @@ function start() {
           console.log(opts('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
-          if (opts('build')) {
+          if (building) return
+
+          if (opts('run')) {
+            building = true
+            console.log('\n  Building for production...')
             await build({ once: true })
+            building = false
+          }
+
+          if (opts('build') && opts('watch')) {
             console.log(`\n  Publishing to surge...`)
             stop()
             proc.stdout.isTTY = false
