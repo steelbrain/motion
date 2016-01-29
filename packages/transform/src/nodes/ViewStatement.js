@@ -8,6 +8,7 @@ export default {
     const fullName = name + (subName ? `.${subName}` : '')
 
     // start new view
+    resetViewState()
     state.currentView = fullName
     state.inView = fullName
     state.meta.views[fullName] = {

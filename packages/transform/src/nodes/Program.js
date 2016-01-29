@@ -8,7 +8,7 @@ export default {
 
   exit(node, parent, scope, file) {
     if (options.onImports) {
-      options.onImports(file.opts.filename, fileImports)
+      options.onImports(file.opts.filename, state.fileImports)
     }
 
     const location = relativePath(file.opts.filename)

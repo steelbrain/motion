@@ -1,11 +1,6 @@
-import { exprStatement } from './helpers'
+import state from '../state'
+import { t, options, exprStatement, nodeToStr } from './helpers'
 import hash from 'hash-sum'
-
-let t
-
-export default function init(_t) {
-  t = _t
-}
 
 // splits styles into static/dynamic pieces
 export function extractAndAssign(node, file) {
@@ -18,16 +13,16 @@ export function extractAndAssign(node, file) {
   if (t.isObjectExpression(node.right)) {
     let name = node.left.name
 
-    if (viewStyleNames[name])
-      throw file.errorWithNode(node.left, `Duplicate style! view ${inView} { ${name} }`)
+    if (state.viewStyleNames[name])
+      throw file.errorWithNode(node.left, `Duplicate style! view ${state.inView} { ${name} }`)
 
-    viewStyleNames[name] = true
+    state.viewStyleNames[name] = true
 
     let { statics, dynamics } = extractStatics(name, node.right, file)
 
     // sets dynamic keys for use in determining hot reload clear later
-    const statKeys = viewStaticStyleKeys
-    const dynKeys = viewDynamicStyleKeys
+    const statKeys = state.viewStaticStyleKeys
+    const dynKeys = state.viewDynamicStyleKeys
 
     statics.forEach(n => statKeys[n.key.name] = nodeToStr(n.value))
     dynamics.forEach(n => {
@@ -48,7 +43,7 @@ export function extractAndAssign(node, file) {
 
     // keep statics hash inside view for child view styles (to trigger hot reloads)
     const isChildView = hasStatics && name[1] && name[1] == name[1].toUpperCase()
-    const isChildViewClassed = hasStatics && viewHasChildWithClass && name != '$'
+    const isChildViewClassed = hasStatics && state.viewHasChildWithClass && name != '$'
 
     if (isChildView || isChildViewClassed) {
       const uniq = hash(statKeys)
@@ -85,8 +80,8 @@ function extractStatics(name, node, file) {
   let statics = []
   let dynamics = []
 
-  viewStyles[inView] = viewStyles[inView] || {}
-  viewStyles[inView][name] = []
+  state.viewStyles[state.inView] = state.viewStyles[state.inView] || {}
+  state.viewStyles[state.inView][name] = []
 
   let duplicate = {}
 
@@ -98,12 +93,12 @@ function extractStatics(name, node, file) {
     }
 
     if (duplicate[prop.key.name])
-      throw file.errorWithNode(prop, `Duplicate style prop! view ${inView} { ${name}.${prop.key.name} }`)
+      throw file.errorWithNode(prop, `Duplicate style prop! view ${state.inView} { ${name}.${prop.key.name} }`)
 
     duplicate[prop.key.name] = true
 
     if (isStatic(prop)) {
-      viewStyles[inView][name].push(prop)
+      state.viewStyles[state.inView][name].push(prop)
       statics.push(prop)
     }
     else {

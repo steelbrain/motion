@@ -1,5 +1,5 @@
 import state from '../state'
-import { t, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
+import { t, idFn, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
 
 export default {
   enter(node, parent, scope, file) {
@@ -20,7 +20,7 @@ export default {
 
       // top level JSX element
       if (scope.hasOwnBinding('view')) {
-        viewRootNodes.push(node)
+        state.viewRootNodes.push(node)
       }
 
       inJSX = true
@@ -39,8 +39,10 @@ export default {
       let arr = [t.literal(name), t.literal(key)]
 
       // track meta
-      if (state.meta.views[currentView]) {
-        state.meta.views[currentView].els[name] = { location: normalizeLocation(el.loc), key }
+      if (state.meta.views[state.currentView]) {
+        state.meta.views[state.currentView].els[name] = {
+          location: normalizeLocation(el.loc), key
+        }
       }
 
       /*
@@ -75,7 +77,7 @@ export default {
         const expr = attr.value && (attr.value.expression || t.literal(attr.value.value))
 
         if (attrName == 'class' && isUpperCase(name))
-          viewHasChildWithClass = true
+          state.viewHasChildWithClass = true
 
         if (attrName == 'route') {
           route = _node => t.logicalExpression('&&',

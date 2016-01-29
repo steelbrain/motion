@@ -100,9 +100,7 @@ export function isObjectAssign(node) {
   return objName == 'Object' && propName == 'assign'
 }
 
-const idFn = x => x
-let log = function() {}
-
+export const idFn = x => x
 
 // helpers
 export function relativePath(filename) {

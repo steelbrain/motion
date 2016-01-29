@@ -1,5 +1,5 @@
 import state from '../state'
-import { t, options } from '../lib/helpers'
+import { t, options, propChange } from '../lib/helpers'
 import { wrapPropertyDeclarator, destructureTrackers, wrapDeclarator } from '../lib/wrapState'
 
 export default {

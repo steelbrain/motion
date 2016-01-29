@@ -38,8 +38,6 @@ export default {
         let cleanViewName = viewName.replace('.', '-')
         tag = tag.replace(/^\$/, '')
 
-        log('styles', 'getSelector', 'viewName', viewName, 'tag', tag)
-
         // styling root tag
         if (shouldStyleTagnameAsRoot && tag == state.inView.toLowerCase() || tag == '')
           return viewMainSelector(cleanViewName, options)
@@ -52,7 +50,6 @@ export default {
         return viewSelector(cleanViewName, tag, options)
       }
 
-      log('styles', 'rawStyles', rawStyles)
       const stylesheet = StyleSheet.create(rawStyles, {
         selector: tag => getSelector(viewName, tag)
       })

@@ -11,12 +11,12 @@ let state = {
   hasExports: false,
   viewHasChildWithClass: false, // if view calls for a child view
   viewStyles: {}, // store styles from views to be extracted
-  viewDynamicStyleKeys: {},
-  viewStaticStyleKeys: {},
+  viewDynamicStyleKeys: null,
+  viewStaticStyleKeys: null,
   viewRootNodes: null, // track root JSX elements
   viewState: null, // track which state to wrap
-  viewStyleNames: {}, // prevent duplicate style names
-  fileImports: [],
+  viewStyleNames: null, // prevent duplicate style names
+  fileImports: null,
 
   init() {
     state.resetProgramState()

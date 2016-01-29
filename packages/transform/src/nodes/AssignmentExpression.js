@@ -1,4 +1,4 @@
-import { t, options, findObjectName, hasObjWithProp, isViewState } from '../lib/helpers'
+import { t, options, findObjectName, hasObjWithProp, isViewState, normalizeLocation } from '../lib/helpers'
 import { extractAndAssign } from '../lib/extractStatics'
 import { wrapSetter, wrapGetter } from '../lib/wrapState'
 import state from '../state'
@@ -14,8 +14,10 @@ export default {
 
     if (!isStyle) return
 
-    if (currentView) {
-      state.meta.views[currentView].styles[node.left.name.substr(1)] = { location: normalizeLocation(node.loc) }
+    if (state.currentView) {
+      const viewMeta = state.meta.views[state.currentView]
+      const cleanName = node.left.name.substr(1)
+      viewMeta.styles[cleanName] = { location: normalizeLocation(node.loc) }
     }
 
     // styles

@@ -1,7 +1,5 @@
 import { init } from './state'
 import helpersInit from './lib/helpers'
-import extractStaticsInit from './lib/extractStatics'
-import wrapStateInit from './lib/wrapState'
 import Program from './nodes/Program'
 import ExportDeclaration from './nodes/ExportDeclaration'
 import ImportDeclaration from './nodes/ImportDeclaration'
@@ -28,8 +26,6 @@ export default function createPlugin(options) {
     // init
     init()
     helpersInit(options, t)
-    wrapStateInit(options, t)
-    extractStaticsInit(options, t)
 
     return new Plugin('flint-transform', {
       metadata: { group: 'builtin-trailing' },

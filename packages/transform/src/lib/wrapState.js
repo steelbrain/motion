@@ -1,8 +1,4 @@
-let t
-
-export default function init(options, _t) {
-  t = _t
-}
+import { t, parentFunctionNode } from './helpers'
 
 export function updateState() {
   return t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
@@ -80,7 +76,6 @@ export function stateTrack(node) {
   return node
 
   function wrapper(body) {
-    console.log(body)
     if (Array.isArray(body)) {
       body.push(updateState())
     }
