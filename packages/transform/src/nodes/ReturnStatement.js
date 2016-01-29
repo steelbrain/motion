@@ -11,6 +11,6 @@ export default {
     const parentFunc = parentFunctionNode(scope)
 
     if (parentFunc && !parentFunc.body.flintView && parentFunc.flintStateMutativeFunction)
-      return [updateState, node]
+      return [updateState(), node]
   }
 }

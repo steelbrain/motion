@@ -13,11 +13,16 @@ export function wrapSetter(name, node, scope, postfix, method = 'set') {
     node.hasSetter = true
 
     // for later view.update() insertion
-    const scopeBlockIsFunc = t.isArrowFunctionExpression(scope.block) || t.isFunctionExpression(scope.block) || t.isFunctionDeclaration(scope.block)
-    if (scopeBlockIsFunc) scope.block.hasSetter = true
+    const scopeBlockIsFunc = (
+      t.isArrowFunctionExpression(scope.block) || t.isFunctionExpression(scope.block) || t.isFunctionDeclaration(scope.block)
+    )
+
+    if (scopeBlockIsFunc) {
+      scope.block.hasSetter = true
+    }
     else {
       // or find parent
-      const parentFunc = (parentFunctionNode(scope))
+      const parentFunc = parentFunctionNode(scope)
       if (parentFunc) parentFunc.flintStateMutativeFunction = true
     }
 
