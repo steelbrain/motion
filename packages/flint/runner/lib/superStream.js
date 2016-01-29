@@ -17,6 +17,8 @@ let basePath, flintPath, relPath
 let internalTimeout
 let browserLoading = {}
 let queue = {}
+let stream = new Readable({ objectMode: true })
+stream._read = function(n) {}
 
 function init() {
   basePath = opts('appDir')
@@ -43,12 +45,9 @@ function setBrowserLoading(path, isLoading) {
   if (!isLoading) loadWaiting(path)
 }
 
-let stream = new Readable({ objectMode: true })
-stream._read = function(n) {}
-
 function fileSend({ path, contents }) {
   // check if file actually in flint project
-  if (!path || path.indexOf(basePath) !== 0 || path.indexOf(flintPath) === 0 || !isFileType(path, 'js')) {
+  if (!path || path.indexOf(basePath) !== 0 || relPath(path).indexOf('.flint') === 0 || !isFileType(path, 'js')) {
     debug('  file not js || not in path || in .flint', path)
     return
   }

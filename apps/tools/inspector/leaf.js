@@ -3,36 +3,39 @@ import getType from '../lib/getType'
 import ellipsize from 'ellipsize'
 
 const PATH_PREFIX = '.root.'
+const noop = () => {}
 const contains = (string, substring) => string.indexOf(substring) !== -1
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
-
-let noop = () => {}
+const getLeafKey = (key, value) => isPrimitive(value) ?
+  (key + ':' + md5(String(key))) :
+  (key + '[' + getType(value) + ']')
+const fnParams = fn => fn.toString()
+  .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
+  .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+  .split(/,/)
 
 view Leaf {
-  prop isExpanded, data, prefix, query, label, id, editable
-  prop getOriginal = noop, onSet = noop, onClick = noop
-
   view.pause()
 
+  prop root, isExpanded, data, prefix, query, label, id, editable
+  prop getOriginal = noop
+  prop onSet = noop
+  prop onClick = noop
+
+  // state
   let rootPath, path, _data, type, key, original, expanded
   let dataKeys = []
   let _query = ''
 
-  const isInitiallyExpanded = () =>
-    view.props.root ||
-    !_query && isExpanded(path, data) ||
-    !contains(path, _query) && (typeof getOriginal === 'function')
+  // helpers
+  const isInitiallyExpanded = () => root || !_query && isExpanded(path, data) || !contains(path, _query)
 
-  const transformData = (data = {}) => {
-    data = Object.keys(_data).sort()
-  }
-
+  // lifecycle
   on.props(() => {
     rootPath = `${prefix}.${label}`
     key = label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
-    // originally was stream of ||s, but 0 was turning into false
-    _data = data
+    _data = data // originally was stream of ||s, but 0 was turning into false
 
     // multiline strings
     if (typeof _data === 'string' && _data.indexOf('\n') > -1) {
@@ -58,28 +61,13 @@ view Leaf {
     view.update()
   })
 
-  function toggle(e) {
-    if (!view.props.root)
-      expanded = !expanded
-
+  const toggle = (e) => {
+    if (!root) expanded = !expanded
     view.update()
     onClick(_data)
     e.stopPropagation()
   }
-
-  const getLeafKey = (key, value) => isPrimitive(value) ?
-    (key + ':' + md5(String(key))) :
-    (key + '[' + getType(value) + ']')
-
-  const format = key => (
-    <Highlighter string={key} highlight={_query} />
-  )
-
-  const fnParams = fn => fn.toString()
-    .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
-    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
-    .split(/,/)
-
+  const format = key => <Highlighter string={key} highlight={_query} />
   const getLabel = (type, val, sets, editable) => (
     <Label
       val={val}
@@ -98,7 +86,6 @@ view Leaf {
       <expand class="function" if={type == 'Function'}>
         <i>fn ({fnParams(_data).join(', ')})</i>
       </expand>
-
       <expand if={type == 'Array'}>
         <type>Array[{_data.length}]</type>
       </expand>
@@ -164,7 +151,11 @@ view Leaf {
     fontWeight: 'bold'
   }]
 
-  $function = { marginLeft: 10, marginTop: 2, color: '#962eba' }
+  $function = {
+    marginLeft: 10,
+    marginTop: 2,
+    color: '#962eba'
+  }
 
   $colon = {
     opacity: 0.3,
@@ -177,8 +168,7 @@ view Leaf {
     margin: ['auto', 0]
   }
 
-  $expand = [row, {
-  }]
+  $expand = [row]
 
   $value = [row, {
     position: 'relative',
