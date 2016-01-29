@@ -1,4 +1,5 @@
 import path from 'path'
+import state from '../state'
 
 let T, options
 
@@ -69,6 +70,11 @@ export function findObjectName(obj) {
 
 export function isInView(scope) {
   return scope.hasBinding("view")
+}
+
+export function getRootTagName() {
+  if (!state.viewRootNodes.length) return ''
+  return getTagName(state.viewRootNodes[0])
 }
 
 export function getTagName(JSXElement) {

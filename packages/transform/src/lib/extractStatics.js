@@ -81,7 +81,7 @@ export function extractAndAssign(node, file) {
 }
 
 // find statics/dynamics in object
-export function extractStatics(name, node, file) {
+function extractStatics(name, node, file) {
   let statics = []
   let dynamics = []
 
@@ -115,7 +115,7 @@ export function extractStatics(name, node, file) {
 }
 
 // determine if property is static
-export function isStatic(prop) {
+function isStatic(prop) {
   const staticKey = t.isIdentifier(prop.key)
 
   if (!staticKey)
@@ -144,7 +144,8 @@ export function dynamicStyleStatement(node, dynamics) {
   )
 }
 
-export function styleLeft(node) {
+
+function styleLeft(node) {
   const prefix = '$'
 
   if (node.left.object) {
@@ -155,7 +156,8 @@ export function styleLeft(node) {
   return t.identifier(`${prefix}["${name}"]`)
 }
 
-export function styleAssign(node, _right) {
+
+function styleAssign(node, _right) {
   let right = _right || node.right
 
   const assignment = t.assignmentExpression('=',
@@ -173,7 +175,6 @@ export function styleAssign(node, _right) {
     )
   }
 }
-
 
 
 // extract statics

@@ -1,5 +1,5 @@
-import { t, isInView, isMutativeArrayFunc, findObjectName, wrapSetter } from '../lib/helpers'
-import { isViewState } from '../state'
+import { t, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign } from '../lib/helpers'
+import state, { isViewState } from '../state'
 import { wrapSetter } from '../lib/wrapState'
 
 export default {
@@ -7,7 +7,7 @@ export default {
     // track require() statements
     if (node.callee && node.callee.name && node.callee.name == 'require') {
       const arg = node.arguments && node.arguments.length && node.arguments[0].value
-      fileImports.push(arg)
+      state.fileImports.push(arg)
     }
 
     // mutative array methods

@@ -1,3 +1,6 @@
+import { t, findObjectName } from '../lib/helpers'
+import { wrapSetter } from '../lib/wrapState'
+
 export default {
   exit(node, _, scope) {
     if (node.operator == '++' || node.operator == '--') {

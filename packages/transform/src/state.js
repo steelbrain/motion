@@ -39,11 +39,6 @@ export resetViewState(file) {
   state.viewHasChildWithClass = false
 }
 
-export function getRootTagName() {
-  if (!state.viewRootNodes.length) return ''
-  return getTagName(state.viewRootNodes[0])
-}
-
 export function shouldStyleAsRoot() {
   const numRoots = state.viewRootNodes.length
   let result = numRoots == 0

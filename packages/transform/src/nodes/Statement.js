@@ -1,5 +1,4 @@
-import { t, options, getSelector } from '../lib/helpers'
-import { getRootTagName } from '../state'
+import { t, options, getSelector, viewMainSelector, viewSelector, getRootTagName } from '../lib/helpers'
 
 import niceStyles from 'flint-nice-styles'
 import StyleSheet from '../stilr'

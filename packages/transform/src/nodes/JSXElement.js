@@ -1,5 +1,5 @@
 import state from '../state'
-import { t, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
+import { t, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
 
 export default {
   enter(node, parent, scope, file) {

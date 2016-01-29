@@ -1,6 +1,6 @@
-import helpers from './lib/helpers'
-import extractStatics from './lib/extractStatics'
-import wrapState from './lib/wrapState'
+import helpersInit from './lib/helpers'
+import extractStaticsInit from './lib/extractStatics'
+import wrapStateInit from './lib/wrapState'
 import Program from './nodes/Program'
 import ExportDeclaration from './nodes/ExportDeclaration'
 import ImportDeclaration from './nodes/ImportDeclaration'
@@ -25,9 +25,9 @@ export default function createPlugin(options) {
   function FlintPlugin({ Plugin, types: t }) {
 
     // init
-    helpers(options, t)
-    wrapState(options, t)
-    extractStatics(options, t)
+    helpersInit(options, t)
+    wrapStateInit(options, t)
+    extractStaticsInit(options, t)
 
     return new Plugin('flint-transform', {
       metadata: { group: 'builtin-trailing' },
