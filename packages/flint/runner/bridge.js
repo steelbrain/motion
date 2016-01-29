@@ -35,6 +35,7 @@ export default new class Bridge {
         }
         try {
           const message = JSON.parse(data)
+          debug('IN', message._type)
           this.emitter.emit(`message:${message._type}`, message)
         } catch (_) {
           debug('Error parsing bridge message')
@@ -48,7 +49,7 @@ export default new class Bridge {
       dir: Cache.baseDir()
     }))
     connection.send(this.encodeMessage('flint:opts', getOptions()))
-    if (this.queue) {
+    if (this.queue.length) {
       this.queue.forEach(function(contents) {
         connection.send(contents)
       })
@@ -59,19 +60,22 @@ export default new class Bridge {
     this.broadcastRaw(this.encodeMessage(type, message))
   }
   encodeMessage(type, message = {}) {
+    debug('OUT', type)
     return JSON.stringify(Object.assign({
       _type: type,
       timestamp: Date.now()
     }, message))
   }
   broadcastRaw(message) {
-    const encodedMessage = message && typeof message === 'object' ? JSON.stringify(message) : message
+    if (typeof message !== 'string') {
+      throw new Error('Malformed message given')
+    }
 
     if (this.connections.size) {
       this.connections.forEach(function(connection) {
-        connection.send(encodedMessage)
+        connection.send(message)
       })
-    } else this.queue.push(encodedMessage)
+    } else this.queue.push(message)
   }
   onMessage(type, callback) {
     return this.emitter.on(`message:${type}`, callback)
