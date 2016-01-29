@@ -29,12 +29,12 @@ var Parser = {
       // scans
       const isInternal = hasExports(source)
       const scan = () => bundler.scanFile(filePath, source)
-      const scanNow = OPTS.build || !opts('hasRunInitialBuild')
+      const scanNow = OPTS.build || OPTS.watch || !opts('hasRunInitialBuild')
 
       // scan immediate on startup or building
       if (scanNow) scan()
       // debounce scan during run
-      else debounce(filePath, 500, scan)
+      else debounce(filePath, 2000, scan)
 
       // building, done
       if (OPTS.build) {

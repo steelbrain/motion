@@ -2,7 +2,8 @@ import { handleError, log, readJSON, writeJSON, writeFile, readFile } from './fn
 
 // uses a simple lock to ensure reads and writes are done safely
 
-export default async function createWriter(filePath, { debug = 'safeWrite', json = false, defaultValue = '' }) {
+export default async function createWriter(filePath, { debug = '', json = false, defaultValue = '' }) {
+  const logw = log.writer.bind(null, debug.yellow)
 
   let doRead = json ? readJSON : readFile
   let doWrite = json ? (a, b) => writeJSON(a, b, { spaces: 2 }) : writeFile
@@ -29,16 +30,16 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
       return state
     }
     catch(e) {
-      log(debug, 'read error'.red, e)
+      logw('read error'.red, e)
       return defaultValue
     }
   }
 
   async function write(writer) {
     try {
-      log(debug, 'waiting...')
+      logw('waiting...')
       if (lock) await lock
-      log(debug, 'get lock')
+      logw('get lock')
       const unlock = getLock()
       const state = await read()
       await stateWriter(writer, state, unlock)
@@ -54,12 +55,12 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
   let unlock = null
 
   function getLock() {
-    log(debug, 'lock', lock)
+    logw('lock', lock)
 
     if (lock)
       return unlock
     else {
-      log(debug, 'no lock, returning new')
+      logw('no lock, returning new')
       lock = new Promise(res => {
         unlock = () => {
           lock = null
@@ -72,13 +73,12 @@ export default async function createWriter(filePath, { debug = 'safeWrite', json
   }
 
   function stateWriter(writer, state, unlock) {
-    log(debug, 'about to call writer...')
+    logw('about to call writer...')
     return new Promise((res, rej) => {
       writer(state, async next => {
         try {
-          log(debug, 'next state', next)
           await doWrite(filePath, next)
-          log(debug, 'unlocking')
+          logw('unlocking')
           unlock()
           res()
         }

@@ -19,6 +19,9 @@ bootstrap:
 ready:
 	git pull --rebase
 
+release: ready
+	node scripts/release.js
+
 patch: ready
 	node scripts/release.js --patch
 

@@ -11,7 +11,7 @@ let hasCopiedBasics = false
 
 export default async function build({ bundle = true } = {}) {
   try {
-    console.log()
+    console.log(`\n  Building...`.dim)
 
     if (bundle) {
       await bundler.install()
@@ -23,7 +23,8 @@ export default async function build({ bundle = true } = {}) {
     await *[
       gulp.bundleApp(),
       copy.flint(),
-      copy.react()
+      copy.react(),
+      copy.styles()
     ]
 
     console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build`)

@@ -7,13 +7,13 @@ import util from 'util'
 let OPTS
 
 function set(key, val) {
-  log('opts.set'.bold.yellow, key, val)
+  log.opts('opts.set'.bold.yellow, key, val)
   OPTS[key] = val
   return val
 }
 
 function get(key) {
-  // if (key != 'deps') log('opts'.bold.green, key, OPTS[key])
+  // if (key != 'deps') log.opts('opts'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 

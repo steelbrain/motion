@@ -37,9 +37,14 @@ function getToInstall(requires) {
 
 // used to quickly check if a file will trigger an install
 export async function willInstall(filePath) {
-  const required = cache.getExternals(filePath)
-  const fresh = await getNew(required)
-  return !!fresh.length
+  try {
+    const required = cache.getExternals(filePath)
+    const fresh = await getNew(required)
+    return !!fresh.length
+  }
+  catch(e) {
+    handleError(e)
+  }
 }
 
 // finds the new externals to install
@@ -61,7 +66,7 @@ export async function installAll(requires) {
     requires = requires || cache.getExternals()
 
     // nothing to install
-    if (!requires.length && !_isInstalling && opts('hasRunInitialBuild'))
+    if (!requires.length && !_isInstalling && opts('finishingFirstBuild'))
       opts.set('hasRunInitialInstall', true)
 
     // determine whats new
@@ -72,7 +77,8 @@ export async function installAll(requires) {
 
     // nothing new
     if (!fresh.length) {
-      if (!_isInstalling) opts.set('hasRunInitialInstall', true)
+      if (!_isInstalling && opts('finishingFirstBuild'))
+        opts.set('hasRunInitialInstall', true)
 
       // new flint excluded require like babel-runtime, see rmFlintExternals
       // TODO this, getNew, normalize all need refactor -- in fact probably most of this file does :)

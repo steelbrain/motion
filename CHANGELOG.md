@@ -1,3 +1,26 @@
+## 1.5
+
+Releasing this more to establish a cutoff point for the cumulated changes from 1.4.
+
+- Large internal refactors of flint-babel-transform
+
+- flint-babel-transform now inserts `view.update()`, rather than relying on `view.set()` + `setTimeout`.
+  This means synchronous updates in React, removing a jank part of 1.4
+
+- flint.json now takes options for build/run: `minify` as boolean, defaults to `true`
+
+```
+{
+  "build": {
+    "minify": "false"
+  }
+}
+```
+
+- Large refactor of `flint build`. Builds now use gulp for more of their processes.
+
+- `flint build --watch` is now far better. Less bugs and fast updates.
+
 ## 1.4.53
 
 - Big fixes in installs that should also speed up builds in general. May cause some bugs installing.

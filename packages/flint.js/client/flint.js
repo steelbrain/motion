@@ -1,4 +1,5 @@
 import 'whatwg-fetch'
+import 'reapp-object-assign'
 
 import hashsum from 'hash-sum'
 import ee from 'event-emitter'

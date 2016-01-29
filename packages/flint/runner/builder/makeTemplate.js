@@ -7,7 +7,6 @@ let OPTS
 
 export default async function makeTemplate() {
   try {
-    log('makeTemplate()')
     OPTS = opts()
 
     const outFile = p(OPTS.buildDir, 'index.html')
@@ -37,8 +36,7 @@ export default async function makeTemplate() {
 `
       ].join("\n"))
 
-    log('makeTemplate', outFile, template)
-
+    log('makeTemplate writing...')
     await writeFile(outFile, template)
   }
   catch(e) {

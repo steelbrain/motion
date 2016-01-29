@@ -7,7 +7,7 @@
     "clone": "1.0.2",
     "deep-equal": "1.0.1",
     "event-emitter": "0.3.4",
-    "flint-nice-styles": "^1.4.0",
+    "flint-nice-styles": "^1.5.0",
     "flint-radium": "0.16.2",
     "hash-sum": "1.0.2",
     "history": "2.0.0-rc2",
@@ -17,6 +17,7 @@
     "strip-ansi": "3.0.0",
     "whatwg-fetch": "0.10.1",
     "react": "^0.14.0",
-    "react-dom": "^0.14.0"
+    "react-dom": "^0.14.0",
+    "reapp-object-assign": "1.0.0"
   }
 }

@@ -4,7 +4,7 @@ import handleError from '../lib/handleError'
 import log from '../lib/log'
 
 export function scanFile(file, source) {
-  log('bundler', 'scanFile', file)
+  log.externals('scanFile', file)
   try {
     // install new stuff
     checkInternals(file, source)

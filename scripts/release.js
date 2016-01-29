@@ -8,6 +8,7 @@ require("shelljs/global")
 //
 
 const VERBOSE = process.argv.indexOf('--verbose') > 0
+const PATCH = process.argv.indexOf('--patch') > 0
 
 // safe exec
 function ex(cmd) {
@@ -132,8 +133,7 @@ function release(name, dir) {
       ex('node prepublish.js')
     }
 
-    // TODO only patch if given option
-    ex('npm version patch')
+    if (PATCH) ex('npm version patch')
     console.log(ex('npm publish --tag=latest'))
   })
 }

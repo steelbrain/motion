@@ -174,7 +174,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.propDefaults = {}
         this.queuedUpdate = false
         this.firstRender = true
-        this.isUpdating = true
         this.styles = {}
         this.events = { mount: u, unmount: u, change: u, props: u }
         this.path = null
@@ -262,7 +261,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       componentDidMount() {
         this.isRendering = false
         this.mounted = true
-        this.isUpdating = false
 
         this.runEvents('mount')
 
@@ -298,7 +296,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
       },
 
       componentWillUpdate() {
-        this.isUpdating = true
         this.runEvents('change')
       },
 
@@ -312,7 +309,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
 
       componentDidUpdate() {
         this.isRendering = false
-        this.isUpdating = false
 
         if (this.queuedUpdate) {
           this.queuedUpdate = false
@@ -403,13 +399,20 @@ export default function createComponent(Flint, Internal, name, view, options = {
         this.update()
       },
 
+      updateSoft() {
+        this.update(true)
+      },
+
       // view.set()
-      update(hard) {
+      update(soft) {
         // view.set respects paused
-        if (!hard && this.isPaused) return
+        if (soft && this.isPaused) return
+
+        // during render, dont update
+        if (this.isRendering) return
 
         // if during a render, wait
-        if (this.isRendering || this.isUpdating || !this.mounted || Internal.firstRender) {
+        if (!this.mounted || Internal.firstRender) {
           this.queuedUpdate = true
         }
         else {
@@ -419,7 +422,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
             return setTimeout(this.update)
 
-          this.isUpdating = true
           this.queuedUpdate = false
 
           // rather than setState because we want to skip shouldUpdate calls

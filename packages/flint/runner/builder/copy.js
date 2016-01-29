@@ -2,6 +2,8 @@ import { log, p, copy, writeFile, readFile, readdir, handleError } from '../lib/
 import opts from '../opts'
 import flintjs from 'flint-js'
 
+// todo gulpify alll the things
+
 async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
   catch(e) { console.log("Couldn't copy", file) }

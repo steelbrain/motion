@@ -1,7 +1,7 @@
 import { t, parentFunctionNode } from './helpers'
 
 export function updateState() {
-  return t.expressionStatement(t.callExpression(t.identifier('view.update'), []))
+  return t.expressionStatement(t.callExpression(t.identifier('view.updateSoft'), []))
 }
 
 export function wrapSetter(name, node, scope, postfix, method = 'set') {
@@ -69,7 +69,7 @@ export function stateTrack(node) {
   if (node.flintStateTracked) return
   node.flintStateTracked = true
 
-  if (node.hasSetter) {
+  if (node.hasSetter || node.flintStateMutativeFunction) {
     if (t.isArrowFunctionExpression(node) && t.isCallExpression(node.body)) {
       node.body = wrapper(node.body)
     }

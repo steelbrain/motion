@@ -81,7 +81,7 @@ const Cache = {
 
   setBaseDir(dir : string) {
     baseDir = path.resolve(dir)
-    log(LOG, 'baseDir', baseDir)
+    log.cache('baseDir', baseDir)
   },
 
   baseDir() {
@@ -137,7 +137,7 @@ const Cache = {
   remove(file: string) {
     const name = relative(file)
     const state = cache.files[name]
-    log(LOG, 'remove', name)
+    log.cache('remove', name)
     delete cache.files[name]
     onDeleteFile({ file, name, state })
   },
@@ -148,7 +148,7 @@ const Cache = {
     onDeleteViews(_.difference(cFile.views, views))
     // onAddViews(_.difference(views, cFile.views))
     cFile.views = views
-    log(LOG, 'setViews', file, views)
+    log.cache('setViews', views)
   },
 
   setFileMeta(file: string, meta: object) {
@@ -182,7 +182,7 @@ const Cache = {
   },
 
   getExported() {
-    log(LOG, 'cache', 'getExported', cache.files)
+    log.cache('cache', 'getExported', cache.files)
     return Object.keys(cache.files)
       .map(name => cache.files[name].isInternal ? name : null)
       .filter(f => f != null)
@@ -209,7 +209,7 @@ const Cache = {
 
   _getFileKeys(key) {
     const result = _.flatten(Object.keys(cache.files).map(file => cache.files[file][key])).filter(x => !!x)
-    log(LOG, '_getFileKeys: ', result)
+    log.cache('_getFileKeys: ', result)
     return result
   },
 
@@ -272,15 +272,15 @@ const Cache = {
 
   setWritten(file : string, time) {
     const f = files(file)
-    log(LOG, 'setWritten', f, time)
+    log.cache('setWritten', time)
     if (f) f.writtenAt = time
   },
 
   serialize() {
-    log(LOG, 'serialize')
+    log.cache('serialize')
     disk.state.write((state, write) => {
       state.cache = cache
-      log(LOG, 'writing cache')
+      log.cache('writing cache')
       write(state)
     })
   },

@@ -35,7 +35,7 @@ done
 if [ "$1" = "--watch" ]; then
   # watch tools after first build
   if [ "$2" != '--notools' ]; then
-    sleep 1
+    sleep 4
     cd apps/tools
     flint build --watch --nomin &
     cd ../..

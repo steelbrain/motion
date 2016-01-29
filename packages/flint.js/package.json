@@ -1,6 +1,6 @@
 {
   "name": "flint-js",
-  "version": "1.4.62",
+  "version": "1.5.0",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.release.js",
@@ -8,7 +8,6 @@
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/flintjs/flint.js.git"

@@ -23,6 +23,7 @@ const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: proc.st
 let stopped = false
 
 export function init() {
+  if (!proc.stdin.setRawMode) return
   start()
   banner()
 }

@@ -1,23 +1,14 @@
 view FlintModal {
-  view.pause()
+  prop open, title, children
 
-  let children, title, open
+  let lastTitle
 
-  on.props(setMessage)
-
-  function setMessage() {
-    open = view.props.open
-
-    // cache last children when empty
-    if (title && !view.props.title)
-      return view.update()
-
-    title = view.props.title
-    children = view.props.children
-  }
+  on.props(() => {
+    lastTitle = title || lastTitle
+  })
 
   <Close size={25} />
-  <title if={title}>{title}</title>
+  <title if={lastTitle}>{lastTitle}</title>
   <message if={children}>{children}</message>
 
   $ = {

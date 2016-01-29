@@ -37,8 +37,7 @@ view Debounce {
 
     // update queue
     lastFew.unshift(diff)
-    if (lastFew.length > 3)
-      lastFew.pop()
+    if (lastFew.length > 3) lastFew.pop()
 
     // if its been a while, clear running avg
     if (diff > Clear) {

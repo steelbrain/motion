@@ -20,8 +20,7 @@ import { findBabelRuntimeRequires } from './lib/findRequires'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from './lib/fns'
 
-const LOG = 'gulp'
-const debug = log.bind(null, { name: 'gulp', icon: '👇' })
+const debug = log.gulp
 
 const $ = loadPlugins()
 
@@ -39,7 +38,7 @@ const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 let out = {}
 out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
-out.goodFile = symbol => (file, ms) => console.log(`  ${symbol} ${relative(file)}`.bold
+out.goodFile = symbol => (file, ms) => console.log('  ' + symbol.dim + ' ' + relative(file)
     + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim)
 
 // TODO bad practice
@@ -135,30 +134,62 @@ export async function init({ once = false } = {}) {
 // ||
 
 export async function assets() {
+  try {
+    await* [
+      assetsApp(),
+      assetsStatics()
+    ]
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
+
+// app images, fonts, etc
+function assetsApp() {
   const assets = {
     glob: ['*', '**/*', '!**/*.js', , '!**/*.js.map', '!.flint{,/**}' ],
     out: opts('buildDir')
   }
 
-  gulp.src(assets.glob)
-      .pipe($.plumber())
-      .pipe($.watch(assets.glob, { readDelay: 1 }))
-      // .pipe(pipefn(out.goodFile('⇢')))
-      .pipe(gulp.dest(assets.out))
+  let stream = gulp.src(assets.glob)
 
+  if (opts('watch'))
+    stream = stream.pipe($.watch(assets.glob, { readDelay: 1 }))
 
+  return new Promise((resolve, reject) => {
+    stream
+        .pipe($.plumber())
+        // .pipe(pipefn(out.goodFile('⇢')))
+        .pipe(gulp.dest(assets.out))
+        .on('end', resolve)
+        .on('error', reject)
+  })
+}
+
+// .flint/static
+async function assetsStatics() {
   const statics = {
     dir: p(opts('flintDir'), 'static'),
     glob: ['*', '**/*', '!.flint{,/**}'],
     out: p(opts('buildDir'), '_', 'static')
   }
 
-  mkdir(statics.out)
-  gulp.src(statics.glob, { cwd: statics.dir })
-      .pipe($.plumber())
-      .pipe($.watch(statics.glob, { readDelay: 1 }))
-      // .pipe(pipefn(out.goodFile('⇢')))
-      .pipe(gulp.dest(statics.out))
+  await mkdir(statics.out)
+
+  let stream = gulp.src(statics.glob, { cwd: statics.dir })
+
+  if (opts('watch'))
+    stream = stream.pipe($.watch(statics.glob, { readDelay: 1 }))
+
+  return new Promise((resolve, reject) => {
+    stream
+        .pipe($.plumber())
+        // .pipe(pipefn(out.goodFile('⇢')))
+        .pipe(gulp.dest(statics.out))
+        .on('end', resolve)
+        .on('error', reject)
+  })
 }
 
 
@@ -230,10 +261,13 @@ export function event(name, cb) {
 // ||
 
 export function buildScripts({ inFiles, outFiles, userStream }) {
-  let curFile, lastError
-  let lastSavedTimestamp = {}
-  let loaded = 0
-  let total = inFiles && inFiles.length || 0
+  let State = {
+    curFile: null,
+    lastError: null,
+    lastSaved: {},
+    loaded: 0,
+    total: inFiles && inFiles.length || 0
+  }
 
   let scripts = userStream || gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
@@ -256,21 +290,14 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       // is internal
       .pipe($.if(file => file.isInternal,
         multipipe(
-          pipefn(out.goodFile('▻')),
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
           gulp.dest(p(OPTS.depsDir, 'internal')),
-          pipefn(afterBuildWatch),
-          $.ignore.exclude(true)
+          pipefn(afterBuildWatchWrite),
+          $.ignore.exclude(true),
         )
       ))
-      // not sourcemap
-      .pipe($.if(file => !isSourceMap(file.path),
-        multipipe(
-          pipefn(out.goodFile('▻')),
-          pipefn(markFileSuccess)
-        )
-      ))
+      .pipe(pipefn(markFileSuccess))
       .pipe($.sourcemaps.write('.'))
       .pipe($.if(checkWriteable, gulp.dest(OPTS.outDir)))
       .pipe(pipefn(afterWrite))
@@ -278,13 +305,16 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function markDone(file) {
     // mark built
-    loaded += 1
-    debug('markDone', loaded, total, file.path)
+    State.loaded += 1
 
-    // check if done
-    if (loaded == total) {
-      // add some delay to allow building last file TODO improve
-      setTimeout(buildDone, 100)
+    const done = State.loaded == State.total
+
+    debug('markDone', State.total, '/', State.loaded, done)
+
+    // check if done, only run once
+    if (done && !opts('hasRunInitialBuild')) {
+      opts.set('finishingFirstBuild', true)
+      file.finishingFirstBuild = true
     }
   }
 
@@ -367,22 +397,22 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
   function resetLastFile(file) {
     fileImports[file] = false
-    lastError = false
-    curFile = file
+    State.lastError = false
+    State.curFile = file
     file.startTime = Date.now()
     file.message = { startTime: file.startTime }
   }
 
   function catchError(error) {
     debug('catchError', error)
-    lastError = true
-    out.badFile(curFile)
+    State.lastError = true
+    out.badFile(State.curFile)
 
     error.timestamp = Date.now()
 
-    logError(error, curFile)
+    logError(error, State.curFile)
 
-    event.run('error', curFile, error)
+    event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
     bridge.message('compile:error', { error }, 'error')
   }
@@ -401,7 +431,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       compiledAt: file.startTime
     }
 
-    curFile = file
+    State.curFile = file
   }
 
   // update cache: meta/src/imports
@@ -443,23 +473,19 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 
   function checkWriteable(file) {
-    if (isBuilding()) {
-      builder.copy.styles()
-    }
-
-    if (userStream || lastError)
+    if (userStream || State.lastError)
       return false
 
     if (isBuilding())
       return true
 
     const isNew = (
-      !lastSavedTimestamp[file.path] ||
-      file.startTime > lastSavedTimestamp[file.path]
+      !State.lastSaved[file.path] ||
+      file.startTime > State.lastSaved[file.path]
     )
 
     if (isNew) {
-      lastSavedTimestamp[file.path] = file.startTime
+      State.lastSaved[file.path] = file.startTime
       return true
     }
 
@@ -469,17 +495,27 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function afterWrite(file) {
     if (isSourceMap(file.path)) return
 
-    // run stuff after each change on build --watch
-    if (afterBuildWatch()) return
+    if (file.finishingFirstBuild) {
+      opts.set('hasRunInitialBuild', true)
+      hasRunCurrentBuild = true
+      buildingOnce = false
+      debug('buildDone'.green.bold, 'waitingForFirstBuild', waitingForFirstBuild.length)
+      waitingForFirstBuild.forEach(res => res())
+    }
 
     // avoid during initial build
     if (!hasFinished()) return
+
+    if (file.isInternal) return
+
+    // run stuff after each change on build --watch
+    afterBuildWatchWrite()
 
     // avoid ?? todo: figure out why this is necessary
     if (!cache.get(file.path)) return
 
     // avoid if error
-    if (lastError) return
+    if (State.lastError) return
 
     // avoid if installing
     if (bundler.isInstalling() || file.willInstall) return
@@ -488,8 +524,8 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     bridge.message('script:add', file.message)
   }
 
-  function afterBuildWatch() {
-    if (opts('buildWatch') && hasBuilt()) {
+  function afterBuildWatchWrite() {
+    if (opts('watch') && hasBuilt()) {
       builder.build({ bundle: false })
       return true
     }
@@ -498,13 +534,18 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function markFileSuccess(file) {
     if (isSourceMap(file.path)) return
 
-    debug('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall, file.path)
+    out.goodFile('-')(file)
+
+    debug('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall)
+
+    if (file.isInternal) return
 
     // update cache error / state
     cache.update(file.path)
 
     // write cache state to disk
-    serializeCache()
+    if (opts('hasRunInitialBuild'))
+      serializeCache()
 
     // message browser of compile success
     bridge.message('compile:success', file.message, 'error')
@@ -550,14 +591,6 @@ function afterBuild() {
     else waitingForFirstBuild.push(res)
   })
 }
-
-function buildDone() {
-  opts.set('hasRunInitialBuild', true)
-  hasRunCurrentBuild = true
-  buildingOnce = false
-  waitingForFirstBuild.forEach(res => res())
-}
-
 
 function pipefn(fn) {
   return through.obj(function(file, enc, next) {

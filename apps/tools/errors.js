@@ -119,15 +119,12 @@ const log = (...args) => {
 }
 
 view Errors {
-  view.pause()
-
   let error = null
   let compileError = null
   let runtimeError = null
   let npmError = null
 
-  /* only set error if there is an error,
-     giving compile priority */
+  // only set error if there is an error, giving compile priority
   function setError() {
     if (compileError)
       error = niceCompilerError(compileError)
@@ -140,7 +137,6 @@ view Errors {
     CUR_ERROR = error
 
     log('tools: view.update()')
-    view.update()
   }
 
   function close() {
@@ -148,7 +144,6 @@ view Errors {
     compileError = null
     runtimeError = null
     npmError = null
-    view.update()
   }
 
   browser.on('compile:error', () => {
@@ -167,7 +162,6 @@ view Errors {
   browser.on('npm:error', () => {
     npmError = niceNpmError(browser.data.error)
     log('npm:error', npmError)
-    view.update()
   })
 
   browser.on('runtime:success', () => {
@@ -197,8 +191,6 @@ const fileName = url => url && url.replace(/[\?\)].*/, '')
 const getLine = err => err && (err.line || err.loc && err.loc.line)
 
 view ErrorMessage {
-  view.pause()
-
   let hasError = false
   let error = {}
   let npmError, fullStack
@@ -214,14 +206,11 @@ view ErrorMessage {
     line = getLine(error)
     fullStack = null
 
-    view.update()
-
     // show full stack after a delay
     if (error) {
       clearDelay = on.delay(2500, () => {
         if (hasError && error.fullStack) {
           fullStack = error.fullStack
-          view.update()
         }
       })
     }
@@ -239,7 +228,6 @@ view ErrorMessage {
   >
     <bar>
       <Close onClick={view.props.close} size={35} />
-
       <inner if={npmError}>
         <where><flint>{npmError.name}</flint></where> {npmError.msg}
       </inner>
