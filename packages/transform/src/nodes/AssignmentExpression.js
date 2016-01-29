@@ -1,0 +1,82 @@
+import { t, findObjectName, hasObjWithProp } from '../lib/helpers'
+import { extractAndAssign } from '../lib/extractStatics'
+import { isViewState } from '../state'
+import { wrapSetter } from '../lib/wrapState'
+
+export default {
+  enter(node, parent, scope, file) {
+    if (node.isStyle) return
+
+    const isStyle = (
+      // $variable = {}
+      node.left.name && node.left.name.indexOf('$') == 0
+    )
+
+    if (!isStyle) return
+
+    if (currentView) {
+      meta.views[currentView].styles[node.left.name.substr(1)] = { location: normalizeLocation(node.loc) }
+    }
+
+    // styles
+    return extractAndAssign(node, file)
+  },
+
+  exit(node, parent, scope, file) {
+    // non-styles
+    if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
+
+    const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
+    if (!isBasicAssign) return
+
+    // destructures
+    if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {
+      let destructNodes = destructureTrackers(node.left, 'set')
+      node.flintTracked = true
+      return [t.expressionStatement(node), ...destructNodes]
+    }
+
+    const isRender = hasObjWithProp(node, 'view', 'render')
+
+    let id = x => x
+    let sett = id
+    let gett = id
+    let added = false
+
+    // view.set
+    if (!isRender) {
+      let name, post
+
+      if (node.left.object) {
+        name = findObjectName(node.left.object)
+        post = t.identifier(name)
+      }
+      else if (t.isJSXExpressionContainer(node.left)) {
+        const { expression } = node.left
+        name = expression.object ?
+               findObjectName(expression.object) :
+               expression.name
+      } else {
+        name = node.left.name
+      }
+
+      if (isViewState(name, scope)) {
+        sett = node => wrapSetter(name, node, scope, post, 'set')
+        added = true
+      }
+    }
+
+    // add getter
+    if (!options.production && !isRender && isViewState(node.left.name, scope)) {
+      gett = node => wrapGetter(node, scope, file)
+      added = true
+    }
+
+    node = sett(gett(node))
+
+    if (added && node)
+      node.flintTracked = 1
+
+    return node
+  }
+}
