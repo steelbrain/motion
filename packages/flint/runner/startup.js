@@ -58,9 +58,11 @@ export async function build(opts = {}) {
     await startup({ ...opts, build: true })
     await bundler.remakeInstallDir()
     await builder.clear.buildDir()
+    gulp.assets()
     await runGulp({ once: opts.once })
     await builder.build()
     if (opts.once) return
+    console.log()
     process.exit()
   }
   catch(e) {

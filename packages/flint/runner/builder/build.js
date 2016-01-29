@@ -26,7 +26,7 @@ export default async function build({ bundle = true } = {}) {
       copy.react()
     ]
 
-    console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build\n`)
+    console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build`)
   }
   catch(e) {
     handleError(e)

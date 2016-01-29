@@ -18,7 +18,7 @@ import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
 import { findBabelRuntimeRequires } from './lib/findRequires'
 import SCRIPTS_GLOB from './const/scriptsGlob'
-import { _, fs, path, glob, readdir, p, rm, handleError, logError, log } from './lib/fns'
+import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from './lib/fns'
 
 const LOG = 'gulp'
 const debug = log.bind(null, { name: 'gulp', icon: '👇' })
@@ -135,24 +135,30 @@ export async function init({ once = false } = {}) {
 // ||
 
 export async function assets() {
-  const _staticsDir = p(opts('flintDir'), 'static', '*')
-  const staticsGlob = ['*', '**/*'].map(g => p(_staticsDir, g))
-  const staticsOut = p(opts('buildDir'), '_', 'static')
+  const assets = {
+    glob: ['*', '**/*', '!**/*.js', , '!**/*.js.map', '!.flint{,/**}' ],
+    out: opts('buildDir')
+  }
 
-  const assetsGlob = ['*', '**/*', '!**/*.js', , '!**/*.js.map', '!.flint{,/**}' ]
-  const assetsOut = opts('buildDir')
-
-  gulp.src(assetsGlob)
+  gulp.src(assets.glob)
       .pipe($.plumber())
-      .pipe($.watch(assetsGlob, { readDelay: 1 }))
-      .pipe(pipefn(out.goodFile('⇢')))
-      .pipe(gulp.dest(assetsOut))
+      .pipe($.watch(assets.glob, { readDelay: 1 }))
+      // .pipe(pipefn(out.goodFile('⇢')))
+      .pipe(gulp.dest(assets.out))
 
-  gulp.src(staticsGlob)
+
+  const statics = {
+    dir: p(opts('flintDir'), 'static'),
+    glob: ['*', '**/*', '!.flint{,/**}'],
+    out: p(opts('buildDir'), '_', 'static')
+  }
+
+  mkdir(statics.out)
+  gulp.src(statics.glob, { cwd: statics.dir })
       .pipe($.plumber())
-      .pipe($.watch(scriptsGlob, { readDelay: 1 }))
-      .pipe(pipefn(out.goodFile('⇢')))
-      .pipe(gulp.dest(staticsOut))
+      .pipe($.watch(statics.glob, { readDelay: 1 }))
+      // .pipe(pipefn(out.goodFile('⇢')))
+      .pipe(gulp.dest(statics.out))
 }
 
 
