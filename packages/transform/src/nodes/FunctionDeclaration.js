@@ -1,4 +1,4 @@
-import { stateTrack } from '../wrapState'
+import { stateTrack } from '../lib/wrapState'
 
 export default {
   exit(node) {

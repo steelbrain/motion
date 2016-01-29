@@ -3,7 +3,7 @@ import state from '../state'
 
 let T, options
 
-export default init(_options, _t) {
+export default function init(_options, _t) {
   // redefine t??
   t = t.t = _t
   options = _options
@@ -183,4 +183,22 @@ export function destructureTrackers(id, wrapType) {
 export function parentFunctionNode(scope) {
   let parentFunc = scope.path.findParent(p => p.isFunction())
   return parentFunc && parentFunc.node
+}
+
+export function shouldStyleAsRoot() {
+  const numRoots = state.viewRootNodes.length
+  let result = numRoots == 0
+  if (numRoots == 1) {
+    const hasRootProp = state.viewRootNodes[0].openingElement.attributes.filter(x => x.name && x.name.name === 'root').length
+
+    result = (
+      hasRootProp ||
+      getRootTagName() == state.inView.toLowerCase()
+    )
+  }
+  return result
+}
+
+export function isViewState(name, scope) {
+  return state.viewState[name] && !scope.hasOwnBinding(name)
 }

@@ -1,13 +1,21 @@
-import { resetViewState } from '../state'
-import { normalizeLocation } from '../helpers'
+import state, { resetViewState } from '../state'
+import { t, normalizeLocation } from '../lib/helpers'
 
 export default {
   enter(node, parent, scope, file) {
-    resetViewState(file)
-
     const name = node.name.name
     const subName = node.subName && node.subName.name
     const fullName = name + (subName ? `.${subName}` : '')
+
+    // start new view
+    state.currentView = fullName
+    state.inView = fullName
+    state.meta.views[fullName] = {
+      location: normalizeLocation(node.loc),
+      file: file.opts.filename,
+      styles: {},
+      els: {}
+    }
 
     node.block.flintView = true
 

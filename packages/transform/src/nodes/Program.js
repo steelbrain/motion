@@ -1,11 +1,9 @@
-import { t, options } from '../lib/helpers'
+import state, { resetProgramState } from '../state'
+import { t, options, relativePath } from '../lib/helpers'
 
 export default {
   enter() {
-    hasView = false
-    hasExports = false
-    fileImports = []
-    meta = { file: null, views: {} }
+    resetProgramState()
   },
 
   exit(node, parent, scope, file) {
@@ -14,13 +12,13 @@ export default {
     }
 
     const location = relativePath(file.opts.filename)
-    meta.file = location
+    state.meta.file = location
 
     if (options.onMeta) {
-      options.onMeta(meta)
+      options.onMeta(state.meta)
     }
 
-    if (!hasExports) {
+    if (!state.hasExports) {
       // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(
         // closure

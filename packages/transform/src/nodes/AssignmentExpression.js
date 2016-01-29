@@ -1,7 +1,7 @@
-import { t, findObjectName, hasObjWithProp } from '../lib/helpers'
+import { t, options, findObjectName, hasObjWithProp, isViewState } from '../lib/helpers'
 import { extractAndAssign } from '../lib/extractStatics'
-import { isViewState } from '../state'
-import { wrapSetter } from '../lib/wrapState'
+import { wrapSetter, wrapGetter } from '../lib/wrapState'
+import state from '../state'
 
 export default {
   enter(node, parent, scope, file) {
@@ -15,7 +15,7 @@ export default {
     if (!isStyle) return
 
     if (currentView) {
-      meta.views[currentView].styles[node.left.name.substr(1)] = { location: normalizeLocation(node.loc) }
+      state.meta.views[currentView].styles[node.left.name.substr(1)] = { location: normalizeLocation(node.loc) }
     }
 
     // styles

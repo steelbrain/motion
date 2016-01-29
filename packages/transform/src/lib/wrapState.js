@@ -1,6 +1,6 @@
 let t
 
-export default init(_t) {
+export default function init(options, _t) {
   t = _t
 }
 

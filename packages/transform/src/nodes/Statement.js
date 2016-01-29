@@ -1,4 +1,5 @@
-import { t, options, getSelector, viewMainSelector, viewSelector, getRootTagName } from '../lib/helpers'
+import state from '../state'
+import { t, options, getSelector, viewMainSelector, viewSelector, getRootTagName, shouldStyleAsRoot } from '../lib/helpers'
 
 import niceStyles from 'flint-nice-styles'
 import StyleSheet from '../stilr'
@@ -7,13 +8,13 @@ export default {
   exit(node) {
     if (node._flintViewParsed) return // avoid parsing twice
 
-    if (inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
+    if (state.inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
       node._flintViewParsed = true
 
       // check if child tag is direct root
       const shouldStyleTagnameAsRoot = shouldStyleAsRoot()
-      const viewName = inView
-      const styles = viewStyles[viewName]
+      const viewName = state.inView
+      const styles = state.viewStyles[viewName]
 
       if (!styles) return
 
@@ -40,7 +41,7 @@ export default {
         log('styles', 'getSelector', 'viewName', viewName, 'tag', tag)
 
         // styling root tag
-        if (shouldStyleTagnameAsRoot && tag == inView.toLowerCase() || tag == '')
+        if (shouldStyleTagnameAsRoot && tag == state.inView.toLowerCase() || tag == '')
           return viewMainSelector(cleanViewName, options)
 
         // styling child view
@@ -94,8 +95,8 @@ export default {
       }
 
       // reset
-      inView = false
-      viewStyles[viewName] = {}
+      state.inView = false
+      state.viewStyles[viewName] = {}
 
       return [ staticStyleExpr, node ]
     }

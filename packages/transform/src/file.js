@@ -1,3 +1,4 @@
+import { init } from './state'
 import helpersInit from './lib/helpers'
 import extractStaticsInit from './lib/extractStatics'
 import wrapStateInit from './lib/wrapState'
@@ -25,6 +26,7 @@ export default function createPlugin(options) {
   function FlintPlugin({ Plugin, types: t }) {
 
     // init
+    init()
     helpersInit(options, t)
     wrapStateInit(options, t)
     extractStaticsInit(options, t)

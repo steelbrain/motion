@@ -1,3 +1,7 @@
+import state from '../state'
+import { t, options } from '../lib/helpers'
+import { wrapPropertyDeclarator, destructureTrackers, wrapDeclarator } from '../lib/wrapState'
+
 export default {
   enter(node, parent, scope) {
     if (node.kind == 'prop' && !node._flintPropParsed) {
@@ -32,7 +36,7 @@ export default {
         }
 
         let name = dec.id.name
-        viewState[name] = true
+        state.viewState[name] = true
 
         // avoid wrapping in production
         if (options.production)

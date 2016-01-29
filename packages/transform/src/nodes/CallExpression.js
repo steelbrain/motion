@@ -1,5 +1,5 @@
-import { t, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign } from '../lib/helpers'
-import state, { isViewState } from '../state'
+import { t, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign, isViewState } from '../lib/helpers'
+import state from '../state'
 import { wrapSetter } from '../lib/wrapState'
 
 export default {

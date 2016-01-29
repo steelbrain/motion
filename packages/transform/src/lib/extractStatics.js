@@ -3,7 +3,7 @@ import hash from 'hash-sum'
 
 let t
 
-export default init(_t) {
+export default function init(_t) {
   t = _t
 }
 

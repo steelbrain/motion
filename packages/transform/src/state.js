@@ -1,58 +1,45 @@
 import { normalizeLocation } from './lib/helpers'
-// state + state mutation
 
-export default  {
+let state = {
   basePath: false,
   currentView: null,
   meta: null, // meta-data for views for atom
-  keyBase, {}
-  inJSX, false
-  inView, null // track current view name
-  hasView, false // if file has a view
-  hasExports, false
-  viewHasChildWithClass, false // if view calls for a child view
-  viewStyles, {} // store styles from views to be extracted
-  viewDynamicStyleKeys, {}
-  viewStaticStyleKeys, {}
-  viewRootNodes, [] // track root JSX elements
-  viewState, {} // track which state to wrap
-  viewStyleNames, {} // prevent duplicate style names
-  fileImports, []
-}
+  keyBase: null,
+  inJSX: false,
+  inView: null, // track current view name
+  hasView: false, // if file has a view
+  hasExports: false,
+  viewHasChildWithClass: false, // if view calls for a child view
+  viewStyles: {}, // store styles from views to be extracted
+  viewDynamicStyleKeys: {},
+  viewStaticStyleKeys: {},
+  viewRootNodes: null, // track root JSX elements
+  viewState: null, // track which state to wrap
+  viewStyleNames: {}, // prevent duplicate style names
+  fileImports: [],
 
-export resetViewState(file) {
-  state.hasView = true
-  state.keyBase = {}
-  state.currentView = fullName
-  state.meta.views[currentView] = {
-    location: normalizeLocation(node.loc),
-    file: file.opts.filename,
-    styles: {},
-    els: {}
+  init() {
+    state.resetProgramState()
+    state.resetViewState()
+  },
+
+  resetProgramState() {
+    state.hasView = false
+    state.hasExports = false
+    state.fileImports = []
+    state.meta = { file: null, views: {} }
+  },
+
+  resetViewState(fullName, file, loc) {
+    state.hasView = true
+    state.keyBase = {}
+    state.viewRootNodes = []
+    state.viewState = {}
+    state.viewStyleNames = {}
+    state.viewDynamicStyleKeys = {}
+    state.viewStaticStyleKeys = {}
+    state.viewHasChildWithClass = false
   }
-  state.inView = fullName
-  state.viewRootNodes = []
-  state.viewState = {}
-  state.viewStyleNames = {}
-  state.viewDynamicStyleKeys = {}
-  state.viewStaticStyleKeys = {}
-  state.viewHasChildWithClass = false
 }
 
-export function shouldStyleAsRoot() {
-  const numRoots = state.viewRootNodes.length
-  let result = numRoots == 0
-  if (numRoots == 1) {
-    const hasRootProp = state.viewRootNodes[0].openingElement.attributes.filter(x => x.name && x.name.name === 'root').length
-
-    result = (
-      hasRootProp ||
-      getRootTagName() == state.inView.toLowerCase()
-    )
-  }
-  return result
-}
-
-export function isViewState(name, scope) {
-  return viewState[name] && !scope.hasOwnBinding(name)
-}
+export default state
