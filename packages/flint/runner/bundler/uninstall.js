@@ -3,7 +3,7 @@ import disk from '../disk'
 import opts from '../opts'
 import { readPackageJSON, readInstalled } from './lib/readInstalled'
 import normalize from './lib/normalize'
-import { bundleExternals } from './externals'
+import { externals } from './externals'
 import npm from './lib/npm'
 import writeInstalled from './lib/writeInstalled'
 import filterWithPath from './lib/filterWithPath'
@@ -73,7 +73,7 @@ export async function uninstall(rebundle) {
 
     // if asked to rebundle or uninstalled, rebundle
     if (rebundle || uninstalled.length) {
-      await bundleExternals()
+      await externals()
     }
 
     return uninstalled

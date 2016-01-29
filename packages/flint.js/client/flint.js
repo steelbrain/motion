@@ -300,7 +300,7 @@ const Flint = {
 
           // if unchanged
           if (Internal.views[name].hash == hash) {
-            setView(name, comp({ hash }))
+            setView(name, comp({ hash, unchanged: true }))
             return
           }
 
