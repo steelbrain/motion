@@ -68,7 +68,7 @@ var appPath = n => path.join('apps', n, '.flint')
 var lastArg = process.argv[process.argv.length - 1]
 
 // release one
-if (lastArg.indexOf('--') == -1) {
+if (!lastArg.indexOf('release') && lastArg.indexOf('--') == -1) {
   console.log("Just releasing", lastArg)
 
   // release one
