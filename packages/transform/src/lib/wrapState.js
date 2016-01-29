@@ -69,9 +69,9 @@ export function stateTrack(node) {
   if (node.flintStateTracked) return
   node.flintStateTracked = true
 
-  if (node.hasSetter && !node.hasReturnStatement) {
-    if (t.isArrowFunctionExpression(node)) {
-      node.body.body = wrapper(node.body.body)
+  if (node.hasSetter) {
+    if (t.isArrowFunctionExpression(node) && t.isCallExpression(node.body)) {
+      node.body = wrapper(node.body)
     }
     else {
       node.body.body = wrapper(node.body.body)
