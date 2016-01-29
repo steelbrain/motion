@@ -3,7 +3,7 @@
   "name": "flint-tools",
   "repository": "https://github.com/tools",
   "description": "tools",
-  "version": "1.4.30",
+  "version": "1.5.0",
   "main": "index.js",
   "scripts": {},
   "dependencies": {
