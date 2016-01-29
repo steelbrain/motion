@@ -189,7 +189,7 @@ function finishedInstalls() {
 function logInstalled(deps) {
   if (!deps.length) return
   deps = _.uniq(deps) // TODO this is fixing a bug upwards
-  console.log(`\n  Installed ${deps.length} packages`.bold)
+  console.log(`\n  Installed ${deps.length} packages`.dim)
   deps.forEach(dep => console.log(`  ✓ ${dep}`.green))
 }
 

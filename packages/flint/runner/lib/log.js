@@ -16,7 +16,6 @@ const subIcons = {
   ASTERISK: ' ✺ ',
   HAPPY: ' ☺ ',
   SAD: ' ☹ ',
-  RELOAD: ' ↺ ',
   WRITE: ' ✍ ',
   DOWN: ' ↓ ',
   UP: ' ↑ ',

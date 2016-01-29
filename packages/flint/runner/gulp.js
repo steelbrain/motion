@@ -16,6 +16,7 @@ import babel from './lib/gulp-babel'
 import opts from './opts'
 import writeStyle from './lib/writeStyle'
 import onMeta from './lib/onMeta'
+import chalk from 'chalk'
 import { findBabelRuntimeRequires } from './lib/findRequires'
 import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from './lib/fns'
@@ -38,8 +39,10 @@ const relative = file => path.relative(opts('appDir'), file.path)
 const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 let out = {}
 out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
-out.goodFile = symbol => (file, ms) => console.log('  ' + symbol.dim + ' ' + relative(file)
-    + `${file.startTime ? time((Date.now() - file.startTime) || 1) : ''}`.dim)
+out.goodFile = symbol => (file, ms) => console.log(
+    `  ${chalk.dim(symbol)} ${chalk.bold(relative(file))} `
+    + chalk.dim(file.startTime ? time((Date.now() - file.startTime) || 1).dim : '')
+)
 
 // TODO bad practice
 let fileImports = {}

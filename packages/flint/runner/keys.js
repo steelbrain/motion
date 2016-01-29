@@ -38,7 +38,7 @@ function promptLayout(messages, { perLine = 2, prefix = '  › ', pad = 12 }) {
   let item = (str, color) => promptItem(_.padEnd(`${prefix}${str}`, pad))
 
   return messages.map((message, i) =>
-    starts(i, perLine) ? chalk.cyan(`\n${item(message)}`) : item(message)
+    starts(i, perLine) ? chalk.yellow(`\n${item(message)}`) : chalk.dim(item(message))
   ).join('')
 }
 
@@ -86,7 +86,6 @@ function start() {
           banner()
           break
         case 'b':
-          console.log('\n  Building...'.dim)
           await builder.build()
           break
         case 'o': // open browser

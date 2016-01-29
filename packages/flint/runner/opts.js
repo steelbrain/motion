@@ -88,10 +88,9 @@ function debug() {
 
 
 function opts(name) {
-  return get(key)
+  return get(name)
 }
 
-opts = get
 opts.set = set
 opts.setAll = setAll
 opts.serialize = serialize
