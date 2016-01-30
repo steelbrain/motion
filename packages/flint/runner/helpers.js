@@ -1,8 +1,9 @@
 'use babel'
 
 import FlintTransform from 'flint-transform'
-import getOption from './opts'
 import {transform as babelTransform} from 'flint-babel-core'
+import getOption from './opts'
+import {Parser} from './compiler'
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g
 
@@ -47,9 +48,13 @@ export function transformFile(text, {
   onImports = null,
   onExports = null
 }) {
-  return babelTransform(text, getBabelConfig({
-    log, writeStyle, onMeta, onImports, onExports
-  }))
+  let toReturn = ''
+  Parser.pre('unknown', text, function(text) {
+    toReturn = babelTransform(text, getBabelConfig({
+      log, writeStyle, onMeta, onImports, onExports
+    }))
+  })
+  return toReturn
 }
 
 export function pointWithinRange(point, range) {
