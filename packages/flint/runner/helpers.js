@@ -49,3 +49,7 @@ export function transformFile(text, {
     log, writeStyle, onMeta, onImports, onExports
   }))
 }
+
+export function pointWithinRange(point, range) {
+  return point.isGreaterThan(range[0]) && point.isLessThan(range[1])
+}
