@@ -15,7 +15,8 @@ export default new class Bridge {
     this.emitter = new Emitter()
     this.connections = new Set()
     this.server = null
-    this.queue = []
+    this.queue = {}
+    this.queuePointer = 0
 
     this.subscriptions.add(this.emitter)
   }
@@ -49,15 +50,13 @@ export default new class Bridge {
       dir: Cache.baseDir()
     }))
     connection.send(this.encodeMessage('flint:opts', getOptions()))
-    if (this.queue.length) {
-      this.queue.forEach(function(contents) {
-        connection.send(contents)
-      })
-      this.queue = []
+    for (const key in this.queue) {
+      connection.send(this.queue[key])
     }
+    this.queue = {}
   }
-  broadcast(type, message) {
-    this.broadcastRaw(this.encodeMessage(type, message))
+  broadcast(type, message, cacheKey = null) {
+    this.broadcastRaw(this.encodeMessage(type, message), cacheKey)
   }
   encodeMessage(type, message = {}) {
     debug('OUT', type)
@@ -66,7 +65,7 @@ export default new class Bridge {
       timestamp: Date.now()
     }, message))
   }
-  broadcastRaw(message) {
+  broadcastRaw(message, cacheKey = null) {
     if (typeof message !== 'string') {
       throw new Error('Malformed message given')
     }
@@ -75,7 +74,10 @@ export default new class Bridge {
       this.connections.forEach(function(connection) {
         connection.send(message)
       })
-    } else this.queue.push(message)
+    } else {
+      cacheKey = cacheKey || ++this.queuePointer
+      this.queue[cacheKey] = message
+    }
   }
   onMessage(type, callback) {
     return this.emitter.on(`message:${type}`, callback)
@@ -86,5 +88,6 @@ export default new class Bridge {
     }
     this.connections.clear()
     this.subscriptions.dispose()
+    this.queue = null
   }
 }
