@@ -11,7 +11,7 @@ export const POSITION_TYPE = {
   VIEW_JSX: 'VIEW_JSX',
   STYLE: 'STYLE'
 }
-const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *['"]?([^,"]*)$/
+const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *(['"]?([^,"]*))$/
 const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
@@ -58,7 +58,7 @@ export default class Autocomplete {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
     const value = STYLE_VALUE_REGEX.exec(lineText)
     if (value !== null) {
-      return this.completeStyleValue(value[1], value[2])
+      return this.completeStyleValue(value[1], value[2], value[3])
     } else {
       return this.completeStyleKey(lineText)
     }
@@ -89,7 +89,7 @@ export default class Autocomplete {
       return item.matchScore !== 0
     })
   }
-  completeStyleValue(name, prefix) {
+  completeStyleValue(name, prefix, scoreBase) {
     let suggestion = null
     for (const entry of Styles) {
       if (entry.name === name) {
@@ -111,7 +111,7 @@ export default class Autocomplete {
         description: '',
         type: 'css-value',
         replacementPrefix: prefix,
-        matchScore: string_score(name, prefix)
+        matchScore: string_score(name, scoreBase)
       }
     }).sort(function(a, b) {
       return b.matchScore - a.matchScore
