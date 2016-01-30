@@ -25,6 +25,11 @@ function niceRuntimeError(err) {
   if (err.file)
     err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/[_]+\/)?'), '')
 
+  if (err.file && err.file === 'flint.dev.js') {
+    err.file = 'Flint'
+    err.line = null
+  }
+
   if (err.file && err.file.indexOf('internals.js') >= 0) {
     if (err.message && err.message.indexOf('Cannot find module') == 0) {
       const badModule = err.message.match(/(fs|path)/)

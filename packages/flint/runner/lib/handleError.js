@@ -26,6 +26,7 @@ export default function handleError(handle) {
   }
   // if used in try/catch
   else {
+    // TODO type this
     const error = handle
     if (!error) return console.log('  No error!')
     errorClient.captureException(error)
@@ -34,6 +35,7 @@ export default function handleError(handle) {
     error.stack = unicodeToChar(error.stack)
 
     logError(error)
+
     bridge.message('compile:error', { error }, 'error')
   }
 }
