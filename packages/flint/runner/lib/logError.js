@@ -9,7 +9,7 @@ export default function logError(error, file) {
     return console.log(error)
 
   if (error.message)
-    console.log('  ' + error.message.replace(opts('appDir'), '').red)
+    console.log('  ' + unicodeToChar(error.message.replace(opts('appDir'), '').red))
 
   if (error.loc)
     console.log('  line: %s, col: %s', error.loc.line, error.loc.column)
