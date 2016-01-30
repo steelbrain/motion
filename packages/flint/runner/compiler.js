@@ -18,7 +18,7 @@ function debounce(key, time, cb) {
   debouncers[key] = setTimeout(cb, time)
 }
 
-var Parser = {
+export var Parser = {
   init(opts) {
     OPTS = opts || {}
   },
