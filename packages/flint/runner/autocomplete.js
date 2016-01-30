@@ -11,7 +11,7 @@ export const POSITION_TYPE = {
   VIEW_JSX: 'VIEW_JSX',
   STYLE: 'STYLE'
 }
-const VALUE_VALIDATION_REGEX = /['"]?\S+['"]?: *['"]?[^,"]*$/
+const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *['"]?([^,"]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
@@ -26,7 +26,7 @@ export default class Autocomplete {
     const viewsPosition = this.getPositionInfo(viewsActive, position)
     if (viewsPosition === POSITION_TYPE.STYLE) {
       // css
-      return this.getStyleAutocomplete(text, position)
+      return this.completeStyle(text, position)
     } else if (viewsPosition === POSITION_TYPE.VIEW_JSX) {
       // jsx tags
     } else if (viewsPosition === POSITION_TYPE.VIEW_TOP) {
@@ -52,13 +52,16 @@ export default class Autocomplete {
     }
     return POSITION_TYPE.VIEW_TOP
   }
-  getStyleAutocomplete(text, position) {
+  completeStyle(text, position) {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
-    if (VALUE_VALIDATION_REGEX.test(lineText)) {
-      // Ignore value suggestions, 'cause we already provided them with key
-      return []
+    const value = STYLE_VALUE_REGEX.exec(lineText)
+    if (value !== null) {
+      return this.completeStyleValue(value[1], value[2])
+    } else {
+      return this.completeStyleKey(lineText)
     }
-    // Autocomplete key
+  }
+  completeStyleKey(lineText) {
     const suggestions = Styles.slice()
     suggestions.sort(function(a, b) {
       return b.strength - a.strength
@@ -69,6 +72,7 @@ export default class Autocomplete {
     suggestions.forEach(function(suggestion) {
       suggestion.replacementPrefix = prefix
       suggestion.descriptionMoreURL = 'https://developer.mozilla.org/en/docs/Web/CSS/' + decamelize(suggestion.name, {separator: '-'})
+      suggestion.type = 'css-key'
     })
     if (prefix === '') {
       return suggestions
@@ -81,6 +85,29 @@ export default class Autocomplete {
     })
     return suggestions.filter(function(item) {
       return item.matchScore !== 0
+    })
+  }
+  completeStyleValue(name, prefix) {
+    let suggestion = null
+    for (const entry of Styles) {
+      if (entry.name === name) {
+        suggestion = entry
+        break
+      }
+    }
+    if (suggestion === null) {
+      return []
+    }
+    if (!Array.isArray(suggestion.options)) {
+      return []
+    }
+    return suggestion.options.map(function(option) {
+      return {
+        name: option,
+        description: '',
+        type: 'css-value',
+        replacementPrefix: prefix
+      }
     })
   }
 }
