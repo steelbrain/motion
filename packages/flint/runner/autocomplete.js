@@ -3,7 +3,7 @@
 import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
 import {decamelize} from 'humps'
-import {transformFile, pointWithinRange, getObjectAtPosition, getRowFromText} from './helpers'
+import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './helpers'
 import Styles from './autocomplete-styles'
 
 export const POSITION_TYPE = {
@@ -12,6 +12,7 @@ export const POSITION_TYPE = {
   STYLE: 'STYLE'
 }
 const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *['"]?([^,"]*)$/
+const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
@@ -31,6 +32,7 @@ export default class Autocomplete {
       // jsx tags
     } else if (viewsPosition === POSITION_TYPE.VIEW_TOP) {
       // maybe autocomplete $h1?
+      return this.completeViewNames(viewsActive, text, position)
     }
     return []
   }
@@ -114,5 +116,35 @@ export default class Autocomplete {
     }).sort(function(a, b) {
       return b.matchScore - a.matchScore
     })
+  }
+  completeViewNames(view, text, position) {
+    const lineText = getRowFromText(text, position.row).slice(0, position.column)
+    let prefix = VIEW_NAME_REGEX.exec(lineText)
+    if (prefix === null) {
+      // Not a view name scenario
+      return []
+    }
+    prefix = prefix[1]
+    const suggestions = []
+    for (const key in view.els) {
+      const name = '$' + key
+      suggestions.push({
+        name: name,
+        description: '',
+        type: 'view-name',
+        replacementPrefix: prefix,
+        matchScore: string_score(name, prefix)
+      })
+    }
+    suggestions.sort(function(a, b) {
+      return b.matchScore - a.matchScore
+    })
+    if (prefix === '') {
+      return suggestions
+    } else {
+      return suggestions.filter(function(item) {
+        return item.matchScore !== 0
+      })
+    }
   }
 }
