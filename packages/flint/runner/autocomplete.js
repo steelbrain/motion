@@ -38,7 +38,7 @@ export default class Autocomplete {
   }
   scanViews(text) {
     let views = {}
-    transformFile(text, {
+    transformText(text, {
       onMeta: function(meta) {
         views = meta.views
       }
