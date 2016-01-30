@@ -10,14 +10,15 @@ import logError from './logError'
 
 const p = path.join
 
-const logWrap = (name, fn) => {
-  return (...args) => {
-    if (!process.env.production)
-      log.file(name.dim.bold, ...args.map(arg => (''+arg).dim))
-
-    return fn(...args)
-  }
-}
+const logWrap = (name, fn) => fn
+// {
+//   return (...args) => {
+//     if (!process.env.production)
+//       log.file(name && name.dim.bold, ...args.map(arg => (''+arg).dim))
+//
+//     return fn(...args)
+//   }
+// }
 
 // promisify
 const rm = logWrap('rm', promisify(remove))

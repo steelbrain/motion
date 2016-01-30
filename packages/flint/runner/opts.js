@@ -4,7 +4,7 @@ import { p, sanitize } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 
-let OPTS
+let OPTS = {}
 
 function set(key, val) {
   log.opts('opts.set'.bold.yellow, key, val)
@@ -13,7 +13,6 @@ function set(key, val) {
 }
 
 function get(key) {
-  // if (key != 'deps') log.opts('opts'.bold.green, key, OPTS[key])
   return key ? OPTS[key] : OPTS
 }
 

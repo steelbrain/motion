@@ -54,7 +54,10 @@ export default function requireFactory(root) {
 
   function safeGet(obj, _ns, names) {
     const ns = `${app}-${_ns}`
-    if (!obj[ns]) throw new Error(`${_ns} not bundled, looking for ${names[0]}`)
+    if (!obj[ns]) {
+      console.error(`${_ns} not bundled, looking for ${names[0]}`)
+      return {}
+    }
 
     let name
     for (let _ of names) {
@@ -64,7 +67,11 @@ export default function requireFactory(root) {
       }
     }
 
-    if (typeof obj[ns][name] == 'undefined') throw new Error(`Package ${name} was not loaded`)
+    if (typeof obj[ns][name] == 'undefined') {
+      console.error(`Package ${name} was not loaded`)
+      return {}
+    }
+
     return obj[ns][name]
   }
 

@@ -39,7 +39,7 @@ let deleteFileCbs = []
 let deleteViewCbs = []
 let addViewCbs = []
 
-function onSetExported(file) {
+function onSetExported(file, val) {
   // debugger // TODO: remove from either out or add to out
 }
 

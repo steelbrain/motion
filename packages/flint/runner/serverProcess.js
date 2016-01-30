@@ -189,8 +189,13 @@ function run() {
 
     server.get('*', function(req, res) {
       afterFirstBuild(async function() {
-        const template = await makeTemplate(req)
-        res.send(template.replace(/\/static/g, '/_/static'))
+        try {
+          const template = await makeTemplate(req)
+          res.send(template.replace(/\/static/g, '/_/static'))
+        }
+        catch(e) {
+          console.log(e, e.stack)
+        }
       })
     })
 
