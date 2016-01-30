@@ -421,7 +421,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
 
     event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
-    bridge.broadcast('compile:error', { error })
+    bridge.broadcast('compile:error', { error }, 'error')
   }
 
   function setLastFile(file) {
@@ -559,13 +559,13 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       serializeCache()
 
     // message browser of compile success
-    bridge.broadcast('compile:success', file.message)
+    bridge.broadcast('compile:success', file.message, 'error')
 
     // check if other errors left still in queue
     const error = cache.getLastError()
     if (!error) return
     debug('cache last error', error)
-    bridge.broadcast('compile:error', { error })
+    bridge.broadcast('compile:error', { error }, 'error')
   }
 
   // ok so we start a file

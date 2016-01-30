@@ -36,6 +36,6 @@ export default function handleError(handle) {
 
     logError(error)
 
-    bridge.broadcast('compile:error', { error })
+    bridge.broadcast('compile:error', { error }, 'error')
   }
 }

@@ -45,7 +45,7 @@ bridge.onMessage('editor', ({ type, key, el, view }) => {
       bridge.broadcast('editor:style', {
         view: viewData,
         position: meta[view].styles[el]
-      })
+      }, 'focus')
     }
 
     if (type == 'focus:element') {
@@ -53,7 +53,7 @@ bridge.onMessage('editor', ({ type, key, el, view }) => {
       bridge.broadcast('editor:element', {
         view: viewData,
         position: meta[view].els[key]
-      })
+      }, 'focus')
     }
   }
 
