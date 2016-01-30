@@ -10,6 +10,7 @@ import cache from './cache'
 import keys from './keys'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
+import Autocomplete from './autocomplete'
 
 // welcome to flint!
 
@@ -74,6 +75,15 @@ export async function build(opts = {}) {
   }
 }
 
+function runAutocomplete(bridge) {
+  const autocomplete = new Autocomplete()
+  bridge.onMessage('editor:autocomplete', function(message) {
+    const id = message.id
+    const suggestions = autocomplete.provideAutocomplete(message.text, message.position)
+    bridge.broadcast('editor:autocomplete', {id, suggestions})
+  })
+}
+
 //
 // flint run
 //
@@ -83,6 +93,7 @@ export async function run(opts) {
     await startup(opts)
     if (opts.watch) gulp.assets()
     await server.run()
+    runAutocomplete(bridge)
     bridge.activate()
     await gulpScripts()
     cache.serialize() // write out cache
