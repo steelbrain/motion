@@ -2,6 +2,7 @@
 
 import FlintTransform from 'flint-transform'
 import getOption from './opts'
+import {transform as babelTransform} from 'flint-babel-core'
 
 export function isProduction() {
   return getOption('build')
@@ -35,4 +36,16 @@ export function getBabelConfig({
     plugins: [FlintTransform.file(transformParameters)],
     extra: { production: isProduction() }
   }
+}
+
+export function transformFile(text, {
+  log = null,
+  writeStyle = null,
+  onMeta = null,
+  onImports = null,
+  onExports = null
+}) {
+  return babelTransform(text, getBabelConfig({
+    log, writeStyle, onMeta, onImports, onExports
+  }))
 }
