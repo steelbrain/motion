@@ -16,6 +16,7 @@
     "flint-up": "./cli/entry/flint-up"
   },
   "dependencies": {
+    "atom-text-buffer-point": "^1.0.0",
     "autoprefixer": "6.2.3",
     "babel-runtime": "5.8.29",
     "chalk": "1.1.1",
