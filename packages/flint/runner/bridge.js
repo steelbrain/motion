@@ -16,7 +16,6 @@ export default new class Bridge {
     this.connections = new Set()
     this.server = null
     this.queue = {}
-    this.queuePointer = 0
 
     this.subscriptions.add(this.emitter)
   }
@@ -70,12 +69,12 @@ export default new class Bridge {
       throw new Error('Malformed message given')
     }
 
+    // If we have any active connections
     if (this.connections.size) {
       this.connections.forEach(function(connection) {
         connection.send(message)
       })
-    } else {
-      cacheKey = cacheKey || ++this.queuePointer
+    } else if (cacheKey !== null) {
       this.queue[cacheKey] = message
     }
   }
