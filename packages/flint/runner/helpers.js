@@ -4,6 +4,8 @@ import FlintTransform from 'flint-transform'
 import getOption from './opts'
 import {transform as babelTransform} from 'flint-babel-core'
 
+const NEWLINE_REGEX = /\r\n|\n|\r/g
+
 export function isProduction() {
   return getOption('build')
 }
@@ -62,4 +64,9 @@ export function getObjectAtPosition(objects, position) {
     }
   }
   return null
+}
+
+export function getRowFromText(text, row) {
+  const rowText = text.split(NEWLINE_REGEX)[row]
+  return rowText || ''
 }
