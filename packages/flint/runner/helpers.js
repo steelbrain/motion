@@ -41,7 +41,7 @@ export function getBabelConfig({
   }
 }
 
-export function transformFile(text, {
+export function transformText(text, {
   log = null,
   writeStyle = null,
   onMeta = null,
