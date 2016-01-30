@@ -32,8 +32,18 @@ function splitVersions(range) {
   return found.length ? found : range
 }
 
-function latestVersion(range) {
-  return semver.maxSatisfying(splitVersions(range), range)
+function latestVersion(name, range) {
+  try {
+    return semver.maxSatisfying(splitVersions(range), range)
+  }
+  catch(e) {
+    const simpleFindVer = range.replace(/[^0-9\. ]+/g, '').split(' ')[0]
+
+    console.log(`  Error in semver of package ${name} ${e.message}`.yellow)
+    console.log("  Attempting ", simpleFindVer)
+
+    return simpleFindVer
+  }
 }
 
 // TODO: only do this if npm 3 `exec('npm -v').charAt(0) == 3`
@@ -50,7 +60,7 @@ async function installPeerDeps(name) {
       console.log(`  Installing ${name} peerDependencies`.bold)
 
       const peersFull = peersArr.map(name => {
-        const version = latestVersion(peers[name])
+        const version = latestVersion(name, peers[name])
 
         if (!version)
           throw new Error(`No valid version range for package ${name}@${peers[name]}`)
