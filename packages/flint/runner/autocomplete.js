@@ -65,6 +65,9 @@ export default class Autocomplete {
 
     let prefix = PREFIX_REGEX.exec(lineText)
     prefix = prefix ? prefix[1] : ''
+    suggestions.forEach(function(suggestion) {
+      suggestion.replacementPrefix = prefix
+    })
     if (prefix === '') {
       return suggestions
     }
