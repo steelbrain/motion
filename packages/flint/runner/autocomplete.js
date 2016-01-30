@@ -2,6 +2,7 @@
 
 import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
+import {decamelize} from 'humps'
 import {transformFile, pointWithinRange, getObjectAtPosition, getRowFromText} from './helpers'
 import Styles from './autocomplete-styles'
 
@@ -67,6 +68,7 @@ export default class Autocomplete {
     prefix = prefix ? prefix[1] : ''
     suggestions.forEach(function(suggestion) {
       suggestion.replacementPrefix = prefix
+      suggestion.descriptionMoreURL = 'https://developer.mozilla.org/en/docs/Web/CSS/' + decamelize(suggestion.name, {separator: '-'})
     })
     if (prefix === '') {
       return suggestions
