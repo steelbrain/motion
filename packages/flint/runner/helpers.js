@@ -53,3 +53,13 @@ export function transformFile(text, {
 export function pointWithinRange(point, range) {
   return point.isGreaterThan(range[0]) && point.isLessThan(range[1])
 }
+
+export function getObjectAtPosition(objects, position) {
+  for (const key in objects) {
+    const value = objects[key]
+    if (pointWithinRange(position, value.location)) {
+      return value
+    }
+  }
+  return null
+}
