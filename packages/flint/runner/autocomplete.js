@@ -102,12 +102,17 @@ export default class Autocomplete {
       return []
     }
     return suggestion.options.map(function(option) {
+      const name = String(option)
       return {
-        name: option,
+        name: name,
+        auto: option,
         description: '',
         type: 'css-value',
-        replacementPrefix: prefix
+        replacementPrefix: prefix,
+        matchScore: string_score(name, prefix)
       }
+    }).sort(function(a, b) {
+      return b.matchScore - a.matchScore
     })
   }
 }
