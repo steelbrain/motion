@@ -5,7 +5,6 @@ import webpackConfig from './lib/webpackConfig'
 import { readInstalled } from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import requireString from './lib/requireString'
-import hasExports from '../lib/hasExports'
 import bridge from '../bridge'
 import cache from '../cache'
 import opts from '../opts'
@@ -38,11 +37,7 @@ let runningBundle = null
 
 // TODO: check this in babel to be more accurate
 export async function checkInternals(file, source) {
-  const isInternal = hasExports(source)
-  cache.setIsInternal(file, isInternal)
-
-  // not on build
-  if (opts('hasRunInitialBuild') && isInternal && !runningBundle) {
+  if (opts('hasRunInitialBuild') && cache.isInternal(file) && !runningBundle) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {
       await internals()

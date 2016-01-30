@@ -7,7 +7,7 @@ export async function readInstalled() {
   try {
     const state = await disk.state.read()
     const installed = state.installed || []
-    log('externals', 'readInstalled()', installed)
+    log.externals('readInstalled', installed.join(' '))
     return installed
   }
   catch(e) {

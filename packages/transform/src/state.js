@@ -8,7 +8,6 @@ let state = {
   inJSX: false,
   inView: null, // track current view name
   hasView: false, // if file has a view
-  hasExports: false,
   viewHasChildWithClass: false, // if view calls for a child view
   viewStyles: {}, // store styles from views to be extracted
   viewDynamicStyleKeys: null,
@@ -17,6 +16,7 @@ let state = {
   viewState: null, // track which state to wrap
   viewStyleNames: null, // prevent duplicate style names
   fileImports: null,
+  hasExports: false,
 
   init() {
     state.resetProgramState()

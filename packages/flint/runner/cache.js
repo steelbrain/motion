@@ -168,7 +168,7 @@ const Cache = {
     return f && f.isInternal
   },
 
-  setIsInternal(file: string, val: boolean) {
+  setFileInternal(file: string, val: boolean) {
     const name = relative(file)
     const f = cache.files[name]
 
@@ -189,12 +189,9 @@ const Cache = {
   },
 
   setFileImports(file: string, imports: ImportArray) {
-    let cacheFile = Cache.get(file)
-    if (!cacheFile) cacheFile = Cache.add(file)
-
+    let cacheFile = Cache.get(file) || Cache.add(file)
     let externals = imports
     let internals = _.remove(externals, n => n && n.charAt(0) == '.')
-
     cacheFile.externals = externals
     cacheFile.internals = internals
   },
@@ -209,7 +206,6 @@ const Cache = {
 
   _getFileKeys(key) {
     const result = _.flatten(Object.keys(cache.files).map(file => cache.files[file][key])).filter(x => !!x)
-    log.cache('_getFileKeys: ', result)
     return result
   },
 

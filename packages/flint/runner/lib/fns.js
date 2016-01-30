@@ -10,10 +10,11 @@ import logError from './logError'
 
 const p = path.join
 
-const LOG = 'file'
 const logWrap = (name, fn) => {
   return (...args) => {
-    log(LOG, name, ...args)
+    if (!process.env.production)
+      log.file(name.dim.bold, ...args.map(arg => (''+arg).dim))
+
     return fn(...args)
   }
 }

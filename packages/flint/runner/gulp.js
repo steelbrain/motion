@@ -71,6 +71,9 @@ const $p = {
       onMeta,
       onImports(file, imports) {
         fileImports[file] = imports
+      },
+      onExports(file, val) {
+        cache.setFileInternal(file, val)
       }
     })],
     extra: { production: isProduction() }
@@ -296,8 +299,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
           gulp.dest(p(OPTS.depsDir, 'internal')),
-          pipefn(afterBuildWatchWrite),
-          $.ignore.exclude(true),
+          pipefn(bundle),
+          pipefn(buildDone),
+          $.ignore.exclude(true)
         )
       ))
       .pipe(pipefn(markFileSuccess))
@@ -498,13 +502,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function afterWrite(file) {
     if (isSourceMap(file.path)) return
 
-    if (file.finishingFirstBuild) {
-      opts.set('hasRunInitialBuild', true)
-      hasRunCurrentBuild = true
-      buildingOnce = false
-      debug('buildDone'.green.bold, 'waitingForFirstBuild', waitingForFirstBuild.length)
-      waitingForFirstBuild.forEach(res => res())
-    }
+    buildDone(file)
 
     // avoid during initial build
     if (!hasFinished()) return
@@ -512,7 +510,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     if (file.isInternal) return
 
     // run stuff after each change on build --watch
-    afterBuildWatchWrite()
+    bundle()
 
     // avoid ?? todo: figure out why this is necessary
     if (!cache.get(file.path)) return
@@ -527,7 +525,17 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     bridge.message('script:add', file.message)
   }
 
-  function afterBuildWatchWrite() {
+  function buildDone(file) {
+    if (file.finishingFirstBuild) {
+      opts.set('hasRunInitialBuild', true)
+      hasRunCurrentBuild = true
+      buildingOnce = false
+      debug('buildDone'.green.bold, 'waitingForFirstBuild', waitingForFirstBuild.length)
+      waitingForFirstBuild.forEach(res => res())
+    }
+  }
+
+  function bundle() {
     if (opts('watch') && hasBuilt()) {
       builder.build({ bundle: false })
       return true
@@ -569,7 +577,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const filePath = path.relative(p(opts('deps').dir, 'internal'), file.path)
     // then resolve path to .flint/.internal/out/xyz.js
     const outPath = p(opts('outDir'), filePath)
-    debug('remove newly internal', outPath)
+    // debug('remove newly internal', outPath)
     rm(outPath)
   }
 }

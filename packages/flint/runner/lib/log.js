@@ -36,7 +36,7 @@ export default function log(info, subIcon, ...args) {
   else
     args = [info, subIcon, ...args]
 
-  const doLog = () => console.log(...colorArgs(args))
+  const doLog = () => console.log('   ', ...colorArgs(args))
 
   // all
   if (!debug.length) return doLog()
@@ -50,6 +50,7 @@ log.cache = log.bind(null, { name: 'cache', icon: '💰' })
 log.opts = log.bind(null, { name: 'opts', icon: '❍' })
 log.gulp = log.bind(null, { name: 'gulp', icon: '👇' })
 log.writer = log.bind(null, { name: 'writer', icon: '✎' })
+log.file = log.bind(null, { name: 'file', icon: '▻' })
 
 function colorArgs(args) {
   return args.map(arg =>

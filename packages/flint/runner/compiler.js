@@ -1,5 +1,4 @@
 import bundler from './bundler'
-import hasExports from './lib/hasExports'
 import cache from './cache'
 import opts from './opts'
 import through from 'through2'
@@ -26,8 +25,9 @@ var Parser = {
 
   async post(filePath, source, next) {
     try {
+      const isInternal = cache.isInternal(filePath)
+
       // scans
-      const isInternal = hasExports(source)
       const scan = () => bundler.scanFile(filePath, source)
       const scanNow = OPTS.build || OPTS.watch || !opts('hasRunInitialBuild')
 
@@ -37,7 +37,7 @@ var Parser = {
       else debounce(filePath, 2000, scan)
 
       // building, done
-      if (OPTS.build) {
+      if (OPTS.build && !OPTS.watch) {
         next(source, { isInternal })
         return
       }
