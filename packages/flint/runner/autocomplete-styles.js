@@ -16,34 +16,41 @@ export default [
   {
     name: 'flexDirection',
     description: 'Row or Column, sets direction element flows in',
-    options: ['row', 'col']
+    options: ['row', 'col'],
+    auto: 'row',
+    strength: 80
   },
   {
     name: 'height',
+    description: 'Height of the element',
+    options: [300, '100%'],
     auto: 300,
-    strength: 80,
-    options: [300, '100%']
+    strength: 80
   },
   {
     name: 'width',
+    description: 'Width of the element',
+    options: [300, '100%'],
     auto: 300,
-    strength: 80,
-    options: [300, '100%']
+    strength: 80
   },
   {
     name: 'border',
+    description: 'Border of the element',
     auto: '1px solid #333',
     strength: 100
   },
   {
     name: 'background',
+    description: 'Background of the element',
     auto: '#eee',
     strength: 100
   },
   {
     name: 'textAlign',
-    auto: 'center',
+    description: 'Alignment of the element',
     options: ['left', 'center', 'right'],
+    auto: 'center',
     strength: 80
   },
   {
