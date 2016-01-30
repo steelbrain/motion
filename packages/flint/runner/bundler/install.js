@@ -12,7 +12,7 @@ import { externals } from './externals'
 
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
-  log('bundler', 'install')
+  log.externals('install')
   try {
     await remakeInstallDir(force)
     await uninstall()

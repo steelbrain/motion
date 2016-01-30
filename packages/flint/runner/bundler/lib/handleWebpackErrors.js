@@ -38,7 +38,6 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
     log(LOG, 'webpackErrors', errors)
 
     let messages = errors.map(split).map(takeWebpack)[0].dim
-
     let whereMsg = where == 'externals' ? 'NPM modules' : 'imported local modules'
     let message = cleanPath(`Webpack: ${whereMsg}`.yellow + `  ${messages}`).grey
 

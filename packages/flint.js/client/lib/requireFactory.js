@@ -61,7 +61,7 @@ export default function requireFactory(root) {
 
     let name
     for (let _ of names) {
-      if (typeof obj[ns][_] != undefined) {
+      if (typeof obj[ns][_] != 'undefined') {
         name = _
         break
       }

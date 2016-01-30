@@ -519,7 +519,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       opts.set('hasRunInitialBuild', true)
       hasRunCurrentBuild = true
       buildingOnce = false
-      debug('buildDone'.green.bold, 'waitingForFirstBuild', waitingForFirstBuild.length)
+      debug('buildDone!!'.green.bold)
       waitingForFirstBuild.forEach(res => res())
     }
   }

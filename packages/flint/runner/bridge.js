@@ -19,6 +19,7 @@ export default new class Bridge {
 
     this.subscriptions.add(this.emitter)
   }
+
   activate() {
     this.server = createServer({
       port: websocketPort()
@@ -44,19 +45,22 @@ export default new class Bridge {
       this.welcomeConnection(connection)
     })
   }
+
   welcomeConnection(connection) {
     connection.send(this.encodeMessage('flint:baseDir', {
       dir: Cache.baseDir()
     }))
     connection.send(this.encodeMessage('flint:opts', getOptions()))
+
     for (const key in this.queue) {
       connection.send(this.queue[key])
     }
-    this.queue = {}
   }
+
   broadcast(type, message, cacheKey = null) {
     this.broadcastRaw(this.encodeMessage(type, message), cacheKey)
   }
+
   encodeMessage(type, message = {}) {
     debug('OUT', type)
     return JSON.stringify(Object.assign({
@@ -64,6 +68,7 @@ export default new class Bridge {
       timestamp: Date.now()
     }, message))
   }
+
   broadcastRaw(message, cacheKey = null) {
     if (typeof message !== 'string') {
       throw new Error('Malformed message given')
@@ -74,13 +79,17 @@ export default new class Bridge {
       this.connections.forEach(function(connection) {
         connection.send(message)
       })
-    } else if (cacheKey !== null) {
+    }
+
+    if (cacheKey !== null) {
       this.queue[cacheKey] = message
     }
   }
+
   onMessage(type, callback) {
     return this.emitter.on(`message:${type}`, callback)
   }
+
   dispose() {
     if (this.server) {
       this.server.close()

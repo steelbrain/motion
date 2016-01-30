@@ -1,11 +1,12 @@
 const externals = [
-  { name: 'babel-runtime', removePaths: true  },
-  { name: 'flint-js',      removePaths: true  },
-  { name: 'react',         removePaths: false },
-  { name: 'react-dom',     removePaths: false },
-  { name: 'history',       removePaths: false },
-  { name: 'radium',        removePaths: false },
-  { name: '',              removePaths: false },
+  { name: 'babel-runtime', stripPath: true  },
+  { name: 'flint-js',      stripPath: false  },
+  // TODO to allow users to have their own react need to patch webpackConfig to allow that then set this true
+  { name: 'react',         stripPath: true },
+  { name: 'react-dom',     stripPath: false },
+  { name: 'history',       stripPath: false },
+  { name: 'radium',        stripPath: false },
+  { name: '',              stripPath: false },
 ]
 
 export default function rmFlintExternals(requires) {
@@ -14,8 +15,8 @@ export default function rmFlintExternals(requires) {
     // react = true
     // otherpackage = false
 
-    for (let { name, removePaths } of externals) {
-      if (removePaths && fullPath.indexOf(name) === 0)
+    for (let { name, stripPath } of externals) {
+      if (stripPath && fullPath.indexOf(name) === 0)
         return false
       else if (fullPath === name)
         return false
