@@ -11,7 +11,7 @@ let join = s => s.join("\n")
 function cleanPath(str) {
   return str
     .trim()
-    .replace(/\.\/\.flint(\/\.internal)?(\/deps)?/g, '')
+    .replace(/\.\/\.flint(\/\.internal)?(\/deps(\/internal)?)?/g, '')
     .replace(new RegExp(opts('appDir'), 'g'), '')
     .replace(new RegExp('Module not found: ', 'g'), '')
 }

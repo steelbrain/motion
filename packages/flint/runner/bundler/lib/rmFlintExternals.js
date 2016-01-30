@@ -1,7 +1,8 @@
 const externals = [
   'flint-js',
-  'react',
-  'react-dom',
+  // allow users to put in their own react (for stuff like react/lib/xyz or maybe override our version)
+  // 'react',
+  // 'react-dom',
   'babel-runtime',
   'history',
   'radium',

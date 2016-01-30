@@ -23,10 +23,8 @@ export default function requireFactory(root) {
       let cleanName = (parentPath ? parentPath + '/' : '')
         + name.replace(/^(\.\.?\/)+/, '')
 
-      let pkg = root.exports[`${app}-internals`]
-
       // try /index for directory shorthand
-      return pkg[cleanName] || pkg[`${cleanName}/index`]
+      return getInternal(cleanName)
     }
 
     // exports
@@ -34,7 +32,7 @@ export default function requireFactory(root) {
       return root.exports[name.replace('exports.', '')]
 
     // get pkg
-    let pkg = root.exports[`${app}-externals`][name]
+    let pkg = getExternal(name)
 
     // we may be waiting for packages reload
     if (!pkg) return
@@ -44,6 +42,30 @@ export default function requireFactory(root) {
       pkg.default = pkg
 
     return pkg
+  }
+
+  function getExternal(name) {
+    return safeGet(root.exports, `externals`, [name])
+  }
+
+  function getInternal(name) {
+    return safeGet(root.exports, `internals`, [name, `${name}/index`])
+  }
+
+  function safeGet(obj, _ns, names) {
+    const ns = `${app}-${_ns}`
+    if (!obj[ns]) throw new Error(`${_ns} not bundled, looking for ${names[0]}`)
+
+    let name
+    for (let _ of names) {
+      if (typeof obj[ns][_] != undefined) {
+        name = _
+        break
+      }
+    }
+
+    if (typeof obj[ns][name] == 'undefined') throw new Error(`Package ${name} was not loaded`)
+    return obj[ns][name]
   }
 
   require.setApp = (appname) => {
