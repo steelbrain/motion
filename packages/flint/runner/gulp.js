@@ -408,6 +408,9 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
     bridge.broadcast('compile:error', { error }, 'error')
+
+    markDone(State.curFile)
+    buildDone(State.curFile)
   }
 
   function setLastFile(file) {

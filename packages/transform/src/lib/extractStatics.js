@@ -14,7 +14,7 @@ export function extractAndAssign(node, file) {
     let name = node.left.name
 
     if (state.viewStyleNames[name])
-      throw file.errorWithNode(node.left, `Duplicate style! view ${state.inView} { ${name} }`)
+      throw file.errorWithNode(node.left, `Duplicate style: view ${state.inView} { ${name} }`)
 
     state.viewStyleNames[name] = true
 
@@ -93,7 +93,7 @@ function extractStatics(name, node, file) {
     }
 
     if (duplicate[prop.key.name])
-      throw file.errorWithNode(prop, `Duplicate style prop! view ${state.inView} { ${name}.${prop.key.name} }`)
+      throw file.errorWithNode(prop, `Duplicate style property: view ${state.inView} { ${name} = { ${prop.key.name} } }`)
 
     duplicate[prop.key.name] = true
 

@@ -32,7 +32,7 @@ export default function handleError(handle) {
     errorClient.captureException(error)
 
     error.message = unicodeToChar(error.message)
-    error.stack = unicodeToChar(error.stack)
+    error.stack = unicodeToChar(error.stack || error.codeFrame)
 
     logError(error)
 
