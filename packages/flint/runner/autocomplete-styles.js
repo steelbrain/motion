@@ -1,60 +1,61 @@
 'use babel'
 
-export default {
-  color: {
+export default [
+  {
+    name: 'color',
     description: 'Sets the text color',
     auto: '#333333',
     strength: 100
   },
-
-  margin: {
+  {
+    name: 'margin',
     description: 'Spacing around an element',
     auto: 10,
     strength: 100
   },
-
-  flexDirection: {
+  {
+    name: 'flexDirection',
     description: 'Row or Column, sets direction element flows in',
     options: ['row', 'col']
   },
-
-  height: {
+  {
+    name: 'height',
     auto: 300,
     strength: 80,
     options: [300, '100%']
   },
-
-  width: {
+  {
+    name: 'width',
     auto: 300,
     strength: 80,
     options: [300, '100%']
   },
-
-  border: {
+  {
+    name: 'border',
     auto: '1px solid #333',
     strength: 100
   },
-
-  background: {
+  {
+    name: 'background',
     auto: '#eee',
     strength: 100
   },
-
-  textAlign: {
+  {
+    name: 'textAlign',
     auto: 'center',
     options: ['left', 'center', 'right'],
     strength: 80
   },
-
-  fontSize: {
+  {
+    name: 'fontSize',
     description: 'Sets size of text',
     auto: 24,
     strength: 100
   },
-
-  padding: {
+  {
+    name: 'padding',
     description: 'Spacing inside an element',
     auto: 10,
     strength: 100
   }
-}
+]
