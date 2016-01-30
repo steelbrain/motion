@@ -79,8 +79,13 @@ function runAutocomplete(bridge) {
   const autocomplete = new Autocomplete()
   bridge.onMessage('editor:autocomplete', function(message) {
     const id = message.id
-    const suggestions = autocomplete.provideAutocomplete(message.text, message.position)
-    bridge.broadcast('editor:autocomplete', {id, suggestions})
+    try  {
+      const suggestions = autocomplete.provideAutocomplete(message.text, message.position)
+      bridge.broadcast('editor:autocomplete', {id, suggestions})
+    } catch (_) {
+      logError(_)
+      bridge.broadcast('editor:autocomplete', {id, suggestions: []})
+    }
   })
 }
 
