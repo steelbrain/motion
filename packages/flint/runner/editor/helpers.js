@@ -17,7 +17,7 @@ export function transformText(text, {
   onMeta = null,
   onImports = null,
   onExports = null
-  }) {
+}) {
   let toReturn = ''
   Parser.pre('unknown', text, function(text) {
     toReturn = babelTransform(text, getBabelConfig({
