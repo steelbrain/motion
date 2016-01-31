@@ -119,7 +119,6 @@ export default class Autocomplete {
       return b.matchScore - a.matchScore
     }).filter(function(suggestion) {
       const key = suggestion.name.substr(1)
-      console.log(key, Object.keys(view.styles), key in view.styles)
       return !(key in view.styles)
     })
     if (prefix !== '') {
