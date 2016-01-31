@@ -10,7 +10,7 @@ import cache from './cache'
 import keys from './keys'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
-import Autocomplete from './autocomplete'
+import Autocomplete from './editor/autocomplete'
 
 // welcome to flint!
 

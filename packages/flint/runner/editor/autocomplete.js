@@ -3,7 +3,7 @@
 import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
 import {decamelize} from 'humps'
-import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './helpers'
+import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './../helpers'
 import Styles from './autocomplete-styles'
 
 export const POSITION_TYPE = {
