@@ -23,8 +23,16 @@ export default class Editor {
 
   complete(text, position) {
     const point = Point.fromObject(position)
-    const positionInfo = this.positionInfo(text, point)
+    let positionInfo
 
+    // Do not log syntax errors to console
+    try {
+      positionInfo = this.positionInfo(text, point)
+    } catch (_) {
+      return []
+    }
+
+    // Errors caught here are probably internal, log them so we can debug
     try {
       return this.autocomplete.complete(text, point, positionInfo)
     } catch (_) {
