@@ -104,7 +104,7 @@ export default class Autocomplete {
       return []
     }
     prefix = prefix[1]
-    const suggestions = []
+    let suggestions = []
     for (const key in view.els) {
       const name = '$' + key
       suggestions.push({
@@ -115,15 +115,18 @@ export default class Autocomplete {
         matchScore: string_score(name, prefix)
       })
     }
-    suggestions.sort(function(a, b) {
+    suggestions = suggestions.sort(function(a, b) {
       return b.matchScore - a.matchScore
+    }).filter(function(suggestion) {
+      const key = suggestion.name.substr(1)
+      console.log(key, Object.keys(view.styles), key in view.styles)
+      return !(key in view.styles)
     })
-    if (prefix === '') {
-      return suggestions
-    } else {
-      return suggestions.filter(function(item) {
+    if (prefix !== '') {
+      suggestions = suggestions.filter(function(item) {
         return item.matchScore !== 0
       })
     }
+    return suggestions
   }
 }
