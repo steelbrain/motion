@@ -49,10 +49,14 @@ export async function willInstall(filePath) {
 
 // finds the new externals to install
 export async function getNew(requires, installed) {
+  if (!requires.length) return requires
+
   // get all installed
   installed = installed || await readInstalled()
 
   const names = normalize(requires)
+  if (!names.length) return names
+
   const fresh = _.difference(names, installed, installing)
   log.externals('DOWN', '  ', names)
   log.externals('DOWN', '- ', installed)
@@ -63,7 +67,8 @@ export async function getNew(requires, installed) {
 
 export async function installAll(requires) {
   try {
-    requires = requires || cache.getExternals()
+    if (!requires) requires = cache.getExternals()
+    if (!requires.length) return requires
 
     // nothing to install
     if (!requires.length && !_isInstalling && opts('finishingFirstBuild'))

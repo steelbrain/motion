@@ -26,7 +26,7 @@ export default function log(info, subIcon, ...args) {
 
   const isInfo = typeof info == 'object' && info.name && info.icon
 
-  let name, icon, subiout
+  let icon, subiout
 
   if (isInfo) {
     const subi = subIcons[subIcon]
@@ -41,7 +41,7 @@ export default function log(info, subIcon, ...args) {
   // all
   if (!debug.length) return doLog()
   // filtered
-  if (name && debug.indexOf(name) >= 0) doLog()
+  if (info.name && debug.indexOf(info.name) >= 0) doLog()
 }
 
 log.externals = log.bind(null, { name: 'externals', icon: '🚀' })
@@ -61,4 +61,16 @@ function colorArgs(args) {
 
 log.setLogging = function() {
   debug = opts('debug')
+}
+
+let timeName = null
+let startTime = null
+
+log.start = (name) => {
+  timeName = name
+  startTime = Date.now()
+}
+
+log.end = () => {
+  console.log('TIME', timeName, Date.now() - startTime)
 }
