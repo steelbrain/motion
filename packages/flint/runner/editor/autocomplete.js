@@ -18,22 +18,24 @@ const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 export default class Autocomplete {
   provideAutocomplete(text, position) {
     position = Point.fromObject(position)
+
     const views = this.scanViews(text)
     const viewsActive = getObjectAtPosition(views, position)
+
     if (viewsActive === null) {
-      // We're at top level in file
       return []
     }
+
     const viewsPosition = this.getPositionInfo(viewsActive, position)
+
     if (viewsPosition === POSITION_TYPE.STYLE) {
-      // css
       return this.completeStyle(text, position)
     } else if (viewsPosition === POSITION_TYPE.VIEW_JSX) {
-      // jsx tags
+      // TODO: Autocomplete jsx tags maybe?
     } else if (viewsPosition === POSITION_TYPE.VIEW_TOP) {
-      // maybe autocomplete $h1?
       return this.completeViewNames(viewsActive, text, position)
     }
+
     return []
   }
   scanViews(text) {
