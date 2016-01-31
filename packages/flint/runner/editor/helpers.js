@@ -19,7 +19,8 @@ export function transformText(text, {
   onExports = null
 }) {
   let toReturn = ''
-  Parser.pre('unknown', text, function(text) {
+  // Setting this key so it's easier to distinguish in debug output
+  Parser.pre('__editor__', text, function(text) {
     toReturn = babelTransform(text, getBabelConfig({
       log, writeStyle, onMeta, onImports, onExports
     }))
