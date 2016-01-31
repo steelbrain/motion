@@ -3,8 +3,10 @@
 import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
 import {decamelize} from 'humps'
-import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './../helpers'
+import {CompositeDisposable} from 'sb-event-kit'
 import Styles from './autocomplete-styles'
+import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './../helpers'
+import {logError} from '../lib/fns'
 
 export const POSITION_TYPE = {
   VIEW_TOP: 'VIEW_TOP',
@@ -16,6 +18,25 @@ const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
+  constructor() {
+    this.subscriptions = new CompositeDisposable()
+  }
+  activate(bridge) {
+    this.subscriptions.add(bridge.onMessage('editor:autocomplete', function(message) {
+      const id = message.id
+      try  {
+        const suggestions = autocomplete.provideAutocomplete(message.text, message.position)
+        bridge.broadcast('editor:autocomplete', {id, suggestions})
+      } catch (_) {
+        logError(_)
+        bridge.broadcast('editor:autocomplete', {id, suggestions: []})
+      }
+    }))
+  }
+  dispose() {
+    this.subscriptions.dispose()
+  }
+
   provideAutocomplete(text, position) {
     position = Point.fromObject(position)
 
