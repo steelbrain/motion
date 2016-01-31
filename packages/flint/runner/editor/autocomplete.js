@@ -1,62 +1,33 @@
 'use babel'
 
-import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
 import {decamelize} from 'humps'
 import Styles from './autocomplete-styles'
-import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './../helpers'
+import {POSITION_TYPE, getRowFromText} from './helpers'
 
-export const POSITION_TYPE = {
-  VIEW_TOP: 'VIEW_TOP',
-  VIEW_JSX: 'VIEW_JSX',
-  STYLE: 'STYLE'
-}
 const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *(['"]?([^,"]*))$/
 const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
-  complete(text, position) {
-    position = Point.fromObject(position)
+  complete(text, position, positionInfo) {
 
-    const views = this.scanViews(text)
-    const viewsActive = getObjectAtPosition(views, position)
-
-    if (viewsActive === null) {
+    if (positionInfo.active === null) {
       return []
     }
 
-    const viewsPosition = this.getPositionInfo(viewsActive, position)
-
-    if (viewsPosition === POSITION_TYPE.STYLE) {
+    if (positionInfo.position === POSITION_TYPE.STYLE) {
       return this.completeStyle(text, position)
-    } else if (viewsPosition === POSITION_TYPE.VIEW_JSX) {
+    }
+
+    if (positionInfo.position === POSITION_TYPE.VIEW_JSX) {
       // TODO: Autocomplete jsx tags maybe?
-    } else if (viewsPosition === POSITION_TYPE.VIEW_TOP) {
-      return this.completeViewNames(viewsActive, text, position)
+      return []
     }
 
-    return []
-  }
-
-  scanViews(text) {
-    let views = {}
-    transformText(text, {
-      onMeta: function(meta) {
-        views = meta.views
-      }
-    })
-    return views
-  }
-
-  getPositionInfo(view, position) {
-    if (getObjectAtPosition(view.els, position)) {
-      return POSITION_TYPE.VIEW_JSX
+    if (positionInfo.position === POSITION_TYPE.VIEW_TOP) {
+      return this.completeViewNames(positionInfo.active, text, position)
     }
-    if (getObjectAtPosition(view.styles, position)) {
-      return POSITION_TYPE.STYLE
-    }
-    return POSITION_TYPE.VIEW_TOP
   }
 
   completeStyle(text, position) {

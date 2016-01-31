@@ -1,8 +1,10 @@
 'use babel'
 
+import Point from 'atom-text-buffer-point'
 import {CompositeDisposable} from 'sb-event-kit'
 import Autocomplete from './autocomplete'
 import {logError} from '../lib/fns'
+import {transformText, getObjectAtPosition, POSITION_TYPE} from './helpers'
 
 export default class Editor {
   constructor() {
@@ -11,20 +13,61 @@ export default class Editor {
 
     this.subscriptions.add(this.autocomplete)
   }
+
   activate(bridge) {
     this.subscriptions.add(bridge.onMessage('editor:autocomplete', message => {
       const suggestions = this.complete(message.text, message.position)
       bridge.broadcast('editor:autocomplete', {id: message.id, suggestions})
     }))
   }
+
   complete(text, position) {
+    const point = Point.fromObject(position)
+    const positionInfo = this.positionInfo(text, point)
+
     try {
-      return this.autocomplete.complete(text, position)
+      return this.autocomplete.complete(text, point, positionInfo)
     } catch (_) {
       logError(_)
       return []
     }
   }
+
+  positionInfo(text, position) {
+    const info = {
+      views: this.getViews(text),
+      active: null,
+      position: null
+    }
+    info.active = getObjectAtPosition(info.views, position)
+
+    if (info.active) {
+      info.position = this.getPositionInfo(info.active, position)
+    }
+
+    return info
+  }
+
+  getPositionInfo(view, position) {
+    if (getObjectAtPosition(view.els, position)) {
+      return POSITION_TYPE.VIEW_JSX
+    }
+    if (getObjectAtPosition(view.styles, position)) {
+      return POSITION_TYPE.STYLE
+    }
+    return POSITION_TYPE.VIEW_TOP
+  }
+
+  getViews(text) {
+    let views = {}
+    transformText(text, {
+      onMeta: function(meta) {
+        views = meta.views
+      }
+    })
+    return views
+  }
+
   dispose() {
     this.subscriptions.dispose()
   }
