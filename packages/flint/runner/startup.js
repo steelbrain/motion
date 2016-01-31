@@ -10,7 +10,7 @@ import cache from './cache'
 import keys from './keys'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
-import Autocomplete from './editor/autocomplete'
+import Editor from './editor'
 
 // welcome to flint!
 
@@ -75,9 +75,9 @@ export async function build(opts = {}) {
   }
 }
 
-function runAutocomplete(bridge) {
-  const autocomplete = new Autocomplete()
-  autocomplete.activate(bridge)
+function activateEditor(bridge) {
+  const editor = new Editor()
+  editor.activate(bridge)
 }
 
 //
@@ -89,7 +89,7 @@ export async function run(opts) {
     await startup(opts)
     if (opts.watch) gulp.assets()
     await server.run()
-    runAutocomplete(bridge)
+    activateEditor(bridge)
     bridge.activate()
     await gulpScripts()
     cache.serialize() // write out cache
