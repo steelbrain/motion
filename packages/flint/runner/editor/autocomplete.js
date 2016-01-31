@@ -21,6 +21,7 @@ export default class Autocomplete {
   constructor() {
     this.subscriptions = new CompositeDisposable()
   }
+
   activate(bridge) {
     this.subscriptions.add(bridge.onMessage('editor:autocomplete', function(message) {
       const id = message.id
@@ -33,11 +34,12 @@ export default class Autocomplete {
       }
     }))
   }
+
   dispose() {
     this.subscriptions.dispose()
   }
 
-  provideAutocomplete(text, position) {
+  complete(text, position) {
     position = Point.fromObject(position)
 
     const views = this.scanViews(text)
@@ -59,6 +61,7 @@ export default class Autocomplete {
 
     return []
   }
+
   scanViews(text) {
     let views = {}
     transformText(text, {
@@ -68,6 +71,7 @@ export default class Autocomplete {
     })
     return views
   }
+
   getPositionInfo(view, position) {
     if (getObjectAtPosition(view.els, position)) {
       return POSITION_TYPE.VIEW_JSX
@@ -77,6 +81,7 @@ export default class Autocomplete {
     }
     return POSITION_TYPE.VIEW_TOP
   }
+
   completeStyle(text, position) {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
     const value = STYLE_VALUE_REGEX.exec(lineText)
@@ -86,6 +91,7 @@ export default class Autocomplete {
       return this.completeStyleKey(lineText)
     }
   }
+
   completeStyleKey(lineText) {
     const suggestions = Styles.slice()
     suggestions.sort(function(a, b) {
@@ -112,6 +118,7 @@ export default class Autocomplete {
       return item.matchScore !== 0
     })
   }
+
   completeStyleValue(name, prefix, scoreBase) {
     let suggestion = null
     for (const entry of Styles) {
@@ -140,6 +147,7 @@ export default class Autocomplete {
       return b.matchScore - a.matchScore
     })
   }
+
   completeViewNames(view, text, position) {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
     let prefix = VIEW_NAME_REGEX.exec(lineText)
