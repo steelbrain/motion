@@ -6,7 +6,7 @@ import Styles from './autocomplete-styles'
 import {POSITION_TYPE, getRowFromText} from './helpers'
 
 const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *(['"]?([^,"]*))$/
-const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
+const VIEW_NAME_REGEX = /^\s*(\$[a-zA-Z0-9]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
