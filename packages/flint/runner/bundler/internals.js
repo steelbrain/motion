@@ -2,7 +2,6 @@ import { finishedInstalling } from './install'
 import { webpack } from '../lib/require'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
-import { readInstalled } from './lib/readInstalled'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import requireString from './lib/requireString'
 import bridge from '../bridge'
@@ -25,6 +24,7 @@ export async function internals() {
   }
 }
 
+// TODO move to writer
 async function writeInternalsIn() {
   const files = cache.getExported()
   await writeFile(opts('deps').internalsIn, requireString(files, {
@@ -35,7 +35,6 @@ async function writeInternalsIn() {
 
 let runningBundle = null
 
-// TODO: check this in babel to be more accurate
 export async function checkInternals(file, source) {
   if (opts('hasRunInitialBuild') && cache.isInternal(file) && !runningBundle) {
     clearTimeout(runningBundle)
