@@ -43,6 +43,7 @@ out.goodFile = symbol => (file, ms) => console.log(
     `  ${chalk.dim(symbol)} ${chalk.bold(relative(file))} `
     + chalk.dim(file.startTime ? time((Date.now() - file.startTime) || 1).dim : '')
 )
+out.goodScript = out.goodFile('-')
 
 // TODO bad practice
 let fileImports = {}
@@ -318,49 +319,37 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return true
 
     // already done with first build
-    if (hasBuilt())
-      return false
+    if (hasBuilt()) return false
 
     // hide behind cached flag for now
     if (!opts('cached')) {
-      finish()
+      markDone(file)
       return false
     }
 
-    debug('buildCheck', file.path)
-
-    function finish() {
-      debug('buildCheck finish')
-      cache.restorePrevious(file.path)
-
-      markDone(file)
-    }
-
+    // TODO this is safe for build now, but we can check SHA and have
+    // more confidence, and then remove this
     if (isBuilding()) {
       finish()
       return false
     }
 
-    const outFile = path.join(OPTS.outDir, path.relative(OPTS.appDir, file.path))
     const prevFile = cache.getPrevious(file.path)
-
-    // if exported file, mark done and skip
-    if (prevFile && prevFile.isInternal) {
-      finish()
-      return false
-    }
+    if (!prevFile) return false
 
     let outMTime, srcMTime
 
-    try {
-      srcMTime = fs.statSync(file.path).mtime
-    }
-    catch(e) {
-      debug('buildCheck', 'src file removed')
-      return false
-    }
+    // read srcfile
+    try { srcMTime = fs.statSync(file.path).mtime }
+    catch(e) { return false }
 
+    // read outfile
     try {
+      const relPath = path.relative(OPTS.appDir, file.path)
+      const outFile = prevFile.isInternal
+        ? path.join(OPTS.deps.dir, 'internal', relPath)
+        : path.join(OPTS.outDir, relPath)
+
       outMTime = fs.statSync(outFile).mtime
     }
     catch(e) {
@@ -369,23 +358,19 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
     }
 
+    // final check
     const goodBuild = +outMTime > +srcMTime
-
-    if (!goodBuild)
-      return false
-
-    const cached = cache.getPrevious(file.path)
-
-    if (!cached)
-      return false
-
-    const goodCache = cached.added > srcMTime
-
-    if (!goodCache)
-      return false
-
+    const goodCache = prevFile.added > srcMTime
+    if (!goodBuild || !goodCache) return false
     finish()
     return true
+
+    function finish() {
+      cache.restorePrevious(file.path)
+      out.goodScript(file)
+      markDone(file)
+      afterWrite(file)
+    }
   }
 
   function resetLastFile(file) {
@@ -534,7 +519,7 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   function markFileSuccess(file) {
     if (isSourceMap(file.path)) return
 
-    out.goodFile('-')(file)
+    out.goodScript(file)
 
     debug('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall)
 

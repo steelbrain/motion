@@ -16,7 +16,11 @@ export async function init() {
 
   await mkdir(opts('internalDir'))
   await mkdir(opts('styleDir'))
-  await recreateDir(opts('outDir'))
+
+  if (opts('cached'))
+    await mkdir(opts('outDir'))
+  else
+    await recreateDir(opts('outDir'))
 }
 
 export async function internalDir() {
