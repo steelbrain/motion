@@ -327,13 +327,6 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
       return false
     }
 
-    // TODO this is safe for build now, but we can check SHA and have
-    // more confidence, and then remove this
-    if (isBuilding()) {
-      finish()
-      return false
-    }
-
     const prevFile = cache.getPrevious(file.path)
     if (!prevFile) return false
 
@@ -362,14 +355,18 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
     const goodBuild = +outMTime > +srcMTime
     const goodCache = prevFile.added > srcMTime
     if (!goodBuild || !goodCache) return false
-    finish()
-    return true
+    return finish(true)
 
-    function finish() {
-      cache.restorePrevious(file.path)
-      out.goodScript(file)
+    function finish(restored = false) {
       markDone(file)
-      afterWrite(file)
+
+      if (restored) {
+        cache.restorePrevious(file.path)
+        out.goodScript(file)
+        afterWrite(file)
+      }
+
+      return restored
     }
   }
 
