@@ -57,7 +57,7 @@ view DevBar {
   }
 
   $pin = {
-    position: 'abosulte',
+    position: 'absolute',
     right: 10,
     top: 3,
   }
