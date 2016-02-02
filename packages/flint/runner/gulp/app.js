@@ -7,7 +7,7 @@ export async function app() {
   try {
     const dest = p(opts('buildDir'), '_')
     const deps = opts('deps')
-    const minify = !opts('nomin')
+    const minify = opts('config').minify
 
     let appFiles = await readdir(opts('outDir'))
     appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()

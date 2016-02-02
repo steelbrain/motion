@@ -210,13 +210,13 @@ function run() {
       process.send(JSON.stringify({ host, port }))
     }
 
-    var host = 'localhost'
-    let port = OPTS.port || OPTS.defaultPort
+    const host = OPTS.config.host || 'localhost'
+    const port = OPTS.config.port || OPTS.defaultPort
 
     // if no specified port, find open one
-    if (!OPTS.port) {
+    if (!OPTS.config.port) {
       portfinder.basePort = port
-      portfinder.getPort({ host: 'localhost' },
+      portfinder.getPort({ host },
         handleError(serverListen)
       )
     }

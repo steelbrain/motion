@@ -6,47 +6,36 @@ import util from 'util'
 
 let OPTS = {}
 
-export async function init(opts) {
-  setup(opts)
-
-  const { flint, babel, webpack } = await loadConfigs()
-  OPTS.config = flint || {}
-  OPTS.babel = babel
-  OPTS.webpack = webpack
-}
-
-async function loadConfigs() {
-  const flint = await flintConfig()
-  return { flint }
-}
-
-async function flintConfig() {
-  try { return await readJSON(OPTS.configFile) }
-  catch(e) { handleError({ message: 'Error parsing config file: .flint/flint.json', stack: e.stack }) }
-}
-
-function setup(opts) {
-  OPTS = {}
-  OPTS.appDir = opts.appDir || path.normalize(process.cwd())
+export async function init(cli) {
+  // init
+  OPTS.appDir = path.normalize(process.cwd())
   OPTS.name = opts.name || path.basename(process.cwd())
   OPTS.saneName = sanitize(opts.name)
-
-  // cli
-
-  OPTS.version = opts.version
-  OPTS.debug = opts.debug
-  OPTS.port = opts.port
-  OPTS.host = opts.host
-  OPTS.watch = opts.watch
-  OPTS.pretty = opts.pretty
-  OPTS.reset = opts.reset
-  OPTS.cached = opts.cached
-  OPTS.nomin = opts.nomin
-  OPTS.build = opts.build
-
   OPTS.hasRunInitialBuild = false
   OPTS.defaultPort = 4000
 
+  setupDirs()
+
+  // config
+  const config = await loadConfigs(cli)
+  setupConfig(cli, config)
+}
+
+async function loadConfigs() {
+  return await flintConfig()
+}
+
+async function flintConfig() {
+  try {
+    const config = await readJSON(OPTS.configFile)
+    return config[OPTS.build ? 'build' : 'run']
+  }
+  catch(e) {
+    handleError({ message: 'Error parsing config file: .flint/flint.json' })
+  }
+}
+
+function setupDirs() {
   // base dirs
   OPTS.flintDir = p(OPTS.appDir, '.flint')
   OPTS.modulesDir = p(OPTS.flintDir, 'node_modules')
@@ -70,12 +59,29 @@ function setup(opts) {
   OPTS.outDir = p(OPTS.internalDir, 'out')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
   OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
+}
 
-  OPTS.config = {}
+function setupConfig(cli, config) {
+  OPTS.version = cli.version
+  OPTS.debug = cli.debug
+  OPTS.watch = cli.watch
+  OPTS.reset = cli.reset
+  OPTS.build = cli.build
 
-  var folders = OPTS.appDir.split('/')
-  OPTS.name = folders[folders.length - 1]
-  OPTS.url = OPTS.name + '.dev'
+  // config
+  OPTS.config = Object.assign(
+    {
+      minify: true,
+      debug: false,
+    },
+    config
+  )
+
+  // cli overrides config
+  if (cli.nomin) OPTS.config.minify = false
+  if (cli.pretty) OPTS.config.pretty = true
+  if (cli.port) OPTS.config.port = cli.port
+  if (cli.host) OPTS.config.host = cli.host
 }
 
 export function set(key, val) {

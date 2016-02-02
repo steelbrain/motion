@@ -1,10 +1,10 @@
 import TransformPlugin from './transform'
-import getOption from './opts'
+import opts from './opts'
 
 export const transformPlugin = new TransformPlugin()
 
 export function isProduction() {
-  return getOption('build')
+  return opts('build')
 }
 
 export function getBabelConfig(config) {
@@ -13,7 +13,7 @@ export function getBabelConfig(config) {
     jsxPragma: 'view.el',
     stage: 1,
     blacklist: ['es6.tailCall', 'strict'],
-    retainLines: getOption('pretty') ? false : true,
+    retainLines: opts('config').pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],
     plugins: [transformPlugin.get(config)],
