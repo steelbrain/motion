@@ -21,6 +21,8 @@ export default {
       options.onMeta(state.meta)
     }
 
+    const location = relativePath(file.opts.filename)
+
     if (!state.hasExports) {
       // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(
