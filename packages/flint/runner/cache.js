@@ -67,7 +67,7 @@ const Cache = {
         const state = await disk.state.read()
         previousCache = state.cache
 
-        Cache.setBaseDir(opts('dir'))
+        Cache.setBaseDir(opts('appDir'))
       }
       catch(e) {
         handleError(e)

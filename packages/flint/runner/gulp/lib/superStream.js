@@ -1,13 +1,12 @@
-import { gulp } from './helpers'
-import { event } from '../index'
-
 import { Readable } from 'stream'
 import File from 'vinyl'
 import nodepath from 'path'
+import { gulp } from './helpers'
+import { event } from '../index'
 import opts from '../../opts'
 import cache from '../../cache'
 import bridge from '../../bridge'
-import { _, path, log, readFile, handleError, vinyl } from '../lib/fns'
+import { _, path, log, readFile, handleError, vinyl } from '../../lib/fns'
 
 // time we wait for browser load before we just force push
 const UPPER_WAIT_LIMIT = 2000

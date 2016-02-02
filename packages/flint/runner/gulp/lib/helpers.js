@@ -1,7 +1,7 @@
-import gulp from 'gulp'
+import _gulp from 'gulp'
+import _babel from './gulp-babel'
 import through from 'through2'
 import loadPlugins from 'gulp-load-plugins'
-import babel from './gulp-babel'
 import { _, opts, path, log } from '../../lib/fns'
 import { getBabelConfig } from '../../helpers'
 
@@ -15,16 +15,17 @@ export const out = {
       `  ${chalk.dim(symbol)} ${chalk.bold(relative(file))} `
       + chalk.dim(file.startTime ? time((Date.now() - file.startTime) || 1).dim : '')
   ),
-  goodScript = out.goodFile('-')
+  goodScript: out.goodFile('-')
 }
 
 export const $ = loadPlugins()
 export const isBuilding = () => opts('build') && !opts('watch')
 export const hasBuilt = () => opts('hasRunInitialBuild')
 export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
+export const isProduction = () => opts('build')
 
-export babel
-export gulp
+export const babel = _babel
+export const gulp = _gulp
 
 export function pipefn(fn) {
   return through.obj(function(file, enc, next) {
