@@ -100,4 +100,7 @@ function loadWaiting(path) {
   if (queued) queued()
 }
 
-export default { init, stream }
+export default {
+  init,
+  stream
+}

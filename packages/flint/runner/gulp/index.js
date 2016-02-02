@@ -1,18 +1,16 @@
 import { _, p, rm, glob, readdir, opts, handleError } from '../lib/fns'
 import writeStyle from '../lib/writeStyle'
-import { buildScripts } from './scripts'
+import superStream from './lib/superStream'
+import { isBuilding } from './lib/helpers'
+import { scripts, afterBuild } from './scripts'
+import { app } from './app'
+import { assets } from './assets'
 
-export async function init({ once = false } = {}) {
+async function init({ once = false } = {}) {
   try {
     writeStyle.init()
 
-    // if manually running a once
-    // if (once) {
-    //   hasRunCurrentBuild = false
-    // }
-
     if (!isBuilding()) {
-      watchDeletes()
       superStream.init()
     }
 
@@ -28,7 +26,7 @@ export async function init({ once = false } = {}) {
     await * deletedPaths.map(f => rm(f))
     log.gulp('deleted', deletedPaths)
 
-    buildScripts({ inFiles, outFiles })
+    scripts({ inFiles, outFiles })
   }
   catch(e) {
     handleError(e)
@@ -37,10 +35,20 @@ export async function init({ once = false } = {}) {
 
 // listen to gulp events
 let listeners = {}
-
-export function event(name, cb) {
+function event(name, cb) {
   listeners[name] = listeners[name] || []
   listeners[name].push(cb)
 }
-
 event.run = (name, file, data) => listeners[name] && listeners[name].forEach(cb => cb(file, data))
+
+
+// exports
+
+export default {
+  init,
+  scripts,
+  afterBuild,
+  assets,
+  app,
+  event
+}

@@ -19,6 +19,9 @@ export const out = {
 }
 
 export const $ = loadPlugins()
+export const isBuilding = () => opts('build') && !opts('watch')
+export const hasBuilt = () => opts('hasRunInitialBuild')
+export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 
 export babel
 export gulp

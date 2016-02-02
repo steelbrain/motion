@@ -21,7 +21,7 @@ export default async function build({ bundle = true } = {}) {
     makeTemplate()
 
     await *[
-      gulp.bundleApp(),
+      gulp.app(),
       copy.flint(),
       copy.react(),
       copy.styles()
