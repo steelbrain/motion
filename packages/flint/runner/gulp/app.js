@@ -1,5 +1,5 @@
 import flintTransform from 'flint-transform'
-import { $, gulp, babel } from './lib/helpers'
+import { $, gulp, babel, isSourceMap } from './lib/helpers'
 import { opts, p, readdir, handleError } from '../lib/fns'
 
 export default async function bundleApp() {

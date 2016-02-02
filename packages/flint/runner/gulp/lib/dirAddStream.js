@@ -1,8 +1,8 @@
 import { Readable } from 'stream'
 import File from 'vinyl'
 import chokidar from 'chokidar'
-import { p, path, handleError, readdir, readFile, vinyl } from '../lib/fns'
-import opts from '../opts'
+import { p, path, handleError, readdir, readFile, vinyl } from '../../lib/fns'
+import opts from '../../opts'
 
 // TODO copying a directory of files over is broken in gulp.watch / gulp-watch
 // when a whole dir is copied in, find files and push into stream

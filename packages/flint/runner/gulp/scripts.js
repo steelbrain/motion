@@ -1,11 +1,10 @@
 import { event } from './index'
-import { $, gulp, pipefn, babel } from './helpers'
+import { $, gulp, pipefn, babel, isSourceMap } from './helpers'
+import SCRIPTS_GLOB from './lib/scriptsGlob'
 
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
-import through from 'through2'
-
 import bridge from './bridge'
 import cache from './cache'
 import builder from './builder'
@@ -13,45 +12,35 @@ import bundler from './bundler'
 import superStream from './lib/superStream'
 import dirAddStream from './lib/dirAddStream'
 import opts from './opts'
-
 import onMeta from './lib/onMeta'
 import chalk from 'chalk'
 import { findBabelRuntimeRequires } from './lib/findRequires'
-import SCRIPTS_GLOB from './const/scriptsGlob'
 import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from './lib/fns'
 import { isProduction } from './helpers'
 
 // TODO bad practice
 let fileImports = {}
+let buildingOnce = false
+let hasRunCurrentBuild = true
+
+// helpers
+export const isBuilding = () => buildingOnce || (opts('build') && !opts('watch'))
+export const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
+export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 
 const $p = {
   flint: {
     pre: () => compiler('pre'),
     post: () => compiler('post')
   },
-
   flintFile: () => babel(getBabelConfig({
     log,
     writeStyle: writeStyle.write,
     onMeta,
-    onImports(file, imports) {
-      fileImports[file] = imports
-    },
-    onExports(file, val) {
-      cache.setFileInternal(file, val)
-    }
+    onImports(file, imports) { fileImports[file] = imports },
+    onExports(file, val) { cache.setFileInternal(file, val) }
   }))
 }
-
-
-// ||
-// ||  BUILD
-// ||
-
-
-// ||
-// ||  RUN / BUILD WATCH
-// ||
 
 export function buildScripts({ inFiles, outFiles, userStream }) {
   let State = {
@@ -352,25 +341,11 @@ export function buildScripts({ inFiles, outFiles, userStream }) {
   }
 }
 
-export function buildWhileRunning() {
-  return new Promise((res, rej) => {
-    gulp.src(['.flint/.internal/out/**/*.js'])
-      .pipe($.plumber(err => {
-        logError(err)
-        rej(err)
-      }))
-      .pipe($.concat(`${OPTS.saneName}.js`))
-      .pipe(gulp.dest(p(OPTS.buildDir, '_')))
-      .pipe(pipefn(res))
-  });
-}
-
 let waitingForFirstBuild = []
-function afterBuild() {
+
+export function afterBuild() {
   return new Promise((res, rej) => {
     if (hasFinished()) return res()
     else waitingForFirstBuild.push(res)
   })
 }
-
-export default { init, buildScripts, bundleApp, afterBuild, event, assets }

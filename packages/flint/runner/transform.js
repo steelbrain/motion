@@ -1,5 +1,3 @@
-'use babel'
-
 import FlintTransform from 'flint-transform'
 import {CompositeDisposable, Emitter} from 'sb-event-kit'
 import {isProduction} from './helpers'

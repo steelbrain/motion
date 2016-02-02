@@ -1,15 +1,12 @@
 import gulp from 'gulp'
-import compiler from './compiler'
+import through from 'through2'
 import loadPlugins from 'gulp-load-plugins'
-import babel from './lib/gulp-babel'
-import { _, opts, path, log } from './lib/fns'
-import { getBabelConfig } from '../helpers'
+import babel from './gulp-babel'
+import { _, opts, path, log } from '../../lib/fns'
+import { getBabelConfig } from '../../helpers'
 
 export const serializeCache = _.throttle(cache.serialize, 200)
 export const isSourceMap = file => path.extname(file) === '.map'
-export const isBuilding = () => buildingOnce || (opts('build') && !opts('watch'))
-export const hasBuilt = () => hasRunCurrentBuild && opts('hasRunInitialBuild')
-export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 export const relative = file => path.relative(opts('appDir'), file.path)
 export const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 export const out = {

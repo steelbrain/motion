@@ -1,6 +1,9 @@
-import bridge from '../bridge'
-import cache from '../cache'
-import exec from './exec'
+// handles meta info on views passed from babel
+// eventually given to atom for IDE
+
+import bridge from '../../bridge'
+import cache from '../../cache'
+import exec from '../../lib/exec'
 
 type Meta = {
   file: string;

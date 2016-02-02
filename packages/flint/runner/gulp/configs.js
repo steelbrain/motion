@@ -1,4 +1,5 @@
-import gulp from 'gulp'
+import { $, gulp, isProduction } from './lib/helpers'
+import { opts } from '../lib/fns'
 
 export function configs(src, { dest, combine, minify, wrap }) {
   return new Promise((resolve, reject) => {
