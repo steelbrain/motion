@@ -36,8 +36,5 @@ export default function createElement(identifier : Identifier, _props, ...args) 
 
   const tag = props.tagName || (el.whitelisted ? DIV : el.component || el.name)
 
-  if (tag === 'svg')
-    console.log(props)
-
   return React.createElement(tag, props, ...args)
 }
