@@ -5,7 +5,6 @@ import createWriter from './lib/createWriter'
 
 export async function init() {
   await createWriters()
-  await ensureConfigFile()
 }
 
 let writers = {
@@ -52,23 +51,6 @@ async function createWriters() {
   writers.externalsWriter = await createWriter(opts('deps').externalsIn, {
     debug: 'externals'
   })
-}
-
-async function ensureConfigFile() {
-  try {
-    let config = await readJSON(opts('configFile'))
-
-    // set config in opts
-    opts.set('config', config)
-
-    // set specific
-    let conf = (opts('build') ? config.build : config.run) || {}
-    opts.set('nomin', conf.minify === 'false')
-
-  }
-  catch(e) {
-    handleError({ message: 'Error parsing config file: .flint/flint.json', stack: e.stack })
-  }
 }
 
 export async function writeServerState() {

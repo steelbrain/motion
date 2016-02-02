@@ -1,3 +1,5 @@
+import { event } from './index'
+
 import { Readable } from 'stream'
 import File from 'vinyl'
 import nodepath from 'path'

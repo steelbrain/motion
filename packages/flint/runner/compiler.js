@@ -4,40 +4,25 @@ import opts from './opts'
 import through from 'through2'
 import handleError from './lib/handleError'
 
-let views = []
-let OPTS
-
 const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
-let debouncers = {}
-function debounce(key, time, cb) {
-  if (debouncers[key])
-    clearTimeout(debouncers[key])
-
-  debouncers[key] = setTimeout(cb, time)
-}
+let views = []
 
 export var Parser = {
-  init(opts) {
-    OPTS = opts || {}
-  },
-
   async post(filePath, source, next) {
     try {
       const isInternal = cache.isInternal(filePath)
-
-      // scans
       const scan = () => bundler.scanFile(filePath, source)
-      const scanNow = OPTS.build || OPTS.watch || !opts('hasRunInitialBuild')
+      const scanNow = opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
-      // scan immediate on startup or building
+      // scan now on startup or build
       if (scanNow) scan()
-      // debounce scan during run
+      // debounce during run
       else debounce(filePath, 2000, scan)
 
       // building, done
-      if (OPTS.build && !OPTS.watch) {
+      if (opts('build') && !opts('watch')) {
         next(source, { isInternal })
         return
       }
@@ -94,10 +79,7 @@ export var Parser = {
   }
 }
 
-function compile(type, opts = {}) {
-  if (type == 'init')
-    return Parser.init(opts)
-
+function compile(type) {
   return through.obj(function(file, enc, next) {
     if (file.isNull()) {
       next(null, file)
@@ -119,5 +101,15 @@ function compile(type, opts = {}) {
     }
   })
 }
+
+
+let debouncers = {}
+function debounce(key, time, cb) {
+  if (debouncers[key])
+    clearTimeout(debouncers[key])
+
+  debouncers[key] = setTimeout(cb, time)
+}
+
 
 export default compile

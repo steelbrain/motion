@@ -6,22 +6,40 @@ import util from 'util'
 
 let OPTS = {}
 
-function set(key, val) {
-  log.opts('opts.set'.bold.yellow, key, val)
-  OPTS[key] = val
-  return val
+export async function init(opts) {
+  const config = await loadConfigs()
+  setAll(config, opts)
 }
 
-function get(key) {
-  return key ? OPTS[key] : OPTS
+function loadConfigs() {
+  // const configs = ['babel', 'webpack', 'flint']
 }
 
-function setAll(opts) {
-  // from cli
+async function flintConfig() {
+  try {
+    let config = await readJSON(opts('configFile'))
+
+    opts.set('config', config)
+
+    // set specific
+    let conf = (opts('build') ? config.build : config.run) || {}
+    opts.set('nomin', conf.minify === 'false')
+
+  }
+  catch(e) {
+    handleError({ message: 'Error parsing config file: .flint/flint.json', stack: e.stack })
+  }
+}
+
+function setAll(config, opts) {
   OPTS = {}
-
+  OPTS.config = config
+  OPTS.appDir = opts.appDir || path.normalize(process.cwd())
   OPTS.name = opts.name || path.basename(process.cwd())
   OPTS.saneName = sanitize(opts.name)
+
+  // cli based
+
 
   OPTS.version = opts.version
   OPTS.debug = opts.debug
@@ -39,7 +57,6 @@ function setAll(opts) {
   OPTS.defaultPort = 4000
 
   // base dirs
-  OPTS.appDir = opts.appDir
   OPTS.dir = OPTS.dir || opts.appDir
   OPTS.flintDir = p(OPTS.dir || opts.appDir, '.flint')
   OPTS.modulesDir = p(OPTS.flintDir, 'node_modules')
@@ -69,11 +86,19 @@ function setAll(opts) {
   var folders = OPTS.dir.split('/')
   OPTS.name = folders[folders.length - 1]
   OPTS.url = OPTS.name + '.dev'
-
-  return OPTS
 }
 
-async function serialize() {
+export function set(key, val) {
+  log.opts('opts.set'.bold.yellow, key, val)
+  OPTS[key] = val
+  return val
+}
+
+export function get(key) {
+  return key ? OPTS[key] : OPTS
+}
+
+export async function serialize() {
   await disk.state.write((state, write) => {
     state.opts = { ...OPTS }
     delete state.opts.state // prevent circular structure
@@ -81,17 +106,22 @@ async function serialize() {
   })
 }
 
-function debug() {
+export function debug() {
   console.log(util.inspect(OPTS, false, 10))
 }
 
+
+
+// this is bit funky, but lets us do:
+//   opts('dir') => path
+//   opts.set('dir', 'other')
 
 function opts(name) {
   return get(name)
 }
 
 opts.set = set
-opts.setAll = setAll
+opts.init = init
 opts.serialize = serialize
 opts.debug = debug
 

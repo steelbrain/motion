@@ -119,11 +119,11 @@ const Flint = {
       iff,
       noop: function(){},
 
-      // alpha
+      // beta
       _onViewInstance: (name, decorator) => !decorator
         ? Internal.instanceDecorator.all = name
         : Internal.instanceDecorator[name] = decorator,
-      _decorateView: (name, decorator) => !decorator
+      decorateView: (name, decorator) => !decorator
         ? Internal.viewDecorator.all = name
         : Internal.viewDecorator[name] = decorator,
 
@@ -154,7 +154,7 @@ const Flint = {
 
           const time = +(Date.now()) - timing.start
           if (!time) return
-          
+
           if (timing) {
             Flint.timer.lastTimes[view] = time
             delete Flint.timer.timing[view]
