@@ -13,6 +13,7 @@ export default function run(browser, opts) {
     },
 
     'script:add': msg => {
+      Flint.timer.lastMsgInfo = { start: msg.startTime }
       replaceScript(msg)
     },
 

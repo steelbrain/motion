@@ -45,7 +45,7 @@ function setBrowserLoading(path, isLoading) {
   if (!isLoading) loadWaiting(path)
 }
 
-function fileSend({ path, contents }) {
+function fileSend({ path, startTime, contents }) {
   // check if file actually in flint project
   if (!path || path.indexOf(basePath) !== 0 || relPath(path).indexOf('.flint') === 0 || !isFileType(path, 'js')) {
     debug('  file not js || not in path || in .flint', path)
@@ -64,6 +64,13 @@ function fileSend({ path, contents }) {
     // we may get another stream in before browser even starts loading
     setBrowserLoading(relative, true)
     const file = new File(vinyl(basePath, path, new Buffer(contents)))
+
+    const stackTime = [{
+      name: 'fileSend',
+      time: +(Date.now()) - startTime
+    }]
+    Object.assign(file, { startTime, stackTime })
+
     stream.push(file)
   }, sendImmediate)
 }
