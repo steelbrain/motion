@@ -1,5 +1,3 @@
-'use babel'
-
 import TransformPlugin from './transform'
 import getOption from './opts'
 

@@ -136,7 +136,7 @@ async function getExternalStyles() {
 
 async function makeTemplate(req) {
   try {
-    const templatePath = p(OPTS.dir, OPTS.template)
+    const templatePath = p(OPTS.appDir, OPTS.template)
     const template = await readFile(templatePath)
     const disableTools = devToolsDisabled(req)
     const scripts = await getScripts({ disableTools })
@@ -229,6 +229,8 @@ function run() {
 let ran = false
 
 process.on('message', function(opts) {
+  console.log('opts', opts)
+
   if (opts === 'EXIT')
     return process.exit(2)
 

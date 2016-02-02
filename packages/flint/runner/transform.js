@@ -1,7 +1,7 @@
 import FlintTransform from 'flint-transform'
-import {CompositeDisposable, Emitter} from 'sb-event-kit'
-import {isProduction} from './helpers'
-import getOption from './opts'
+import { CompositeDisposable, Emitter } from 'sb-event-kit'
+import { isProduction } from './gulp/lib/helpers'
+import opts from './opts'
 
 // The purpose of this class is to serve as a proxy to transform package
 // The transform package uses files instead of instances to store state
@@ -17,9 +17,9 @@ export default class Transform {
   get(config) {
     if (this.transform === null) {
       this.transform = FlintTransform.file({
-        basePath: getOption('dir'),
+        basePath: opts('dir'),
         production: isProduction(),
-        selectorPrefix: getOption('config').selectorPrefix || '#_flintapp ',
+        selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
         log: () => {
           this.emitter.emit('log', ...arguments)
         },

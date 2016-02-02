@@ -1,5 +1,15 @@
 import { event } from './index'
-import { $, gulp, SCRIPTS_GLOB, pipefn, babel, isBuilding, hasBuilt, hasFinished, isSourceMap } from './lib/helpers'
+import {
+  $,
+  gulp,
+  SCRIPTS_GLOB,
+  out,
+  pipefn,
+  babel,
+  isBuilding,
+  hasBuilt,
+  hasFinished,
+  isSourceMap } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
@@ -12,7 +22,8 @@ import superStream from './lib/superStream'
 import dirAddStream from './lib/dirAddStream'
 import opts from '../opts'
 import onMeta from './lib/onMeta'
-import chalk from 'chalk'
+import writeStyle from '../lib/writeStyle'
+import { getBabelConfig } from '../helpers'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
 import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from '../lib/fns'
 

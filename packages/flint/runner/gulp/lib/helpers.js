@@ -1,11 +1,11 @@
+import chalk from 'chalk'
 import _gulp from 'gulp'
 import _babel from './gulp-babel'
-import through from 'through2'
+import _through from 'through2'
 import loadPlugins from 'gulp-load-plugins'
 import { _, path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
-import { getBabelConfig } from '../../helpers'
 import scriptsGlob from './scriptsGlob'
 
 export const serializeCache = _.throttle(cache.serialize, 200)
@@ -27,12 +27,13 @@ export const hasBuilt = () => opts('hasRunInitialBuild')
 export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 export const isProduction = () => opts('build')
 
+export const through = _through
 export const babel = _babel
 export const gulp = _gulp
 export const SCRIPTS_GLOB = scriptsGlob
 
 export function pipefn(fn) {
-  return through.obj(function(file, enc, next) {
+  return _through.obj(function(file, enc, next) {
     let result = fn && fn(file)
 
     if (typeof result == 'string') {

@@ -10,7 +10,7 @@ export async function init(opts) {
   setup(opts)
 
   const { flint, babel, webpack } = await loadConfigs()
-  OPTS.config = flint
+  OPTS.config = flint || {}
   OPTS.babel = babel
   OPTS.webpack = webpack
 }
