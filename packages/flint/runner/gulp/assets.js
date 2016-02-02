@@ -1,9 +1,6 @@
 import { $, gulp } from './lib/helpers'
-import { opts, p, mkdir } from '../lib/fns'
-
-// ||
-// ||  ASSETS
-// ||
+import opts from '../opts'
+import { p, mkdir, handleError } from '../lib/fns'
 
 export async function assets() {
   try {

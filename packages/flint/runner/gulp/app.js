@@ -1,6 +1,7 @@
 import flintTransform from 'flint-transform'
 import { $, gulp, babel, isSourceMap, isProduction } from './lib/helpers'
-import { opts, p, readdir, handleError } from '../lib/fns'
+import opts from '../opts'
+import { p, readdir, handleError } from '../lib/fns'
 
 export async function app() {
   try {
@@ -8,7 +9,7 @@ export async function app() {
     const deps = opts('deps')
     const minify = !opts('nomin')
 
-    let appFiles = await readdir(OPTS.outDir)
+    let appFiles = await readdir(opts('outDir'))
     appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()
 
     if (minify)
