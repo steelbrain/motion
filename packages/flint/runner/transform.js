@@ -17,7 +17,7 @@ export default class Transform {
   get(config) {
     if (this.transform === null) {
       this.transform = FlintTransform.file({
-        basePath: opts('dir'),
+        basePath: opts('appDir'),
         production: isProduction(),
         selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
         log: () => {

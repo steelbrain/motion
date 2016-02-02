@@ -9,7 +9,9 @@ import {
   isBuilding,
   hasBuilt,
   hasFinished,
-  isSourceMap } from './lib/helpers'
+  isSourceMap,
+  serializeCache
+} from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'

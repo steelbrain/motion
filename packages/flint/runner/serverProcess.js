@@ -229,8 +229,6 @@ function run() {
 let ran = false
 
 process.on('message', function(opts) {
-  console.log('opts', opts)
-
   if (opts === 'EXIT')
     return process.exit(2)
 

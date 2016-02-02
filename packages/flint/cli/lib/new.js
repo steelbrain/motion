@@ -288,7 +288,7 @@ export default function run({ name, use, nocache, debug }) {
       message(opts.msg || cmd)
 
     return new Promise(function(resolve, reject) {
-      process.chdir(opts.dir || FLINT.dest)
+      process.chdir(opts.appDir || FLINT.dest)
       log(' $ ', cmd)
       exec(cmd, { uid: process.getuid() }, (...args) => {
         handleChildProcess(resolve, reject, ...args)
