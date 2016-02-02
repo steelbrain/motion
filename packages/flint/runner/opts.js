@@ -1,8 +1,10 @@
 import path from 'path'
 import log from './lib/log'
-import { p, sanitize, handleError, readJSON } from './lib/fns'
+import { p, sanitize, handleError, readJSON, touch } from './lib/fns'
 import disk from './disk'
 import util from 'util'
+// import webpack from 'webpack'
+// import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
 
 let OPTS = {}
 
@@ -21,7 +23,30 @@ export async function init(cli) {
   setupConfig(cli, config)
 }
 
+function readConfig() {
+  return new Promise((resolve, reject) => {
+    // touch(p(OPTS.flintDir, 'config.js'))
+
+    // webpack({
+    //   context: OPTS.flintDir,
+    //   entry: './config.js',
+    //   output: {
+    //     filename: 'config.js',
+    //     path: './internal'
+    //   }
+    //   // module: {
+    //   //   loaders: [
+    //   //     { test: /\.js$/, loader: babel }
+    //   //   ]
+    //   // }
+    // }, (err, stats) => {
+    //   handleWebpackErrors('externals', err, stats, resolve, reject)
+    // })
+  })
+}
+
 async function loadConfigs() {
+  // await readConfig()
   return await flintConfig()
 }
 
@@ -31,7 +56,7 @@ async function flintConfig() {
     return config[OPTS.build ? 'build' : 'run']
   }
   catch(e) {
-    handleError({ message: 'Error parsing config file: .flint/flint.json' })
+    handleError({ message: `Error parsing config file: ${OPTS.configFile}` })
   }
 }
 
