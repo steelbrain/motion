@@ -1,59 +1,35 @@
 'use babel'
 
-import Point from 'atom-text-buffer-point'
 import string_score from 'sb-string_score'
 import {decamelize} from 'humps'
-import {transformText, pointWithinRange, getObjectAtPosition, getRowFromText} from './helpers'
 import Styles from './autocomplete-styles'
+import {POSITION_TYPE, getRowFromText} from './helpers'
 
-export const POSITION_TYPE = {
-  VIEW_TOP: 'VIEW_TOP',
-  VIEW_JSX: 'VIEW_JSX',
-  STYLE: 'STYLE'
-}
 const STYLE_VALUE_REGEX = /['"]?(\S+)['"]?: *(['"]?([^,"]*))$/
-const VIEW_NAME_REGEX = /^\s*([a-zA-Z0-9$]*)$/
+const VIEW_NAME_REGEX = /^\s*(\$[a-zA-Z0-9]*)$/
 const PREFIX_REGEX = /['"]?([a-zA-Z0-9]+)$/
 
 export default class Autocomplete {
-  provideAutocomplete(text, position) {
-    position = Point.fromObject(position)
-    const views = this.scanViews(text)
-    const viewsActive = getObjectAtPosition(views, position)
-    if (viewsActive === null) {
-      // We're at top level in file
+  complete(text, position, positionInfo) {
+
+    if (positionInfo.active === null) {
       return []
     }
-    const viewsPosition = this.getPositionInfo(viewsActive, position)
-    if (viewsPosition === POSITION_TYPE.STYLE) {
-      // css
+
+    if (positionInfo.position === POSITION_TYPE.STYLE) {
       return this.completeStyle(text, position)
-    } else if (viewsPosition === POSITION_TYPE.VIEW_JSX) {
-      // jsx tags
-    } else if (viewsPosition === POSITION_TYPE.VIEW_TOP) {
-      // maybe autocomplete $h1?
-      return this.completeViewNames(viewsActive, text, position)
     }
-    return []
-  }
-  scanViews(text) {
-    let views = {}
-    transformText(text, {
-      onMeta: function(meta) {
-        views = meta.views
-      }
-    })
-    return views
-  }
-  getPositionInfo(view, position) {
-    if (getObjectAtPosition(view.els, position)) {
-      return POSITION_TYPE.VIEW_JSX
+
+    if (positionInfo.position === POSITION_TYPE.VIEW_JSX) {
+      // TODO: Autocomplete jsx tags maybe?
+      return []
     }
-    if (getObjectAtPosition(view.styles, position)) {
-      return POSITION_TYPE.STYLE
+
+    if (positionInfo.position === POSITION_TYPE.VIEW_TOP) {
+      return this.completeViewNames(positionInfo.active, text, position)
     }
-    return POSITION_TYPE.VIEW_TOP
   }
+
   completeStyle(text, position) {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
     const value = STYLE_VALUE_REGEX.exec(lineText)
@@ -63,6 +39,7 @@ export default class Autocomplete {
       return this.completeStyleKey(lineText)
     }
   }
+
   completeStyleKey(lineText) {
     const suggestions = Styles.slice()
     suggestions.sort(function(a, b) {
@@ -89,6 +66,7 @@ export default class Autocomplete {
       return item.matchScore !== 0
     })
   }
+
   completeStyleValue(name, prefix, scoreBase) {
     let suggestion = null
     for (const entry of Styles) {
@@ -117,6 +95,7 @@ export default class Autocomplete {
       return b.matchScore - a.matchScore
     })
   }
+
   completeViewNames(view, text, position) {
     const lineText = getRowFromText(text, position.row).slice(0, position.column)
     let prefix = VIEW_NAME_REGEX.exec(lineText)
@@ -125,7 +104,7 @@ export default class Autocomplete {
       return []
     }
     prefix = prefix[1]
-    const suggestions = []
+    let suggestions = []
     for (const key in view.els) {
       const name = '$' + key
       suggestions.push({
@@ -136,15 +115,17 @@ export default class Autocomplete {
         matchScore: string_score(name, prefix)
       })
     }
-    suggestions.sort(function(a, b) {
+    suggestions = suggestions.sort(function(a, b) {
       return b.matchScore - a.matchScore
+    }).filter(function(suggestion) {
+      const key = suggestion.name.substr(1)
+      return !(key in view.styles)
     })
-    if (prefix === '') {
-      return suggestions
-    } else {
-      return suggestions.filter(function(item) {
+    if (prefix !== '') {
+      suggestions = suggestions.filter(function(item) {
         return item.matchScore !== 0
       })
     }
+    return suggestions
   }
 }
