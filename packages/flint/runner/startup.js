@@ -1,5 +1,4 @@
 import bridge from './bridge'
-import compiler from './compiler'
 import server from './server'
 import bundler from './bundler'
 import builder from './builder'

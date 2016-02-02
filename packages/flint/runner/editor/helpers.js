@@ -1,8 +1,6 @@
-'use babel'
-
-import {transform as babelTransform} from 'flint-babel-core'
-import {Parser} from '../compiler'
-import {transformPlugin, getBabelConfig} from '../helpers'
+import { transform as babelTransform } from 'flint-babel-core'
+import { Scanner } from '../gulp/scanner'
+import { transformPlugin, getBabelConfig } from '../helpers'
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g
 export const POSITION_TYPE = {
@@ -20,7 +18,7 @@ export function transformText(text, {
 }) {
   let toReturn = ''
   // Setting this key so it's easier to distinguish in debug output
-  Parser.pre('__editor__', text, function(text) {
+  Scanner.pre('__editor__', text, function(text) {
     toReturn = babelTransform(text, getBabelConfig({
       log, writeStyle, onMeta, onImports, onExports
     }))

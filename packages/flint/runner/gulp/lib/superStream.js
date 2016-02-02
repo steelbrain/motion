@@ -31,7 +31,7 @@ function init() {
   bridge.onMessage('live:save', _.throttle(fileSend, 22, { leading: true }))
 
   // reset loading on errors in pipeline
-  gulp.event('error', ({ path }) => setBrowserLoading(relPath(path), false))
+  event('error', ({ path }) => setBrowserLoading(relPath(path), false))
 }
 
 // ignore stream when loading file in browser

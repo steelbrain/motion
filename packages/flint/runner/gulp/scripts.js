@@ -1,6 +1,5 @@
 import { event } from './index'
-import { $, gulp, pipefn, babel, isBuilding, hasBuilt, hasFinished, isSourceMap } from './lib/helpers'
-import SCRIPTS_GLOB from './lib/scriptsGlob'
+import { $, gulp, SCRIPTS_GLOB, pipefn, babel, isBuilding, hasBuilt, hasFinished, isSourceMap } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
@@ -8,6 +7,7 @@ import bridge from '../bridge'
 import cache from '../cache'
 import builder from '../builder'
 import bundler from '../bundler'
+import scanner from './scanner'
 import superStream from './lib/superStream'
 import dirAddStream from './lib/dirAddStream'
 import opts from '../opts'
@@ -23,8 +23,8 @@ let hasRunCurrentBuild = true
 
 const $p = {
   flint: {
-    pre: () => compiler('pre'),
-    post: () => compiler('post')
+    pre: () => scanner('pre'),
+    post: () => scanner('post')
   },
   flintFile: () => babel(getBabelConfig({
     log,
@@ -67,7 +67,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
-          gulp.dest(p(OPTS.depsDir, 'internal')),
+          gulp.dest(p(opts('depsDir'), 'internal')),
           pipefn(bundle),
           pipefn(buildDone),
           $.ignore.exclude(true)
@@ -75,7 +75,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       ))
       .pipe(pipefn(markFileSuccess))
       .pipe($.sourcemaps.write('.'))
-      .pipe($.if(checkWriteable, gulp.dest(OPTS.outDir)))
+      .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
       .pipe(pipefn(afterWrite))
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -128,10 +128,10 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     // read outfile
     try {
-      const relPath = path.relative(OPTS.appDir, file.path)
+      const relPath = path.relative(opts('appDir'), file.path)
       const outFile = prevFile.isInternal
-        ? path.join(OPTS.deps.dir, 'internal', relPath)
-        : path.join(OPTS.outDir, relPath)
+        ? path.join(opts('deps').dir, 'internal', relPath)
+        : path.join(opts('outDir'), relPath)
 
       outMTime = fs.statSync(outFile).mtime
     }
@@ -187,7 +187,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
   function setLastFile(file) {
     if (isBuilding()) return
-    let name = file.path.replace(OPTS.appDir, '')
+    let name = file.path.replace(opts('appDir'), '')
     if (name.charAt(0) != '/') name = '/' + name
     log.gulp(name)
 

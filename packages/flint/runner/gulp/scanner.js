@@ -9,7 +9,7 @@ const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 
 let views = []
 
-export var Parser = {
+export const Scanner = {
   async post(filePath, source, next) {
     try {
       const isInternal = cache.isInternal(filePath)
@@ -87,7 +87,7 @@ function compile(type) {
     }
 
     try {
-      let res = Parser[type](file.path, file.contents.toString(), (source, fileProps = {}) => {
+      let res = Scanner[type](file.path, file.contents.toString(), (source, fileProps = {}) => {
         file.contents = new Buffer(source || '')
         // add fileprops coming from compilers
         Object.assign(file, fileProps)

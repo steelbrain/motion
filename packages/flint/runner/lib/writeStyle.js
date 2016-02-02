@@ -7,7 +7,7 @@ import opts from '../opts'
 let STYLE_DIR
 
 export function init() {
-  STYLE_DIR = path.join(opts('dir'), '.flint', '.internal', 'styles')
+  STYLE_DIR = path.join(opts('appDir'), '.flint', '.internal', 'styles')
 }
 
 export async function write(view, sheet) {

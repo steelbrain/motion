@@ -1,12 +1,13 @@
-import { _, p, rm, glob, readdir, opts, handleError } from '../lib/fns'
+import { _, p, log, rm, glob, readdir, handleError } from '../lib/fns'
+import opts from '../opts'
 import writeStyle from '../lib/writeStyle'
 import superStream from './lib/superStream'
-import { isBuilding } from './lib/helpers'
+import { SCRIPTS_GLOB, isBuilding } from './lib/helpers'
 import { scripts, afterBuild } from './scripts'
 import { app } from './app'
 import { assets } from './assets'
 
-async function init({ once = false } = {}) {
+export async function init({ once = false } = {}) {
   try {
     writeStyle.init()
 
@@ -15,7 +16,7 @@ async function init({ once = false } = {}) {
     }
 
     const inFiles = await glob(SCRIPTS_GLOB)
-    const _outFiles = await readdir(OPTS.outDir)
+    const _outFiles = await readdir(opts('outDir'))
     const outFiles = _outFiles
       .map(file => file.path)
       .filter(path => path.slice(-4) !== '.map')
@@ -35,7 +36,7 @@ async function init({ once = false } = {}) {
 
 // listen to gulp events
 let listeners = {}
-function event(name, cb) {
+export function event(name, cb) {
   listeners[name] = listeners[name] || []
   listeners[name].push(cb)
 }
