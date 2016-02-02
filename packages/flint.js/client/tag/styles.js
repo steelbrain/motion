@@ -105,6 +105,7 @@ export default function elementStyles(el, view, props) {
         let className = classes[i]
 
         if (isLowerCase(className[0])) {
+
           if (view.styles[className]) {
             result = mergeStyles(result, view.styles[className](el.repeatItem, el.index))
           }
@@ -130,7 +131,7 @@ export default function elementStyles(el, view, props) {
 
     // parent class styles
     if (deservesRootStyles) {
-      let viewClassName = view.props.className || view.props.class
+      let viewClassName = view.props.className || view.props.class || view.props.__flintAddClass
 
       if (viewClassName) {
         let classes = viewClassName.split(' ')

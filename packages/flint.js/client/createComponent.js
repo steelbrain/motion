@@ -485,16 +485,15 @@ export default function createComponent(Flint, Internal, name, view, options = {
         let addWrapper = true
         const numRenders = this.renders && this.renders.length
 
+        // no root elements
         if (!numRenders) {
           tags = []
           props = { yield: true }
         }
-
+        // one root element
         else if (numRenders == 1) {
           tags = this.renders[0].call(this)
-
           const hasMultipleTags = Array.isArray(tags)
-
           addWrapper = hasMultipleTags || !tags.props
 
           if (!hasMultipleTags && tags.props && !tags.props.root) {
@@ -505,18 +504,12 @@ export default function createComponent(Flint, Internal, name, view, options = {
             }
           }
         }
-
+        // multiple root elements
         else if (numRenders > 1) {
           tags = this.renders.map(r => r.call(this))
         }
 
-        // top level tag returned false
-        if (!tags)
-          addWrapper = true
-
-        const wrappedTags = addWrapper ?
-          this.getWrapper(tags, props, numRenders) :
-          tags
+        const wrappedTags = addWrapper ? this.getWrapper(tags, props, numRenders) : tags
 
         const cleanName = name.replace('.', '-')
         const viewClassName = `View${cleanName}`
