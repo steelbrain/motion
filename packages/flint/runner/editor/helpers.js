@@ -16,15 +16,15 @@ export function transformText(text, {
   onImports = null,
   onExports = null
 }) {
-  let toReturn = ''
-  // Setting this key so it's easier to distinguish in debug output
-  Scanner.pre('__editor__', text, function(text) {
-    toReturn = babelTransform(text, getBabelConfig({
+  const filePath = '__editor__'
+  Scanner.pre(filePath, text, function(text) {
+    const babelConfig = getBabelConfig({
       log, writeStyle, onMeta, onImports, onExports
-    }))
+    })
+    babelConfig.filename = filePath
+    babelTransform(text, babelConfig)
   })
   transformPlugin.disposeLast()
-  return toReturn
 }
 
 export function pointWithinRange(point, range) {
