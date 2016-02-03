@@ -179,7 +179,10 @@ export function destructureTrackers(id, wrapType) {
 }
 
 export function parentFunctionNode(scope) {
-  let parentFunc = scope.path.findParent(p => p.isFunction())
+  if (t.isArrowFunctionExpression(scope.parentBlock.init))
+    return scope.parentBlock.init
+
+  const parentFunc = scope.path.findParent(p => p.isFunction())
   return parentFunc && parentFunc.node
 }
 
