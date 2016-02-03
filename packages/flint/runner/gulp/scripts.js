@@ -296,6 +296,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (State.lastError) return
 
     // avoid if installing
+    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', file.willInstall)
     if (bundler.isInstalling() || file.willInstall) return
 
     // ADD

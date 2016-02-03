@@ -1,8 +1,6 @@
 import opts from '../../opts'
 import { p, path, log, _ } from '../../lib/fns'
 
-const LOG = 'webpack'
-
 let lineSep = `\n  `
 let takeWebpack = ls => lineSep + _.take(ls, 2).join(lineSep)
 let split = s => s.split("\n")
@@ -28,8 +26,8 @@ export default function getWebpackErrors(where, err, stats) {
 
   // debug
   if (opts('debug')) {
-    log(LOG, '--- webpack output ---')
-    log(LOG, jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
+    log.webpack('--- webpack output ---')
+    log.webpack(jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
   }
 
   // check errors
@@ -37,7 +35,7 @@ export default function getWebpackErrors(where, err, stats) {
 
   if (errors.length) {
     // debug output everything
-    log(LOG, 'webpackErrors', errors)
+    log.webpack('webpackErrors', errors)
 
     let messages = errors.map(split).map(takeWebpack)[0].dim
     let whereMsg = where == 'externals' ? 'NPM modules' : 'imported local modules'
@@ -71,5 +69,5 @@ export default function getWebpackErrors(where, err, stats) {
     console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
   }
 
-  log(LOG, 'webpack finished')
+  log.webpack('webpack finished')
 }

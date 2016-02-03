@@ -51,6 +51,7 @@ log.opts = log.bind(null, { name: 'opts', icon: '❍' })
 log.gulp = log.bind(null, { name: 'gulp', icon: '👇' })
 log.writer = log.bind(null, { name: 'writer', icon: '✎' })
 log.file = log.bind(null, { name: 'file', icon: '▻' })
+log.webpack = log.bind(null, { name: 'webpack', icon: '🎒' })
 
 function colorArgs(args) {
   return args.map(arg =>

@@ -65,18 +65,7 @@ export default function webpackConfig(filename, config = {}) {
         {
           test: /\.(png|jpg|gif)$/,
           loader: 'url?limit=8192&name=[name]-[hash].[ext]'
-        },
-
-        // let users config this
-        // {
-        //   test: /\.scss$/,
-        //   loaders: [
-        //     fileStyleFolder,
-        //     'style',
-        //     'css?sourceMap&module&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
-        //     // 'sass?sourceMap'
-        //   ]
-        // }
+        }
       ]
     }
   }, config)
