@@ -1,5 +1,5 @@
 import opts from '../../opts'
-import { p, log, _ } from '../../lib/fns'
+import { p, log, _, handleError } from '../../lib/fns'
 
 const LOG = 'webpack'
 
@@ -48,9 +48,12 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
     try {
       const lastError = errors[errors.length - 1].split("\n")
       const fileAndLine = cleanPath(lastError[lastError.length - 1]).split(' ') // on last line of webpack error
-      file = fileAndLine[1]
-      line = fileAndLine[2].split(':')[0]
-      column = fileAndLine[2].split(':')[1]
+
+      if (fileAndLine.length > 2) {
+        file = fileAndLine[1]
+        line = fileAndLine[2].split(':')[0]
+        column = fileAndLine[2].split(':')[1]
+      }
     }
     catch(e) {
       handleError(e)

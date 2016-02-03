@@ -20,6 +20,7 @@ export default class Transform {
         basePath: opts('appDir'),
         production: isProduction(),
         selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
+        routing: opts('config').routing,
         log: () => {
           this.emitter.emit('log', ...arguments)
         },
