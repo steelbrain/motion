@@ -78,6 +78,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       // is internal
       .pipe($.if(file => file.isInternal,
         multipipe(
+          pipefn(() => console.log('dunzo')),
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
           gulp.dest(p(opts('depsDir'), 'internal')),
@@ -90,6 +91,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe($.sourcemaps.write('.'))
       .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
       .pipe(pipefn(afterWrite))
+      // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())

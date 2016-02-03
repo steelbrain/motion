@@ -1,13 +1,13 @@
 import { webpack } from '../lib/requires'
 import webpackConfig from './lib/webpackConfig'
-import handleWebpackErrors from './lib/handleWebpackErrors'
+import getWebpackErrors from './lib/getWebpackErrors'
 import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
 import requireString from './lib/requireString'
 import { installAll } from './install'
 import { onInstalled } from './lib/messages'
-import { log, path, writeJSON, writeFile } from '../lib/fns'
+import { log, logError } from '../lib/fns'
 
 export async function externals(opts = {}) {
   if (opts.doInstall) await installAll()
@@ -36,8 +36,9 @@ async function packExternals() {
       entry: opts('deps').externalsIn,
     })
 
-    webpack()(conf, (err, stats) => {
-      handleWebpackErrors('externals', err, stats, resolve, reject)
+    webpack()(conf, async (err, stats) => {
+      logError(getWebpackErrors('externals', err, stats))
+      resolve()
     })
   })
 }

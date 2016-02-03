@@ -4,7 +4,7 @@ import { p, sanitize, handleError, readJSON, readFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
-import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
+import getWebpackErrors from './bundler/lib/getWebpackErrors'
 
 let OPTS = {}
 
@@ -55,12 +55,12 @@ function parseConfig() {
         resolveLoader: { root: runnerModules },
       }, (err, stats) => {
         const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
-        handleWebpackErrors('config', err, stats, res, reject)
+        let error = getWebpackErrors('config', err, stats)
+        if (error) resolve(false)
       })
     }
     catch(e) {
       handleError(e)
-      reject(e)
     }
   })
 }

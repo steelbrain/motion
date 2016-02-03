@@ -1,5 +1,5 @@
 import opts from '../../opts'
-import { p, log, _, handleError } from '../../lib/fns'
+import { p, path, log, _ } from '../../lib/fns'
 
 const LOG = 'webpack'
 
@@ -14,11 +14,13 @@ function cleanPath(str) {
     .replace(/\.\/\.flint(\/\.internal)?(\/deps(\/internal)?)?/g, '')
     .replace(new RegExp(opts('appDir'), 'g'), '')
     .replace(new RegExp('Module not found: ', 'g'), '')
+    .replace('in /' + path.relative(opts('appDir'), opts('deps').dir), '') // webpack remove "in /deps/externals.in.js"
+    .replace("/externals.in.js\n", '')
+    .replace("/internals.in.js\n", '')
 }
 
-export default function handleWebpackErrors(where, err, stats, resolve, reject) {
-  if (err)
-    return reject(err)
+export default function getWebpackErrors(where, err, stats) {
+  if (err) return err
 
   const jsonStats = stats.toJson({
     source: false
@@ -56,10 +58,12 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
       }
     }
     catch(e) {
-      handleError(e)
+      return e
     }
 
-    return reject({ message, file, loc: { line, column } })
+    // rather than error out and break startup of app from running,
+    // we just log directly but continue
+    return { message, file, loc: { line, column } }
   }
 
   // check warnings
@@ -68,5 +72,4 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
   }
 
   log(LOG, 'webpack finished')
-  return resolve()
 }
