@@ -1,5 +1,3 @@
-import { createMarkupForStyles } from 'react/lib/CSSPropertyOperations';
-
 export function sortObject(obj) {
   return Object.keys( obj )
     .sort()
@@ -56,10 +54,6 @@ export function createClassName(options, tag, obj) {
   return hash
     ? '_' + hash
     : undefined;
-}
-
-export function createMarkup(obj) {
-  return createMarkupForStyles( obj );
 }
 
 export function isEmpty(obj) {

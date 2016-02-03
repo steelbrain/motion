@@ -5,6 +5,6 @@
   "dependencies": {
     "flint-nice-styles": "^1.5.0",
     "hash-sum": "1.0.2",
-    "react": "^0.14.6"
+    "object-to-css": "1.0.3"
   }
 }

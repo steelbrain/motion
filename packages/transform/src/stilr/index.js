@@ -1,7 +1,8 @@
+import objToCSS from 'object-to-css'
+
 import {
   sortObject,
   createClassName,
-  createMarkup,
   seperateStyles,
   isEmpty,
 } from './utils';
@@ -112,7 +113,7 @@ export default {
         continue;
       }
 
-      const markup = createMarkup( styles );
+      const markup = objToCSS( styles );
       const prefix = stylesheet.customTags ? '' : '.'
 
       css += options.pretty
