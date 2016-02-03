@@ -257,6 +257,8 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.runEvents('props', [this.props])
         }
         else {
+          // moved to here to fix issues where updating during first mount fails
+          //    see: https://github.com/flintjs/flint/issues/305
           Internal.firstRender = false
         }
       },
