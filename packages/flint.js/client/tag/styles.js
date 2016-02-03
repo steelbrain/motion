@@ -39,6 +39,9 @@ export default function elementStyles(el, view, props) {
     props.className = props.className ? `${props.className} ${name}` : name
   }
 
+  if (view.name === 'Page.Sidebar')
+    console.log(el.name, deservesRootStyles)
+
   if (deservesRootStyles) {
     if (view.props.__flint) {
       const parentName = view.props.__flint.parentName
