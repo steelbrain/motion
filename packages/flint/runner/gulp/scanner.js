@@ -72,8 +72,11 @@ export const Scanner = {
       })
       .join("\n")
 
-    cache.add(filePath)
-    cache.setViews(filePath, viewNames)
+    // TODO move this into babel
+    if (filePath) {
+      cache.add(filePath)
+      cache.setViews(filePath, viewNames)
+    }
 
     next(source)
   }
