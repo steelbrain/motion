@@ -24,7 +24,7 @@ export async function init({ once = false } = {}) {
     // cleanup out dir since last run
     const deleted = _.difference(outFiles, inFiles)
     const deletedPaths = deleted.map(f => p(opts('outDir'), f))
-    await * deletedPaths.map(f => rm(f))
+    await Promise.all(deletedPaths.map(f => rm(f)))
     log.gulp('deleted', deletedPaths)
 
     scripts({ inFiles, outFiles })

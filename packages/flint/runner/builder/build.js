@@ -20,12 +20,12 @@ export default async function build({ bundle = true } = {}) {
 
     makeTemplate()
 
-    await *[
+    await Promise.all([
       gulp.app(),
       copy.flint(),
       copy.react(),
       copy.styles()
-    ]
+    ])
 
     console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build`)
   }

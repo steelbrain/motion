@@ -4,10 +4,10 @@ import { p, mkdir, handleError } from '../lib/fns'
 
 export async function assets() {
   try {
-    await * [
+    await Promise.all([
       assetsApp(),
       assetsStatics()
-    ]
+    ])
   }
   catch(e) {
     handleError(e)

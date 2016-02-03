@@ -10,12 +10,12 @@ export async function init() {
   if (opts('reset') || isDiffVersion)
     await recreateDir(opts('internalDir'))
 
-  await * [
+  await Promise.all([
     recreateDir(opts('deps').assetsDir),
     mkdir(opts('internalDir')),
     mkdir(opts('styleDir')),
     rm(p(opts('internalDir'), 'user-config'))
-  ]
+  ])
 
   if (opts('cached'))
     await mkdir(opts('outDir'))
