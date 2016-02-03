@@ -1,4 +1,4 @@
-import uniq from 'lodash/uniq'
+import _ from 'lodash'
 import rmFlintExternals from './rmFlintExternals'
 
  // ['pkg/x', 'pkg/y'] => ['pkg']
@@ -6,7 +6,7 @@ import rmFlintExternals from './rmFlintExternals'
 
 export default function normalize(deps) {
   if (!deps) return []
-  return uniq(rmFlintExternals(deps).map(replaceSubPath)).filter(x => x !== '')
+  return _.uniq(rmFlintExternals(deps).map(replaceSubPath)).filter(x => x !== '')
 }
 
 

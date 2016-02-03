@@ -1,3 +1,7 @@
+if (process.env.FLINT_DEBUG) {
+  process.env.startedat = Date.now()
+}
+
 import Program from 'commander'
 import colors from 'colors'
 import { exec } from 'child_process'

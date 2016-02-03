@@ -76,5 +76,8 @@
     "vinyl-sourcemaps-apply": "0.2.1",
     "webpack": "1.12.11",
     "ws": "^1.0.1"
+  },
+  "devDependencies": {
+    "time-require": "^0.1.2"
   }
 }

@@ -13,6 +13,21 @@ var nodeModules = fs.readdirSync('node_modules')
 //   'cors',
 //   'globby',
 //   'replace-ext',
+//   'lodash',
+//   'regenerator-runtime-only',
+//   'sb-event-kit',
+//   'sb-promisify',
+//   'strip-ansi',
+//   'raven',
+//   'readdirp',
+//   'vinyl',
+//   'chalk',
+//   'gulp',
+//   'through2',
+//   'commander',
+//   'vinyl-sourcemaps-apply',
+//   'open',
+//   'sb-string_score',
 // ])
 
 var banners = [
