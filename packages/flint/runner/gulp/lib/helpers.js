@@ -22,6 +22,9 @@ out.goodFile = symbol => (file, ms) =>
 out.goodScript = out.goodFile('-')
 
 export const $ = loadPlugins()
+
+$.filterEmptyDirs = $.if(file => !file.stat.isFile(), $.ignore.exclude(true))
+
 export const isBuilding = () => opts('build') && !opts('watch')
 export const hasBuilt = () => opts('hasRunInitialBuild')
 export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')

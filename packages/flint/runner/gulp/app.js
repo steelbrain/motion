@@ -13,7 +13,7 @@ export async function app() {
     appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()
 
     if (minify)
-      console.log(`\n  Minifying...`.dim)
+      console.log(`  Minifying...`.dim)
 
     // build parallel
     await* [
