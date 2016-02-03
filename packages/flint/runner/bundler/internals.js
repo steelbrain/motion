@@ -1,5 +1,5 @@
 import { finishedInstalling } from './install'
-import { webpack } from '../lib/require'
+import { webpack } from '../lib/requires'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'

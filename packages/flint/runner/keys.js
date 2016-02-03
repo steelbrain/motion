@@ -3,7 +3,7 @@ import server from './server'
 import shutdown from './shutdown'
 import open from 'open'
 import keypress from 'keypress'
-
+import { surge } from './lib/requires'
 import { _ } from './lib/fns'
 import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
@@ -16,9 +16,6 @@ import { build } from './startup'
 import cache from './cache'
 
 const proc = process // cache for keypress
-
-import Surge from 'surge'
-const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: proc.stdout })
 
 let stopped = false
 
@@ -121,6 +118,9 @@ function start() {
           }
 
           if (opts('build') && opts('watch')) {
+            let Surge = surge()
+            const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: proc.stdout })
+
             console.log(`\n  Publishing to surge...`)
             stop()
             proc.stdout.isTTY = false

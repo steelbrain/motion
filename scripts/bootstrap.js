@@ -3,6 +3,11 @@ require("shelljs/global")
 var path = require("path")
 var fs   = require("fs")
 
+console.log("\n\HEY! LISTEN!\n")
+console.log("PUT THIS IN YOUR SHELL TO GET DEBUGS:")
+console.log('export FLINT_DEBUG="true"')
+console.log("\n\n")
+
 // ensure proper npm global permissions
 var canWrite = true
 

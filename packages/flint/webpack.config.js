@@ -5,31 +5,6 @@ var _ = require('lodash')
 
 var nodeModules = fs.readdirSync('node_modules')
 
-// let inline a few of the node modules for performance
-// TODO this can be done but has to be very careful (ex commander is bad, would be included in multiple)
-// once done we can move these to "devDependendencies"
-// var nodeModules = _.difference(nodeModules, [
-//   'deepmerge',
-//   'cors',
-//   'globby',
-//   'replace-ext',
-//   'lodash',
-//   'regenerator-runtime-only',
-//   'sb-event-kit',
-//   'sb-promisify',
-//   'strip-ansi',
-//   'raven',
-//   'readdirp',
-//   'vinyl',
-//   'chalk',
-//   'gulp',
-//   'through2',
-//   'commander',
-//   'vinyl-sourcemaps-apply',
-//   'open',
-//   'sb-string_score',
-// ])
-
 var banners = [
   'require("source-map-support").install();'
 ].join("\n")

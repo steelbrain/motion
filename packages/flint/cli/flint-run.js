@@ -1,3 +1,7 @@
+if (process.env.FLINT_DEBUG) {
+  require('time-require')
+}
+
 import './lib/checkForApp'
 import Program from 'commander'
 import colors from 'colors'

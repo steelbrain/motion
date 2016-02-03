@@ -1,4 +1,4 @@
-import { webpack } from '../lib/require'
+import { webpack } from '../lib/requires'
 import webpackConfig from './lib/webpackConfig'
 import handleWebpackErrors from './lib/handleWebpackErrors'
 import disk from '../disk'
