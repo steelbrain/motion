@@ -256,6 +256,9 @@ export default function createComponent(Flint, Internal, name, view, options = {
         if (name != 'Main') {
           this.runEvents('props', [this.props])
         }
+        else {
+          Internal.firstRender = false
+        }
       },
 
       componentDidMount() {
@@ -268,9 +271,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           this.queuedUpdate = false
           this.update()
         }
-
-        if (name === 'Main')
-          Internal.firstRender = false
 
         if (!process.env.production) {
           this.props.__flint.onMount(this)
@@ -408,25 +408,25 @@ export default function createComponent(Flint, Internal, name, view, options = {
         // view.set respects paused
         if (soft && this.isPaused) return
 
-        // during render, dont update
-        if (this.isRendering) return
-
         // if during a render, wait
         if (!this.mounted || Internal.firstRender) {
           this.queuedUpdate = true
+          return
         }
-        else {
-          // tools run into weird bug where if error in app on initial render, react gets
-          // mad that you are trying to re-render tools during app render TODO: strip in prod
-          // check for isRendering so it shows if fails to render
-          if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
-            return setTimeout(this.update)
 
-          this.queuedUpdate = false
+        // during render, dont update
+        if (this.isRendering) return
 
-          // rather than setState because we want to skip shouldUpdate calls
-          this.forceUpdate()
-        }
+        // tools run into weird bug where if error in app on initial render, react gets
+        // mad that you are trying to re-render tools during app render TODO: strip in prod
+        // check for isRendering so it shows if fails to render
+        if (!process.env.production && _Flint.firstRender && _Flint.isRendering)
+          return setTimeout(this.update)
+
+        this.queuedUpdate = false
+
+        // rather than setState because we want to skip shouldUpdate calls
+        this.forceUpdate()
       },
 
       // childContextTypes: {
