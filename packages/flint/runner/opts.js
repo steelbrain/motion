@@ -1,12 +1,10 @@
 import path from 'path'
 import log from './lib/log'
-import { p, sanitize, handleError, readJSON, readFile, writeFile, touch } from './lib/fns'
+import { p, sanitize, handleError, readJSON, readFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
 import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
-import ex from './lib/execPromise'
-import sandbox from 'sandbox'
 
 let OPTS = {}
 
@@ -27,8 +25,14 @@ export async function init(cli) {
 }
 
 function parseConfig() {
-  return new Promise((resolve, reject) => {
-    touch(p(OPTS.flintDir, 'config.js'))
+  return new Promise(async (resolve, reject) => {
+    const confLocation = p(OPTS.flintDir, 'config.js')
+    const hasConf = await exists(confLocation)
+    if (!hasConf) return
+
+    // for json loader
+    const runnerRoot = path.resolve(path.join(__dirname, '..'))
+    const runnerModules = path.join(runnerRoot, 'node_modules')
 
     webpack({
       context: OPTS.flintDir,
@@ -38,9 +42,15 @@ function parseConfig() {
         path: './.flint/.internal',
         libraryTarget: 'commonjs2'
       },
+      module: {
+        loaders: [
+          { test: /\.json$/, loader: 'json' }
+        ]
+      },
+      resolveLoader: { root: runnerModules },
     }, (err, stats) => {
-      const res = () => resolve(p(OPTS.internalDir, 'config.js'))
-      handleWebpackErrors('externals', err, stats, res, reject)
+      const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
+      handleWebpackErrors('config', err, stats, res, reject)
     })
   })
 }
@@ -57,22 +67,25 @@ async function loadConfigs() {
   const file = await parseConfig()
 
   if (file) {
-    const userConf = require('./.flint/.internal/user-config')
-
-    // const out = await readFile(file)
-    // console.log(eval(out))
-
-    // const out = await ex(`node ${file}`)
+    // const userConf = require('./.flint/.internal/user-config')
+    const out = await readFile(file)
+    const conf = eval(out)
+    return modeMergedConfig(conf)
   }
 
-  return await flintConfig()
+  return await jsonConfig()
 }
 
-async function flintConfig() {
+function modeMergedConfig(config) {
+  const modeSpecificConfig = config[OPTS.build ? 'build' : 'run']
+  const merged = Object.assign({}, config, modeSpecificConfig)
+  return merged
+}
+
+async function jsonConfig() {
   try {
     const config = await readJSON(OPTS.configFile)
-    const modeSpecificConfig = config[OPTS.build ? 'build' : 'run']
-    return Object.assign(config, modeSpecificConfig)
+    return modeMergedConfig(config)
   }
   catch(e) {
     handleError({ message: `Error parsing config file: ${OPTS.configFile}` })

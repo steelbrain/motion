@@ -51,8 +51,10 @@ module.exports = {
   },
   externals: [
     function(context, request, callback) {
-      if (request.indexOf('user-config'))
+      if (/user-config$/.test(request)) {
+        console.log(request)
         return callback(null, request)
+      }
 
       var pathStart = request.split('/')[0];
       if (nodeModules.indexOf(pathStart) >= 0 && request != 'webpack/hot/signal.js') {
