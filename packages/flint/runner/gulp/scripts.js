@@ -78,7 +78,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
       // is internal
       .pipe($.if(file => file.isInternal,
         multipipe(
-          pipefn(() => console.log('dunzo')),
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
           gulp.dest(p(opts('depsDir'), 'internal')),
