@@ -64,6 +64,7 @@ const router = {
     router.next()
     router.recognize()
     if (!opts.dontRender) render()
+    if (!opts.keepScroll) setTimeout(() => window.scrollTo(0, 0))
   },
 
   isActive(path) {
