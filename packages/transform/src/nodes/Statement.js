@@ -24,9 +24,13 @@ export default {
       Object.keys(styles).forEach(tag => {
         const styleProps = styles[tag]
         const viewstyle = styleProps.reduce((acc, cur) => {
+          // TODO this is way specific to what we extract
+          // there should be a way to turn AST back into code here without rewriting babel itself
           acc[cur.key.name] = t.isArrayExpression(cur.value)
             ? cur.value.elements.map(e => e.value)
-            : cur.value.value
+            : t.isUnaryExpression(cur.value)
+              ? (cur.value.operator === '-' ? -1 : 1) * cur.value.argument.value
+              : cur.value.value
           return acc
         }, {})
 
