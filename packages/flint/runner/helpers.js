@@ -18,7 +18,9 @@ export function getBabelConfig(config) {
     comments: true,
     optional: ['regenerator', 'runtime'],
     plugins: [transformPlugin.get(config)],
-    extra: { production: isProduction() }
+    extra: {
+      production: isProduction()
+    },
   }
 
   const userConf = opts('config').babel

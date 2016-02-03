@@ -134,6 +134,7 @@ function setupConfig(cli, config) {
     {
       minify: true,
       debug: false,
+      routing: true
     },
     config
   )

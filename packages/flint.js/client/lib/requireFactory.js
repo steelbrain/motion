@@ -5,6 +5,7 @@ export default function requireFactory(root) {
 
   function require(name, folder) {
     if (!name) return
+
     if (name.charAt(0) == '.') {
       let parentDirs = folder.split('/')
       let upDirs = parentFolderMatch(name)
@@ -59,16 +60,18 @@ export default function requireFactory(root) {
       return {}
     }
 
-    let name
-    for (let _ of names) {
-      if (typeof obj[ns][_] != 'undefined') {
-        name = _
+    let found, name, i, len = names.length
+
+    for (i = 0; i < len; i++) {
+      found = names[i]
+      if (typeof obj[ns][found] != 'undefined') {
+        name = found
         break
       }
     }
 
     if (typeof obj[ns][name] == 'undefined') {
-      console.error(`Package ${name} was not loaded`)
+      console.error(`Can't find import "${names[0]}". Note: Views don't need to be exported. For more, see http://flintjs.com/docs/views`)
       return {}
     }
 

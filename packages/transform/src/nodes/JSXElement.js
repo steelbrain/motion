@@ -1,5 +1,5 @@
 import state from '../state'
-import { t, idFn, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
+import { t, options, idFn, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
 
 export default {
   enter(node, parent, scope, file) {
@@ -79,7 +79,7 @@ export default {
         if (attrName == 'class' && isUpperCase(name))
           state.viewHasChildWithClass = true
 
-        if (attrName == 'route') {
+        if (options.routing && attrName == 'route') {
           route = _node => t.logicalExpression('&&',
             t.callExpression(t.identifier('Flint.routeMatch'), [expr]),
             _node
