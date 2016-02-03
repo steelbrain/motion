@@ -26,32 +26,42 @@ export async function init(cli) {
 
 function parseConfig() {
   return new Promise(async (resolve, reject) => {
-    const confLocation = p(OPTS.flintDir, 'config.js')
-    const hasConf = await exists(confLocation)
-    if (!hasConf) return
+    try {
+      try {
+        const confLocation = p(OPTS.flintDir, 'config.js')
+        await exists(confLocation)
+      }
+      catch(e) {
+        resolve(false)
+      }
 
-    // for json loader
-    const runnerRoot = path.resolve(path.join(__dirname, '..'))
-    const runnerModules = path.join(runnerRoot, 'node_modules')
+      // for json loader
+      const runnerRoot = path.resolve(path.join(__dirname, '..'))
+      const runnerModules = path.join(runnerRoot, 'node_modules')
 
-    webpack({
-      context: OPTS.flintDir,
-      entry: './config.js',
-      output: {
-        filename: 'user-config.js',
-        path: './.flint/.internal',
-        libraryTarget: 'commonjs2'
-      },
-      module: {
-        loaders: [
-          { test: /\.json$/, loader: 'json' }
-        ]
-      },
-      resolveLoader: { root: runnerModules },
-    }, (err, stats) => {
-      const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
-      handleWebpackErrors('config', err, stats, res, reject)
-    })
+      webpack({
+        context: OPTS.flintDir,
+        entry: './config.js',
+        output: {
+          filename: 'user-config.js',
+          path: './.flint/.internal',
+          libraryTarget: 'commonjs2'
+        },
+        module: {
+          loaders: [
+            { test: /\.json$/, loader: 'json' }
+          ]
+        },
+        resolveLoader: { root: runnerModules },
+      }, (err, stats) => {
+        const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
+        handleWebpackErrors('config', err, stats, res, reject)
+      })
+    }
+    catch(e) {
+      handleError(e)
+      reject(e)
+    }
   })
 }
 

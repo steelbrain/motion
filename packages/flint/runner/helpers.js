@@ -9,9 +9,7 @@ export function isProduction() {
 }
 
 export function getBabelConfig(config) {
-  const userConf = opts('config').babel
-
-  return deepmerge({
+  const babelConf = {
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'view.el',
     stage: 1,
@@ -21,5 +19,12 @@ export function getBabelConfig(config) {
     optional: ['regenerator', 'runtime'],
     plugins: [transformPlugin.get(config)],
     extra: { production: isProduction() }
-  }, userConf)
+  }
+
+  const userConf = opts('config').babel
+
+  if (userConf)
+    return deepmerge(babelConf, userConf)
+  else
+    return babelConf
 }
