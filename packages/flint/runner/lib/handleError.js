@@ -2,6 +2,7 @@ import bridge from '../bridge'
 import raven from 'raven'
 import logError from './logError'
 import unicodeToChar from './unicodeToChar'
+import path from 'path'
 
 const errorClient = new raven.Client('https://196a18bffe5f4859bb48bbdbef4d6375:d92602c84a694bd6ab31ef3051fe8bd5@app.getsentry.com/55034')
 

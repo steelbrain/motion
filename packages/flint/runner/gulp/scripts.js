@@ -192,6 +192,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
+
+    error.file = path.relative(opts('appDir'), error.fileName)
     bridge.broadcast('compile:error', { error }, 'error')
 
     markDone(State.curFile)

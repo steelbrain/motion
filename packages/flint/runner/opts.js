@@ -62,7 +62,8 @@ async function loadConfigs() {
 async function flintConfig() {
   try {
     const config = await readJSON(OPTS.configFile)
-    return config[OPTS.build ? 'build' : 'run']
+    const modeSpecificConfig = config[OPTS.build ? 'build' : 'run']
+    return Object.assign(config, modeSpecificConfig)
   }
   catch(e) {
     handleError({ message: `Error parsing config file: ${OPTS.configFile}` })
