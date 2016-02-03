@@ -48,7 +48,7 @@ export default { init, outDir, buildDir, internalDir, styles }
 
 
 async function differentFlintVersion() {
-  const version = opts('config').version
+  const version = opts('version')
   const state = await disk.state.read()
   const stateVersion = state && state.opts && state.opts.version
 

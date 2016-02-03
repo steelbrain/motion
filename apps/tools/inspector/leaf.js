@@ -17,11 +17,6 @@ const fnParams = fn => fn.toString()
   .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
   .split(/,/)
 
-const fnParams = fn => fn.toString()
-  .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
-  .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
-  .split(/,/)
-
 view Leaf {
   view.pause()
 
