@@ -1,10 +1,12 @@
 import path from 'path'
 import log from './lib/log'
-import { p, sanitize, handleError, readJSON, touch } from './lib/fns'
+import { p, sanitize, handleError, readJSON, readFile, writeFile, touch } from './lib/fns'
 import disk from './disk'
 import util from 'util'
-// import webpack from 'webpack'
-// import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
+import webpack from 'webpack'
+import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
+import ex from './lib/execPromise'
+import sandbox from 'sandbox'
 
 let OPTS = {}
 
@@ -24,25 +26,22 @@ export async function init(cli) {
   setupConfig(cli, config)
 }
 
-function readConfig() {
+function parseConfig() {
   return new Promise((resolve, reject) => {
-    // touch(p(OPTS.flintDir, 'config.js'))
+    touch(p(OPTS.flintDir, 'config.js'))
 
-    // webpack({
-    //   context: OPTS.flintDir,
-    //   entry: './config.js',
-    //   output: {
-    //     filename: 'config.js',
-    //     path: './internal'
-    //   }
-    //   // module: {
-    //   //   loaders: [
-    //   //     { test: /\.js$/, loader: babel }
-    //   //   ]
-    //   // }
-    // }, (err, stats) => {
-    //   handleWebpackErrors('externals', err, stats, resolve, reject)
-    // })
+    webpack({
+      context: OPTS.flintDir,
+      entry: './config.js',
+      output: {
+        filename: 'user-config.js',
+        path: './.flint/.internal',
+        libraryTarget: 'commonjs2'
+      },
+    }, (err, stats) => {
+      const res = () => resolve(p(OPTS.internalDir, 'config.js'))
+      handleWebpackErrors('externals', err, stats, res, reject)
+    })
   })
 }
 
@@ -55,7 +54,17 @@ function setupCliOpts(cli) {
 }
 
 async function loadConfigs() {
-  // await readConfig()
+  const file = await parseConfig()
+
+  if (file) {
+    const userConf = require('./.flint/.internal/user-config')
+
+    // const out = await readFile(file)
+    // console.log(eval(out))
+
+    // const out = await ex(`node ${file}`)
+  }
+
   return await flintConfig()
 }
 

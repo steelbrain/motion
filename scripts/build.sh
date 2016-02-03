@@ -40,6 +40,20 @@ if [ "$1" = "--watch" ]; then
     flint build --watch --nomin &
     cd ../..
   fi
+
+  # relink cli automatically
+  chsum1=""
+  cd packages/flint
+  while [[ true ]]; do
+    if [ -d 'dist' ]; then
+      chsum2=`find dist -type f -exec md5 {} \;`
+      if [[ $chsum1 != $chsum2 ]] ; then
+        npm link --loglevel=error
+        chsum1=$chsum2
+      fi
+    fi
+    sleep 1
+  done
 fi
 
 # wait for bg tasks
