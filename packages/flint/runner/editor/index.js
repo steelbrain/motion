@@ -29,7 +29,10 @@ export default class Editor {
     try {
       positionInfo = this.positionInfo(text, point)
     } catch (_) {
-      return []
+      if (typeof _.pos !== 'undefined') {
+        // Syntax error
+        return []
+      } else throw _
     }
 
     // Errors caught here are probably internal, log them so we can debug
