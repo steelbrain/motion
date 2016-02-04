@@ -85,6 +85,7 @@ async function loadConfigs() {
 
   if (file) {
     // const userConf = require('./.flint/.internal/user-config')
+    // TODO not eval or at least return export properly, also whitelist options
     const out = await readFile(file)
     const conf = eval(out)
     return modeMergedConfig(conf)
