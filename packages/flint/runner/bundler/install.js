@@ -30,10 +30,6 @@ let installingFullNames = []
 let installing = []
 let _isInstalling = false
 
-function getToInstall(requires) {
-  return requires
-}
-
 // used to quickly check if a file will trigger an install
 export async function willInstall(imports) {
   return !!getNew(imports).length

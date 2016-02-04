@@ -24,6 +24,7 @@ const hasBuilt = () => opts('hasRunInitialBuild')
 
 export function scripts({ inFiles, outFiles, userStream }) {
   let State = {
+    files: {},
     curFile: null,
     lastError: null,
     lastSaved: {},
@@ -36,6 +37,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
+  const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
+  const isInternal = ({ path }) => State.files[path] && State.files[path].isInternal
+  const willInstall = ({ path }) => State.files[path] && State.files[path].willInstall
 
   return (isBuilding() ?
     scripts :
@@ -56,29 +60,30 @@ export function scripts({ inFiles, outFiles, userStream }) {
           cache.setFileInternal(file, val)
         },
 
-        async onImports(file, imports) {
+        onImports(file, imports) {
           const src = file.contents.toString()
           const allImports = getAllImports(src, imports)
-          cache.setFileImports(file.path, allImports)
 
-          const isInternal = cache.isInternal(file.path)
-          const scan = () => bundler.scanFile(file.path)
-          const scanNow = opts('build') || opts('watch') || !opts('hasRunInitialBuild')
+          const scan = () => {
+            cache.setFileImports(file.path, allImports)
+            bundler.scanFile(file.path)
+          }
 
-          // scan now on startup or build, else debounce during run
-          if (scanNow) scan()
-          else debounce(`install-${file.path}`, 2000, scan)
+          if (scanNow())
+            scan()
+          else
+            debounce(`install-${file.path}`, 2000, scan)
 
-          State.curFile.isInternal = isInternal
+          State.files[file.path].isInternal = cache.isInternal(file.path)
 
           if (!opts('build') || opts('watch'))
-            State.curFile.willInstall = bundler.willInstall(allImports)
+            State.files[file.path].willInstall = bundler.willInstall(allImports)
         }
       })))
       .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
-      .pipe($.if(file => file.isInternal,
+      .pipe($.if(file => isInternal(file),
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
@@ -286,8 +291,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (State.lastError) return
 
     // avoid if installing
-    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', file.willInstall)
-    if (bundler.isInstalling() || file.willInstall) return
+    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', willInstall(file))
+    if (bundler.isInstalling() || willInstall(file)) return
 
     // ADD
     bridge.broadcast('script:add', file.message)
@@ -312,9 +317,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (isSourceMap(file.path)) return
 
     out.goodScript(file)
-    log.gulp('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall)
+    log.gulp('DOWN', 'success'.green, 'internal?', isInternal(file))
 
-    if (file.isInternal) return
+    if (isInternal(file)) return
 
     // update cache error / state
     cache.update(file.path)
