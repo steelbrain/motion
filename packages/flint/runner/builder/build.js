@@ -1,4 +1,4 @@
-import { p } from '../lib/fns'
+import { p, path } from '../lib/fns'
 import gulp from '../gulp'
 import bundler from '../bundler'
 import keys from '../keys'
@@ -27,9 +27,13 @@ export default async function build({ bundle = true } = {}) {
       copy.styles()
     ]
 
-    console.log(`\n  Built! ⇢`.green.bold + `  cd .flint/build`)
+    console.log(`\n  Built! ⇢`.green.bold + `  cd ${buildDir()}`)
   }
   catch(e) {
     handleError(e)
   }
+}
+
+function buildDir() {
+  return path.relative(opts('appDir'), opts('buildDir'))
 }

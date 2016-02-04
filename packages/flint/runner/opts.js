@@ -65,12 +65,19 @@ function parseConfig() {
   })
 }
 
-function setupCliOpts(cli) {
+async function setupCliOpts(cli) {
   OPTS.version = cli.version
   OPTS.debug = cli.debug
   OPTS.watch = cli.watch
   OPTS.reset = cli.reset
   OPTS.build = cli.build
+  OPTS.out = cli.out
+
+  // ensure we dont clobber things
+  if (cli.out && (await exists(cli.out)))  {
+    console.error(`\n  Build dir already exists! Ensure you target an empty directory.\n`.red)
+    process.exit(1)
+  }
 }
 
 async function loadConfigs() {

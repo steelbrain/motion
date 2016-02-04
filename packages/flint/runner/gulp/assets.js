@@ -30,7 +30,7 @@ function assetsApp() {
     stream
         .pipe($.plumber())
         // .pipe(pipefn(out.goodFile('⇢')))
-        .pipe($.filterEmptyDirs)
+        // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(assets.out))
         .on('end', resolve)
         .on('error', reject)
@@ -56,7 +56,7 @@ async function assetsStatics() {
     stream
         .pipe($.plumber())
         // .pipe(pipefn(out.goodFile('⇢')))
-        .pipe($.filterEmptyDirs)
+        // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(statics.out))
         .on('end', resolve)
         .on('error', reject)

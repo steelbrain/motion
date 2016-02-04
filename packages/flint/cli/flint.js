@@ -45,7 +45,7 @@ Program
   .version(version)
   .command('run', 'run app, `flint` is a shortcut for this')
   .command('new [name] [template]', 'start a new app')
-  .command('build', 'build your app to .flint/build')
+  .command('build', 'build for production')
   // .command('up', 'upload app to the web with Surge.sh')
   .command('update', 'update flint')
 

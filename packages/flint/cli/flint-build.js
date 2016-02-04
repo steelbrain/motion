@@ -12,6 +12,7 @@ Program
   .option('--reset', 'resets cache, internals, bundles')
   .option('--cached', 'run from cache for speedup (may break)')
   .option('--nomin', 'avoid minification')
+  .option('--out <where>', 'build target directory')
   .parse(process.argv)
 
 const opts = {
@@ -22,6 +23,7 @@ const opts = {
   reset: Program.reset,
   cached: Program.cached,
   nomin: Program.nomin,
+  out: Program.out,
   pretty: true,
 }
 
