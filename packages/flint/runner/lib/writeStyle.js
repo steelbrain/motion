@@ -4,15 +4,12 @@ import { writeFile, log, handleError, path } from './fns'
 import bridge from '../bridge'
 import opts from '../opts'
 
-let STYLE_DIR
+let styleDir
 
-export function init() {
-  STYLE_DIR = path.join(opts('appDir'), '.flint', '.internal', 'styles')
-}
-
-export async function write(view, sheet) {
+export default async function writeStyle(view, sheet) {
   try {
-    const file = path.join(STYLE_DIR, `${view}.css`)
+    styleDir = styleDir || path.join(opts('appDir'), '.flint', '.internal', 'styles')
+    const file = path.join(styleDir, `${view}.css`)
     const prefixed = await postcss([ autoprefixer ]).process(sheet)
     let final = prefixed.css
 
@@ -24,5 +21,3 @@ export async function write(view, sheet) {
     handleError(e)
   }
 }
-
-export default { write, init }

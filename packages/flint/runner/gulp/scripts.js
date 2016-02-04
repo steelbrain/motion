@@ -38,8 +38,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
   const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
-  const isInternal = ({ path }) => State.files[path] && State.files[path].isInternal
-  const willInstall = ({ path }) => State.files[path] && State.files[path].willInstall
+  const isInternal = ({ path }) => State.files[path].isInternal
+  const willInstall = ({ path }) => console.log(path, State.files) && State.files[path].willInstall
 
   return (isBuilding() ?
     scripts :
@@ -54,29 +54,29 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(babel(getBabelConfig({
         log,
         onMeta,
-        writeStyle: writeStyle.write,
+        writeStyle,
 
         onExports(file, val) {
           cache.setFileInternal(file, val)
         },
 
-        onImports(file, imports) {
-          const fileState = State.files[file.path]
+        onImports(filePath, imports) {
+          const fileState = State.files[filePath]
 
-          const src = file.contents.toString()
+          const src = State.curFile.contents.toString()
           const allImports = getAllImports(src, imports)
 
           const scan = () => {
-            cache.setFileImports(file.path, allImports)
-            bundler.scanFile(file.path)
+            cache.setFileImports(filePath, allImports)
+            bundler.scanFile(filePath)
           }
 
           if (scanNow())
             scan()
           else
-            debounce(`install-${file.path}`, 2000, scan)
+            debounce(`install-${filePath}`, 2000, scan)
 
-          fileState.isInternal = cache.isInternal(file.path)
+          fileState.isInternal = cache.isInternal(filePath)
 
           if (!opts('build') || opts('watch'))
             fileState.willInstall = bundler.willInstall(allImports)

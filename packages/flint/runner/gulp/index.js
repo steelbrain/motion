@@ -1,6 +1,5 @@
 import { _, p, log, rm, glob, readdir, handleError } from '../lib/fns'
 import opts from '../opts'
-import writeStyle from '../lib/writeStyle'
 import superStream from './lib/superStream'
 import { SCRIPTS_GLOB, isBuilding } from './lib/helpers'
 import { scripts, afterBuild } from './scripts'
@@ -9,8 +8,6 @@ import { assets } from './assets'
 
 export async function init({ once = false } = {}) {
   try {
-    writeStyle.init()
-
     if (!isBuilding()) {
       superStream.init()
     }
