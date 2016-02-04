@@ -21,7 +21,7 @@ export default function hotCache({ Internal, options, name }) {
 
     // on access
     get(name, val, where) {
-      if (process.env.production)
+      if (process.env.production || typeof val == 'function')
         return val
 
       const path = this.props.__flint.path
@@ -51,7 +51,6 @@ export default function hotCache({ Internal, options, name }) {
       )
 
       const checkDeep = true
-
       const cacheVal = Internal.getCache[path][name]
       const cacheInitVal = Internal.getCacheInit[path][name]
 
@@ -92,6 +91,7 @@ export default function hotCache({ Internal, options, name }) {
       if (!result)
         result = restore ? originalValue : val
 
+      console.log('return', name, val, result)
       return result
     }
   }
