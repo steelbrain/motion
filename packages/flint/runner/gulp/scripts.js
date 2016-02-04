@@ -1,7 +1,7 @@
 import { event } from './index'
 import gulp from 'gulp'
 import babel from './lib/gulp-babel'
-import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, hasBuilt, isSourceMap, serializeCache } from './lib/helpers'
+import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap, serializeCache } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
@@ -46,7 +46,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
-      .pipe(pipefn(resetLastFile))
+      .pipe(pipefn(reset))
       .pipe($.plumber(catchError))
       .pipe(pipefn(setLastFile))
       .pipe(scanner('pre'))
@@ -61,6 +61,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
         },
 
         onImports(file, imports) {
+          const fileState = State.files[file.path]
+
           const src = file.contents.toString()
           const allImports = getAllImports(src, imports)
 
@@ -74,10 +76,10 @@ export function scripts({ inFiles, outFiles, userStream }) {
           else
             debounce(`install-${file.path}`, 2000, scan)
 
-          State.files[file.path].isInternal = cache.isInternal(file.path)
+          fileState.isInternal = cache.isInternal(file.path)
 
           if (!opts('build') || opts('watch'))
-            State.files[file.path].willInstall = bundler.willInstall(allImports)
+            fileState.willInstall = bundler.willInstall(allImports)
         }
       })))
       .pipe(pipefn(updateCache)) // right after flint
@@ -181,7 +183,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     }
   }
 
-  function resetLastFile(file) {
+  function reset(file) {
+    State.files[file.path] = {}
     State.lastError = false
     State.curFile = file
     file.startTime = Date.now()
