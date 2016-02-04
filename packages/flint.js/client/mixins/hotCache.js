@@ -91,7 +91,6 @@ export default function hotCache({ Internal, options, name }) {
       if (!result)
         result = restore ? originalValue : val
 
-      console.log('return', name, val, result)
       return result
     }
   }

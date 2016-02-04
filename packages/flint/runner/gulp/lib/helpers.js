@@ -26,8 +26,6 @@ export const $ = loadPlugins()
 $.filterEmptyDirs = $.if(file => !file.stat.isFile(), $.ignore.exclude(true))
 
 export const isBuilding = () => opts('build') && !opts('watch')
-export const hasBuilt = () => opts('hasRunInitialBuild')
-export const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 export const isProduction = () => opts('build')
 
 export const through = _through

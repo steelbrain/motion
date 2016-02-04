@@ -1,17 +1,7 @@
 import { event } from './index'
-import {
-  $,
-  gulp,
-  SCRIPTS_GLOB,
-  out,
-  pipefn,
-  babel,
-  isBuilding,
-  hasBuilt,
-  hasFinished,
-  isSourceMap,
-  serializeCache
-} from './lib/helpers'
+import gulp from 'gulp'
+import babel from './lib/gulp-babel'
+import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, hasBuilt, isSourceMap, serializeCache } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import flintTransform from 'flint-transform'
@@ -27,26 +17,10 @@ import onMeta from './lib/onMeta'
 import writeStyle from '../lib/writeStyle'
 import { getBabelConfig } from '../helpers'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
-import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from '../lib/fns'
+import { _, fs, path, debounce, glob, readdir, p, rm, handleError, logError, log } from '../lib/fns'
 
-// TODO bad practice
-let fileImports = {}
-let buildingOnce = false
-let hasRunCurrentBuild = true
-
-const $p = {
-  flint: {
-    pre: () => scanner('pre'),
-    post: () => scanner('post')
-  },
-  flintFile: () => babel(getBabelConfig({
-    log,
-    writeStyle: writeStyle.write,
-    onMeta,
-    onImports(file, imports) { fileImports[file] = imports },
-    onExports(file, val) { cache.setFileInternal(file, val) }
-  }))
-}
+const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
+const hasBuilt = () => opts('hasRunInitialBuild')
 
 export function scripts({ inFiles, outFiles, userStream }) {
   let State = {
@@ -61,6 +35,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
+  const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
+
   return (isBuilding() ?
     scripts :
     merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
@@ -69,11 +45,37 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(pipefn(resetLastFile))
       .pipe($.plumber(catchError))
       .pipe(pipefn(setLastFile))
-      .pipe($p.flint.pre())
+      .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe($p.flintFile())
-      .pipe(pipefn(updateCache)) // right after babel
-      .pipe($p.flint.post())
+      .pipe(babel(getBabelConfig({
+        log,
+        onMeta,
+        writeStyle: writeStyle.write,
+
+        onExports(file, val) {
+          cache.setFileInternal(file, val)
+        },
+
+        async onImports(file, imports) {
+          const src = file.contents.toString()
+          const allImports = getAllImports(src, imports)
+          cache.setFileImports(file.path, allImports)
+
+          const isInternal = cache.isInternal(file.path)
+          const scan = () => bundler.scanFile(file.path)
+          const scanNow = opts('build') || opts('watch') || !opts('hasRunInitialBuild')
+
+          // scan now on startup or build, else debounce during run
+          if (scanNow) scan()
+          else debounce(`install-${file.path}`, 2000, scan)
+
+          State.curFile.isInternal = isInternal
+
+          if (!opts('build') || opts('watch'))
+            State.curFile.willInstall = bundler.willInstall(allImports)
+        }
+      })))
+      .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
       .pipe($.if(file => file.isInternal,
@@ -175,7 +177,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
   }
 
   function resetLastFile(file) {
-    fileImports[file] = false
     State.lastError = false
     State.curFile = file
     file.startTime = Date.now()
@@ -221,13 +222,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
   // update cache: meta/src/imports
   function updateCache(file) {
     file.src = file.contents.toString()
-
-    //  babel externals, set imports for willInstall detection
-    let babelExternals = findBabelRuntimeRequires(file.contents.toString())
-    let imports = fileImports[file.path]
-    let all = [].concat(babelExternals, imports)
-    cache.setFileImports(file.path, all)
-
     // meta
     let meta = cache.getFileMeta(file.path)
     // outside changed detection
@@ -257,11 +251,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
   }
 
   function checkWriteable(file) {
-    if (userStream || State.lastError)
-      return false
+    if (userStream || State.lastError) return false
 
-    if (isBuilding())
-      return true
+    if (isBuilding()) return true
 
     const isNew = (
       !State.lastSaved[file.path] ||
@@ -283,7 +275,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     // avoid during initial build
     if (!hasFinished()) return
-
     if (file.isInternal) return
 
     // run stuff after each change on build --watch
@@ -291,7 +282,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     // avoid ?? todo: figure out why this is necessary
     if (!cache.get(file.path)) return
-
     // avoid if error
     if (State.lastError) return
 
@@ -322,7 +312,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (isSourceMap(file.path)) return
 
     out.goodScript(file)
-
     log.gulp('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall)
 
     if (file.isInternal) return
@@ -331,8 +320,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     cache.update(file.path)
 
     // write cache state to disk
-    if (opts('hasRunInitialBuild'))
-      serializeCache()
+    if (opts('hasRunInitialBuild')) serializeCache()
 
     // message browser of compile success
     bridge.broadcast('compile:success', file.message, 'error')

@@ -1,5 +1,4 @@
-import { readInstalled } from './lib/readInstalled'
-import writeInstalled from './lib/writeInstalled'
+import { writeInstalled, readInstalled } from './lib/installed'
 import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
@@ -36,15 +35,8 @@ function getToInstall(requires) {
 }
 
 // used to quickly check if a file will trigger an install
-export async function willInstall(filePath) {
-  try {
-    const required = cache.getExternals(filePath)
-    const fresh = await getNew(required)
-    return !!fresh.length
-  }
-  catch(e) {
-    handleError(e)
-  }
+export async function willInstall(imports) {
+  return !!getNew(imports).length
 }
 
 // finds the new externals to install
@@ -52,7 +44,7 @@ export async function getNew(requires, installed) {
   if (!requires.length) return requires
 
   // get all installed
-  installed = installed || await readInstalled()
+  installed = installed || readInstalled({ fromCache: true })
 
   const names = normalize(requires)
   if (!names.length) return names
