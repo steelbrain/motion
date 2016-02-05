@@ -24,7 +24,6 @@ const hasBuilt = () => opts('hasRunInitialBuild')
 
 export function scripts({ inFiles, outFiles, userStream }) {
   let State = {
-    files: {},
     curFile: null,
     lastError: null,
     lastSaved: {},
@@ -38,9 +37,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
   const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
-  const fileIs = (loc, key) => State.files[loc] && State.files[loc][key]
-  const isInternal = loc => fileIs(loc, 'isInternal')
-  const willInstall = loc => fileIs(loc, 'willInstall')
   const originalPath = loc => {
     const is = loc.replace('/.flint/.internal/out', '').replace('/.flint/.internal/deps/internal', '')
     console.log('>>>',is)
@@ -66,7 +62,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
-      .pipe($.if(file => isInternal(file.path),
+      .pipe($.if(file => file.isInternal,
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
@@ -165,7 +161,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
   }
 
   function reset(file) {
-    State.files[file.path] = {}
     State.lastError = false
     State.curFile = file
     file.startTime = Date.now()
@@ -208,6 +203,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     State.curFile = file
   }
 
+  // sets isInternal and willInstall
+  // for handling npm and bundling related things
   function processDependencies(file) {
     const modules = file.babel.modules // babel metadata :)
     const imports = modules.imports.map(i => i.source)
@@ -297,12 +294,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
     // avoid if error
     if (State.lastError) return
 
-    // avoid if installing
-    const fileWillInstall = willInstall(originalPath(file.path))
-    const bundlerInstalling = bundler.isInstalling()
-
-    log.gulp('bundler installing?', bundlerInstalling, 'willInstall?', fileWillInstall)
-    if (bundlerInstalling || fileWillInstall) return
+    // dont broadcast script if installing/bundling
+    log.gulp('bundler installing?', bundler.isInstalling(), 'willInstall?', file.willInstall)
+    if (bundler.isInstalling() || file.willInstall) return
 
     // ADD
     bridge.broadcast('script:add', file.message)
