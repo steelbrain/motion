@@ -31,12 +31,12 @@ let installing = []
 let _isInstalling = false
 
 // used to quickly check if a file will trigger an install
-export async function willInstall(imports) {
+export function willInstall(imports) {
   return !!getNew(imports).length
 }
 
 // finds the new externals to install
-export async function getNew(requires, installed) {
+export function getNew(requires, installed) {
   if (!requires.length) return requires
 
   // get all installed
@@ -46,10 +46,8 @@ export async function getNew(requires, installed) {
   if (!names.length) return names
 
   const fresh = _.difference(names, installed, installing)
-  log.externals('DOWN', '  ', names)
-  log.externals('DOWN', '- ', installed)
-  log.externals('DOWN', '- ', installing)
-  log.externals('DOWN', '= ', fresh)
+  log.externals('DOWN', '  ', names, '- ', installed, '- ', installing)
+  log.externals('DOWN', '  = ', fresh)
   return fresh
 }
 

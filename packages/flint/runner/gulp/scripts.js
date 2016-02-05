@@ -17,7 +17,7 @@ import onMeta from './lib/onMeta'
 import writeStyle from '../lib/writeStyle'
 import { getBabelConfig } from '../helpers'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
-import { _, fs, path, debounce, glob, readdir, p, rm, handleError, logError, log } from '../lib/fns'
+import { _, fs, path, debounce, p, rm, handleError, logError, log } from '../lib/fns'
 
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
@@ -38,8 +38,10 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
   const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
-  const isInternal = ({ path }) => State.files[path].isInternal
-  const willInstall = ({ path }) => console.log(path, State.files) && State.files[path].willInstall
+  const fileIs = (loc, key) => State.files[loc] && State.files[loc][key]
+  const isInternal = loc => fileIs(loc, 'isInternal')
+  const willInstall = loc => fileIs(loc, 'willInstall')
+  const originalPath = loc => loc.replace('/.flint/.internal/out', '').replace('/.flint/.internal/deps/internal', '')
 
   return (isBuilding() ?
     scripts :
@@ -78,14 +80,17 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
           fileState.isInternal = cache.isInternal(filePath)
 
-          if (!opts('build') || opts('watch'))
+          if (!opts('build') || opts('watch')) {
+            console.log('set file willInstall', allImports, bundler.willInstall(allImports))
             fileState.willInstall = bundler.willInstall(allImports)
+            console.log(filePath, State.files)
+          }
         }
       })))
       .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
-      .pipe($.if(file => isInternal(file),
+      .pipe($.if(file => isInternal(file.path),
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
@@ -294,8 +299,11 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (State.lastError) return
 
     // avoid if installing
-    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', willInstall(file))
-    if (bundler.isInstalling() || willInstall(file)) return
+    const fileWillInstall = willInstall(originalPath(file.path))
+    const bundlerInstalling = bundler.isInstalling()
+
+    log.gulp('bundler installing?', bundlerInstalling, 'willInstall?', fileWillInstall)
+    if (bundlerInstalling || fileWillInstall) return
 
     // ADD
     bridge.broadcast('script:add', file.message)
