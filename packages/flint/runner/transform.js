@@ -29,12 +29,6 @@ export default class Transform {
         },
         onMeta: (state) => {
           this.emitter.emit('onMeta', state)
-        },
-        onImports: (file, imports) => {
-          this.emitter.emit('onImports', file, imports)
-        },
-        onExports: (file, imports) => {
-          this.emitter.emit('onExports', file, imports)
         }
       })
     }
@@ -48,12 +42,6 @@ export default class Transform {
     }
     if (config.onMeta) {
       disposable.add(this.emitter.on('onMeta', config.onMeta))
-    }
-    if (config.onImports) {
-      disposable.add(this.emitter.on('onImports', config.onImports))
-    }
-    if (config.onExports) {
-      disposable.add(this.emitter.on('onExports', config.onExports))
     }
     this.disposables.push(disposable)
     return this.transform

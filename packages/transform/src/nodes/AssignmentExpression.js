@@ -31,10 +31,6 @@ export default {
     const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
     if (!isBasicAssign) return
 
-    // module.exports check
-    if (t.isMemberExpression(node.left) && node.left.object.name === 'module')
-      state.hasExports = true
-
     // destructures
     if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {
       let destructNodes = destructureTrackers(node.left, 'set')

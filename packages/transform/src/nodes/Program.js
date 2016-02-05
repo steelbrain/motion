@@ -7,14 +7,6 @@ export default {
   },
 
   exit(node, parent, scope, file) {
-    if (options.onImports) {
-      options.onImports(file.opts.filename, state.fileImports)
-    }
-
-    if (options.onExports) {
-      options.onExports(file.opts.filename, state.hasExports)
-    }
-
     state.meta.file = file.opts.filename
 
     if (options.onMeta) {
@@ -23,7 +15,9 @@ export default {
 
     const location = relativePath(file.opts.filename)
 
-    if (!state.hasExports) {
+    console.log('has exports', file.metadata.exports)
+
+    if (!file.metadata.exports) {
       // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(
         // closure

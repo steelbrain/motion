@@ -13,13 +13,11 @@ export function transformText(text, {
   log = null,
   writeStyle = null,
   onMeta = null,
-  onImports = null,
-  onExports = null
 }) {
 
   Scanner.pre(false, text, function(text) {
     const babelConfig = getBabelConfig({
-      log, writeStyle, onMeta, onImports, onExports
+      log, writeStyle, onMeta
     })
     babelConfig.filename = '__editor__'
     babelTransform(text, babelConfig)

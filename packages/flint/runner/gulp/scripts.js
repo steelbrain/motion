@@ -58,7 +58,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
         onMeta,
         writeStyle
       })))
-      .piep(pipefn(processDependencies))
+      .pipe(pipefn(processDependencies))
       .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
@@ -208,20 +208,22 @@ export function scripts({ inFiles, outFiles, userStream }) {
   function processDependencies(file) {
     const modules = file.babel.modules // babel metadata :)
     const imports = modules.imports.map(i => i.source)
-    const isExported = !!_.flatten(modules.exports.map(e => e.exported))
+    const isExported = !!_.flatten(modules.exports.exported.map(e => e.exported)).length
 
-    cache.setFileInternal(file, isExported)
+    console.log(modules, imports, isExported)
+
+    cache.setFileInternal(file.path, isExported)
     file.isInternal = isExported
 
     const allImports = getAllImports(file.contents.toString(), imports)
 
     const scan = () => {
-      cache.setFileImports(filePath, allImports)
-      bundler.scanFile(filePath)
+      cache.setFileImports(file.path, allImports)
+      bundler.scanFile(file.path)
     }
 
     if (scanNow()) scan()
-    else debounce(`install:${filePath}`, 2000, scan)
+    else debounce(`install:${file.path}`, 2000, scan)
 
     if (!opts('build') || opts('watch')) {
       file.willInstall = bundler.willInstall(allImports)
@@ -321,9 +323,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (isSourceMap(file.path)) return
 
     out.goodScript(file)
-    log.gulp('DOWN', 'success'.green, 'internal?', isInternal(file))
+    log.gulp('DOWN', 'success'.green, 'internal?', file.isInternal)
 
-    if (isInternal(file)) return
+    if (file.isInternal) return
 
     // update cache error / state
     cache.update(file.path)
