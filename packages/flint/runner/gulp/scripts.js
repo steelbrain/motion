@@ -4,7 +4,6 @@ import babel from './lib/gulp-babel'
 import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap, serializeCache } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
-import flintTransform from 'flint-transform'
 import bridge from '../bridge'
 import cache from '../cache'
 import builder from '../builder'
@@ -274,10 +273,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     // run stuff after each change on build --watch
     bundle()
 
-    // avoid ?? todo: figure out why this is necessary
-    if (!cache.get(file.path)) return
-    // avoid if error
-    if (State.lastError) return
+    if (!cache.get(file.path)) return // avoid ?? todo: figure out why this is necessary
+    if (State.lastError) return // avoid if error
 
     // dont broadcast script if installing/bundling
     log.gulp('bundler installing?', bundler.isInstalling(), 'willInstall?', file.willInstall)
