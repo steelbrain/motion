@@ -1,4 +1,4 @@
-import { writeInstalled, readInstalled } from './lib/installed'
+import { writeInstalled, readInstalled, readInstalledCache } from './lib/installed'
 import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
@@ -36,18 +36,14 @@ export function willInstall(imports) {
 }
 
 // finds the new externals to install
-export function getNew(requires, installed) {
+export function getNew(requires, installed = readInstalledCache()) {
   if (!requires.length) return requires
-
-  // get all installed
-  installed = installed || readInstalled({ fromCache: true })
 
   const names = normalize(requires)
   if (!names.length) return names
 
   const fresh = _.difference(names, installed, installing)
-  log.externals('DOWN', '  ', names, '- ', installed, '- ', installing)
-  log.externals('DOWN', '  = ', fresh)
+  log.externals('DOWN', '  ', names, '- ', installed, '- ', installing, '  = ', fresh)
   return fresh
 }
 

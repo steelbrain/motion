@@ -41,7 +41,11 @@ export function scripts({ inFiles, outFiles, userStream }) {
   const fileIs = (loc, key) => State.files[loc] && State.files[loc][key]
   const isInternal = loc => fileIs(loc, 'isInternal')
   const willInstall = loc => fileIs(loc, 'willInstall')
-  const originalPath = loc => loc.replace('/.flint/.internal/out', '').replace('/.flint/.internal/deps/internal', '')
+  const originalPath = loc => {
+    const is = loc.replace('/.flint/.internal/out', '').replace('/.flint/.internal/deps/internal', '')
+    console.log('>>>',is)
+    return is
+  }
 
   return (isBuilding() ?
     scripts :
@@ -56,37 +60,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(babel(getBabelConfig({
         log,
         onMeta,
-        writeStyle,
-
-        onExports(file, val) {
-          cache.setFileInternal(file, val)
-        },
-
-        onImports(filePath, imports) {
-          const fileState = State.files[filePath]
-
-          const src = State.curFile.contents.toString()
-          const allImports = getAllImports(src, imports)
-
-          const scan = () => {
-            cache.setFileImports(filePath, allImports)
-            bundler.scanFile(filePath)
-          }
-
-          if (scanNow())
-            scan()
-          else
-            debounce(`install-${filePath}`, 2000, scan)
-
-          fileState.isInternal = cache.isInternal(filePath)
-
-          if (!opts('build') || opts('watch')) {
-            console.log('set file willInstall', allImports, bundler.willInstall(allImports))
-            fileState.willInstall = bundler.willInstall(allImports)
-            console.log(filePath, State.files)
-          }
-        }
+        writeStyle
       })))
+      .piep(pipefn(processDependencies))
       .pipe(pipefn(updateCache)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
@@ -230,6 +206,29 @@ export function scripts({ inFiles, outFiles, userStream }) {
     }
 
     State.curFile = file
+  }
+
+  function processDependencies(file) {
+    const modules = file.babel.modules // babel metadata :)
+    const imports = modules.imports.map(i => i.source)
+    const isExported = !!_.flatten(modules.exports.map(e => e.exported))
+
+    cache.setFileInternal(file, isExported)
+    file.isInternal = isExported
+
+    const allImports = getAllImports(file.contents.toString(), imports)
+
+    const scan = () => {
+      cache.setFileImports(filePath, allImports)
+      bundler.scanFile(filePath)
+    }
+
+    if (scanNow()) scan()
+    else debounce(`install:${filePath}`, 2000, scan)
+
+    if (!opts('build') || opts('watch')) {
+      file.willInstall = bundler.willInstall(allImports)
+    }
   }
 
   // update cache: meta/src/imports

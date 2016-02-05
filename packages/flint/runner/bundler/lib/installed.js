@@ -8,9 +8,11 @@ import filterWithPath from './filterWithPath'
 
 let installed = []
 
-export async function readInstalled({ fromCache = false } = {}) {
-  if (fromCache) return installed
+export function readInstalledCache() {
+  return installed
+}
 
+export async function readInstalled() {
   try {
     const state = await disk.state.read()
     const installed = state.installed || []
