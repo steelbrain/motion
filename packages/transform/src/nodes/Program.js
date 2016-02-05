@@ -15,8 +15,6 @@ export default {
 
     const location = relativePath(file.opts.filename)
 
-    console.log('has exports', file.metadata.exports)
-
     if (!file.metadata.exports) {
       // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(

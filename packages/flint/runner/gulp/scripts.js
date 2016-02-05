@@ -210,8 +210,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
     const imports = modules.imports.map(i => i.source)
     const isExported = !!_.flatten(modules.exports.exported.map(e => e.exported)).length
 
-    console.log(modules, imports, isExported)
-
     cache.setFileInternal(file.path, isExported)
     file.isInternal = isExported
 
@@ -226,6 +224,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     else debounce(`install:${file.path}`, 2000, scan)
 
     if (!opts('build') || opts('watch')) {
+      debounce('removeOldImports', 3000, bundler.uninstall)
       file.willInstall = bundler.willInstall(allImports)
     }
   }
