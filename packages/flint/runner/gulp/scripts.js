@@ -38,11 +38,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
   const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
-  const originalPath = loc => {
-    const is = loc.replace('/.flint/.internal/out', '').replace('/.flint/.internal/deps/internal', '')
-    console.log('>>>',is)
-    return is
-  }
 
   return (isBuilding() ?
     scripts :
@@ -54,15 +49,10 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(pipefn(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe(babel(getBabelConfig({
-        log,
-        onMeta,
-        writeStyle
-      })))
+      .pipe(babel(getBabelConfig({ log, onMeta, writeStyle })))
       .pipe(pipefn(processDependencies))
       .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-      // is internal
       .pipe($.if(file => file.isInternal,
         multipipe(
           pipefn(removeNewlyInternal),
