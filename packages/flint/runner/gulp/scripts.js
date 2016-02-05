@@ -28,7 +28,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
     lastError: null,
     lastSaved: {},
     loaded: 0,
-    total: inFiles && inFiles.length || 0
+    total: inFiles && inFiles.length || 0,
+    outsideSources: {}
   }
 
   let scripts = userStream || gulp.src(SCRIPTS_GLOB)
@@ -238,8 +239,6 @@ export function scripts({ inFiles, outFiles, userStream }) {
     sendOutsideChanged(meta, file)
   }
 
-  let outsideSources = {}
-
   // detects if a file has changed not inside views for hot reloads correctness
   function sendOutsideChanged(meta, file) {
     if (!meta) return
@@ -251,11 +250,10 @@ export function scripts({ inFiles, outFiles, userStream }) {
       // slice out all code not in views
       const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
 
-      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
-      const cacheFile = cache.getFile(file.path)
-      const prevOutside = outsideSources[file.path]
-      changed = prevOutside.outsideSrc !== outsideSrc
-      outsideSources[file.path] = outsideSrc // update
+      const outside = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
+      const prevOutside = State.outsideSources[file.path]
+      changed = prevOutside !== outside
+      State.outsideSources[file.path] = outside // update
     }
 
     if (opts('hasRunInitialBuild'))

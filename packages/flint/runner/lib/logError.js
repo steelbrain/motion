@@ -22,17 +22,14 @@ export default function logError(error, file) {
   if (error.loc)
     console.log('  line: %s, col: %s', error.loc.line, error.loc.column)
 
-  if (error.stack && error.plugin != 'gulp-babel')
-    console.log(error.stack)
-
   error.stack = error.stack || error.codeFrame || ''
-  error.stack = unicodeToChar(error.stack)
 
   if (error.plugin == 'gulp-babel')
     error.stack = error.stack ? error.stack.split("\n").slice(0, 7).join("\n") : ''
 
-  if (error.stack)
-    error.stack = unicodeToChar(error.stack)
+  if (error.stack) {
+    console.log(unicodeToChar(error.stack))
+  }  
 
   if (file && typeof file == 'object')
     log('FILE', "\n", file.contents && file.contents.toString())
