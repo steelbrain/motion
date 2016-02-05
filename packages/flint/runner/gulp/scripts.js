@@ -238,11 +238,13 @@ export function scripts({ inFiles, outFiles, userStream }) {
     sendOutsideChanged(meta, file)
   }
 
+  let outsideSources = {}
+
   // detects if a file has changed not inside views for hot reloads correctness
   function sendOutsideChanged(meta, file) {
     if (!meta) return
 
-    let changed = false
+    let changed = true
     const viewLocs = Object.keys(meta).map(view => meta[view].location)
 
     if (viewLocs.length) {
@@ -251,9 +253,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
       const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
       const cacheFile = cache.getFile(file.path)
-      const prevOutsideSrc = cacheFile.outsideSrc
-      cacheFile.outsideSrc = outsideSrc // update
-      changed = prevOutsideSrc !== outsideSrc
+      const prevOutside = outsideSources[file.path]
+      changed = prevOutside.outsideSrc !== outsideSrc
+      outsideSources[file.path] = outsideSrc // update
     }
 
     if (opts('hasRunInitialBuild'))
