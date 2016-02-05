@@ -60,7 +60,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
         writeStyle
       })))
       .pipe(pipefn(processDependencies))
-      .pipe(pipefn(updateCache)) // right after flint
+      .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       // is internal
       .pipe($.if(file => file.isInternal,
@@ -230,17 +230,11 @@ export function scripts({ inFiles, outFiles, userStream }) {
     }
   }
 
-  // update cache: meta/src/imports
-  function updateCache(file) {
-    file.src = file.contents.toString()
-    // meta
-    let meta = cache.getFileMeta(file.path)
-    // outside changed detection
-    sendOutsideChanged(meta, file)
-  }
-
   // detects if a file has changed not inside views for hot reloads correctness
-  function sendOutsideChanged(meta, file) {
+  function sendOutsideChanged(file) {
+    let src = file.contents.toString()
+    let meta = cache.getFileMeta(file.path)
+
     if (!meta) return
 
     let changed = true
@@ -250,7 +244,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       // slice out all code not in views
       const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
 
-      const outside = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
+      const outside = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), src.split("\n")).join('')
       const prevOutside = State.outsideSources[file.path]
       changed = prevOutside !== outside
       State.outsideSources[file.path] = outside // update
