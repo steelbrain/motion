@@ -3,7 +3,15 @@ import state from '../state'
 import { wrapSetter } from '../lib/wrapState'
 
 export default {
-  exit(node, parent, scope) {
+  exit(node, parent, scope, file) {
+    // track require() statements
+    if (node.callee && node.callee.name && node.callee.name == 'require') {
+      const arg = node.arguments && node.arguments.length && node.arguments[0].value
+
+      // mutating babel metadata
+      file.metadata.modules.imports.push({ source: arg })
+    }
+
     // mutative array methods
     if (isInView(scope)) {
       if (isMutativeArrayFunc(node)) {
