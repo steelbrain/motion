@@ -196,14 +196,17 @@ export function scripts({ inFiles, outFiles, userStream }) {
   // sets isInternal and willInstall
   // for handling npm and bundling related things
   function processDependencies(file) {
-    const modules = file.babel.modules // babel metadata :)
-    const imports = modules.imports.map(i => i.source)
-    const isExported = !!_.flatten(modules.exports.exported.map(e => e.exported)).length
+     // babel metadata :)
+    const { imports, exports: { exported } } = file.babel.modules
+    const importNames = imports.map(i => i.source)
+    const isExported = !!exported.length
+
+    console.log(file.babel.modules)
 
     cache.setFileInternal(file.path, isExported)
     file.isInternal = isExported
 
-    const allImports = getAllImports(file.contents.toString(), imports)
+    const allImports = getAllImports(file.contents.toString(), importNames)
 
     const scan = () => {
       cache.setFileImports(file.path, allImports)
