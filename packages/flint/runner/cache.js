@@ -4,7 +4,6 @@ import opts from './opts'
 import { _, log, path, writeJSON } from './lib/fns'
 import util from 'util'
 
-const LOG = 'cache'
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>

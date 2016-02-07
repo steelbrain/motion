@@ -1,7 +1,8 @@
 import { $, gulp, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
 import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
-import { _, fs, path, debounce, p, rm, handleError, logError, log } from '../lib/fns'
+import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
 import { event } from './index'
+import { findBabelRuntimeRequires } from '../lib/findRequires'
 import flintBabel from './lib/gulp-babel'
 import bridge from '../bridge'
 import cache from '../cache'
@@ -9,28 +10,24 @@ import builder from '../builder'
 import bundler from '../bundler'
 import scanner from './scanner'
 import opts from '../opts'
-import { findBabelRuntimeRequires } from '../lib/findRequires'
 
 const serializeCache = _.throttle(cache.serialize, 300)
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
 
-export function scripts({ inFiles, outFiles, userStream }) {
+export function scripts({ inFiles = [], userStream }) {
   let State = {
     curFile: null,
     lastError: null,
     lastSaved: {},
     loaded: 0,
-    total: inFiles && inFiles.length || 0,
+    total: inFiles.length,
     outsideSources: {}
   }
 
-  let scripts = userStream || gulp.src(SCRIPTS_GLOB)
+  const scripts = userStream || gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
-
-  const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
-  const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
   return (
     isBuilding() ?
@@ -187,6 +184,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     State.curFile = file
   }
+
+  const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
+  const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
   // sets isInternal and willInstall
   // for handling npm and bundling related things
