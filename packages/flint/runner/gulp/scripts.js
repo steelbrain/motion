@@ -1,7 +1,7 @@
 import { event } from './index'
 import gulp from 'gulp'
 import babel from './lib/gulp-babel'
-import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap, serializeCache } from './lib/helpers'
+import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
 import merge from 'merge-stream'
 import multipipe from 'multipipe'
 import bridge from '../bridge'
@@ -12,12 +12,10 @@ import scanner from './scanner'
 import superStream from './lib/superStream'
 import dirAddStream from './lib/dirAddStream'
 import opts from '../opts'
-import onMeta from './lib/onMeta'
-import writeStyle from '../lib/writeStyle'
-import { getBabelConfig } from '../helpers'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
 import { _, fs, path, debounce, p, rm, handleError, logError, log } from '../lib/fns'
 
+const serializeCache = _.throttle(cache.serialize, 300)
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
 
@@ -49,7 +47,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(pipefn(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe(babel(getBabelConfig({ log, onMeta, writeStyle })))
+      .pipe(babel())
       .pipe(pipefn(processDependencies))
       .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))

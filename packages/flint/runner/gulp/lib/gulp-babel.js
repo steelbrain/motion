@@ -4,8 +4,16 @@ import applySourceMap from 'vinyl-sourcemaps-apply'
 import replaceExt from 'replace-ext'
 import { babel } from '../../lib/requires'
 
+import onMeta from './onMeta'
+import writeStyle from '../../lib/writeStyle'
+import { getBabelConfig } from '../../helpers'
+import { log } from '../../lib/fns'
+
 module.exports = function (opts) {
 	opts = opts || {}
+
+	// TODO use
+	let flintFileInfo = {}
 
 	return through.obj(function (file, enc, cb) {
 		if (file.isNull()) {
@@ -19,6 +27,13 @@ module.exports = function (opts) {
 		}
 
 		try {
+			let flintBabel = getBabelConfig({
+				log,
+				onMeta,
+				writeStyle,
+				// TODO imports/exports cb onto flintFileInfo
+			})
+
 			var fileOpts = Object.assign({}, opts, {
 				filename: file.path,
 				filenameRelative: file.relative,
@@ -26,6 +41,8 @@ module.exports = function (opts) {
 			})
 
 			var res = babel().transform(file.contents.toString(), fileOpts)
+
+			// TODO merge flintFileInfo + metadata
 
 			if (file.sourceMap && res.map) {
 				res.map.file = replaceExt(res.map.file, '.js')

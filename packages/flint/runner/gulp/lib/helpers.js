@@ -8,7 +8,6 @@ import opts from '../../opts'
 import cache from '../../cache'
 import scriptsGlob from './scriptsGlob'
 
-export const serializeCache = _.throttle(cache.serialize, 200)
 export const isSourceMap = file => path.extname(file) === '.map'
 export const relative = file => path.relative(opts('appDir'), file.path)
 export const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
