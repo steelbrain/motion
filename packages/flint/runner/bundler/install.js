@@ -49,7 +49,7 @@ export function getNew(requires, installed = readInstalledCache()) {
 
 export async function installAll(requires) {
   try {
-    if (!requires) requires = cache.getExternals()
+    requires = requires || cache.getExternals()
 
     // nothing to install
     if (!requires.length && !_isInstalling && opts('finishingFirstBuild'))
@@ -131,7 +131,7 @@ function runInstall(prevInstalled, toInstall) {
   }
 
   async function done() {
-    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+    const installedFullPaths = _.uniq(_.flattenDeep(_.compact(installingFullNames)))
     let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
     log.externals('DONE, finalPaths', finalPaths)
 
