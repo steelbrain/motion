@@ -38,7 +38,8 @@ export function scripts({ inFiles, outFiles, userStream }) {
   const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
   const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
-  return (isBuilding() ?
+  return (
+    isBuilding() ?
     scripts :
     merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
   )
@@ -56,7 +57,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
-          gulp.dest(p(opts('depsDir'), 'internal')),
+          gulp.dest(opts('deps').internalDir),
           pipefn(bundle),
           pipefn(buildDone),
           $.ignore.exclude(true)
