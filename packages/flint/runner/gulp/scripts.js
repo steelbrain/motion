@@ -1,19 +1,15 @@
+import { $, gulp, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
+import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
+import { _, fs, path, debounce, p, rm, handleError, logError, log } from '../lib/fns'
 import { event } from './index'
-import gulp from 'gulp'
-import babel from './lib/gulp-babel'
-import { $, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
-import merge from 'merge-stream'
-import multipipe from 'multipipe'
+import flintBabel from './lib/gulp-babel'
 import bridge from '../bridge'
 import cache from '../cache'
 import builder from '../builder'
 import bundler from '../bundler'
 import scanner from './scanner'
-import superStream from './lib/superStream'
-import dirAddStream from './lib/dirAddStream'
 import opts from '../opts'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
-import { _, fs, path, debounce, p, rm, handleError, logError, log } from '../lib/fns'
 
 const serializeCache = _.throttle(cache.serialize, 300)
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
@@ -47,7 +43,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe(pipefn(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe(babel())
+      .pipe(flintBabel())
       .pipe(pipefn(processDependencies))
       .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
