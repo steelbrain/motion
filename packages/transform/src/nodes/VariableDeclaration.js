@@ -38,6 +38,10 @@ export default {
         let name = dec.id.name
         state.viewState[name] = true
 
+        // avoid wrapping functions
+        if (t.isFunctionExpression(dec.init) || t.isArrowFunctionExpression(dec.init))
+          return dec
+
         // avoid wrapping in production
         if (options.production)
           return dec

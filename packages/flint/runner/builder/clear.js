@@ -1,4 +1,4 @@
-import { p, log, handleError, rm, recreateDir, mkdir } from '../lib/fns'
+import { p, log, handleError, rm, recreateDir, mkdir, exists } from '../lib/fns'
 import opts from '../opts'
 import disk from '../disk'
 

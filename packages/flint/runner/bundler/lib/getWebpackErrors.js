@@ -1,7 +1,5 @@
 import opts from '../../opts'
-import { p, log, _, handleError } from '../../lib/fns'
-
-const LOG = 'webpack'
+import { p, path, log, _ } from '../../lib/fns'
 
 let lineSep = `\n  `
 let takeWebpack = ls => lineSep + _.take(ls, 2).join(lineSep)
@@ -14,11 +12,13 @@ function cleanPath(str) {
     .replace(/\.\/\.flint(\/\.internal)?(\/deps(\/internal)?)?/g, '')
     .replace(new RegExp(opts('appDir'), 'g'), '')
     .replace(new RegExp('Module not found: ', 'g'), '')
+    .replace('in /' + path.relative(opts('appDir'), opts('deps').dir), '') // webpack remove "in /deps/externals.in.js"
+    .replace("/externals.in.js\n", '')
+    .replace("/internals.in.js\n", '')
 }
 
-export default function handleWebpackErrors(where, err, stats, resolve, reject) {
-  if (err)
-    return reject(err)
+export default function getWebpackErrors(where, err, stats) {
+  if (err) return err
 
   const jsonStats = stats.toJson({
     source: false
@@ -26,8 +26,8 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
 
   // debug
   if (opts('debug')) {
-    log(LOG, '--- webpack output ---')
-    log(LOG, jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
+    log.webpack('--- webpack output ---')
+    log.webpack(jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
   }
 
   // check errors
@@ -35,7 +35,7 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
 
   if (errors.length) {
     // debug output everything
-    log(LOG, 'webpackErrors', errors)
+    log.webpack('webpackErrors', errors)
 
     let messages = errors.map(split).map(takeWebpack)[0].dim
     let whereMsg = where == 'externals' ? 'NPM modules' : 'imported local modules'
@@ -56,10 +56,12 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
       }
     }
     catch(e) {
-      handleError(e)
+      return e
     }
 
-    return reject({ message, file, loc: { line, column } })
+    // rather than error out and break startup of app from running,
+    // we just log directly but continue
+    return { message, file, loc: { line, column } }
   }
 
   // check warnings
@@ -67,6 +69,5 @@ export default function handleWebpackErrors(where, err, stats, resolve, reject) 
     console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
   }
 
-  log(LOG, 'webpack finished')
-  return resolve()
+  log.webpack('webpack finished')
 }

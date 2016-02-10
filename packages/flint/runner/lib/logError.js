@@ -1,15 +1,23 @@
+import path from 'path'
 import opts from '../opts'
 import log from './log'
 import unicodeToChar from './unicodeToChar'
 
+// TODO clean up error system in general
+// This does stuff specific to things that pass in errors, it shouldn't
+
 export default function logError(error, file) {
+  if (!error) return
+
   console.log()
 
   if (typeof error != 'object' || Array.isArray(error))
     return console.log(error)
 
-  if (error.message)
-    console.log('  ' + unicodeToChar(error.message.replace(opts('appDir'), '').red))
+  if (error.message) {
+    const message = error.message.replace(opts('appDir'), '')
+    console.log('  ' + unicodeToChar(message).red)
+  }
 
   if (error.loc)
     console.log('  line: %s, col: %s', error.loc.line, error.loc.column)

@@ -19,7 +19,9 @@ export const Scanner = {
       // scan now on startup or build
       if (scanNow) scan()
       // debounce during run
-      else debounce(filePath, 2000, scan)
+      else {
+        debounce(filePath, 2000, scan)
+      }
 
       // building, done
       if (opts('build') && !opts('watch')) {
@@ -72,8 +74,11 @@ export const Scanner = {
       })
       .join("\n")
 
-    cache.add(filePath)
-    cache.setViews(filePath, viewNames)
+    // TODO move this into babel
+    if (filePath) {
+      cache.add(filePath)
+      cache.setViews(filePath, viewNames)
+    }
 
     next(source)
   }

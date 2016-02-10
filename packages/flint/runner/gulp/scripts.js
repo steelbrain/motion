@@ -90,6 +90,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
       .pipe($.sourcemaps.write('.'))
       .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
       .pipe(pipefn(afterWrite))
+      // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
       .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
@@ -295,6 +296,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (State.lastError) return
 
     // avoid if installing
+    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', file.willInstall)
     if (bundler.isInstalling() || file.willInstall) return
 
     // ADD

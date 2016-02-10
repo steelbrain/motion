@@ -1,5 +1,6 @@
+import disk from '../../disk'
 import opts from '../../opts'
-import { p, readJSON, handleError } from '../../lib/fns'
+import { p, readJSON, handleError, rm } from '../../lib/fns'
 import execPromise from '../../lib/execPromise'
 import normalize from './normalize'
 import progress from './progress'
@@ -7,14 +8,9 @@ import semver from 'semver'
 
 // npm install --save 'name'
 export async function save(name, index, total) {
-  try {
-    await progress('Installing', `npm install --save ${name}`, name, index, total)
-    // npm 3 we need to install peerDependencies as well
-    await installPeerDeps(name)
-  }
-  catch(e) {
-    handleError(e)
-  }
+  await progress('Installing', `npm install --save ${name}`, name, index, total)
+  // npm 3 we need to install peerDependencies as well
+  await installPeerDeps(name)
 }
 
 // npm uninstall --save 'name'
@@ -23,7 +19,12 @@ export async function unsave(name, index, total) {
     await progress('Uninstalling', 'npm uninstall --save ' + name, name, index, total)
   }
   catch(e) {
-    handleError(e)
+    // manual uninstall
+    await rm(p(opts('modulesDir'), name))
+    await disk.packageJSON.write((current, write) => {
+      delete current.dependencies[name]
+      write(current)
+    })
   }
 }
 

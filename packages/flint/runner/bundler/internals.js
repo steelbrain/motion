@@ -1,15 +1,13 @@
 import { finishedInstalling } from './install'
-import { webpack } from '../lib/require'
+import { webpack } from '../lib/requires'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
-import handleWebpackErrors from './lib/handleWebpackErrors'
+import getWebpackErrors from './lib/getWebpackErrors'
 import requireString from './lib/requireString'
 import bridge from '../bridge'
 import cache from '../cache'
 import opts from '../opts'
-import log from '../lib/log'
-import handleError from '../lib/handleError'
-import { writeFile } from '../lib/fns'
+import { log, logError, handleError, writeFile } from '../lib/fns'
 
 export async function internals() {
   try {
@@ -66,7 +64,8 @@ function packInternals() {
     })
 
     webpack()(conf, (err, stats) => {
-      handleWebpackErrors('internals', err, stats, resolve, reject)
+      logError(getWebpackErrors('internals', err, stats))
+      resolve()
     })
   })
 }

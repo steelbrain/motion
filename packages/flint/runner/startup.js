@@ -16,6 +16,10 @@ import Editor from './editor'
 let started = false
 
 export async function startup(options = {}) {
+  if (process.env.startedat) {
+    console.log('total startup time: ', Date.now() - process.env.startedat)
+  }
+
   if (started) return
   started = true
 

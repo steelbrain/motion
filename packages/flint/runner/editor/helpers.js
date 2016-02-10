@@ -16,12 +16,12 @@ export function transformText(text, {
   onImports = null,
   onExports = null
 }) {
-  const filePath = '__editor__'
-  Scanner.pre(filePath, text, function(text) {
+
+  Scanner.pre(false, text, function(text) {
     const babelConfig = getBabelConfig({
       log, writeStyle, onMeta, onImports, onExports
     })
-    babelConfig.filename = filePath
+    babelConfig.filename = '__editor__'
     babelTransform(text, babelConfig)
   })
   transformPlugin.disposeLast()

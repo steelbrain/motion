@@ -1,34 +1,56 @@
 import path from 'path'
-import log from './lib/log'
-import { p, sanitize, handleError, readJSON, readFile, exists } from './lib/fns'
+import { p, log, sanitize, handleError, readJSON, readFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
-import handleWebpackErrors from './bundler/lib/handleWebpackErrors'
+import getWebpackErrors from './bundler/lib/getWebpackErrors'
 
 let OPTS = {}
 
 export async function init(cli) {
-  // init
-  OPTS.appDir = path.normalize(process.cwd())
-  OPTS.name = cli.name || path.basename(process.cwd())
-  OPTS.saneName = sanitize(cli.name)
-  OPTS.hasRunInitialBuild = false
-  OPTS.defaultPort = 4000
+  try {
+    // init
+    OPTS.appDir = path.normalize(process.cwd())
+    OPTS.name = cli.name || path.basename(process.cwd())
+    OPTS.saneName = sanitize(cli.name)
+    OPTS.hasRunInitialBuild = false
+    OPTS.defaultPort = 4000
 
-  setupCliOpts(cli)
-  setupDirs()
+    setupCliOpts(cli)
+    setupDirs()
 
-  // config
-  const config = await loadConfigs(cli)
-  setupConfig(cli, config)
+    // config
+    const config = await loadConfigs(cli)
+    setupConfig(cli, config)
+  }
+  catch(e) {
+    handleError(e)
+  }
+}
+
+async function loadConfigs() {
+  const file = await parseConfig()
+  let result
+
+  if (file) {
+    // const userConf = require('./.flint/.internal/user-config')
+    // TODO not eval or at least return export properly, also whitelist options
+    const out = await readFile(file)
+    result = eval(out)
+  }
+  else {
+    result = await jsonConfig()
+  }
+
+  return modeMergedConfig(result)
 }
 
 function parseConfig() {
   return new Promise(async (resolve, reject) => {
+    const confLocation = p(OPTS.flintDir, 'config.js')
+
     try {
       try {
-        const confLocation = p(OPTS.flintDir, 'config.js')
         await exists(confLocation)
       }
       catch(e) {
@@ -55,35 +77,30 @@ function parseConfig() {
         resolveLoader: { root: runnerModules },
       }, (err, stats) => {
         const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
-        handleWebpackErrors('config', err, stats, res, reject)
+        let error = getWebpackErrors('config', err, stats)
+        if (error) resolve(false)
+        else resolve(confLocation)
       })
     }
     catch(e) {
       handleError(e)
-      reject(e)
     }
   })
 }
 
-function setupCliOpts(cli) {
+async function setupCliOpts(cli) {
   OPTS.version = cli.version
   OPTS.debug = cli.debug
   OPTS.watch = cli.watch
   OPTS.reset = cli.reset
   OPTS.build = cli.build
-}
+  OPTS.out = cli.out
 
-async function loadConfigs() {
-  const file = await parseConfig()
-
-  if (file) {
-    // const userConf = require('./.flint/.internal/user-config')
-    const out = await readFile(file)
-    const conf = eval(out)
-    return modeMergedConfig(conf)
+  // ensure we dont clobber things
+  if (cli.out && (await exists(cli.out)))  {
+    console.error(`\n  Build dir already exists! Ensure you target an empty directory.\n`.red)
+    process.exit(1)
   }
-
-  return await jsonConfig()
 }
 
 function modeMergedConfig(config) {

@@ -1,7 +1,7 @@
 'use babel'
 
 import string_score from 'sb-string_score'
-import {decamelize} from 'humps'
+import { decamelize } from 'humps'
 import Styles from './autocomplete-styles'
 import {POSITION_TYPE, getRowFromText} from './helpers'
 

@@ -200,7 +200,6 @@ export default function createComponent(Flint, Internal, name, view, options = {
           }
           catch(e) {
             Internal.caughtRuntimeErrors++
-            console.log('reporting error from getInitialState')
             reportError(e)
             console.error(e.stack || e)
             this.recoveryRender = true

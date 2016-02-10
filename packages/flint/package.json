@@ -1,6 +1,6 @@
 {
   "name": "flint",
-  "version": "1.5.17",
+  "version": "1.5.25",
   "description": "Run flint apps",
   "main": "dist/main.js",
   "scripts": {},
@@ -16,7 +16,7 @@
     "flint-up": "./cli/entry/flint-up"
   },
   "dependencies": {
-    "atom-text-buffer-point": "^1.0.0",
+    "atom-text-buffer-point": "1.0.0",
     "autoprefixer": "6.2.3",
     "babel-runtime": "5.8.29",
     "chalk": "1.1.1",
@@ -45,7 +45,7 @@
     "gulp-uglify": "1.5.1",
     "gulp-util": "3.0.7",
     "gulp-watch": "4.3.5",
-    "humps": "^1.0.0",
+    "humps": "1.0.0",
     "json-loader": "0.5.4",
     "keypress": "0.2.1",
     "lodash": "4.0.0",
@@ -75,6 +75,6 @@
     "vinyl": "1.1.0",
     "vinyl-sourcemaps-apply": "0.2.1",
     "webpack": "1.12.11",
-    "ws": "^1.0.1"
+    "ws": "1.0.1"
   }
 }

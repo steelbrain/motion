@@ -129,7 +129,7 @@ function runInstall(prevInstalled, toInstall) {
       onFinish(dep)
     }
     catch(e) {
-      console.error(`Error installing ${dep}`, e.message)
+      console.error(`\n  ${e.message}`.red)
       failed.push(dep)
       log.externals('package install failed', dep, e.message, e.stack)
       onError(dep, e)

@@ -2,7 +2,7 @@ import gutil from 'gulp-util'
 import through from 'through2'
 import applySourceMap from 'vinyl-sourcemaps-apply'
 import replaceExt from 'replace-ext'
-import { babel } from '../../lib/require'
+import { babel } from '../../lib/requires'
 
 module.exports = function (opts) {
 	opts = opts || {};

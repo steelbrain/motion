@@ -66,9 +66,11 @@ export default function elementProps({ name, whitelisted, key, index, isView }, 
     let userOnChange = props.onChange
     let type = props.type
     let attr = (
-      (!type && name == 'input') || type == 'input' || type == 'textarea' ? 'value'
-      : type == 'checkbox' || type == 'radio' ? 'checked'
-      : false
+      ((!type && name == 'input') || type == 'input' || type == 'text' || type == 'textarea'  || type == 'search')
+        ? 'value'
+        : type == 'checkbox' || type == 'radio'
+          ? 'checked'
+          : false
     )
 
     if (!attr) {
