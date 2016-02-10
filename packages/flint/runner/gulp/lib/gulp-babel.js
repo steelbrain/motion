@@ -12,9 +12,6 @@ import { log } from '../../lib/fns'
 module.exports = function (opts) {
 	opts = opts || {}
 
-	// TODO use
-	let flintFileInfo = {}
-
 	return through.obj(function (file, enc, cb) {
 		if (file.isNull()) {
 			cb(null, file)
@@ -27,11 +24,18 @@ module.exports = function (opts) {
 		}
 
 		try {
+			// TODO use
+			let meta = {}
+
+			const onImports = imports => meta.imports = imports
+			const onExports = exports => meta.exports = exports
+
 			let flintBabel = getBabelConfig({
 				log,
 				onMeta,
 				writeStyle,
-				// TODO imports/exports cb onto flintFileInfo
+				onImports,
+				onExports
 			})
 
 			var fileOpts = Object.assign({}, opts, {
@@ -42,7 +46,8 @@ module.exports = function (opts) {
 
 			var res = babel().transform(file.contents.toString(), fileOpts)
 
-			// TODO merge flintFileInfo + metadata
+			console.log('md', res.metadata)
+			console.log('meta', meta)
 
 			if (file.sourceMap && res.map) {
 				res.map.file = replaceExt(res.map.file, '.js')

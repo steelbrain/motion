@@ -4,7 +4,6 @@ import opts from '../opts'
 import { through } from './lib/helpers'
 import { handleError, debounce } from '../lib/fns'
 
-const isNotIn = (x,y) => x.indexOf(y) == -1
 const viewMatcher = /^view\s+([\.A-Za-z_0-9]*)\s*\{/
 let views = []
 
@@ -17,8 +16,7 @@ export const Scanner = {
       .split("\n")
       .map((line, index) => {
         let result = line
-
-        let view = result.match(viewMatcher);
+        let view = result.match(viewMatcher)
 
         if (view && view.length) {
           inView = true
