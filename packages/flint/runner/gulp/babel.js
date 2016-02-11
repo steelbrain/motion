@@ -7,6 +7,7 @@ import onMeta from './lib/onMeta'
 import config from './lib/config'
 import writeStyle from '../lib/writeStyle'
 import { log } from '../lib/fns'
+import getMatches from '../lib/getMatches'
 
 export function file(opts) {
 	return babelStream({
@@ -40,6 +41,12 @@ function flintApp(file) {
 	return { res, file }
 }
 
+const babelCoreRequire =
+	/require\(\'(babel\-runtime\/core\-js\/[a-zA-Z0-9]+\/?[a-zA-Z0-9]*\/?[a-zA-Z0-9]*)\'\)/g
+
+const getBabelCoreRequires = src =>
+	getMatches(src, babelCoreRequire, 1)
+
 function flintFile(file) {
 	let track = {
 		imports: [],
@@ -65,9 +72,16 @@ function flintFile(file) {
 	const importNames = imports.map(i => i.source)
 
 	let meta = {
-		imports: [].concat(importNames, track.imports || [], importedHelpers || []),
+		imports: [].concat(
+			importNames,
+			(track.imports || []),
+			(importedHelpers || []),
+			getBabelCoreRequires(res.code)
+		),
 		isExported: track.isExported,
 	}
+
+	console.log('meta', getBabelCoreRequires(res.code))
 
 	log.gulp('meta', meta)
 
