@@ -1,14 +1,16 @@
-import TransformPlugin from './transform'
+import FlintTransform from 'flint-transform'
+import { isProduction } from './gulp/lib/helpers'
 import opts from './opts'
 import deepmerge from 'deepmerge'
 
-export const transformPlugin = new TransformPlugin()
+export function getBabelConfig(flintConfig) {
+  const flintPlugin = FlintTransform.file(Object.assign({
+    basePath: opts('appDir'),
+    production: isProduction(),
+    selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
+    routing: opts('config').routing
+  }, flintConfig))
 
-export function isProduction() {
-  return opts('build')
-}
-
-export function getBabelConfig(config) {
   const babelConf = {
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'view.el',
@@ -17,7 +19,7 @@ export function getBabelConfig(config) {
     retainLines: opts('config').pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],
-    plugins: [transformPlugin.get(config)],
+    plugins: [flintPlugin],
     extra: {
       production: isProduction()
     },

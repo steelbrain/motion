@@ -1,4 +1,4 @@
-import { t, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign, isViewState } from '../lib/helpers'
+import { t, options, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign, isViewState } from '../lib/helpers'
 import state from '../state'
 import { wrapSetter } from '../lib/wrapState'
 
@@ -9,7 +9,8 @@ export default {
       const arg = node.arguments && node.arguments.length && node.arguments[0].value
 
       // mutating babel metadata
-      file.metadata.modules.imports.push({ source: arg })
+      options.onImports && options.onImports(arg)
+      // file.metadata.modules.imports.push({ source: arg })
     }
 
     // mutative array methods

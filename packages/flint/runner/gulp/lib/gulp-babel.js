@@ -24,11 +24,13 @@ module.exports = function (opts) {
 		}
 
 		try {
-			// TODO use
-			let meta = {}
+			let meta = {
+				imports: [],
+				exports: false
+			}
 
-			const onImports = imports => meta.imports = imports
-			const onExports = exports => meta.exports = exports
+			const onImports = (imports : string) => meta.imports.push(imports)
+			const onExports = (val : boolean) => meta.exports = val
 
 			let flintBabel = getBabelConfig({
 				log,

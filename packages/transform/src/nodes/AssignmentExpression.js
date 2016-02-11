@@ -33,8 +33,10 @@ export default {
 
     // module.exports check
     if (t.isMemberExpression(node.left) && node.left.object.name === 'module') {
-      file.metadata.exports = file.metadata.exports || {}
-      file.metadata.exports.hasExports = true
+      options.onExports && options.onExports(true)
+
+      // file.metadata.exports = file.metadata.exports || {}
+      // file.metadata.exports.hasExports = true
     }
 
 
