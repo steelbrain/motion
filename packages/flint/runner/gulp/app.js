@@ -1,5 +1,6 @@
 import flintTransform from 'flint-transform'
-import { $, gulp, babel, isSourceMap, isProduction } from './lib/helpers'
+import babel from './babel'
+import { $, gulp, isSourceMap, isProduction } from './lib/helpers'
 import opts from '../opts'
 import { p, readdir, handleError } from '../lib/fns'
 
@@ -33,16 +34,8 @@ function buildForDeploy(src, { dest, combine, minify, wrap }) {
       .pipe($.sourcemaps.init())
       // .pipe($.if(combine, $.order(src)))
       .pipe($.if(combine, $.concat(`${opts('saneName')}.js`)))
-      .pipe($.if(wrap,
-        babel({
-          whitelist: [],
-          retainLines: true,
-          comments: true,
-          plugins: [flintTransform.app({ name: opts('saneName') })],
-          compact: true,
-          extra: { production: isProduction() }
-        })
-      ))
+      .pipe(pipefn)
+      .pipe($.if(wrap, babel.app()))
       .pipe($.if(minify, $.uglify()))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(dest))

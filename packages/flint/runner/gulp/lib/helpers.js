@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import _gulp from 'gulp'
-import _babel from './gulp-babel'
 import _through from 'through2'
 import loadPlugins from 'gulp-load-plugins'
 import { _, path, log } from '../../lib/fns'
@@ -28,7 +27,6 @@ export const isBuilding = () => opts('build') && !opts('watch')
 export const isProduction = () => opts('build')
 
 export const through = _through
-export const babel = _babel
 export const gulp = _gulp
 export const SCRIPTS_GLOB = scriptsGlob
 

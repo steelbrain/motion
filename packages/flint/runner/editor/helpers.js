@@ -1,6 +1,6 @@
 import { transform as babelTransform } from 'flint-babel-core'
 import { Scanner } from '../gulp/scanner'
-import { transformPlugin, getBabelConfig } from '../helpers'
+// import { transformPlugin, getBabelConfig } from '../helpers'
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g
 export const POSITION_TYPE = {
@@ -15,13 +15,13 @@ export function transformText(text, {
   onMeta = null,
 }) {
 
-  Scanner.pre(false, text, function(text) {
-    const babelConfig = getBabelConfig({
-      log, writeStyle, onMeta
-    })
-    babelConfig.filename = '__editor__'
-    babelTransform(text, babelConfig)
-  })
+  // Scanner.pre(false, text, function(text) {
+  //   const babelConfig = getBabelConfig({
+  //     log, writeStyle, onMeta
+  //   })
+  //   babelConfig.filename = '__editor__'
+  //   babelTransform(text, babelConfig)
+  // })
   transformPlugin.disposeLast()
 }
 

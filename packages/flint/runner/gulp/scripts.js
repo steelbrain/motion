@@ -3,7 +3,7 @@ import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
 import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
 import { event } from './index'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
-import flintBabel from './lib/gulp-babel'
+import babel from './babel'
 import bridge from '../bridge'
 import cache from '../cache'
 import builder from '../builder'
@@ -42,7 +42,7 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe(pipefn(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe(flintBabel())
+      .pipe(babel.file())
       .pipe(pipefn(processDependencies))
       .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
