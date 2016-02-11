@@ -81,8 +81,6 @@ function flintFile(file) {
 		isExported: track.isExported,
 	}
 
-	console.log('meta', getBabelCoreRequires(res.code))
-
 	log.gulp('meta', meta)
 
 	return { res, meta }
