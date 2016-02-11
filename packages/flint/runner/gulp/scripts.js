@@ -14,6 +14,8 @@ import opts from '../opts'
 const serializeCache = _.throttle(cache.serialize, 300)
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
+const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
+const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
 export function scripts({ inFiles = [], userStream }) {
   let State = {
@@ -184,9 +186,6 @@ export function scripts({ inFiles = [], userStream }) {
 
     State.curFile = file
   }
-
-  const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
-  const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
   // sets isInternal and willInstall
   // for handling npm and bundling related things

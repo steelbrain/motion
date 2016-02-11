@@ -38,7 +38,7 @@ module.exports = function (opts) {
 				onExports
 			})
 
-			var fileOpts = Object.assign({}, opts, {
+			var fileOpts = Object.assign({}, flintBabel, {
 				filename: file.path,
 				filenameRelative: file.relative,
 				sourceMap: Boolean(file.sourceMap)
