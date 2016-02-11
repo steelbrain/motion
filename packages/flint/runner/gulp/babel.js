@@ -60,20 +60,21 @@ function flintFile(file) {
 		}))
 	)
 
-	const { usedHelpers, modules: { imports, exports: { exported } } } = res.metadata
+	const { usedHelpers, modules: { imports } } = res.metadata
 	const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
 	const importNames = imports.map(i => i.source)
-	const isExported = !!exported.length
 
 	let meta = {
 		imports: [].concat(importNames, track.imports || [], importedHelpers || []),
-		isExported: isExported || track.isExported,
+		isExported: track.isExported,
 	}
+
+	log.gulp('meta', meta)
 
 	return { res, meta }
 }
 
-function babelStream({ transformer, opts = {} }) {
+function babelStream({ transformer }) {
 	return through.obj(function(file, enc, cb) {
 		if (file.isNull()) {
 			cb(null, file)
