@@ -190,20 +190,10 @@ export function scripts({ inFiles = [], userStream }) {
   // sets isInternal and willInstall
   // for handling npm and bundling related things
   function processDependencies(file) {
-     // babel metadata :)
-    const { imports, exports: { exported } } = file.babel.modules
-    const importNames = imports.map(i => i.source)
-    const isExported = !!exported.length
-
-    console.log(file.babel.modules)
-
-    cache.setFileInternal(file.path, isExported)
-    file.isInternal = isExported
-
-    const allImports = getAllImports(file.contents.toString(), importNames)
+    cache.setFileInternal(file.path, file.babel.isExported)
 
     const scan = () => {
-      cache.setFileImports(file.path, allImports)
+      cache.setFileImports(file.path, file.babel.imports)
       bundler.scanFile(file.path)
     }
 
@@ -212,7 +202,7 @@ export function scripts({ inFiles = [], userStream }) {
 
     if (!opts('build') || opts('watch')) {
       debounce('removeOldImports', 3000, bundler.uninstall)
-      file.willInstall = bundler.willInstall(allImports)
+      file.willInstall = bundler.willInstall(file.babel.imports)
     }
   }
 

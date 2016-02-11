@@ -26,11 +26,11 @@ module.exports = function (opts) {
 		try {
 			let meta = {
 				imports: [],
-				exports: false
+				isExported: false
 			}
 
 			const onImports = (imports : string) => meta.imports.push(imports)
-			const onExports = (val : boolean) => meta.exports = val
+			const onExports = (val : boolean) => meta.isExported = val
 
 			let flintBabel = getBabelConfig({
 				log,
@@ -51,6 +51,17 @@ module.exports = function (opts) {
 			console.log('md', res.metadata)
 			console.log('meta', meta)
 
+			const { usedHelpers, modules } = res.metadata
+			const { imports, exports: { exported }, usedHelpers } = modules
+			const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/{name}`) || []
+	    const importNames = imports.map(i => i.source)
+	    const isExported = !!exported.length
+
+			file.babel = {
+				imports: [].concat(importNames, meta.imports || [], importedHelpers || []),
+				isExported: isExported || meta.isExported,
+			}
+
 			if (file.sourceMap && res.map) {
 				res.map.file = replaceExt(res.map.file, '.js')
 				applySourceMap(file, res.map)
@@ -58,10 +69,9 @@ module.exports = function (opts) {
 
 			file.contents = new Buffer(res.code)
 			file.path = replaceExt(file.path, '.js')
-			file.babel = res.metadata
-
 			this.push(file)
-		} catch (err) {
+		}
+		catch(err) {
 			this.emit('error', new gutil.PluginError('gulp-babel', err, {
 				fileName: file.path,
 				showProperties: false
@@ -69,5 +79,5 @@ module.exports = function (opts) {
 		}
 
 		cb()
-	});
-};
+	})
+}
