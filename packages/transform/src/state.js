@@ -23,6 +23,7 @@ let state = {
 
   resetProgramState() {
     state.hasView = false
+    state.hasExports = false
     state.meta = { file: null, views: {} }
   },
 

@@ -34,8 +34,8 @@ export default {
     // module.exports check
     if (t.isMemberExpression(node.left) && node.left.object.name === 'module') {
       options.onExports && options.onExports(true)
+      state.hasExports = true
     }
-
 
     // destructures
     if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {

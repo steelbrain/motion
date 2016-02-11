@@ -113,7 +113,7 @@ export function scripts({ inFiles = [], userStream }) {
     // read outfile
     try {
       const relPath = path.relative(opts('appDir'), file.path)
-      const outFile = prevFile.isInternal
+      const outFile = prevFile.babel.isExported
         ? path.join(opts('deps').dir, 'internal', relPath)
         : path.join(opts('outDir'), relPath)
 
