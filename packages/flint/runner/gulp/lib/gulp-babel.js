@@ -48,8 +48,8 @@ module.exports = function (opts) {
 
 			var res = babel().transform(file.contents.toString(), fileOpts)
 
-			console.log('md', res.metadata)
-			console.log('meta', meta)
+			// console.log('md', res.metadata)
+			// console.log('meta', meta)
 
 			const { usedHelpers, modules: { imports, exports: { exported } } } = res.metadata
 			const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
