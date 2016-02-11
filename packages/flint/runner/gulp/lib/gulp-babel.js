@@ -51,9 +51,8 @@ module.exports = function (opts) {
 			console.log('md', res.metadata)
 			console.log('meta', meta)
 
-			const { usedHelpers, modules } = res.metadata
-			const { imports, exports: { exported }, usedHelpers } = modules
-			const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/{name}`) || []
+			const { usedHelpers, modules: { imports, exports: { exported } } } = res.metadata
+			const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
 	    const importNames = imports.map(i => i.source)
 	    const isExported = !!exported.length
 

@@ -46,7 +46,7 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe(pipefn(processDependencies))
       .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-      .pipe($.if(file => file.isInternal,
+      .pipe($.if(file => file.babel.isExported,
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
@@ -255,7 +255,7 @@ export function scripts({ inFiles = [], userStream }) {
 
     // avoid during initial build
     if (!hasFinished()) return
-    if (file.isInternal) return
+    if (file.babel.isExported) return
 
     // run stuff after each change on build --watch
     bundle()
@@ -290,9 +290,9 @@ export function scripts({ inFiles = [], userStream }) {
     if (isSourceMap(file.path)) return
 
     out.goodScript(file)
-    log.gulp('DOWN', 'success'.green, 'internal?', file.isInternal)
+    log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
-    if (file.isInternal) return
+    if (file.babel.isExported) return
 
     // update cache error / state
     cache.update(file.path)
