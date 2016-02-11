@@ -1,5 +1,4 @@
-import { readInstalled } from './lib/readInstalled'
-import writeInstalled from './lib/writeInstalled'
+import { writeInstalled, readInstalled, readInstalledCache } from './lib/installed'
 import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
@@ -31,43 +30,26 @@ let installingFullNames = []
 let installing = []
 let _isInstalling = false
 
-function getToInstall(requires) {
-  return requires
-}
-
 // used to quickly check if a file will trigger an install
-export async function willInstall(filePath) {
-  try {
-    const required = cache.getExternals(filePath)
-    const fresh = await getNew(required)
-    return !!fresh.length
-  }
-  catch(e) {
-    handleError(e)
-  }
+export function willInstall(imports) {
+  return !!getNew(imports).length
 }
 
 // finds the new externals to install
-export async function getNew(requires, installed) {
+export function getNew(requires, installed = readInstalledCache()) {
   if (!requires.length) return requires
-
-  // get all installed
-  installed = installed || await readInstalled()
 
   const names = normalize(requires)
   if (!names.length) return names
 
   const fresh = _.difference(names, installed, installing)
-  log.externals('DOWN', '  ', names)
-  log.externals('DOWN', '- ', installed)
-  log.externals('DOWN', '- ', installing)
-  log.externals('DOWN', '= ', fresh)
+  log.externals('DOWN', '  ', names, '- ', installed, '- ', installing, '  = ', fresh)
   return fresh
 }
 
 export async function installAll(requires) {
   try {
-    if (!requires) requires = cache.getExternals()
+    requires = requires || cache.getExternals()
 
     // nothing to install
     if (!requires.length && !_isInstalling && opts('finishingFirstBuild'))
@@ -149,7 +131,7 @@ function runInstall(prevInstalled, toInstall) {
   }
 
   async function done() {
-    const installedFullPaths = _.flattenDeep(_.compact(_.uniq(installingFullNames)))
+    const installedFullPaths = _.uniq(_.flattenDeep(_.compact(installingFullNames)))
     let finalPaths = _.uniq([].concat(prevInstalled, installedFullPaths))
     log.externals('DONE, finalPaths', finalPaths)
 

@@ -16,7 +16,7 @@ export async function externals(opts = {}) {
   if (!opts.silent) onInstalled()
 }
 
-export async function installExternals(filePath, source) {
+export async function installExternals(filePath) {
   const found = cache.getExternals(filePath)
   log.externals('installExternals', found)
   if (opts('hasRunInitialBuild')) installAll(found)

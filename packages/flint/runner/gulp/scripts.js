@@ -1,86 +1,56 @@
+import { $, gulp, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
+import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
+import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
 import { event } from './index'
-import {
-  $,
-  gulp,
-  SCRIPTS_GLOB,
-  out,
-  pipefn,
-  babel,
-  isBuilding,
-  hasBuilt,
-  hasFinished,
-  isSourceMap,
-  serializeCache
-} from './lib/helpers'
-import merge from 'merge-stream'
-import multipipe from 'multipipe'
-import flintTransform from 'flint-transform'
+import { findBabelRuntimeRequires } from '../lib/findRequires'
+import babel from './babel'
 import bridge from '../bridge'
 import cache from '../cache'
 import builder from '../builder'
 import bundler from '../bundler'
 import scanner from './scanner'
-import superStream from './lib/superStream'
-import dirAddStream from './lib/dirAddStream'
 import opts from '../opts'
-import onMeta from './lib/onMeta'
-import writeStyle from '../lib/writeStyle'
-import { getBabelConfig } from '../helpers'
-import { findBabelRuntimeRequires } from '../lib/findRequires'
-import { _, fs, path, glob, readdir, p, rm, mkdir, handleError, logError, log } from '../lib/fns'
 
-// TODO bad practice
-let fileImports = {}
-let buildingOnce = false
-let hasRunCurrentBuild = true
+const serializeCache = _.throttle(cache.serialize, 300)
+const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
+const hasBuilt = () => opts('hasRunInitialBuild')
+const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
+const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 
-const $p = {
-  flint: {
-    pre: () => scanner('pre'),
-    post: () => scanner('post')
-  },
-  flintFile: () => babel(getBabelConfig({
-    log,
-    writeStyle: writeStyle.write,
-    onMeta,
-    onImports(file, imports) { fileImports[file] = imports },
-    onExports(file, val) { cache.setFileInternal(file, val) }
-  }))
-}
-
-export function scripts({ inFiles, outFiles, userStream }) {
+export function scripts({ inFiles = [], userStream }) {
   let State = {
     curFile: null,
     lastError: null,
     lastSaved: {},
     loaded: 0,
-    total: inFiles && inFiles.length || 0
+    total: inFiles.length,
+    outsideSources: {}
   }
 
-  let scripts = userStream || gulp.src(SCRIPTS_GLOB)
+  const scripts = userStream || gulp.src(SCRIPTS_GLOB)
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
-  return (isBuilding() ?
+  return (
+    isBuilding() ?
     scripts :
     merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
-      .pipe(pipefn(resetLastFile))
+      .pipe(pipefn(reset))
       .pipe($.plumber(catchError))
       .pipe(pipefn(setLastFile))
-      .pipe($p.flint.pre())
+      .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
-      .pipe($p.flintFile())
-      .pipe(pipefn(updateCache)) // right after babel
-      .pipe($p.flint.post())
+      .pipe(babel.file())
+      .pipe(pipefn(processDependencies))
+      .pipe(pipefn(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
-      // is internal
-      .pipe($.if(file => file.isInternal,
+      .pipe($.if(file => file.babel.isExported,
         multipipe(
           pipefn(removeNewlyInternal),
           pipefn(markFileSuccess), // before writing to preserve path
-          gulp.dest(p(opts('depsDir'), 'internal')),
+          gulp.dest(opts('deps').internalDir),
           pipefn(bundle),
           pipefn(buildDone),
           $.ignore.exclude(true)
@@ -143,7 +113,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     // read outfile
     try {
       const relPath = path.relative(opts('appDir'), file.path)
-      const outFile = prevFile.isInternal
+      const outFile = prevFile.babel.isExported
         ? path.join(opts('deps').dir, 'internal', relPath)
         : path.join(opts('outDir'), relPath)
 
@@ -174,8 +144,7 @@ export function scripts({ inFiles, outFiles, userStream }) {
     }
   }
 
-  function resetLastFile(file) {
-    fileImports[file] = false
+  function reset(file) {
     State.lastError = false
     State.curFile = file
     file.startTime = Date.now()
@@ -218,38 +187,43 @@ export function scripts({ inFiles, outFiles, userStream }) {
     State.curFile = file
   }
 
-  // update cache: meta/src/imports
-  function updateCache(file) {
-    file.src = file.contents.toString()
+  // sets isInternal and willInstall
+  // for handling npm and bundling related things
+  function processDependencies(file) {
+    cache.setFileInternal(file.path, file.babel.isExported)
 
-    //  babel externals, set imports for willInstall detection
-    let babelExternals = findBabelRuntimeRequires(file.contents.toString())
-    let imports = fileImports[file.path]
-    let all = [].concat(babelExternals, imports)
-    cache.setFileImports(file.path, all)
+    const scan = () => {
+      cache.setFileImports(file.path, file.babel.imports)
+      bundler.scanFile(file.path)
+    }
 
-    // meta
-    let meta = cache.getFileMeta(file.path)
-    // outside changed detection
-    sendOutsideChanged(meta, file)
+    if (scanNow()) scan()
+    else debounce(`install:${file.path}`, 2000, scan)
+
+    if (!opts('build') || opts('watch')) {
+      debounce('removeOldImports', 3000, bundler.uninstall)
+      file.willInstall = bundler.willInstall(file.babel.imports)
+    }
   }
 
   // detects if a file has changed not inside views for hot reloads correctness
-  function sendOutsideChanged(meta, file) {
+  function sendOutsideChanged(file) {
+    let src = file.contents.toString()
+    let meta = cache.getFileMeta(file.path)
+
     if (!meta) return
 
-    let changed = false
+    let changed = true
     const viewLocs = Object.keys(meta).map(view => meta[view].location)
 
     if (viewLocs.length) {
       // slice out all code not in views
       const outerSlice = (ls, start, end) => ls.slice(0, start).concat(ls.slice(end))
 
-      const outsideSrc = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), file.src.split("\n")).join('')
-      const cacheFile = cache.getFile(file.path)
-      const prevOutsideSrc = cacheFile.outsideSrc
-      cacheFile.outsideSrc = outsideSrc // update
-      changed = prevOutsideSrc !== outsideSrc
+      const outside = viewLocs.reduce((src, loc) => outerSlice(src, loc[0][0], loc[1][0] + 1), src.split("\n")).join('')
+      const prevOutside = State.outsideSources[file.path]
+      changed = prevOutside !== outside
+      State.outsideSources[file.path] = outside // update
     }
 
     if (opts('hasRunInitialBuild'))
@@ -257,11 +231,9 @@ export function scripts({ inFiles, outFiles, userStream }) {
   }
 
   function checkWriteable(file) {
-    if (userStream || State.lastError)
-      return false
+    if (userStream || State.lastError) return false
 
-    if (isBuilding())
-      return true
+    if (isBuilding()) return true
 
     const isNew = (
       !State.lastSaved[file.path] ||
@@ -283,20 +255,16 @@ export function scripts({ inFiles, outFiles, userStream }) {
 
     // avoid during initial build
     if (!hasFinished()) return
-
-    if (file.isInternal) return
+    if (file.babel.isExported) return
 
     // run stuff after each change on build --watch
     bundle()
 
-    // avoid ?? todo: figure out why this is necessary
-    if (!cache.get(file.path)) return
+    if (!cache.get(file.path)) return // avoid ?? todo: figure out why this is necessary
+    if (State.lastError) return // avoid if error
 
-    // avoid if error
-    if (State.lastError) return
-
-    // avoid if installing
-    log.gulp('bundler installing?', bundler.isInstalling(), 'file willInstall?', file.willInstall)
+    // dont broadcast script if installing/bundling
+    log.gulp('bundler installing?', bundler.isInstalling(), 'willInstall?', file.willInstall)
     if (bundler.isInstalling() || file.willInstall) return
 
     // ADD
@@ -322,17 +290,15 @@ export function scripts({ inFiles, outFiles, userStream }) {
     if (isSourceMap(file.path)) return
 
     out.goodScript(file)
+    log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
-    log.gulp('DOWN', 'success'.green, 'internal?', file.isInternal, 'install?', file.willInstall)
-
-    if (file.isInternal) return
+    if (file.babel.isExported) return
 
     // update cache error / state
     cache.update(file.path)
 
     // write cache state to disk
-    if (opts('hasRunInitialBuild'))
-      serializeCache()
+    if (opts('hasRunInitialBuild')) serializeCache()
 
     // message browser of compile success
     bridge.broadcast('compile:success', file.message, 'error')

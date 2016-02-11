@@ -124,13 +124,13 @@ function setupDirs() {
   OPTS.flintDir = p(OPTS.appDir, '.flint')
   OPTS.modulesDir = p(OPTS.flintDir, 'node_modules')
   OPTS.internalDir = p(OPTS.flintDir, '.internal')
-  OPTS.depsDir = p(OPTS.internalDir, 'deps')
   OPTS.template = OPTS.template || '.flint/index.html'
   OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.flintDir, 'build')
 
   // deps dirs
   OPTS.deps = {}
   OPTS.deps.dir = p(OPTS.internalDir, 'deps')
+  OPTS.deps.internalDir = p(OPTS.internalDir, 'deps', 'internal')
   OPTS.deps.assetsDir = p(OPTS.deps.dir, 'assets')
   OPTS.deps.internalsIn = p(OPTS.deps.dir, 'internals.in.js')
   OPTS.deps.internalsOut = p(OPTS.deps.dir, 'internals.js')

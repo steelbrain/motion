@@ -1,13 +1,16 @@
-import { t, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign, isViewState } from '../lib/helpers'
+import { t, options, isInView, isMutativeArrayFunc, findObjectName, isObjectAssign, isViewState } from '../lib/helpers'
 import state from '../state'
 import { wrapSetter } from '../lib/wrapState'
 
 export default {
-  exit(node, parent, scope) {
+  exit(node, parent, scope, file) {
     // track require() statements
     if (node.callee && node.callee.name && node.callee.name == 'require') {
       const arg = node.arguments && node.arguments.length && node.arguments[0].value
-      state.fileImports.push(arg)
+
+      // mutating babel metadata
+      options.onImports && options.onImports(arg)
+      // file.metadata.modules.imports.push({ source: arg })
     }
 
     // mutative array methods

@@ -33,7 +33,7 @@ async function writeInternalsIn() {
 
 let runningBundle = null
 
-export async function checkInternals(file, source) {
+export async function checkInternals(file) {
   if (opts('hasRunInitialBuild') && cache.isInternal(file) && !runningBundle) {
     clearTimeout(runningBundle)
     runningBundle = setTimeout(async () => {

@@ -12,14 +12,14 @@ async function copyWithSourceMap(file, dest) {
 }
 
 export function flint() {
-  var read = p(flintjs(), 'dist', 'flint.prod.js');
-  var write = p(opts('buildDir'), '_', 'flint.prod.js');
+  const read = p(flintjs(), 'dist', 'flint.prod.js')
+  const write = p(opts('buildDir'), '_', 'flint.prod.js')
   return copyWithSourceMap(read, write)
 }
 
 export function react() {
-  var read = p(flintjs(), 'dist', 'react.prod.js');
-  var write = p(opts('buildDir'), '_', 'react.prod.js');
+  const read = p(flintjs(), 'dist', 'react.prod.js')
+  const write = p(opts('buildDir'), '_', 'react.prod.js')
   return copyWithSourceMap(read, write)
 }
 

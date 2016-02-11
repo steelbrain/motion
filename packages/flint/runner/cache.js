@@ -4,7 +4,6 @@ import opts from './opts'
 import { _, log, path, writeJSON } from './lib/fns'
 import util from 'util'
 
-const LOG = 'cache'
 const relative = f => path.relative(baseDir, f).replace('.flint/.internal/out/', '')
 
 type ViewArray = Array<string>
@@ -27,6 +26,7 @@ type CacheState = {
   internals: ImportArray;
 }
 
+let meta = {}
 let previousCache: CacheState
 let cache: CacheState = {
   files: {},
@@ -151,12 +151,12 @@ const Cache = {
     log.cache('setViews', views)
   },
 
-  setFileMeta(file: string, meta: object) {
-    files(file).meta = meta
+  setFileMeta(file: string, fileMeta: object) {
+    meta[relative(file)] = fileMeta
   },
 
   getFileMeta(file: string) {
-    return files(file).meta
+    return meta[relative(file)]
   },
 
   setFileSrc(file: string, src: string) {

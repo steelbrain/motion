@@ -62,10 +62,17 @@ function vinyl(basePath, path, contents) {
   return { cwd, base, path, contents }
 }
 
+let debouncers = {}
+function debounce(key, time, cb) {
+  if (debouncers[key]) clearTimeout(debouncers[key])
+  debouncers[key] = setTimeout(cb, time)
+}
+
 export default {
   _,
   p,
   fs,
+  debounce,
   path,
   mkdir,
   rm,
