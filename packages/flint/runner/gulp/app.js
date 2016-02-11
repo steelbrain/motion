@@ -34,7 +34,6 @@ function buildForDeploy(src, { dest, combine, minify, wrap }) {
       .pipe($.sourcemaps.init())
       // .pipe($.if(combine, $.order(src)))
       .pipe($.if(combine, $.concat(`${opts('saneName')}.js`)))
-      .pipe(pipefn)
       .pipe($.if(wrap, babel.app()))
       .pipe($.if(minify, $.uglify()))
       .pipe($.sourcemaps.write('.'))
