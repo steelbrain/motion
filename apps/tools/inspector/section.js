@@ -9,7 +9,7 @@ view Inspector.Section {
   </body>
 
   $ = {
-    padding: [5, 0]
+    padding: [0, 0, 5]
   }
 
   $body = {

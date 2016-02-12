@@ -96,7 +96,8 @@ view Inspector.View {
   }
 
   $top = {
-    flexFlow: 'row'
+    flexFlow: 'row',
+    paddingBottom: 10
   }
 
   $active = {
