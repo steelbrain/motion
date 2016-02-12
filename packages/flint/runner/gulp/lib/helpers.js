@@ -14,10 +14,10 @@ export const out = {}
 out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
 out.goodFile = symbol => (file, ms) =>
   console.log(
-    `  ${chalk.dim(symbol)} ${chalk.bold(relative(file))} `
+    `  ${chalk.dim(symbol)}${relative(file)} `
     + chalk.dim(file.startTime ? time((Date.now() - file.startTime) || 1).dim : '')
   )
-out.goodScript = out.goodFile('-')
+out.goodScript = out.goodFile('')
 
 export const $ = loadPlugins()
 
