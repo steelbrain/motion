@@ -1,13 +1,10 @@
 import { p, path } from '../lib/fns'
 import gulp from '../gulp'
 import bundler from '../bundler'
-import keys from '../keys'
 import copy from './copy'
 import opts from '../opts'
 import makeTemplate from './makeTemplate'
-import { log, handleError } from '../lib/fns'
-
-let hasCopiedBasics = false
+import { handleError } from '../lib/fns'
 
 export default async function build({ bundle = true } = {}) {
   try {
@@ -22,9 +19,9 @@ export default async function build({ bundle = true } = {}) {
 
     await *[
       gulp.app(),
+      gulp.styles(),
       copy.flint(),
       copy.react(),
-      copy.styles()
     ]
 
     print(`\n  Built! ⇢`.green.bold + `  cd ${buildDir()}`)

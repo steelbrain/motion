@@ -142,7 +142,8 @@ function setupDirs() {
   OPTS.stateFile = p(OPTS.internalDir, 'state.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
-  OPTS.styleOutDir = p(OPTS.buildDir, '_', 'styles.css')
+  OPTS.styleOutDir = p(OPTS.buildDir, '_')
+  OPTS.styleOutName = 'styles.css'
 }
 
 function setupConfig(cli, config) {

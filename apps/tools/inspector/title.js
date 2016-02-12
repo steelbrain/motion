@@ -13,10 +13,11 @@ view Inspector.Title {
 
   $title = {
     fontWeight: 300,
-    borderBottom: '1px solid #eee',
+    fontSize: 11,
+    borderBottom: '1px solid #f4f4f4',
     height: 10,
-    margin: [5, 5, 8],
-    color: '#999',
+    margin: [0, 5, 4],
+    color: 'rgba(0,0,0,0.4)',
     flexFlow: 'row',
   }
 

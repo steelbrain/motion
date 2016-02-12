@@ -1,8 +1,8 @@
 import flintTransform from 'flint-transform'
 import babel from './babel'
-import { $, gulp, isSourceMap, isProduction } from './lib/helpers'
+import { $, pipefn, gulp, isSourceMap, isProduction } from './lib/helpers'
 import opts from '../opts'
-import { p, readdir, handleError } from '../lib/fns'
+import { p, readdir, handleError, log } from '../lib/fns'
 
 export async function app() {
   try {
@@ -17,11 +17,11 @@ export async function app() {
       print(`  Minifying...`.dim)
 
     // build parallel
-    await* [
+    await Promise.all([
       buildForDeploy(deps.internalsOut, { dest, minify }),
       buildForDeploy(deps.externalsOut, { dest, minify }),
       buildForDeploy(appFiles, { dest, minify, combine: true, wrap: true })
-    ]
+    ])
   }
   catch(e) {
     handleError(e)
@@ -38,7 +38,10 @@ function buildForDeploy(src, { dest, combine, minify, wrap }) {
       .pipe($.if(minify, $.uglify()))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(dest))
-      .on('end', resolve)
+      .on('end', () => {
+        log.gulp('finished', src)
+        resolve()
+      })
       .on('error', reject)
   })
 }

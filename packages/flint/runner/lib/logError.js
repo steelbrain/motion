@@ -16,7 +16,7 @@ export default function logError(error, file) {
 
   if (error.message) {
     const message = error.message.replace(opts('appDir'), '')
-    print('  ' + unicodeToChar(message).red)
+    print('  ' + message.red)
   }
 
   if (error.loc)
@@ -27,9 +27,8 @@ export default function logError(error, file) {
   if (error.plugin == 'gulp-babel')
     error.stack = error.stack ? error.stack.split("\n").slice(0, 7).join("\n") : ''
 
-  if (error.stack) {
-    print(unicodeToChar(error.stack))
-  }  
+  if (error.stack)
+    print(error.stack)
 
   if (file && typeof file == 'object')
     log('FILE', "\n", file.contents && file.contents.toString())
