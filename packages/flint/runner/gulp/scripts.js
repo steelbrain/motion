@@ -1,6 +1,7 @@
 import { $, gulp, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
 import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
 import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
+import unicodeToChar from '../lib/unicodeToChar'
 import { event } from './index'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
 import babel from './babel'
@@ -157,6 +158,7 @@ export function scripts({ inFiles = [], userStream }) {
     out.badFile(State.curFile)
 
     error.timestamp = Date.now()
+    error.stack = unicodeToChar(error.stack)
 
     logError(error, State.curFile)
 

@@ -16,7 +16,7 @@ export default function logError(error, file) {
 
   if (error.message) {
     const message = error.message.replace(opts('appDir'), '')
-    console.log('  ' + unicodeToChar(message).red)
+    console.log('  ' + message.red)
   }
 
   if (error.loc)
@@ -28,8 +28,8 @@ export default function logError(error, file) {
     error.stack = error.stack ? error.stack.split("\n").slice(0, 7).join("\n") : ''
 
   if (error.stack) {
-    console.log(unicodeToChar(error.stack))
-  }  
+    console.log(error.stack)
+  }
 
   if (file && typeof file == 'object')
     log('FILE', "\n", file.contents && file.contents.toString())

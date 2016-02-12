@@ -3,6 +3,7 @@ import opts from '../opts'
 import superStream from './lib/superStream'
 import { SCRIPTS_GLOB, isBuilding } from './lib/helpers'
 import { scripts, afterBuild } from './scripts'
+import { styles } from './styles'
 import { app } from './app'
 import { assets } from './assets'
 
@@ -48,5 +49,6 @@ export default {
   afterBuild,
   assets,
   app,
-  event
+  event,
+  styles
 }

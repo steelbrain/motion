@@ -23,25 +23,4 @@ export function react() {
   return copyWithSourceMap(read, write)
 }
 
-// was for webpack styles copying
-export async function styles() {
-  try {
-    let source = ''
-
-    try {
-      const files = await readdir(opts('styleDir'))
-      const sources = await* files.map(async file => await readFile(file.fullPath))
-      source = sources.join("\n\n")
-    }
-    catch(e) {
-      // no styles, thats ok
-    }
-
-    await writeFile(opts('styleOutDir'), source)
-  }
-  catch(e) {
-    handleError(e)
-  }
-}
-
-export default { flint, react, styles }
+export default { flint, react }

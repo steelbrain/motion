@@ -1,6 +1,6 @@
 import { $, gulp, pipefn } from './lib/helpers'
 import opts from '../opts'
-import { p, mkdir, handleError } from '../lib/fns'
+import { p, mkdir, handleError, log } from '../lib/fns'
 
 export async function assets() {
   try {
@@ -32,7 +32,10 @@ function assetsApp() {
         // .pipe(pipefn(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(assets.out))
-        .on('end', resolve)
+        .on('end', () => {
+          log.gulp('finished assets')
+          resolve()
+        })
         .on('error', reject)
   })
 }
@@ -58,7 +61,10 @@ async function assetsStatics() {
         // .pipe(pipefn(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(statics.out))
-        .on('end', resolve)
+        .on('end', () => {
+          log.gulp('finished statics')
+          resolve()
+        })
         .on('error', reject)
   })
 }
