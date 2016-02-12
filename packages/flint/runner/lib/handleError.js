@@ -28,7 +28,7 @@ export default function handleError(handle) {
   else {
     // TODO type this
     const error = handle
-    if (!error) return console.log('  No error!')
+    if (!error) return print('  No error!')
     errorClient.captureException(error)
 
     error.message = unicodeToChar(error.message)

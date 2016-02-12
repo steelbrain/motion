@@ -17,13 +17,13 @@ let started = false
 
 export async function startup(options = {}) {
   if (process.env.FLINT_DEBUG) {
-    console.log('total startup time: ', Date.now() - process.env.startedat)
+    print('total startup time: ', Date.now() - process.env.startedat)
   }
 
   if (started) return
   started = true
 
-  console.log()
+  print()
 
   // order important!
   await opts.init(options)
@@ -57,7 +57,7 @@ export async function build(opts = {}) {
     ]
     await builder.build()
     if (opts.once) return
-    console.log()
+    print()
     process.exit()
   }
   catch(e) {

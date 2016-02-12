@@ -194,7 +194,7 @@ function run() {
           res.send(template.replace(/\/static/g, '/_/static'))
         }
         catch(e) {
-          console.log(e, e.stack)
+          print(e, e.stack)
         }
       })
     })

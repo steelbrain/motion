@@ -40,8 +40,8 @@ function latestVersion(name, range) {
   catch(e) {
     const simpleFindVer = range.replace(/[^0-9\. ]+/g, '').split(' ')[0]
 
-    console.log(`  Error in semver of package ${name} ${e.message}`.yellow)
-    console.log("  Attempting ", simpleFindVer)
+    print(`  Error in semver of package ${name} ${e.message}`.yellow)
+    print("  Attempting ", simpleFindVer)
 
     return simpleFindVer
   }
@@ -58,7 +58,7 @@ async function installPeerDeps(name) {
     const peersArr = normalize(Object.keys(peers))
 
     if (peersArr.length) {
-      console.log(`  Installing ${name} peerDependencies`.bold)
+      print(`  Installing ${name} peerDependencies`.bold)
 
       const peersFull = peersArr.map(name => {
         const version = latestVersion(name, peers[name])
@@ -69,7 +69,7 @@ async function installPeerDeps(name) {
         return `${name}@${version}`
       })
       await* peersFull.map(full => execPromise(`npm install --save ${full}`, opts('flintDir')))
-      console.log('  ✓'.green, peersArr.join(', '))
+      print('  ✓'.green, peersArr.join(', '))
       return peersArr
     }
   }

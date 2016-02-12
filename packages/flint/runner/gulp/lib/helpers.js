@@ -11,9 +11,9 @@ export const isSourceMap = file => path.extname(file) === '.map'
 export const relative = file => path.relative(opts('appDir'), file.path)
 export const time = _ => typeof _ == 'number' ? ` ${_}ms` : ''
 export const out = {}
-out.badFile = (file, err) => console.log(`  ✖ ${relative(file)}`.red),
+out.badFile = (file, err) => print(`  ✖ ${relative(file)}`.red),
 out.goodFile = symbol => (file, ms) =>
-  console.log(
+  print(
     `  ${chalk.dim(symbol)} ${chalk.bold(relative(file))} `
     + chalk.dim(file.startTime ? time((Date.now() - file.startTime) || 1).dim : '')
   )

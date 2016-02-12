@@ -29,7 +29,7 @@ function logProgress(tag, name, index, total) {
     : `  ${tag}: ${name}`.dim
 
   if (opts('build') && !opts('watch'))
-    console.log(out)
+    print(out)
   else {
     let spinner = new Spinner(out)
     spinner.start({ fps: 15 })

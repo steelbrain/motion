@@ -20,7 +20,7 @@ export async function readInstalled() {
     return installed
   }
   catch(e) {
-    console.log("Couldn't read installed packages")
+    print("Couldn't read installed packages")
     // handleError(e)
   }
 }

@@ -43,7 +43,7 @@ export function banner() {
   const newLine = "\n"
   const userEditor = (process.env.VISUAL || process.env.EDITOR)
 
-  console.log(`\n  http://${server.url()}`.green)
+  print(`\n  http://${server.url()}`.green)
 
   const messages = [
     'Open', 'Verbose', 'Build',
@@ -53,9 +53,9 @@ export function banner() {
   if (opts('build') && opts('watch'))
     messages.push('Upload')
 
-  // console.log('  Shortcuts')
-  console.log(promptLayout(messages, { perLine: 3 }))
-  console.log()
+  // print('  Shortcuts')
+  print(promptLayout(messages, { perLine: 3 }))
+  print()
 
   resume()
 }
@@ -93,26 +93,26 @@ function start() {
             editor('.')
           }
           catch(e) {
-            console.log('Error running your editor, make sure your shell EDITOR variable is set')
+            print('Error running your editor, make sure your shell EDITOR variable is set')
           }
 
           break
         case 'r': // bundler
-          console.log('  Bundling internals / npm packages...'.dim)
+          print('  Bundling internals / npm packages...'.dim)
           await bundler.install(true)
-          console.log(`  Bundled!\n`.green.bold)
+          print(`  Bundled!\n`.green.bold)
           break
         case 'v': // verbose logging
           opts.set('debug', !opts('debug'))
           log.setLogging()
-          console.log(opts('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
+          print(opts('debug') ? 'Set to log verbose'.yellow : 'Set to log quiet'.yellow, "\n")
           break
         case 'u': // upload
           if (building) return
 
           if (opts('run')) {
             building = true
-            console.log('\n  Building for production...')
+            print('\n  Building for production...')
             await build({ once: true })
             building = false
           }
@@ -121,12 +121,12 @@ function start() {
             let Surge = surge()
             const surge = Surge({ platform: 'flint.love', input: proc.stdin, output: proc.stdout })
 
-            console.log(`\n  Publishing to surge...`)
+            print(`\n  Publishing to surge...`)
             stop()
             proc.stdout.isTTY = false
             surge.publish({
               postPublish() {
-                console.log('🚀🚀🚀🚀')
+                print('🚀🚀🚀🚀')
                 resume()
               }
             })({})
@@ -134,10 +134,10 @@ function start() {
           }
           break
         case 'd':
-          console.log("---------opts---------")
+          print("---------opts---------")
           opts.debug()
 
-          console.log("\n---------cache---------")
+          print("\n---------cache---------")
           cache.debug()
           break
       }

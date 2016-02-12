@@ -9,18 +9,18 @@ import unicodeToChar from './unicodeToChar'
 export default function logError(error, file) {
   if (!error) return
 
-  console.log()
+  print()
 
   if (typeof error != 'object' || Array.isArray(error))
-    return console.log(error)
+    return print(error)
 
   if (error.message) {
     const message = error.message.replace(opts('appDir'), '')
-    console.log('  ' + unicodeToChar(message).red)
+    print('  ' + unicodeToChar(message).red)
   }
 
   if (error.loc)
-    console.log('  line: %s, col: %s', error.loc.line, error.loc.column)
+    print('  line: %s, col: %s', error.loc.line, error.loc.column)
 
   error.stack = error.stack || error.codeFrame || ''
 
@@ -28,11 +28,11 @@ export default function logError(error, file) {
     error.stack = error.stack ? error.stack.split("\n").slice(0, 7).join("\n") : ''
 
   if (error.stack) {
-    console.log(unicodeToChar(error.stack))
+    print(unicodeToChar(error.stack))
   }  
 
   if (file && typeof file == 'object')
     log('FILE', "\n", file.contents && file.contents.toString())
 
-  console.log()
+  print()
 }

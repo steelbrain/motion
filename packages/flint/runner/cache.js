@@ -282,7 +282,7 @@ const Cache = {
   },
 
   debug() {
-    console.log(util.inspect(cache, false, 10))
+    print(util.inspect(cache, false, 10))
   }
 
 }

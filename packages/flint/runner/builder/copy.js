@@ -6,7 +6,7 @@ import flintjs from 'flint-js'
 
 async function copyWithSourceMap(file, dest) {
   try { await copy(file, dest) }
-  catch(e) { console.log("Couldn't copy", file) }
+  catch(e) { print("Couldn't copy", file) }
   try { await copy(file + '.map', dest + '.map') }
   catch(e) { handleError(e) }
 }

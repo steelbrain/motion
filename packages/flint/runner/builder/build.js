@@ -11,7 +11,7 @@ let hasCopiedBasics = false
 
 export default async function build({ bundle = true } = {}) {
   try {
-    console.log(`\n  Building...`.dim)
+    print(`\n  Building...`.dim)
 
     if (bundle) {
       await bundler.install()
@@ -27,7 +27,7 @@ export default async function build({ bundle = true } = {}) {
       copy.styles()
     ]
 
-    console.log(`\n  Built! ⇢`.green.bold + `  cd ${buildDir()}`)
+    print(`\n  Built! ⇢`.green.bold + `  cd ${buildDir()}`)
   }
   catch(e) {
     handleError(e)

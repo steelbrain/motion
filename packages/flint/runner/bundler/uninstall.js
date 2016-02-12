@@ -33,13 +33,13 @@ export async function uninstall(rebundle) {
     if (!toUninstall.length)
       return
 
-    console.log(`\n  Uninstalling...`.bold)
+    print(`\n  Uninstalling...`.bold)
 
     // do uninstalls
     const attempted = await* toUninstall.map(async dep => {
       try {
         await npm.unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
-        console.log(`  ✘ ${dep}`.red)
+        print(`  ✘ ${dep}`.red)
         return dep
       }
       catch(e) {

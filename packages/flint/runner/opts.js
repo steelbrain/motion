@@ -182,7 +182,7 @@ export async function serialize() {
 }
 
 export function debug() {
-  console.log(util.inspect(OPTS, false, 10))
+  print(util.inspect(OPTS, false, 10))
 }
 
 

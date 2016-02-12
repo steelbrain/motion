@@ -66,7 +66,7 @@ export default function getWebpackErrors(where, err, stats) {
 
   // check warnings
   if (jsonStats.warnings.length) {
-    console.log('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
+    print('Webpack warnings: ', jsonStats.warnings[0].split("\n").slice(0, 3).join("\n"))
   }
 
   log.webpack('webpack finished')

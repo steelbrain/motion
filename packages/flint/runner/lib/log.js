@@ -36,7 +36,7 @@ export default function log(info, subIcon, ...args) {
   else
     args = [info, subIcon, ...args]
 
-  const doLog = () => console.log('   ', ...colorArgs(args))
+  const doLog = () => print('   ', ...colorArgs(args))
 
   // all
   if (!debug.length) return doLog()
@@ -73,5 +73,5 @@ log.start = (name) => {
 }
 
 log.end = () => {
-  console.log('TIME', timeName, Date.now() - startTime)
+  print('TIME', timeName, Date.now() - startTime)
 }

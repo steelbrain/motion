@@ -6,7 +6,7 @@ export default function editor(file, cb) {
     cb && cb(result)
   }
   catch(e) {
-    console.log(
+    print(
       `Error running atom, install at https://atom.io`,
       `\n  be sure to run "Atom > Install Shell Commands"`,
       e
