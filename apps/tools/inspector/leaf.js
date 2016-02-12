@@ -27,7 +27,6 @@ view Leaf {
 
   // state
   let rootPath, path, _data, key, original, expanded
-
   let dataKeys = []
   let _query = ''
 
