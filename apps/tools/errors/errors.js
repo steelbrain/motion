@@ -24,6 +24,8 @@ view Errors {
     else {
       error = null
     }
+
+    browser.curError = error
   }
 
   function close() {
@@ -65,7 +67,7 @@ view Errors {
     setError()
   })
 
-  <Error.Message
+  <Errors.Message
     error={error}
     npmError={npmError}
     close={close}

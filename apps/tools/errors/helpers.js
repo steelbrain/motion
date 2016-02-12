@@ -6,7 +6,7 @@ const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1
 export function showFlintErrorDiv() {
   setTimeout(() => {
     // avoid showing if error fixed in meantime
-    if (!CUR_ERROR) return
+    if (!browser.curError) return
 
     const errors = document.querySelectorAll('.__flintError')
     if (!errors.length) return
