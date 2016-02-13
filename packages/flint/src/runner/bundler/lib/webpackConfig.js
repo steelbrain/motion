@@ -4,12 +4,8 @@ import opts from '../../opts'
 import cache from '../../cache'
 import flintjs from 'flint-js'
 
-// __dirname == flint/dist directory (because we webpack this)
-let runnerRoot = path.resolve(path.join(__dirname, '..'))
+let runnerRoot = path.resolve(path.join(__dirname, '..', '..', '..'))
 let runnerModules = path.join(runnerRoot, 'node_modules')
-
-let flintRoot = path.resolve(path.join(__dirname, '..'))
-let flintModules = path.join(flintRoot, 'node_modules')
 
 // copy styles into .flint/static/styles
 let fileStyleFolder = 'file?name=assets/styles/[name]-[hash].css'
@@ -45,7 +41,7 @@ export default function webpackConfig(filename, config = {}) {
       extensions: ['', '.js', '.jsx', '.css'],
       fallback: [
         runnerModules,
-        flintModules, /* babel-runtime may be in either depending on npm */
+        // flintModules, /* babel-runtime may be in either depending on npm */
         // path.join(flintRoot, '..') // fallback to app root for import css
       ]
     },

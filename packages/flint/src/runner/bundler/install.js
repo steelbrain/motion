@@ -32,7 +32,7 @@ let _isInstalling = false
 
 // used to quickly check if a file will trigger an install
 export function willInstall(imports) {
-  return !!getNew(imports).length
+  return !!getNew(imports.filter(x => x.charAt(0) != '.')).length
 }
 
 // finds the new externals to install

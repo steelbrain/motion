@@ -62,9 +62,7 @@ function flintFile(file) {
 			log,
 			onMeta,
 			writeStyle,
-			onImports() {
-				console.log(arguments)
-			},
+			onImports,
 			onExports
 		}))
 	)
@@ -82,10 +80,6 @@ function flintFile(file) {
 		),
 		isExported: track.isExported,
 	}
-
-	// console.log('track', track)
-	// console.log('meta', meta)
-	// console.log('imports', imports)
 
 	log.gulp('meta', meta)
 
