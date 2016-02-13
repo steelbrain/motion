@@ -1,0 +1,35 @@
+matrix:
+  include:
+    - os: linux
+      language: node_js
+      node_js: "5"
+    - os: linux
+      language: node_js
+      node_js: "4"
+
+install:
+  - make bootstrap
+
+script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+git:
+  depth: 10
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - build-essential
+    - git
+    - libgnome-keyring-dev
+    - fakeroot
+
+branches:
+  only:
+    - master
