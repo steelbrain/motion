@@ -4,12 +4,12 @@ import { t, parentFunctionNode } from '../lib/helpers'
 export default {
   exit(node, parent, scope) {
     // view.update() before return
-    if (node.flintReturnTracked) return
-    node.flintReturnTracked = true
+    if (node.motionReturnTracked) return
+    node.motionReturnTracked = true
 
     const parentFunc = parentFunctionNode(scope)
 
-    if (parentFunc && !parentFunc.body.flintView && (parentFunc.flintStateMutativeFunction || parentFunc.hasSetter))
+    if (parentFunc && !parentFunc.body.motionView && (parentFunc.motionStateMutativeFunction || parentFunc.hasSetter))
       return [updateState(), node]
   }
 }

@@ -6,8 +6,8 @@ const removeHead = ([l, ...ls]) => ls
 const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
 const isEsc = cb => e => e.keyCode === 27 && cb()
 
-const setLocal = (k,v) => localStorage.setItem(`__flint.state.${k}`, JSON.stringify(v))
-const getLocal = (k,d) => JSON.parse(localStorage.getItem(`__flint.state.${k}`)) || d
+const setLocal = (k,v) => localStorage.setItem(`__motion.state.${k}`, JSON.stringify(v))
+const getLocal = (k,d) => JSON.parse(localStorage.getItem(`__motion.state.${k}`)) || d
 
 const round = Math.round
 
@@ -39,10 +39,10 @@ function hideHighlight() {
 
 function findPath(node) {
   if (!node || !node.getAttribute) return null
-  const flintid = node.__flintID
-  if (!flintid) return findPath(node.parentNode)
+  const motionid = node.__motionID
+  if (!motionid) return findPath(node.parentNode)
   positionHighlight(node)
-  return flintid
+  return motionid
 }
 
 function tempActive(views) {
@@ -89,7 +89,7 @@ function toggleView(views, path) {
 }
 
 function internal() {
-  return window._Flint
+  return window._Motion
 }
 
 function writeBack(path, writePath) {
@@ -129,7 +129,7 @@ view Inspector {
     hoverOff = on.mousemove(window, throttle(mouseMove, 40))
     if (highlighter) return
     highlighter = document.createElement('div')
-    highlighter.className = "_flintHighlighter"
+    highlighter.className = "_motionHighlighter"
     document.body.appendChild(highlighter)
   })
 

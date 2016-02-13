@@ -2,7 +2,7 @@
 
 import {waitsForAsync, waitsForAsyncRejection} from './helpers'
 
-describe('Flint', function() {
+describe('Motion', function() {
   describe('expect..toBe', function() {
     it('performs strict matching', function() {
       expect(true).toBe(true)

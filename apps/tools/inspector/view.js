@@ -6,14 +6,14 @@ function pathToName(path) {
 }
 
 function filterProps(props) {
-  let leaveOut = ['if', 'repeat', 'style', 'yield', '__flint']
+  let leaveOut = ['if', 'repeat', 'style', 'yield', '__motion']
   return omit.apply(null, [props].concat(leaveOut))
 }
 
 view Inspector.View {
   prop highlight, closing, path, onClose
 
-  const inspect = window.Flint.inspect
+  const inspect = window.Motion.inspect
   let name
   let active = false
   let state = {}
@@ -29,7 +29,7 @@ view Inspector.View {
   })
 
   on.unmount(() => {
-    delete window._Flint.inspector[path]
+    delete window._Motion.inspector[path]
   })
 
   on.props(() => {
@@ -39,7 +39,7 @@ view Inspector.View {
     name = pathToName(path)
 
     // if not inspecting, inspect
-    if (!_Flint.inspector[path]) {
+    if (!_Motion.inspector[path]) {
       inspect(path, (_props, _state, _wb) => {
         props = filterProps(_props || {})
         state = _state || {}

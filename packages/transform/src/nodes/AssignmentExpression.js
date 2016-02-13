@@ -26,7 +26,7 @@ export default {
 
   exit(node, parent, scope, file) {
     // non-styles
-    if (node.flintTracked || node.hasSetter || node.hasGetter || node.isStyle) return
+    if (node.motionTracked || node.hasSetter || node.hasGetter || node.isStyle) return
 
     const isBasicAssign = node.operator === "=" || node.operator === "-=" || node.operator === "+="
     if (!isBasicAssign) return
@@ -40,7 +40,7 @@ export default {
     // destructures
     if (scope.hasOwnBinding('view') && t.isObjectPattern(node.left)) {
       let destructNodes = destructureTrackers(node.left, 'set')
-      node.flintTracked = true
+      node.motionTracked = true
       return [t.expressionStatement(node), ...destructNodes]
     }
 
@@ -83,7 +83,7 @@ export default {
     node = sett(gett(node))
 
     if (added && node)
-      node.flintTracked = 1
+      node.motionTracked = 1
 
     return node
   }

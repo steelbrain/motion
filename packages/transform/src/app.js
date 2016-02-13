@@ -1,8 +1,8 @@
 // wraps your app in closure / export
 
-export default function FlintApp({ name }) {
-  return function FlintAppPlugin({ Plugin, types: t }) {
-    return new Plugin("flint-transform-app", {
+export default function MotionApp({ name }) {
+  return function MotionAppPlugin({ Plugin, types: t }) {
+    return new Plugin("motion-transform-app", {
       visitor: {
         Program: {
           exit(node) {
@@ -12,21 +12,21 @@ export default function FlintApp({ name }) {
               t.assignmentExpression('=',
                 t.identifier(`exports["${name}"]`),
                 //wrapFnName
-                t.functionExpression(null, [t.identifier('Flint'), t.identifier('opts')], t.blockStatement([
-                  // closure (function(Flint) {})(Flint)
+                t.functionExpression(null, [t.identifier('Motion'), t.identifier('opts')], t.blockStatement([
+                  // closure (function(Motion) {})(Motion)
                   t.callExpression(
                     t.functionExpression(null,
-                      [t.identifier('Flint')],
+                      [t.identifier('Motion')],
                       t.blockStatement(
                         [].concat(
                           node.body,
                           t.expressionStatement(
-                            t.callExpression(t.identifier('Flint.start'), [])
+                            t.callExpression(t.identifier('Motion.start'), [])
                           )
                         )
                       ) // end blockStatement
                     ) // end functionExpression
-                  , [t.identifier('Flint')]) // end callExpression
+                  , [t.identifier('Motion')]) // end callExpression
                 ]))
               )
             )]

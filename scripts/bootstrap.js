@@ -36,7 +36,7 @@ if (!canWrite) {
 var packages = []
 
 // order important so they are linkable to each other
-var packageNames = ['transform', 'nice-styles', 'flint.js', 'flint']
+var packageNames = ['transform', 'nice-styles', 'motion.js', 'motion']
 var globalFolder = exec('npm root -g').output.replace("\n", '')
 
 packageNames.forEach(function (loc) {
@@ -61,7 +61,7 @@ packageNames.forEach(function (loc) {
 var apps = ['tools']
 
 apps.forEach(function(app) {
-  cd("apps/" + app + "/.flint")
+  cd("apps/" + app + "/.motion")
   exec("npm install --loglevel=error")
   exec("npm link")
   cd("../../..")
@@ -78,7 +78,7 @@ packages.forEach(function (pkg) {
   cd(pkgFolder)
   console.log('pruning...')
   exec('npm prune', { silent: true })
-  exec('(cd node_modules && find . -name "flint*" -exec rm -r "{}" \\;)')
+  exec('(cd node_modules && find . -name "motion*" -exec rm -r "{}" \\;)')
   cd('../..')
 
   mkdir("-p", nodeModulesLoc)
@@ -92,11 +92,11 @@ packages.forEach(function (pkg) {
     // if linked into globals, lets link it in
     var depGlobalPath = path.join(globalFolder, dep).toString()
 
-    // if starts with flint and is a link in the globals, link it in
-    return (dep.indexOf('flint-') == 0 && test('-L', depGlobalPath))
+    // if starts with motion and is a link in the globals, link it in
+    return (dep.indexOf('motion-') == 0 && test('-L', depGlobalPath))
   })
 
-  console.log('linking in other flint packages...')
+  console.log('linking in other motion packages...')
 
   links.forEach(function(link) {
     console.log(link)

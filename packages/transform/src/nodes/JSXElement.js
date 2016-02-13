@@ -6,15 +6,15 @@ export default {
     const el = node.openingElement
 
     // avoid reprocessing
-    if (node.flintJSXVisits != 2) {
+    if (node.motionJSXVisits != 2) {
       // add index keys for repeat elements
-      if (node.flintJSXVisits == 1) {
+      if (node.motionJSXVisits == 1) {
         if (scope.hasBinding('_index')) {
           el.name.elements.push(t.identifier('_'))
           el.name.elements.push(t.identifier('_index'))
         }
 
-        node.flintJSXVisits = 2
+        node.motionJSXVisits = 2
         return
       }
 
@@ -25,7 +25,7 @@ export default {
 
       inJSX = true
 
-      node.flintJSXVisits = 1
+      node.motionJSXVisits = 1
       const name = nodeToNameString(el.name)
 
       // ['quotedname', key]
@@ -81,18 +81,18 @@ export default {
 
         if (options.routing && attrName == 'route') {
           route = _node => t.logicalExpression('&&',
-            t.callExpression(t.identifier('Flint.routeMatch'), [expr]),
+            t.callExpression(t.identifier('Motion.routeMatch'), [expr]),
             _node
           )
 
           // spread routeprops onto route
           el.attributes.push(t.JSXSpreadAttribute(
-            t.callExpression(t.identifier('Flint.routeParams'), [expr])
+            t.callExpression(t.identifier('Motion.routeParams'), [expr])
           ))
         }
 
         if (attrName == 'if') {
-          iff = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Flint.iff'), [expr]), _node)
+          iff = _node => t.logicalExpression('&&', t.callExpression(t.identifier('Motion.iff'), [expr]), _node)
         }
 
         if (attrName == 'repeat') {
@@ -102,7 +102,7 @@ export default {
             // opening.attributes = opening.attributes.filter(attr => attr.name !== 'repeat')
 
             return t.callExpression(
-              t.memberExpression(t.callExpression(t.identifier('Flint.range'), [expr]), t.identifier('map')),
+              t.memberExpression(t.callExpression(t.identifier('Motion.range'), [expr]), t.identifier('map')),
               [t.functionExpression(null, [t.identifier('_'), t.identifier('_index')], t.blockStatement([
                 t.returnStatement(_node)
               ]))]

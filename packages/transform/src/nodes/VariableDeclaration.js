@@ -4,9 +4,9 @@ import { wrapPropertyDeclarator, destructureTrackers, wrapDeclarator } from '../
 
 export default {
   enter(node, parent, scope) {
-    if (node.kind == 'prop' && !node._flintPropParsed) {
+    if (node.kind == 'prop' && !node._motionPropParsed) {
       node.kind = 'const'
-      node._flintPropParsed = true
+      node._motionPropParsed = true
 
       node.declarations.map(dec => {
         let name = dec.id.name
@@ -19,15 +19,15 @@ export default {
   },
 
   exit(node, parent, scope, file) {
-    if (node.isStyle || node._flintDeclarationParsed) return
-    node._flintDeclarationParsed = true
+    if (node.isStyle || node._motionDeclarationParsed) return
+    node._motionDeclarationParsed = true
 
     // add getter
-    if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.flintTracked) {
+    if (scope.hasOwnBinding('view') && node.kind != 'const' && !node.motionTracked) {
       let destructNodes = []
 
       node.declarations.map(dec => {
-        if (dec.flintTracked) return dec
+        if (dec.motionTracked) return dec
 
         // destructures
         if (t.isObjectPattern(dec.id)) {
@@ -48,12 +48,12 @@ export default {
 
         if (!dec.init) {
           dec.init = wrapDeclarator(name, t.identifier('undefined'), scope)
-          dec.flintTracked = true
+          dec.motionTracked = true
           return dec
         }
 
         dec.init = wrapDeclarator(name, dec.init, scope)
-        node.flintTracked = true
+        node.motionTracked = true
         return dec
       })
 

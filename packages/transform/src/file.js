@@ -18,16 +18,16 @@ import UpdateExpression from './nodes/UpdateExpression'
 
 export default function createPlugin(options) {
   // running without options
-  if (options.Transformer) return FlintPlugin(options)
+  if (options.Transformer) return MotionPlugin(options)
 
   // plugin
-  function FlintPlugin({ Plugin, types: t }) {
+  function MotionPlugin({ Plugin, types: t }) {
 
     // init
     init()
     helpersInit(options, t)
 
-    return new Plugin('flint-transform', {
+    return new Plugin('motion-transform', {
       metadata: { group: 'builtin-trailing' },
       visitor: {
         Program,
@@ -49,5 +49,5 @@ export default function createPlugin(options) {
     })
   }
 
-  return FlintPlugin
+  return MotionPlugin
 }

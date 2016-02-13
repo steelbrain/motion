@@ -1,15 +1,15 @@
 import state from '../state'
 import { t, options, getSelector, viewMainSelector, viewSelector, getRootTagName, shouldStyleAsRoot } from '../lib/helpers'
 
-import niceStyles from 'flint-nice-styles'
+import niceStyles from 'motion-nice-styles'
 import StyleSheet from '../stilr'
 
 export default {
   exit(node) {
-    if (node._flintViewParsed) return // avoid parsing twice
+    if (node._motionViewParsed) return // avoid parsing twice
 
-    if (state.inView && node.expression && node.expression.callee && node.expression.callee.name == 'Flint.view') {
-      node._flintViewParsed = true
+    if (state.inView && node.expression && node.expression.callee && node.expression.callee.name == 'Motion.view') {
+      node._motionViewParsed = true
 
       // check if child tag is direct root
       const shouldStyleTagnameAsRoot = shouldStyleAsRoot()
@@ -78,19 +78,19 @@ export default {
         }, [])
       )
 
-      // Flint.staticStyles('ViewName', {}, ``)
+      // Motion.staticStyles('ViewName', {}, ``)
       const staticStyleExpr = t.expressionStatement(
-        t.callExpression(t.identifier('Flint.staticStyles'), [
+        t.callExpression(t.identifier('Motion.staticStyles'), [
           t.literal(viewName),
           classNamesObject,
           stylesObject
         ])
       )
 
-      // Flint.viewRoots["Name"] = "RootElementName"
+      // Motion.viewRoots["Name"] = "RootElementName"
       if (shouldStyleAsRoot()) {
         const viewRootNodeExpr = t.expressionStatement(
-          t.assignmentExpression('=', t.identifier(`Flint.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
+          t.assignmentExpression('=', t.identifier(`Motion.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
         )
         return [ staticStyleExpr, viewRootNodeExpr, node ]
       }

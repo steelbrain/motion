@@ -1,10 +1,10 @@
 #!/bin/sh
 
 
-# Welcome to the Flint install script!
+# Welcome to the Motion install script!
 # To run this, open your terminal and type:
 #
-#    sh <(curl -L https://flint.love)
+#    sh <(curl -L https://motion.love)
 
 
 # (wrapped with function to execute only if fully downloaded)
@@ -41,10 +41,10 @@ echo_error() {
 cat <<"EOF"
 
   Open an issue at:
-    https://github.com/flintjs/flint/issues
+    https://github.com/motionjs/motion/issues
 
   Or join our Slack:
-    http://flint-slack.herokuapp.com
+    http://motion-slack.herokuapp.com
 
 EOF
 }
@@ -87,25 +87,25 @@ fi
 # read -p "Would you like to install the atom plugin [y/n]? " reply
 # echo
 # if [[ "$reply" =~ ^[Yy]$ ]]; then
-#   sudo rm -r ~/.atom/packages/flint
-#   git clone -b beta http://github.com/flintjs/atom ~/.atom/packages/flint
-#   (cd ~/.atom/packages/flint && npm install)
+#   sudo rm -r ~/.atom/packages/motion
+#   git clone -b beta http://github.com/motionjs/atom ~/.atom/packages/motion
+#   (cd ~/.atom/packages/motion && npm install)
 # fi
 
 # Check sudo privelege on global node_modules
 if [ -w "$NODE_MODULES" ] && [ -w "$NODE_MODULES_BIN" ]; then
   echo_good "Checking global node_modules permissions... ✓"
   echo
-  echo "Installing Flint..."
+  echo "Installing Motion..."
   echo
-  npm install -g flint --loglevel=error
+  npm install -g motion --loglevel=error
 else
   #
 cat <<"EOF"
 
   Your global npm modules are owned by sudo!
 
-  This will cause Flint to create new apps more slowly
+  This will cause Motion to create new apps more slowly
   (and forces you to use sudo when installing npm globally).
 
 EOF
@@ -124,9 +124,9 @@ EOF
       echo
       echo_good "Node modules permissions fixed ✓"
       echo
-      echo "Installing flint..."
+      echo "Installing motion..."
       echo
-      npm install -g flint --loglevel=error
+      npm install -g motion --loglevel=error
     else
       echo
       echo_bad "Uh oh! Couldn't fix permissions!"
@@ -152,40 +152,40 @@ EOF
     #
     sleep 2
     echo
-    echo "Installing flint with sudo..."
+    echo "Installing motion with sudo..."
     echo
-    sudo npm install -g flint --loglevel=error
+    sudo npm install -g motion --loglevel=error
   fi
 fi
 
-if hash flint 2>/dev/null; then
+if hash motion 2>/dev/null; then
   echo
   if [ -z "$EDITOR" ]; then
     echo_bold "No EDITOR set in your shell"
-    echo "Flint helps open your editor if you set your EDITOR shell variable"
+    echo "Motion helps open your editor if you set your EDITOR shell variable"
   else
     echo_bold "Your default editor is set to $EDITOR"
   fi
 
   echo
-  echo_good "Flint has been installed!"
+  echo_good "Motion has been installed!"
   #
 cat <<"EOF"
 
-  Run Flint with:
+  Run Motion with:
 
-    $ flint new appname
+    $ motion new appname
     $ cd appname
-    $ flint
+    $ motion
 
-  Docs at http://flintjs.com/docs
+  Docs at http://motionjs.com/docs
 
 EOF
   #
 else
   #
   echo
-  echo_bad "Flint not installed!"
+  echo_bad "Motion not installed!"
   echo_error
   #
 fi

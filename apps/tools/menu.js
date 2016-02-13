@@ -13,13 +13,13 @@ view Menu {
   let focused
   on.keydown(() => {
     if (keys.alt && keys.command) {
-      document.body.classList.add('__flintfocus')
+      document.body.classList.add('__motionfocus')
       focused = true
     }
   })
   on.keyup(() => {
     if (focused) {
-      document.body.classList.remove('__flintfocus')
+      document.body.classList.remove('__motionfocus')
       focused = false
     }
   })

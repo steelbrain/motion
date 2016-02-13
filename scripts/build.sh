@@ -6,7 +6,7 @@ set -e
 trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
 # order important so they build for each other
-packages=("nice-styles" "transform" "flint.js" "flint")
+packages=("nice-styles" "transform" "motion.js" "motion")
 
 # build
 for p in "${packages[@]}"; do
@@ -37,13 +37,13 @@ if [ "$1" = "--watch" ]; then
   if [ "$2" != '--notools' ]; then
     sleep 4
     cd apps/tools
-    flint build --watch --nomin &
+    motion build --watch --nomin &
     cd ../..
   fi
 
   # relink cli automatically
   # chsum1=""
-  # cd packages/flint
+  # cd packages/motion
   # while [[ true ]]; do
   #   if [ -d 'dist' ]; then
   #     chsum2=`find dist -type f -exec md5 {} \;`

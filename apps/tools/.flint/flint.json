@@ -1,7 +1,0 @@
-{
-  "selectorPrefix": "#_flintdevtools ",
-  "tools": "false",
-  "build": {
-    "minify": false
-  }
-}

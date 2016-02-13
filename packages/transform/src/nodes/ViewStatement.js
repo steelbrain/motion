@@ -18,9 +18,9 @@ export default {
       els: {}
     }
 
-    node.block.flintView = true
+    node.block.motionView = true
 
-    return t.callExpression(t.identifier('Flint.view'), [t.literal(fullName),
+    return t.callExpression(t.identifier('Motion.view'), [t.literal(fullName),
       t.functionExpression(null, [t.identifier('view'), t.identifier('on'), t.identifier('$')], node.block)]
     )
   }

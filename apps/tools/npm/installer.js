@@ -57,14 +57,14 @@ view Installer {
   }
 
   // was <modal but collided with bootstrap
-  <FlintModal
+  <MotionModal
     open={state > 0}
     onClose={closeModal}
     title={title(state)}
     titleColor={state == 3 ? "#8c1919" : "#0f8c3c"}>
     <InstallerLoading if={false && state < 2} />
     {body(state)}
-  </FlintModal>
+  </MotionModal>
 }
 
 view Versions {

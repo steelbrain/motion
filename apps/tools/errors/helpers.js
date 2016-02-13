@@ -3,12 +3,12 @@ export const isLive = () => browser.editor && browser.editor.live
 
 const split = (s, i) => [s.substring(0, i), s.substring(i, i+1), s.substring(i+1)]
 
-export function showFlintErrorDiv() {
+export function showMotionErrorDiv() {
   setTimeout(() => {
     // avoid showing if error fixed in meantime
     if (!browser.curError) return
 
-    const errors = document.querySelectorAll('.__flintError')
+    const errors = document.querySelectorAll('.__motionError')
     if (!errors.length) return
     // add active class to show them
     ;[].forEach.call(errors, error => {
@@ -22,8 +22,8 @@ export function niceRuntimeError(err) {
   if (err.file)
     err.file = err.file.replace(new RegExp('.*' + window.location.origin + '(\/[_]+\/)?'), '')
 
-  if (err.file && err.file === 'flint.dev.js') {
-    err.file = 'Flint'
+  if (err.file && err.file === 'motion.dev.js') {
+    err.file = 'Motion'
     err.line = null
   }
 
@@ -117,5 +117,5 @@ function niceStack(err) {
 }
 
 export const log = (...args) => {
-  if (localStorage.getItem('flintdebug')) console.log(...args)
+  if (localStorage.getItem('motiondebug')) console.log(...args)
 }

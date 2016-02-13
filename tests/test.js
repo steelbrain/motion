@@ -1,7 +1,7 @@
 import assert from 'assert'
 import jsdom from 'jsdom'
 
-import flintNew from '../packages/cli/lib/modern/lib/new'
+import motionNew from '../packages/cli/lib/modern/lib/new'
 import runner from '../packages/runner/lib/modern/index'
 
 try {
@@ -10,7 +10,7 @@ cd('tests')
 
 const appName = '.tmp'
 
-flintNew({
+motionNew({
   name: appName,
   nocache: true
 })
@@ -35,10 +35,10 @@ function domTests(err, window) {
   if (err) throw new Error(err)
 
   const $ = window.$
-  const Flint = window.Flint
+  const Motion = window.Motion
   const Internal = window.Internal
 
-  Flint.on('after:render', () => {
+  Motion.on('after:render', () => {
     console.log('rendered')
   })
 

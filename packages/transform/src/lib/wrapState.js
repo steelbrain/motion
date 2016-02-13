@@ -23,7 +23,7 @@ export function wrapSetter(name, node, scope, postfix, method = 'set') {
     else {
       // or find parent
       const parentFunc = parentFunctionNode(scope)
-      if (parentFunc) parentFunc.flintStateMutativeFunction = true
+      if (parentFunc) parentFunc.motionStateMutativeFunction = true
     }
 
     return expr
@@ -65,11 +65,11 @@ export function wrapGetter(node, scope, file) {
 
 
 export function stateTrack(node) {
-  if (node.body.flintView) return
-  if (node.flintStateTracked) return
-  node.flintStateTracked = true
+  if (node.body.motionView) return
+  if (node.motionStateTracked) return
+  node.motionStateTracked = true
 
-  if (node.hasSetter || node.flintStateMutativeFunction) {
+  if (node.hasSetter || node.motionStateMutativeFunction) {
     if (t.isArrowFunctionExpression(node) && t.isCallExpression(node.body)) {
       node.body = wrapper(node.body)
     }

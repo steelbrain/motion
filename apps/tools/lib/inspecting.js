@@ -45,7 +45,7 @@ const Inspecting = {
       let next = this.props(parent)
 
       if (next.view && next.view != last.view) {
-        // filter __flintfocus
+        // filter __motionfocus
         if (next.view[0] != '_') {
           parents.push(next)
         }

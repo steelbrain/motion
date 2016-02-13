@@ -2,12 +2,12 @@
 
 Releasing this more to establish a cutoff point for the cumulated changes from 1.4.
 
-- Large internal refactors of flint-babel-transform
+- Large internal refactors of motion-babel-transform
 
-- flint-babel-transform now inserts `view.update()`, rather than relying on `view.set()` + `setTimeout`.
+- motion-babel-transform now inserts `view.update()`, rather than relying on `view.set()` + `setTimeout`.
   This means synchronous updates in React, removing a jank part of 1.4
 
-- flint.json now takes options for build/run: `minify` as boolean, defaults to `true`
+- motion.json now takes options for build/run: `minify` as boolean, defaults to `true`
 
 ```
 {
@@ -17,9 +17,9 @@ Releasing this more to establish a cutoff point for the cumulated changes from 1
 }
 ```
 
-- Large refactor of `flint build`. Builds now use gulp for more of their processes.
+- Large refactor of `motion build`. Builds now use gulp for more of their processes.
 
-- `flint build --watch` is now far better. Less bugs and fast updates.
+- `motion build --watch` is now far better. Less bugs and fast updates.
 
 ## 1.4.53
 
@@ -28,8 +28,8 @@ Releasing this more to establish a cutoff point for the cumulated changes from 1
 
 ## 1.4.39
 
-- Another big internal refactor that brings big upgrades to Flint's structure. No longer is it doing
-  a ton of stuff on window. Now all flint apps and flint itself use commonjs to run in the browser.
+- Another big internal refactor that brings big upgrades to Motion's structure. No longer is it doing
+  a ton of stuff on window. Now all motion apps and motion itself use commonjs to run in the browser.
 
 - This makes sourcemaps work in production
 
@@ -87,11 +87,11 @@ view Main {
 
 - `on.event` custom events can pass objects: `on.event('custom', { some: 'obj' })`
 
-- flint --cached (for faster startup time, broken atm)
+- motion --cached (for faster startup time, broken atm)
 
-- flint --reset (deletes internals for clean restart)
+- motion --reset (deletes internals for clean restart)
 
-- Flint recognizes if upgraded and clears internals automatically now
+- Motion recognizes if upgraded and clears internals automatically now
 
 - view.inlineStyles() forces a view to render its styles inline
 

@@ -1,7 +1,7 @@
 import {
   browser,
   isLive,
-  showFlintErrorDiv
+  showMotionErrorDiv
 } from './helpers'
 
 const last = arr => arr[arr.length - 1]
@@ -42,19 +42,19 @@ view Errors.Message {
     delay={isLive() ? 2000 : 1000}
     force={hasError === false}
     showKey={fullStack || error && error.message}
-    onUpdate={showFlintErrorDiv}
+    onUpdate={showMotionErrorDiv}
   >
     <bar>
       <Close onClick={view.props.close} size={35} />
       <inner if={npmError}>
-        <where><flint>{npmError.name}</flint></where> {npmError.msg}
+        <where><motion>{npmError.name}</motion></where> {npmError.msg}
       </inner>
 
       <inner>
         <top>
           <where>
-            <span>In <flint>{fileName(error.file)}</flint></span>
-            <line>{line ? ' line' : ''} <flint if={line}>{line}</flint></line>
+            <span>In <motion>{fileName(error.file)}</motion></span>
+            <line>{line ? ' line' : ''} <motion if={line}>{line}</motion></line>
           </where>
 
           {' '}
@@ -127,7 +127,7 @@ view Errors.Message {
     pointerEvents: 'all'
   }
 
-  $flint = {
+  $motion = {
     display: 'inline',
     fontWeight: 700,
     color: '#fff'
@@ -176,9 +176,9 @@ view Errors.Message {
     padding: [0, 20]
   }
 
-  $flintline = {
+  $motionline = {
     whiteSpace: 'pre',
     pointerEvents: 'all',
-    fontWeight: 'flint'
+    fontWeight: 'motion'
   }
 }

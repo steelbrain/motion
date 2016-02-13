@@ -16,11 +16,11 @@ export default {
     const location = relativePath(file.opts.filename)
 
     if (!file.metadata.exports && !state.hasExports) {
-      // function(){ Flint.file('${location}',function(require, exports){ ${contents}\n  })\n}()
+      // function(){ Motion.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(
         // closure
         t.callExpression(t.functionExpression(null, [], t.blockStatement([
-          t.callExpression(t.identifier('Flint.file'), [t.literal(location),
+          t.callExpression(t.identifier('Motion.file'), [t.literal(location),
             t.functionExpression(null, [t.identifier('require')],
               t.blockStatement(node.body)
             )

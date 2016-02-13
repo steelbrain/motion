@@ -1,4 +1,4 @@
-view FlintModal {
+view MotionModal {
   prop open, title, children
 
   let lastTitle

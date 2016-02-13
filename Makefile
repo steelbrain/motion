@@ -12,7 +12,7 @@ watch: clean
 
 bootstrap:
 	npm install
-	(cd flintjs-deps && npm prune && npm install)
+	(cd js-deps && npm prune && npm install)
 	node scripts/bootstrap.js
 	scripts/build.sh
 
@@ -31,11 +31,11 @@ patch-verbose:
 patch-tools: ready
 	node scripts/release.js --patch tools
 
-patch-flint: ready
-	node scripts/release.js --patch flint
+patch-motion: ready
+	node scripts/release.js --patch motion
 
-patch-flint.js: ready
-	node scripts/release.js --patch flint.js
+patch-motion.js: ready
+	node scripts/release.js --patch motion.js
 
 patch-transform: ready
 	node scripts/release.js --patch transform

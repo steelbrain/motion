@@ -1,9 +1,9 @@
 {
-  "name": "flint-transform",
-  "version": "1.5.10",
+  "name": "motion-transform",
+  "version": "0.9.0",
   "main": "lib/index.js",
   "dependencies": {
-    "flint-nice-styles": "^1.5.0",
+    "motion-nice-styles": "^0.9.0",
     "hash-sum": "1.0.2",
     "object-to-css": "1.0.3"
   }

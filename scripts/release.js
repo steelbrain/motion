@@ -52,9 +52,9 @@ function shrinkwrap(where) {
 var releaseOrder = [
   'nice-styles',
   'transform',
-  'flint.js',
+  'motion.js',
   'tools',
-  'flint',
+  'motion',
 ]
 
 var apps = []
@@ -62,7 +62,7 @@ var packages = []
 
 var sortByReleaseOrder = ls => _.sortBy(ls, x => releaseOrder.indexOf(x))
 var projectPath = n => path.join('packages', n)
-var appPath = n => path.join('apps', n, '.flint')
+var appPath = n => path.join('apps', n, '.motion')
 
 // options
 var lastArg = process.argv[process.argv.length - 1]
@@ -101,9 +101,9 @@ else {
   apps = sortByReleaseOrder(filterByName(changedFiles, 'apps'))
 }
 
-// always release flint & always last
-if (packages.indexOf('flint') < 0)
-  packages.push('flint')
+// always release motion & always last
+if (packages.indexOf('motion') < 0)
+  packages.push('motion')
 
 // release
 if (!packages.length && !apps.length) {

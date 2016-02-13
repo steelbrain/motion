@@ -1,13 +1,13 @@
 {
-  "name": "flint-nice-styles",
-  "version": "1.5.0",
+  "name": "motion-nice-styles",
+  "version": "0.9.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Flint",
+  "author": "Motion",
   "license": "MIT",
   "dependencies": {}
 }

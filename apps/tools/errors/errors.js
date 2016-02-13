@@ -1,7 +1,7 @@
 import {
   browser,
   isLive,
-  showFlintErrorDiv,
+  showMotionErrorDiv,
   niceRuntimeError,
   niceNpmError,
   niceCompilerError,
