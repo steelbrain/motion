@@ -205,6 +205,8 @@ export function scripts({ inFiles = [], userStream }) {
 
     if (!opts('build') || opts('watch')) {
       debounce('removeOldImports', 3000, bundler.uninstall)
+
+      // check will install
       file.willInstall = bundler.willInstall(file.babel.imports)
     }
   }

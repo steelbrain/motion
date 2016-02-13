@@ -16,7 +16,7 @@ export async function install(force) {
     await remakeInstallDir(force)
     await uninstall()
     await installAll()
-    await externals()
+    await externals({ force })
   }
   catch (e) {
     handleError(e)
@@ -32,6 +32,7 @@ let _isInstalling = false
 
 // used to quickly check if a file will trigger an install
 export function willInstall(imports) {
+  // TODO dont ignore internals
   return !!getNew(imports.filter(x => x.charAt(0) != '.')).length
 }
 

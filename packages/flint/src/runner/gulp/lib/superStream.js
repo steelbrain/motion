@@ -63,7 +63,7 @@ function fileSend({ path, startTime, contents }) {
     debug('SOUT', relative)
     queue[relative] = false
     // we may get another stream in before browser even starts loading
-    setBrowserLoading(relative, true)
+    // setBrowserLoading(relative, true)
     const file = new File(vinyl(basePath, path, new Buffer(contents)))
 
     const stackTime = [{
@@ -82,11 +82,16 @@ function pushStreamRun(relative, finish, sendImmediate) {
     return finish()
 
   // only queue once
-  if (queue[relative]) return
+  if (queue[relative])
+    return
+
   queue[relative] = finish
+
   // ensure upper limit on wait
   setTimeout(() => {
-    if (!queue[relative]) return
+    if (!queue[relative])
+      return
+
     debug('upper limit! finish'.yellow)
     browserLoading[relative] = false
     finish()

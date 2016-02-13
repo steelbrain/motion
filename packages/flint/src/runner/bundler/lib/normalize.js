@@ -6,7 +6,7 @@ import rmFlintExternals from './rmFlintExternals'
 
 export default function normalize(deps) {
   if (!deps) return []
-  return _.uniq(rmFlintExternals(deps).map(replaceSubPath)).filter(x => x !== '')
+  return _.uniq(rmFlintExternals(deps).map(replaceSubPath))
 }
 
 

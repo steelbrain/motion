@@ -18,7 +18,7 @@ export async function externals(opts = {}) {
     await installAll()
 
 
-  if (disk.externalsPaths.hasChanged()) {
+  if (opts.force || disk.externalsPaths.hasChanged()) {
     const paths = await disk.externalsPaths.read()
 
     await disk.externalsIn.write((current, write) => {
