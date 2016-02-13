@@ -24,7 +24,7 @@ export default async function createWriter(filePath, { debug = '', json = false,
   // internal state
   let cache = null
   let cacheStr = null
-  let _hasChanged = false
+  let _hasChanged = true
 
   // public
   async function read() {
