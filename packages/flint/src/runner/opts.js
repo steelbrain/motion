@@ -42,7 +42,23 @@ async function loadConfigs() {
     result = await jsonConfig()
   }
 
-  return modeMergedConfig(result)
+  return modeMergedConfig(result || {})
+}
+
+function modeMergedConfig(config) {
+  const modeSpecificConfig = config[OPTS.build ? 'build' : 'run']
+  const merged = Object.assign({}, config, modeSpecificConfig)
+  return merged
+}
+
+async function jsonConfig() {
+  try {
+    const config = await readJSON(OPTS.configFile)
+    return modeMergedConfig(config)
+  }
+  catch(e) {
+    handleError({ message: `Error parsing config file: ${OPTS.configFile}` })
+  }
 }
 
 function parseConfig() {
@@ -58,7 +74,7 @@ function parseConfig() {
       }
 
       // for json loader
-      const runnerRoot = path.resolve(path.join(__dirname, '..'))
+      const runnerRoot = path.resolve(path.join(__dirname, '..', '..'))
       const runnerModules = path.join(runnerRoot, 'node_modules')
 
       webpack({
@@ -76,10 +92,10 @@ function parseConfig() {
         },
         resolveLoader: { root: runnerModules },
       }, (err, stats) => {
-        const res = () => resolve(p(OPTS.internalDir, 'user-config.js'))
-        let error = getWebpackErrors('config', err, stats)
-        if (error) resolve(false)
-        else resolve(confLocation)
+        if (getWebpackErrors('config', err, stats))
+          resolve(false)
+        else
+          resolve(p(OPTS.internalDir, 'user-config.js'))
       })
     }
     catch(e) {
@@ -100,22 +116,6 @@ async function setupCliOpts(cli) {
   if (cli.out && (await exists(cli.out)))  {
     console.error(`\n  Build dir already exists! Ensure you target an empty directory.\n`.red)
     process.exit(1)
-  }
-}
-
-function modeMergedConfig(config) {
-  const modeSpecificConfig = config[OPTS.build ? 'build' : 'run']
-  const merged = Object.assign({}, config, modeSpecificConfig)
-  return merged
-}
-
-async function jsonConfig() {
-  try {
-    const config = await readJSON(OPTS.configFile)
-    return modeMergedConfig(config)
-  }
-  catch(e) {
-    handleError({ message: `Error parsing config file: ${OPTS.configFile}` })
   }
 }
 

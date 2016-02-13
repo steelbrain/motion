@@ -113,34 +113,25 @@ const Flint = {
         Flint.render()
       },
 
-      // private API
-      reportError,
-      range,
-      iff,
-      noop: function(){},
+      views: {},
 
       // beta
       _onViewInstance: (name, decorator) => !decorator
         ? Internal.instanceDecorator.all = name
         : Internal.instanceDecorator[name] = decorator,
+
+      // decorate a view instance
       decorateView: (name, decorator) => !decorator
         ? Internal.viewDecorator.all = name
         : Internal.viewDecorator[name] = decorator,
 
-      // external API
       keyframes,
+
       router,
-      preloaders: [], // async functions needed before loading app
 
-      preload(fn) {
-        Flint.preloaders.push(fn)
-      },
-
-      // styles, TODO: move internal
-      staticStyles,
-      viewRoots: {},
-      styleClasses: {},
-      styleObjects: {},
+      // async functions before loading app
+      preloaders: [],
+      preload(fn) { Flint.preloaders.push(fn) },
 
       render() {
         if (Flint.preloaders.length) {
@@ -186,13 +177,81 @@ const Flint = {
         }
       },
 
-      // internal events
+      // flint events
       on(name, cb) {
         emitter.on(name, cb)
       },
 
       // for use in jsx
       debug: () => { debugger },
+
+      view(name, body) {
+        const comp = opts => createComponent(Flint, Internal, name, body, opts)
+
+        if (process.env.production)
+          return setView(name, comp())
+
+        const hash = hashsum(body)
+
+        function setView(name, component) {
+          Internal.views[name] = { hash, component, file: Internal.currentHotFile }
+          Flint.views[name] = component
+        }
+
+        // set view in cache
+        let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
+        if (viewsInFile)
+          viewsInFile.push(name)
+
+        // if new
+        if (!Internal.views[name]) {
+          setView(name, comp({ hash, changed: true }))
+          Internal.changedViews.push(name)
+          return
+        }
+
+        // dev stuff
+        if (!process.env.production) {
+          if (!Internal.mountedViews[name])
+            Internal.mountedViews[name] = []
+
+          // not new
+          // if defined twice during first run
+          if (Internal.firstRender && !Internal.runtimeErrors) {
+            Internal.views[name] = ErrorDefinedTwice(name)
+            throw new Error(`Defined a view twice: ${name}`)
+          }
+
+          // if unchanged
+          if (Internal.views[name].hash == hash) {
+            setView(name, comp({ hash, unchanged: true }))
+            return
+          }
+
+          // changed
+          setView(name, comp({ hash, changed: true }))
+          Internal.changedViews.push(name)
+
+          // this resets tool errors
+          window.onViewLoaded()
+        }
+      },
+
+      getView(name) {
+        return Flint.views[name] || NotFound(name)
+      },
+
+
+      //
+      //  private API (TODO move this)
+      //
+
+
+      // styles, TODO: move to Internal
+      staticStyles,
+      viewRoots: {},
+      styleClasses: {},
+      styleObjects: {},
 
       // load a file
       file(file, run) {
@@ -268,57 +327,6 @@ const Flint = {
         delete Internal.viewsInFile[file]
       },
 
-      view(name, body) {
-        const comp = opts => createComponent(Flint, Internal, name, body, opts)
-
-        if (process.env.production)
-          return setView(name, comp())
-
-        const hash = hashsum(body)
-
-        function setView(name, component) {
-          Internal.views[name] = { hash, component, file: Internal.currentHotFile }
-        }
-
-        // set view in cache
-        let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
-        if (viewsInFile)
-          viewsInFile.push(name)
-
-        // if new
-        if (!Internal.views[name]) {
-          setView(name, comp({ hash, changed: true }))
-          Internal.changedViews.push(name)
-          return
-        }
-
-        // dev stuff
-        if (!process.env.production) {
-          if (!Internal.mountedViews[name])
-            Internal.mountedViews[name] = []
-
-          // not new
-          // if defined twice during first run
-          if (Internal.firstRender && !Internal.runtimeErrors) {
-            Internal.views[name] = ErrorDefinedTwice(name)
-            throw new Error(`Defined a view twice: ${name}`)
-          }
-
-          // if unchanged
-          if (Internal.views[name].hash == hash) {
-            setView(name, comp({ hash, unchanged: true }))
-            return
-          }
-
-          // changed
-          setView(name, comp({ hash, changed: true }))
-          Internal.changedViews.push(name)
-
-          // this resets tool errors
-          window.onViewLoaded()
-        }
-      },
-
       deleteFile(name) {
         const viewsInFile = Internal.viewsInFile[name]
 
@@ -329,20 +337,6 @@ const Flint = {
 
         delete Internal.viewCache[name]
         Flint.render()
-      },
-
-      getView(name) {
-        let result
-
-        // regular view
-        if (Internal.views[name]) {
-          result = Internal.views[name].component
-        }
-        else {
-          result = NotFound(name)
-        }
-
-        return result
       },
 
       routeMatch(path) {
@@ -357,7 +351,12 @@ const Flint = {
       inspect(path, cb) {
         Internal.inspector[path] = cb
         Internal.setInspector(path)
-      }
+      },
+
+      reportError,
+      range,
+      iff,
+      noop: function(){},
     }
 
     // view shim (TODO freeze)
