@@ -1,6 +1,6 @@
 import flintTransform from 'flint-transform'
 import babel from './babel'
-import { $, pipefn, gulp, isSourceMap, isProduction } from './lib/helpers'
+import { $, gulp, isSourceMap, isProduction } from './lib/helpers'
 import opts from '../opts'
 import { p, readdir, handleError, log } from '../lib/fns'
 

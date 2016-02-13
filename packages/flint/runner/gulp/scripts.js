@@ -1,5 +1,5 @@
-import { $, gulp, SCRIPTS_GLOB, out, pipefn, isBuilding, isSourceMap } from './lib/helpers'
-import { superStream, dirAddStream, merge, multipipe } from './lib/streams'
+import { $, gulp, SCRIPTS_GLOB, out, isBuilding, isSourceMap } from './lib/helpers'
+import { superStream, dirAddStream } from './lib/streams'
 import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
 import unicodeToChar from '../lib/unicodeToChar'
 import { event } from './index'
@@ -35,44 +35,43 @@ export function scripts({ inFiles = [], userStream }) {
   return (
     isBuilding() ?
     scripts :
-    merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
+    $.merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
-      .pipe(pipefn(reset))
+      .pipe($.log(reset))
       .pipe($.plumber(catchError))
-      .pipe(pipefn(setLastFile))
+      .pipe($.log(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
       .pipe(babel.file())
-      .pipe(pipefn(processDependencies))
-      .pipe(pipefn(sendOutsideChanged)) // right after flint
+      .pipe($.log(processDependencies))
+      .pipe($.log(sendOutsideChanged)) // right after flint
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       .pipe($.if(file => file.babel.isExported,
-        multipipe(
-          pipefn(removeNewlyInternal),
-          pipefn(markFileSuccess), // before writing to preserve path
+        $.multipipe(
+          $.log(removeNewlyInternal),
+          $.log(markFileSuccess), // before writing to preserve path
           gulp.dest(opts('deps').internalDir),
-          pipefn(bundle),
-          pipefn(buildDone),
+          $.log(bundle),
+          $.log(buildDone),
           $.ignore.exclude(true)
         )
       ))
-      .pipe(pipefn(markFileSuccess))
+      .pipe($.log(markFileSuccess))
       .pipe($.sourcemaps.write('.'))
       .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
-      .pipe(pipefn(afterWrite))
+      .pipe($.log(afterWrite))
       // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-      .pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn()).pipe(pipefn())
-
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
 
   function markDone(file) {
     State.loaded++
@@ -165,7 +164,9 @@ export function scripts({ inFiles = [], userStream }) {
     event.run('error', State.curFile, error)
     cache.addError(error.fileName || '', error)
 
-    error.file = path.relative(opts('appDir'), error.fileName)
+    if (error.fileName)
+      error.file = path.relative(opts('appDir'), error.fileName)
+
     bridge.broadcast('compile:error', { error }, 'error')
 
     markDone(State.curFile)

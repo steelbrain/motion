@@ -4,15 +4,17 @@ import opts from '../../opts'
 import deepmerge from 'deepmerge'
 
 export function file(config) {
+  const flintOpts = {
+    basePath: opts('appDir'),
+    production: isProduction(),
+    selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
+    routing: opts('config').routing,
+    ...config
+  }
+
   return getBabelConfig({
     plugins: [
-      FlintTransform.file({
-        basePath: opts('appDir'),
-        production: isProduction(),
-        selectorPrefix: opts('config').selectorPrefix || '#_flintapp ',
-        routing: opts('config').routing,
-        ...config
-      })
+      FlintTransform.file(flintOpts)
     ]
   })
 }

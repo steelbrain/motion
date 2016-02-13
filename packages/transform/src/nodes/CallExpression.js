@@ -8,9 +8,7 @@ export default {
     if (node.callee && node.callee.name && node.callee.name == 'require') {
       const arg = node.arguments && node.arguments.length && node.arguments[0].value
 
-      // mutating babel metadata
       options.onImports && options.onImports(arg)
-      // file.metadata.modules.imports.push({ source: arg })
     }
 
     // mutative array methods

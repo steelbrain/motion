@@ -1,4 +1,4 @@
-import { $, gulp, pipefn } from './lib/helpers'
+import { $, gulp, multipipe } from './lib/helpers'
 import opts from '../opts'
 import { p, mkdir, handleError, log } from '../lib/fns'
 
@@ -13,18 +13,17 @@ export async function styles() {
   return gulpStyles(where)
 }
 
+// todo this is re-running every build --watch change, use $.watch
 function gulpStyles({ src, glob, out }) {
-  let stream = gulp.src(glob, { cwd: src })
-
-  if (opts('watch'))
-    stream = stream
-      .pipe($.watch(glob, { readDelay: 1 }))
-      // TODO install these and make this work
-      .pipe($.cached('styles'))
-      .pipe($.remember())
-
   return new Promise((resolve, reject) => {
-    stream
+    gulp.src(glob, { cwd: src })
+      .pipe($.plumber())
+      .pipe($.if(opts('watch'),
+        $.multipipe(
+          $.cached('styles'),
+          $.remember('styles'),
+        )
+      ))
       .pipe($.concat(opts('styleOutName')))
       .pipe(gulp.dest(out))
       .on('end', () => {
@@ -32,5 +31,8 @@ function gulpStyles({ src, glob, out }) {
         resolve()
       })
       .on('error', reject)
+
+    // resolve right away for watch
+    if (opts('watch')) resolve()
   })
 }

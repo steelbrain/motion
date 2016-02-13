@@ -1,4 +1,4 @@
-import { $, gulp, pipefn } from './lib/helpers'
+import { $, gulp } from './lib/helpers'
 import opts from '../opts'
 import { p, mkdir, handleError, log } from '../lib/fns'
 
@@ -29,7 +29,7 @@ function assetsApp() {
   return new Promise((resolve, reject) => {
     stream
         .pipe($.plumber())
-        // .pipe(pipefn(out.goodFile('⇢')))
+        // .pipe($.log(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(assets.out))
         .on('end', () => {
@@ -58,7 +58,7 @@ async function assetsStatics() {
   return new Promise((resolve, reject) => {
     stream
         .pipe($.plumber())
-        // .pipe(pipefn(out.goodFile('⇢')))
+        // .pipe($.log(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(statics.out))
         .on('end', () => {

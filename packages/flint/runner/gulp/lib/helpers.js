@@ -6,6 +6,8 @@ import { _, path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
 import scriptsGlob from './scriptsGlob'
+import merge from 'merge-stream'
+import multipipe from 'multipipe'
 
 export const isSourceMap = file => path.extname(file) === '.map'
 export const relative = file => path.relative(opts('appDir'), file.path)
@@ -22,6 +24,9 @@ out.goodScript = out.goodFile('')
 export const $ = loadPlugins()
 
 $.filterEmptyDirs = $.if(file => !file.stat.isFile(), $.ignore.exclude(true))
+$.merge = merge
+$.multipipe = multipipe
+$.log = logfn
 
 export const isBuilding = () => opts('build') && !opts('watch')
 export const isProduction = () => opts('build')
@@ -30,7 +35,7 @@ export const through = _through
 export const gulp = _gulp
 export const SCRIPTS_GLOB = scriptsGlob
 
-export function pipefn(fn) {
+function logfn(fn) {
   return _through.obj(function(file, enc, next) {
     let result = fn && fn(file)
 

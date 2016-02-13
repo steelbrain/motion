@@ -117,5 +117,5 @@ function niceStack(err) {
 }
 
 export const log = (...args) => {
-  if (false) console.log(...args)
+  if (localStorage.getItem('flintdebug')) console.log(...args)
 }
