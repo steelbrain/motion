@@ -30,11 +30,11 @@ export async function startup(options = {}) {
   log.setLogging()
   await disk.init() // reads versions and sets up readers/writers
   await builder.clear.init() // ensures internal directories set up
-  await * [
+  await Promise.all([
     opts.serialize(), // write out opts to state file
     cache.init(),
     bundler.init()
-  ]
+  ])
 
   watchDeletes()
 }
@@ -47,14 +47,14 @@ async function gulpScripts(opts) {
 export async function build(opts = {}) {
   try {
     await startup({ ...opts, build: true })
-    await * [
+    await Promise.all([
       bundler.remakeInstallDir(),
       builder.clear.buildDir()
-    ]
-    await * [
+    ])
+    await Promise.all([
       gulp.assets(),
       gulpScripts({ once: opts.once })
-    ]
+    ])
     await builder.build()
     if (opts.once) return
     print()

@@ -17,12 +17,12 @@ export default async function build({ bundle = true } = {}) {
 
     makeTemplate()
 
-    await *[
+    await Promise.all([
       gulp.app(),
       gulp.styles(),
       copy.flint(),
       copy.react(),
-    ]
+    ])
 
     print(`\n  Built! ⇢`.green.bold + `  cd ${buildDir()}`)
   }
