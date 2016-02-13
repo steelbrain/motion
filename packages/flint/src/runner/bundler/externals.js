@@ -25,11 +25,11 @@ export async function externals(opts = {}) {
       write(requireString(paths))
     })
 
-    packExternals()
-  }
+    await packExternals()
 
-  if (!opts.silent)
-    onInstalled()
+    if (!opts.silent)
+      onInstalled()
+  }
 }
 
 function packExternals() {
