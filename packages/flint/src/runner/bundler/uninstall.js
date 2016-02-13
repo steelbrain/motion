@@ -24,11 +24,11 @@ export async function uninstall(rebundle) {
     // difference, uniq
     const toUninstall = _.difference(installed, imported)
 
-    log(LOG, 'uninstall',
-      'installed', installed,
-      'imported', imported,
-      'toUninstall', toUninstall,
-    )
+    // log(LOG, 'uninstall',
+    //   'installed', installed,
+    //   'imported', imported,
+    //   'toUninstall', toUninstall,
+    // )
 
     if (!toUninstall.length)
       return

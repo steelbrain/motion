@@ -21,6 +21,12 @@ let writers = {
     hasChanged: () => writers.externalsWriter.hasChanged()
   },
 
+  internalsIn: {
+    read: () => writers.internalsWriter.read(),
+    write: (a) => writers.internalsWriter.write(a),
+    hasChanged: () => writers.internalsWriter.hasChanged()
+  },
+
   state: {
     read: () => writers.stateWriter.read(),
     write: (a) => writers.stateWriter.write(a),
@@ -55,6 +61,10 @@ async function createWriters() {
 
   writers.externalsWriter = await createWriter(opts('deps').externalsIn, {
     debug: 'externals'
+  })
+
+  writers.internalsWriter = await createWriter(opts('deps').internalsIn, {
+    debug: 'internals'
   })
 }
 

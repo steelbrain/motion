@@ -99,7 +99,7 @@ function start() {
           break
         case 'r': // bundler
           print('  Bundling internals / npm packages...'.dim)
-          await bundler.install(true)
+          await bundler.all({ force: true })
           print(`  Bundled!\n`.green.bold)
           break
         case 'v': // verbose logging

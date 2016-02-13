@@ -6,25 +6,23 @@ export default async function createWriter(filePath, { debug = '', json = false,
   // helpers
   const logw = log.writer.bind(null, debug.yellow)
 
-
   // constructor
-  try {         await read() }
-  catch(e) {
-    try {       await write((_, write) => write(defaultValue)) }
-    catch(e) {  handleError(e) }
+  try {
+    await read()
   }
-
-  // API
-  return {
-    read,
-    write,
-    hasChanged
+  catch(e) {
+    try {
+      await write((_, write) => write(defaultValue))
+    }
+    catch(e) {
+      handleError(e)
+    }
   }
 
   // internal state
   let cache = null
   let cacheStr = null
-  let _hasChanged = true
+  let isChanged = true
 
   // public
   async function read() {
@@ -61,9 +59,9 @@ export default async function createWriter(filePath, { debug = '', json = false,
   }
 
   function hasChanged() {
-    let result = _hasChanged
+    let result = isChanged
     logw('hasChanged?', result)
-    _hasChanged = false
+    isChanged = false
     return result
   }
 
@@ -104,7 +102,7 @@ export default async function createWriter(filePath, { debug = '', json = false,
         // do this before doing equality checks for cache
         if (json) {
           toWriteRaw = toWrite
-          toWrite = JSON.stringify(toWrite)
+          toWrite = JSON.stringify(toWrite, null, 2)
         }
 
         if (cacheStr == toWrite) {
@@ -116,7 +114,7 @@ export default async function createWriter(filePath, { debug = '', json = false,
         try {
           await writeFile(filePath, toWrite)
 
-          _hasChanged = true
+          isChanged = true
           cacheStr = toWrite
           cache = toWriteRaw
 
@@ -129,4 +127,12 @@ export default async function createWriter(filePath, { debug = '', json = false,
     })
   }
 
+
+
+  // API
+  return {
+    read,
+    write,
+    hasChanged
+  }
 }

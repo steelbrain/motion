@@ -5,30 +5,31 @@ import webpackConfig from './lib/webpackConfig'
 import getWebpackErrors from './lib/getWebpackErrors'
 import requireString from './lib/requireString'
 import bridge from '../bridge'
+import disk from '../disk'
 import cache from '../cache'
 import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
-export async function internals() {
+export async function internals(opts = {}) {
   try {
     log.internals('internals')
     await finishedInstalling()
-    await writeInternalsIn()
-    await packInternals()
-    onInternalInstalled()
+
+    if (opts.force || disk.internalsIn.hasChanged()) {
+      await disk.internalsIn.write((current, write) => {
+        write(requireString(cache.getExported(), {
+          prefix: './internal/',
+          removeExt: true
+        }))
+      })
+
+      await packInternals()
+      onInternalInstalled()
+    }
   }
   catch(e) {
     handleError(e)
   }
-}
-
-// TODO move to writer
-async function writeInternalsIn() {
-  const files = cache.getExported()
-  await writeFile(opts('deps').internalsIn, requireString(files, {
-    prefix: './internal/',
-    removeExt: true
-  }))
 }
 
 let runningBundle = null

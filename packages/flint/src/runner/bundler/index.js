@@ -9,9 +9,9 @@ async function init() {
   await remakeInstallDir()
 }
 
-async function all() {
-  await internals()
-  await externals({ doInstall: true })
+async function all(opts) {
+  await internals(opts)
+  await externals({ doInstall: true, ...opts })
   await uninstall()
 }
 

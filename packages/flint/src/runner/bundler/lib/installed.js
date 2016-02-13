@@ -27,7 +27,7 @@ export async function readInstalled() {
 
 export async function writeInstalled(_packages, _paths) {
   try {
-    log.externals('writeInstalled', '_packages', _packages, '_paths', _paths)
+    log.externals('writeInstalled', '_packages', _packages.join(','), '_paths', _paths)
     const packages = rmFlintExternals(normalize(_packages))
     const paths = _paths || cache.getExternals()
 
@@ -41,7 +41,7 @@ export async function writeInstalled(_packages, _paths) {
 
     // write full paths
     const fullPaths = filterWithPath(paths, packages)
-    log.externals('writeInstalled', 'packages', packages, 'fullPaths', fullPaths)
+    log.externals('writeInstalled', 'fullPaths', fullPaths.join(','))
     await disk.externalsPaths.write((_, write) => write(fullPaths))
   }
   catch(e) {

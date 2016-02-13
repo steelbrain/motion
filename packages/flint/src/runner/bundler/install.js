@@ -44,7 +44,7 @@ export function getNew(requires, installed = readInstalledCache()) {
   if (!names.length) return names
 
   const fresh = _.difference(names, installed, installing)
-  log.externals('DOWN', '  ', names, '- ', installed, '- ', installing, '  = ', fresh)
+  // log.externals('DOWN', '  ', names, '- ', installed, '- ', installing, '  = ', fresh)
   return fresh
 }
 
@@ -102,6 +102,13 @@ function runInstall(prevInstalled, toInstall) {
 
   async function installNext() {
     const dep = installing[0]
+
+    // ignore empty
+    if (dep === '') {
+      installing.shift()
+      return
+    }
+
     onStart(dep)
 
     try {
