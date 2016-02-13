@@ -1,7 +1,8 @@
+import { options } from '../lib/helpers'
 import state from '../state'
 
-export default () => {
-  // export check
+export default (node, parent, scope, file) => {
+  options.onExports && options.onExports(true)
   state.hasExports = true
 
   if (state.hasView)

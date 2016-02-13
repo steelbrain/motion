@@ -15,8 +15,6 @@ let state = {
   viewRootNodes: null, // track root JSX elements
   viewState: null, // track which state to wrap
   viewStyleNames: null, // prevent duplicate style names
-  fileImports: null,
-  hasExports: false,
 
   init() {
     state.resetProgramState()
@@ -26,7 +24,6 @@ let state = {
   resetProgramState() {
     state.hasView = false
     state.hasExports = false
-    state.fileImports = []
     state.meta = { file: null, views: {} }
   },
 

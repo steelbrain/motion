@@ -27,7 +27,6 @@ view Leaf {
 
   // state
   let rootPath, path, _data, key, original, expanded
-
   let dataKeys = []
   let _query = ''
 
@@ -116,13 +115,13 @@ view Leaf {
         <obj if={is.object}>
           <type>{'{}   ' + dataKeys.length + ' keys'}</type>
         </obj>
+        <str if={is.string}>
+          {format(ellipsize(String(_data), 25))}
+        </str>
+        <else if={!is.string && is.literal}>
+          {format(String(_data))}
+        </else>
         <nested if={is.nested} class={type.toLowerCase()}>
-          <str if={is.string}>
-            {format(ellipsize(String(_data), 25))}
-          </str>
-          <else if={!is.string && is.literal}>
-            {format(String(_data))}
-          </else>
           {getLabel('val', _data, key, editable)}
         </nested>
       </value>
@@ -183,8 +182,7 @@ view Leaf {
   }
 
   $colon = {
-    opacity: 0.3,
-    color: '#000'
+    color: 'rgba(0,0,0,0.2)'
   }
 
   $name = {
