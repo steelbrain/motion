@@ -12,7 +12,7 @@ import bundler from '../bundler'
 import scanner from './scanner'
 import opts from '../opts'
 
-const serializeCache = _.throttle(cache.serialize, 300)
+const serializeCache = _.debounce(cache.serialize, 600)
 const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
 const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)

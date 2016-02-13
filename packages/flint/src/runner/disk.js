@@ -7,25 +7,30 @@ export async function init() {
   await createWriters()
 }
 
+// TODO ugly
 let writers = {
   externalsPaths: {
     read: () => writers.pathsWriter.read(),
-    write: (a) => writers.pathsWriter.write(a)
+    write: (a) => writers.pathsWriter.write(a),
+    hasChanged: () => writers.pathsWriter.hasChanged()
   },
 
   externalsIn: {
     read: () => writers.externalsWriter.read(),
-    write: (a) => writers.externalsWriter.write(a)
+    write: (a) => writers.externalsWriter.write(a),
+    hasChanged: () => writers.externalsWriter.hasChanged()
   },
 
   state: {
     read: () => writers.stateWriter.read(),
     write: (a) => writers.stateWriter.write(a),
+    hasChanged: () => writers.stateWriter.hasChanged()
   },
 
   packageJSON: {
     read: () => writers.package.read(),
     write: (a) => writers.package.write(a),
+    hasChanged: () => writers.package.hasChanged()
   }
 }
 

@@ -9,26 +9,30 @@ import { installAll } from './install'
 import { onInstalled } from './lib/messages'
 import { log, logError } from '../lib/fns'
 
+// EXTERNALS
+//    check updated
+//      => write paths to disk
+//      => pack with webpack
 export async function externals(opts = {}) {
-  if (opts.doInstall) await installAll()
-  await externalsPathsToIn()
-  await packExternals()
-  if (!opts.silent) onInstalled()
+  if (opts.doInstall)
+    await installAll()
+
+
+  if (disk.externalsPaths.hasChanged()) {
+    const paths = await disk.externalsPaths.read()
+
+    await disk.externalsIn.write((current, write) => {
+      write(requireString(paths))
+    })
+
+    packExternals()
+  }
+
+  if (!opts.silent)
+    onInstalled()
 }
 
-export async function installExternals(filePath) {
-  const found = cache.getExternals(filePath)
-  log.externals('installExternals', found)
-  if (opts('hasRunInitialBuild')) installAll(found)
-}
-
-// read externals.path => write externals.in
-async function externalsPathsToIn() {
-  const fullpaths = await disk.externalsPaths.read()
-  await disk.externalsIn.write((_, write) => write(requireString(fullpaths)))
-}
-
-async function packExternals() {
+function packExternals() {
   log.externals('pack externals')
 
   return new Promise((resolve, reject) => {
@@ -41,4 +45,13 @@ async function packExternals() {
       resolve()
     })
   })
+}
+
+
+export async function installExternals(filePath) {
+  const found = cache.getExternals(filePath)
+  log.externals('installExternals', found)
+
+  if (opts('hasRunInitialBuild'))
+    installAll(found)
 }

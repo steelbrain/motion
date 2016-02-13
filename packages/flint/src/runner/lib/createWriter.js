@@ -1,32 +1,44 @@
-import { handleError, log, readJSON, writeJSON, writeFile, readFile } from './fns'
+import { handleError, log, writeFile, readFile } from './fns'
 
 // uses a simple lock to ensure reads and writes are done safely
 
 export default async function createWriter(filePath, { debug = '', json = false, defaultValue = '' }) {
+  // helpers
   const logw = log.writer.bind(null, debug.yellow)
 
-  let doRead = json ? readJSON : readFile
-  let doWrite = json ? (a, b) => writeJSON(a, b, { spaces: 2 }) : writeFile
 
-  // init file
-  try {
-    await read()
-  }
+  // constructor
+  try {         await read() }
   catch(e) {
-    try {
-      await write((_, write) => write(defaultValue))
-    }
-    catch(e) {
-      handleError(e)
-    }
+    try {       await write((_, write) => write(defaultValue)) }
+    catch(e) {  handleError(e) }
   }
 
-  // return API
-  return { read, write }
+  // API
+  return {
+    read,
+    write,
+    hasChanged
+  }
 
+  // internal state
+  let cache = null
+  let cacheStr = null
+  let _hasChanged = false
+
+  // public
   async function read() {
     try {
-      const state = await doRead(filePath)
+      if (cache) return cache
+      let state = await readFile(filePath)
+
+      cacheStr = state
+
+      if (json) {
+        state = JSON.parse(state)
+        cache = state
+      }
+
       return state
     }
     catch(e) {
@@ -37,30 +49,36 @@ export default async function createWriter(filePath, { debug = '', json = false,
 
   async function write(writer) {
     try {
-      logw('waiting...')
+      // logw('waiting...')
       if (lock) await lock
-      logw('get lock')
       const unlock = getLock()
       const state = await read()
-      await stateWriter(writer, state, unlock)
+      let result = await stateWriter(writer, state, unlock)
     }
     catch(e) {
       handleError(e)
     }
   }
 
-  // private
+  function hasChanged() {
+    let result = _hasChanged
+    logw('hasChanged?', result)
+    _hasChanged = false
+    return result
+  }
 
+
+  // private
   let lock = null
   let unlock = null
 
   function getLock() {
-    logw('lock', lock)
+    // logw('lock', lock)
 
     if (lock)
       return unlock
     else {
-      logw('no lock, returning new')
+      // logw('no lock, returning new')
       lock = new Promise(res => {
         unlock = () => {
           lock = null
@@ -73,14 +91,36 @@ export default async function createWriter(filePath, { debug = '', json = false,
   }
 
   function stateWriter(writer, state, unlock) {
-    logw('about to call writer...')
+    // logw('about to call writer...')
     return new Promise((res, rej) => {
-      writer(state, async next => {
-        try {
-          await doWrite(filePath, next)
-          logw('unlocking')
+      writer(state, async toWrite => {
+        const finish = () => {
           unlock()
           res()
+        }
+
+        let toWriteRaw
+
+        // do this before doing equality checks for cache
+        if (json) {
+          toWriteRaw = toWrite
+          toWrite = JSON.stringify(toWrite)
+        }
+
+        if (cacheStr == toWrite) {
+          logw('hasnt changed!'.bold)
+          finish()
+          return
+        }
+
+        try {
+          await writeFile(filePath, toWrite)
+
+          _hasChanged = true
+          cacheStr = toWrite
+          cache = toWriteRaw
+
+          finish()
         }
         catch(e) {
           rej(e)
