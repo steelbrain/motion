@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Run motion apps",
   "main": "dist/main.js",
   "scripts": {},
