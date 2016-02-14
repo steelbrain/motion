@@ -17,7 +17,7 @@ bootstrap:
 	scripts/build.sh
 
 ready:
-	git pull --rebase
+	# git pull --rebase
 
 release: ready
 	node scripts/release.js

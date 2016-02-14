@@ -1,5 +1,6 @@
 var _ = require('lodash')
 var path = require('path')
+var fs = require('fs')
 
 require("shelljs/global")
 
@@ -29,19 +30,6 @@ function cdTo(where, execute) {
   cd(where)
   execute(where)
   cd(cwd)
-}
-
-// ensure prune/shrinkwrap
-function shrinkwrap(where) {
-  // skipShinkwrap option
-  if (test('-f', 'skipShrinkwrap')) {
-    console.log('dont shrinkwrap', where)
-    return
-  }
-
-  console.log('shrinkwrapping... ', where)
-  ex('npm prune')
-  ex('npm shrinkwrap')
 }
 
 //
@@ -111,30 +99,47 @@ if (!packages.length && !apps.length) {
   process.exit()
 }
 
-// ensure they are all shrinkwrappable before trying to release
-// (prevents unnecessary patches)
-apps.forEach(name => cdTo(appPath(name), shrinkwrap))
-packages.forEach(name => cdTo(projectPath(name), shrinkwrap))
-
 console.log(
   "\nReleasing (in order):", apps, packages, '...', "\n"
 )
+
+var releasedVersions = {}
 
 // release
 function release(name, dir) {
   console.log("Releasing...", name)
 
   cdTo(dir, function() {
-    if (!test('-f', 'skipShinkwrap'))
-      shrinkwrap(dir)
+    // get package.json
+    var info = JSON.parse(fs.readFileSync('package.json'))
 
+    // motion
+    if (name == 'motion') {
+      // bundled dependencies
+      info.bundledDependencies = Object.keys(info.dependencies)
+
+      // lockdown versions
+      Object.keys(releasedVersions).forEach(released => {
+        console.log('locking motion to use', released, releasedVersions[released])
+        info.dependencies[released] = releasedVersions[released]
+      })
+
+      fs.writeFileSync('package.json', JSON.stringify(info, null, 2))
+    }
+
+    // prepublish
     if (test('-f', 'prepublish.js')) {
       console.log('running prepublish for', name)
       ex('node prepublish.js')
     }
 
-    if (PATCH) ex('npm version patch')
-    console.log(ex('npm publish --tag=latest'))
+    // if (PATCH)
+    //   ex('npm version patch')
+
+    // console.log(ex('npm publish --tag=latest'))
+
+    // store released versions
+    releasedVersions[name] = info.version
   })
 }
 
