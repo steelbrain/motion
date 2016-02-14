@@ -1,5 +1,5 @@
 import path from 'path'
-import { p, log, sanitize, handleError, readJSON, readFile, exists } from './lib/fns'
+import { p, log, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
@@ -29,17 +29,30 @@ export async function init(cli) {
 }
 
 async function loadConfigs() {
-  const file = await parseConfig()
   let result
 
-  if (file) {
-    // const userConf = require('./.motion/.internal/user-config')
-    // TODO not eval or at least return export properly, also whitelist options
-    const out = await readFile(file)
-    result = eval(out)
+  try {
+    const file = await parseConfig()
+
+    if (file) {
+      const out = await readFile(file)
+      result = eval(out)
+    }
+    else {
+      // migration from flint - TODO REMOVE-MINOR
+      const oldConfLoc = p(opts('motionDir'), 'flint.json')
+      if (await exists(oldConfLoc)) {
+        console.log(`\n  Migrating flint config to motion (flint.json => config.js)...\n`)
+        const oldConf = await readFile(oldConfLoc)
+        await writeFile(OPTS.configFile, `module.exports = ${oldConf}`)
+      }
+      else {
+        console.error('No .motion/config.js file found!')
+      }
+    }
   }
-  else {
-    result = await jsonConfig()
+  catch(e) {
+    handleError(e)
   }
 
   return modeMergedConfig(result || {})
@@ -51,27 +64,11 @@ function modeMergedConfig(config) {
   return merged
 }
 
-async function jsonConfig() {
-  try {
-    const config = await readJSON(OPTS.configFile)
-    return modeMergedConfig(config)
-  }
-  catch(e) {
-    handleError({ message: `Error parsing config file: ${OPTS.configFile}` })
-  }
-}
-
 function parseConfig() {
   return new Promise(async (resolve, reject) => {
-    const confLocation = p(OPTS.motionDir, 'config.js')
-
     try {
-      try {
-        await exists(confLocation)
-      }
-      catch(e) {
+      if (!(await exists(OPTS.configFile)))
         resolve(false)
-      }
 
       // for json loader
       const runnerRoot = path.resolve(path.join(__dirname, '..', '..'))
@@ -92,14 +89,16 @@ function parseConfig() {
         },
         resolveLoader: { root: runnerModules },
       }, (err, stats) => {
-        if (getWebpackErrors('config', err, stats))
-          resolve(false)
+        let error = getWebpackErrors('config', err, stats)
+
+        if (error)
+          reject(error)
         else
           resolve(p(OPTS.internalDir, 'user-config.js'))
       })
     }
     catch(e) {
-      handleError(e)
+      reject(e)
     }
   })
 }
@@ -138,7 +137,7 @@ function setupDirs() {
   OPTS.deps.externalsOut = p(OPTS.deps.dir, 'externals.js')
   OPTS.deps.externalsPaths = p(OPTS.deps.dir, 'externals.paths.js')
 
-  OPTS.configFile = p(OPTS.motionDir, 'motion.json')
+  OPTS.configFile = p(OPTS.motionDir, 'config.js')
   OPTS.stateFile = p(OPTS.internalDir, 'state.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')

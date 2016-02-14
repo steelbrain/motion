@@ -33,8 +33,17 @@ const readJSON = logWrap('readJSON', file => _readFile(file).then(res => JSON.pa
 const writeJSON = logWrap('writeJSON', (path, str) => _writeFile(path, JSON.stringify(str)))
 const touch = logWrap('touch', promisify(ensureFile))
 const _copy = logWrap('copy', promisify(copy))
-const exists = logWrap('exists', promisify(stat))
 const glob = logWrap('glob', _glob)
+
+const exists = logWrap('exists', where => new Promise((res, rej) => {
+  try {
+    stat(where)
+    res(true)
+  }
+  catch(e) {
+    res(false)
+  }
+}))
 
 const recreateDir = (dir) =>
   new Promise((res, rej) => {
