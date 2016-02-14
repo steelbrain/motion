@@ -32,7 +32,7 @@ export default class SuperStream {
     bridge.onMessage('live:save', _.throttle(this.fileSend, 22, { leading: true }))
 
     // reset loading on errors in pipeline
-    event('error', ({ path }) => this.setBrowserLoading(relPath(path), false))
+    event('error', ({ path }) => this.setBrowserLoading(this.relPath(path), false))
   }
 
   getStream() {
