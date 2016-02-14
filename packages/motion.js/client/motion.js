@@ -6,7 +6,7 @@ import ee from 'event-emitter'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import rafBatch from './lib/reactRaf'
-import { StyleRoot, keyframes } from 'flint-radium'
+import { StyleRoot, keyframes } from 'motion-radium'
 import regeneratorRuntime from './vendor/regenerator'
 
 import './shim/root'

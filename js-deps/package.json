@@ -8,7 +8,7 @@
     "deep-equal": "1.0.1",
     "event-emitter": "0.3.4",
     "motion-nice-styles": "^0.9.0",
-    "flint-radium": "0.16.2",
+    "motion-radium": "0.16.2",
     "hash-sum": "1.0.2",
     "history": "2.0.0-rc2",
     "lodash.isequal": "4.0.0",

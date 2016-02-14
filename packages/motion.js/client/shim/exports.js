@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import history from 'history'
-import radium from 'flint-radium'
+import radium from 'motion-radium'
 
 // exports
 root.exports = root.exports || {}

@@ -1,4 +1,4 @@
-import Radium from 'flint-radium'
+import Radium from 'motion-radium'
 
 export default function ConfiguredRadium(component) {
   return Radium({
