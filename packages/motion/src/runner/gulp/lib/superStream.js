@@ -58,7 +58,9 @@ export default class SuperStream {
   fileSend({ path, startTime, contents }) {
     // check if file actually in motion project
     if (!path || path.indexOf(this.basePath) !== 0 || this.relPath(path).indexOf('.motion') === 0 || !isFileType(path, 'js')) {
-      debug('  file not js || not in path || in .motion', path)
+      debug('  file not streamable',
+        path.indexOf(this.basePath) !== 0, this.relPath(path).indexOf('.motion') === 0, !isFileType(path, 'js')
+      )
       return
     }
 
