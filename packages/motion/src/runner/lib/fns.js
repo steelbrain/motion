@@ -4,7 +4,7 @@ import _glob from 'globby'
 import readdirp from 'readdirp'
 import path from 'path'
 import replace from 'replace'
-import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile, move } from 'fs-extra'
+import fs, { copy, remove, mkdirs, readFile, writeFile, ensureFile, move } from 'fs-extra'
 
 import log from './log'
 import handleError from './handleError'
@@ -36,16 +36,7 @@ const writeJSON = logWrap('writeJSON', (path, str) => _writeFile(path, JSON.stri
 const touch = logWrap('touch', promisify(ensureFile))
 const _copy = logWrap('copy', promisify(copy))
 const glob = logWrap('glob', _glob)
-
-const exists = logWrap('exists', where => new Promise((res, rej) => {
-  try {
-    stat(where)
-    res(true)
-  }
-  catch(e) {
-    res(false)
-  }
-}))
+const exists = logWrap('exists', where => new Promise((res, rej) => fs.stat(where, err => res(!err))))
 
 const recreateDir = (dir) =>
   new Promise((res, rej) => {
