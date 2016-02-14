@@ -107,21 +107,24 @@ var releasedVersions = {}
 
 // release
 function release(name, dir) {
-  console.log("Releasing...", name)
-
   cdTo(dir, function() {
+    // patch before read version
+    if (PATCH) ex('npm version patch')
+
     // get package.json
     var info = JSON.parse(fs.readFileSync('package.json'))
+
+    console.log("Releasing...", name, '@', info.version)
 
     // motion
     if (name == 'motion') {
       // bundled dependencies
-      info.bundledDependencies = Object.keys(info.dependencies)
+      info.bundledDependencies = Object.keys(info.dependencies).sort()
 
       // lockdown versions
       Object.keys(releasedVersions).forEach(released => {
         console.log('locking motion to use', released, releasedVersions[released])
-        info.dependencies[released] = releasedVersions[released]
+        info.dependencies['motion-' + released] = releasedVersions[released]
       })
 
       fs.writeFileSync('package.json', JSON.stringify(info, null, 2))
@@ -133,10 +136,7 @@ function release(name, dir) {
       ex('node prepublish.js')
     }
 
-    // if (PATCH)
-    //   ex('npm version patch')
-
-    // console.log(ex('npm publish --tag=latest'))
+    console.log(ex('npm publish --tag=latest'))
 
     // store released versions
     releasedVersions[name] = info.version
@@ -148,8 +148,8 @@ apps.forEach(name => release(name, appPath(name)))
 packages.forEach(name => release(name, projectPath(name)))
 
 // push it up
-// console.log("\n", 'Pushing...')
-// ex("git commit -am 'publish' --quiet")
-// ex("git push origin head --quiet")
-//
-// console.log("\n", 'All done!', "\n")
+console.log("\n", 'Pushing...')
+ex("git commit -am 'publish' --quiet")
+ex("git push origin head --quiet")
+
+console.log("\n", 'All done!', "\n")
