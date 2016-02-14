@@ -13,7 +13,7 @@ export default function run({ name, use, nocache, debug }) {
   // scaffolds as second argument
   // motion new app from/repo
   const scaffoldRepo = 'scaffold'
-  let org = 'motionjs'
+  let org = 'motion'
   let repo = scaffoldRepo
 
   // scaffold
@@ -38,7 +38,7 @@ export default function run({ name, use, nocache, debug }) {
   var spinner
   let MOTION = {}
   MOTION.scaffoldDir = p(getUserHome(), '.motion', 'scaffold')
-  MOTION.scaffoldRepo = `https://github.com/${org}/${repo}`
+  MOTION.scaffoldRepo = `git://github.com/${org}/${repo}`
   MOTION.scaffoldSHA = p(getUserHome(), '.motion', 'scaffoldSHA')
   MOTION.dest = p(process.cwd(), name)
 
@@ -222,7 +222,7 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   function gitClone(dest) {
-    return 'git clone --depth=1 ' + MOTION.scaffoldRepo + ' '+ dest
+    return 'git clone --depth=1 ' + MOTION.scaffoldRepo + ' ' + dest
   }
 
   // clone right into target new folder

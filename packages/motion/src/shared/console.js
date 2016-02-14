@@ -30,7 +30,7 @@ var helpers = {
         return sprintf('  \u001b[96m%s ', c);
       });
 
-      play(frames, opts.fps || 50)
+      play(frames, opts.fps || 200)
     };
 
     this.message = function (message) {
