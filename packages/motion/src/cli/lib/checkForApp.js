@@ -10,7 +10,7 @@ catch(e) {
     console.log('  Flint app found, upgrading to motion...')
   }
   catch(e) {
-    console.log("\n not in a motion app directory\n".red)
+    console.log("\n not in a motion app directory\n")
     process.argv.push('--help')
   }
 }
