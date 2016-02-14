@@ -1,6 +1,7 @@
 {
   "name": "motion-transform",
   "version": "0.9.0",
+  "description": "Motion babel transform",
   "main": "lib/index.js",
   "dependencies": {
     "motion-nice-styles": "^0.9.0",

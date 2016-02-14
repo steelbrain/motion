@@ -148,8 +148,8 @@ apps.forEach(name => release(name, appPath(name)))
 packages.forEach(name => release(name, projectPath(name)))
 
 // push it up
-console.log("\n", 'Pushing...')
-ex("git commit -am 'publish' --quiet")
-ex("git push origin head --quiet")
-
-console.log("\n", 'All done!', "\n")
+// console.log("\n", 'Pushing...')
+// ex("git commit -am 'publish' --quiet")
+// ex("git push origin head --quiet")
+//
+// console.log("\n", 'All done!', "\n")
