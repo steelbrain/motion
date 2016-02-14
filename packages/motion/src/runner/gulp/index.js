@@ -1,6 +1,5 @@
 import { _, p, log, rm, glob, readdir, handleError } from '../lib/fns'
 import opts from '../opts'
-import superStream from './lib/superStream'
 import { SCRIPTS_GLOB, isBuilding } from './lib/helpers'
 import { scripts, afterBuild } from './scripts'
 import { styles } from './styles'
@@ -9,10 +8,6 @@ import { assets } from './assets'
 
 export async function init({ once = false } = {}) {
   try {
-    if (!isBuilding()) {
-      superStream.init()
-    }
-
     const inFiles = await glob(SCRIPTS_GLOB)
     const _outFiles = await readdir(opts('outDir'))
     const outFiles = _outFiles

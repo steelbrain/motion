@@ -9,102 +9,102 @@ import bridge from '../../bridge'
 import { _, path, log, readFile, handleError, vinyl } from '../../lib/fns'
 
 // time we wait for browser load before we just force push
-const UPPER_WAIT_LIMIT = 2000
-
+const UPPER_WAIT_LIMIT = 1000
 const isFileType = (_path, ext) => path.extname(_path) == `.${ext}`
 const debug = log.bind(null, { name: 'stream', icon: '🎏' })
 
-let basePath, motionPath, relPath
-let internalTimeout
-let browserLoading = {}
-let queue = {}
-let stream = new Readable({ objectMode: true })
-stream._read = function(n) {}
+export default class SuperStream {
+  constructor() {
+    this.basePath = opts('appDir')
+    this.motionPath = opts('motionDir')
+    this.relPath = p => nodepath.relative(this.basePath, p)
+    this.internalTimeout
+    this.browserLoading = {}
+    this.queue = {}
+    this.stream = new Readable({ objectMode: true })
+    this.stream._read = function(n) {}
 
-function init() {
-  basePath = opts('appDir')
-  motionPath = opts('motionDir')
-  relPath = p => nodepath.relative(basePath, p)
-  watchForBrowserLoading()
+    this.watchForBrowserLoading()
 
-  // watch, throttle the stream a bit
-  bridge.onMessage('live:save', _.throttle(fileSend, 22, { leading: true }))
+    // watch, throttle the stream a bit
+    bridge.onMessage('live:save', _.throttle(this.fileSend, 22, { leading: true }))
 
-  // reset loading on errors in pipeline
-  event('error', ({ path }) => setBrowserLoading(relPath(path), false))
-}
-
-// ignore stream when loading file in browser
-function watchForBrowserLoading() {
-  bridge.onMessage('script:load', ({ path }) => setBrowserLoading(path, true))
-  bridge.onMessage('script:done', ({ path }) => setBrowserLoading(path, false))
-}
-
-function setBrowserLoading(path, isLoading) {
-  browserLoading[path] = isLoading
-  debug('IN', 'browser', isLoading ? 'loading'.red : 'done'.green, path)
-  if (!isLoading) loadWaiting(path)
-}
-
-function fileSend({ path, startTime, contents }) {
-  // check if file actually in motion project
-  if (!path || path.indexOf(basePath) !== 0 || relPath(path).indexOf('.motion') === 0 || !isFileType(path, 'js')) {
-    debug('  file not js || not in path || in .motion', path)
-    return
+    // reset loading on errors in pipeline
+    event('error', ({ path }) => this.setBrowserLoading(relPath(path), false))
   }
 
-  // write to stream
-  const relative = relPath(path)
-  const sendImmediate = cache.isInternal(path)
+  getStream() {
+    return this.stream
+  }
 
-  debug('SIN', relative)
+  watchForBrowserLoading() {
+    bridge.onMessage('script:load', ({ path }) => this.setBrowserLoading(path, true))
+    bridge.onMessage('script:done', ({ path }) => this.setBrowserLoading(path, false))
+  }
 
-  pushStreamRun(relative, () => {
-    debug('SOUT', relative)
-    queue[relative] = false
-    // we may get another stream in before browser even starts loading
-    // setBrowserLoading(relative, true)
-    const file = new File(vinyl(basePath, path, new Buffer(contents)))
+  setBrowserLoading(path, isLoading) {
+    this.browserLoading[path] = isLoading
+    debug('IN', 'browser', isLoading ? 'loading'.red : 'done'.green, path)
+    if (!isLoading) this.loadWaiting(path)
+  }
 
-    const stackTime = [{
-      name: 'fileSend',
-      time: +(Date.now()) - startTime
-    }]
-    Object.assign(file, { startTime, stackTime })
+  loadWaiting(path) {
+    const queued = queue[this.relPath(path)]
+    if (queued) queued()
+  }
 
-    stream.push(file)
-  }, sendImmediate)
-}
+  fileSend({ path, startTime, contents }) {
+    // check if file actually in motion project
+    if (!path || path.indexOf(this.basePath) !== 0 || this.relPath(path).indexOf('.motion') === 0 || !isFileType(path, 'js')) {
+      debug('  file not js || not in path || in .motion', path)
+      return
+    }
 
-function pushStreamRun(relative, finish, sendImmediate) {
-  // waiting for script load
-  if (!browserLoading[relative] || sendImmediate)
-    return finish()
+    // write to stream
+    const relative = this.relPath(path)
+    const sendImmediate = cache.isInternal(path)
 
-  // only queue once
-  if (queue[relative])
-    return
+    debug('SIN', relative)
 
-  queue[relative] = finish
+    this.pushStreamRun(relative, () => {
 
-  // ensure upper limit on wait
-  setTimeout(() => {
-    if (!queue[relative])
+      debug('SOUT', relative)
+      this.queue[relative] = false
+      // we may get another stream in before browser even starts loading
+      // setBrowserLoading(relative, true)
+      const file = new File(vinyl(this.basePath, path, new Buffer(contents)))
+
+      const stackTime = [{
+        name: 'fileSend',
+        time: +(Date.now()) - startTime
+      }]
+
+      Object.assign(file, { startTime, stackTime })
+
+      this.stream.push(file)
+
+    }, sendImmediate)
+  }
+
+  pushStreamRun(relative, finish, sendImmediate) {
+    // waiting for script load
+    if (!this.browserLoading[relative] || sendImmediate)
+      return finish()
+
+    // only queue once
+    if (this.queue[relative])
       return
 
-    debug('upper limit! finish'.yellow)
-    browserLoading[relative] = false
-    finish()
-  }, UPPER_WAIT_LIMIT)
-}
+    this.queue[relative] = finish
 
-// load waiting
-function loadWaiting(path) {
-  const queued = queue[relPath(path)]
-  if (queued) queued()
-}
+    // ensure upper limit on wait
+    setTimeout(() => {
+      if (!this.queue[relative])
+        return
 
-export default {
-  init,
-  stream
+      debug('upper limit! finish'.yellow)
+      this.browserLoading[relative] = false
+      finish()
+    }, UPPER_WAIT_LIMIT)
+  }
 }

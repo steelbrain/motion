@@ -1,7 +1,7 @@
-import superStream from './superStream'
+import SuperStream from './superStream'
 import dirAddStream from './dirAddStream'
 
 export default {
-  superStream,
+  SuperStream,
   dirAddStream
 }

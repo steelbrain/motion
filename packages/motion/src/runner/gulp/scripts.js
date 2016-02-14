@@ -1,5 +1,5 @@
 import { $, gulp, SCRIPTS_GLOB, out, isBuilding, isSourceMap } from './lib/helpers'
-import { superStream, dirAddStream } from './lib/streams'
+import { SuperStream, dirAddStream } from './lib/streams'
 import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
 import unicodeToChar from '../lib/unicodeToChar'
 import { event } from './index'
@@ -35,7 +35,7 @@ export function scripts({ inFiles = [], userStream }) {
   return (
     isBuilding() ?
     scripts :
-    $.merge(scripts, dirAddStream(opts('appDir')), superStream.stream)
+    $.merge(scripts, dirAddStream(opts('appDir')), (new SuperStream()).getStream())
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
       .pipe($.log(reset))
