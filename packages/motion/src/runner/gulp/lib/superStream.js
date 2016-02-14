@@ -1,6 +1,5 @@
 import { Readable } from 'stream'
 import File from 'vinyl'
-import nodepath from 'path'
 import { gulp } from './helpers'
 import { event } from '../index'
 import opts from '../../opts'
@@ -13,11 +12,14 @@ const UPPER_WAIT_LIMIT = 1000
 const isFileType = (_path, ext) => path.extname(_path) == `.${ext}`
 const debug = log.bind(null, { name: 'stream', icon: '🎏' })
 
+// socket for sending files to browser from editor
+// has a lock system that waits for browser to load before sending more
+
 export default class SuperStream {
   constructor() {
     this.basePath = opts('appDir')
     this.motionPath = opts('motionDir')
-    this.relPath = p => nodepath.relative(this.basePath, p)
+    this.relPath = p => path.relative(this.basePath, p)
     this.internalTimeout
     this.browserLoading = {}
     this.queue = {}
