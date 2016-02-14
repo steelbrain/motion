@@ -3,3 +3,6 @@
 .*node_modules.*
 .*babel2.*
 [libs]
+[options]
+module.system=node
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore
