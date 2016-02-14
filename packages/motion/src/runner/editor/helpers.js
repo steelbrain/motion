@@ -22,7 +22,7 @@ export function transformText(text, {
   //   babelConfig.filename = '__editor__'
   //   babelTransform(text, babelConfig)
   // })
-  transformPlugin.disposeLast()
+  // transformPlugin.disposeLast()
 }
 
 export function pointWithinRange(point, range) {

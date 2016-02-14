@@ -52,6 +52,7 @@ log.gulp = log.bind(null, { name: 'gulp', icon: '👇' })
 log.writer = log.bind(null, { name: 'writer', icon: '✎' })
 log.file = log.bind(null, { name: 'file', icon: '▻' })
 log.webpack = log.bind(null, { name: 'webpack', icon: '🎒' })
+log.bridge = log.bind(null, { name: 'bridge', icon: '🚃' })
 
 function colorArgs(args) {
   return args.map(arg =>

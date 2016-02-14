@@ -44,16 +44,7 @@ if [ "$1" = "--watch" ]; then
   # relink cli automatically
   chsum1=""
   cd packages/motion
-  while [[ true ]]; do
-    if [ -d 'lib' ]; then
-      chsum2=`find lib -type f -exec md5 {} \;`
-      if [[ $chsum1 != $chsum2 ]] ; then
-        npm link --loglevel=error
-        chsum1=$chsum2
-      fi
-    fi
-    sleep 1
-  done
+  npm link --loglevel=error
 fi
 
 # wait for bg tasks

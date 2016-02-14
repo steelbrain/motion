@@ -1,13 +1,9 @@
-'use babel'
-
-import {Emitter, CompositeDisposable} from 'sb-event-kit'
-import {createServer} from 'ws'
+import { Emitter, CompositeDisposable } from 'sb-event-kit'
+import { createServer } from 'ws'
 import websocketPort from './lib/wport'
 import Cache from './cache'
+import { log, handleError } from './lib/fns'
 import getOptions from './opts'
-import Log from './lib/log'
-
-const debug = Log.bind(null, { name: 'bridge', icon: '🚃' })
 
 export default new class Bridge {
   constructor() {
@@ -31,15 +27,15 @@ export default new class Bridge {
       connection.on('message', (data, flags) => {
         if (flags.binary) {
           // Ignore binary
-          debug('Ignoring message because its binary')
+          log.bridge('Ignoring message because its binary')
           return
         }
         try {
           const message = JSON.parse(data)
-          debug('IN', message._type)
+          log.bridge('IN', message._type)
           this.emitter.emit(`message:${message._type}`, message)
-        } catch (_) {
-          debug('Error parsing bridge message')
+        } catch (e) {
+          handleError(e)
         }
       })
       this.welcomeConnection(connection)
@@ -62,7 +58,7 @@ export default new class Bridge {
   }
 
   encodeMessage(type, message = {}) {
-    debug('OUT', type)
+    log.bridge('OUT', type)
     return JSON.stringify(Object.assign({
       _type: type,
       timestamp: Date.now()

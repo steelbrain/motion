@@ -29,7 +29,7 @@ export default class SuperStream {
     this.watchForBrowserLoading()
 
     // watch, throttle the stream a bit
-    bridge.onMessage('live:save', _.throttle(this.fileSend, 22, { leading: true }))
+    bridge.onMessage('live:save', _.throttle(this.fileSend.bind(this), 22, { leading: true }))
 
     // reset loading on errors in pipeline
     event('error', ({ path }) => this.setBrowserLoading(this.relPath(path), false))
@@ -51,7 +51,7 @@ export default class SuperStream {
   }
 
   loadWaiting(path) {
-    const queued = queue[this.relPath(path)]
+    const queued = this.queue[this.relPath(path)]
     if (queued) queued()
   }
 
