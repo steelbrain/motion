@@ -41,7 +41,7 @@ window._DT = {
 }
 
 const opts = {
-  websocketPort: window._FLINT_WEBSOCKET_PORT
+  websocketPort: window._MOTION_WEBSOCKET_PORT
 }
 
 errors(window._DT, opts)

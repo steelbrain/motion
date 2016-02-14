@@ -3,7 +3,7 @@ import shell from 'shelljs'
 
 const TEMP_DIR = '.tmp/tests/cli'
 const ORIGINAL_DIR = '../../../'
-const FLINT_CLI_PATH = '../../../packages/motion/cli/entry/motion' // relative to TEMP_DIR
+const MOTION_CLI_PATH = '../../../packages/motion/cli/entry/motion' // relative to TEMP_DIR
 
 let before = () => test('cli test setup', t => {
   shell.mkdir('-p', TEMP_DIR)
@@ -24,7 +24,7 @@ let run = (name, fn) => {
 }
 
 run('Creates a new motion app', t => {
-  t.equal(shell.exec(FLINT_CLI_PATH + ' new appname').code, 0)
+  t.equal(shell.exec(MOTION_CLI_PATH + ' new appname').code, 0)
   t.ok(shell.test('-d', './appname'))
   t.ok(shell.test('-f', './appname/main.js'))
   t.ok(shell.test('-f', './appname/.motion/index.html'))
@@ -36,9 +36,9 @@ run('Creates a new motion app', t => {
 })
 
 run('Builds motion app', t => {
-  t.equal(shell.exec(FLINT_CLI_PATH + ' new appname').code, 0)
+  t.equal(shell.exec(MOTION_CLI_PATH + ' new appname').code, 0)
   t.equal(shell.exec('cd ' + TEMP_DIR + '/appname').code, 0)
-  t.equal(shell.exec(FLINT_CLI_PATH + ' build').code, 0)
+  t.equal(shell.exec(MOTION_CLI_PATH + ' build').code, 0)
   t.ok(shell.test('-d', './appname/.motion/.internal'))
   t.ok(shell.test('-f', './appname/.motion/.internal/state.json'))
   t.ok(shell.test('-d', './appname/.motion/.internal/out'))

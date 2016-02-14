@@ -36,14 +36,14 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   var spinner
-  let FLINT = {}
-  FLINT.scaffoldDir = p(getUserHome(), '.motion', 'scaffold')
-  FLINT.scaffoldRepo = `https://github.com/${org}/${repo}`
-  FLINT.scaffoldSHA = p(getUserHome(), '.motion', 'scaffoldSHA')
-  FLINT.dest = p(process.cwd(), name)
+  let MOTION = {}
+  MOTION.scaffoldDir = p(getUserHome(), '.motion', 'scaffold')
+  MOTION.scaffoldRepo = `https://github.com/${org}/${repo}`
+  MOTION.scaffoldSHA = p(getUserHome(), '.motion', 'scaffoldSHA')
+  MOTION.dest = p(process.cwd(), name)
 
-  if (fs.existsSync(FLINT.dest)) {
-    console.log("Error! Directory %s already exists\n".red, FLINT.dest)
+  if (fs.existsSync(MOTION.dest)) {
+    console.log("Error! Directory %s already exists\n".red, MOTION.dest)
   }
   else {
     console.log()
@@ -70,9 +70,9 @@ export default function run({ name, use, nocache, debug }) {
 
   function makeFolder() {
     return new Promise(function(resolve, reject) {
-      log('makeFolder', FLINT.dest)
-      fs.mkdirs(FLINT.scaffoldDir, function(err) {
-        fs.mkdirs(FLINT.dest, function(err) {
+      log('makeFolder', MOTION.dest)
+      fs.mkdirs(MOTION.scaffoldDir, function(err) {
+        fs.mkdirs(MOTION.dest, function(err) {
           if (err) reject(err)
           else resolve()
         })
@@ -93,7 +93,7 @@ export default function run({ name, use, nocache, debug }) {
           copyScaffold().then(() => res())
         })
 
-      var next =  fs.mkdirs.bind(null, FLINT.scaffoldDir, err => {
+      var next =  fs.mkdirs.bind(null, MOTION.scaffoldDir, err => {
         log('fs.mkdirs err', err)
         const isCloningExample = repo != scaffoldRepo
 
@@ -120,7 +120,7 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   function updateScaffoldCache() {
-    log('Looking for updated scaffold in %s', FLINT.scaffoldRepo)
+    log('Looking for updated scaffold in %s', MOTION.scaffoldRepo)
 
     return new Promise(function(resolve, reject) {
       checkNewScaffold(needsNew => {
@@ -128,14 +128,14 @@ export default function run({ name, use, nocache, debug }) {
         if (!needsNew) return resolve(true)
 
         // remove old scaffold
-        fs.remove(FLINT.scaffoldDir, function(err) {
+        fs.remove(MOTION.scaffoldDir, function(err) {
           log('fs.remove err?', err)
           if (err) return resolve(false)
 
           // clone new scaffold
-          promiseProcess(gitClone(FLINT.scaffoldDir), { msg: false })
-            .then(() => copyLatestSHA(FLINT.scaffoldDir))
-            .then(() => deleteGitFolder(FLINT.scaffoldDir))
+          promiseProcess(gitClone(MOTION.scaffoldDir), { msg: false })
+            .then(() => copyLatestSHA(MOTION.scaffoldDir))
+            .then(() => deleteGitFolder(MOTION.scaffoldDir))
             .then(() => resolve(true))
         })
       })
@@ -143,8 +143,8 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   function checkNewScaffold(cb) {
-    log('Check for new scaffold SHA in...', FLINT.scaffoldSHA)
-    fs.readFile(FLINT.scaffoldSHA, function(err, data) {
+    log('Check for new scaffold SHA in...', MOTION.scaffoldSHA)
+    fs.readFile(MOTION.scaffoldSHA, function(err, data) {
       if (err) {
         log('Error reading scaffold file')
         return cb(true)
@@ -192,11 +192,11 @@ export default function run({ name, use, nocache, debug }) {
       log('copyLatestSHA')
       // copy latest SHA into folder
       var head = p(dir, '.git', 'refs', 'heads', 'master')
-      log('Copy new SHA', head, FLINT.scaffoldSHA)
+      log('Copy new SHA', head, MOTION.scaffoldSHA)
 
       try {
         var sha = fs.readFileSync(head)
-        fs.writeFileSync(FLINT.scaffoldSHA, sha)
+        fs.writeFileSync(MOTION.scaffoldSHA, sha)
         res()
       }
       catch(e) {
@@ -207,12 +207,12 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   function copyScaffold() {
-    log('Copy new scaffold', FLINT.scaffoldDir, FLINT.dest)
+    log('Copy new scaffold', MOTION.scaffoldDir, MOTION.dest)
     return new Promise((res, rej) => {
-      fs.copy(FLINT.scaffoldDir, FLINT.dest, function(err) {
+      fs.copy(MOTION.scaffoldDir, MOTION.dest, function(err) {
         if (err) {
           console.log("Error, couldn't copy scaffold folder".red)
-          console.log(FLINT.scaffoldDir, FLINT.dest)
+          console.log(MOTION.scaffoldDir, MOTION.dest)
           process.exit(1)
         }
 
@@ -222,14 +222,14 @@ export default function run({ name, use, nocache, debug }) {
   }
 
   function gitClone(dest) {
-    return 'git clone --depth=1 ' + FLINT.scaffoldRepo + ' '+ dest
+    return 'git clone --depth=1 ' + MOTION.scaffoldRepo + ' '+ dest
   }
 
   // clone right into target new folder
   function cloneDirectly() {
-    log('Cloning directly', gitClone(FLINT.dest))
-    return promiseProcess(gitClone(FLINT.dest), { msg: false })
-      .then(() => deleteGitFolder(FLINT.dest))
+    log('Cloning directly', gitClone(MOTION.dest))
+    return promiseProcess(gitClone(MOTION.dest), { msg: false })
+      .then(() => deleteGitFolder(MOTION.dest))
   }
 
   function initGit() {
@@ -240,11 +240,11 @@ export default function run({ name, use, nocache, debug }) {
   function replaceGivenNameInApp() {
     message('Setting app name...')
     return new Promise(function(resolve, reject) {
-      log('Updating app name to', name, 'in', FLINT.dest)
+      log('Updating app name to', name, 'in', MOTION.dest)
       replace({
         regex: 'motion-scaffold',
         replacement: name,
-        paths: [FLINT.dest],
+        paths: [MOTION.dest],
         recursive: true,
         silent: true
       })
@@ -253,7 +253,7 @@ export default function run({ name, use, nocache, debug }) {
       replace({
         regex: 'lightsalmon',
         replacement: randomColor(),
-        paths: [p(FLINT.dest, 'main.js')],
+        paths: [p(MOTION.dest, 'main.js')],
         recursive: false,
         silent: true
       })
@@ -266,7 +266,7 @@ export default function run({ name, use, nocache, debug }) {
     log('Running npm install')
     return promiseProcess('npm install', {
       msg: 'Running npm install...',
-      dir: FLINT.dest + '/.motion'
+      dir: MOTION.dest + '/.motion'
     })
   }
 
@@ -274,7 +274,7 @@ export default function run({ name, use, nocache, debug }) {
     log('Try to link local motion')
     return promiseProcess('npm link motionjs', {
       msg: false,
-      dir: FLINT.dest + '/.motion'
+      dir: MOTION.dest + '/.motion'
     })
   }
 
@@ -288,7 +288,7 @@ export default function run({ name, use, nocache, debug }) {
       message(opts.msg || cmd)
 
     return new Promise(function(resolve, reject) {
-      process.chdir(opts.appDir || FLINT.dest)
+      process.chdir(opts.appDir || MOTION.dest)
       log(' $ ', cmd)
       exec(cmd, { uid: process.getuid() }, (...args) => {
         handleChildProcess(resolve, reject, ...args)

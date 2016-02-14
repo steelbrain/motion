@@ -68,10 +68,10 @@ async function getScripts({ disableTools }) {
     return [
       '<div id="_motiondevtools" class="_motiondevtools"></div>',
       newLine,
-      '<!-- FLINT JS -->',
+      '<!-- MOTION JS -->',
       '<script src="/__/react.dev.js"></script>',
       '<script src="/__/motion.dev.js"></script>',
-      '<script>_FLINT_WEBSOCKET_PORT = ' + wport() + '</script>',
+      '<script>_MOTION_WEBSOCKET_PORT = ' + wport() + '</script>',
       '<script src="/__/devtools.dev.js"></script>',
 `
   <script>

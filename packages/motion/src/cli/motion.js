@@ -1,4 +1,4 @@
-if (process.env.FLINT_DEBUG) {
+if (process.env.MOTION_DEBUG) {
   process.env.startedat = Date.now()
 }
 

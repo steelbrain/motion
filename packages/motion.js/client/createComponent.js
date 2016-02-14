@@ -325,7 +325,7 @@ export default function createComponent(Motion, Internal, name, view, options = 
         }
       },
 
-      // FLINT HELPERS
+      // MOTION HELPERS
       // view.element('foo') -> <foo>
       element(selector) {
         const viewNode = ReactDOM.findDOMNode(this)
