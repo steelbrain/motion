@@ -27,6 +27,8 @@ export async function startup(options = {}) {
 
   // order important!
   await opts.init(options)
+
+
   log.setLogging()
   await disk.init() // reads versions and sets up readers/writers
   await builder.clear.init() // ensures internal directories set up

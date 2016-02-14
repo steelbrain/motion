@@ -1,5 +1,5 @@
 import path from 'path'
-import { p, log, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
+import fn, { p, log, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
@@ -19,12 +19,43 @@ export async function init(cli) {
     setupCliOpts(cli)
     setupDirs()
 
+    // from flint
+    await migration()
+
     // config
     const config = await loadConfigs(cli)
     setupConfig(cli, config)
   }
   catch(e) {
     handleError(e)
+  }
+}
+
+// TODO remove in minor
+async function migration() {
+  let flintDir = p(OPTS.appDir, '.flint')
+
+  // .flint => .motion
+  if (await exists(flintDir))
+    await fn.move(flintDir, OPTS.motionDir)
+
+  // index.html "#_flintapp" => "#_motionapp"
+  fn.replace({
+    regex: '#_flintapp',
+    replacement: '#_motionapp',
+    paths: [OPTS.motionDir],
+    recursive: false,
+    silent: true
+  })
+
+  // .motion/flint.json => .motion/config.js
+  const oldConfLoc = p(OPTS.motionDir, 'flint.json')
+  if (await exists(oldConfLoc)) {
+    console.log(`  Migrating flint config to motion (flint.json => config.js)...\n`)
+    await fn.move(oldConfLoc, OPTS.configFile)
+    // add module.exports
+    const oldConf = await readFile(OPTS.configFile)
+    await writeFile(OPTS.configFile, `module.exports = ${oldConf}`)
   }
 }
 
@@ -39,16 +70,7 @@ async function loadConfigs() {
       result = eval(out)
     }
     else {
-      // migration from flint - TODO REMOVE-MINOR
-      const oldConfLoc = p(opts('motionDir'), 'flint.json')
-      if (await exists(oldConfLoc)) {
-        console.log(`\n  Migrating flint config to motion (flint.json => config.js)...\n`)
-        const oldConf = await readFile(oldConfLoc)
-        await writeFile(OPTS.configFile, `module.exports = ${oldConf}`)
-      }
-      else {
-        console.error('No .motion/config.js file found!')
-      }
+      print('No .motion/config.js file found!')
     }
   }
   catch(e) {

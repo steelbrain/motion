@@ -3,7 +3,8 @@ import _ from 'lodash'
 import _glob from 'globby'
 import readdirp from 'readdirp'
 import path from 'path'
-import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile } from 'fs-extra'
+import replace from 'replace'
+import fs, { copy, remove, mkdirs, readFile, writeFile, stat, ensureFile, move } from 'fs-extra'
 
 import log from './log'
 import handleError from './handleError'
@@ -24,6 +25,7 @@ const logWrap = (name, fn) => fn
 // promisify
 const rm = logWrap('rm', promisify(remove))
 const mkdir = logWrap('mkdir', promisify(mkdirs))
+const _move = logWrap('move', promisify(move))
 const _readdir = promisify(readdirp)
 const readdir = logWrap('readdir', (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files))
 const _readFilePromise = promisify(readFile)
@@ -84,9 +86,11 @@ export default {
   debounce,
   path,
   mkdir,
+  move: _move,
   rm,
   recreateDir,
   readdir,
+  replace,
   readJSON,
   writeJSON,
   readFile: _readFile,
