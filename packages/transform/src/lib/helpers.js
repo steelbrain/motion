@@ -46,8 +46,8 @@ export function viewSelector(viewName, tag, options) {
   const selTag = `${tag}.${viewName}`
   const selClass = `.${viewName}.${tag}`
   const selSelfClass = `.View${viewName}.${tag}`
-  const selChildClass = `.${viewName} > .${tag}` // for children views?
-  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelfClass}, ${pre + selChildClass}`
+  // const selChildClass = `.${viewName} > .${tag}` // for children views?
+  return `${pre + selTag}, ${pre + selClass}, ${pre + selSelfClass}`
 }
 
 export function hasObjWithProp(node, base, prop) {
