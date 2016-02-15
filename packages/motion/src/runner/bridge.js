@@ -82,7 +82,7 @@ export default new class Bridge {
     }
   }
 
-  onMessage(type, callback) {
+  onDidReceiveMessage(type, callback) {
     return this.emitter.on(`message:${type}`, callback)
   }
 

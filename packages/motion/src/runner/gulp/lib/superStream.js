@@ -24,7 +24,7 @@ export default class SuperStream {
     this.stream = new Readable({ objectMode: true })
     this.stream._read = function(n) {}
 
-    bridge.onMessage('live:save',
+    bridge.onDidReceiveMessage('live:save',
       _.throttle(this.fileSend.bind(this), 16, { leading: true })
     )
 

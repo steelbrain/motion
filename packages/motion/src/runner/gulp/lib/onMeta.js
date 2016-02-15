@@ -30,7 +30,7 @@ export default function setMeta({ file, views }) {
 // cache.onDeleteView(view => bridge.message('view:delete', { view, meta: meta[view] }))
 
 
-bridge.onMessage('editor', ({ type, key, el, view }) => {
+bridge.onDidReceiveMessage('editor', ({ type, key, el, view }) => {
   if (type.substr(0, 6) != 'focus:') return
 
   if (view === undefined) return
