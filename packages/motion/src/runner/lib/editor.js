@@ -1,8 +1,10 @@
+import { realpathSync } from 'fs'
 import { execSync } from 'child_process'
 
 export default function editor(file, cb) {
   try {
-    let result = execSync(`atom ${file}`, { stdio: 'inherit' })
+    const realPath = realpathSync(file)
+    let result = execSync(`atom ${realPath}`, { stdio: 'inherit' })
     cb && cb(result)
   }
   catch(e) {
