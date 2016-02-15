@@ -5,7 +5,7 @@ import { event } from '../index'
 import opts from '../../opts'
 import cache from '../../cache'
 import bridge from '../../bridge'
-import { path, log, vinyl, emitter } from '../../lib/fns'
+import { _, path, log, vinyl, emitter } from '../../lib/fns'
 
 // time we wait for browser load before we just force push
 const UPPER_WAIT_LIMIT = 1000
@@ -27,7 +27,7 @@ export default class SuperStream {
 
     emitter.on('script:end', ({ path }) => this.doneBuilding(path))
 
-    bridge.onMessage('live:save', this.fileSend.bind(this))
+    bridge.onMessage('live:save', _.throttle(this.fileSend.bind(this), 16, { leading: true }))
 
     // reset loading on errors in pipeline
     event('error', ({ path }) => this.doneBuilding(path))
@@ -46,6 +46,7 @@ export default class SuperStream {
 
   runQueue(path) {
     const queued = this.queue[path]
+    this.queue[path] = false
     if (queued) queued()
   }
 
@@ -66,7 +67,6 @@ export default class SuperStream {
     this.pushStreamRun(relative, () => {
       debug('SOUT', relative)
       this.isBuilding[relative] = true
-      this.queue[relative] = false
       const file = new File(vinyl(this.basePath, path, new Buffer(contents)))
 
       const stackTime = [{
@@ -81,22 +81,16 @@ export default class SuperStream {
   }
 
   pushStreamRun(relative, finish, sendImmediate) {
-    // waiting for script load
-    if (!this.isBuilding[relative] || sendImmediate) {
+    if (!this.isBuilding[relative] || sendImmediate)
       return finish()
-    }
 
     this.queue[relative] = finish
 
     // ensure upper limit on wait
     clearTimeout(this.upperLimit)
-
     this.upperLimit = setTimeout(() => {
-      if (!this.queue[relative])
-        return
-
+      if (!this.queue[relative]) return
       debug('upper limit! finish'.yellow)
-      this.isBuilding[relative] = false
       finish()
     }, UPPER_WAIT_LIMIT)
   }
