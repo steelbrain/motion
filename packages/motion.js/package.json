@@ -1,6 +1,6 @@
 {
   "name": "motion-js",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.release.js",
