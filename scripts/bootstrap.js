@@ -36,7 +36,7 @@ if (!canWrite) {
 var packages = []
 
 // order important so they are linkable to each other
-var packageNames = ['transform', 'nice-styles', 'motion.js', 'motion']
+var packageNames = ['transform', 'nice-styles', 'client', 'motion']
 var globalFolder = exec('npm root -g').output.replace("\n", '')
 
 packageNames.forEach(function (loc) {

@@ -34,8 +34,8 @@ patch-tools: ready
 patch-motion: ready
 	node scripts/release.js --patch motion
 
-patch-motion.js: ready
-	node scripts/release.js --patch motion.js
+patch-client: ready
+	node scripts/release.js --patch client
 
 patch-transform: ready
 	node scripts/release.js --patch transform

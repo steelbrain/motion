@@ -23,9 +23,7 @@ export default function logError(error, file) {
     print('  line: %s, col: %s', error.loc.line, error.loc.column)
 
   error.stack = error.stack || error.codeFrame || ''
-
-  if (error.plugin == 'gulp-babel')
-    error.stack = error.stack ? error.stack.split("\n").slice(0, 7).join("\n") : ''
+  error.stack = error.stack.split("\n").slice(0, 9).join("\n")
 
   if (error.stack)
     print(error.stack)

@@ -18,18 +18,17 @@ const debug = log.bind(null, { name: 'stream', icon: '🎏' })
 export default class SuperStream {
   constructor() {
     this.basePath = opts('appDir')
-    this.motionPath = opts('motionDir')
     this.relPath = p => path.relative(this.basePath, p)
     this.isBuilding = {}
     this.queue = {}
     this.stream = new Readable({ objectMode: true })
     this.stream._read = function(n) {}
 
+    bridge.onMessage('live:save',
+      _.throttle(this.fileSend.bind(this), 16, { leading: true })
+    )
+
     emitter.on('script:end', ({ path }) => this.doneBuilding(path))
-
-    bridge.onMessage('live:save', _.throttle(this.fileSend.bind(this), 16, { leading: true }))
-
-    // reset loading on errors in pipeline
     event('error', ({ path }) => this.doneBuilding(path))
   }
 
@@ -44,29 +43,29 @@ export default class SuperStream {
     this.runQueue(rel)
   }
 
-  runQueue(path) {
-    const queued = this.queue[path]
-    this.queue[path] = false
+  runQueue(relativePath) {
+    const queued = this.queue[relativePath]
+    this.queue[relativePath] = false
     if (queued) queued()
   }
 
   fileSend({ path, startTime, contents }) {
-    const relative = this.relPath(path)
-    debug('SIN', relative)
+    const relativePath = this.relPath(path)
+    debug('SIN', relativePath)
 
     // check if file actually in motion project
-    if (!path || path.indexOf(this.basePath) !== 0 || relative.indexOf('.motion') >= 0 || !isFileType(path, 'js')) {
+    if (!path || path.indexOf(this.basePath) !== 0 || relativePath.indexOf('.motion') >= 0 || !isFileType(path, 'js')) {
       debug('  file not streamable',
-        path.indexOf(this.basePath) !== 0, relative.indexOf('.motion') === 0, !isFileType(path, 'js')
+        path.indexOf(this.basePath) !== 0, relativePath.indexOf('.motion') === 0, !isFileType(path, 'js')
       )
       return
     }
 
-    const sendImmediate = cache.isInternal(relative)
+    const sendImmediate = cache.isInternal(relativePath)
 
-    this.pushStreamRun(relative, () => {
-      debug('SOUT', relative)
-      this.isBuilding[relative] = true
+    this.pushStreamRun(relativePath, () => {
+      debug('SOUT', relativePath)
+      this.isBuilding[relativePath] = true
       const file = new File(vinyl(this.basePath, path, new Buffer(contents)))
 
       const stackTime = [{

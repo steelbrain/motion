@@ -1,7 +1,7 @@
 const filters = [
   /^babel-runtime(\/.*)?$/,
   /^react(\/.*)?$/, // TODO allow subpaths
-  /^motion-js$/,
+  /^motion-client$/,
   /^react-dom$/,
   /^history$/,
   /^radium$/,

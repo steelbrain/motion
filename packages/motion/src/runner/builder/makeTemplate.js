@@ -47,7 +47,7 @@ export default async function makeTemplate() {
 function makeIsomorphic() {
   // TODO: motion build --isomorphic
   // if (OPTS.isomorphic) {
-  //   var Motion = require('motion-js/dist/motion.node')
+  //   var Motion = require('client/dist/motion.node')
   //   var app = require(p(OPTS.buildDir, '_', OPTS.saneName))
   //
   //   var MotionApp = app(false, { Motion }, async function(output) {

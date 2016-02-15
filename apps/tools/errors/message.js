@@ -16,6 +16,7 @@ view Errors.Message {
   let clearDelay
 
   on.props(() => {
+    console.log('clear')
     clearDelay && clearDelay()
 
     npmError = view.props.npmError
@@ -41,7 +42,7 @@ view Errors.Message {
     // delay more during live typing
     delay={isLive() ? 2000 : 1000}
     force={hasError === false}
-    showKey={fullStack || error && error.message}
+    showKey={error && error.timestamp || fullStack}
     onUpdate={showMotionErrorDiv}
   >
     <bar>

@@ -2,7 +2,6 @@ import deepmerge from 'deepmerge'
 import { path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
-import motionjs from 'motion-js'
 
 let runnerRoot = path.resolve(path.join(__dirname, '..', '..', '..', '..'))
 let runnerModules = path.join(runnerRoot, 'node_modules')

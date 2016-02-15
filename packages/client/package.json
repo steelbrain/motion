@@ -1,5 +1,5 @@
 {
-  "name": "motion-js",
+  "name": "motion-client",
   "version": "0.9.3",
   "main": "index.js",
   "scripts": {
@@ -10,10 +10,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/motionjs/motion.js.git"
+    "url": "https://github.com/motion/motion.git"
   },
   "bugs": {
-    "url": "https://github.com/motionjs/motion.js/issues"
+    "url": "https://github.com/motion/motion/issues"
   },
   "homepage": "https://motionjs.com",
   "devDependencies": {}

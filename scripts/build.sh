@@ -28,6 +28,7 @@ for p in "${packages[@]}"; do
       --optional asyncToGenerator \
       --blacklist es6.tailCall \
       --blacklist strict \
+      --source-maps \
       --copy-files $1 &
   fi
 done
@@ -45,6 +46,7 @@ if [ "$1" = "--watch" ]; then
   chsum1=""
   cd packages/motion
   npm link --loglevel=error
+  cd ../..
 fi
 
 # wait for bg tasks

@@ -88,6 +88,8 @@ export function scripts({ inFiles = [], userStream }) {
 
   // only do on first run
   function buildCheck(file) {
+    file.relativePath = path.relative(opts('appDir'), file.path)
+
     // BUGFIX gulp sends deleted files through here, this filters them
     if (!file.contents)
       return true
@@ -112,10 +114,9 @@ export function scripts({ inFiles = [], userStream }) {
 
     // read outfile
     try {
-      const relPath = path.relative(opts('appDir'), file.path)
       const outFile = prevFile.babel.isExported
-        ? path.join(opts('deps').dir, 'internal', relPath)
-        : path.join(opts('outDir'), relPath)
+        ? path.join(opts('deps').dir, 'internal', file.relativePath)
+        : path.join(opts('outDir'), file.relativePath)
 
       outMTime = fs.statSync(outFile).mtime
     }
@@ -277,6 +278,7 @@ export function scripts({ inFiles = [], userStream }) {
     if (bundler.isInstalling() || file.willInstall) return
 
     // ADD
+    emitter.emit('script:end', { path: file.relativePath })
     bridge.broadcast('script:add', file.message)
   }
 
@@ -298,7 +300,6 @@ export function scripts({ inFiles = [], userStream }) {
   function markFileSuccess(file) {
     if (isSourceMap(file.path)) return
 
-    emitter.emit('script:end', file)
     out.goodScript(file)
     log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
@@ -326,9 +327,8 @@ export function scripts({ inFiles = [], userStream }) {
   // now we need to remove it from .motion/out
   function removeNewlyInternal(file) {
     // resolve path from .motion/.internal/deps/internals/xyz.js back to xyz.js
-    const filePath = path.relative(p(opts('deps').dir, 'internal'), file.path)
     // then resolve path to .motion/.internal/out/xyz.js
-    const outPath = p(opts('outDir'), filePath)
+    const outPath = p(opts('outDir'), file.relativePath)
     // log.gulp('remove newly internal', outPath)
     rm(outPath)
   }

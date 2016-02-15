@@ -5,7 +5,7 @@ global.print = console.log.bind(console)
 import express from 'express'
 import cors from 'cors'
 import portfinder from 'portfinder'
-import motionjs from 'motion-js'
+import client from 'motion-client'
 import motiontools from 'motion-tools'
 
 import { p, readFile, readdir, handleError } from './lib/fns'
@@ -186,7 +186,7 @@ function run() {
     // tools.js
     server.use('/__/tools', express.static(p(motiontools(), 'build', '_')))
     // motion.js & react.js
-    server.use('/__', express.static(p(motionjs(), 'dist')))
+    server.use('/__', express.static(p(client(), 'dist')))
 
     server.get('*', function(req, res) {
       afterFirstBuild(async function() {

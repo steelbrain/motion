@@ -40,7 +40,7 @@ function cdTo(where, execute) {
 var releaseOrder = [
   'nice-styles',
   'transform',
-  'motion.js',
+  'client',
   'tools',
   'motion',
 ]
