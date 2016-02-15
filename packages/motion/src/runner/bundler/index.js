@@ -10,8 +10,8 @@ async function init() {
 }
 
 async function all(opts) {
-  await internals(opts)
   await externals({ doInstall: true, ...opts })
+  await internals(opts)
   await uninstall()
 }
 

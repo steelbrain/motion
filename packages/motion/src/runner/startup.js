@@ -57,6 +57,7 @@ export async function build(opts = {}) {
       gulp.assets(),
       gulpScripts({ once: opts.once })
     ])
+    await bundler.all()
     await builder.build()
     if (opts.once) return
     print()

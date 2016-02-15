@@ -6,7 +6,7 @@ import opts from '../opts'
 import makeTemplate from './makeTemplate'
 import { handleError } from '../lib/fns'
 
-export default async function build({ bundle = true } = {}) {
+export default async function build() {
   try {
     print(`\n  Building...`.dim)
 
