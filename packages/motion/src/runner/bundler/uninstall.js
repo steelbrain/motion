@@ -36,7 +36,7 @@ export async function uninstall(rebundle) {
     print(`\n  Uninstalling...`.bold)
 
     // do uninstalls
-    const attempted = await* toUninstall.map(async dep => {
+    const attempted = await Promise.all(toUninstall.map(async dep => {
       try {
         await npm.unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
         print(`  ✘ ${dep}`.red)
@@ -46,7 +46,7 @@ export async function uninstall(rebundle) {
         handleError(e)
         return false
       }
-    })
+    }))
 
     const uninstalled = attempted.filter(l => !!l)
 

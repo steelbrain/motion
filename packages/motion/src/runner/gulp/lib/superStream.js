@@ -43,6 +43,11 @@ export default class SuperStream {
     this.runQueue(rel)
   }
 
+  // prevent upper limit send post hoc
+  avoidSending(path) {
+    this.queue[this.relPath(path)] = false
+  }
+
   runQueue(relativePath) {
     const queued = this.queue[relativePath]
     this.queue[relativePath] = false

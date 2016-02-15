@@ -32,10 +32,12 @@ export function scripts({ inFiles = [], userStream }) {
     .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
+  const superStream = new SuperStream()
+
   return (
     isBuilding() ?
     scripts :
-    $.merge(scripts, dirAddStream(opts('appDir')), (new SuperStream()).getStream())
+    $.merge(scripts, dirAddStream(opts('appDir')), superStream.getStream())
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
       .pipe($.log(reset))
@@ -213,6 +215,9 @@ export function scripts({ inFiles = [], userStream }) {
 
       // check will install
       file.willInstall = bundler.willInstall(file.babel.imports)
+
+      if (file.willInstall)
+        superStream.avoidSending(file.path)
     }
   }
 

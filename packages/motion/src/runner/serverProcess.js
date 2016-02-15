@@ -1,5 +1,3 @@
-import regeneratorRuntime from 'regenerator-runtime-only'
-global.regeneratorRuntime = regeneratorRuntime
 global.print = console.log.bind(console)
 
 import express from 'express'

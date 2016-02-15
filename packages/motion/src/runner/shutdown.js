@@ -1,5 +1,3 @@
-import { logError } from './lib/fns'
-
 // STOP
 
 process.on('SIGINT', cleanExit)
@@ -9,7 +7,7 @@ process.on('uncaughtException', cleanExit)
 let child
 
 function cleanExit(e) {
-  if (e) logError(e)
+  if (e) console.log(e.stack)
 
   child && child.send('EXIT') // this seems to be required
 

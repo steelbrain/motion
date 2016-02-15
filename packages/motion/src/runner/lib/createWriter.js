@@ -28,6 +28,7 @@ export default async function createWriter(filePath, { debug = '', json = false,
   async function read() {
     try {
       if (cache) return cache
+      logw('reading file', filePath)
       let state = await readFile(filePath)
 
       cacheStr = state

@@ -16,7 +16,6 @@ view Errors.Message {
   let clearDelay
 
   on.props(() => {
-    console.log('clear')
     clearDelay && clearDelay()
 
     npmError = view.props.npmError

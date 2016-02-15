@@ -1,105 +1,71 @@
-import promisify from 'sb-promisify'
-import _ from 'lodash'
+import _promisify from 'sb-promisify'
+import lodash from 'lodash'
 import _glob from 'globby'
 import readdirp from 'readdirp'
-import path from 'path'
-import replace from 'replace'
-import fs, { copy, remove, mkdirs, readFile, writeFile, ensureFile, move } from 'fs-extra'
-
-import log from './log'
-import handleError from './handleError'
-import logError from './logError'
-
+import _path from 'path'
+import _replace from 'replace'
+import fse from 'fs-extra'
+import _log from './log'
+import _handleError from './handleError'
+import _logError from './logError'
 import { Emitter } from 'sb-event-kit'
 
-const emitter = new Emitter()
+// helpers
+export const replace = _replace
+export const log = _log
+export const logError = _logError
+export const handleError = _handleError
+export const promisify = _promisify
+export const emitter = new Emitter()
+export const path = _path
+export const p = _path.join
+export const _ = lodash
 
-const p = path.join
-
-const logWrap = (name, fn) => fn
-// {
-//   return (...args) => {
-//     if (!process.env.production)
-//       log.file(name && name.dim.bold, ...args.map(arg => (''+arg).dim))
-//
-//     return fn(...args)
-//   }
-// }
-
-// promisify
-const rm = logWrap('rm', promisify(remove))
-const mkdir = logWrap('mkdir', promisify(mkdirs))
-const _move = logWrap('move', promisify(move))
+// files
+export const fs = fse
+export const rm = promisify(fs.remove)
+export const mkdir = promisify(fs.mkdirs)
+export const move = promisify(fs.move)
+export const writeFile = promisify(fs.writeFile)
 const _readdir = promisify(readdirp)
-const readdir = logWrap('readdir', (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files))
-const _readFilePromise = promisify(readFile)
-const _readFile = logWrap('readFile', file => _readFilePromise(file, 'utf-8'))
-const _writeFile = promisify(writeFile)
-const readJSON = logWrap('readJSON', file => _readFile(file).then(res => JSON.parse(res)))
-const writeJSON = logWrap('writeJSON', (path, str) => _writeFile(path, JSON.stringify(str)))
-const touch = logWrap('touch', promisify(ensureFile))
-const _copy = logWrap('copy', promisify(copy))
-const glob = logWrap('glob', _glob)
-const exists = logWrap('exists', where => new Promise((res, rej) => fs.stat(where, err => res(!err))))
-
-const recreateDir = (dir) =>
+export const readdir = (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files)
+const readFilePromise = promisify(fs.readFile)
+export const readFile = file => readFilePromise(file, 'utf-8')
+export const readJSON = file => readFile(file).then(res => JSON.parse(res))
+export const writeJSON = (path, str) => writeFile(path, JSON.stringify(str))
+export const touch = promisify(fs.ensureFile)
+export const copy = promisify(fs.copy)
+export const glob = _glob
+export const exists = where => new Promise((res, rej) => fs.stat(where, err => res(!err)))
+// TODO use promises
+export const recreateDir = (dir) =>
   new Promise((res, rej) => {
-    remove(dir, err => {
+    fs.remove(dir, err => {
       if (err) return rej(err)
-      mkdirs(dir, err => {
+      fs.mkdirs(dir, err => {
         if (err) return rej(err)
         res(dir)
       });
     })
   })
 
-async function globCopy(pattern, dest, opts = {}) {
+export async function globCopy(pattern, dest, opts = {}) {
   const srcs = await glob(pattern, { dot: false, nodir: true, ...opts })
-  await* srcs.map(f => _copy(p(opts.cwd || '', f), p(dest, f)))
+  await Promise.all(srcs.map(f => _copy(p(opts.cwd || '', f), p(dest, f))))
 }
 
-function sanitize(str) {
+export function sanitize(str) {
   return str.replace(/[^a-zA-Z]/, '')
 }
 
-function vinyl(basePath, path, contents) {
+export function vinyl(basePath, path, contents) {
   const cwd = '/'
   const base = basePath + '/'
   return { cwd, base, path, contents }
 }
 
 let debouncers = {}
-function debounce(key, time, cb) {
+export function debounce(key, time, cb) {
   if (debouncers[key]) clearTimeout(debouncers[key])
   debouncers[key] = setTimeout(cb, time)
-}
-
-export default {
-  _,
-  p,
-  fs,
-  debounce,
-  path,
-  mkdir,
-  move: _move,
-  rm,
-  recreateDir,
-  readdir,
-  replace,
-  readJSON,
-  writeJSON,
-  readFile: _readFile,
-  writeFile: _writeFile,
-  copy: _copy,
-  globCopy,
-  touch,
-  exists,
-  sanitize,
-  log,
-  handleError,
-  logError,
-  glob,
-  promisify,
-  vinyl,
-  emitter,
 }

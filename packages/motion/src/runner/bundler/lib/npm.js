@@ -68,7 +68,11 @@ async function installPeerDeps(name) {
 
         return `${name}@${version}`
       })
-      await* peersFull.map(full => execPromise(`npm install --save ${full}`, opts('motionDir')))
+
+      await Promise.all(
+        peersFull.map(full => execPromise(`npm install --save ${full}`, opts('motionDir')))
+      )
+
       print('  ✓'.green, peersArr.join(', '))
       return peersArr
     }

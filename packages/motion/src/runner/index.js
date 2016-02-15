@@ -1,6 +1,3 @@
-import regeneratorRuntime from 'regenerator-runtime-only'
-global.regeneratorRuntime = regeneratorRuntime
-
 import { run, build } from './startup'
 
 // print - so we can easily weed out console.logs

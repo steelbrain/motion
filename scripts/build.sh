@@ -22,12 +22,10 @@ for p in "${packages[@]}"; do
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
 
-    node ./node_modules/babel/bin/babel "$f/src" --out-dir "$f/lib" \
-      --stage 0 \
-      --loose all \
-      --optional asyncToGenerator \
-      --blacklist es6.tailCall \
-      --blacklist strict \
+    node ./node_modules/babel-cli/bin/babel "$f/src" \
+      --out-dir "$f/lib" \
+      --presets es2015-node,stage-2 \
+      --plugins transform-async-to-generator,transform-flow-strip-types,syntax-flow \
       --source-maps \
       --copy-files $1 &
   fi

@@ -10,22 +10,22 @@ export default async function remakeInstallDir(reset) {
     await mkdir(deps.dir)
 
     if (reset) {
-      await* [
+      await Promise.all([
         rm(deps.externalsIn),
         rm(deps.externalsPaths),
         rm(deps.externalsOut),
         rm(deps.internalsIn),
         rm(deps.internalsOut),
-      ]
+      ])
     }
 
-    await* [
+    await Promise.all([
       touch(deps.externalsIn),
       touch(deps.externalsOut),
       touch(deps.internalsIn),
       touch(deps.internalsOut),
       // disk.externalsPaths.write((_, write) => write([]))
-    ]
+    ])
   }
   catch(e) {
     handleError(e)

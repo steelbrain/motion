@@ -1,7 +1,7 @@
 import path from 'path'
 import state from '../state'
 
-let T, options
+let T
 
 export default function init(_options, _t) {
   // redefine t??

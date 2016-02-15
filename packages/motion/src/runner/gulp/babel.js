@@ -2,7 +2,7 @@ import gutil from 'gulp-util'
 import through from 'through2'
 import applySourceMap from 'vinyl-sourcemaps-apply'
 import replaceExt from 'replace-ext'
-import { babel } from '../lib/requires'
+import { transform } from 'flint-babel-core'
 import onMeta from './lib/onMeta'
 import config from './lib/config'
 import writeStyle from '../lib/writeStyle'
@@ -34,7 +34,7 @@ function babelOpts(file, opts) {
 }
 
 function motionApp(file) {
-	let res = babel().transform(
+	let res = transform(
 		file.contents.toString(),
 		babelOpts(file, config.app())
 	)
@@ -56,7 +56,7 @@ function motionFile(file) {
 	const onImports = (imports : string) => track.imports.push(imports)
 	const onExports = (val : boolean) => track.isExported = val
 
-	let res = babel().transform(
+	let res = transform(
 		file.contents.toString(),
 		babelOpts(file, config.file({
 			log,

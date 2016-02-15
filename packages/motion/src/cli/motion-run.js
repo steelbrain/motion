@@ -2,7 +2,7 @@ import './lib/checkForApp'
 import Program from 'commander'
 import colors from 'colors'
 import fs from 'fs'
-import { run } from '../runner'
+import Runner from '../runner'
 import name from './lib/appName'
 import version from './lib/version'
 
@@ -17,7 +17,7 @@ Program
   .option('--cached', 'run from cache for speedup (may break)')
   .parse(process.argv)
 
-run({
+Runner.run({
   name,
   version,
   debug: Program.debug,

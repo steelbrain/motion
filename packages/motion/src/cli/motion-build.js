@@ -1,7 +1,7 @@
 import './lib/checkForApp'
 import Program from 'commander'
 import colors from 'colors'
-import { build, run } from '../runner'
+import Runner from '../runner'
 import name from './lib/appName'
 import version from './lib/version'
 
@@ -28,6 +28,6 @@ const opts = {
 }
 
 if (opts.watch)
-  run({ build: true, watch: true, ...opts })
+  Runner.run({ build: true, watch: true, ...opts })
 else
-  build(opts)
+  Runner.build(opts)

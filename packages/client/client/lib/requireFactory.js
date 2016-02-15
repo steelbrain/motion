@@ -71,7 +71,7 @@ export default function requireFactory(root) {
     }
 
     if (typeof obj[ns][name] == 'undefined') {
-      console.error(`Can't find import "${names[0]}" in window.export["${ns}"][${names[0]}]`)
+      console.error(`Can't find import "${names[0]}" in window.exports["${ns}"][${names[0]}]`)
       return {}
     }
 

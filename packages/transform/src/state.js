@@ -15,28 +15,28 @@ let state = {
   viewRootNodes: null, // track root JSX elements
   viewState: null, // track which state to wrap
   viewStyleNames: null, // prevent duplicate style names
+}
 
-  init() {
-    state.resetProgramState()
-    state.resetViewState()
-  },
+export function init() {
+  resetProgramState()
+  resetViewState()
+}
 
-  resetProgramState() {
-    state.hasView = false
-    state.hasExports = false
-    state.meta = { file: null, views: {} }
-  },
+export function resetProgramState() {
+  state.hasView = false
+  state.hasExports = false
+  state.meta = { file: null, views: {} }
+}
 
-  resetViewState(fullName, file, loc) {
-    state.hasView = true
-    state.keyBase = {}
-    state.viewRootNodes = []
-    state.viewState = {}
-    state.viewStyleNames = {}
-    state.viewDynamicStyleKeys = {}
-    state.viewStaticStyleKeys = {}
-    state.viewHasChildWithClass = false
-  }
+export function resetViewState(fullName, file, loc) {
+  state.hasView = true
+  state.keyBase = {}
+  state.viewRootNodes = []
+  state.viewState = {}
+  state.viewStyleNames = {}
+  state.viewDynamicStyleKeys = {}
+  state.viewStaticStyleKeys = {}
+  state.viewHasChildWithClass = false
 }
 
 export default state

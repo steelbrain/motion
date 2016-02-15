@@ -23,8 +23,6 @@ export default {
         state.viewRootNodes.push(node)
       }
 
-      inJSX = true
-
       node.motionJSXVisits = 1
       const name = nodeToNameString(el.name)
 

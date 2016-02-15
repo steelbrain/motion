@@ -1,7 +1,5 @@
-import SuperStream from './superStream'
-import dirAddStream from './dirAddStream'
+import _SuperStream from './superStream'
+import _dirAddStream from './dirAddStream'
 
-export default {
-  SuperStream,
-  dirAddStream
-}
+export const SuperStream = _SuperStream
+export const dirAddStream = _dirAddStream
