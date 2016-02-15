@@ -1,6 +1,6 @@
 import { $, gulp, SCRIPTS_GLOB, out, isBuilding, isSourceMap } from './lib/helpers'
 import { SuperStream, dirAddStream } from './lib/streams'
-import { _, fs, path, debounce, p, rm, logError, log } from '../lib/fns'
+import { _, fs, path, debounce, p, rm, logError, log, emitter } from '../lib/fns'
 import unicodeToChar from '../lib/unicodeToChar'
 import { event } from './index'
 import { findBabelRuntimeRequires } from '../lib/findRequires'
@@ -145,6 +145,7 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function reset(file) {
+    emitter.emit('script:start', file)
     State.lastError = false
     State.curFile = file
     file.startTime = Date.now()
@@ -280,6 +281,8 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function buildDone(file) {
+    emitter.emit('script:end', file)
+
     if (file.finishingFirstBuild) {
       opts.set('hasRunInitialBuild', true)
       log.gulp('buildDone!!'.green.bold)

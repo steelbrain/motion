@@ -10,6 +10,10 @@ import log from './log'
 import handleError from './handleError'
 import logError from './logError'
 
+import { Emitter } from 'sb-event-kit'
+
+const emitter = new Emitter()
+
 const p = path.join
 
 const logWrap = (name, fn) => fn
@@ -96,5 +100,6 @@ export default {
   logError,
   glob,
   promisify,
-  vinyl
+  vinyl,
+  emitter,
 }

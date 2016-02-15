@@ -74,6 +74,10 @@ function TagLoader() {
   return function(name, load) {
     let oldTag = last[name]
 
+    if (wait[name]) {
+      return
+    }
+
     if (loading[name]) {
       wait[name] = true
       return
