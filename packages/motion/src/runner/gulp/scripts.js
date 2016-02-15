@@ -281,8 +281,6 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function buildDone(file) {
-    emitter.emit('script:end', file)
-
     if (file.finishingFirstBuild) {
       opts.set('hasRunInitialBuild', true)
       log.gulp('buildDone!!'.green.bold)
@@ -300,6 +298,7 @@ export function scripts({ inFiles = [], userStream }) {
   function markFileSuccess(file) {
     if (isSourceMap(file.path)) return
 
+    emitter.emit('script:end', file)
     out.goodScript(file)
     log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
