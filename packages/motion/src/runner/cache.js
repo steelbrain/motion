@@ -234,12 +234,9 @@ const Cache = {
   },
 
   addError(file : string, error : object) {
-    if (!n) return
-
+    if (!file) return
     let n = relative(file)
-
     if (!cache.files[n]) Cache.add(n)
-
     cache.files[n].error = error
   },
 

@@ -33,6 +33,7 @@
     "motion-transform": "0.9.3",
     "fs-extra": "0.26.3",
     "globby": "4.0.0",
+    "react": "0.14.0",
     "gulp": "3.9.0",
     "gulp-cached": "^1.1.0",
     "gulp-concat": "2.6.0",

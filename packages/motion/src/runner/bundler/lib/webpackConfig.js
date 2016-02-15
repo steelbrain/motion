@@ -20,7 +20,7 @@ export default function webpackConfig(filename, config = {}) {
       library: `${opts('saneName')}-${filename.replace('.js', '')}`,
       libraryTarget: 'commonjs'
     },
-    // come from motion.js
+    // from motion-client
     externals: {
       react: 'exports.React',
       'react-dom': 'exports.ReactDOM',
