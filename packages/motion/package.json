@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "motion - moving development forward",
   "main": "dist/main.js",
   "scripts": {},
@@ -121,6 +121,7 @@
     "portfinder",
     "postcss",
     "raven",
+    "react",
     "readdirp",
     "reapp-object-assign",
     "replace",
