@@ -6,7 +6,7 @@ set -e
 trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
 # order important so they build for each other
-packages=("nice-styles" "transform" "motion.js" "motion")
+packages=("nice-styles" "transform" "client" "motion")
 
 # build
 for p in "${packages[@]}"; do

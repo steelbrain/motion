@@ -67,10 +67,18 @@ module.exports = function(opts) {
       loaders: [
         {
           test: /\.js$/,
-          loader: 'babel-loader',
+          loader: 'babel',
           query: {
-            stage: 2,
-            optional: ['runtime', 'flow']
+            presets: [
+              'es2015',
+              'stage-2',
+              'react'
+            ],
+            plugins: [
+              'syntax-flow',
+              'transform-flow-strip-types',
+              'transform-runtime'
+            ]
           },
           include: [path.resolve(__dirname, 'client'), path.resolve(__dirname, 'tools')],
           exclude: [path.resolve(__dirname, 'client', 'vendor')]

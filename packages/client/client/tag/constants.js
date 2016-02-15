@@ -1,5 +1,5 @@
 // tags that shouldn't map out to real names
-const whitelist = [
+export const whitelist = [
   'title',
   'meta',
   'head',
@@ -8,7 +8,7 @@ const whitelist = [
   'body'
 ]
 
-const niceAttrs = {
+export const niceAttrs = {
   class: 'className',
   for: 'htmlFor',
   srcset: 'srcSet',
