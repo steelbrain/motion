@@ -30,13 +30,17 @@ export default new class Bridge {
           log.bridge('Ignoring message because its binary')
           return
         }
-        try {
-          const message = JSON.parse(data)
+        let message
+        new Promise(resolve => {
+          message = JSON.parse(data)
           log.bridge('IN', message._type)
-          this.emitter.emit(`message:${message._type}`, message)
-        } catch (e) {
-          handleError(e)
-        }
+          resolve(this.emitter.emit(`message:${message._type}`, message))
+        }).catch(handleError).then(() => {
+          if (message && message.id) {
+            const result = Object.assign({id: message.id}, message.result)
+            connection.send(this.encodeMessage(message._type, result))
+          }
+        })
       })
       this.welcomeConnection(connection)
     })
