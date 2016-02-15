@@ -10,11 +10,6 @@ export default async function build({ bundle = true } = {}) {
   try {
     print(`\n  Building...`.dim)
 
-    if (bundle) {
-      await bundler.install()
-      await bundler.internals()
-    }
-
     makeTemplate()
 
     await Promise.all([

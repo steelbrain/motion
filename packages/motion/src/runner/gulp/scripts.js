@@ -52,7 +52,7 @@ export function scripts({ inFiles = [], userStream }) {
           $.log(removeNewlyInternal),
           $.log(markFileSuccess), // before writing to preserve path
           gulp.dest(opts('deps').internalDir),
-          $.log(bundle),
+          $.log(bundler.internals.bind(null, { force: true })),
           $.log(buildDone),
           $.ignore.exclude(true)
         )
@@ -200,8 +200,11 @@ export function scripts({ inFiles = [], userStream }) {
       bundler.scanFile(file.path)
     }
 
-    if (scanNow()) scan()
-    else debounce(`install:${file.path}`, 2000, scan)
+    // run scan
+    if (file.babel.isExported || scanNow())
+      scan()
+    else
+      debounce(`install:${file.path}`, 2000, scan)
 
     if (!opts('build') || opts('watch')) {
       debounce('removeOldImports', 3000, bundler.uninstall)
@@ -263,7 +266,7 @@ export function scripts({ inFiles = [], userStream }) {
     if (file.babel.isExported) return
 
     // run stuff after each change on build --watch
-    bundle()
+    doBuild()
 
     if (!cache.get(file.path)) return // avoid ?? todo: figure out why this is necessary
     if (State.lastError) return // avoid if error
@@ -284,9 +287,9 @@ export function scripts({ inFiles = [], userStream }) {
     }
   }
 
-  function bundle() {
+  function doBuild() {
     if (opts('watch') && hasBuilt()) {
-      builder.build({ bundle: false })
+      builder.build()
       return true
     }
   }
