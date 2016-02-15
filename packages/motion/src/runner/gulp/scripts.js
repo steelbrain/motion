@@ -54,7 +54,7 @@ export function scripts({ inFiles = [], userStream }) {
           $.log(removeNewlyInternal),
           $.log(markFileSuccess), // before writing to preserve path
           gulp.dest(opts('deps').internalDir),
-          $.log(bundler.internals.bind(null, { force: true })),
+          $.if(hasBuilt, $.log(bundler.internals.bind(null, { force: true }))),
           $.log(buildDone),
           $.ignore.exclude(true)
         )
@@ -287,7 +287,7 @@ export function scripts({ inFiles = [], userStream }) {
     bridge.broadcast('script:add', file.message)
   }
 
-  function buildDone(file) {
+  async function buildDone(file) {
     if (file.finishingFirstBuild) {
       opts.set('hasRunInitialBuild', true)
       log.gulp('buildDone!!'.green.bold)

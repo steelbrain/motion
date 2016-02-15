@@ -182,10 +182,12 @@ const Cache = {
   },
 
   getExported() {
-    log.cache('cache', 'getExported', cache.files)
-    return Object.keys(cache.files)
+    const result = Object.keys(cache.files)
       .map(name => cache.files[name].isInternal ? name : null)
       .filter(f => f != null)
+
+    log.cache('cache', 'getExported', result)
+    return result
   },
 
   setFileImports(file: string, imports: ImportArray) {

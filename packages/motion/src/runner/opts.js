@@ -1,5 +1,5 @@
 import path from 'path'
-import fn, { p, log, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
+import { p, log, move, replace, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
@@ -37,10 +37,10 @@ async function migration() {
 
   if (await exists(flintDir)) {
     // .flint => .motion
-    await fn.move(flintDir, OPTS.motionDir)
+    await move(flintDir, OPTS.motionDir)
 
     // index.html "#_flintapp" => "#_motionapp"
-    fn.replace({
+    replace({
       regex: '#_flintapp',
       replacement: '#_motionapp',
       paths: [OPTS.motionDir],
@@ -52,7 +52,7 @@ async function migration() {
     const oldConfLoc = p(OPTS.motionDir, 'flint.json')
     if (await exists(oldConfLoc)) {
       console.log(`  Migrating flint config to motion (flint.json => config.js)...\n`)
-      await fn.move(oldConfLoc, OPTS.configFile)
+      await move(oldConfLoc, OPTS.configFile)
       // add module.exports
       const oldConf = await readFile(OPTS.configFile)
       await writeFile(OPTS.configFile, `module.exports = ${oldConf}`)

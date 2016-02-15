@@ -42,7 +42,7 @@ function motionApp(file) {
 }
 
 const babelCoreRequire =
-	/require\(\'(babel\-runtime\/core\-js\/[a-zA-Z0-9]+\/?[a-zA-Z0-9]*\/?[a-zA-Z0-9]*)\'\)/g
+	/require\(\'(babel\-runtime\/core\-js\/[a-zA-Z-0-9]+\/?[a-zA-Z-0-9]*\/?[a-zA-Z-0-9]*)\'\)/g
 
 const getBabelCoreRequires = src =>
 	getMatches(src, babelCoreRequire, 1)

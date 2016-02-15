@@ -24,12 +24,6 @@ export default function getWebpackErrors(where, err, stats) {
     source: false
   })
 
-  // debug
-  if (opts('debug')) {
-    log.webpack('--- webpack output ---')
-    log.webpack(jsonStats.modules.map(s => `${s.name}`[s.built && !s.failed ? 'green' : 'red']).join("\n"))
-  }
-
   // check errors
   let errors = jsonStats.errors
 

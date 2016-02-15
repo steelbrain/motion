@@ -11,7 +11,7 @@ import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
 export async function internals(opts = {}) {
-  try {
+  try {    
     log.internals('internals')
     await finishedInstalling()
 

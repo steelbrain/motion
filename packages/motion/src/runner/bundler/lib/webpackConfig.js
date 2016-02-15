@@ -64,7 +64,5 @@ export default function webpackConfig(filename, config = {}) {
     }
   }, config)
 
-  log('bundler', '------------webpackConfig------------'.yellow, conf)
-
   return conf
 }

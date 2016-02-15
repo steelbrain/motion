@@ -24,7 +24,7 @@ for p in "${packages[@]}"; do
 
     node ./node_modules/babel-cli/bin/babel "$f/src" \
       --out-dir "$f/lib" \
-      --presets es2015-node,stage-2 \
+      --presets es2015-node4,stage-2 \
       --plugins transform-async-to-generator,transform-flow-strip-types,syntax-flow \
       --source-maps \
       --copy-files $1 &
