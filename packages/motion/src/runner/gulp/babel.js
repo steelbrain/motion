@@ -47,7 +47,7 @@ const babelRuntimeRegex =
 const babelRuntimeRequire = src =>
 	getMatches(src, babelRuntimeRegex, 1)
 
-function motionFile(file) {
+export function motionFile(file) {
 	let track = {
 		imports: [],
 		isExported: false

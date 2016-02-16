@@ -1,6 +1,5 @@
-import { transform as babelTransform } from 'flint-babel-core'
-import { Scanner } from '../gulp/scanner'
-// import { transformPlugin, getBabelConfig } from '../helpers'
+import {motionFile} from '../gulp/babel'
+import Cache from '../cache'
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g
 export const POSITION_TYPE = {
@@ -9,20 +8,18 @@ export const POSITION_TYPE = {
   STYLE: 'STYLE'
 }
 
-export function transformText(text, {
-  log = null,
-  writeStyle = null,
-  onMeta = null,
-}) {
-
-  // Scanner.pre(false, text, function(text) {
-  //   const babelConfig = getBabelConfig({
-  //     log, writeStyle, onMeta
-  //   })
-  //   babelConfig.filename = '__editor__'
-  //   babelTransform(text, babelConfig)
-  // })
-  // transformPlugin.disposeLast()
+export function collectViews(contents) {
+  try {
+    motionFile({
+      contents,
+      path: '__editor__',
+      relative: '__editor__',
+      sourceMap: false
+    })
+    return Cache.getFileMeta('__editor__') || {}
+  } catch (_) {
+    return {}
+  }
 }
 
 export function pointWithinRange(point, range) {
