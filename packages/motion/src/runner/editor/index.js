@@ -36,13 +36,7 @@ export default class Editor {
       } else throw _
     }
 
-    // Errors caught here are probably internal, log them so we can debug
-    try {
-      return this.autocomplete.complete(text, point, positionInfo)
-    } catch (_) {
-      logError(_)
-      return []
-    }
+    return this.autocomplete.complete(text, point, positionInfo)
   }
 
   positionInfo(text, position) {
