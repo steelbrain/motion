@@ -36,6 +36,12 @@ export default class SuperStream {
     return this.stream
   }
 
+  clearFile(path) {
+    const rel = this.relPath(path)
+    this.isBuilding[rel] = false
+    this.queue[rel] = false
+  }
+
   doneBuilding(path) {
     const rel = this.relPath(path)
     this.isBuilding[rel] = false
@@ -46,6 +52,7 @@ export default class SuperStream {
   // prevent upper limit send post hoc
   avoidSending(path) {
     this.queue[this.relPath(path)] = false
+    clearTimeout(this.upperLimit)
   }
 
   runQueue(relativePath) {

@@ -8,9 +8,9 @@ import bridge from '../bridge'
 import disk from '../disk'
 import cache from '../cache'
 import opts from '../opts'
-import { log, logError, handleError, writeFile } from '../lib/fns'
+import { log, logError, handleError, writeFile, emitter } from '../lib/fns'
 
-export async function internals(opts = {}) {
+export async function writeInternals(opts = {}) {
   try {
     log.internals('internals')
     await finishedInstalling()
@@ -42,7 +42,10 @@ export function runInternals() {
     const err = getWebpackErrors('externals', e, stats)
 
     if (err) logError(err)
-    else onInternalInstalled()
+    else {
+      emitter.emit('bundler:internals')
+      onInternalInstalled()
+    }
   })
 }
 

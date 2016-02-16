@@ -29,7 +29,7 @@ function assetsApp() {
   return new Promise((resolve, reject) => {
     stream
         .pipe($.plumber())
-        // .pipe($.log(out.goodFile('⇢')))
+        // .pipe($.fn(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(assets.out))
         .on('end', () => {
@@ -58,7 +58,7 @@ async function assetsStatics() {
   return new Promise((resolve, reject) => {
     stream
         .pipe($.plumber())
-        // .pipe($.log(out.goodFile('⇢')))
+        // .pipe($.fn(out.goodFile('⇢')))
         // .pipe($.filterEmptyDirs)
         .pipe(gulp.dest(statics.out))
         .on('end', () => {

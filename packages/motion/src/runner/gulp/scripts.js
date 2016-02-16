@@ -40,40 +40,40 @@ export function scripts({ inFiles = [], userStream }) {
     $.merge(scripts, dirAddStream(opts('appDir')), superStream.getStream())
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
-      .pipe($.log(reset))
+      .pipe($.fn(reset))
       .pipe($.plumber(catchError))
-      .pipe($.log(setLastFile))
+      .pipe($.fn(setLastFile))
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
       .pipe(babel.file())
-      .pipe($.log(processDependencies))
-      .pipe($.log(sendOutsideChanged)) // right after motion
+      .pipe($.fn(processDependencies))
+      .pipe($.fn(sendOutsideChanged)) // right after motion
       .pipe($.if(!userStream, $.rename({ extname: '.js' })))
       .pipe($.if(file => file.babel.isExported,
         $.multipipe(
-          $.log(removeNewlyInternal),
-          $.log(markFileSuccess), // before writing to preserve path
+          $.fn(removeNewlyInternal),
+          $.fn(markFileSuccess), // before writing to preserve path
           gulp.dest(opts('deps').internalDir),
-          $.if(hasBuilt, $.log(bundler.internals.bind(null, { force: true }))),
-          $.log(buildDone),
+          $.if(hasBuilt, $.fn(bundler.writeInternals.bind(null, { force: true }))),
+          $.fn(buildDone),
           $.ignore.exclude(true)
         )
       ))
       .pipe($.sourcemaps.write('.'))
-      .pipe($.log(markFileSuccess))
+      .pipe($.fn(markFileSuccess))
       .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
-      .pipe($.log(afterWrite))
+      .pipe($.fn(afterWrite))
       // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
-      .pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log()).pipe($.log())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
+      .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
 
   function markDone(file) {
     State.loaded++
@@ -278,15 +278,24 @@ export function scripts({ inFiles = [], userStream }) {
     if (!cache.get(file.path)) return // avoid ?? todo: figure out why this is necessary
     if (State.lastError) return // avoid if error
 
+    const finish = () => {
+      emitter.emit('script:end', { path: file.relativePath })
+      bridge.broadcast('script:add', file.message)
+    }
+
     // dont broadcast script if installing/bundling
     const isInstalling = bundler.isInstalling()
-    log.gulp('bundler.isInstalling', isInstalling, 'willInstall?', file.willInstall)
-    if (isInstalling || file.willInstall)
+    log.gulp('isInstalling?', isInstalling, file.willInstall)
+
+    if (isInstalling)
       return
 
-    // ADD
-    emitter.emit('script:end', { path: file.relativePath })
-    bridge.broadcast('script:add', file.message)
+    if (file.willInstall) {
+      superStream.clearFile(file.path)
+      return
+    }
+
+    finish()
   }
 
   async function buildDone(file) {

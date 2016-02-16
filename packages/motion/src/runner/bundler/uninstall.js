@@ -4,7 +4,7 @@ import normalize from './lib/normalize'
 import npm from './lib/npm'
 import filterWithPath from './lib/filterWithPath'
 import { readPackageJSON, readInstalled } from './lib/installed'
-import { externals } from './externals'
+import { writeExternals } from './externals'
 import { writeInstalled } from './lib/installed'
 import { rm, p, _, log, handleError } from '../lib/fns'
 
@@ -62,7 +62,7 @@ export async function uninstall(rebundle) {
 
     // if asked to rebundle or uninstalled, rebundle
     if (rebundle || uninstalled.length) {
-      await externals()
+      await writeExternals()
     }
 
     return uninstalled

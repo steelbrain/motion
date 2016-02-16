@@ -7,7 +7,7 @@ import npm from './lib/npm'
 import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
-import { externals } from './externals'
+import { writeExternals } from './externals'
 
 // ensures all packages installed, uninstalled, written out to bundle
 export async function install(force) {
@@ -16,7 +16,7 @@ export async function install(force) {
     await remakeInstallDir(force)
     await uninstall()
     await installAll()
-    await externals({ force })
+    await writeExternals({ force })
   }
   catch (e) {
     handleError(e)
@@ -31,10 +31,10 @@ let installing = []
 let _isInstalling = false
 
 // used to quickly check if a file will trigger an install
-export async function willInstall(file, paths) {
+export function willInstall(file, paths) {
   const { externals } = cache.getFile(file)
-  const hasNew = !!_.difference(externals, paths).length
-  return hasNew
+  const different = !!_.xor(externals, paths).length
+  return different
 }
 
 // finds the new externals to install
@@ -74,7 +74,7 @@ export async function installAll(requires) {
       // new motion excluded require like babel-runtime, see rmExternals
       if (requires.length) {
         await writeInstalled(installed)
-        await externals({ silent: true })
+        await writeExternals({ silent: true })
       }
       return
     }
@@ -149,7 +149,7 @@ function runInstall(prevInstalled, toInstall) {
 
     logInstalled(successful)
     await writeInstalled(finalPaths, toInstall)
-    await externals()
+    await writeExternals()
 
     // reset
     installingFullNames = []

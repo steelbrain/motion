@@ -26,7 +26,7 @@ export const $ = loadPlugins()
 $.filterEmptyDirs = $.if(file => !file.stat.isFile(), $.ignore.exclude(true))
 $.merge = merge
 $.multipipe = multipipe
-$.log = logfn
+$.fn = logfn
 
 export const isBuilding = () => opts('build') && !opts('watch')
 export const isProduction = () => opts('build')

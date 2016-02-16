@@ -1,14 +1,22 @@
-import { internals } from './internals'
+import { writeInternals } from './internals'
 import { installExternals } from './externals'
-import handleError from '../lib/handleError'
-import log from '../lib/log'
+import { log, handleError, emitter } from '../lib/fns'
 
 export async function scanFile(file) {
-  log.externals('scanFile', file)
+  log.externals('scanFile', file.path)
   try {
     // install new stuff
     await installExternals(file.path)
-    await internals({ force: file.willInstall })
+    await writeInternals({ force: file.willInstall })
+
+    // notify finished installing
+    // if (file.willInstall) {
+    //   let e = emitter.on('bundler:internals', () => {
+    //     log.externals('done bundling, send scanned')
+    //     e.dispose()
+    //     emitter.emit('file:scanned', file.path)
+    //   })
+    // }
   }
   catch (e) {
     handleError(e)

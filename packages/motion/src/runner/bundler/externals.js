@@ -13,10 +13,7 @@ import { log, logError } from '../lib/fns'
 //    check updated
 //      => write paths to disk
 //      => pack with webpack
-export async function externals(opts = {}) {
-  if (opts.doInstall)
-    await installAll()
-
+export async function writeExternals(opts = {}) {
   if (opts.force || disk.externalsPaths.hasChanged()) {
     const paths = await disk.externalsPaths.read()
 
@@ -43,9 +40,6 @@ export function runExternals() {
 }
 
 export async function installExternals(filePath) {
-  const found = cache.getExternals(filePath)
-  log.externals('installExternals', found)
-
   if (opts('hasRunInitialBuild'))
-    await installAll(found)
+    await installAll(cache.getExternals(filePath))
 }

@@ -29,7 +29,7 @@ export default function getWebpackErrors(where, err, stats) {
 
   if (errors.length) {
     // debug output everything
-    log.webpack('webpackErrors', errors)
+    log.webpack('webpackErrors', errors.join("\n"))
 
     let messages = errors.map(split).map(takeWebpack)[0].dim
     let whereMsg = where == 'externals' ? 'NPM modules' : 'imported local modules'
