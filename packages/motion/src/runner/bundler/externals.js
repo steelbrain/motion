@@ -52,5 +52,5 @@ export async function installExternals(filePath) {
   log.externals('installExternals', found)
 
   if (opts('hasRunInitialBuild'))
-    installAll(found)
+    await installAll(found)
 }

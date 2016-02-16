@@ -201,7 +201,17 @@ export function scripts({ inFiles = [], userStream }) {
 
     const scan = () => {
       cache.setFileImports(file.path, file.babel.imports)
-      bundler.scanFile(file.path)
+      bundler.scanFile(file)
+    }
+
+    if (!opts('build') || opts('watch')) {
+      debounce('removeOldImports', 3000, bundler.uninstall)
+
+      // check will install
+      file.willInstall = bundler.willInstall(file.path, file.babel.imports)
+
+      if (file.willInstall)
+        superStream.avoidSending(file.path)
     }
 
     // run scan
@@ -209,16 +219,6 @@ export function scripts({ inFiles = [], userStream }) {
       scan()
     else
       debounce(`install:${file.path}`, 2000, scan)
-
-    if (!opts('build') || opts('watch')) {
-      debounce('removeOldImports', 3000, bundler.uninstall)
-
-      // check will install
-      file.willInstall = bundler.willInstall(file.babel.imports)
-
-      if (file.willInstall)
-        superStream.avoidSending(file.path)
-    }
   }
 
   // detects if a file has changed not inside views for hot reloads correctness
@@ -279,8 +279,10 @@ export function scripts({ inFiles = [], userStream }) {
     if (State.lastError) return // avoid if error
 
     // dont broadcast script if installing/bundling
-    log.gulp('bundler installing?', bundler.isInstalling(), 'willInstall?', file.willInstall)
-    if (bundler.isInstalling() || file.willInstall) return
+    const isInstalling = bundler.isInstalling()
+    log.gulp('bundler.isInstalling', isInstalling, 'willInstall?', file.willInstall)
+    if (isInstalling || file.willInstall)
+      return
 
     // ADD
     emitter.emit('script:end', { path: file.relativePath })

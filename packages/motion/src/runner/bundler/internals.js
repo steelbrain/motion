@@ -11,7 +11,7 @@ import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
 export async function internals(opts = {}) {
-  try {    
+  try {
     log.internals('internals')
     await finishedInstalling()
 
@@ -29,18 +29,6 @@ export async function internals(opts = {}) {
   }
   catch(e) {
     handleError(e)
-  }
-}
-
-let runningBundle = null
-
-export async function checkInternals(file) {
-  if (opts('hasRunInitialBuild') && cache.isInternal(file) && !runningBundle) {
-    clearTimeout(runningBundle)
-    runningBundle = setTimeout(async () => {
-      await internals()
-      runningBundle = null
-    }, 100)
   }
 }
 
