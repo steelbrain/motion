@@ -6,7 +6,12 @@ export default async function createWriter(filePath, { debug = '', json = false,
   // helpers
   const logw = log.writer.bind(null, debug.yellow)
 
-  // constructor
+  // internal state
+  let cache = null
+  let cacheStr = null
+  let isChanged = true
+
+  // init
   try {
     await read()
   }
@@ -18,11 +23,6 @@ export default async function createWriter(filePath, { debug = '', json = false,
       handleError(e)
     }
   }
-
-  // internal state
-  let cache = null
-  let cacheStr = null
-  let isChanged = true
 
   // public
   async function read() {
@@ -41,7 +41,7 @@ export default async function createWriter(filePath, { debug = '', json = false,
       return state
     }
     catch(e) {
-      logw('read error'.red, e)
+      logw(e, e.stack)
       return defaultValue
     }
   }
