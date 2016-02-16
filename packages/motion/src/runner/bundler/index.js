@@ -1,4 +1,4 @@
-import { install, installAll, isInstalling, finishedInstalling, willInstall } from './install'
+import { install, installAll, isInstalling, finishedInstalling } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
 import { runInternals, writeInternals } from './internals'
@@ -28,6 +28,5 @@ export default {
   writeInternals,
   isInstalling,
   finishedInstalling,
-  remakeInstallDir,
-  willInstall
+  remakeInstallDir
 }

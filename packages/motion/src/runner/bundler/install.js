@@ -30,13 +30,6 @@ let installingFullNames = []
 let installing = []
 let _isInstalling = false
 
-// used to quickly check if a file will trigger an install
-export function willInstall(file, paths) {
-  const { externals } = cache.getFile(file)
-  const different = !!_.xor(externals, paths).length
-  return different
-}
-
 // finds the new externals to install
 export function getNew(requires, installed = readInstalledCache()) {
   if (!requires.length) return requires

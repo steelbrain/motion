@@ -23,6 +23,7 @@ export function scripts({ inFiles = [], userStream }) {
     curFile: null,
     lastError: null,
     lastSaved: {},
+    previouslyInstalled: {},
     loaded: 0,
     total: inFiles.length,
     outsideSources: {}
@@ -194,6 +195,12 @@ export function scripts({ inFiles = [], userStream }) {
     State.curFile = file
   }
 
+  function willInstall(path, imports) {
+    const result = !!_.xor(imports, State.previouslyInstalled[path]).length
+    State.previouslyInstalled[path] = imports
+    return result
+  }
+
   // sets isInternal and willInstall
   // for handling npm and bundling related things
   function processDependencies(file) {
@@ -208,7 +215,7 @@ export function scripts({ inFiles = [], userStream }) {
       debounce('removeOldImports', 3000, bundler.uninstall)
 
       // check will install
-      file.willInstall = bundler.willInstall(file.path, file.babel.imports)
+      file.willInstall = willInstall(file.path, file.babel.imports)
 
       if (file.willInstall)
         superStream.avoidSending(file.path)
