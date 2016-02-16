@@ -50,6 +50,12 @@ const router = {
     if (Internal.firstRender) return setTimeout(() => router.go(path, opts))
     if (!render) return
 
+    // external links
+    if (path.indexOf('http://') == 0 || path.indexOf('https://') == 0) {
+      window.location.assign(path)
+      return
+    }
+
     // query changes
     if (path[0] === '?')
       path = location + path

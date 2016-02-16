@@ -114,7 +114,7 @@ function release(name, dir) {
     // get package.json
     var info = JSON.parse(fs.readFileSync('package.json'))
 
-    console.log("Releasing...", name, '@', info.version)
+    console.log("Releasing...", name+'@'+info.version)
 
     // motion
     if (name == 'motion') {
