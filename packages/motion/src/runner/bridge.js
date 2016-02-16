@@ -7,7 +7,7 @@ import Cache from './cache'
 import { log, handleError } from './lib/fns'
 import getOptions from './opts'
 
-import type {Disposable} from 'sb-event-kit'
+import type { Disposable } from 'sb-event-kit'
 import type WebSocket from 'ws'
 
 type Message = {
