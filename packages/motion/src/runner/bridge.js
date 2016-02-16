@@ -7,6 +7,7 @@ import Cache from './cache'
 import { log, handleError } from './lib/fns'
 import getOptions from './opts'
 
+import type {Disposable} from 'sb-event-kit'
 import type WebSocket from 'ws'
 
 type Message = {
@@ -15,7 +16,7 @@ type Message = {
 }
 
 export default new class Bridge {
-  cache: Map<string, Message>;
+  cache: Map<string, string>;
   server: ?Server;
   emitter: Emitter;
   connections: Set<WebSocket>;
@@ -31,7 +32,7 @@ export default new class Bridge {
     this.subscriptions.add(this.emitter)
   }
 
-  activateNew(): Promise {
+  activate(): Promise {
     return new Promise((resolve, reject) => {
       const server = this.server = new Server({
         port: websocketPort()
@@ -46,7 +47,6 @@ export default new class Bridge {
         reject(error)
       }))
       this.subscriptions.add(disposableEvent(server, 'connection', connection => this.handleConnection(connection)))
-    }).then(() => {
     })
   }
   handleConnection(connection: WebSocket) {
@@ -84,11 +84,11 @@ export default new class Bridge {
     }
   }
 
-  broadcast(type, message, cacheKey = null) {
+  broadcast(type: string, message: Message, cacheKey: ?string = null) {
     this.broadcastRaw(this.encodeMessage(type, message), cacheKey)
   }
 
-  encodeMessage(type, message = {}) {
+  encodeMessage(type: string, message: Object): string {
     log.bridge('OUT', type)
     return JSON.stringify(Object.assign({
       _type: type,
@@ -96,7 +96,7 @@ export default new class Bridge {
     }, message))
   }
 
-  broadcastRaw(message, cacheKey = null) {
+  broadcastRaw(message: string, cacheKey: ?string = null) {
     if (typeof message !== 'string') {
       throw new Error('Malformed message given')
     }
@@ -108,12 +108,12 @@ export default new class Bridge {
       })
     }
 
-    if (cacheKey !== null) {
+    if (cacheKey) {
       this.cache.set(cacheKey, message)
     }
   }
 
-  onDidReceiveMessage(type, callback) {
+  onDidReceiveMessage(type: string, callback: Function): Disposable {
     return this.emitter.on(`message:${type}`, callback)
   }
 
