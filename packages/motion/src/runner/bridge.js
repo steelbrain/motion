@@ -79,7 +79,7 @@ export class Bridge {
     }))
     connection.send(this.encodeMessage('motion:opts', getOptions()))
 
-    for (const value in this.cache.values()) {
+    for (const value of this.cache.values()) {
       connection.send(value)
     }
   }
