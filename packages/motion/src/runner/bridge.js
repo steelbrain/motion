@@ -15,7 +15,7 @@ type Message = {
   timestamp: number
 }
 
-export default new class Bridge {
+export class Bridge {
   cache: Map<string, string>;
   server: ?Server;
   emitter: Emitter;
@@ -126,3 +126,5 @@ export default new class Bridge {
     this.cache.clear()
   }
 }
+
+export default new Bridge()
