@@ -6,7 +6,7 @@ import { transform } from 'flint-babel-core'
 import onMeta from './lib/onMeta'
 import config from './lib/config'
 import writeStyle from '../lib/writeStyle'
-import { log } from '../lib/fns'
+import { _, log } from '../lib/fns'
 import getMatches from '../lib/getMatches'
 
 export function file(opts) {
@@ -41,11 +41,11 @@ function motionApp(file) {
 	return { res, file }
 }
 
-const babelCoreRequire =
-	/require\(\'(babel\-runtime\/core\-js\/[a-zA-Z-0-9]+\/?[a-zA-Z-0-9]*\/?[a-zA-Z-0-9]*)\'\)/g
+const babelRuntimeRegex =
+	/require\(\'(babel-runtime[a-z-A-Z0-9\/]*)\'\)/g
 
-const getBabelCoreRequires = src =>
-	getMatches(src, babelCoreRequire, 1)
+const babelRuntimeRequire = src =>
+	getMatches(src, babelRuntimeRegex, 1)
 
 function motionFile(file) {
 	let track = {
@@ -72,12 +72,12 @@ function motionFile(file) {
 	const importNames = imports.map(i => i.source)
 
 	let meta = {
-		imports: [].concat(
+		imports: _.uniq([].concat(
 			importNames,
 			(track.imports || []),
 			(importedHelpers || []),
-			getBabelCoreRequires(res.code)
-		),
+			babelRuntimeRequire(res.code)
+		)),
 		isExported: track.isExported,
 	}
 

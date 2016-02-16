@@ -11,7 +11,7 @@ export default function requireString(names, { prefix = '', removeExt = false } 
   return `
   var packages = {}
 
-  ${names.map(name => {
+${names.map(name => {
     return `  packages["${name}"] = require("${prefix}${name}");\n`
   }).join('')}
 

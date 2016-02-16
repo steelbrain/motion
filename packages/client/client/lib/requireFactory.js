@@ -25,7 +25,7 @@ export default function requireFactory(root) {
         + name.replace(/^(\.\.?\/)+/, '')
 
       // try /index for directory shorthand
-      return getInternal(cleanName)
+      return getInternal(cleanName, folder)
     }
 
     // exports
@@ -33,7 +33,7 @@ export default function requireFactory(root) {
       return root.exports[name.replace('exports.', '')]
 
     // get pkg
-    let pkg = getExternal(name)
+    let pkg = getExternal(name, folder)
 
     // we may be waiting for packages reload
     if (!pkg) return
@@ -45,15 +45,15 @@ export default function requireFactory(root) {
     return pkg
   }
 
-  function getExternal(name) {
-    return safeGet(root.exports, `externals`, [name])
+  function getExternal(name, folder) {
+    return safeGet(root.exports, `externals`, [name], folder)
   }
 
-  function getInternal(name) {
-    return safeGet(root.exports, `internals`, [name, `${name}/index`])
+  function getInternal(name, folder) {
+    return safeGet(root.exports, `internals`, [name, `${name}/index`], folder)
   }
 
-  function safeGet(obj, _ns, names) {
+  function safeGet(obj, _ns, names, folder) {
     const ns = `${app}-${_ns}`
     if (!obj[ns]) {
       console.error(`${_ns} not bundled, looking for ${names[0]}`)
@@ -71,7 +71,11 @@ export default function requireFactory(root) {
     }
 
     if (typeof obj[ns][name] == 'undefined') {
-      console.error(`Can't find import "${names[0]}" in window.exports["${ns}"][${names[0]}]`)
+      const where = folder ?
+        ` into ${folder}` :
+        ``
+
+      console.error(`Can't find import "${names[0]}"${where} (using exports["${ns}"]["${names[0]}"])`)
       return {}
     }
 

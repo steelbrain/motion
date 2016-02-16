@@ -51,6 +51,8 @@ export default function createComponent(Motion, Internal, name, view, options = 
   function createProxyComponent() {
     return React.createClass({
 
+      displayName: `${name}Proxy`,
+
       childContextTypes: {
         path: React.PropTypes.string,
         displayName: React.PropTypes.string
