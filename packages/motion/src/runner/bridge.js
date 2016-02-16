@@ -1,59 +1,86 @@
+/* @flow */
 import { Emitter, CompositeDisposable } from 'sb-event-kit'
-import { createServer } from 'ws'
+import { Server } from 'ws'
+import disposableEvent from 'disposable-event'
 import websocketPort from './lib/wport'
 import Cache from './cache'
 import { log, handleError } from './lib/fns'
 import getOptions from './opts'
 
+import type WebSocket from 'ws'
+
+type Message = {
+  _type: string,
+  timestamp: number
+}
+
 export default new class Bridge {
+  cache: Map<string, Message>;
+  server: ?Server;
+  emitter: Emitter;
+  connections: Set<WebSocket>;
+  subscriptions: CompositeDisposable;
+
   constructor() {
-    this.subscriptions = new CompositeDisposable()
+    this.cache = new Map()
+    this.server = null
     this.emitter = new Emitter()
     this.connections = new Set()
-    this.server = null
-    this.queue = {}
+    this.subscriptions = new CompositeDisposable()
 
     this.subscriptions.add(this.emitter)
   }
 
-  activate() {
-    this.server = createServer({
-      port: websocketPort()
-    }, connection => {
-      this.connections.add(connection)
-      connection.on('close', () => {
-        this.connections.delete(connection)
+  activateNew(): Promise {
+    return new Promise((resolve, reject) => {
+      const server = this.server = new Server({
+        port: websocketPort()
       })
-      connection.on('message', (data, flags) => {
-        if (flags.binary) {
-          // Ignore binary
-          log.bridge('Ignoring message because its binary')
-          return
-        }
-        let message
-        new Promise(resolve => {
-          message = JSON.parse(data)
-          log.bridge('IN', message._type)
-          resolve(this.emitter.emit(`message:${message._type}`, message))
-        }).catch(handleError).then(() => {
-          if (message && message.id) {
-            const result = Object.assign({id: message.id}, message.result)
-            connection.send(this.encodeMessage(message._type, result))
-          }
-        })
-      })
-      this.welcomeConnection(connection)
+      const subscriptions = new CompositeDisposable()
+      subscriptions.add(disposableEvent(server, 'listening', function() {
+        subscriptions.dispose()
+        resolve()
+      }))
+      subscriptions.add(disposableEvent(server, 'error', function(error) {
+        subscriptions.dispose()
+        reject(error)
+      }))
+      this.subscriptions.add(disposableEvent(server, 'connection', connection => this.handleConnection(connection)))
+    }).then(() => {
     })
   }
+  handleConnection(connection: WebSocket) {
+    this.connections.add(connection)
+    connection.on('close', () => {
+      this.connections.delete(connection)
+    })
+    connection.on('message', async (data, flags) => {
+      if (flags.binary) {
+        log.bridge('Ignoring message because it\'s binary')
+        return
+      }
 
-  welcomeConnection(connection) {
+      let message
+      try {
+        message = JSON.parse(data)
+        log.bridge('IN', message._type)
+        await this.emitter.emit(`message:${message._type}`, message)
+      } catch (error) {
+        handleError(error)
+      } finally {
+        if (message && message.id) {
+          connection.send(this.encodeMessage(message._type, Object.assign({id: message.id}, message.result)))
+        }
+      }
+    })
+
     connection.send(this.encodeMessage('motion:baseDir', {
       dir: Cache.baseDir()
     }))
     connection.send(this.encodeMessage('motion:opts', getOptions()))
 
-    for (const key in this.queue) {
-      connection.send(this.queue[key])
+    for (const value in this.cache.values()) {
+      connection.send(value)
     }
   }
 
@@ -82,7 +109,7 @@ export default new class Bridge {
     }
 
     if (cacheKey !== null) {
-      this.queue[cacheKey] = message
+      this.cache.set(cacheKey, message)
     }
   }
 
@@ -96,6 +123,6 @@ export default new class Bridge {
     }
     this.connections.clear()
     this.subscriptions.dispose()
-    this.queue = null
+    this.cache.clear()
   }
 }
