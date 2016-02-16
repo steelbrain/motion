@@ -272,11 +272,13 @@ const Cache = {
   },
 
   setFileInstalling(file : string, val : boolean) {
-    files(file).installing = val
+    const f = files(file)
+    if (f) f.installing = val
   },
 
   isInstalling(file : string) {
-    return files(file).installing
+    const f = files(file)
+    return f ? f.installing : false
   },
 
   serialize() {
