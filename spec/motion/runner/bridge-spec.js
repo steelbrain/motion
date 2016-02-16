@@ -48,4 +48,51 @@ describe('Bridge', function() {
       expect(JSON.parse(connection.send.calls[2].args[0])._type).toBe('editor:error')
     })
   })
+
+  describe('::broadcast', function() {
+    it('encodes the message and sends it through ::broadcastRaw', function() {
+      spyOn(bridge, 'encodeMessage').andCallThrough()
+      spyOn(bridge, 'broadcastRaw').andCallThrough()
+      bridge.broadcast('editor:error', {})
+      expect(bridge.encodeMessage).toHaveBeenCalled()
+      expect(bridge.broadcastRaw).toHaveBeenCalled()
+      expect(typeof bridge.broadcastRaw.mostRecentCall.args[0]).toBe('string')
+    })
+  })
+
+  describe('::encodeMessage', function() {
+    it('returns a string', function() {
+      expect(typeof bridge.encodeMessage('wow', {})).toBe('string')
+    })
+    it('adds timestamp and type to messages', function() {
+      const message = JSON.parse(bridge.encodeMessage('wow', {}))
+      expect(message._type).toBe('wow')
+      expect(typeof message.timestamp).toBe('number')
+    })
+  })
+
+  describe('::broadcastRaw', function() {
+    it('emits if there\'s active connection', function() {
+      const connection = createDummyConnection()
+      bridge.handleConnection(connection)
+      expect(connection.send.calls.length).toBe(2)
+      bridge.broadcastRaw('asd')
+      expect(connection.send.calls.length).toBe(3)
+      expect(bridge.cache.size).toBe(0)
+    })
+    it('caches if a cache key is found', function() {
+      bridge.broadcastRaw('Hey!', 'key')
+      expect(bridge.cache.size).toBe(1)
+      expect(bridge.cache.get('key')).toBe('Hey!')
+    })
+    it('caches even though there\'s an active connection', function() {
+      const connection = createDummyConnection()
+      bridge.handleConnection(connection)
+      expect(connection.send.calls.length).toBe(2)
+      bridge.broadcastRaw('asd', 'key')
+      expect(connection.send.calls.length).toBe(3)
+      expect(bridge.cache.size).toBe(1)
+      expect(bridge.cache.get('key')).toBe('asd')
+    })
+  })
 })
