@@ -22,9 +22,6 @@ export async function internals(opts = {}) {
           removeExt: true
         }))
       })
-
-      await packInternals()
-      onInternalInstalled()
     }
   }
   catch(e) {
@@ -32,8 +29,25 @@ export async function internals(opts = {}) {
   }
 }
 
+export function runInternals() {
+  const bundler = webpack(webpackConfig('internals.js', {
+    entry: opts('deps').internalsIn,
+    externals: webpackUserExternals()
+  }))
+
+  const mode = !opts('build') ? 'watch' : 'run'
+
+  bundler[mode]({}, (e, stats) => {
+    log.externals('ran webpack internals')
+    const err = getWebpackErrors('externals', e, stats)
+
+    if (err) logError(err)
+    else onInternalInstalled()
+  })
+}
+
 // let internals use externals
-export function webpackUserExternals() {
+function webpackUserExternals() {
   const imports = cache.getExternals()
   const externalsObj = imports.reduce((acc, cur) => {
     acc[cur] = cur
@@ -41,20 +55,4 @@ export function webpackUserExternals() {
   }, {})
 
   return externalsObj
-}
-
-function packInternals() {
-  log.internals('packInternals')
-
-  return new Promise((resolve, reject) => {
-    const conf = webpackConfig('internals.js', {
-      entry: opts('deps').internalsIn,
-      externals: webpackUserExternals()
-    })
-
-    webpack(conf, (err, stats) => {
-      logError(getWebpackErrors('internals', err, stats))
-      resolve()
-    })
-  })
 }

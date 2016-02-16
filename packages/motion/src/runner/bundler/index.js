@@ -1,8 +1,8 @@
 import { install, installAll, isInstalling, finishedInstalling, willInstall } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
-import { internals } from './internals'
-import { externals } from './externals'
+import { runInternals, internals } from './internals'
+import { runExternals, externals } from './externals'
 import remakeInstallDir from './lib/remakeInstallDir'
 
 async function init() {
@@ -10,6 +10,8 @@ async function init() {
 }
 
 async function all(opts) {
+  runExternals()
+  runInternals()
   await externals({ doInstall: true, ...opts })
   await internals(opts)
   await uninstall()

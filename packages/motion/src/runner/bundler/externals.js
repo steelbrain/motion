@@ -23,29 +23,24 @@ export async function externals(opts = {}) {
     await disk.externalsIn.write((current, write) => {
       write(requireString(paths))
     })
-
-    await packExternals()
-
-    if (!opts.silent)
-      onInstalled()
   }
 }
 
-function packExternals() {
-  log.externals('pack externals')
+export function runExternals() {
+  const bundler = webpack(webpackConfig('externals.js', {
+    entry: opts('deps').externalsIn,
+  }))
 
-  return new Promise((resolve, reject) => {
-    const conf = webpackConfig('externals.js', {
-      entry: opts('deps').externalsIn,
-    })
+  const mode = !opts('build') ? 'watch' : 'run'
 
-    webpack(conf, async (err, stats) => {
-      logError(getWebpackErrors('externals', err, stats))
-      resolve()
-    })
+  bundler[mode]({}, (e, stats) => {
+    log.externals('ran webpack externals')
+    const err = getWebpackErrors('externals', e, stats)
+
+    if (err) logError(err)
+    else onInstalled()
   })
 }
-
 
 export async function installExternals(filePath) {
   const found = cache.getExternals(filePath)
