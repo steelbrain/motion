@@ -37,23 +37,28 @@ export class Bridge {
       const server = this.server = new Server({
         port: websocketPort()
       })
+
       const subscriptions = new CompositeDisposable()
       subscriptions.add(disposableEvent(server, 'listening', function() {
         subscriptions.dispose()
         resolve()
       }))
+
       subscriptions.add(disposableEvent(server, 'error', function(error) {
         subscriptions.dispose()
         reject(error)
       }))
+
       this.subscriptions.add(disposableEvent(server, 'connection', connection => this.handleConnection(connection)))
     })
   }
   handleConnection(connection: WebSocket) {
     this.connections.add(connection)
+
     connection.on('close', () => {
       this.connections.delete(connection)
     })
+
     connection.on('message', async (data, flags) => {
       if (flags.binary) {
         log.bridge('Ignoring message because it\'s binary')
@@ -61,13 +66,16 @@ export class Bridge {
       }
 
       let message
+
       try {
         message = JSON.parse(data)
         log.bridge('IN', message._type)
         await this.emitter.emit(`message:${message._type}`, message)
-      } catch (error) {
+      }
+      catch (error) {
         handleError(error)
-      } finally {
+      }
+      finally {
         if (message && message.id) {
           connection.send(this.encodeMessage(message._type, Object.assign({id: message.id}, message.result)))
         }
