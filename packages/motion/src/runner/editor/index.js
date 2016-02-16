@@ -15,9 +15,10 @@ export default class Editor {
   }
 
   activate(bridge) {
-    this.subscriptions.add(bridge.onMessage('editor:autocomplete', message => {
-      const suggestions = this.complete(message.text, message.position)
-      bridge.broadcast('editor:autocomplete', {id: message.id, suggestions})
+    this.subscriptions.add(bridge.onDidReceiveMessage('editor:autocomplete', message => {
+      message.result = {
+        suggestions: this.complete(message.text, message.position)
+      }
     }))
   }
 
