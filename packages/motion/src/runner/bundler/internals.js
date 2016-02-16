@@ -1,5 +1,5 @@
 import { finishedInstalling } from './install'
-import webpack from 'webpack'
+import webpack from './lib/webpack'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import getWebpackErrors from './lib/getWebpackErrors'
@@ -8,7 +8,7 @@ import bridge from '../bridge'
 import disk from '../disk'
 import cache from '../cache'
 import opts from '../opts'
-import { log, logError, handleError, writeFile, emitter } from '../lib/fns'
+import { log, logError, handleError, writeFile } from '../lib/fns'
 
 export async function writeInternals(opts = {}) {
   try {
@@ -30,23 +30,12 @@ export async function writeInternals(opts = {}) {
 }
 
 export function runInternals() {
-  const bundler = webpack(webpackConfig('internals.js', {
+  const config = webpackConfig('internals.js', {
     entry: opts('deps').internalsIn,
     externals: webpackUserExternals()
-  }))
-
-  const mode = !opts('build') ? 'watch' : 'run'
-
-  bundler[mode]({}, (e, stats) => {
-    log.externals('ran webpack internals')
-    const err = getWebpackErrors('externals', e, stats)
-
-    if (err) logError(err)
-    else {
-      emitter.emit('bundler:internals')
-      onInternalInstalled()
-    }
   })
+
+  return webpack('internals', config, onInternalInstalled)
 }
 
 // let internals use externals

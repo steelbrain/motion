@@ -10,8 +10,10 @@ async function init() {
 }
 
 async function all() {
-  runExternals()
-  runInternals()
+  await Promise.all([
+    runExternals(),
+    runInternals()
+  ])
   await installAll()
   await writeInternals({ force: true })
   await uninstall()

@@ -1,6 +1,5 @@
-import webpack from 'webpack'
+import webpack from './lib/webpack'
 import webpackConfig from './lib/webpackConfig'
-import getWebpackErrors from './lib/getWebpackErrors'
 import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
@@ -24,19 +23,11 @@ export async function writeExternals(opts = {}) {
 }
 
 export function runExternals() {
-  const bundler = webpack(webpackConfig('externals.js', {
+  const config = webpackConfig('externals.js', {
     entry: opts('deps').externalsIn,
-  }))
-
-  const mode = !opts('build') ? 'watch' : 'run'
-
-  bundler[mode]({}, (e, stats) => {
-    log.externals('ran webpack externals')
-    const err = getWebpackErrors('externals', e, stats)
-
-    if (err) logError(err)
-    else onInstalled()
   })
+
+  return webpack('externals', config, onInstalled)
 }
 
 export async function installExternals(filePath) {
