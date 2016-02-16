@@ -47,7 +47,7 @@ const babelCoreRequire =
 const getBabelCoreRequires = src =>
 	getMatches(src, babelCoreRequire, 1)
 
-function motionFile(file) {
+export function motionFile(file) {
 	let track = {
 		imports: [],
 		isExported: false

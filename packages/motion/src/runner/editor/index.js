@@ -4,7 +4,7 @@ import Point from 'atom-text-buffer-point'
 import {CompositeDisposable} from 'sb-event-kit'
 import Autocomplete from './autocomplete'
 import {logError} from '../lib/fns'
-import {transformText, getObjectAtPosition, POSITION_TYPE} from './helpers'
+import {collectViews, getObjectAtPosition, POSITION_TYPE} from './helpers'
 
 export default class Editor {
   constructor() {
@@ -47,7 +47,7 @@ export default class Editor {
 
   positionInfo(text, position) {
     const info = {
-      views: this.getViews(text),
+      views: collectViews(text),
       active: null,
       position: null
     }
@@ -68,16 +68,6 @@ export default class Editor {
       return POSITION_TYPE.STYLE
     }
     return POSITION_TYPE.VIEW_TOP
-  }
-
-  getViews(text) {
-    let views = {}
-    transformText(text, {
-      onMeta: function(meta) {
-        views = meta.views
-      }
-    })
-    return views
   }
 
   dispose() {
