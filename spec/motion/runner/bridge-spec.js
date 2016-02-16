@@ -95,4 +95,18 @@ describe('Bridge', function() {
       expect(bridge.cache.get('key')).toBe('asd')
     })
   })
+
+  it('properly replies to messages if they have an id', async function() {
+    const connection = createDummyConnection()
+    bridge.handleConnection(connection)
+    bridge.onDidReceiveMessage('something', function(message) {
+      message.result = {something: true}
+    })
+    connection.emit('message', JSON.stringify({_type: 'something', id: 2}), {})
+    await wait(0)
+    const mostRecent = JSON.parse(connection.send.mostRecentCall.args[0])
+    expect(mostRecent._type).toBe('something')
+    expect(mostRecent.id).toBe(2)
+    expect(mostRecent.something).toBe(true)
+  })
 })

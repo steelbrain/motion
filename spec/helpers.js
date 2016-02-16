@@ -26,5 +26,6 @@ function resetClock() {
   }
 }
 
-// Initialization Code
-resetClock()
+beforeEach(function() {
+  resetClock()
+})
