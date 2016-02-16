@@ -9,11 +9,11 @@ async function init() {
   await remakeInstallDir()
 }
 
-async function all(opts) {
+async function all() {
   runExternals()
   runInternals()
   await installAll()
-  await writeInternals(opts)
+  await writeInternals({ force: true })
   await uninstall()
 }
 
