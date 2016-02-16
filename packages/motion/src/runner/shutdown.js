@@ -7,7 +7,7 @@ process.on('uncaughtException', cleanExit)
 let child
 
 function cleanExit(e) {
-  if (e) console.log(e.stack)
+  if (e) print(e.stack)
 
   child && child.send('EXIT') // this seems to be required
 

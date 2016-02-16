@@ -51,7 +51,7 @@ async function migration() {
     // .motion/flint.json => .motion/config.js
     const oldConfLoc = p(OPTS.motionDir, 'flint.json')
     if (await exists(oldConfLoc)) {
-      console.log(`  Migrating flint config to motion (flint.json => config.js)...\n`)
+      print(`  Migrating flint config to motion (flint.json => config.js)...\n`)
       await move(oldConfLoc, OPTS.configFile)
       // add module.exports
       const oldConf = await readFile(OPTS.configFile)

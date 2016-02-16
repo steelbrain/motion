@@ -271,6 +271,14 @@ const Cache = {
     if (f) f.writtenAt = time
   },
 
+  setFileInstalling(file : string, val : boolean) {
+    files(file).installing = val
+  },
+
+  isInstalling(file : string) {
+    return files(file).installing
+  },
+
   serialize() {
     log.cache('serialize')
     disk.state.write((state, write) => {

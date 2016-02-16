@@ -291,7 +291,7 @@ export function scripts({ inFiles = [], userStream }) {
       return
 
     if (file.willInstall) {
-      superStream.clearFile(file.path)
+      cache.setFileInstalling(file.path, true)
       return
     }
 

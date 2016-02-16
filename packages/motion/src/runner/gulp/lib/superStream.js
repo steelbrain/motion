@@ -20,6 +20,7 @@ export default class SuperStream {
     this.basePath = opts('appDir')
     this.relPath = p => path.relative(this.basePath, p)
     this.isBuilding = {}
+    this.upperLimit = {}
     this.queue = {}
     this.stream = new Readable({ objectMode: true })
     this.stream._read = function(n) {}
@@ -36,12 +37,6 @@ export default class SuperStream {
     return this.stream
   }
 
-  clearFile(path) {
-    const rel = this.relPath(path)
-    this.isBuilding[rel] = false
-    this.queue[rel] = false
-  }
-
   doneBuilding(path) {
     const rel = this.relPath(path)
     this.isBuilding[rel] = false
@@ -51,33 +46,37 @@ export default class SuperStream {
 
   // prevent upper limit send post hoc
   avoidSending(path) {
-    this.queue[this.relPath(path)] = false
-    clearTimeout(this.upperLimit)
+    const rel = this.relPath(path)
+    this.queue[rel] = false
+    clearTimeout(this.upperLimit[rel])
   }
 
-  runQueue(relativePath) {
-    const queued = this.queue[relativePath]
-    this.queue[relativePath] = false
+  runQueue(rel) {
+    const queued = this.queue[rel]
+    this.queue[rel] = false
     if (queued) queued()
   }
 
   fileSend({ path, startTime, contents }) {
-    const relativePath = this.relPath(path)
-    debug('SIN', relativePath)
+    const rel = this.relPath(path)
+    debug('SIN', rel)
 
     // check if file actually in motion project
-    if (!path || path.indexOf(this.basePath) !== 0 || relativePath.indexOf('.motion') >= 0 || !isFileType(path, 'js')) {
+    if (!path || path.indexOf(this.basePath) !== 0 || rel.indexOf('.motion') >= 0 || !isFileType(path, 'js')) {
       debug('  file not streamable',
-        path.indexOf(this.basePath) !== 0, relativePath.indexOf('.motion') === 0, !isFileType(path, 'js')
+        path.indexOf(this.basePath) !== 0, rel.indexOf('.motion') === 0, !isFileType(path, 'js')
       )
       return
     }
 
-    const sendImmediate = cache.isInternal(relativePath)
+    const sendImmediate = (
+      cache.isInternal(rel) ||
+      cache.isInstalling(rel)
+    )
 
-    this.pushStreamRun(relativePath, () => {
-      debug('SOUT', relativePath)
-      this.isBuilding[relativePath] = true
+    this.pushStreamRun(rel, () => {
+      debug('SOUT', rel)
+      this.isBuilding[rel] = true
       const file = new File(vinyl(this.basePath, path, new Buffer(contents)))
 
       const stackTime = [{
@@ -91,16 +90,16 @@ export default class SuperStream {
     }, sendImmediate)
   }
 
-  pushStreamRun(relative, finish, sendImmediate) {
-    if (!this.isBuilding[relative] || sendImmediate)
+  pushStreamRun(rel, finish, sendImmediate) {
+    if (!this.isBuilding[rel] || sendImmediate)
       return finish()
 
-    this.queue[relative] = finish
+    this.queue[rel] = finish
 
     // ensure upper limit on wait
-    clearTimeout(this.upperLimit)
-    this.upperLimit = setTimeout(() => {
-      if (!this.queue[relative]) return
+    clearTimeout(this.upperLimit[rel])
+    this.upperLimit[rel] = setTimeout(() => {
+      if (!this.queue[rel]) return
       debug('upper limit! finish'.yellow)
       finish()
     }, UPPER_WAIT_LIMIT)
