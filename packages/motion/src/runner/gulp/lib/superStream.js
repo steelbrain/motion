@@ -25,12 +25,19 @@ export default class SuperStream {
     this.stream = new Readable({ objectMode: true })
     this.stream._read = function(n) {}
 
+    // start receiving saves for stream
     bridge.onDidReceiveMessage('live:save',
       _.throttle(this.fileSend.bind(this), 16, { leading: true })
     )
 
+    // clear stream at times
     emitter.on('script:end', ({ path }) => this.doneBuilding(path))
     event('error', ({ path }) => this.doneBuilding(path))
+
+    // clear all stream on packages bundle (TODO make this smarter)
+    bridge.onDidReceiveMessage('packages:reload', () => {
+      this.isBuilding = {}
+    })
   }
 
   getStream() {
