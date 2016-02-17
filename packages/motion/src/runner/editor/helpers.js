@@ -1,4 +1,5 @@
 import {motionFile} from '../gulp/babel'
+import {Scanner} from '../gulp/scanner'
 import Cache from '../cache'
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g
@@ -9,14 +10,18 @@ export const POSITION_TYPE = {
 }
 
 export function collectViews(contents) {
+  const filePath = '__editor__'
   try {
-    motionFile({
-      contents,
-      path: '__editor__',
-      relative: '__editor__',
-      sourceMap: false
+    let views = {}
+    Scanner.pre(filePath, contents, function(contents) {
+      motionFile({
+        contents,
+        path: filePath,
+        relative: filePath,
+        sourceMap: false
+      })
     })
-    return Cache.getFileMeta('__editor__') || {}
+    return Cache.getFileMeta(filePath) || {}
   } catch (_) {
     return {}
   }
