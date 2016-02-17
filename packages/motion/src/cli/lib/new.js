@@ -57,7 +57,7 @@ export default function run({ name, use, nocache, debug }) {
       .then(nocache ? cloneDirectly : getScaffold)
       .then(initGit)
       .then(replaceGivenNameInApp)
-      .then(npmInstall)
+      // .then(npmInstall)
       .then(finish)
       .then(() => {
         spinner.stop()
