@@ -109,6 +109,12 @@ export default function elementProps({ name, whitelisted, key, index, isView }, 
     props.className = addClassName(props, name)
   }
 
+  if (name == 'svg') {
+    // for react 0.15
+    props.class = props.className
+    delete props.className
+  }
+
   return props
 }
 
