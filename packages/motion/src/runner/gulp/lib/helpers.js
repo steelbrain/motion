@@ -28,7 +28,6 @@ $.merge = merge
 $.multipipe = multipipe
 $.fn = logfn
 
-export const isBuilding = () => opts('build') && !opts('watch')
 export const isProduction = () => opts('build')
 
 export const through = _through

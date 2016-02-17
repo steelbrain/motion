@@ -9,21 +9,6 @@ import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
 import { writeExternals } from './externals'
 
-// ensures all packages installed, uninstalled, written out to bundle
-export async function install(force) {
-  log.externals('install')
-  try {
-    await remakeInstallDir(force)
-    await uninstall()
-    await installAll()
-    await writeExternals({ force })
-  }
-  catch (e) {
-    handleError(e)
-    throw new Error(e)
-  }
-}
-
 let successful = []
 let failed = []
 let installingFullNames = []
@@ -194,7 +179,7 @@ export function finishedInstalling() {
 }
 
 function isDone() {
-  return (opts('build') && !opts('watch'))
+  return !opts('watching')
     ? !_isInstalling && opts('hasRunInitialInstall')
     : !_isInstalling
 }

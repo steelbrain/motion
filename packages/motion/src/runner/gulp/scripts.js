@@ -1,4 +1,4 @@
-import { $, gulp, SCRIPTS_GLOB, out, isBuilding, isSourceMap } from './lib/helpers'
+import { $, gulp, SCRIPTS_GLOB, out, isSourceMap } from './lib/helpers'
 import { SuperStream, dirAddStream } from './lib/streams'
 import { _, fs, path, debounce, p, rm, logError, log, emitter } from '../lib/fns'
 import unicodeToChar from '../lib/unicodeToChar'
@@ -30,15 +30,15 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   const scripts = userStream || gulp.src(SCRIPTS_GLOB)
-    .pipe($.if(!isBuilding(), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
+    .pipe($.if(opts('watching'), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
     .pipe($.if(file => file.event == 'unlink', $.ignore.exclude(true)))
 
   const superStream = new SuperStream()
 
   return (
-    isBuilding() ?
-    scripts :
-    $.merge(scripts, dirAddStream(opts('appDir')), superStream.getStream())
+    opts('watching') ?
+    $.merge(scripts, dirAddStream(opts('appDir')), superStream.getStream()) :
+    scripts
   )
       .pipe($.if(buildCheck, $.ignore.exclude(true)))
       .pipe($.fn(reset))
@@ -180,7 +180,7 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function setLastFile(file) {
-    if (isBuilding()) return
+    if (!opts('watching')) return
     let name = file.path.replace(opts('appDir'), '')
     if (name.charAt(0) != '/') name = '/' + name
     log.gulp(name)
@@ -212,7 +212,7 @@ export function scripts({ inFiles = [], userStream }) {
       bundler.scanFile(file)
     }
 
-    if (!opts('build') || opts('watch')) {
+    if (opts('watching')) {
       debounce('removeOldImports', 3000, bundler.uninstall)
 
       // check will install
@@ -256,7 +256,7 @@ export function scripts({ inFiles = [], userStream }) {
   function checkWriteable(file) {
     if (userStream || State.lastError) return false
 
-    if (isBuilding()) return true
+    if (!opts('watching')) return true
 
     const isNew = (
       !State.lastSaved[file.path] ||

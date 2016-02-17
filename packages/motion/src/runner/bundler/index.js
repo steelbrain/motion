@@ -1,3 +1,4 @@
+import opts from '../opts'
 import { install, installAll, isInstalling, finishedInstalling } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
@@ -9,19 +10,26 @@ async function init() {
   await remakeInstallDir()
 }
 
-async function all() {
+async function webpack() {
   await Promise.all([
     runExternals(),
     runInternals()
   ])
+}
+
+// webpack either watches or just runs once
+async function all() {
+  if (opts('watching')) await webpack()
   await installAll()
   await writeInternals({ force: true })
   await uninstall()
+  if (!opts('watching')) await webpack()
 }
 
 export default {
   init,
   all,
+  webpack,
   install,
   installAll,
   uninstall,
