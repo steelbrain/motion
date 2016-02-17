@@ -1,6 +1,6 @@
 {
   "name": "motion-client",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.release.js",
