@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "0.9.19",
+  "version": "0.9.20",
   "description": "motion - moving development forward",
   "main": "dist/main.js",
   "scripts": {},
