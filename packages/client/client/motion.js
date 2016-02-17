@@ -92,7 +92,7 @@ const Motion = {
 
     if (!process.env.production && Tools) {
       // pass data from tools to internal
-      Tools.emitter.on('editor:state', () => {
+      Tools.on('editor:state', () => {
         Internal.editor = Tools.editor
       })
     }
