@@ -13,6 +13,7 @@ watch: clean
 bootstrap:
 	npm install
 	(cd js-deps && npm prune && npm install)
+	(cd packages/client && ln -s ../../js-deps/node_modules node_modules)
 	node scripts/bootstrap.js
 	scripts/build.sh
 

@@ -93,11 +93,6 @@ module.exports = function(opts) {
       // libraryTarget: target || opts.libraryTarget
     },
 
-    plugins: plugins,
-
-    resolve: {
-      // resolve from our deps folder, weird but necessary, see js-deps/readme
-      root: path.resolve(__dirname, '..', '..', 'js-deps', 'node_modules')
-    }
+    plugins: plugins
   }
 }
