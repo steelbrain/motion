@@ -1,3 +1,5 @@
+import { favicon } from './favicon'
+
 let opts
 let browser
 let actions
@@ -38,6 +40,7 @@ function onOpen() {
   isOpen = true
   isOpening = false
   reconnecting = false
+  favicon.good()
 }
 
 function onMessage(message) {
@@ -58,6 +61,7 @@ let tries
 let reconnecting = false
 
 function reconnect() {
+  favicon.off()
   isOpening = false
   isOpen = false
 
