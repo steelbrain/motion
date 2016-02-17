@@ -20,6 +20,11 @@ export default class Editor {
         suggestions: this.complete(message.text, message.position)
       }
     }))
+    this.subscriptions.add(bridge.onDidReceiveMessage('editor:collect:views', message => {
+      message.result = {
+        views: collectViews(message.contents || '')
+      }
+    }))
   }
 
   complete(text, position) {
