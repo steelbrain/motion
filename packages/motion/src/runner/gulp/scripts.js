@@ -198,7 +198,7 @@ export function scripts({ inFiles = [], userStream }) {
 
   function willInstall(path, imports) {
     const result = !!_.xor(imports, State.previouslyInstalled[path]).length
-    State.previouslyInstalled[path] = imports
+    State.previouslyInstalled[path] = [ ...imports ]
     return result
   }
 
@@ -268,6 +268,7 @@ export function scripts({ inFiles = [], userStream }) {
       return true
     }
 
+    log.gulp('not writeable')
     return false
   }
 
@@ -283,8 +284,10 @@ export function scripts({ inFiles = [], userStream }) {
     // run stuff after each change on build --watch
     doBuild()
 
-    if (!cache.get(file.path)) return // avoid ?? todo: figure out why this is necessary
-    if (State.lastError) return // avoid if error
+    if (State.lastError) {
+      log.gulp('State.lastError', State.lastError)
+      return // avoid if error
+    }
 
     const finish = () => {
       emitter.emit('script:end', { path: file.relativePath })
@@ -293,12 +296,14 @@ export function scripts({ inFiles = [], userStream }) {
 
     // dont broadcast script if installing/bundling
     const isInstalling = bundler.isInstalling()
-    log.gulp('isInstalling?', isInstalling, file.willInstall)
 
-    if (isInstalling)
+    if (isInstalling) {
+      log.gulp('isInstalling', true)
       return
+    }
 
     if (file.willInstall) {
+      log.gulp('willInstall', true)
       cache.setFileInstalling(file.path, true)
       return
     }
