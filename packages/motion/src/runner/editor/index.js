@@ -20,21 +20,16 @@ export default class Editor {
         suggestions: this.complete(message.text, message.position)
       }
     }))
+    this.subscriptions.add(bridge.onDidReceiveMessage('editor:collect:views', message => {
+      message.result = {
+        views: collectViews(message.contents || '')
+      }
+    }))
   }
 
   complete(text, position) {
     const point = Point.fromObject(position)
-    let positionInfo
-
-    // Do not log syntax errors to console
-    try {
-      positionInfo = this.positionInfo(text, point)
-    } catch (_) {
-      if (typeof _.pos !== 'undefined') {
-        // Syntax error
-        return []
-      } else throw _
-    }
+    const positionInfo = this.positionInfo(text, point)
 
     return this.autocomplete.complete(text, point, positionInfo)
   }
