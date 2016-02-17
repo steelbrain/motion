@@ -14,6 +14,7 @@ bootstrap:
 	npm install
 	node scripts/bootstrap.js
 	scripts/build.sh
+	(cd apps/tools && motion build)
 
 ready:
 	git pull --rebase
