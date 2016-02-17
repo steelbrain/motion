@@ -12,12 +12,15 @@ import { log, logError, handleError, writeFile } from '../lib/fns'
 
 export async function writeInternals(opts = {}) {
   try {
-    log.internals('internals')
     await finishedInstalling()
 
     if (opts.force || disk.internalsIn.hasChanged()) {
       await disk.internalsIn.write((current, write) => {
-        write(requireString(cache.getExported(), {
+        const internals = cache.getExported()
+
+        log.internals('internals', internals)
+
+        write(requireString(internals, {
           prefix: './internal/',
           removeExt: true
         }))

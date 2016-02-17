@@ -55,7 +55,14 @@ function onAddViews(views) {
   views.forEach(view => addViewCbs.forEach(cb => cb(view)))
 }
 
-const files = file => cache.files[relative(file)]
+function getFile(path) {
+  const file = cache.files[relative(path)]
+
+  if (!file)
+    throw new Error('No file found in cache, ' + path)
+
+  return file
+}
 
 const Cache = {
   relative,
@@ -106,7 +113,7 @@ const Cache = {
   },
 
   get(file: string) {
-    return files(file)
+    return getFile(file)
   },
 
   getAll() {
@@ -144,7 +151,7 @@ const Cache = {
 
   setViews(file: string, views: ViewArray) {
     if (!file) return
-    const cFile = files(file)
+    const cFile = getFile(file)
     onDeleteViews(_.difference(cFile.views, views))
     // onAddViews(_.difference(views, cFile.views))
     cFile.views = views
@@ -160,25 +167,23 @@ const Cache = {
   },
 
   setFileSrc(file: string, src: string) {
-    files(file).src = src
+    getFile(file).src = src
   },
 
   isInternal(file: string) {
-    const f = files(file)
+    const f = getFile(file)
     return f && f.isInternal
   },
 
-  setFileInternal(file: string, val: boolean) {
+  setFileInternal(file: string, isInternal: boolean) {
     const name = relative(file)
-    const f = cache.files[name]
+    const f = Cache.get(file)
 
-    if (!f) return
+    const wasInternal = f.isInternal
+    f.isInternal = isInternal
 
-    const isInternal = f.isInternal
-    cache.files[name].isInternal = val
-
-    if (isInternal != val)
-      onSetExported(name, val)
+    if (wasInternal != isInternal)
+      onSetExported(name, isInternal)
   },
 
   getExported() {
@@ -199,11 +204,11 @@ const Cache = {
   },
 
   getFile(file:? string) {
-    return files(file)
+    return getFile(file)
   },
 
   getViews(file?: string) {
-    return files(file).views
+    return getFile(file).views
   },
 
   _getFileKeys(key) {
@@ -214,13 +219,13 @@ const Cache = {
   // npm
   getExternals(file?: string) {
     if (!file) return Cache._getFileKeys('externals')
-    return files(file).externals
+    return getFile(file).externals
   },
 
   // ./local
   getInternals(file?: string) {
     if (!file) return Cache._getFileKeys('internals')
-    return files(file).internals
+    return getFile(file).internals
   },
 
   // npm + local
@@ -243,8 +248,7 @@ const Cache = {
   },
 
   removeError(file : string) {
-    if (files(file))
-      files(file).error = null
+    getFile(file).error = null
   },
 
   getLastError() {
@@ -266,18 +270,16 @@ const Cache = {
   },
 
   setWritten(file : string, time) {
-    const f = files(file)
     log.cache('setWritten', time)
-    if (f) f.writtenAt = time
+    Cache.get(file).writtenAt = time
   },
 
   setFileInstalling(file : string, val : boolean) {
-    const f = files(file)
-    if (f) f.installing = val
+    Cache.get(file).installing = val
   },
 
   isInstalling(file : string) {
-    const f = files(file)
+    const f = getFile(file)
     return f ? f.installing : false
   },
 

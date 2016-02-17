@@ -149,6 +149,8 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function reset(file) {
+    console.log('adding to cache', file.path)
+    cache.add(file.path)
     emitter.emit('script:start', file)
     State.lastError = false
     State.curFile = file

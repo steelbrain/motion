@@ -36,6 +36,7 @@ export default function watchDeletes() {
         await deleteJS(view)
       })
 
+      cache.remove(file)
       bridge.broadcast('file:delete', { name })
     })
   }
