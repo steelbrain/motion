@@ -41,10 +41,10 @@ async function migration() {
 
     // index.html "#_flintapp" => "#_motionapp"
     replace({
-      regex: '#_flintapp',
-      replacement: '#_motionapp',
+      regex: '_flintapp',
+      replacement: '_motionapp',
       paths: [OPTS.motionDir],
-      recursive: false,
+      recursive: true,
       silent: true
     })
 
