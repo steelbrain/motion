@@ -43,7 +43,7 @@ if [ "$1" = "--watch" ]; then
   # relink cli automatically
   chsum1=""
   cd packages/motion
-  npm link --loglevel=error
+  npm link --loglevel=error --no-progress
   cd ../..
 fi
 
