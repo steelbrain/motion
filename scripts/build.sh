@@ -36,7 +36,7 @@ if [ "$1" = "--watch" ]; then
   if [ "$2" != '--notools' ]; then
     sleep 4
     cd apps/tools
-    motion build --watch --nomin &
+    motion build --watch &
     cd ../..
   fi
 

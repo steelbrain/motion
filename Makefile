@@ -16,6 +16,7 @@ bootstrap:
 	(cd packages/client && ln -s ../../js-deps/node_modules node_modules)
 	node scripts/bootstrap.js
 	scripts/build.sh
+	(cd apps/tools && motion build)
 
 ready:
 	git pull --rebase
