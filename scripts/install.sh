@@ -98,7 +98,7 @@ if [ -w "$NODE_MODULES" ] && [ -w "$NODE_MODULES_BIN" ]; then
   echo
   echo "Installing Motion..."
   echo
-  npm install -g motion --loglevel=error
+  npm install -g motion --loglevel=error --no-progress
 else
   #
 cat <<"EOF"
@@ -126,7 +126,7 @@ EOF
       echo
       echo "Installing motion..."
       echo
-      npm install -g motion --loglevel=error
+      npm install -g motion --loglevel=error --no-progress
     else
       echo
       echo_bad "Uh oh! Couldn't fix permissions!"
@@ -154,7 +154,7 @@ EOF
     echo
     echo "Installing motion with sudo..."
     echo
-    sudo npm install -g motion --loglevel=error
+    sudo npm install -g motion --loglevel=error --no-progress
   fi
 fi
 

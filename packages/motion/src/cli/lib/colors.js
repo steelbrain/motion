@@ -53,8 +53,6 @@ var colors = [
     "indigo",
     "khaki",
     "lawngreen",
-    "lime",
-    "limegreen",
     "magenta",
     "maroon",
     "mediumaquamarine",

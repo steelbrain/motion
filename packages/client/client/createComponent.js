@@ -538,10 +538,10 @@ export default function createComponent(Motion, Internal, name, view, options = 
       },
 
       // TODO once this works better in 0.15
-      // unstable_handleError(e) {
-      //   console.log('ERR', e)
-      //   reportError(e)
-      // },
+      unstable_handleError(e) {
+        console.log('ERR', e)
+        reportError(e)
+      },
 
       _render() {
         const self = this
