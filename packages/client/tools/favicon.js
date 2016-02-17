@@ -8,7 +8,6 @@ const icons = {
 export function favicon(state) {
   const icon = document.querySelector('link[rel="icon"]')
   if (!icon) return
-  console.log('setting', state)
   icon.href = icons[state]
 }
 
