@@ -1,12 +1,12 @@
 import webpack from 'webpack'
 import opts from '../../opts'
 import getWebpackErrors from './getWebpackErrors'
-import { log, logError, emitter } from '../../lib/fns'
+import { log, logError, emitter, readFile } from '../../lib/fns'
 
 export default function webpacker(name, config, cb) {
-  return new Promise((res, rej) => {
+  return new Promise(async (res, rej) => {
     const compiler = webpack(config)
-    const watching = opts('watch') || !opts('build')
+    const watching = opts('watching')
 
     // continue if watching
     if (watching) res()

@@ -1,6 +1,6 @@
 import { _, p, log, rm, glob, readdir, handleError } from '../lib/fns'
 import opts from '../opts'
-import { SCRIPTS_GLOB, isBuilding } from './lib/helpers'
+import { SCRIPTS_GLOB } from './lib/helpers'
 import { scripts, afterBuild } from './scripts'
 import { styles } from './styles'
 import { app } from './app'

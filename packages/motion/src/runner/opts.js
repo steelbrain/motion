@@ -134,6 +134,8 @@ async function setupCliOpts(cli) {
   OPTS.build = cli.build
   OPTS.out = cli.out
 
+  OPTS.watching = cli.watch || !cli.build
+
   // ensure we dont clobber things
   if (cli.out && (await exists(cli.out)))  {
     console.error(`\n  Build dir already exists! Ensure you target an empty directory.\n`.red)
