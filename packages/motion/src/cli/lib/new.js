@@ -57,6 +57,7 @@ export default function run({ name, use, nocache, debug }) {
       .then(nocache ? cloneDirectly : getScaffold)
       .then(initGit)
       .then(replaceGivenNameInApp)
+      .then(npmInstall)
       .then(finish)
       .then(() => {
         spinner.stop()
@@ -269,15 +270,6 @@ export default function run({ name, use, nocache, debug }) {
       dir: MOTION.dest + '/.motion'
     })
   }
-
-  function tryLinkMotion() {
-    log('Try to link local motion')
-    return promiseProcess('npm link motionjs', {
-      msg: false,
-      dir: MOTION.dest + '/.motion'
-    })
-  }
-
 
   const exec = require('child_process').exec
 
