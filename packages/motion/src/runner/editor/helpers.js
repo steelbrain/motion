@@ -23,7 +23,10 @@ export function collectViews(contents) {
     })
     return Cache.getFileMeta(filePath) || {}
   } catch (_) {
-    return {}
+    if (typeof _.pos !== 'undefined') {
+      // Syntax error
+      return {}
+    } else throw _
   }
 }
 
