@@ -11,7 +11,6 @@ view Label {
   let editing = false
 
   on.props(() => {
-    console.log('val', val, 'newval', newVal)
     if (!editing && newVal !== val) {
       newVal = val
       view.update({ immediate: true })

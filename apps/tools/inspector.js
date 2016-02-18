@@ -3,9 +3,6 @@ import { keys, onKey, onKeyDown } from './keys'
 import { throttle } from 'lodash'
 
 const removeHead = ([l, ...ls]) => ls
-const isAlt = cb => e => e.keyIdentifier === 'Alt' && cb()
-const isEsc = cb => e => e.keyCode === 27 && cb()
-
 const setLocal = (k,v) => localStorage.setItem(`__motion.state.${k}`, JSON.stringify(v))
 const getLocal = (k,d) => JSON.parse(localStorage.getItem(`__motion.state.${k}`)) || d
 
@@ -150,6 +147,7 @@ view Inspector {
   }
 
   function glue({ target }) {
+    if (!hudActive) return
     const inspector = ReactDOM.findDOMNode(view)
     if (inspector.contains(target)) return
 
