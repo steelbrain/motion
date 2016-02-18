@@ -191,7 +191,6 @@ const Cache = {
       .map(name => cache.files[name].isInternal ? name : null)
       .filter(f => f != null)
 
-    log.cache('cache', 'getExported', result)
     return result
   },
 
@@ -248,7 +247,9 @@ const Cache = {
   },
 
   removeError(file : string) {
-    getFile(file).error = null
+    const f = getFile(file)
+    log.cache('removeError', f)
+    f.error = null
   },
 
   getLastError() {

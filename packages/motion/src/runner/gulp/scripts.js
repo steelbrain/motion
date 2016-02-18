@@ -332,10 +332,10 @@ export function scripts({ inFiles = [], userStream }) {
     out.goodScript(file)
     log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
-    if (file.babel.isExported) return
-
     // update cache error / state
     cache.update(file.path)
+
+    if (file.babel.isExported) return
 
     // write cache state to disk
     if (opts('hasRunInitialBuild')) serializeCache()
