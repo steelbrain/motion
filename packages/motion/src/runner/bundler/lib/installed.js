@@ -40,7 +40,7 @@ export async function writeInstalled(_packages, _paths) {
     })
 
     // write full paths
-    const fullPaths = filterWithPath(paths, packages)
+    const fullPaths = filterWithPath(packages, paths)
     log.externals('writeInstalled', 'fullPaths', fullPaths.join(','))
     await disk.externalsPaths.write((_, write) => write(fullPaths))
   }

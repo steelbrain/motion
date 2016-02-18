@@ -49,8 +49,8 @@ export async function installAll(requires) {
       if (!_isInstalling && opts('finishingFirstBuild'))
         opts.set('hasRunInitialInstall', true)
 
-      // new motion excluded require like babel-runtime, see rmExternals
       if (requires.length) {
+        log.externals('no fresh but has requires, writeInstalled + writeExternals')
         await writeInstalled(installed)
         await writeExternals({ silent: true })
       }
