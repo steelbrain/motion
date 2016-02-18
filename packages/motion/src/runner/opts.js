@@ -1,5 +1,5 @@
 import path from 'path'
-import { p, log, move, replace, sanitize, handleError, readJSON, readFile, writeFile, exists } from './lib/fns'
+import { p, log, move, replace, sanitize, handleError, readFile, writeFile, exists, emitter } from './lib/fns'
 import disk from './disk'
 import util from 'util'
 import webpack from 'webpack'
@@ -8,6 +8,11 @@ import getWebpackErrors from './bundler/lib/getWebpackErrors'
 let OPTS = {}
 
 export async function init(cli) {
+  emitter.on('debug', () => {
+    print("---------opts---------")
+    debug()
+  })
+
   try {
     // init
     OPTS.appDir = path.normalize(process.cwd())

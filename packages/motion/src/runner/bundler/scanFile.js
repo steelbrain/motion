@@ -3,16 +3,15 @@ import { installExternals } from './externals'
 import { log, handleError, emitter } from '../lib/fns'
 import cache from '../cache'
 
-export async function scanFile(file) {
-  const path = file.relativePath
-  log.externals('scanFile', path)
+export async function scanFile({ willInstall, relPath }) {
+  log.externals('scanFile', relPath)
 
   try {
     // install new stuff
-    await installExternals(path)
-    await writeInternals({ force: file.willInstall })
+    await installExternals(relPath)
+    await writeInternals({ force: willInstall })
 
-    cache.setFileInstalling(path, false)
+    cache.setFileInstalling(relPath, false)
   }
   catch (e) {
     handleError(e)

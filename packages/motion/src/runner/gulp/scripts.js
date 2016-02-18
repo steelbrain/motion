@@ -24,10 +24,16 @@ export function scripts({ inFiles = [], userStream }) {
     lastError: null,
     lastSaved: {},
     previouslyInstalled: {},
+    awaitingScan: {},
     loaded: 0,
     total: inFiles.length,
     outsideSources: {}
   }
+
+  emitter.on('debug', () => {
+    print(`\n\n---------gulp state--------`)
+    print(State)
+  })
 
   const scripts = userStream || gulp.src(SCRIPTS_GLOB)
     .pipe($.if(opts('watching'), $.watch(SCRIPTS_GLOB, { readDelay: 1 })))
@@ -91,7 +97,7 @@ export function scripts({ inFiles = [], userStream }) {
 
   // only do on first run
   function buildCheck(file) {
-    file.relativePath = path.relative(opts('appDir'), file.path)
+    file.relPath = path.relative(opts('appDir'), file.path)
 
     // BUGFIX gulp sends deleted files through here, this filters them
     if (!file.contents)
@@ -106,20 +112,20 @@ export function scripts({ inFiles = [], userStream }) {
       return false
     }
 
-    const prevFile = cache.getPrevious(file.path)
+    const prevFile = cache.getPrevious(file.relPath)
     if (!prevFile) return false
 
     let outMTime, srcMTime
 
     // read srcfile
-    try { srcMTime = fs.statSync(file.path).mtime }
+    try { srcMTime = fs.statSync(file.relPath).mtime }
     catch(e) { return false }
 
     // read outfile
     try {
       const outFile = prevFile.babel.isExported
-        ? path.join(opts('deps').dir, 'internal', file.relativePath)
-        : path.join(opts('outDir'), file.relativePath)
+        ? path.join(opts('deps').dir, 'internal', file.relPath)
+        : path.join(opts('outDir'), file.relPath)
 
       outMTime = fs.statSync(outFile).mtime
     }
@@ -139,7 +145,7 @@ export function scripts({ inFiles = [], userStream }) {
       markDone(file)
 
       if (restored) {
-        cache.restorePrevious(file.path)
+        cache.restorePrevious(file.relPath)
         out.goodScript(file)
         afterWrite(file)
       }
@@ -149,7 +155,7 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function reset(file) {
-    cache.add(file.path)
+    cache.add(file.relPath)
     emitter.emit('script:start', file)
     State.lastError = false
     State.curFile = file
@@ -181,7 +187,7 @@ export function scripts({ inFiles = [], userStream }) {
 
   function setLastFile(file) {
     if (!opts('watching')) return
-    let name = file.path.replace(opts('appDir'), '')
+    let name = file.relPath
     if (name.charAt(0) != '/') name = '/' + name
     log.gulp(name)
 
@@ -197,6 +203,7 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function willInstall(path, imports) {
+    if (State.awaitingScan[path]) return true
     const result = !!_.xor(imports, State.previouslyInstalled[path]).length
     State.previouslyInstalled[path] = [ ...imports ]
     return result
@@ -205,28 +212,31 @@ export function scripts({ inFiles = [], userStream }) {
   // sets isInternal and willInstall
   // for handling npm and bundling related things
   function processDependencies(file) {
-    cache.setFileInternal(file.path, file.babel.isExported)
+    cache.setFileInternal(file.relPath, file.babel.isExported)
 
     const scan = () => {
-      cache.setFileImports(file.path, file.babel.imports)
+      cache.setFileImports(file.relPath, file.babel.imports)
       bundler.scanFile(file)
+      State.awaitingScan[file.relPath] = false
     }
 
     if (opts('watching')) {
       debounce('removeOldImports', 3000, bundler.uninstall)
 
       // check will install
-      file.willInstall = willInstall(file.path, file.babel.imports)
+      file.willInstall = willInstall(file.relPath, file.babel.imports)
 
-      if (file.willInstall)
-        superStream.avoidSending(file.path)
+      if (file.willInstall) {
+        State.awaitingScan[file.relPath] = true
+        superStream.avoidSending(file.relPath)
+      }
     }
 
     // run scan
     if (file.babel.isExported || scanNow())
       scan()
     else
-      debounce(`install:${file.path}`, 2000, scan)
+      debounce(`install:${file.relPath}`, 1600, scan)
   }
 
   // detects if a file has changed not inside views for hot reloads correctness
@@ -290,7 +300,7 @@ export function scripts({ inFiles = [], userStream }) {
     }
 
     const finish = () => {
-      emitter.emit('script:end', { path: file.relativePath })
+      emitter.emit('script:end', { path: file.relPath })
       bridge.broadcast('script:add', file.message)
     }
 
@@ -304,7 +314,7 @@ export function scripts({ inFiles = [], userStream }) {
 
     if (file.willInstall) {
       log.gulp('willInstall', true)
-      cache.setFileInstalling(file.path, true)
+      cache.setFileInstalling(file.relPath, true)
       return
     }
 
@@ -333,7 +343,7 @@ export function scripts({ inFiles = [], userStream }) {
     log.gulp('DOWN', 'success'.green, 'internal?', file.babel.isExported)
 
     // update cache error / state
-    cache.update(file.path)
+    cache.update(file.relPath)
 
     if (file.babel.isExported) return
 
@@ -357,7 +367,7 @@ export function scripts({ inFiles = [], userStream }) {
   function removeNewlyInternal(file) {
     // resolve path from .motion/.internal/deps/internals/xyz.js back to xyz.js
     // then resolve path to .motion/.internal/out/xyz.js
-    const outPath = p(opts('outDir'), file.relativePath)
+    const outPath = p(opts('outDir'), file.relPath)
     // log.gulp('remove newly internal', outPath)
     rm(outPath)
   }

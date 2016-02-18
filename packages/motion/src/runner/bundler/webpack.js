@@ -1,11 +1,12 @@
 import webpack from 'webpack'
-import opts from '../../opts'
-import getWebpackErrors from './getWebpackErrors'
-import { log, logError, emitter, readFile } from '../../lib/fns'
+import webpackConfig from './lib/webpackConfig'
+import getWebpackErrors from './lib/getWebpackErrors'
+import opts from '../opts'
+import { log, logError, emitter, readFile } from '../lib/fns'
 
-export default function webpacker(name, config, cb) {
+export default function webpacker({ name, config, onFinish }) {
   return new Promise(async (res, rej) => {
-    const compiler = webpack(config)
+    const compiler = webpack(webpackConfig(`${name}.js`, config))
     const watching = opts('watching')
 
     // continue if watching
@@ -25,7 +26,7 @@ export default function webpacker(name, config, cb) {
       }
       else {
         emitter.emit('compiler:' + name)
-        cb()
+        onFinish()
         res()
       }
     })
