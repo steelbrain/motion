@@ -33,7 +33,7 @@ view Test.PropsChild {
 }
 
 view Tests.Counter {
-  let count = 0
+  let count = 5
   <h1>count is {count}</h1>
   <button onClick={() => count++}>up</button>
   <button onClick={() => count--}>down</button>

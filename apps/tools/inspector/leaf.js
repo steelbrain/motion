@@ -2,20 +2,28 @@ import md5 from 'md5-o-matic'
 import getType from '../lib/getType'
 import ellipsize from 'ellipsize'
 
-import { isString, isFunction,
+import { isString, isFunction, isBoolean,
          isArray, isNumber, isObject } from 'lodash'
 
 const PATH_PREFIX = '.root.'
 const noop = () => {}
 const contains = (string, substring) => string.indexOf(substring) !== -1
 const isPrimitive = v => getType(v) !== 'Object' && getType(v) !== 'Array'
-const getLeafKey = (key, value) => isPrimitive(value) ?
+const getLeafKey = (key, val) => isPrimitive(val) ?
   (key + ':' + md5(String(key))) :
-  (key + '[' + getType(value) + ']')
+  (key + '[' + getType(val) + ']')
+
 const fnParams = fn => fn.toString()
   .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'')
   .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
   .split(/,/)
+
+const valueStyles = {
+  boolean: { color: '#32a3cd', fontWeight: 700 },
+  number: { color: '#b92222', marginTop: 2, fontWeight: 500 },
+  string: { color: '#698c17' },
+  function: { marginLeft: 10, marginTop: 2, color: '#962eba' },
+}
 
 view Leaf {
   view.pause()
@@ -26,7 +34,7 @@ view Leaf {
   prop onClick = noop
 
   // state
-  let rootPath, path, _data, key, original, expanded
+  let rootPath, path, value, key, original, expanded
   let dataKeys = []
   let _query = ''
 
@@ -38,18 +46,18 @@ view Leaf {
     rootPath = `${prefix}.${label}`
     key = label.toString()
     path = rootPath.substr(PATH_PREFIX.length)
-    _data = data // originally was stream of ||s, but 0 was turning into false
+    value = data // originally was stream of ||s, but 0 was turning into false
 
     // multiline strings
-    if (typeof _data === 'string' && _data.indexOf('\n') > -1) {
-      _data = _data.split('\n')
+    if (typeof value === 'string' && value.indexOf('\n') > -1) {
+      value = value.split('\n')
     }
 
-    if (_data)
-      dataKeys = Object.keys(_data).sort()
+    if (value)
+      dataKeys = Object.keys(value).sort()
 
-    if (_data === undefined) _data = data
-    if (_data === undefined) _data = {}
+    if (value === undefined) value = data
+    if (value === undefined) value = {}
     _query = query || ''
 
     if (view.props.root)
@@ -66,75 +74,72 @@ view Leaf {
   const toggle = (e) => {
     if (!root) expanded = !expanded
     view.update()
-    onClick(_data)
+    onClick(value)
     e.stopPropagation()
   }
 
-  const getLeafKey = (key, value) => isPrimitive(value) ?
-    (key + ':' + md5(String(key))) :
-    (key + '[' + getType(value) + ']')
-
-  const format = key => (
-    <Highlighter string={key} highlight={_query} />
-  )
-
   const getLabel = (type, val, sets, editable) => (
-    <Label
-      val={val}
-      editable={editable}
-      onSet={_ => onSet([sets, _])}
-    />
+    <Label {...{val, editable, onSet}} />
   )
 
   let is = {}, type;
 
   on.change(() => {
-    is.function = isFunction(_data)
-    is.array = isArray(_data)
-    is.object = isObject(_data)
-    is.string = isString(_data)
-    is.number = isNumber(_data)
+    /* don't need to analyze types for root */
+    if (view.props.root) return
+    is.function = isFunction(value)
+    is.array = isArray(value)
+    is.object = isObject(value)
+    is.boolean = isBoolean(value)
+    is.string = isString(value)
+    is.number = isNumber(value)
     is.nested = is.function || is.object || is.array
     is.literal = !is.nested
-    type = typeof _data
+    type = typeof value
   })
 
   <leaf class={rootPath}>
     <label if={!view.props.root} htmlFor={id} onClick={toggle}>
       <key>
-        <name>{format(key)}</name>
+        <name>{key}</name>
       </key>
       <colon>:</colon>
       <value>
-        <fn class="function" if={is.function}>
-          <i>fn ({fnParams(_data).join(', ')})</i>
+        <fn style={valueStyles.function} if={is.function}>
+          <i>fn ({fnParams(value).join(', ')})</i>
         </fn>
         <array if={is.array}>
-          <type>Array[{_data.length}]</type>
+          <type>Array[{value.length}]</type>
         </array>
         <obj if={is.object}>
           <type>{'{}   ' + dataKeys.length + ' keys'}</type>
         </obj>
         <str if={is.string}>
-          {format(ellipsize(String(_data), 25))}
+          <Label val={value}
+                 valueStyle={valueStyles.string}
+                 editable={true}
+                 onSet={value => onSet(key, value)} />
         </str>
-        <else if={!is.string && is.literal}>
-          {format(String(_data))}
-        </else>
+        <simple if={is.number || is.boolean}>
+          <Label val={value.toString()}
+                 valueStyle={valueStyles.number}
+                 editable={true}
+                 onSet={value => onSet(key, value)} />
+        </simple>
         <nested if={is.nested} class={type.toLowerCase()}>
-          {getLabel('val', _data, key, editable)}
+          {getLabel('val', value, key, editable)}
         </nested>
       </value>
     </label>
     <children>
       <child
-        if={expanded && !isPrimitive(_data)}
+        if={expanded && !isPrimitive(value)}
         repeat={dataKeys}>
         <Leaf
           if={_.indexOf('__') == -1}
-          key={getLeafKey(_, _data[_])}
-          onSet={(...args) => onSet(key, ...args)}
-          data={_data[_]}
+          key={getLeafKey(_, value[_])}
+          onSet={onSet}
+          data={value[_]}
           editable={editable}
           label={_}
           prefix={rootPath}
@@ -164,22 +169,12 @@ view Leaf {
     alignItems: 'baseline'
   }]
 
-  $helper = { color: '#ffff05' }
-  $boolean = { color: '#32a3cd', fontWeight: 700 }
-  $number = { color: '#b92222', marginTop: 2, fontWeight: 500 }
-  $string = { color: '#698c17' }
 
   $key = [row, {
     color: 'rgba(0,0,0,0.9)',
     margin: [0],
     fontWeight: 'bold'
   }]
-
-  $function = {
-    marginLeft: 10,
-    marginTop: 2,
-    color: '#962eba'
-  }
 
   $colon = {
     color: 'rgba(0,0,0,0.2)'
