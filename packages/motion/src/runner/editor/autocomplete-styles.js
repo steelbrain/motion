@@ -176,4 +176,29 @@ export default [
     auto: 1,
     strength: 100
   },
+  {
+    name: 'flexGrow',
+    description: 'Flexbox stretch weight',
+    auto: 1,
+    strength: 100
+  },
+  {
+    name: 'flexShrink',
+    description: 'Flexbox shrink weight',
+    auto: 1,
+    strength: 100
+  },
+  {
+    name: 'cursor',
+    description: 'Layer index in document',
+    options: ['auto', 'default', 'none', 'pointer', 'text', 'crosshair', 'zoom-in', 'zoom-out'],
+    auto: 'pointer',
+    strength: 100
+  },
+  {
+    name: 'outline',
+    description: 'Outline on form and link elements',
+    auto: 'none',
+    strength: 100
+  },
 ]
