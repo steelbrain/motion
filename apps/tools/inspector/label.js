@@ -30,17 +30,18 @@ view Label {
 
   const onChange = e => {
     newVal = e.target.value
-    view.update({ immediate: true })
 
     if (isNumber(val)) {
       // dont let them change from num to str
       if (newVal === '' || isNaN(newVal)) return
+      newVal = +newVal
     }
 
     // todo: debate
     if (newVal === 'false') newVal = false
     if (newVal === 'true') newVal = true
     onSet(newVal)
+    view.update({ immediate: true })
   }
 
   let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}

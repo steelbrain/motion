@@ -63,7 +63,6 @@ view Inspector.View {
       <Tree
         editable={true}
         onSet={(key, value) => {
-          console.log('got onSet key', key, 'value', value);
           writeBack && writeBack(key, value)
         }}
         data={state}

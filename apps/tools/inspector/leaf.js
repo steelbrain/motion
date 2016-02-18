@@ -121,7 +121,7 @@ view Leaf {
                  onSet={value => onSet(key, value)} />
         </str>
         <simple if={is.number || is.boolean}>
-          <Label val={value.toString()}
+          <Label val={value}
                  valueStyle={valueStyles.number}
                  editable={true}
                  onSet={value => onSet(key, value)} />
