@@ -18,7 +18,7 @@ function init(baseDir) {
     try {
       // TODO use globber from gulp
       const files = await readdir(dir, {
-        fileFilter: [ '*.js' ],
+        fileFilter: [ '*.js', '*.json', '*.jsx' ],
         directoryFilter: [ '!.git', '!node_modules', '!.motion', '!.*' ]
       })
 

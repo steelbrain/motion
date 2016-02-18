@@ -4,7 +4,7 @@ import applySourceMap from 'vinyl-sourcemaps-apply'
 import replaceExt from 'replace-ext'
 import { transform } from 'flint-babel-core'
 import config from './lib/config'
-import { _, log } from '../lib/fns'
+import { _, path, log } from '../lib/fns'
 import getMatches from '../lib/getMatches'
 
 export function file(opts) {
@@ -83,7 +83,8 @@ export function motionFile(file) {
 
 function babelStream({ transformer }) {
   return through.obj(function(file, enc, cb) {
-    if (file.isNull()) {
+    if (file.isNull() || path.extname(file.path) == '.json') {
+      file.babel = {}
       cb(null, file)
       return
     }

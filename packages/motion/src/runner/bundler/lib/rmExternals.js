@@ -1,5 +1,6 @@
 const filters = [
   /^babel-runtime(\/.*)?$/,
+  /^babel-polyfill$/,
   /^react(\/.*)?$/, // TODO allow subpaths
   /^motion-client$/,
   /^react-dom$/,

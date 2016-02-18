@@ -17,6 +17,7 @@ const hasFinished = () => hasBuilt() && opts('hasRunInitialInstall')
 const hasBuilt = () => opts('hasRunInitialBuild')
 const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
 const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
+const isJSON = file => path.extname(file.path) == '.json'
 
 export function scripts({ inFiles = [], userStream }) {
   let State = {
@@ -53,9 +54,18 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
       .pipe(babel.file())
+      // json
+      .pipe($.if(isJSON,
+        $.multipipe(
+          gulp.dest(opts('deps').internalDir),
+          $.fn(buildDone),
+          $.ignore.exclude(true)
+        )
+      ))
       .pipe($.fn(processDependencies))
       .pipe($.fn(sendOutsideChanged)) // right after motion
-      .pipe($.if(!userStream, $.rename({ extname: '.js' })))
+      .pipe($.rename({ extname: '.js' }))
+      // internals
       .pipe($.if(file => file.babel.isExported,
         $.multipipe(
           $.fn(removeNewlyInternal),
