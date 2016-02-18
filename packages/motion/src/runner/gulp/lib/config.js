@@ -3,19 +3,23 @@ import { isProduction } from './helpers'
 import opts from '../../opts'
 import deepmerge from 'deepmerge'
 
+let motion = null
+
 export function file(config) {
-  const motionOpts = {
-    basePath: opts('appDir'),
-    production: isProduction(),
-    selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
-    routing: opts('config').routing,
-    ...config
+  if (!motion) {
+    const motionOpts = {
+      basePath: opts('appDir'),
+      production: isProduction(),
+      selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
+      routing: opts('config').routing,
+      ...config
+    }
+
+    motion = MotionTransform.file(motionOpts)
   }
 
   return getBabelConfig({
-    plugins: [
-      MotionTransform.file(motionOpts)
-    ]
+    plugins: [motion]
   })
 }
 

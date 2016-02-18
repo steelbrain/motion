@@ -45,17 +45,23 @@ export default [
     strength: 80
   },
   {
+    name: 'transition',
+    description: 'Transition values for element',
+    auto: 'all ease-in 300ms',
+    strength: 100
+  },
+  {
     name: 'height',
     description: 'Height of the element',
-    options: [300, '100%'],
-    auto: 300,
+    options: [100, '100%'],
+    auto: 100,
     strength: 80
   },
   {
     name: 'width',
     description: 'Width of the element',
-    options: [300, '100%'],
-    auto: 300,
+    options: [100, '100%'],
+    auto: 100,
     strength: 80
   },
   {
