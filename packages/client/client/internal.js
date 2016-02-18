@@ -64,7 +64,13 @@ export function init(name) {
       if (Internal.inspector[path]) {
         let props = Internal.viewsAtPath[path].props
         const state = Internal.getCache[path]
-        Internal.inspector[path](props, state)
+        Internal.inspector[path](props, state, (key, value) => {
+          Internal.setCache(path, key, value)
+          Internal.inspectorRefreshing = path
+          Internal.getInitialStates[path]()
+          Internal.viewsAtPath[path].forceUpdate()
+          Internal.inspectorRefreshing = null
+        })
       }
     },
 

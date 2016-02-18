@@ -92,34 +92,6 @@ function internal() {
   return window._Motion
 }
 
-function writeBack(path, writePath) {
-  let Int = internal()
-  let cache = Int.getCache[path]
-
-  // update getCache
-  writePath.reduce((acc, cur) => {
-    if (cur == 'root') return acc
-
-    if (!Array.isArray(cur))
-      return acc[cur]
-
-    // is end of path: [key, val]
-    let [ key, val ] = cur
-    let current = acc[key]
-
-    if (typeof current == 'number')
-      val = +val
-
-    // write
-    acc[key] = val
-  }, cache)
-
-  Int.inspectorRefreshing = path
-  Int.getInitialStates[path]()
-  Int.viewsAtPath[path].forceUpdate()
-  Int.inspectorRefreshing = null
-}
-
 view Inspector {
   let clickOff, hoverOff, lastTarget
   let hudActive = false
@@ -199,16 +171,10 @@ view Inspector {
     views = removeTemp(views)
   }
 
-  function onWriteBack(path, data) {
-    writeBack(path, data)
-    view.update()
-  }
-
   <Inspector.View
     repeat={views}
     key={_.path}
     {..._}
-    writeBack={onWriteBack}
     onClose={e => close(_.path, e)}
   />
 
