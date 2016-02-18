@@ -14,6 +14,8 @@ bootstrap:
 	npm install
 	node scripts/bootstrap.js
 	scripts/build.sh
+	# ensure linked before motion build
+	(cd packages/motion && npm link)
 	(cd apps/tools && motion build)
 
 ready:
