@@ -51,7 +51,12 @@ view Menu {
   function focusElement(el) {
     return function() {
       // slicing because h11 -> h1
-      toEditor({ type: 'focus:element', key: el.key.slice(0, -1), view: el.view })
+      toEditor({
+        type: 'focus:element',
+        key: el.key.slice(0, -1),
+        view: el.view,
+        filePath: _Motion.views[el.view].file
+      })
     }
   }
 
