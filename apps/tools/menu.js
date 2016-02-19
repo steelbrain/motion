@@ -50,7 +50,8 @@ view Menu {
 
   function focusElement(el) {
     return function() {
-      toEditor({ type: 'focus:element', key: el.key, view: el.view })
+      // slicing because h11 -> h1
+      toEditor({ type: 'focus:element', key: el.key.slice(0, -1), view: el.view })
     }
   }
 
