@@ -3,9 +3,7 @@ import through from 'through2'
 import applySourceMap from 'vinyl-sourcemaps-apply'
 import replaceExt from 'replace-ext'
 import { transform } from 'flint-babel-core'
-import onMeta from './lib/onMeta'
 import config from './lib/config'
-import writeStyle from '../lib/writeStyle'
 import { _, log } from '../lib/fns'
 import getMatches from '../lib/getMatches'
 
@@ -59,9 +57,6 @@ export function motionFile(file) {
   let res = transform(
     file.contents.toString(),
     babelOpts(file, config.file({
-      log,
-      onMeta,
-      writeStyle,
       onImports,
       onExports
     }))

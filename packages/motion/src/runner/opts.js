@@ -41,10 +41,10 @@ async function migration() {
 
     // index.html "#_flintapp" => "#_motionapp"
     replace({
-      regex: '#_flintapp',
-      replacement: '#_motionapp',
+      regex: '_flintapp',
+      replacement: '_motionapp',
       paths: [OPTS.motionDir],
-      recursive: false,
+      recursive: true,
       silent: true
     })
 
@@ -133,6 +133,8 @@ async function setupCliOpts(cli) {
   OPTS.reset = cli.reset
   OPTS.build = cli.build
   OPTS.out = cli.out
+
+  OPTS.watching = cli.watch || !cli.build
 
   // ensure we dont clobber things
   if (cli.out && (await exists(cli.out)))  {

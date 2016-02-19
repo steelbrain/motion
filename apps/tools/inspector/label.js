@@ -1,47 +1,54 @@
-import { isNumber, isBoolean } from 'lodash'
+import { isNumber, isBoolean, isString } from 'lodash'
 
 view Label {
   prop val, editable, onSet
+  prop valueStyle = {}
+  prop editingStyle = {}
+  prop nonEditingStyle = {}
 
   let input = null
-  let focus, newVal
+  let newVal
+  let editing = false
 
   on.props(() => {
-    if (!focus) newVal = val
+    if (!editing && newVal !== val) {
+      newVal = val
+      view.update({ immediate: true })
+    }
   })
 
   const onFocus = e => {
     if (!editable) return
     if (isBoolean(val)) return onSet(!val)
-    focus = true
+    editing = true
     e.stopPropagation()
   }
 
   const onBlur = e => {
-    focus = false
+    editing = false
   }
 
   const onChange = e => {
     newVal = e.target.value
-    view.update({ immediate: true })
 
     if (isNumber(val)) {
       // dont let them change from num to str
       if (newVal === '' || isNaN(newVal)) return
+      newVal = +newVal
     }
 
     // todo: debate
     if (newVal === 'false') newVal = false
     if (newVal === 'true') newVal = true
     onSet(newVal)
+    view.update({ immediate: true })
   }
 
   let tabIndex = editable => editable ? {} : {tabIndex: 5000, disabled: true}
 
   <input
-    defaultValue={val.toString()}
-    value={newVal}
-    class={{ focus }}
+    value={isString(newVal) ? newVal : newVal.toString()}
+    class={{ editing }}
     size={Math.max(4, val && val.length || 0)}
     spellCheck={false}
     onMouseDown={onFocus}
@@ -51,11 +58,7 @@ view Label {
     {...{ onFocus, onBlur, onChange }}
   />
 
-  $input = {
-    position: 'absolute',
-    top: 0,
-    left: -1,
-    right: 0,
+  $input = [{
     color: '#333',
     padding: 1,
     width: 140,
@@ -63,11 +66,10 @@ view Label {
     border: 'none',
     // nice cursor on boolean toggle
     cursor: isBoolean(val) ? 'pointer' : 'auto',
-    opacity: 0,
-    boxShadow: '1px 1px 2px rgba(0,0,0,0.4)'
-  }
+    boxShadow: editing ? '1px 1px 2px rgba(0,0,0,0.4)' : undefined,
+  }, valueStyle, editing ? editingStyle : nonEditingStyle]
 
-  $focus = {
+  $editing = {
     opacity: '1 !important',
   }
 }

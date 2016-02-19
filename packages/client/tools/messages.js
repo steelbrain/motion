@@ -1,4 +1,5 @@
 import { compileError, compileSuccess } from './errors'
+import { favicon } from './favicon'
 import socket from './socket'
 
 export default function run(browser, opts) {
@@ -25,10 +26,12 @@ export default function run(browser, opts) {
     },
 
     'compile:error': msg => {
+      favicon.bad()
       compileError(msg.error)
     },
 
     'compile:success': msg => {
+      favicon.good()
       compileSuccess()
     },
 

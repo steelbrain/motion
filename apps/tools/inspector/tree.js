@@ -1,24 +1,19 @@
 import lens from '../lib/lens'
 
 view Tree {
+  prop data, id, editable, isExpanded, interactiveLabel
+  prop onEdit = () => {}, onSet = () => {}, validateQuery = () => {}
   let query = ''
 
-  const search = q => query === '' || view.props.validateQuery(query) ? query = q : false
-  const getOriginal = path => lens(view.props.data, path)
+  const search = q => query === '' || validateQuery(query) ? query = q : false
+  const getOriginal = path => lens(data, path)
 
-  <Leaf
-    data={view.props.data}
-    onClick={view.props.onClick}
-    id={view.props.id}
-    getOriginal={getOriginal}
-    query={query}
-    label="root"
-    editable={view.props.editable}
-    root={true}
-    validateQuery={query => query.length >= 2}
-    isExpanded={view.props.isExpanded || () => false}
-    interactiveLabel={view.props.interactiveLabel}
-    onSet={(...args) => view.props.onSet(args)}
+  <Leaf {...({ data, onEdit, id, getOriginal,
+              query, editable, isExpanded, })}
+        onSet={onSet}
+        label="root"
+        root={true}
+        validateQuery={query => query.length >= 2}
   />
 
   $ = {

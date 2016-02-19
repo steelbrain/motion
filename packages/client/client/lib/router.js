@@ -36,6 +36,10 @@ const router = {
       throw new Error('Must provide function to Motion.router.onChange')
 
     listeners.push(cb)
+
+    return () => {
+      listeners = listeners.filter(fn => fn !== cb)
+    }
   },
 
   link(...args) {

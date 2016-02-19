@@ -45,17 +45,23 @@ export default [
     strength: 80
   },
   {
+    name: 'transition',
+    description: 'Transition values for element',
+    auto: 'all ease-in 300ms',
+    strength: 100
+  },
+  {
     name: 'height',
     description: 'Height of the element',
-    options: [300, '100%'],
-    auto: 300,
+    options: [100, '100%'],
+    auto: 100,
     strength: 80
   },
   {
     name: 'width',
     description: 'Width of the element',
-    options: [300, '100%'],
-    auto: 300,
+    options: [100, '100%'],
+    auto: 100,
     strength: 80
   },
   {
@@ -168,6 +174,31 @@ export default [
     name: 'zIndex',
     description: 'Layer index in document',
     auto: 1,
+    strength: 100
+  },
+  {
+    name: 'flexGrow',
+    description: 'Flexbox stretch weight',
+    auto: 1,
+    strength: 100
+  },
+  {
+    name: 'flexShrink',
+    description: 'Flexbox shrink weight',
+    auto: 1,
+    strength: 100
+  },
+  {
+    name: 'cursor',
+    description: 'Layer index in document',
+    options: ['auto', 'default', 'none', 'pointer', 'text', 'crosshair', 'zoom-in', 'zoom-out'],
+    auto: 'pointer',
+    strength: 100
+  },
+  {
+    name: 'outline',
+    description: 'Outline on form and link elements',
+    auto: 'none',
     strength: 100
   },
 ]

@@ -5,7 +5,6 @@ let state = {
   currentView: null,
   meta: null, // meta-data for views for atom
   keyBase: null,
-  inJSX: false,
   inView: null, // track current view name
   hasView: false, // if file has a view
   viewHasChildWithClass: false, // if view calls for a child view

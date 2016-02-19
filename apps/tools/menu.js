@@ -17,11 +17,26 @@ view Menu {
       focused = true
     }
   })
+
   on.keyup(() => {
     if (focused) {
       document.body.classList.remove('__motionfocus')
       focused = false
     }
+  })
+
+  on.event('contextmenu', e => {
+    const mode = keys.alt && keys.command
+    if (!mode) return
+
+    e.preventDefault()
+
+    const { clientX, clientY } = e
+
+    left = clientX
+    top = clientY - 18
+    active = true
+    elements = inspecting.all()
   })
 
   on.click(window, e => {
@@ -31,18 +46,6 @@ view Menu {
       active = false
       return
     }
-
-    const mode = keys.alt && keys.command
-    if (!mode) return
-
-    e.preventDefault()
-
-    const { clientX, clientY } = e
-
-    left = clientX
-    top = clientY
-    active = true
-    elements = inspecting.all()
   })
 
   function focusElement(el) {
@@ -65,21 +68,23 @@ view Menu {
         last: _index == elements.length - 1
       }}
     >
-      <main class="hl" onClick={focusElement(_)}>{_.view}</main>
-      <sub class="hl" onClick={focusStyle(_)}>$</sub>
+      <toEl class="hl" onClick={focusElement(_)}>{_.view.replace(/\-/g, '.')}</toEl>
+      <toStyle class="hl">
+        <Dollar onClick={focusStyle(_)}/>
+      </toStyle>
     </item>
   </menu>
 
-  const rad = 5
+  const rad = 2
 
   $menu = {
     borderRadius: rad,
     border: '1px solid #ddd',
-    boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+    boxShadow: '0 2px 2px rgba(0,0,0,0.1)',
     position: 'absolute',
     top,
     left,
-    background: '#fff',
+    background: '#fcfcfc',
     zIndex: 2147483647,
     transition: 'opacity ease-in 30ms, transform ease-in 30ms',
     opacity: 0,
@@ -94,7 +99,13 @@ view Menu {
     transform: { y: 0 }
   }
 
+  $Dollar = {
+    marginTop: 2,
+    opacity: 0.8,
+  }
+
   $item = {
+    borderTop: _index === 0 ? undefined : '1px solid rgba(0,0,0,0.1)',
     minWidth: 120,
     cursor: 'pointer',
     flexFlow: 'row',
@@ -113,14 +124,29 @@ view Menu {
   }
 
   $hl = {
-    padding: [4, 8],
-
+    padding: [8, 8],
     hover: {
-      background: [0,0,0,0.1]
+      background: [0,0,0,0.05]
     }
   }
 
-  $main = {
-    flexGrow: 1
+  $sub = {
+    marginTop: 5,
+    marginLeft: 0,
+    fontSize: 13,
+  }
+
+  $toStyle = {
+    hover: {
+      borderLeft: '1px solid rgba(0,0,0, 0.1)',
+    }
+  }
+
+  $toEl = {
+    flexGrow: 1,
+    hover: {
+      fontSize: 30,
+      borderRight: '1px solid rgba(0,0,0, 0.1)',
+    }
   }
 }

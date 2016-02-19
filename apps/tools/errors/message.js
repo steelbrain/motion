@@ -35,7 +35,7 @@ view Errors.Message {
   })
 
   // update on editor state
-  browser.emitter.on('editor:state', () => setTimeout(view.update))
+  browser.on('editor:state', () => setTimeout(view.update))
 
   <Debounce
     // delay more during live typing

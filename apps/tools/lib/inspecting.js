@@ -4,6 +4,7 @@ let getReactKey = el =>
   Object.keys(el).filter(k => k.indexOf('__reactInternalInst')==0)[0]
 
 function getReactId(el) {
+  if (!el) return null
   if (!reactKey) reactKey = getReactKey(el)
   if (!el[reactKey]) return
   let current = el[reactKey]._currentElement

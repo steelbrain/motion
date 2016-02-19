@@ -73,8 +73,8 @@ export async function run(opts) {
     await startup(opts)
     if (opts.watch) gulp.assets()
     await server.run()
+    await bridge.activate()
     activateEditor(bridge)
-    bridge.activate()
     await gulpScripts()
     cache.serialize() // write out cache
     await bundler.all()

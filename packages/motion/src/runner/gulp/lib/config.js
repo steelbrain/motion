@@ -1,21 +1,42 @@
 import MotionTransform from 'motion-transform'
 import { isProduction } from './helpers'
 import opts from '../../opts'
+import onMeta from './onMeta'
+import { log } from '../../lib/fns'
+import writeStyle from '../../lib/writeStyle'
 import deepmerge from 'deepmerge'
 
+let motion = null
+const id = () => {}
+
+// allow these to change per-call
+let _onImports, _onExports
+let onImports = _ => _onImports(_)
+let onExports = _ => _onExports(_)
+
 export function file(config) {
-  const motionOpts = {
-    basePath: opts('appDir'),
-    production: isProduction(),
-    selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
-    routing: opts('config').routing,
-    ...config
+  _onImports = config.onImports
+  _onExports = config.onExports
+
+  // only instantiate once
+  if (!motion) {
+    const motionOpts = {
+      basePath: opts('appDir'),
+      production: isProduction(),
+      selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
+      routing: opts('config').routing,
+      log,
+      onMeta,
+      writeStyle,
+      onImports: _ => onImports(_),
+      onExports: _ => onExports(_)
+    }
+
+    motion = MotionTransform.file(motionOpts)
   }
 
   return getBabelConfig({
-    plugins: [
-      MotionTransform.file(motionOpts)
-    ]
+    plugins: [motion]
   })
 }
 

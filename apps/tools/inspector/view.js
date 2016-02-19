@@ -20,10 +20,6 @@ view Inspector.View {
   let props = null
   let writeBack = null
 
-  function onSet(write) {
-    view.props.writeBack(path, write)
-  }
-
   on.delay(60, () => {
     active = true
   })
@@ -66,7 +62,9 @@ view Inspector.View {
     <Inspector.Section title="State" if={hasKeys(state)}>
       <Tree
         editable={true}
-        onSet={onSet}
+        onSet={(key, value) => {
+          writeBack && writeBack(key, value)
+        }}
         data={state}
       />
     </Inspector.Section>
