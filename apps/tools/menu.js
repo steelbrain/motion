@@ -12,7 +12,7 @@ view Menu {
   // prevent select and show custom cursor when ready for context
   let focused
   on.keydown(() => {
-    if (keys.alt && keys.command) {
+    if (keys.alt) {
       document.body.classList.add('__motionfocus')
       focused = true
     }
@@ -26,7 +26,7 @@ view Menu {
   })
 
   on.event('contextmenu', e => {
-    const mode = keys.alt && keys.command
+    const mode = keys.alt
     if (!mode) return
 
     e.preventDefault()
@@ -60,7 +60,7 @@ view Menu {
     }
   }
 
-  <menu class={{ internal: true, active }}>
+  <menu class={{ internal: true, active, '__motionMenu': true }}>
     <item
       repeat={elements.filter(i => !!i.view)}
       class={{
