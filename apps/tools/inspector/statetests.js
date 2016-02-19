@@ -6,6 +6,7 @@ view StateTests {
   <Tests.Counter />
   <Tests.Props />
   <Tests.Circles />
+  <Tests.Deep />
 }
 
 view Tests.Boolean {
@@ -39,12 +40,6 @@ view Tests.Counter {
   <button onClick={() => count--}>down</button>
 }
 
-view Tests.Deep {
-  let person = { name: 'nick', tools: ['js', 'juggling balls', 'coffee'] }
-  <h1>deep</h1>
-  <h2>{JSON.stringify(person)}</h2>
-}
-
 view Tests.Name {
   let first = 'nick'
   let last = 'cammarata'
@@ -74,6 +69,20 @@ view Tests.Circles {
   </circles>
 
   $circles = { position: 'relative', background: '#eee', height: 400, width: 400 }
+}
+
+view Tests.Deep {
+  let friend = {
+    name: 'nick',
+    age: 'twenty three',
+    food: {
+      want: true,
+      temp: 'warm'
+    },
+    sayHi: () => alert('hello!')
+  }
+
+  <h1>testing deep state {JSON.stringify(friend)}</h1>
 }
 
 view Tests.Circle {
