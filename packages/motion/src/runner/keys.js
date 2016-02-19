@@ -4,7 +4,7 @@ import shutdown from './shutdown'
 import open from 'open'
 import keypress from 'keypress'
 import { surge } from './lib/requires'
-import { _ } from './lib/fns'
+import { _, emitter } from './lib/fns'
 import log from './lib/log'
 import openInBrowser from './lib/openInBrowser'
 import handleError from './lib/handleError'
@@ -134,11 +134,7 @@ function start() {
           }
           break
         case 'd':
-          print("---------opts---------")
-          opts.debug()
-
-          print("\n---------cache---------")
-          cache.debug()
+          emitter.emit('debug')
           break
       }
     }

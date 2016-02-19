@@ -1,5 +1,5 @@
 import { finishedInstalling } from './install'
-import webpack from './lib/webpack'
+import webpack from './webpack'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
 import getWebpackErrors from './lib/getWebpackErrors'
@@ -33,12 +33,14 @@ export async function writeInternals(opts = {}) {
 }
 
 export function runInternals() {
-  const config = webpackConfig('internals.js', {
-    entry: opts('deps').internalsIn,
-    externals: webpackUserExternals()
+  return webpack({
+    name: 'internals',
+    onFinish: onInternalInstalled,
+    config: {
+      entry: opts('deps').internalsIn,
+      externals: webpackUserExternals(),
+    }
   })
-
-  return webpack('internals', config, onInternalInstalled)
 }
 
 // let internals use externals

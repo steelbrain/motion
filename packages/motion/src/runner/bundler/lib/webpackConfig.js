@@ -26,6 +26,7 @@ export default function webpackConfig(filename, config = {}) {
       'react-dom': 'exports.ReactDOM',
       history: 'exports.history',
       radium: 'exports.radium',
+      'babel-polyfill': 'var $'
     },
     devtool: 'source-map',
     node: {
@@ -37,7 +38,7 @@ export default function webpackConfig(filename, config = {}) {
     resolve: {
       root: opts('motionDir'),
       modulesDirectories: ['node_modules'],
-      extensions: ['', '.js', '.jsx', '.css'],
+      extensions: ['', '.js', '.jsx'],
       fallback: [
         runnerModules,
         // path.join(motionRoot, '..') // fallback to app root for import css
