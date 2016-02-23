@@ -42,8 +42,11 @@ const router = {
     }
   },
 
-  link(...args) {
-    return () => router.go(...args)
+  link(a, b) {
+    return e => {
+      e.preventDefault()
+      router.go(a, b)
+    }
   },
 
   back() { history.goBack() },
@@ -74,7 +77,7 @@ const router = {
     router.next()
     router.recognize()
     if (!opts.dontRender) render()
-    if (!opts.keepScroll) setTimeout(() => window.scrollTo(0, 0))
+    if (!opts.keepScroll) window.scrollTo(0, 0)
   },
 
   isActive(path) {

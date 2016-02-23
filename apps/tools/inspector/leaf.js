@@ -99,7 +99,7 @@ view Leaf {
   })
 
   <leaf class={rootPath}>
-    <label if={!view.props.root} htmlFor={id} onClick={toggle}>
+    <label if={!view.props.root && key != 'relay' && key != 3} htmlFor={id} onClick={toggle}>
       <key>
         <name>{key}</name>
       </key>
@@ -112,7 +112,7 @@ view Leaf {
           <type>Array[{value.length}]</type>
         </array>
         <obj if={is.object}>
-          <type>{'{} ' + dataKeys.length + ' keys'}</type>
+          <type>{'{} '}</type>
         </obj>
         <str if={is.string}>
           <Label val={value}
