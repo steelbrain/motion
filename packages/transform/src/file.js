@@ -15,6 +15,7 @@ import CallExpression from './nodes/CallExpression'
 import VariableDeclaration from './nodes/VariableDeclaration'
 import AssignmentExpression from './nodes/AssignmentExpression'
 import UpdateExpression from './nodes/UpdateExpression'
+import ClassDeclaration from './nodes/ClassDeclaration'
 
 export default function createPlugin(options) {
   // running without options
@@ -44,7 +45,8 @@ export default function createPlugin(options) {
         CallExpression,
         VariableDeclaration,
         AssignmentExpression,
-        UpdateExpression
+        UpdateExpression,
+        ClassDeclaration
       }
     })
   }

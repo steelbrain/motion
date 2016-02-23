@@ -114,8 +114,8 @@ const Motion = {
 
     const Motion = {
       start() {
-        router.init(ID, { onChange: Motion.render })
-        Motion.render()
+        router.init(ID, { onChange: Motion.run })
+        Motion.run()
       },
 
       views: {},
@@ -138,7 +138,11 @@ const Motion = {
       preloaders: [],
       preload(fn) { Motion.preloaders.push(fn) },
 
-      render() {
+      entry(entry) {
+        Internal.views.Main = { component: entry }
+      },
+
+      run() {
         if (Motion.preloaders.length) {
           return Promise
             .all(Motion.preloaders.map(loader => typeof loader == 'function' ? loader() : loader))
@@ -300,7 +304,7 @@ const Motion = {
 
           // safe re-render
           if (isNewFile || removedViews.length || addedViews.length)
-            return Motion.render()
+            return Motion.run()
 
           // if outside of views the FILE changed, refresh all views in file
           if (!Internal.changedViews.length && Internal.fileChanged[file]) {
@@ -341,7 +345,7 @@ const Motion = {
         }
 
         delete Internal.viewCache[name]
-        Motion.render()
+        Motion.run()
       },
 
       routeMatch(path) {

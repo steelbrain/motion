@@ -12,6 +12,13 @@ export default function init(_options, _t) {
 export function t() {}
 export function options() {}
 
+export function componentTrack(name) {
+  console.log('name', name)
+  return t.expressionStatement(
+    t.callExpression(t.identifier('Motion.component'), [t.identifier(name)])
+  )
+}
+
 let niceAttrs = {
   className: 'class',
   htmlFor: 'for',

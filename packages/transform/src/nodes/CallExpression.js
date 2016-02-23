@@ -4,10 +4,11 @@ import { wrapSetter } from '../lib/wrapState'
 
 export default {
   exit(node, parent, scope, file) {
-    // track require() statements
-    if (node.callee && node.callee.name && node.callee.name == 'require') {
-      const arg = node.arguments && node.arguments.length && node.arguments[0].value
+    const callee = node.callee
 
+    // track require() statements
+    if (callee && callee.name == 'require') {
+      const arg = node.arguments && node.arguments.length && node.arguments[0].value
       options.onImports && options.onImports(arg)
     }
 
@@ -34,7 +35,5 @@ export default {
           return wrapSetter(name, node, scope)
       }
     }
-
-    // return stateTrack(node)
   }
 }

@@ -249,7 +249,7 @@ function reloadImportScripts({ importers } = {}) {
 
   Promise.all(scriptLoaders)
     .then(() => {
-      Motion.render()
+      Motion.run()
     })
 }
 
@@ -262,7 +262,7 @@ function renderMotion() {
   }
 
   if (typeof Motion != 'undefined') {
-    setTimeout(Motion.render)
+    setTimeout(Motion.run)
     renderAttempts = 0
   }
   else {
