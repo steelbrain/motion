@@ -194,18 +194,27 @@ const Motion = {
       // for use in jsx
       debug: () => { debugger },
 
+      component(name, component) {
+        Internal.views[name] = createComponent(Motion, Internal, name, component, { changed: true })
+        Motion.views[name] = component
+        Internal.changedViews.push(name)
+        console.log('loaded,', name)
+      },
+
       view(name, body) {
-        const comp = opts => createComponent(Motion, Internal, name, body, opts)
-
-        if (process.env.production)
-          return setView(name, comp())
-
-        const hash = hashsum(body)
+        function comp(opts = {}) {
+          return createComponent(Motion, Internal, name, body, { ...opts, isView: true })
+        }
 
         function setView(name, component) {
           Internal.views[name] = { hash, component, file: Internal.currentHotFile }
           Motion.views[name] = component
         }
+
+        if (process.env.production)
+          return setView(name, comp())
+
+        const hash = hashsum(body)
 
         // set view in cache
         let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]

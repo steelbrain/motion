@@ -28,9 +28,13 @@ export default {
         const { object, property } = dec.init.callee
 
         if (object.name == 'React' && property.name == 'createClass') {
+          const name = dec.id.name
+          scope.rename(name)
+          const uid = dec.id.name
+
           return [
             node,
-            componentTrack(dec.id.name)
+            componentTrack(name, uid)
           ]
         }
       }

@@ -37,7 +37,10 @@ export default function createComponent(Motion, Internal, name, view, options = 
     return wrapComponent(createViewComponent())
 
   // development
-  views[name] = createViewComponent()
+  // detect view{} syntax vs just passing in class/createclass
+  views[name] = options.isView ?
+    createViewComponent() :
+    view
 
   // once rendered, isChanged is used to prevent
   // unnecessary props hashing, for faster hot reloads
