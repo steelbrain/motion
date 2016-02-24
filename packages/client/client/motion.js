@@ -235,6 +235,7 @@ const Motion = {
         component.__motioninfo__ = { name, type }
 
         // so that it updates
+        delete Internal.views[name]
         delete Motion.views[name]
 
         Internal.changedViews.push(name)

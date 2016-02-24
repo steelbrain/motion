@@ -161,7 +161,15 @@ export default function createComponent(Motion, Internal, name, view, options = 
       el: createElement,
 
       render() {
-        let [ dom, style ] = view.call(null, { props: this.props, state: this.state, update: this.setState })
+        let args = {
+          props: this.props,
+          update: this.setState.bind(this)
+        }
+
+        if (this.state)
+          args.state = this.state
+
+        let [ dom, style ] = view.call(null, args)
 
         this.$ = style
 

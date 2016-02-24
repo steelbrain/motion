@@ -1,12 +1,18 @@
 import { updateState } from '../lib/wrapState'
-import { t, parentFunctionNode, isComponentReturn } from '../lib/helpers'
+import { t, parentFunctionNode, isComponentReturn, component } from '../lib/helpers'
 
 export default {
-  exit(node, parent, scope) {
+  enter(node, parent, scope) {
     if (isComponentReturn(node.argument)) {
       console.log('in return')
-    }
 
+      let parentFunc = parentFunctionNode(scope)
+
+      parentFunc.motionIsComponent = true
+    }
+  },
+
+  exit(node, parent, scope) {
     // view.update() before return
     if (node.motionReturnTracked) return
     node.motionReturnTracked = true

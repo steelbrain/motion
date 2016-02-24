@@ -38,6 +38,9 @@ export function component({ name, node, type = component.CLASS }) {
 component.SIMPLE = 'Motion.componentFn'
 component.CLASS = 'Motion.componentClass'
 
+component.simple = opts => component({ ...opts, type: component.SIMPLE })
+component.class = opts => component({ ...opts, type: component.CLASS })
+
 let niceAttrs = {
   className: 'class',
   htmlFor: 'for',
