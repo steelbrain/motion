@@ -170,6 +170,7 @@ function setupDirs() {
   OPTS.configFile = p(OPTS.motionDir, 'config.js')
   OPTS.stateFile = p(OPTS.internalDir, 'state.json')
   OPTS.outDir = p(OPTS.internalDir, 'out')
+  OPTS.hotDir = p(OPTS.internalDir, 'hot')
   OPTS.styleDir = p(OPTS.internalDir, 'styles')
   OPTS.styleOutDir = p(OPTS.buildDir, '_')
   OPTS.styleOutName = 'styles.css'

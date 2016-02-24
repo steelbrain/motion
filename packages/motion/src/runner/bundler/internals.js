@@ -10,9 +10,13 @@ import cache from '../cache'
 import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
-export async function writeInternals({ force } = {}) {
+let RELOAD = false
+
+export async function writeInternals({ force, reload } = {}) {
   try {
     await finishedInstalling()
+
+    RELOAD = reload
 
     if (force || disk.internalsIn.hasChanged()) {
       await disk.internalsIn.write((current, write) => {
@@ -38,7 +42,7 @@ export async function writeInternals({ force } = {}) {
 export function runInternals() {
   return webpack({
     name: 'internals',
-    onFinish: onInternalInstalled,
+    onFinish: () => RELOAD && onInternalInstalled(),
     config: {
       entry: opts('deps').internalsIn,
       externals: webpackUserExternals(),

@@ -15,8 +15,6 @@ export default {
 
     const location = relativePath(file.opts.filename)
 
-    console.log('first run?', options.firstRun)
-
     if (!options.firstRun && state.file.meta.isHot) {
       // function(){ Motion.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(

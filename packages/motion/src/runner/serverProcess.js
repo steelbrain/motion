@@ -131,8 +131,8 @@ function run() {
     }
 
     // USER files
-    // user js files at '/_/filename.js'
-    server.use('/_', express.static('.motion/.internal/out'))
+    // hot reload files at '/_/filename.js'
+    server.use('/_', express.static('.motion/.internal/hot'))
     // user non-js files
     server.use('/', express.static('.', staticOpts))
     // user static files...

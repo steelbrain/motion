@@ -18,6 +18,7 @@ const hasBuilt = () => opts('hasRunInitialBuild')
 const getAllImports = (src, imports) => [].concat(findBabelRuntimeRequires(src), imports)
 const scanNow = () => opts('build') || opts('watch') || !opts('hasRunInitialBuild')
 const isJSON = file => path.extname(file.path) == '.json'
+const hotReloadable = file => hasBuilt() && file.babel.isHot
 
 export function scripts({ inFiles = [], userStream }) {
   let State = {
@@ -68,11 +69,25 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe($.fn(markFileSuccess))
       // internals after hot to keep bundle up to date
       .pipe($.if(file => file.babel.isExported,
-        $.fn(bundler.writeInternals.bind(null, { force: true }))
+        $.fn(file => {
+          bundler.writeInternals({ force: true, reload: !file.babel.isHot })
+        })
       ))
-      .pipe($.sourcemaps.write('.')) //warning removes babel info
-      .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
-      .pipe($.fn(hotReload))
+      // hot reload
+      .pipe($.if(hotReloadable,
+        $.multipipe(
+          gulp.dest(opts('hotDir')),
+          $.fn(hotReload)
+        )
+      ))
+      // out to bundle
+      .pipe($.if(checkWriteable,
+        $.multipipe(
+          $.sourcemaps.write('.'),
+          gulp.dest(opts('outDir')),
+          $.fn(buildDone)
+        )
+      ))
       // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
       .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
       .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
@@ -285,9 +300,6 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   function hotReload(file) {
-    if (isSourceMap(file.path)) return
-    buildDone(file)
-
     // avoid
     if (!file.babel.isHot) return
     if (!hasFinished()) return
@@ -321,6 +333,8 @@ export function scripts({ inFiles = [], userStream }) {
   }
 
   async function buildDone(file) {
+    if (isSourceMap(file.path)) return
+
     if (file.finishingFirstBuild) {
       opts.set('hasRunInitialBuild', true)
       log.gulp('buildDone!!'.green.bold)

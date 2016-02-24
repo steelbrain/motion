@@ -17,10 +17,14 @@ export async function init() {
     rm(p(opts('internalDir'), 'user-config'))
   ])
 
-  if (opts('cached'))
+  if (opts('cached')) {
     await mkdir(opts('outDir'))
-  else
+    await mkdir(opts('hotDir'))
+  }
+  else {
     await recreateDir(opts('outDir'))
+    await recreateDir(opts('hotDir'))
+  }
 }
 
 export async function internalDir() {
