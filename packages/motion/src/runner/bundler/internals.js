@@ -10,18 +10,21 @@ import cache from '../cache'
 import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
-export async function writeInternals(opts = {}) {
+export async function writeInternals({ force } = {}) {
   try {
     await finishedInstalling()
 
-    if (opts.force || disk.internalsIn.hasChanged()) {
+    if (force || disk.internalsIn.hasChanged()) {
       await disk.internalsIn.write((current, write) => {
         const internals = cache.getExported()
 
         log.internals('internals', internals)
 
-        write(requireString(internals, {
-          prefix: './internal/',
+        // get user entry
+        const main = opts('config').entry.replace('./', '')
+
+        write(requireString([main, ...internals], {
+          prefix: './out/',
           removeExt: true
         }))
       })

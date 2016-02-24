@@ -13,7 +13,9 @@ export function t() {}
 export function options() {}
 
 export function componentTrack(name, node) {
-  return t.callExpression(t.identifier('Motion.component'), [t.literal(name), node])
+  const wrapped = t.callExpression(t.identifier('Motion.component'), [t.literal(name), node])
+  wrapped.isMotionHot = true
+  return wrapped
 }
 
 let niceAttrs = {

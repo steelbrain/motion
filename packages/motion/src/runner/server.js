@@ -3,25 +3,32 @@
 // which does heavy requesting
 
 import cp from 'child_process'
-import { setChild } from './shutdown'
 import opts from './opts'
 import disk from './disk'
 
 import { p } from './lib/fns'
 const serverPath = p(__dirname, 'serverProcess')
 
+function sendOpts() {
+  process.children.server.send(JSON.stringify({
+    type: 'opts',
+    data: opts()
+  }))
+}
+
 export function run() {
   return new Promise((res, rej) => {
-    let child = cp.fork(serverPath, '', {
+    let server = cp.fork(serverPath, '', {
       // for express to run quickly
       env: { NODE_ENV: 'production' }
     })
 
-    setChild(child)
+    process.children = process.children || {}
+    process.children.server = server
 
-    child.send(JSON.stringify(opts()))
+    sendOpts()
 
-    child.once('message', message => {
+    server.once('message', message => {
       let { port, host } = JSON.parse(message)
 
       opts.set('port', port)
@@ -33,10 +40,10 @@ export function run() {
     })
 
     // send opts after first build complete
-    let sendOpts = setInterval(() => {
+    let wait = setInterval(() => {
       if (opts('hasRunInitialBuild')) {
-        child.send(JSON.stringify(opts()))
-        clearInterval(sendOpts)
+        sendOpts()
+        clearInterval(wait)
       }
     }, 150)
   })

@@ -289,6 +289,7 @@ const Motion = {
 
       // load a file
       file(file, run) {
+        console.log('file')
         if (!process.env.production) {
           Internal.viewsInFile[file] = []
           Internal.changedViews = []
@@ -321,6 +322,8 @@ const Motion = {
           Internal.currentHotFile = null
           Internal.viewCache[file] = Internal.viewsInFile[file]
 
+          console.log('1')
+
           if (Internal.firstRender)
             return
 
@@ -335,6 +338,8 @@ const Motion = {
           if (!Internal.changedViews.length && Internal.fileChanged[file]) {
             Internal.changedViews = Internal.viewsInFile[file]
           }
+
+          console.log('1')
 
           Internal.changedViews.forEach(name => {
             if (!Internal.mountedViews[name]) return

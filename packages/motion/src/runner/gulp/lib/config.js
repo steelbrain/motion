@@ -10,29 +10,39 @@ let motion = null
 const id = () => {}
 
 // allow these to change per-call
-let _onImports, _onExports
+let _onImports, _onCold, _onExports
 let onImports = _ => _onImports(_)
 let onExports = _ => _onExports(_)
+let onCold = _ => _onCold(_)
+
+const getFileTransformer = (conf) => MotionTransform.file({
+  basePath: opts('appDir'),
+  production: isProduction(),
+  selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
+  routing: opts('config').routing,
+  log,
+  onMeta,
+  writeStyle,
+  onImports: _ => onImports(_),
+  onExports: _ => onExports(_),
+  onCold: _ => onCold(_),
+  ...conf
+})
+
+let switchedToRunning
 
 export function file(config) {
   _onImports = config.onImports
   _onExports = config.onExports
+  _onCold = config.onCold
 
   // only instantiate once
   if (!motion) {
-    const motionOpts = {
-      basePath: opts('appDir'),
-      production: isProduction(),
-      selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
-      routing: opts('config').routing,
-      log,
-      onMeta,
-      writeStyle,
-      onImports: _ => onImports(_),
-      onExports: _ => onExports(_)
-    }
-
-    motion = MotionTransform.file(motionOpts)
+    motion = getFileTransformer({ firstRun: true })
+  }
+  else if (!switchedToRunning && opts('hasRunInitialBuild')) {
+    switchedToRunning = true
+    motion = getFileTransformer({ firstRun: false })
   }
 
   return getBabelConfig({
@@ -55,7 +65,7 @@ export function getBabelConfig({ plugins }) {
   const babelConf = {
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'view.el',
-    stage: 1,
+    stage: 0,
     blacklist: ['es6.tailCall', 'strict'],
     retainLines: opts('config').pretty ? false : true,
     comments: true,

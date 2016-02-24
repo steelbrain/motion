@@ -161,7 +161,7 @@ function setupDirs() {
   OPTS.deps.dir = p(OPTS.internalDir, 'deps')
   OPTS.deps.internalDir = p(OPTS.internalDir, 'deps', 'internal')
   OPTS.deps.assetsDir = p(OPTS.deps.dir, 'assets')
-  OPTS.deps.internalsIn = p(OPTS.deps.dir, 'internals.in.js')
+  OPTS.deps.internalsIn = p(OPTS.internalDir, 'internals.in.js')
   OPTS.deps.internalsOut = p(OPTS.deps.dir, 'internals.js')
   OPTS.deps.externalsIn = p(OPTS.deps.dir, 'externals.in.js')
   OPTS.deps.externalsOut = p(OPTS.deps.dir, 'externals.js')
@@ -178,10 +178,12 @@ function setupDirs() {
 function setupConfig(cli, config) {
   // config
   OPTS.config = Object.assign(
+    // defaults TODO move somewhere nice
     {
       minify: true,
       debug: false,
-      routing: true
+      routing: true,
+      entry: 'main.js'
     },
     config
   )

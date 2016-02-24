@@ -65,21 +65,14 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe($.fn(processDependencies))
       .pipe($.fn(sendOutsideChanged)) // right after motion
       .pipe($.rename({ extname: '.js' }))
-      // internals
-      .pipe($.if(file => file.babel.isExported,
-        $.multipipe(
-          $.fn(removeNewlyInternal),
-          $.fn(markFileSuccess), // before writing to preserve path
-          gulp.dest(opts('deps').internalDir),
-          $.if(hasBuilt, $.fn(bundler.writeInternals.bind(null, { force: true }))),
-          $.fn(buildDone),
-          $.ignore.exclude(true)
-        )
-      ))
-      .pipe($.sourcemaps.write('.'))
       .pipe($.fn(markFileSuccess))
+      // internals after hot to keep bundle up to date
+      .pipe($.if(file => file.babel.isExported,
+        $.fn(bundler.writeInternals.bind(null, { force: true }))
+      ))
+      .pipe($.sourcemaps.write('.')) //warning removes babel info
       .pipe($.if(checkWriteable, gulp.dest(opts('outDir'))))
-      .pipe($.fn(afterWrite))
+      .pipe($.fn(hotReload))
       // temporary bugfix because gulp doesnt work well with watch (pending gulp 4)
       .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
       .pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn()).pipe($.fn())
@@ -157,7 +150,6 @@ export function scripts({ inFiles = [], userStream }) {
       if (restored) {
         cache.restorePrevious(file.relPath)
         out.goodScript(file)
-        afterWrite(file)
       }
 
       return restored
@@ -292,14 +284,14 @@ export function scripts({ inFiles = [], userStream }) {
     return false
   }
 
-  function afterWrite(file) {
+  function hotReload(file) {
     if (isSourceMap(file.path)) return
-
     buildDone(file)
 
-    // avoid during initial build
+    // avoid
+    if (!file.babel.isHot) return
     if (!hasFinished()) return
-    if (file.babel.isExported) return
+    if (file.babel.isInternal) return
 
     // run stuff after each change on build --watch
     doBuild()
@@ -307,11 +299,6 @@ export function scripts({ inFiles = [], userStream }) {
     if (State.lastError) {
       log.gulp('State.lastError', State.lastError)
       return // avoid if error
-    }
-
-    const finish = () => {
-      emitter.emit('script:end', { path: file.relPath })
-      bridge.broadcast('script:add', file.message)
     }
 
     // dont broadcast script if installing/bundling
@@ -328,7 +315,9 @@ export function scripts({ inFiles = [], userStream }) {
       return
     }
 
-    finish()
+    // emit hot reload
+    emitter.emit('script:end', { path: file.relPath })
+    bridge.broadcast('script:add', file.message)
   }
 
   async function buildDone(file) {
@@ -368,18 +357,6 @@ export function scripts({ inFiles = [], userStream }) {
     if (!error) return
     log.gulp('cache last error', error)
     bridge.broadcast('compile:error', { error }, 'error')
-  }
-
-  // ok so we start a file
-  // its built into .motion/out
-  // we then add an export
-  // now we need to remove it from .motion/out
-  function removeNewlyInternal(file) {
-    // resolve path from .motion/.internal/deps/internals/xyz.js back to xyz.js
-    // then resolve path to .motion/.internal/out/xyz.js
-    const outPath = p(opts('outDir'), file.relPath)
-    // log.gulp('remove newly internal', outPath)
-    rm(outPath)
   }
 }
 

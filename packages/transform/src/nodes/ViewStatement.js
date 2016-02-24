@@ -11,7 +11,7 @@ export default {
     resetViewState()
     state.currentView = fullName
     state.inView = fullName
-    state.meta.views[fullName] = {
+    state.file.meta.views[fullName] = {
       location: normalizeLocation(node.loc),
       file: file.opts.filename,
       styles: {},

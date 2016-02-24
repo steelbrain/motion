@@ -4,20 +4,25 @@ process.on('SIGINT', cleanExit)
 process.on('SIGTERM', cleanExit)
 process.on('uncaughtException', cleanExit)
 
-let child
-
 function cleanExit(e) {
   if (e) console.log(e.stack)
 
-  child && child.send('EXIT') // this seems to be required
+  const children = Object.keys(process.children)
 
-  setTimeout(() => {
-    child &&  child.kill('SIGINT')
-    process.exit(0)
+  // kill children
+  children.forEach(key => {
+    let child = process.children[key]
+
+    // this seems to be required
+    child && child.send('EXIT')
+
+    setTimeout(() => {
+      child &&  child.kill('SIGINT')
+      process.exit(0)
+    })
   })
 }
 
 export function now() { cleanExit() }
-export function setChild(_child) { child = _child }
 
-export default { now, setChild }
+export default { now }
