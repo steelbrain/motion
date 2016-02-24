@@ -120,6 +120,10 @@ const Motion = {
 
     Motion = Object.assign(Motion, {
       start() {
+        if (!Internal.entry) {
+          Internal.entry = Motion.views.Main
+        }
+
         router.init(ID, { onChange: Motion.run })
         Motion.run()
       },

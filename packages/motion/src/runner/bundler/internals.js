@@ -10,6 +10,8 @@ import cache from '../cache'
 import opts from '../opts'
 import { log, logError, handleError, writeFile } from '../lib/fns'
 
+// TODO we need a better way to manage what files are about to be bundled,
+// and then what actually gets picked up by webpack --watch, and then manage that queue
 let RELOAD = false
 
 export async function writeInternals({ force, reload } = {}) {
@@ -20,7 +22,7 @@ export async function writeInternals({ force, reload } = {}) {
 
     if (force || disk.internalsIn.hasChanged()) {
       await disk.internalsIn.write((current, write) => {
-        const internals = cache.getExported()
+        const internals = cache.getAllNames()
 
         log.internals('internals', internals)
 

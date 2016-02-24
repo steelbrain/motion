@@ -126,6 +126,10 @@ const Cache = {
     return cache.files
   },
 
+  getAllNames() {
+    return Object.keys(cache.files)
+  },
+
   getPrevious(file: string) {
     return previousCache.files[relative(file)]
   },
