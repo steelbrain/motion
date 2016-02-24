@@ -12,13 +12,8 @@ export default function init(_options, _t) {
 export function t() {}
 export function options() {}
 
-export function componentTrack(name, uid) {
-  return t.variableDeclaration('let', [
-    t.variableDeclarator(
-      t.identifier(name),
-      t.callExpression(t.identifier('Motion.component'), [t.literal(name), t.identifier(uid)])
-    )
-  ])
+export function componentTrack(name, node) {
+  return t.callExpression(t.identifier('Motion.component'), [t.literal(name), node])
 }
 
 let niceAttrs = {

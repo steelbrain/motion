@@ -107,6 +107,7 @@ const Motion = {
     const LastWorkingMain = LastWorkingMainFactory(Internal)
 
     const emitter = ee({})
+    let nextComponentName = null
 
     //
     // begin the motionception
@@ -178,6 +179,8 @@ const Motion = {
               </StyleRoot>,
               document.getElementById(opts.node)
             )
+
+            Internal.firstRender = false
           }
 
           Internal.lastWorkingViews.Main = Main
@@ -194,11 +197,24 @@ const Motion = {
       // for use in jsx
       debug: () => { debugger },
 
+      nextComponent(name) {
+        nextComponentName = name
+      },
+
       component(name, component) {
+        // coming from class, decorator
+        if (!component) {
+          component = name
+          name = nextComponentName
+        }
+
         Internal.views[name] = createComponent(Motion, Internal, name, component, { changed: true })
         Motion.views[name] = component
         Internal.changedViews.push(name)
-        console.log('loaded,', name)
+        let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
+        if (viewsInFile) viewsInFile.push(name)
+
+        return Internal.views[name]
       },
 
       view(name, body) {

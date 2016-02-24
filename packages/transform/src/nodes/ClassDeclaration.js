@@ -3,13 +3,13 @@ import { t, componentTrack } from '../lib/helpers'
 export default {
   exit(node, parent, scope) {
     if (node.superClass && node.superClass.name == 'Component') {
-      const name = node.id.name
-      scope.rename(name)
-      const uid = node.id.name
+      node.decorators = [t.decorator(t.identifier('Motion.component'))]
 
       return [
-        node,
-        componentTrack(name, uid)
+        t.expressionStatement(
+          t.callExpression(t.identifier('Motion.nextComponent'), [t.literal(node.id.name)])
+        ),
+        node
       ]
     }
   }

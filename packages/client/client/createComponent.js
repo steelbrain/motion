@@ -106,6 +106,18 @@ export default function createComponent(Motion, Internal, name, view, options = 
         Internal.paths[this.pathKey] = this.path
       },
 
+      componentDidMount() {
+        if (options.isView) return
+
+        Internal.mountedViews[name] = Internal.mountedViews[name] || []
+        Internal.mountedViews[name].push(this)
+        Internal.viewsAtPath[this.getPath()] = this
+      },
+
+      componentWillUnmount() {
+        // TODO remove from mounted views
+      },
+
       onMount(component) {
         const path = this.getPath()
         const lastRendered = component.lastRendered
@@ -259,11 +271,6 @@ export default function createComponent(Motion, Internal, name, view, options = 
         // run props before mount
         if (name != 'Main') {
           this.runEvents('props', [this.props])
-        }
-        else {
-          // moved to here to fix issues where updating during first mount fails
-          //    see: https://github.com/motionjs/motion/issues/305
-          Internal.firstRender = false
         }
       },
 
