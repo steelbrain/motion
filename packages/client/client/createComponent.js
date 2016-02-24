@@ -155,20 +155,29 @@ export default function createComponent(Motion, Internal, name, view, options = 
   }
 
   function createFnComponent() {
-    return React.createClass({
+    let component = {
       displayName: name,
       Motion,
       el: createElement,
+
       render() {
         let [ dom, style ] = view.call(null, { props: this.props, state: this.state, update: this.setState })
 
         this.$ = style
 
-        console.log(dom, style)
-
         return dom
       }
-    })
+    }
+
+    let [ __motioninfo__, ...statics ] = Object.keys(view)
+
+    // assign lifecycles and such
+    for (let key of statics) {
+      let val = view[key]
+      component[key] = val
+    }
+
+    return React.createClass(component)
   }
 
   // create view

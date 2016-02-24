@@ -210,8 +210,13 @@ const Motion = {
       debug: () => { debugger },
 
       getComponent(component) {
-        console.log('getting', component.__motionid__, Internal.views)
-        return Internal.views[component.__motionid__]
+        const { name, type } = component.__motioninfo__
+
+        if (!Internal.views[name]) {
+          Motion.makeComponent(name, component, type)
+        }
+
+        return Internal.views[name]
       },
 
       nextComponent(name) {
@@ -219,11 +224,24 @@ const Motion = {
       },
 
       componentClass(name, component) {
-        return Motion.makeComponent(name, component, Motion.viewTypes.CLASS)
+        return Motion.markComponent(name, component, Motion.viewTypes.CLASS)
       },
 
       componentFn(name, component) {
-        return Motion.makeComponent(name, component, Motion.viewTypes.FN)
+        return Motion.markComponent(name, component, Motion.viewTypes.FN)
+      },
+
+      markComponent(name, component, type) {
+        component.__motioninfo__ = { name, type }
+
+        // so that it updates
+        delete Motion.views[name]
+
+        Internal.changedViews.push(name)
+        let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
+        if (viewsInFile) viewsInFile.push(name)
+
+        return component
       },
 
       makeComponent(name, component, type) {
@@ -233,13 +251,8 @@ const Motion = {
           name = nextComponentName
         }
 
-        component.__motionid__ = name
-
         Internal.views[name] = createComponent2(name, component, { changed: true, type })
         Motion.views[name] = component
-        Internal.changedViews.push(name)
-        let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
-        if (viewsInFile) viewsInFile.push(name)
 
         return component
       },
