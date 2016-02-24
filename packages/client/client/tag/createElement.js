@@ -26,7 +26,7 @@ export default function createElement(identifier : Identifier, _props, ...args) 
   const view = this
   const Motion = view.Motion
 
-  const el: Element = getElement(identifier, view, _props, Motion.getView)
+  const el: Element = getElement(identifier, view, _props, Motion)
   const props = elementProps(el, view, Motion, _props)
   props.style = elementStyles(el, view, props)
 

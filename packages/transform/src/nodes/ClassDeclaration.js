@@ -1,4 +1,4 @@
-import { t, componentTrack } from '../lib/helpers'
+import { t } from '../lib/helpers'
 
 export default {
   exit(node, parent, scope) {

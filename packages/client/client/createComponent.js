@@ -37,13 +37,21 @@ export default function createComponent(Motion, Internal, name, view, options = 
     return wrapComponent(createViewComponent())
 
   // development
-  // detect view{} syntax vs just passing in class/createclass
-  views[name] = options.isView ?
-    createViewComponent() :
-    view
+  switch(options.type) {
+    case Motion.viewTypes.VIEW:
+      views[name] = createViewComponent()
+      break
+    case Motion.viewTypes.CLASS:
+      views[name] = view
+      break
+    case Motion.viewTypes.FN:
+      views[name] = createFnComponent()
+      break
+  }
 
   // once rendered, isChanged is used to prevent
   // unnecessary props hashing, for faster hot reloads
+  // TODO once?
   Motion.on('render:done', () => {
     isChanged = false
   })
@@ -142,6 +150,23 @@ export default function createComponent(Motion, Internal, name, view, options = 
         viewProps.__motion.path = this.getPath()
 
         return React.createElement(View, viewProps)
+      }
+    })
+  }
+
+  function createFnComponent() {
+    return React.createClass({
+      displayName: name,
+      Motion,
+      el: createElement,
+      render() {
+        let [ dom, style ] = view.call(null, { props: this.props, state: this.state, update: this.setState })
+
+        this.$ = style
+
+        console.log(dom, style)
+
+        return dom
       }
     })
   }

@@ -113,13 +113,22 @@ const Motion = {
     // begin the motionception
     //
 
-    const Motion = {
+    let Motion = {}
+
+    let createComponent2 = createComponent.bind(null, Motion, Internal)
+
+    Motion = Object.assign(Motion, {
       start() {
         router.init(ID, { onChange: Motion.run })
         Motion.run()
       },
 
       views: {},
+      viewTypes: {
+        FN: 'FN',
+        SIMPLE: 'SIMPLE',
+        CLASS: 'CLASS'
+      },
 
       // beta
       _onViewInstance: (name, decorator) => !decorator
@@ -140,7 +149,7 @@ const Motion = {
       preload(fn) { Motion.preloaders.push(fn) },
 
       entry(entry) {
-        Internal.views.Main = { component: entry }
+        Internal.entry = Motion.getComponent(entry)
       },
 
       run() {
@@ -157,11 +166,14 @@ const Motion = {
           if (Internal.isRendering > 3) return
 
           // find Main
-          let Main = Internal.views.Main && Internal.views.Main.component
-          if (!Main && Internal.lastWorkingRenders.Main)
-            Main = LastWorkingMain
-          if (!Main)
-            Main = MainErrorView
+          let Main = Internal.entry
+
+          if (!Main) {
+            if (Internal.lastWorkingRenders.Main)
+              Main = LastWorkingMain
+            else
+              Main = MainErrorView
+          }
 
           // server render
           if (!opts.node) {
@@ -197,29 +209,44 @@ const Motion = {
       // for use in jsx
       debug: () => { debugger },
 
+      getComponent(component) {
+        console.log('getting', component.__motionid__, Internal.views)
+        return Internal.views[component.__motionid__]
+      },
+
       nextComponent(name) {
         nextComponentName = name
       },
 
-      component(name, component) {
+      componentClass(name, component) {
+        return Motion.makeComponent(name, component, Motion.viewTypes.CLASS)
+      },
+
+      componentFn(name, component) {
+        return Motion.makeComponent(name, component, Motion.viewTypes.FN)
+      },
+
+      makeComponent(name, component, type) {
         // coming from class, decorator
         if (!component) {
           component = name
           name = nextComponentName
         }
 
-        Internal.views[name] = createComponent(Motion, Internal, name, component, { changed: true })
+        component.__motionid__ = name
+
+        Internal.views[name] = createComponent2(name, component, { changed: true, type })
         Motion.views[name] = component
         Internal.changedViews.push(name)
         let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
         if (viewsInFile) viewsInFile.push(name)
 
-        return Internal.views[name]
+        return component
       },
 
       view(name, body) {
         function comp(opts = {}) {
-          return createComponent(Motion, Internal, name, body, { ...opts, isView: true })
+          return createComponent2(name, body, { ...opts, type: Motion.viewTypes.VIEW })
         }
 
         function setView(name, component) {
@@ -289,7 +316,6 @@ const Motion = {
 
       // load a file
       file(file, run) {
-        console.log('file')
         if (!process.env.production) {
           Internal.viewsInFile[file] = []
           Internal.changedViews = []
@@ -322,8 +348,6 @@ const Motion = {
           Internal.currentHotFile = null
           Internal.viewCache[file] = Internal.viewsInFile[file]
 
-          console.log('1')
-
           if (Internal.firstRender)
             return
 
@@ -338,8 +362,6 @@ const Motion = {
           if (!Internal.changedViews.length && Internal.fileChanged[file]) {
             Internal.changedViews = Internal.viewsInFile[file]
           }
-
-          console.log('1')
 
           Internal.changedViews.forEach(name => {
             if (!Internal.mountedViews[name]) return
@@ -396,7 +418,7 @@ const Motion = {
       range,
       iff,
       noop: function(){},
-    }
+    })
 
     // view shim (TODO freeze)
     root.view = {

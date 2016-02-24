@@ -12,11 +12,31 @@ export default function init(_options, _t) {
 export function t() {}
 export function options() {}
 
-export function componentTrack(name, node) {
-  const wrapped = t.callExpression(t.identifier('Motion.component'), [t.literal(name), node])
+export function isComponentReturn(node) {
+  if (t.isArrayExpression(node)) {
+    for (let i = 0; i < node.elements.length; i++) {
+      let el = node.elements[i]
+
+      const isJSX = t.isJSXElement(el)
+      const isStyle = t.isObjectExpression(el)
+      if (!(isJSX || isStyle)) {
+        return false
+      }
+    }
+
+    // we've got a component :)
+    return true
+  }
+}
+
+export function component({ name, node, type = component.CLASS }) {
+  const wrapped = t.callExpression(t.identifier(type), [t.literal(name), node])
   wrapped.isMotionHot = true
   return wrapped
 }
+
+component.SIMPLE = 'Motion.componentFn'
+component.CLASS = 'Motion.componentClass'
 
 let niceAttrs = {
   className: 'class',

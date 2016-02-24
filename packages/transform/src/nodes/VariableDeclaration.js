@@ -1,5 +1,5 @@
 import state from '../state'
-import { t, options, propChange, componentTrack } from '../lib/helpers'
+import { t, options, propChange, component } from '../lib/helpers'
 import { wrapPropertyDeclarator, destructureTrackers, wrapDeclarator } from '../lib/wrapState'
 
 export default {
@@ -29,7 +29,7 @@ export default {
 
         if (object.name == 'React' && property.name == 'createClass') {
           const name = dec.id.name
-          dec.init = componentTrack(name, dec.init)
+          dec.init = component({ name, node: dec.init })
         }
       }
     }
