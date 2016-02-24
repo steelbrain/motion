@@ -154,13 +154,17 @@ export default function createComponent(Motion, Internal, name, view, options = 
     })
   }
 
+
+  // for regular function style components
   function createFnComponent() {
     let component = {
+      renders: [], // TODO remove this, fix bugs
+      name,
       displayName: name,
       Motion,
       el: createElement,
 
-      render() {
+      getArgs() {
         let args = {
           props: this.props,
           update: this.setState.bind(this)
@@ -169,10 +173,12 @@ export default function createComponent(Motion, Internal, name, view, options = 
         if (this.state)
           args.state = this.state
 
-        let [ dom, style ] = view.call(null, args)
+        return args
+      },
 
-        this.$ = style
-
+      render() {
+        let [ dom, style ] = view.call(null, component, this.getArgs())
+        this.styles = style
         return dom
       }
     }
@@ -182,13 +188,14 @@ export default function createComponent(Motion, Internal, name, view, options = 
     // assign lifecycles and such
     for (let key of statics) {
       let val = view[key]
-      component[key] = val
+      component[key] = function() { return val(this.getArgs()) }
     }
 
     return React.createClass(component)
   }
 
-  // create view
+
+  // for custom view syntax
   function createViewComponent() {
     const component = React.createClass({
       displayName: name,

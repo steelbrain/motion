@@ -199,7 +199,7 @@ export default function elementStyles(el, view, props) {
     }
   }
 
-  if (Object.keys(styles).length)
+  if (styles && Object.keys(styles).length)
     return styles
   else
     return null

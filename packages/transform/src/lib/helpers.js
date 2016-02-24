@@ -30,6 +30,11 @@ export function isComponentReturn(node) {
 }
 
 export function component({ name, node, type = component.CLASS }) {
+  if (type == component.SIMPLE) {
+    // add view as first parameter
+    node.params = [ t.identifier('view'), ...node.params ]
+  }
+
   const wrapped = t.callExpression(t.identifier(type), [t.literal(name), node])
   wrapped.isMotionHot = true
   return wrapped

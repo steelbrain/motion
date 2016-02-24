@@ -3,7 +3,7 @@ import { t } from '../lib/helpers'
 export default {
   exit(node, parent, scope) {
     if (node.superClass && node.superClass.name == 'Component') {
-      node.decorators = [t.decorator(t.identifier('Motion.component'))]
+      node.decorators = [t.decorator(t.identifier('Motion.componentClass'))]
 
       return [
         t.expressionStatement(

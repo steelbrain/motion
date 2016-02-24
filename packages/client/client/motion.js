@@ -63,6 +63,7 @@ const Motion = {
 
     // shims
     root.React = React
+    root.Component = React.Component
     root.ReactDOM = ReactDOM
     root.global = root // for radium
     root.regeneratorRuntime = regeneratorRuntime
@@ -223,8 +224,8 @@ const Motion = {
         nextComponentName = name
       },
 
-      componentClass(name, component) {
-        return Motion.markComponent(name, component, Motion.viewTypes.CLASS)
+      componentClass(component) {
+        return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
       },
 
       componentFn(name, component) {
@@ -246,12 +247,6 @@ const Motion = {
       },
 
       makeComponent(name, component, type) {
-        // coming from class, decorator
-        if (!component) {
-          component = name
-          name = nextComponentName
-        }
-
         Internal.views[name] = createComponent2(name, component, { changed: true, type })
         Motion.views[name] = component
 

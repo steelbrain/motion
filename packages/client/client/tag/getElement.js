@@ -22,6 +22,8 @@ export default function getElement(identifier: Identifier, view, props, Motion):
   // passing in a variable as the view
   else if (typeof identifier[0] !== 'string') {
     [component, name, key, repeatItem, index] = identifier
+
+    component = Motion.getComponent(component)
   }
   // passing in string ref as view
   else {
