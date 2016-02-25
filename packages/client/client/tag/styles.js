@@ -68,6 +68,8 @@ export default function elementStyles(Motion, el, view, props) {
 
     let tagStyle = hasTag && parent.styles[tag]
 
+    console.log(parent.styles, tag)
+
     if (typeof tagStyle == 'function')
       tagStyle = parent.styles[tag](el.repeatItem, el.index)
 

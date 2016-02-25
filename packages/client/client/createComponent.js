@@ -39,13 +39,13 @@ export default function createComponent(Motion, Internal, name, view, options = 
   // development
   switch(options.type) {
     case Motion.viewTypes.VIEW:
-      views[name] = createViewComponent()
+      views[name] = Radium(createViewComponent())
       break
     case Motion.viewTypes.CLASS:
-      views[name] = createClassComponent()
+      views[name] = Radium(view)
       break
     case Motion.viewTypes.FN:
-      views[name] = createFnComponent()
+      views[name] = Radium(createFnComponent())
       break
   }
 
@@ -152,11 +152,6 @@ export default function createComponent(Motion, Internal, name, view, options = 
         return React.createElement(View, viewProps)
       }
     })
-  }
-
-  function createClassComponent() {
-    
-    return view
   }
 
 
@@ -682,6 +677,6 @@ export default function createComponent(Motion, Internal, name, view, options = 
       }
     })
 
-    return Radium(component)
+    return component
   }
 }

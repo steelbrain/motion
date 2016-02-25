@@ -178,8 +178,11 @@ const Motion = {
           if (!Main) {
             if (Internal.lastWorkingRenders.Main)
               Main = LastWorkingMain
-            else
-              Main = MainErrorView
+          }
+
+          if (!Main) {
+            console.log('No main view found, add a Motion.entry(MainView) to render')
+            return
           }
 
           // server render

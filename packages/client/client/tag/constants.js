@@ -1,5 +1,5 @@
 // tags that shouldn't map out to real names
-export const whitelist = [
+export const blacklist = [
   'title',
   'meta',
   'head',
@@ -21,6 +21,6 @@ export const niceAttrs = {
 
 
 export default {
-  whitelist,
+  blacklist,
   niceAttrs
 }

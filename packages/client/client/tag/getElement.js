@@ -1,5 +1,5 @@
 import type { Identifier, Element } from './types'
-import { whitelist } from './constants'
+import { blacklist } from './constants'
 
 /*
 
@@ -33,7 +33,7 @@ export default function getElement(Motion, identifier: Identifier, view, props):
   if (!name)
     return React.createElement('div', null, 'No name given!')
 
-  let whitelisted
+  let blacklisted
 
   // find element
   if (typeof name != 'string') {
@@ -50,8 +50,8 @@ export default function getElement(Motion, identifier: Identifier, view, props):
         || props && props.tagName
       )
 
-      // whitelist
-      whitelisted = whitelist.indexOf(name) >= 0
+      // blacklist
+      blacklisted = blacklist.indexOf(name) >= 0
     }
     // find a view
     else if (!component) {
@@ -67,7 +67,7 @@ export default function getElement(Motion, identifier: Identifier, view, props):
     index,
     repeatItem,
     component,
-    whitelisted,
+    blacklisted,
     isView
   }
 }
