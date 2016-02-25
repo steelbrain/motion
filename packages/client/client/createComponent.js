@@ -42,7 +42,7 @@ export default function createComponent(Motion, Internal, name, view, options = 
       views[name] = createViewComponent()
       break
     case Motion.viewTypes.CLASS:
-      views[name] = view
+      views[name] = createClassComponent()
       break
     case Motion.viewTypes.FN:
       views[name] = createFnComponent()
@@ -152,6 +152,11 @@ export default function createComponent(Motion, Internal, name, view, options = 
         return React.createElement(View, viewProps)
       }
     })
+  }
+
+  function createClassComponent() {
+    
+    return view
   }
 
 

@@ -42,9 +42,11 @@ export function componentReturn(node) {
     let el = node.elements[i]
 
     if (t.isJSXElement(el)) {
-      node.elements[i] = t.functionExpression(null, [], t.blockStatement([ t.returnStatement(el) ]))
+      node.elements[i] = t.functionExpression(null, [t.identifier('view')], t.blockStatement([ t.returnStatement(el) ]))
     }
   }
+
+  node = t.callExpression(t.identifier('this.__motionRender'), [node])
 
   return node
 }

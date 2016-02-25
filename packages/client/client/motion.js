@@ -229,6 +229,41 @@ const Motion = {
       },
 
       componentClass(component) {
+        component.prototype.el = createElement
+
+        component.prototype.styleObjects = {}
+        component.prototype.styles = {}
+
+        component.prototype.__motionRender = function(visual) {
+          let dom = []
+
+          for (let i = 0; i < visual.length; i++) {
+            let item = visual[i]
+
+            console.log('item is', item)
+
+            if (typeof item == 'function') {
+              dom.push(item)
+            }
+            else {
+              // apply styles to class
+              Object.assign(this.styles, item)
+            }
+          }
+
+          // dom will fetch styles
+
+          dom = dom.map(d => d(this))
+
+          // if (dom.length > 1)
+          //   return <div>{dom}</div>
+          // else
+            return <div>hello</div>
+        }
+
+
+        console.log(component.prototype)
+
         return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
       },
 

@@ -24,7 +24,7 @@ export default function createElement(identifier : Identifier, _props, ...args) 
     return React.createElement(identifier[1], _props, ...args)
 
   const view = this
-  const Motion = view.Motion
+  const Motion = view.Motion || window.Motion
 
   const el: Element = getElement(identifier, view, _props, Motion)
   const props = elementProps(el, view, Motion, _props)
