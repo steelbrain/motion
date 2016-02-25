@@ -14,6 +14,7 @@ import './shim/exports'
 import './shim/on'
 import './lib/promiseErrorHandle'
 import $ from './$'
+import cliOpts from './lib/opts'
 import internal from './internal'
 import onError from './shim/motion'
 import createComponent from './createComponent'
@@ -59,6 +60,8 @@ const Motion = {
     }
 
     // shims
+    const appRequire = requireFactory(root)
+    root.require = appRequire
     root.React = React
     root.Component = React.Component
     root.ReactDOM = ReactDOM
@@ -66,7 +69,6 @@ const Motion = {
     root.regeneratorRuntime = regeneratorRuntime
     root.on = on
     root.fetch.json = (a, b, c) => fetch(a, b, c).then(res => res.json())
-    root.require = requireFactory(root)
     root.process = root.process || {
       env: {
         NODE_ENV: process.env.production ? 'production' : 'development'
@@ -112,6 +114,8 @@ const Motion = {
 
     let Motion = {}
 
+    root.module = root.module || {}
+    root.exports = root.exports || {}
     root.exports.Motion = Motion
     root._Motion = Internal
     root.$ = $(Motion)
@@ -347,10 +351,12 @@ const Motion = {
 
         // set up require for file that resolves relative paths
         const fileFolder = folderFromFile(file)
-        const scopedRequire = pkg => root.require(pkg, fileFolder)
 
         // run file!
-        run(scopedRequire)
+        const oldRequire = root.require // change require during hot reload, ugly but necessary atm
+        root.require = pkg => appRequire(pkg, fileFolder)
+        run()
+        root.require = oldRequire // restore
 
         if (!process.env.production) {
           const cached = Internal.viewCache[file] || Internal.viewsInFile[file]

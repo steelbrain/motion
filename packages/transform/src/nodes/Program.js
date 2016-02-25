@@ -20,7 +20,7 @@ export default {
         // closure
         t.callExpression(t.functionExpression(null, [], t.blockStatement([
           t.callExpression(t.identifier('Motion.file'), [t.literal(location),
-            t.functionExpression(null, [t.identifier('require')],
+            t.functionExpression(null, [],
               t.blockStatement(node.body)
             )
           ])

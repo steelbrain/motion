@@ -29,7 +29,10 @@ export default function createPlugin(options) {
     helpersInit(options, t)
 
     return new Plugin('motion-transform', {
-      metadata: { group: 'builtin-trailing' },
+      metadata: {
+        group: 'builtin-trailing'
+      },
+
       visitor: {
         Program,
         ExportDeclaration,
