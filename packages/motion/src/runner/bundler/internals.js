@@ -8,7 +8,7 @@ import bridge from '../bridge'
 import disk from '../disk'
 import cache from '../cache'
 import opts from '../opts'
-import { log, logError, handleError, writeFile } from '../lib/fns'
+import { _, log, logError, handleError, writeFile } from '../lib/fns'
 
 // TODO we need a better way to manage what files are about to be bundled,
 // and then what actually gets picked up by webpack --watch, and then manage that queue
@@ -29,7 +29,7 @@ export async function writeInternals({ force, reload } = {}) {
         // get user entry
         const main = opts('config').entry.replace('./', '')
 
-        write(requireString([main, ...internals], {
+        write(requireString(_.uniq([main, ...internals]), {
           prefix: './out/',
           removeExt: true
         }))

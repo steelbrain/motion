@@ -64,7 +64,8 @@ export default {
         name = expression.object ?
                findObjectName(expression.object) :
                expression.name
-      } else {
+      }
+      else {
         name = node.left.name
       }
 

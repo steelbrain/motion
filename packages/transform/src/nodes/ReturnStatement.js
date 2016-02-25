@@ -1,13 +1,11 @@
 import { updateState } from '../lib/wrapState'
-import { t, parentFunctionNode, isComponentReturn, component } from '../lib/helpers'
+import { t, parentFunctionNode, isComponentReturn, componentReturn, component } from '../lib/helpers'
 
 export default {
   enter(node, parent, scope) {
     if (isComponentReturn(node.argument)) {
-      console.log('in return')
-
+      node.argument = componentReturn(node.argument)
       let parentFunc = parentFunctionNode(scope)
-
       parentFunc.motionIsComponent = true
     }
   },
@@ -19,7 +17,7 @@ export default {
 
     const parentFunc = parentFunctionNode(scope)
 
-    if (parentFunc && !parentFunc.body.motionView && (parentFunc.motionStateMutativeFunction || parentFunc.hasSetter))
+    if (parentFunc && parentFunc.body && !parentFunc.body.motionView && (parentFunc.motionStateMutativeFunction || parentFunc.hasSetter))
       return [updateState(), node]
   }
 }
