@@ -27,7 +27,6 @@ export default async function makeTemplate() {
 `,
         '  <script src="/_/externals.js"></script>',
         '  <script src="/_/internals.js"></script>',
-        '  <script src="/_/'+OPTS.saneName+'.js"></script>',
 
 `
   <script>

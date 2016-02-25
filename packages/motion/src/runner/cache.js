@@ -195,10 +195,11 @@ const Cache = {
     if (wasInternal != isInternal)
       onSetExported(name, isInternal)
 
-    process.children.server.send(JSON.stringify({
-      type: 'cache',
-      data: cache
-    }))
+    if (process.children)
+      process.children.server.send(JSON.stringify({
+        type: 'cache',
+        data: cache
+      }))
   },
 
   getExported() {

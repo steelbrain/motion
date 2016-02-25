@@ -10,17 +10,13 @@ export async function app() {
     const deps = opts('deps')
     const minify = opts('config').minify
 
-    let appFiles = await readdir(opts('outDir'))
-    appFiles = appFiles.map(f => f.fullPath).filter(x => !isSourceMap(x)).sort()
-
     if (minify)
       print(`  Minifying...`.dim)
 
     // build parallel
     await Promise.all([
-      buildForDeploy(deps.internalsOut, { dest, minify }),
-      buildForDeploy(deps.externalsOut, { dest, minify }),
-      buildForDeploy(appFiles, { dest, minify, combine: true, wrap: true })
+      buildForDeploy(deps.internalsOut, { dest, minify, name: opts('saneName'), wrap: true }),
+      buildForDeploy(deps.externalsOut, { dest, minify, name: 'externals' }),
     ])
   }
   catch(e) {
@@ -28,14 +24,16 @@ export async function app() {
   }
 }
 
-function buildForDeploy(src, { dest, combine, minify, wrap }) {
+function buildForDeploy(src, { dest, name, minify, wrap }) {
   return new Promise((resolve, reject) => {
     gulp.src(src)
       .pipe($.sourcemaps.init())
       // .pipe($.if(combine, $.order(src)))
-      .pipe($.if(combine, $.concat(`${opts('saneName')}.js`)))
-      .pipe($.if(wrap, babel.app()))
+      .pipe($.if(wrap, babel.app({
+        retainLines: false
+      })))
       .pipe($.if(minify, $.uglify()))
+      .pipe($.rename(`${name}.js`))
       .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(dest))
       .on('end', () => {

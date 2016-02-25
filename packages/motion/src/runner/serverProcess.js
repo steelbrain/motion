@@ -44,7 +44,6 @@ async function getScripts({ disableTools }) {
       // devtools
       disableTools ? '' : [
         '<script src="/__/tools/externals.js"></script>',
-        '<script src="/__/tools/internals.js"></script>',
         '<script src="/__/tools/motiontools.js"></script>',
 `
   <script>
