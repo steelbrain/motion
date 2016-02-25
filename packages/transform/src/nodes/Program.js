@@ -2,13 +2,12 @@ import state, { resetProgramState } from '../state'
 import { t, options, relativePath } from '../lib/helpers'
 
 export default {
-  enter() {
+  enter(node, parent, scope, file) {
     resetProgramState()
+    state.file.meta.file = file.opts.filename
   },
 
   exit(node, parent, scope, file) {
-    state.file.meta.file = file.opts.filename
-
     if (options.onMeta) {
       options.onMeta(state.file.meta)
     }

@@ -194,6 +194,7 @@ function setupConfig(cli, config) {
   if (cli.pretty) OPTS.config.pretty = true
   if (cli.port) OPTS.config.port = cli.port
   if (cli.host) OPTS.config.host = cli.host
+  if (cli.entry) OPTS.config.entry = cli.entry
 }
 
 export function set(key, val) {

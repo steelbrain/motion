@@ -2,7 +2,7 @@ import MotionTransform from 'motion-transform'
 import { isProduction } from './helpers'
 import opts from '../../opts'
 import onMeta from './onMeta'
-import { log } from '../../lib/fns'
+import { p, log } from '../../lib/fns'
 import writeStyle from '../../lib/writeStyle'
 import deepmerge from 'deepmerge'
 
@@ -20,6 +20,7 @@ const getFileTransformer = (conf) => MotionTransform.file({
   production: isProduction(),
   selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
   routing: opts('config').routing,
+  entry: p(opts('appDir'), opts('config').entry),
   log,
   onMeta,
   writeStyle,

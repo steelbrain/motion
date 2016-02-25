@@ -1,4 +1,4 @@
-import { options } from '../lib/helpers'
+import { t, options } from '../lib/helpers'
 import state from '../state'
 
 export default {
@@ -11,6 +11,15 @@ export default {
   },
 
   exit(node) {
+    // wrap entry file export to grab view
+    // also, it should never not be hot (its the entry)
+    if (options.entry == state.file.meta.file) {
+      node.declaration = t.callExpression(
+        t.identifier('Motion.entry'), [node.declaration]
+      )
+      // return
+    }
+
     if (!node.declaration) return
 
     const declarations = node.declaration.declarations

@@ -17,6 +17,7 @@ import $ from './$'
 import internal from './internal'
 import onError from './shim/motion'
 import createComponent from './createComponent'
+import __motionRender from './lib/__motionRender.js'
 import range from './lib/range'
 import iff from './lib/iff'
 import router from './lib/router'
@@ -232,33 +233,7 @@ const Motion = {
 
       componentClass(component) {
         component.prototype.el = createElement
-        component.prototype.__motionRender = function(visual) {
-          this.__motion.renders = 0
-          let dom = []
-
-          for (let i = 0; i < visual.length; i++) {
-            let item = visual[i]
-
-            if (typeof item == 'function') {
-              this.__motion.renders++
-              dom.push(item)
-            }
-            else {
-              // apply styles to class
-              Object.assign(this.__motion.styles, item)
-            }
-          }
-
-          // dom will fetch styles
-
-          dom = dom.map(d => d(this))
-
-          if (dom.length > 1)
-            return <div>{dom}</div>
-          else
-            return dom[0]
-        }
-
+        component.prototype.__motionRender = __motionRender
         return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
       },
 

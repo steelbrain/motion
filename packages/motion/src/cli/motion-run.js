@@ -12,6 +12,7 @@ Program
   .option('-d, --debug [what]', 'output extra information for debugging', list)
   .option('-p, --port [number]', 'specify a port [number]')
   .option('-h, --host [host]', 'specify hostname')
+  .option('-e, --entry [entry]', 'entry to app')
   .option('--pretty', 'pretty print files')
   .option('--reset', 'resets cache, internals, bundles')
   .option('--cached', 'run from cache for speedup (may break)')
@@ -25,4 +26,5 @@ Runner.run({
   host: Program.host,
   pretty: Program.pretty,
   cached: Program.cached,
+  entry: Program.entry,
 })
