@@ -242,8 +242,6 @@ const Motion = {
           for (let i = 0; i < visual.length; i++) {
             let item = visual[i]
 
-            console.log('item is', item)
-
             if (typeof item == 'function') {
               this.__motion.renders++
               dom.push(item)
@@ -258,10 +256,10 @@ const Motion = {
 
           dom = dom.map(d => d(this))
 
-          // if (dom.length > 1)
-          //   return <div>{dom}</div>
-          // else
-            return <div>hello</div>
+          if (dom.length > 1)
+            return <div>{dom}</div>
+          else
+            return dom[0]
         }
 
         return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
