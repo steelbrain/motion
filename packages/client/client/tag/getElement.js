@@ -11,7 +11,7 @@ import { whitelist } from './constants'
 */
 
 
-export default function getElement(identifier: Identifier, view, props, Motion): Element {
+export default function getElement(Motion, identifier: Identifier, view, props): Element {
   let isView = false
   let name, tagName, key, index, component, repeatItem
 

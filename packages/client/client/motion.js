@@ -91,7 +91,6 @@ const Motion = {
 
     // init Internal
     const Internal = internal.init(ID)
-    root._Motion = Internal
 
     // tools bridge
     const Tools = root._DT
@@ -115,6 +114,9 @@ const Motion = {
     //
 
     let Motion = {}
+
+    root.exports.Motion = Motion
+    root._Motion = Internal
 
     let createComponent2 = createComponent.bind(null, Motion, Internal)
 
@@ -230,11 +232,8 @@ const Motion = {
 
       componentClass(component) {
         component.prototype.el = createElement
-
-        component.prototype.styleObjects = {}
-        component.prototype.styles = {}
-
         component.prototype.__motionRender = function(visual) {
+          this.__motion.renders = 0
           let dom = []
 
           for (let i = 0; i < visual.length; i++) {
@@ -243,11 +242,12 @@ const Motion = {
             console.log('item is', item)
 
             if (typeof item == 'function') {
+              this.__motion.renders++
               dom.push(item)
             }
             else {
               // apply styles to class
-              Object.assign(this.styles, item)
+              Object.assign(this.__motion.styles, item)
             }
           }
 
@@ -260,9 +260,6 @@ const Motion = {
           // else
             return <div>hello</div>
         }
-
-
-        console.log(component.prototype)
 
         return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
       },
