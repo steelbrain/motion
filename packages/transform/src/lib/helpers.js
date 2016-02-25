@@ -13,36 +13,20 @@ export function t() {}
 export function options() {}
 
 export function isComponentReturn(node) {
-  if (t.isArrayExpression(node)) {
-    let numJSX = 0
-
-    for (let i = 0; i < node.elements.length; i++) {
-      let el = node.elements[i]
-
-      const isJSX = t.isJSXElement(el)
-      const isStyle = t.isObjectExpression(el)
-
-      if (isJSX)
-        numJSX++
-
-      // avoid if not jsx or style
-      if (!isJSX && !isStyle) {
-        return false
-      }
-    }
-
-    // for now dumb, just detect an array with one jsx
-    return !!numJSX
-  }
+  return (
+    t.isCallExpression(node) && node.callee.name == '$'
+  )
 }
 
 // array of dom+style
 export function componentReturn(node) {
-  for (let i = 0; i < node.elements.length; i++) {
-    let el = node.elements[i]
+  const args = node.arguments
+
+  for (let i = 0; i < args.length; i++) {
+    let el = args[i]
 
     if (t.isJSXElement(el)) {
-      node.elements[i] = t.functionExpression(null, [t.identifier('view')], t.blockStatement([ t.returnStatement(el) ]))
+      args[i] = t.functionExpression(null, [t.identifier('view')], t.blockStatement([ t.returnStatement(el) ]))
     }
   }
 

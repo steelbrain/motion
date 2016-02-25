@@ -13,6 +13,7 @@ import './shim/root'
 import './shim/exports'
 import './shim/on'
 import './lib/promiseErrorHandle'
+import $ from './$'
 import internal from './internal'
 import onError from './shim/motion'
 import createComponent from './createComponent'
@@ -50,11 +51,6 @@ const Motion = {
       if (args[0] && args[0].indexOf('Unsupported CSS property "display') == 0) return
       if (args[0] && args[0].indexOf('Radium:') == 0) return
       originalWarn.call(console, ...args)
-    }
-
-    // prevent breaking when writing $ styles in auto-save mode
-    if (!process.env.production) {
-      root.$ = null
     }
 
     if (process.env.production) {
@@ -117,6 +113,7 @@ const Motion = {
 
     root.exports.Motion = Motion
     root._Motion = Internal
+    root.$ = $(Motion)
 
     let createComponent2 = createComponent.bind(null, Motion, Internal)
 
