@@ -1,6 +1,6 @@
 export default [
   '[Mm]ain.js',
-  '**/*.{js,jsf,jsx}',
+  '**/*.{js,json,jsx}',
   '!node_modules{,/**}',
   '!.motion{,/**}'
 ]

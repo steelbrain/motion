@@ -15,7 +15,7 @@ export default function socket(_browser, _opts, _actions) {
   open()
 
   browser.messageEditor = obj => {
-    socket.send('editor', obj)
+    socket.send('broadcast:editor', obj)
   }
 }
 

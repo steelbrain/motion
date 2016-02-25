@@ -122,7 +122,7 @@ view Inspector {
     const inspector = ReactDOM.findDOMNode(view)
 
     if (lastTarget != target) {
-      if (inspector.contains(target))
+      if (inspector.contains(target) || document.querySelector('.__motionMenu').contains(target))
         return
 
       lastTarget = target

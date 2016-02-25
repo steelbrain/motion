@@ -69,6 +69,11 @@ const Motion = {
     root.on = on
     root.fetch.json = (a, b, c) => fetch(a, b, c).then(res => res.json())
     root.require = requireFactory(root)
+    root.process = root.process || {
+      env: {
+        NODE_ENV: process.env.production ? 'production' : 'development'
+      }
+    }
   },
 
   // run an app

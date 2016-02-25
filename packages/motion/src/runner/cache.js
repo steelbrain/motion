@@ -1,7 +1,7 @@
 import disk from './disk'
 import handleError from './lib/handleError'
 import opts from './opts'
-import { _, log, path, writeJSON } from './lib/fns'
+import { _, log, path, writeJSON, emitter } from './lib/fns'
 import util from 'util'
 
 const relative = f => path.relative(baseDir, f).replace('.motion/.internal/out/', '')
@@ -84,6 +84,11 @@ const Cache = {
     previousCache = previousCache || {
       files: {}
     }
+
+    emitter.on('debug', () => {
+      print(`\n\n---------cache---------`)
+      Cache.debug()
+    })
   },
 
   setBaseDir(dir : string) {

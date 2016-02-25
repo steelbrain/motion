@@ -89,7 +89,7 @@ view Leaf {
     if (view.props.root) return
     is.function = isFunction(value)
     is.array = isArray(value)
-    is.object = isObject(value)
+    is.object = isObject(value) && !is.array && !is.function
     is.boolean = isBoolean(value)
     is.string = isString(value)
     is.number = isNumber(value)
@@ -112,7 +112,7 @@ view Leaf {
           <type>Array[{value.length}]</type>
         </array>
         <obj if={is.object}>
-          <type>{'{}   ' + dataKeys.length + ' keys'}</type>
+          <type>{'{} ' + dataKeys.length + ' keys'}</type>
         </obj>
         <str if={is.string}>
           <Label val={value}
@@ -126,9 +126,6 @@ view Leaf {
                  editable={true}
                  onSet={value => onSet(key, value)} />
         </simple>
-        <nested if={is.nested} class={type.toLowerCase()}>
-          {getLabel('val', value, key, editable)}
-        </nested>
       </value>
     </label>
     <children>
@@ -198,7 +195,7 @@ view Leaf {
   }
 
   $type = {
-    margin: [1, 0, 0, 8],
+    margin: [1, 0, 0, 3],
     opacity: 0.7,
     flexFlow: 'row',
   }

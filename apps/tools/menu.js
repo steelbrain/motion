@@ -12,7 +12,7 @@ view Menu {
   // prevent select and show custom cursor when ready for context
   let focused
   on.keydown(() => {
-    if (keys.alt && keys.command) {
+    if (keys.alt) {
       document.body.classList.add('__motionfocus')
       focused = true
     }
@@ -26,7 +26,7 @@ view Menu {
   })
 
   on.event('contextmenu', e => {
-    const mode = keys.alt && keys.command
+    const mode = keys.alt
     if (!mode) return
 
     e.preventDefault()
@@ -50,7 +50,14 @@ view Menu {
 
   function focusElement(el) {
     return function() {
-      toEditor({ type: 'focus:element', key: el.key, view: el.view })
+      // slicing because h11 -> h1
+      const view = el.view.replace(/\-/g, '.')
+      toEditor({
+        type: 'focus:element',
+        key: el.key.slice(0, -1),
+        view,
+        filePath: _Motion.views[view].file
+      })
     }
   }
 
@@ -60,7 +67,7 @@ view Menu {
     }
   }
 
-  <menu class={{ internal: true, active }}>
+  <menu class={{ internal: true, active, '__motionMenu': true }}>
     <item
       repeat={elements.filter(i => !!i.view)}
       class={{

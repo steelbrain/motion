@@ -73,7 +73,7 @@ export async function run(opts) {
     await startup(opts)
     if (opts.watch) gulp.assets()
     await server.run()
-    await bridge.activate()
+    await activateBridge()
     activateEditor(bridge)
     await gulpScripts()
     cache.serialize() // write out cache
@@ -86,7 +86,14 @@ export async function run(opts) {
   }
 }
 
-function activateEditor(bridge) {
+function activateEditor() {
   const editor = new Editor()
   editor.activate(bridge)
+}
+
+async function activateBridge() {
+  await bridge.activate()
+  bridge.onDidReceiveMessage('broadcast:editor', function(message) {
+    bridge.broadcast('broadcast:editor', message)
+  })
 }

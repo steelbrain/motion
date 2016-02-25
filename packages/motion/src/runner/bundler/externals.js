@@ -1,5 +1,4 @@
-import webpack from './lib/webpack'
-import webpackConfig from './lib/webpackConfig'
+import webpack from './webpack'
 import disk from '../disk'
 import opts from '../opts'
 import cache from '../cache'
@@ -23,11 +22,13 @@ export async function writeExternals(opts = {}) {
 }
 
 export function runExternals() {
-  const config = webpackConfig('externals.js', {
-    entry: opts('deps').externalsIn,
+  return webpack({
+    name: 'externals',
+    onFinish: onInstalled,
+    config: {
+      entry: opts('deps').externalsIn
+    }
   })
-
-  return webpack('externals', config, onInstalled)
 }
 
 export async function installExternals(filePath) {
