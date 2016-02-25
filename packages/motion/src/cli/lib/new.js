@@ -8,7 +8,7 @@ import randomColor from './colors'
 
 const p = path.join
 
-export default function run({ name, use, nocache, debug }) {
+export default function run({ name, use, nocache, debug, init }) {
   try {
   // scaffolds as second argument
   // motion new app from/repo
@@ -40,19 +40,34 @@ export default function run({ name, use, nocache, debug }) {
   MOTION.scaffoldDir = p(getUserHome(), '.motion', 'scaffold')
   MOTION.scaffoldRepo = `git://github.com/${org}/${repo}`
   MOTION.scaffoldSHA = p(getUserHome(), '.motion', 'scaffoldSHA')
-  MOTION.dest = p(process.cwd(), name)
 
-  if (fs.existsSync(MOTION.dest)) {
+  MOTION.dest = init
+    ? process.cwd()
+    : p(process.cwd(), name)
+
+  if (!init && fs.existsSync(MOTION.dest)) {
     console.log("Error! Directory %s already exists\n".red, MOTION.dest)
   }
   else {
     console.log()
-    spinner = new Spinner('Creating app...  ')
+    spinner = new Spinner(`${init ? 'Initializing' : 'Creating'} app...  `)
     spinner.start()
-    start()
+
+    if (init)
+      init()
+    else
+      create()
   }
 
-  function start() {
+  function init() {
+    copyMotionFolder()
+      .then(finish)
+      .then(() => {
+        spinner.stop()
+      })
+  }
+
+  function create() {
     makeFolder()
       .then(nocache ? cloneDirectly : getScaffold)
       .then(initGit)
@@ -222,6 +237,24 @@ export default function run({ name, use, nocache, debug }) {
     })
   }
 
+  function copyMotionFolder() {
+    log('Copy motion folder', MOTION.scaffoldDir, MOTION.dest)
+    return new Promise((res, rej) => {
+      const src = p(MOTION.scaffoldDir, '.motion')
+      const dest = (MOTION.dest, '.motion')
+
+      fs.copy(src, dest, function(err) {
+        if (err) {
+          console.log("Error, couldn't copy motion folder".red)
+          console.log(src, dest)
+          process.exit(1)
+        }
+
+        res()
+      })
+    })
+  }
+
   function gitClone(dest) {
     return 'git clone --depth=1 ' + MOTION.scaffoldRepo + ' ' + dest
   }
@@ -301,7 +334,12 @@ export default function run({ name, use, nocache, debug }) {
   function finish() {
     message('Done!')
     spinner.stop()
-    console.log('  Done! ⇢'.green.bold, ` cd ${name}\n`)
+
+    if (init)
+      console.log(`  Created .motion folder, ready to run motion\n`)
+    else
+      console.log('  Done! ⇢'.green.bold, ` cd ${name}\n`)
+
     process.exit()
   }
 

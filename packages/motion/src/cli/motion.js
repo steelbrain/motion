@@ -12,7 +12,8 @@ const commands = [
   'run',
   'new',
   'build',
-  'update'
+  'update',
+  'init'
 ]
 
 let [ node, motion, cmd = 'run', ...flags ] = process.argv
@@ -48,5 +49,6 @@ Program
   .command('build', 'build for production')
   // .command('up', 'upload app to the web with Surge.sh')
   .command('update', 'update motion')
+  .command('init', 'add a motion config to an existing app (temporary, awaiting https://github.com/motion/motion/issues/339)')
 
 Program.parse(args)
