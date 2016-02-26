@@ -65,7 +65,7 @@ export function app() {
 export function getBabelConfig({ plugins }) {
   const babelConf = {
     breakConfig: true, // avoid reading .babelrc
-    jsxPragma: 'view.el',
+    jsxPragma: 'Motion.createElement',
     stage: 0,
     blacklist: ['es6.tailCall', 'strict'],
     retainLines: opts('config').pretty ? false : true,

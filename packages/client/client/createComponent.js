@@ -2,6 +2,7 @@ import ReactDOMServer from 'react-dom/server'
 import ReactDOM from 'react-dom'
 import React from 'react'
 import raf from 'raf'
+import ReactCreateElement from './lib/ReactCreateElement'
 import Radium from './lib/radium'
 
 import phash from './lib/phash'
@@ -32,7 +33,20 @@ export default function createComponent(Motion, Internal, name, view, options = 
     return component
   }
 
-  // development
+  // shim render to provide context aware Motion.createElement
+  if (view.prototype.render) {
+    let innerRender = view.prototype.render
+    view.prototype.render = function() {
+      // sets active component so createElement has access
+      Motion.createElement.activeComponent = this
+      let result = innerRender.call(this)
+      Motion.createElement.activeComponent = null
+      return result
+    }
+  }
+
+  // create each type of view
+  // TODO move radium below proxy?
   switch(options.type) {
     case Motion.viewTypes.VIEW:
       views[name] = Radium(createViewComponent())
@@ -149,7 +163,7 @@ export default function createComponent(Motion, Internal, name, view, options = 
         viewProps.__motion.onMount = this.onMount
         viewProps.__motion.path = this.getPath()
 
-        return React.createElement(View, viewProps)
+        return ReactCreateElement(View, viewProps)
       }
     })
   }

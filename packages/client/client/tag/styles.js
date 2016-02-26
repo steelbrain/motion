@@ -31,7 +31,7 @@ export default function elementStyles(Motion, el, view, props) {
   // attach view styles from $ to element matching view name lowercase
   const tag = el.name
   const isRootName = parent.name && parent.name.toLowerCase() == el.name
-  const hasOneRender = parent.renders.length <= 1
+  const hasOneRender = !parent.renders || parent.renders.length <= 1
   const isWrapperOrRoot = props && (props.__motionIsWrapper || props.root)
   const deservesRootStyles = !!(isRootName && hasOneRender || isWrapperOrRoot)
 

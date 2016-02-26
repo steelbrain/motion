@@ -7,6 +7,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup'
 import ReactTransitionGroup from 'react/lib/ReactTransitionGroup'
+import ReactCreateElement from './lib/ReactCreateElement'
 import rafBatch from './lib/reactRaf'
 import { StyleRoot, keyframes } from 'motion-radium'
 import regeneratorRuntime from './vendor/regenerator'
@@ -95,6 +96,18 @@ const Motion = {
     // tools bridge
     const Tools = root._DT
 
+    // shim React.createElement to get proxies even on components
+    // passed around to external things that render them through react
+    if (!process.env.production) {
+      React.createElement = function(el, ...args) {
+        if (el.__motioninfo__) {
+          return ReactCreateElement(Internal.views[el.__motioninfo__.name], ...args)
+        }
+
+        return ReactCreateElement(el, ...args)
+      }
+    }
+
     if (!process.env.production && Tools) {
       // pass data from tools to internal
       Tools.on('editor:state', () => {
@@ -129,7 +142,7 @@ const Motion = {
     Motion = Object.assign(Motion, {
       start() {
         if (!Internal.entry) {
-          Internal.entry = Motion.views.Main
+          Internal.entry = Internal.views.Main.component
         }
 
         router.init(ID, { onChange: Motion.run })
@@ -153,8 +166,8 @@ const Motion = {
         ? Internal.viewDecorator.all = name
         : Internal.viewDecorator[name] = decorator,
 
+      createElement,
       keyframes,
-
       router,
 
       // async functions before loading app
@@ -231,12 +244,15 @@ const Motion = {
       debug: () => { debugger },
 
       getComponent(component) {
+        if (!component.__motioninfo__)
+          return component
+
         const { name, type } = component.__motioninfo__
 
-        if (!Internal.views[name]) {
+        if (!Internal.views[name])
           Motion.makeComponent(name, component, type)
-        }
 
+        // return proxied component
         return Internal.views[name]
       },
 
@@ -246,7 +262,6 @@ const Motion = {
         if (!component) {
           component = name
           name = component.prototype.__motion.name
-          component.prototype.el = createElement
           component.prototype.__motionRender = __motionRender
         }
 
@@ -257,6 +272,7 @@ const Motion = {
         return Motion.markComponent(name, component, Motion.viewTypes.FN)
       },
 
+      // classes pass through here for proxying and tagging
       markComponent(name, component, type) {
         component.__motioninfo__ = { name, type }
 
@@ -458,17 +474,6 @@ const Motion = {
       iff,
       noop: function(){},
     })
-
-    // view shim (TODO freeze)
-    root.view = {
-      el(info, props, ...children) {
-        if (typeof info[0] === 'string' && info[0].charAt(0).toUpperCase() === info[0].charAt(0)) {
-          return React.createElement(Motion.getView(info[0]), props)
-        }
-
-        return React.createElement(info[0], props, ...children);
-      }
-    }
 
     // prevent overwriting
     Object.freeze(Motion)

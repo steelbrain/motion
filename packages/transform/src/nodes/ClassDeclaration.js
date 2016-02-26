@@ -2,7 +2,14 @@ import { t } from '../lib/helpers'
 
 export default {
   exit(node, parent, scope) {
-    if (node.superClass && node.superClass.name == 'Component') {
+    const ext = node.superClass
+
+    if (ext && (
+      // extends React.Component
+      ext.object && ext.object.name == 'React' && ext.property.name == 'Component' ||
+      // or just extends Component
+      ext.name == 'Component'
+    )) {
       const name = node.id.name
 
       node.body.body.push(t.methodDefinition(
