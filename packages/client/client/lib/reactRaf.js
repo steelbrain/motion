@@ -2,18 +2,18 @@ import ReactUpdates from 'react/lib/ReactUpdates'
 import raf from 'raf'
 
 const tick = () => {
-  ReactUpdates.flushBatchedUpdates();
-  raf(tick);
+  ReactUpdates.flushBatchedUpdates()
+  raf(tick)
 }
 
 const inject = () => {
   ReactUpdates.injection.injectBatchingStrategy({
     isBatchingUpdates: true,
     batchedUpdates: function(callback, ...args) {
-      callback(...args);
+      callback(...args)
     }
-  });
-  raf(tick);
+  })
+  raf(tick)
 }
 
-export default { inject };
+export default { inject }

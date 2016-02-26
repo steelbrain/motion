@@ -45,6 +45,12 @@ if [ "$1" = "--watch" ]; then
   cd packages/motion
   npm link --loglevel=error --no-progress
   cd ../..
+
+  # this is expensive
+  # while true; do
+  #   sleep 20
+  #   (cd packages/client && node prepublish)
+  # done
 fi
 
 # wait for bg tasks

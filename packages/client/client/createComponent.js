@@ -32,10 +32,6 @@ export default function createComponent(Motion, Internal, name, view, options = 
     return component
   }
 
-  // production
-  if (process.env.production)
-    return wrapComponent(createViewComponent())
-
   // development
   switch(options.type) {
     case Motion.viewTypes.VIEW:
@@ -48,6 +44,10 @@ export default function createComponent(Motion, Internal, name, view, options = 
       views[name] = Radium(createFnComponent())
       break
   }
+
+  // production
+  if (process.env.production)
+    return wrapComponent(views[name])
 
   // once rendered, isChanged is used to prevent
   // unnecessary props hashing, for faster hot reloads
