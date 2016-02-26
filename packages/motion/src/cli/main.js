@@ -29,8 +29,8 @@ export class CLI {
     this.instance.log(WELCOME_MESSAGE)
   }
   addCommand(name: string, helpText: string, callback: Function) {
-    this.instance.command(name, helpText).action(function(args, keepRunning) {
-      const result = callback(args)
+    this.instance.command(name, helpText).action((args, keepRunning) => {
+      const result = callback(this.instance, args)
       if (result) {
         return result
       } else {
