@@ -10,7 +10,5 @@ function get(name) {
 }
 
 export default {
-  webpack: () => get('webpack'),
-  babel: () => get('flint-babel-core'),
   surge: () => get('surge'),
 }
