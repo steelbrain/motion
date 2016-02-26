@@ -109,18 +109,7 @@ export default {
         }
       }
 
-      // wrap outermost JSX elements (in views) in this.render()
-      let wrap = idFn
-      const isDirectChildOfView = scope.hasOwnBinding('view') && scope.hasOwnBinding('$')
-
-      if (isDirectChildOfView)
-        wrap = node => t.callExpression(t.identifier('view.render'), [
-          t.functionExpression(null, [], t.blockStatement([
-            t.returnStatement(node)
-          ]))
-        ])
-
-      return wrap(iff(route(rpt(node))))
+      return iff(route(rpt(node)))
     }
   }
 }

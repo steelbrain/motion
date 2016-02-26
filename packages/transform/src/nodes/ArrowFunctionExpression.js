@@ -8,7 +8,5 @@ export default {
       const name = scope.path.parent.id.name
       return component.simple({ name, node })
     }
-
-    return stateTrack(node)
   }
 }

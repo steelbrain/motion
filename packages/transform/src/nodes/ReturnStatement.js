@@ -8,16 +8,5 @@ export default {
       let parentFunc = parentFunctionNode(scope)
       parentFunc.motionIsComponent = true
     }
-  },
-
-  exit(node, parent, scope) {
-    // view.update() before return
-    if (node.motionReturnTracked) return
-    node.motionReturnTracked = true
-
-    const parentFunc = parentFunctionNode(scope)
-
-    if (parentFunc && parentFunc.body && !parentFunc.body.motionView && (parentFunc.motionStateMutativeFunction || parentFunc.hasSetter))
-      return [updateState(), node]
   }
 }

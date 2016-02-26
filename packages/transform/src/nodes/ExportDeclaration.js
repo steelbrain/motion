@@ -5,9 +5,6 @@ export default {
   enter(node, parent, scope, file) {
     options.onExports && options.onExports(true)
     state.file.hasExports = true
-
-    if (state.file.hasView)
-      throw new Error("Views shouldn't be exported! Put your exports into files without views.")
   },
 
   exit(node) {
@@ -17,7 +14,7 @@ export default {
       node.declaration = t.callExpression(
         t.identifier('Motion.entry'), [node.declaration]
       )
-      // return
+      return
     }
 
     if (!node.declaration) return

@@ -20,7 +20,7 @@ import $ from './$'
 import cliOpts from './lib/opts'
 import internal from './internal'
 import onError from './shim/motion'
-import createComponent from './createComponent'
+import CreateComponent from './createComponent'
 import __motionRender from './lib/__motionRender.js'
 import range from './lib/range'
 import iff from './lib/iff'
@@ -115,7 +115,10 @@ const Motion = {
       })
     }
 
-    // setup shims that use Internal
+    // set up Internal
+    // TODO cleanup
+    root._Motion = Internal
+    root.module = root.module || {}
     onError(Internal, Tools)
     const LastWorkingMain = LastWorkingMainFactory(Internal)
 
@@ -127,9 +130,8 @@ const Motion = {
 
     let Motion = {}
 
-    // TODO cleanup
-    root.module = root.module || {}
-    root._Motion = Internal
+    // pass in Motion
+    let createComponent = CreateComponent(Motion, Internal)
     root.$ = $(Motion)
     root.exports = Object.assign(root.exports || {}, {
       Motion,
@@ -137,8 +139,7 @@ const Motion = {
       ReactTransitionGroup
     })
 
-    let createComponent2 = createComponent.bind(null, Motion, Internal)
-
+    // Motion
     Motion = Object.assign(Motion, {
       start() {
         if (!Internal.entry) {
@@ -152,7 +153,6 @@ const Motion = {
       views: {},
       viewTypes: {
         FN: 'FN',
-        SIMPLE: 'SIMPLE',
         CLASS: 'CLASS'
       },
 
@@ -205,7 +205,7 @@ const Motion = {
           }
 
           if (!Main) {
-            console.log('No main view found, add a Motion.entry(MainView) to render')
+            console.log('No entry component, "export default" your entry from your entry file')
             return
           }
 
@@ -274,6 +274,7 @@ const Motion = {
 
       // classes pass through here for proxying and tagging
       markComponent(name, component, type) {
+        console.log('make component', name, type)
         component.__motioninfo__ = { name, type }
 
         // so that it updates
@@ -290,7 +291,7 @@ const Motion = {
       },
 
       makeComponent(name, component, type) {
-        Internal.views[name] = createComponent2(name, component, { changed: true, type })
+        Internal.views[name] = createComponent(name, component, { changed: true, type })
         Motion.views[name] = component
 
         return component
@@ -298,7 +299,7 @@ const Motion = {
 
       view(name, body) {
         function comp(opts = {}) {
-          return createComponent2(name, body, { ...opts, type: Motion.viewTypes.VIEW })
+          return createComponent(name, body, { ...opts, type: Motion.viewTypes.VIEW })
         }
 
         function setView(name, component) {
