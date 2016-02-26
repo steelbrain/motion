@@ -24,9 +24,11 @@ export default function webpackConfig(filename, config = {}) {
     externals: {
       react: 'exports.React',
       'react-dom': 'exports.ReactDOM',
+      'react-addons-css-transition-group': 'exports.ReactCSSTransitionGroup',
+      'react-addons-transition-group': 'exports.ReactTransitionGroup',
       history: 'exports.history',
       radium: 'exports.radium',
-      'babel-polyfill': 'var $'
+      'babel-polyfill': 'var $',
     },
     devtool: 'source-map',
     node: {

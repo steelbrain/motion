@@ -3,6 +3,8 @@ const filters = [
   /^babel-polyfill$/,
   /^react(\/.*)?$/, // TODO allow subpaths
   /^motion-client$/,
+  /^react-addons-css-transition-group$/,
+  /^react-addons-transition-group$/,
   /^react-dom$/,
   /^history$/,
   /^radium$/,

@@ -5,6 +5,8 @@ import hashsum from 'hash-sum'
 import ee from 'event-emitter'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup'
+import ReactTransitionGroup from 'react/lib/ReactTransitionGroup'
 import rafBatch from './lib/reactRaf'
 import { StyleRoot, keyframes } from 'motion-radium'
 import regeneratorRuntime from './vendor/regenerator'
@@ -112,11 +114,15 @@ const Motion = {
 
     let Motion = {}
 
+    // TODO cleanup
     root.module = root.module || {}
-    root.exports = root.exports || {}
-    root.exports.Motion = Motion
     root._Motion = Internal
     root.$ = $(Motion)
+    root.exports = Object.assign(root.exports || {}, {
+      Motion,
+      ReactCSSTransitionGroup,
+      ReactTransitionGroup
+    })
 
     let createComponent2 = createComponent.bind(null, Motion, Internal)
 
@@ -235,6 +241,8 @@ const Motion = {
       },
 
       componentClass(name, component) {
+        // classes pass in just the class itself (no name)
+        // name is put onto .__motion.name
         if (!component) {
           component = name
           name = component.prototype.__motion.name
