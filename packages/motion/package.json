@@ -8,13 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/motion/motion",
   "bin": {
-    "motion": "./lib/cli",
-    "motion-new": "./lib/cli/entry/motion-new",
-    "motion-run": "./lib/cli/entry/motion-run",
-    "motion-build": "./lib/cli/entry/motion-build",
-    "motion-update": "./lib/cli/entry/motion-update",
-    "motion-init": "./lib/cli/entry/motion-init",
-    "motion-up": "./lib/cli/entry/motion-up"
+    "motion": "./lib/cli/index.js"
   },
   "dependencies": {
     "atom-text-buffer-point": "1.0.0",
