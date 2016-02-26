@@ -247,6 +247,8 @@ const Motion = {
         delete Internal.views[name]
         delete Motion.views[name]
 
+        Motion.makeComponent(name, component, type)
+
         Internal.changedViews.push(name)
         let viewsInFile = Internal.viewsInFile[Internal.currentHotFile]
         if (viewsInFile) viewsInFile.push(name)
@@ -386,6 +388,7 @@ const Motion = {
             if (!Internal.mountedViews[name]) return
 
             Internal.mountedViews[name] = Internal.mountedViews[name].map(view => {
+              // this keeps our mounted view array nicely filtered lazily
               if (view.isMounted()) {
                 view.forceUpdate()
                 return view

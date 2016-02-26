@@ -66,14 +66,18 @@ export default function elementStyles(Motion, el, view, props) {
     const diffName = el.name !== tag
     const hasTag = typeof tag == 'string'
 
-    let tagStyle = hasTag && parent.styles[tag]
-
-    if (typeof tagStyle == 'function')
-      tagStyle = parent.styles[tag](el.repeatItem, el.index)
-
     const classes = Motion.styleClasses[parent.name]
-    const viewStyle = parent.styles[prefix] && parent.styles[prefix](el.index)
-    const nameStyle = diffName && parent.styles[el.name] && parent.styles[el.name](el.repeatItem, el.index)
+    let tagStyle = hasTag && parent.styles[tag]
+    let viewStyle = parent.styles[prefix]
+    let nameStyle = diffName && parent.styles[el.name]
+
+    // only views have wrapped style objects with functions for repeat
+    if (typeof tagStyle == 'function')
+      tagStyle = tagStyle(el.repeatItem, el.index)
+    if (typeof viewStyle == 'function')
+      viewStyle = viewStyle(el.index)
+    if (typeof nameStyle == 'function')
+      nameStyles = nameStyle(el.repeatItem, el.index)
 
     // merge styles
 
