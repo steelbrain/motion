@@ -47,42 +47,14 @@ const babelRuntimeRequire = src =>
   getMatches(src, babelRuntimeRegex, 1)
 
 export function motionFile(file) {
-  let track = {
-    imports: [],
-    isCold: false,
-    isExported: false
-  }
-
-  const onImports = (imports : string) => track.imports.push(imports)
-  const onExports = (exports : string) => track.isExported = true
-  const onCold = (val : boolean) => track.isCold = val
+  let meta
 
   let res = transform(
     file.contents.toString(),
-    babelOpts(file, config.file({
-      onImports,
-      onExports,
-      onCold
-    }))
+    babelOpts(file, config.file(_ => meta = _))
   )
 
-  const { usedHelpers, modules: { imports } } = res.metadata
-  const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
-  const importNames = imports.map(i => i.source)
-
-  let meta = {
-    imports: _.uniq([].concat(
-      importNames,
-      (track.imports || []),
-      (importedHelpers || []),
-      babelRuntimeRequire(res.code)
-    )),
-    isExported: track.isExported,
-    isHot: !track.isCold
-  }
-
   log.gulp('meta', meta)
-
   return { res, meta }
 }
 

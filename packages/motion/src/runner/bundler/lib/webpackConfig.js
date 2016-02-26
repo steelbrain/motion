@@ -1,5 +1,4 @@
-import deepmerge from 'deepmerge'
-import { path, log } from '../../lib/fns'
+import { _, path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
 
@@ -10,7 +9,7 @@ let runnerModules = path.join(runnerRoot, 'node_modules')
 let fileStyleFolder = 'file?name=assets/styles/[name]-[hash].css'
 
 export default function webpackConfig(filename, config = {}) {
-  const conf = deepmerge({
+  const conf = _.merge({
     context: runnerRoot,
     debug: opts('debug'),
     output: {
@@ -66,6 +65,8 @@ export default function webpackConfig(filename, config = {}) {
       ]
     }
   }, config)
+
+  console.log(conf.module.loaders)
 
   return conf
 }

@@ -1,7 +1,6 @@
 [include]
 [ignore]
 .*node_modules.*
-.*babel2.*
 [libs]
 [options]
 module.system=node

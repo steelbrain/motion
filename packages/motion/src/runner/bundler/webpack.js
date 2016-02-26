@@ -16,8 +16,10 @@ export default function webpacker({ name, config, onFinish }) {
       compiler.watch.bind(compiler, {}) :
       compiler.run.bind(compiler)
 
-    run((e, stats) => {
+    run((e, _stats) => {
       log.externals('ran webpack', name)
+
+      const stats = _stats.toJson()
       const err = getWebpackErrors('externals', e, stats)
 
       if (err) {
@@ -26,7 +28,7 @@ export default function webpacker({ name, config, onFinish }) {
       }
       else {
         emitter.emit('compiler:' + name)
-        onFinish()
+        onFinish(stats)
         res()
       }
     })

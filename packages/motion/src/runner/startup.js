@@ -2,6 +2,7 @@ import bridge from './bridge'
 import server from './server'
 import bundler from './bundler'
 import builder from './builder'
+import Webpack from './webpack'
 import opts from './opts'
 import disk from './disk'
 import gulp from './gulp'
@@ -16,19 +17,14 @@ import Editor from './editor'
 let started = false
 
 export async function startup(options = {}) {
-  if (process.env.MOTION_DEBUG) {
-    print('total startup time: ', Date.now() - process.env.startedat)
-  }
-
-  if (started) return
   started = true
+  if (process.env.startedat) print('startup time: ', Date.now() - process.env.startedat)
 
+  // space
   print()
 
   // order important!
   await opts.init(options)
-
-
   log.setLogging()
   await disk.init() // reads versions and sets up readers/writers
   await builder.clear.init() // ensures internal directories set up
@@ -41,21 +37,24 @@ export async function startup(options = {}) {
   watchDeletes()
 }
 
-async function gulpScripts(opts) {
+async function scripts(opts) {
+  const webpack = new Webpack()
   await gulp.init(opts)
   await gulp.afterBuild()
 }
 
 export async function build(opts = {}) {
   try {
-    await startup({ ...opts, build: true })
+    if (!started)
+      await startup({ ...opts, build: true })
+
     await Promise.all([
       bundler.remakeInstallDir(),
       builder.clear.buildDir()
     ])
     await Promise.all([
       gulp.assets(),
-      gulpScripts({ once: opts.once })
+      scripts({ once: opts.once })
     ])
     await bundler.all()
     await builder.build()
@@ -75,7 +74,7 @@ export async function run(opts) {
     await server.run()
     await activateBridge()
     activateEditor(bridge)
-    await gulpScripts()
+    await scripts()
     cache.serialize() // write out cache
     await bundler.all()
     if (opts.watch) await builder.build()

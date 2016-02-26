@@ -2,53 +2,88 @@ import MotionTransform from 'motion-transform'
 import { isProduction } from './helpers'
 import opts from '../../opts'
 import onMeta from './onMeta'
-import { p, log } from '../../lib/fns'
+import { _, p, log } from '../../lib/fns'
 import writeStyle from '../../lib/writeStyle'
-import deepmerge from 'deepmerge'
 
-let motion = null
 const id = () => {}
 
-// allow these to change per-call
-let _onImports, _onCold, _onExports
-let onImports = _ => _onImports(_)
-let onExports = _ => _onExports(_)
-let onCold = _ => _onCold(_)
+export function file(onInfo) {
+  const plugin = getPlugin(onInfo)
+  return babelConf({ plugins: [plugin] })
+}
 
-const getFileTransformer = (conf) => MotionTransform.file({
-  basePath: opts('appDir'),
-  production: isProduction(),
-  selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
-  routing: opts('config').routing,
-  entry: p(opts('appDir'), opts('config').entry),
-  log,
-  onMeta,
-  writeStyle,
-  onImports: _ => onImports(_),
-  onExports: _ => onExports(_),
-  onCold: _ => onCold(_),
-  ...conf
-})
+let isRunning = false
+let plugin = null
+let onInfoCb = null
 
-let switchedToRunning
+function getPlugin(onInfo) {
+  // update info cb per-call
+  onInfoCb = onInfo
 
-export function file(config) {
-  _onImports = config.onImports
-  _onExports = config.onExports
-  _onCold = config.onCold
+  // dont update plugin per-call
+  // (once on startup, once after initial build)
+  if (!plugin || !isRunning) {
+    if (opts('hasRunInitialBuild')) isRunning = true
 
-  // only instantiate once
-  if (!motion) {
-    motion = getFileTransformer({ firstRun: true })
-  }
-  else if (!switchedToRunning && opts('hasRunInitialBuild')) {
-    switchedToRunning = true
-    motion = getFileTransformer({ firstRun: false })
+    console.log('setting oninfo', onInfo && onInfo.toString())
+    plugin = MotionTransform.file(fileConf({
+      firstRun: !isRunning,
+      onInfo
+    }))
   }
 
-  return getBabelConfig({
-    plugins: [motion]
-  })
+  return plugin
+}
+
+function fileConf({ firstRun, onInfo = id }) {
+  let info
+
+  const onImports = (imports : string) => info.imports.push(imports)
+  const onExports = (exports : string) => info.isExported = true
+  const onCold = (val : boolean) => info.isCold = val
+
+  const onStart = () => {
+    console.log('start file')
+    info = {
+      imports: [],
+      isCold: false,
+      isExported: false
+    }
+  }
+
+  const onFinish = metadata => {
+    const { usedHelpers, modules: { imports } } = metadata
+    const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
+    const importNames = imports.map(i => i.source)
+    const result = {
+      imports: _.uniq([].concat(
+        importNames,
+        (info.imports || []),
+        (importedHelpers || []),
+        babelRuntimeRequire(res.code)
+      )),
+      isExported: info.isExported,
+      isHot: !info.isCold
+    }
+
+    onInfo(result)
+  }
+
+  return {
+    basePath: opts('appDir'),
+    production: isProduction(),
+    selectorPrefix: opts('config').selectorPrefix || '#_motionapp ',
+    routing: opts('config').routing,
+    entry: p(opts('appDir'), opts('config').entry),
+    log,
+    onMeta,
+    writeStyle,
+    onStart,
+    onImports,
+    onExports,
+    onCold,
+    firstRun
+  }
 }
 
 export function app() {
@@ -62,8 +97,8 @@ export function app() {
   }
 }
 
-export function getBabelConfig({ plugins }) {
-  const babelConf = {
+export function babelConf(_config) {
+  const config = {
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'Motion.createElement',
     stage: 0,
@@ -71,19 +106,20 @@ export function getBabelConfig({ plugins }) {
     retainLines: opts('config').pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],
-    plugins,
     extra: {
       production: isProduction()
     },
+    ..._config
   }
 
   const userConf = opts('config').babel
 
   if (userConf)
-    return deepmerge(babelConf, userConf)
+    return _.merge(config, userConf)
   else
-    return babelConf
+    return config
 }
+
 
 export default {
   app,

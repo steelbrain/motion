@@ -2,7 +2,7 @@ import opts from '../../opts'
 import { p, path, log, _ } from '../../lib/fns'
 
 let lineSep = `\n  `
-let takeWebpack = ls => lineSep + _.take(ls, 2).join(lineSep)
+let takeWebpack = ls => lineSep + _.take(ls, 10).join(lineSep)
 let split = s => s.split("\n")
 let join = s => s.join("\n")
 
@@ -20,7 +20,7 @@ function cleanPath(str) {
 export default function getWebpackErrors(where, err, stats) {
   if (err) return err
 
-  const jsonStats = stats.toJson({
+  const jsonStats = !stats.toJson ? stats : stats.toJson({
     source: false
   })
 

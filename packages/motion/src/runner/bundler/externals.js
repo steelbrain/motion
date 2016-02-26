@@ -35,3 +35,14 @@ export async function installExternals(filePath) {
   if (opts('hasRunInitialBuild'))
     await installAll(cache.getExternals(filePath))
 }
+
+// let internals use externals
+export function userExternals() {
+  const imports = cache.getExternals()
+  const externalsObj = imports.reduce((acc, cur) => {
+    acc[cur] = cur
+    return acc
+  }, {})
+
+  return externalsObj
+}

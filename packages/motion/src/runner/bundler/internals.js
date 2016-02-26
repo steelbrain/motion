@@ -2,6 +2,7 @@ import { finishedInstalling } from './install'
 import webpack from './webpack'
 import { onInternalInstalled } from './lib/messages'
 import webpackConfig from './lib/webpackConfig'
+import { userExternals } from './externals'
 import getWebpackErrors from './lib/getWebpackErrors'
 import requireString from './lib/requireString'
 import bridge from '../bridge'
@@ -47,18 +48,7 @@ export function runInternals() {
     onFinish: () => RELOAD && onInternalInstalled(),
     config: {
       entry: opts('deps').internalsIn,
-      externals: webpackUserExternals(),
+      externals: userExternals()
     }
   })
-}
-
-// let internals use externals
-function webpackUserExternals() {
-  const imports = cache.getExternals()
-  const externalsObj = imports.reduce((acc, cur) => {
-    acc[cur] = cur
-    return acc
-  }, {})
-
-  return externalsObj
 }
