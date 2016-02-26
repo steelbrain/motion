@@ -16,7 +16,7 @@ function niceProps(props) {
   return props
 }
 
-export default function elementProps(Motion, { name, whitelisted, key, index, isView }, view, props) {
+export default function elementProps(Motion, { name, whitelisted, key, index }, view, props) {
   const viewName = view.__motion ? view.__motion.name : view.name
 
   if (props) {
@@ -90,7 +90,7 @@ export default function elementProps(Motion, { name, whitelisted, key, index, is
   }
 
   // if not external component
-  if (isView || typeof component != 'function') {
+  if (typeof component != 'function') {
     props.__motion = {
       parentStyles: view.styles,
       parentStylesStatic: Motion.styleObjects[viewName],

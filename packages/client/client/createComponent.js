@@ -1,43 +1,24 @@
 import ReactDOMServer from 'react-dom/server'
 import ReactDOM from 'react-dom'
 import React from 'react'
-import raf from 'raf'
 import ReactCreateElement from './lib/ReactCreateElement'
 import Radium from './lib/radium'
-
 import phash from './lib/phash'
-import cloneError from './lib/cloneError'
-import hotCache from './mixins/hotCache'
-import reportError from './lib/reportError'
 import createElement from './tag/createElement'
-import viewOn from './lib/viewOn'
-
-const capitalize = str =>
-  str[0].toUpperCase() + str.substring(1)
 
 const pathWithoutProps = path =>
   path.replace(/\.[a-z0-9\-]+$/, '')
 
-let views = {}
-let viewErrorDebouncers = {}
+let components = {}
 
 export default function CreateComponent(Motion, Internal) {
-  return (name, view, options = {}) => {
+  return (name, component, options = {}) => {
     let isChanged = options.changed
 
-    // wrap decorators
-    const wrapComponent = (component) => {
-      if (Internal.viewDecorator[name])
-        component = Internal.viewDecorator[name](component)
-      if (Internal.viewDecorator.all)
-        component = Internal.viewDecorator.all(component)
-      return component
-    }
-
     // shim render to provide context aware Motion.createElement
-    if (view.prototype.render) {
-      let innerRender = view.prototype.render
-      view.prototype.render = function() {
+    if (component.prototype.render) {
+      let innerRender = component.prototype.render
+      component.prototype.render = function() {
         // sets active component so createElement has access
         Motion.createElement.activeComponent = this
         let result = innerRender.call(this)
@@ -46,20 +27,20 @@ export default function CreateComponent(Motion, Internal) {
       }
     }
 
-    // create each type of view
+    // create each type of component
     // TODO move radium below proxy?
     switch(options.type) {
       case Motion.viewTypes.CLASS:
-        views[name] = Radium(view)
+        components[name] = Radium(component)
         break
       case Motion.viewTypes.FN:
-        views[name] = Radium(createFnComponent())
+        components[name] = Radium(createFnComponent())
         break
     }
 
     // production
     if (process.env.production)
-      return wrapComponent(views[name])
+      return components[name]
 
     // once rendered, isChanged is used to prevent
     // unnecessary props hashing, for faster hot reloads
@@ -68,7 +49,7 @@ export default function CreateComponent(Motion, Internal) {
       isChanged = false
     })
 
-    return wrapComponent(createProxyComponent())
+    return createProxyComponent()
 
     // proxy components handle hot reloads
     function createProxyComponent() {
@@ -134,32 +115,20 @@ export default function CreateComponent(Motion, Internal) {
           Internal.viewsAtPath[this.getPath()] = this
         },
 
-        componentWillUnmount() {
-          // TODO remove from mounted views
-        },
-
-        onMount(component) {
-          const path = this.getPath()
-          const lastRendered = component.lastRendered
-
-          Internal.mountedViews[name] = Internal.mountedViews[name] || []
-          Internal.mountedViews[name].push(this)
-          Internal.viewsAtPath[path] = component
-
-          if (lastRendered)
-            Internal.lastWorkingRenders[pathWithoutProps(path)] = lastRendered
-
-          Internal.lastWorkingViews[name] = { component }
-        },
-
         render() {
-          const View = views[name]
+          const View = components[name]
 
           let viewProps = Object.assign({}, this.props)
 
           viewProps.__motion = viewProps.__motion || {}
           viewProps.__motion.onMount = this.onMount
           viewProps.__motion.path = this.getPath()
+
+          // FROM component
+          // if (component.lastRendered)
+          //   Internal.lastWorkingRenders[pathWithoutProps(path)] = lastRendered
+          //
+          // Internal.lastWorkingViews[name] = { component }
 
           return ReactCreateElement(View, viewProps)
         }
@@ -189,17 +158,17 @@ export default function CreateComponent(Motion, Internal) {
         },
 
         render() {
-          let [ dom, style ] = view.call(null, component, this.getArgs())
+          let [ dom, style ] = component.call(null, component, this.getArgs())
           this.styles = style
           return dom
         }
       }
 
-      let [ __motioninfo__, ...statics ] = Object.keys(view)
+      let [ __motioninfo__, ...statics ] = Object.keys(component)
 
       // assign lifecycles and such
       for (let key of statics) {
-        let val = view[key]
+        let val = component[key]
         component[key] = function() { return val(this.getArgs()) }
       }
 

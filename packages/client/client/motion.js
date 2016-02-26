@@ -14,7 +14,6 @@ import regeneratorRuntime from './vendor/regenerator'
 
 import './shim/root'
 import './shim/exports'
-import './shim/on'
 import './lib/promiseErrorHandle'
 import $ from './$'
 import cliOpts from './lib/opts'
@@ -69,7 +68,6 @@ const Motion = {
     root.ReactDOM = ReactDOM
     root.global = root // for radium
     root.regeneratorRuntime = regeneratorRuntime
-    root.on = on
     root.fetch.json = (a, b, c) => fetch(a, b, c).then(res => res.json())
     root.process = root.process || {
       env: {
@@ -142,10 +140,7 @@ const Motion = {
     // Motion
     Motion = Object.assign(Motion, {
       start() {
-        if (!Internal.entry) {
-          Internal.entry = Internal.views.Main.component
-        }
-
+        Internal.entry = Internal.entry || Internal.views.Main.component
         router.init(ID, { onChange: Motion.run })
         Motion.run()
       },
@@ -155,16 +150,6 @@ const Motion = {
         FN: 'FN',
         CLASS: 'CLASS'
       },
-
-      // beta
-      _onViewInstance: (name, decorator) => !decorator
-        ? Internal.instanceDecorator.all = name
-        : Internal.instanceDecorator[name] = decorator,
-
-      // decorate a view instance
-      decorateView: (name, decorator) => !decorator
-        ? Internal.viewDecorator.all = name
-        : Internal.viewDecorator[name] = decorator,
 
       createElement,
       keyframes,
@@ -297,6 +282,7 @@ const Motion = {
         return component
       },
 
+      // TODO extract hash body stuff
       view(name, body) {
         function comp(opts = {}) {
           return createComponent(name, body, { ...opts, type: Motion.viewTypes.VIEW })

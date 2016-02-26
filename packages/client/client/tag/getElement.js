@@ -13,7 +13,6 @@ import ReactCreateElement from '../lib/ReactCreateElement'
 
 
 export default function getElement(Motion, identifier: Identifier, view, props): Element {
-  let isView = false
   let name, tagName, key, index, component, repeatItem
 
   // used directly by user
@@ -55,11 +54,6 @@ export default function getElement(Motion, identifier: Identifier, view, props):
       // blacklist
       blacklisted = blacklist.indexOf(name) >= 0
     }
-    // find a view
-    else if (!component) {
-      isView = true
-      component = Motion.getView(name)
-    }
   }
 
   return {
@@ -70,6 +64,5 @@ export default function getElement(Motion, identifier: Identifier, view, props):
     repeatItem,
     component,
     blacklisted,
-    isView
   }
 }
