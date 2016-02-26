@@ -9,6 +9,9 @@ const validCommands = ['new', 'build', 'update', 'init']
 
 // TODO: Check for updates
 
+// Note: This is a trick to make multiple commander commands work with single executables
+process.argv = process.argv.slice(0, 2).concat(process.argv.slice(3))
+
 if (!command || command === 'run') {
   require('./motion-run')
 } else if (validCommands.indexOf(command) !== -1) {
