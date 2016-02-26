@@ -7,6 +7,8 @@ const parameters = require('minimist')(process.argv.slice(2))
 const command = parameters['_'][0]
 const validCommands = ['new', 'build', 'update', 'init']
 
+// TODO: Check for updates
+
 if (!command || command === 'run') {
   require('./motion-run')
 } else if (validCommands.indexOf(command) !== -1) {
