@@ -60,8 +60,7 @@ const Motion = {
     }
 
     // shims
-    const appRequire = requireFactory(root)
-    root.require = appRequire
+    root.require = requireFactory(root)
     root.React = React
     root.Component = React.Component
     root.ReactDOM = ReactDOM
@@ -354,7 +353,7 @@ const Motion = {
 
         // run file!
         const oldRequire = root.require // change require during hot reload, ugly but necessary atm
-        root.require = pkg => appRequire(pkg, fileFolder)
+        root.require = pkg => oldRequire(pkg, fileFolder)
         run()
         root.require = oldRequire // restore
 
