@@ -67,7 +67,7 @@ export function getBabelConfig({ plugins }) {
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'Motion.createElement',
     stage: 0,
-    blacklist: ['es6.tailCall', 'strict'],
+    blacklist: ['es6.tailCall'],
     retainLines: opts('config').pretty ? false : true,
     comments: true,
     optional: ['regenerator', 'runtime'],

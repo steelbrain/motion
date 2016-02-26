@@ -26,7 +26,7 @@ export function componentReturn(node) {
     let el = args[i]
 
     if (t.isJSXElement(el)) {
-      args[i] = t.functionExpression(null, [t.identifier('view')], t.blockStatement([ t.returnStatement(el) ]))
+      args[i] = t.functionExpression(null, [], t.blockStatement([ t.returnStatement(el) ]))
     }
   }
 

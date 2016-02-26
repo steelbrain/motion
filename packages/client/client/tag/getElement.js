@@ -47,7 +47,7 @@ export default function getElement(Motion, identifier: Identifier, view, props):
       tagName = (
         // TODO this is definitely a bug but works in single element case, move this to props.js
         // yield isnt merged in at this point so we check for it
-        view.props && view.props.yield && view.props.tagName
+        view && view.props && view.props.yield && view.props.tagName
         // otherwise use prop tagname
         || props && props.tagName
       )
