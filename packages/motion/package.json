@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/motion/motion",
   "bin": {
-    "motion": "./lib/cli/entry/motion",
+    "motion": "./lib/cli",
     "motion-new": "./lib/cli/entry/motion-new",
     "motion-run": "./lib/cli/entry/motion-run",
     "motion-build": "./lib/cli/entry/motion-build",
