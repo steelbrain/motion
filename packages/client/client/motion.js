@@ -235,7 +235,8 @@ const Motion = {
       },
 
       componentClass(name, component) {
-        if (!name) {
+        if (!component) {
+          component = name
           name = component.prototype.__motion.name
           component.prototype.el = createElement
           component.prototype.__motionRender = __motionRender
