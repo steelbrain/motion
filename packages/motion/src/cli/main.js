@@ -5,7 +5,8 @@
 import {CompositeDisposable, Emitter, Disposable} from 'sb-event-kit'
 import vorpal from 'vorpal'
 
-const CLI_DELIMITER = 'motion>'
+const CLI_DELIMITER = 'motion ❯❯❯'
+const WELCOME_MESSAGE = '♥ ♥ ♥ Welcome to Motion ♥ ♥ ♥'
 
 export class CLI {
   active: boolean;
@@ -25,6 +26,7 @@ export class CLI {
     this.instance.delimiter(CLI_DELIMITER)
     this.instance.show()
     this.active = true
+    this.instance.log(WELCOME_MESSAGE)
   }
   addCommand(name: string, helpText: string, callback: Function) {
     this.instance.command(name, helpText).action(function(args, keepRunning) {

@@ -1,4 +1,7 @@
 #!/usr/bin/env node
 'use strict'
 
-console.log('Welcome to motion')
+import {CLI} from './main'
+
+const cli = new CLI()
+cli.activate()
