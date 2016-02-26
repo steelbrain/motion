@@ -19,11 +19,10 @@ async function webpack() {
 
 // webpack either watches or just runs once
 async function all() {
-  if (opts('watching')) await webpack()
   await installAll()
   await writeInternals({ force: true })
   await uninstall()
-  if (!opts('watching')) await webpack()
+  await webpack()
 }
 
 export default {

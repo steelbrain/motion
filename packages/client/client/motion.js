@@ -155,8 +155,13 @@ const Motion = {
       preloaders: [],
       preload(fn) { Motion.preloaders.push(fn) },
 
+      // set entry to app
       entry(entry) {
-        Internal.entry = Motion.getComponent(entry)
+        // allow `export default <dom />`
+        if (React.isValidElement(entry))
+          Internal.entry = () => entry
+        else
+          Internal.entry = Motion.getComponent(entry)
       },
 
       run() {
@@ -229,11 +234,14 @@ const Motion = {
         return Internal.views[name]
       },
 
-      componentClass(component) {
-        component.prototype.el = createElement
-        component.prototype.__motionRender = __motionRender
+      componentClass(name, component) {
+        if (!name) {
+          name = component.prototype.__motion.name
+          component.prototype.el = createElement
+          component.prototype.__motionRender = __motionRender
+        }
 
-        return Motion.markComponent(component.prototype.__motion.name, component, Motion.viewTypes.CLASS)
+        return Motion.markComponent(name, component, Motion.viewTypes.CLASS)
       },
 
       componentFn(name, component) {

@@ -52,6 +52,7 @@ export async function installAll(requires) {
       if (requires.length) {
         log.externals('no fresh but has requires, writeInstalled + writeExternals')
         await writeInstalled(installed)
+        console.log('write from here')
         await writeExternals({ silent: true })
       }
       return
