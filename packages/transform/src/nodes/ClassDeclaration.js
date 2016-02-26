@@ -18,12 +18,7 @@ export default {
 
       node.decorators = [t.decorator(t.identifier('Motion.componentClass'))]
 
-      return [
-        t.expressionStatement(
-          t.callExpression(t.identifier('Motion.nextComponent'), [t.literal(name)])
-        ),
-        node
-      ]
+      return node
     }
   }
 }

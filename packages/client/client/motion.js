@@ -105,7 +105,6 @@ const Motion = {
     const LastWorkingMain = LastWorkingMainFactory(Internal)
 
     const emitter = ee({})
-    let nextComponentName = null
 
     //
     // begin the motionception
@@ -230,14 +229,11 @@ const Motion = {
         return Internal.views[name]
       },
 
-      nextComponent(name) {
-        nextComponentName = name
-      },
-
       componentClass(component) {
         component.prototype.el = createElement
         component.prototype.__motionRender = __motionRender
-        return Motion.markComponent(nextComponentName, component, Motion.viewTypes.CLASS)
+
+        return Motion.markComponent(component.prototype.__motion.name, component, Motion.viewTypes.CLASS)
       },
 
       componentFn(name, component) {
