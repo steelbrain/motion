@@ -3,11 +3,12 @@
 /* @flow */
 
 import { inspect } from 'util'
-import {CompositeDisposable, Emitter, Disposable} from 'sb-event-kit'
+import { CompositeDisposable, Emitter, Disposable } from 'sb-event-kit'
 import vorpal from 'vorpal'
+import chalk from 'chalk'
 
-const CLI_DELIMITER = 'motion ❯❯❯'
-const WELCOME_MESSAGE = '♥ ♥ ♥ Welcome to Motion ♥ ♥ ♥'
+const CLI_DELIMITER = `${chalk.blue('motion')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
+const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥')} ${chalk.yellow('Welcome to Motion')} ${chalk.red('♥ ♥ ♥')}`
 
 export class CLI {
   active: boolean;
