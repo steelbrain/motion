@@ -79,12 +79,7 @@ export async function run(options) {
     await scripts()
     Cache.serialize() // write out cache
     await bundler.all()
-<<<<<<< 608fc6d9d559eb39c752104c5b80e43ecdbb205b
-    if (options.watch) await builder.build()
-    keys.init()
-=======
     if (opts.watch) await builder.build()
->>>>>>> :fire: Remove  initialization in startup
   }
   catch(e) {
     handleError(e)
