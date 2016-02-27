@@ -1,3 +1,4 @@
+import path from 'path'
 import state, { resetProgramState } from '../state'
 import { t, options, relativePath } from '../lib/helpers'
 
@@ -5,6 +6,7 @@ export default {
   enter(node, parent, scope, file) {
     options.onStart && options.onStart()
     resetProgramState()
+    state.file.name = path.relative(options.basePath, file.opts.filename)
     state.file.meta.file = file.opts.filename
   },
 
@@ -29,6 +31,6 @@ export default {
       )]
     }
 
-    options.onFinish && options.onFinish(state.file.meta)
+    options.onFinish && options.onFinish(state.file)
   }
 }

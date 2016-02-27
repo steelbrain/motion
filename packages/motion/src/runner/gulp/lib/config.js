@@ -38,22 +38,7 @@ function getPlugin(onInfo) {
 }
 
 function fileConf({ firstRun, onInfo = id }) {
-  let info
-
-  const onImports = (imports : string) => info.imports.push(imports)
-  const onExports = (exports : string) => info.isExported = true
-  const onCold = (val : boolean) => info.isCold = val
-
-  const onStart = () => {
-    console.log('start')
-    info = {
-      imports: [],
-      isCold: false,
-      isExported: false
-    }
-  }
-
-  const onFinish = () => onInfo(info)
+  const onFinish = info => onInfo(info)
 
   return {
     basePath: opts('appDir'),
@@ -64,11 +49,7 @@ function fileConf({ firstRun, onInfo = id }) {
     log,
     onMeta,
     writeStyle,
-    onStart,
     onFinish,
-    onImports,
-    onExports,
-    onCold,
     firstRun
   }
 }

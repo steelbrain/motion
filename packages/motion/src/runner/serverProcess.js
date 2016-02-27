@@ -61,7 +61,7 @@ async function getScripts({ disableTools }) {
   </script>
 `,
       '<script src="/__/externals.js" id="__motionExternals"></script>',
-      '<script src="/__/internals.js" id="__motionInternals"></script>',
+      '<script src="/__/app.js" id="__motionInternals"></script>',
       '<script>Motion.start()</script>',
       '<!-- END APP -->'
     ].join(newLine)

@@ -5,12 +5,12 @@ import opts from '../opts'
 import { log, logError, emitter, readFile } from '../lib/fns'
 
 export default function webpacker({ name, config, onFinish }) {
-  return new Promise(async (res, rej) => {
+  return new Promise((res, rej) => {
     const compiler = webpack(webpackConfig(`${name}.js`, config))
     const watching = opts('watching')
 
     // continue if watching
-    if (watching) res()
+    // if (watching) res()
 
     const run = watching ?
       compiler.watch.bind(compiler, {}) :

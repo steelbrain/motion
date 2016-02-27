@@ -1,6 +1,5 @@
 import state from '../state'
 
-export default (node, parent, scope, file) => {
-  console.log(node)
-  // state.file.imports.push(node)
+export default (node) => {
+  state.file.imports.push(node.source.value)
 }

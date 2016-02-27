@@ -7,6 +7,7 @@ import JSXAttribute from './nodes/JSXAttribute'
 import ArrowFunctionExpression from './nodes/ArrowFunctionExpression'
 import ReturnStatement from './nodes/ReturnStatement'
 import ExportDeclaration from './nodes/ExportDeclaration'
+import ImportDeclaration from './nodes/ImportDeclaration'
 import CallExpression from './nodes/CallExpression'
 import VariableDeclaration from './nodes/VariableDeclaration'
 import AssignmentExpression from './nodes/AssignmentExpression'
@@ -29,6 +30,7 @@ export default function createPlugin(options) {
       visitor: {
         Program,
         ExportDeclaration,
+        ImportDeclaration,
         Statement,
         JSXElement,
         JSXAttribute,
