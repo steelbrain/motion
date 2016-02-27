@@ -2,6 +2,7 @@
 
 /* @flow */
 
+import { inspect } from 'util'
 import {CompositeDisposable, Emitter, Disposable} from 'sb-event-kit'
 import vorpal from 'vorpal'
 
@@ -37,6 +38,20 @@ export class CLI {
         keepRunning()
       }
     })
+  }
+  log() {
+    let contents = []
+    for (let i = 0; i < arguments.length; ++i) {
+      const value = arguments[i]
+      if (value === null) {
+        contents.push('null')
+      } else if (typeof value === 'string') {
+        contents.push(value)
+      } else [
+        contents.push(inspect(value))
+      ]
+    }
+    this.instance.log(contents.join(' '))
   }
   dispose() {
     if (this.active) {
