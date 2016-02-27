@@ -8,27 +8,22 @@ import opts from '../opts'
 import { _, path, log } from '../lib/fns'
 import getMatches from '../lib/getMatches'
 
+const babelRuntimeRegex =
+  /require\(\'(babel-runtime[a-z-A-Z0-9\/]*)\'\)/g
+const babelRuntimeRequire = src =>
+  getMatches(src, babelRuntimeRegex, 1)
+
 export function file(opts) {
-  return babelStream({
+  return gulpStream({
     transformer: motionFile,
     opts
   })
 }
 
 export function app(opts) {
-  return babelStream({
+  return gulpStream({
     transformer: motionApp,
     opts
-  })
-}
-
-export default { file, app }
-
-function babelOpts(file, opts) {
-  return Object.assign({}, opts, {
-    filename: file.path,
-    filenameRelative: file.relative,
-    sourceMap: Boolean(file.sourceMap)
   })
 }
 
@@ -39,12 +34,6 @@ function motionApp(file) {
   )
   return { res, file }
 }
-
-const babelRuntimeRegex =
-  /require\(\'(babel-runtime[a-z-A-Z0-9\/]*)\'\)/g
-
-const babelRuntimeRequire = src =>
-  getMatches(src, babelRuntimeRegex, 1)
 
 export function motionFile(file) {
   let meta
@@ -58,7 +47,7 @@ export function motionFile(file) {
   return { res, meta }
 }
 
-function babelStream({ transformer }) {
+function gulpStream({ transformer }) {
   return through.obj(function(file, enc, cb) {
     if (file.isNull() || path.extname(file.path) == '.json') {
       file.babel = {}
@@ -90,3 +79,14 @@ function babelStream({ transformer }) {
     cb()
   })
 }
+
+function babelOpts(file, opts) {
+  return Object.assign({}, opts, {
+    filename: file.path,
+    filenameRelative: file.relative,
+    sourceMap: Boolean(file.sourceMap)
+  })
+}
+
+
+export default { file, app }

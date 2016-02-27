@@ -1,6 +1,7 @@
 import { _, path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
+import extend from 'deep-extend'
 
 let runnerRoot = path.resolve(path.join(__dirname, '..', '..', '..', '..'))
 let runnerModules = path.join(runnerRoot, 'node_modules')
@@ -9,7 +10,7 @@ let runnerModules = path.join(runnerRoot, 'node_modules')
 let fileStyleFolder = 'file?name=assets/styles/[name]-[hash].css'
 
 export default function webpackConfig(filename, config = {}) {
-  const conf = _.merge({
+  let result = extend({
     context: runnerRoot,
     debug: opts('debug'),
     output: {
@@ -66,7 +67,5 @@ export default function webpackConfig(filename, config = {}) {
     }
   }, config)
 
-  console.log(conf.module.loaders)
-
-  return conf
+  return result
 }

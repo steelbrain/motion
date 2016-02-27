@@ -28,6 +28,7 @@
     "commander": "2.9.0",
     "cors": "2.7.1",
     "css-loader": "0.23.1",
+    "deep-extend": "^0.4.1",
     "disposable-event": "^1.0.0",
     "express": "4.12.3",
     "file-loader": "0.8.5",

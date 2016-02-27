@@ -2,19 +2,20 @@ import MotionTransform from 'motion-transform'
 import { isProduction } from './helpers'
 import opts from '../../opts'
 import onMeta from './onMeta'
+import extend from 'deep-extend'
 import { _, p, log } from '../../lib/fns'
 import writeStyle from '../../lib/writeStyle'
 
 const id = () => {}
-
-export function file(onInfo) {
-  const plugin = getPlugin(onInfo)
-  return babelConf({ plugins: [plugin] })
-}
-
 let isRunning = false
 let plugin = null
 let onInfoCb = null
+
+export function file(onInfo) {
+  const plugin = getPlugin(onInfo)
+  const config = babelConf({ plugins: [plugin] })
+  return config
+}
 
 function getPlugin(onInfo) {
   // update info cb per-call
@@ -25,11 +26,12 @@ function getPlugin(onInfo) {
   if (!plugin || !isRunning) {
     if (opts('hasRunInitialBuild')) isRunning = true
 
-    console.log('setting oninfo', onInfo && onInfo.toString())
-    plugin = MotionTransform.file(fileConf({
+    const conf = fileConf({
       firstRun: !isRunning,
       onInfo
-    }))
+    })
+
+    plugin = MotionTransform.file(conf)
   }
 
   return plugin
@@ -43,7 +45,7 @@ function fileConf({ firstRun, onInfo = id }) {
   const onCold = (val : boolean) => info.isCold = val
 
   const onStart = () => {
-    console.log('start file')
+    console.log('start')
     info = {
       imports: [],
       isCold: false,
@@ -51,23 +53,7 @@ function fileConf({ firstRun, onInfo = id }) {
     }
   }
 
-  const onFinish = metadata => {
-    const { usedHelpers, modules: { imports } } = metadata
-    const importedHelpers = usedHelpers && usedHelpers.map(name => `babel-runtime/helpers/${name}`) || []
-    const importNames = imports.map(i => i.source)
-    const result = {
-      imports: _.uniq([].concat(
-        importNames,
-        (info.imports || []),
-        (importedHelpers || []),
-        babelRuntimeRequire(res.code)
-      )),
-      isExported: info.isExported,
-      isHot: !info.isCold
-    }
-
-    onInfo(result)
-  }
+  const onFinish = () => onInfo(info)
 
   return {
     basePath: opts('appDir'),
@@ -79,6 +65,7 @@ function fileConf({ firstRun, onInfo = id }) {
     onMeta,
     writeStyle,
     onStart,
+    onFinish,
     onImports,
     onExports,
     onCold,
@@ -97,8 +84,9 @@ export function app() {
   }
 }
 
-export function babelConf(_config) {
+export function babelConf({ plugins }) {
   const config = {
+    plugins,
     breakConfig: true, // avoid reading .babelrc
     jsxPragma: 'Motion.createElement',
     stage: 0,
@@ -108,14 +96,13 @@ export function babelConf(_config) {
     optional: ['regenerator', 'runtime'],
     extra: {
       production: isProduction()
-    },
-    ..._config
+    }
   }
 
   const userConf = opts('config').babel
 
   if (userConf)
-    return _.merge(config, userConf)
+    return extend(config, userConf)
   else
     return config
 }

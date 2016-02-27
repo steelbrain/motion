@@ -10,20 +10,19 @@ class Webpack {
     webpack({
       name: 'app',
       onFinish: stats => {
-        console.log('onstats')
-        console.log(info)
-        // stats)
+        // TODO send this over to gulp watchers
+        console.log(info, stats)
       },
       config: {
         context: process.cwd(),
         entry: './'+opts('config').entry,
         externals: userExternals(),
+        babel: config.file(_ => info = _),
         module: {
           loaders: [
             {
               test: /\.js$/,
               loader: 'babel',
-              query: config.file(_ => info = _)
             }
           ]
         }

@@ -23,13 +23,11 @@ export function init() {
 
 export function resetProgramState() {
   // TODO move the meta stuff directly into file
-  state.file = {}
-
-  // if file has a view
-  state.file.hasView = false
-
-  // if file has exports
-  state.file.hasExports = false
+  state.file = {
+    hasView: false,
+    hasExports: false,
+    imports: []
+  }
 
   // meta-data for views for atom
   state.file.meta = {

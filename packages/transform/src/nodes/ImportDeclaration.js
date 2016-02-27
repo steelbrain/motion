@@ -1,5 +1,6 @@
 import state from '../state'
 
 export default (node, parent, scope, file) => {
-  // onImports
+  console.log(node)
+  // state.file.imports.push(node)
 }
