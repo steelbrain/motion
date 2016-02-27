@@ -5,9 +5,8 @@ import builder from './builder'
 import Webpack from './webpack'
 import opts from './opts'
 import disk from './disk'
-import Gulp from './gulp'
-import Cache from './cache'
-import keys from './keys'
+import gulp from './gulp'
+import cache from './cache'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
 import Editor from './editor'
@@ -80,8 +79,12 @@ export async function run(options) {
     await scripts()
     Cache.serialize() // write out cache
     await bundler.all()
+<<<<<<< 608fc6d9d559eb39c752104c5b80e43ecdbb205b
     if (options.watch) await builder.build()
     keys.init()
+=======
+    if (opts.watch) await builder.build()
+>>>>>>> :fire: Remove  initialization in startup
   }
   catch(e) {
     handleError(e)
