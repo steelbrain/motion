@@ -7,7 +7,9 @@ const validCommands = ['new', 'build', 'update', 'init']
 // TODO: Check for updates
 
 // Note: This is a trick to make multiple commander commands work with single executables
-process.argv = process.argv.slice(0, 2).concat(process.argv.slice(3))
+// In: [nodePath, 'motion', 'run', '--help']
+// Out: [nodePath, 'motion run', '--help']
+process.argv = [process.argv[0], [process.argv[1], process.argv[2]].join(' ').trim()].concat(process.argv.slice(3))
 
 let showHelp = command === '--help'
 
