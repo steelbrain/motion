@@ -18,6 +18,10 @@ global.print = console.log.bind(console)
 async function run(options) {
   const cli = new CLI()
   cli.activate()
+  // Make printing go to our shiny UI
+  global.print = function() {
+    cli.log(...arguments)
+  }
   await runStartup(options, cli)
 
   // Startup messages
