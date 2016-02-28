@@ -8,7 +8,7 @@ import vorpal from 'vorpal'
 import chalk from 'chalk'
 
 const CLI_DELIMITER = `${chalk.blue('motion')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
-const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥')} ${chalk.yellow('Welcome to Motion')} ${chalk.red('♥ ♥ ♥')}`
+const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')} ${chalk.yellow('Welcome to Motion')} ${chalk.red('♥ ♥ ♥ ♥ ♥')}`
 
 export class CLI {
   active: boolean;
