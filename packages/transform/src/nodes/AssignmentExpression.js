@@ -15,7 +15,7 @@ export default {
     // if (!isStyle) return
     //
     // if (state.currentView) {
-    //   const viewMeta = state.file.meta.views[state.currentView]
+    //   const viewMeta = state.file.views[state.currentView]
     //   const cleanName = node.left.name.substr(1)
     //   viewMeta.styles[cleanName] = { location: normalizeLocation(node.loc) }
     // }

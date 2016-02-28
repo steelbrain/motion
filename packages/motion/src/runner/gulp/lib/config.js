@@ -21,8 +21,7 @@ function getPlugin(onInfo) {
   // update info cb per-call
   onInfoCb = onInfo
 
-  // dont update plugin per-call
-  // (once on startup, once after initial build)
+  // dont update plugin per-call (once on startup, once after initial build)
   if (!plugin || !isRunning) {
     if (opts('hasRunInitialBuild')) isRunning = true
 
@@ -31,6 +30,7 @@ function getPlugin(onInfo) {
       onInfo
     })
 
+    // cached
     plugin = MotionTransform.file(conf)
   }
 
@@ -38,7 +38,9 @@ function getPlugin(onInfo) {
 }
 
 function fileConf({ firstRun, onInfo = id }) {
-  const onFinish = info => onInfo(info)
+  const onFinish = info => {
+    onInfo(info)
+  }
 
   return {
     basePath: opts('appDir'),

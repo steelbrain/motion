@@ -7,17 +7,20 @@ export default {
     options.onStart && options.onStart()
     resetProgramState()
     state.file.name = path.relative(options.basePath, file.opts.filename)
-    state.file.meta.file = file.opts.filename
+    state.file.file = file.opts.filename
   },
 
   exit(node, parent, scope, file) {
+    if (file.motionHasParsedProgram) return
+    file.motionHasParsedProgram = true
+
     if (options.onMeta) {
-      options.onMeta(state.file.meta)
+      options.onMeta(state.file)
     }
 
     const location = relativePath(file.opts.filename)
 
-    if (!options.firstRun && state.file.meta.isHot) {
+    if (!options.firstRun && state.file.isHot) {
       // function(){ Motion.file('${location}',function(require, exports){ ${contents}\n  })\n}()
       node.body = [t.expressionStatement(
         // closure

@@ -10,7 +10,7 @@ export default {
   exit(node) {
     // wrap entry file export to grab view
     // also, it should never not be hot (its the entry)
-    if (options.entry == state.file.meta.file) {
+    if (options.entry == state.file.file) {
       node.declaration = t.callExpression(
         t.identifier('Motion.entry'), [node.declaration]
       )
@@ -24,9 +24,9 @@ export default {
     if (declarations) {
       const exported = declarations[0].init
 
-      if (state.file.meta.isHot && !exported.isMotionHot) {
+      if (state.file.isHot && !exported.isMotionHot) {
         options.onCold && options.onCold(true)
-        state.file.meta.isHot = false
+        state.file.isHot = false
       }
     }
   }

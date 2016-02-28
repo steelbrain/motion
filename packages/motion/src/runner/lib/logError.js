@@ -23,7 +23,7 @@ export default function logError(error, file) {
     print('  line: %s, col: %s', error.loc.line, error.loc.column)
 
   error.stack = error.stack || error.codeFrame || ''
-  error.stack = error.stack.split("\n").slice(0, 9).join("\n")
+  error.stack = error.stack.split("\n").slice(0, 14).join("\n")
 
   if (error.stack)
     print(error.stack)

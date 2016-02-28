@@ -37,8 +37,8 @@ export default {
       let arr = [t.literal(name), t.literal(key)]
 
       // track meta
-      if (state.file.meta.views[state.currentView]) {
-        state.file.meta.views[state.currentView].els[name] = {
+      if (state.file.views[state.currentView]) {
+        state.file.views[state.currentView].els[name] = {
           location: normalizeLocation(el.loc), key
         }
       }

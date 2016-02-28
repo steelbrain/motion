@@ -7,10 +7,6 @@
   "main": "index.js",
   "scripts": {},
   "dependencies": {
-    "ellipsize": "0.0.2",
-    "keycode": "^2.1.0",
-    "lodash": "^4.4.0",
-    "md5-o-matic": "^0.1.1",
-    "mouse-event-offset": "^3.0.2"
+    "keycode": "^2.1.0"
   }
 }

@@ -22,19 +22,14 @@ export function init() {
 }
 
 export function resetProgramState() {
-  // TODO move the meta stuff directly into file
   state.file = {
+    name: null,
+    file: null,
+    views: {},
+    isHot: true,
     hasView: false,
     hasExports: false,
     imports: []
-  }
-
-  // meta-data for views for atom
-  state.file.meta = {
-    file: null,
-    views: {},
-    // track if file is can be really hot reloaded
-    isHot: true
   }
 }
 

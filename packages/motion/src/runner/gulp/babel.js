@@ -27,28 +27,30 @@ export function app(opts) {
   })
 }
 
-function motionApp(file) {
+function motionApp(file, cb) {
   let res = transform(
     file.contents.toString(),
     babelOpts(file, config.app())
   )
-  return { res, file }
+
+  cb({ res })
 }
 
-export function motionFile(file) {
-  let meta
-
+export function motionFile(file, cb) {
   let res = transform(
     file.contents.toString(),
-    babelOpts(file, config.file(_ => meta = _))
+    babelOpts(file, config.file(meta => {
+      log.gulp('meta', meta)
+      setTimeout(() =>
+        cb({ res, meta })
+      )
+    }))
   )
-
-  log.gulp('meta', meta)
-  return { res, meta }
 }
 
 function gulpStream({ transformer }) {
   return through.obj(function(file, enc, cb) {
+
     if (file.isNull() || path.extname(file.path) == '.json') {
       file.babel = {}
       cb(null, file)
@@ -56,27 +58,33 @@ function gulpStream({ transformer }) {
     }
 
     try {
-      const { meta, res } = transformer(file)
+      let hasCalledBack = false
 
-      file.babel = meta
+      transformer(file, ({ res, meta }) => {
+        if (hasCalledBack) return
 
-      if (file.sourceMap && res.map) {
-        res.map.file = replaceExt(res.map.file, '.js')
-        applySourceMap(file, res.map)
-      }
+        file.babel = meta
 
-      file.contents = new Buffer(res.code)
-      file.path = replaceExt(file.path, '.js')
-      this.push(file)
+        if (file.sourceMap && res.map) {
+          res.map.file = replaceExt(res.map.file, '.js')
+          applySourceMap(file, res.map)
+        }
+
+        file.contents = new Buffer(res.code)
+        file.path = replaceExt(file.path, '.js')
+        this.push(file)
+        hasCalledBack = true
+        cb()
+      })
     }
     catch(err) {
       this.emit('error', new gutil.PluginError('gulp-babel', err, {
         fileName: file.path,
         showProperties: false
       }))
-    }
 
-    cb()
+      cb()
+    }
   })
 }
 
