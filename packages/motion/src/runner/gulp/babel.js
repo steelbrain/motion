@@ -13,39 +13,50 @@ const babelRuntimeRegex =
 const babelRuntimeRequire = src =>
   getMatches(src, babelRuntimeRegex, 1)
 
+function options(file) {
+  return {
+    filename: file.path,
+    filenameRelative: file.relative,
+    sourceMap: Boolean(file.sourceMap)
+  }
+}
+
 export function file(opts) {
   return gulpStream({
-    transformer: motionFile,
+    transformer: (file, cb) => {
+      let sent = false
+      const res = transform(file.contents.toString(), {
+        ...options(file),
+        ...config.file(meta => {
+          // patch because idk why but babel hits Program.exit() twice
+          if (sent) return
+          sent = true
+
+          log.gulp('meta', meta)
+
+          // settimeout (transform is sync)
+          setTimeout(() =>
+            cb({ res, meta })
+          )
+        })
+      })
+    },
     opts
   })
 }
 
 export function app(opts) {
   return gulpStream({
-    transformer: motionApp,
-    opts
+    opts,
+    transformer: (file, cb) => {
+      let res = transform(file.contents.toString(), {
+        ...options(file),
+        ...config.app()
+      })
+
+      cb({ res })
+    }
   })
-}
-
-function motionApp(file, cb) {
-  let res = transform(
-    file.contents.toString(),
-    babelOpts(file, config.app())
-  )
-
-  cb({ res })
-}
-
-export function motionFile(file, cb) {
-  let res = transform(
-    file.contents.toString(),
-    babelOpts(file, config.file(meta => {
-      log.gulp('meta', meta)
-      setTimeout(() =>
-        cb({ res, meta })
-      )
-    }))
-  )
 }
 
 function gulpStream({ transformer }) {
@@ -58,11 +69,7 @@ function gulpStream({ transformer }) {
     }
 
     try {
-      let hasCalledBack = false
-
       transformer(file, ({ res, meta }) => {
-        if (hasCalledBack) return
-
         file.babel = meta
 
         if (file.sourceMap && res.map) {
@@ -73,7 +80,6 @@ function gulpStream({ transformer }) {
         file.contents = new Buffer(res.code)
         file.path = replaceExt(file.path, '.js')
         this.push(file)
-        hasCalledBack = true
         cb()
       })
     }
@@ -87,14 +93,5 @@ function gulpStream({ transformer }) {
     }
   })
 }
-
-function babelOpts(file, opts) {
-  return Object.assign({}, opts, {
-    filename: file.path,
-    filenameRelative: file.relative,
-    sourceMap: Boolean(file.sourceMap)
-  })
-}
-
 
 export default { file, app }

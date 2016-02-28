@@ -15,10 +15,11 @@ import ClassDeclaration from './nodes/ClassDeclaration'
 
 export default function createPlugin(options) {
   // running without options
-  if (options.Transformer) return MotionPlugin(options)
+  if (options.Transformer)
+    return MotionPlugin(options)
 
   // plugin
-  function MotionPlugin({ Plugin, types: t }) {
+  return function MotionPlugin({ Plugin, types: t }) {
 
     // init
     init()
@@ -43,6 +44,4 @@ export default function createPlugin(options) {
       }
     })
   }
-
-  return MotionPlugin
 }

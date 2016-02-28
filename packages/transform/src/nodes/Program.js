@@ -11,9 +11,6 @@ export default {
   },
 
   exit(node, parent, scope, file) {
-    if (file.motionHasParsedProgram) return
-    file.motionHasParsedProgram = true
-
     if (options.onMeta) {
       options.onMeta(state.file)
     }

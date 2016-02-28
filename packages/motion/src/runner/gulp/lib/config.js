@@ -7,41 +7,62 @@ import { _, p, log } from '../../lib/fns'
 import writeStyle from '../../lib/writeStyle'
 
 const id = () => {}
-let isRunning = false
+let hasSetupAfterRun = false
 let plugin = null
-let onInfoCb = null
+let onFinishCb = null
 
-export function file(onInfo) {
-  const plugin = getPlugin(onInfo)
-  const config = babelConf({ plugins: [plugin] })
+function babelConfig() {
+  return {
+    breakConfig: true, // avoid reading .babelrc
+    jsxPragma: 'Motion.createElement',
+    stage: 0,
+    blacklist: ['es6.tailCall'],
+    retainLines: opts('config').pretty ? false : true,
+    comments: true,
+    optional: ['regenerator', 'runtime'],
+    extra: {
+      production: isProduction()
+    },
+    ...(opts('config').babel || {})
+  }
+}
+
+export function file(onFinish) {
+  let config = babelConfig()
+
+  config.plugins = config.plugins || []
+  config.plugins.push(motionFilePlugin(onFinish))
+
   return config
 }
 
-function getPlugin(onInfo) {
+function motionFilePlugin(onFinish) {
   // update info cb per-call
-  onInfoCb = onInfo
+  onFinishCb = onFinish
 
-  // dont update plugin per-call (once on startup, once after initial build)
-  if (!plugin || !isRunning) {
-    if (opts('hasRunInitialBuild')) isRunning = true
+  // only instantiate plugin as needed
 
-    const conf = fileConf({
-      firstRun: !isRunning,
-      onInfo
+  // on init
+  plugin = plugin || MotionTransform.file({
+    ...fileConf(),
+    firstRun: true,
+    onFinish: _ => onFinishCb(_)
+  })
+
+  // on watch (hot reloads)
+  if (opts('hasRunInitialBuild') && !hasSetupAfterRun) {
+    hasSetupAfterRun = true
+    plugin = MotionTransform.file({
+      ...fileConf(),
+      firstRun: false,
+      onFinish: _ => onFinishCb(_)
     })
-
-    // cached
-    plugin = MotionTransform.file(conf)
   }
 
   return plugin
 }
 
-function fileConf({ firstRun, onInfo = id }) {
-  const onFinish = info => {
-    onInfo(info)
-  }
-
+function fileConf() {
   return {
     basePath: opts('appDir'),
     production: isProduction(),
@@ -50,9 +71,7 @@ function fileConf({ firstRun, onInfo = id }) {
     entry: p(opts('appDir'), opts('config').entry),
     log,
     onMeta,
-    writeStyle,
-    onFinish,
-    firstRun
+    writeStyle
   }
 }
 
@@ -66,30 +85,6 @@ export function app() {
     extra: { production: isProduction() }
   }
 }
-
-export function babelConf({ plugins }) {
-  const config = {
-    plugins,
-    breakConfig: true, // avoid reading .babelrc
-    jsxPragma: 'Motion.createElement',
-    stage: 0,
-    blacklist: ['es6.tailCall'],
-    retainLines: opts('config').pretty ? false : true,
-    comments: true,
-    optional: ['regenerator', 'runtime'],
-    extra: {
-      production: isProduction()
-    }
-  }
-
-  const userConf = opts('config').babel
-
-  if (userConf)
-    return extend(config, userConf)
-  else
-    return config
-}
-
 
 export default {
   app,
