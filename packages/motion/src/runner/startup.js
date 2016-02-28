@@ -40,7 +40,6 @@ export async function startup(options = {}) {
 async function scripts(opts) {
   const webpack = new Webpack()
   let { files, info } = await webpack.bundleApp()
-  console.log('files', files, 'info', info)
   // TODO put in cache and use in gulp scripts pipeline + ignoreInitial
 
   await gulp.init(opts)
