@@ -63,11 +63,7 @@
     "replace": "0.3.0",
     "replace-ext": "0.0.1",
     "sb-event-kit": "1.0.3",
-<<<<<<< e8e29cf10d91008edaae274b439298736fa30701
     "sb-exec": "^1.0.1",
-=======
-    "sb-exec": "^1.0.0",
->>>>>>> :new: Add sb-exec as a dependency
     "sb-promisify": "1.1.0",
     "sb-string_score": "0.1.20",
     "semver": "5.1.0",

@@ -1,7 +1,6 @@
 'use strict'
 
-import FS from 'fs'
-import promisify from 'sb-promisify'
+import Path from 'path'
 import open from 'open'
 import chalk from 'chalk'
 import { exec } from 'sb-exec'
@@ -9,14 +8,14 @@ import { CLI } from './cli'
 import { run as runStartup, build } from './startup'
 import server from './server'
 import builder from './builder'
-
-const realPath = promisify(FS.realpath)
+import { realPath, exists, readFile } from './lib/fs'
+import { get as getOption } from './opts'
 
 // print - so we can easily weed out console.logs
 global.print = console.log.bind(console)
 
 async function run(options) {
-  const showUI = proc.stdin.isTTY
+  const showUI = process.stdin.isTTY
   let cli
 
   if (showUI) {
@@ -40,6 +39,19 @@ async function run(options) {
     cli.addCommand('build', 'Build dist files of your motion app', async function() {
       await builder.build()
     })
+
+    const manifestPath = Path.join(getOption('appDir'), 'package.json')
+    const manifestExists = await exists(manifestPath)
+    if (manifestExists) {
+      const manifestContents = JSON.parse((await readFile(manifestPath)))
+      if (manifestContents.scripts && typeof manifestContents.scripts)
+      for (const name in manifestContents.scripts) {
+        const command = manifestContents.scripts[name]
+        cli.addCommand(`run-${name.replace(/ /g, '-')}`, 'Execute the npm script', async function() {
+          await exec(process.env.SHELL, ['-c', command], { stream: 'both', 'stdio': 'inherit' })
+        })
+      }
+    }
   } else {
     await runStartup(options, cli)
   }
