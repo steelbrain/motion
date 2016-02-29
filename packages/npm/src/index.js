@@ -4,7 +4,7 @@
 
 import path from 'path'
 import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
-import exec from 'sb-exec'
+import { exec } from 'sb-exec'
 import semver from 'semver'
 
 export default class Install {
@@ -17,14 +17,14 @@ export default class Install {
   }
 
   async save(name) {
-    await exec(`npm install --save ${name}`)
+    await exec('npm', ['install', '--save', name])
     await this.installPeerDeps(name)
   }
 
   // npm uninstall --save 'name'
   async unsave(name) {
     try {
-      await exec(`npm uninstall --save ${name}`)
+      await exec('npm', ['uninstall', '--save', name])
     }
     catch(e) {
       // manual uninstall
@@ -81,7 +81,7 @@ export default class Install {
 
         await Promise.all(
           peersFull.map(full =>
-            exec(`npm install --save ${full}`, this.options.where)
+            exec('npm', ['install', '--save', full, this.options.where])
           )
         )
 
