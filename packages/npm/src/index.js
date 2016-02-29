@@ -1,3 +1,7 @@
+'use strict'
+
+/* @flow */
+
 import path from 'path'
 import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
 import exec from 'sb-exec'
