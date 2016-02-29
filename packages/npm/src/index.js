@@ -7,7 +7,7 @@ import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
 import { exec } from 'sb-exec'
 import semver from 'semver'
 
-export default class Install {
+class Install {
   constructor(options) {
     this.options = {
       where: __dirname,
@@ -95,3 +95,5 @@ export default class Install {
     return path.join(this.options.where, name, 'package.json')
   }
 }
+
+module.exports = Install
