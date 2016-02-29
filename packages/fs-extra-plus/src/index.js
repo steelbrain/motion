@@ -1,25 +1,13 @@
-import _promisify from 'sb-promisify'
-import lodash from 'lodash'
 import _glob from 'globby'
 import readdirp from 'readdirp'
 import _path from 'path'
 import _replace from 'replace'
 import fse from 'fs-extra'
-import _log from './log'
-import _handleError from './handleError'
-import _logError from './logError'
-import { Emitter } from 'sb-event-kit'
 
 // helpers
 export const replace = _replace
-export const log = _log
-export const logError = _logError
-export const handleError = _handleError
-export const promisify = _promisify
-export const emitter = new Emitter()
 export const path = _path
 export const p = _path.join
-export const _ = lodash
 
 // files
 export const fs = fse
@@ -52,20 +40,4 @@ export const recreateDir = (dir) =>
 export async function globCopy(pattern, dest, opts = {}) {
   const srcs = await glob(pattern, { dot: false, nodir: true, ...opts })
   await Promise.all(srcs.map(f => _copy(p(opts.cwd || '', f), p(dest, f))))
-}
-
-export function sanitize(str) {
-  return str.replace(/[^a-zA-Z]/, '')
-}
-
-export function vinyl(basePath, path, contents) {
-  const cwd = '/'
-  const base = basePath + '/'
-  return { cwd, base, path, contents }
-}
-
-let debouncers = {}
-export function debounce(key, time, cb) {
-  if (debouncers[key]) clearTimeout(debouncers[key])
-  debouncers[key] = setTimeout(cb, time)
 }

@@ -2,10 +2,14 @@
   "name": "motion-npm-install",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Motion <natewienert@gmail.com> (motion.io)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "sb-exec": "^1.0.1",
+    "semver": "^5.1.0"
+  }
 }
