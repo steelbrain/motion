@@ -151,7 +151,7 @@ async function setupCliOpts(cli) {
 function setupDirs() {
   // base dirs
   OPTS.motionDir = p(OPTS.appDir, '.motion')
-  OPTS.modulesDir = p(OPTS.motionDir, 'node_modules')
+  OPTS.modulesDir = p(OPTS.appDir, 'node_modules')
   OPTS.internalDir = p(OPTS.motionDir, '.internal')
   OPTS.template = OPTS.template || '.motion/index.html'
   OPTS.buildDir = OPTS.out ? p(OPTS.out) : p(OPTS.motionDir, 'build')

@@ -37,19 +37,20 @@ export async function startup(options = {}) {
   watchDeletes()
 }
 
-async function scripts(opts) {
+async function scripts(options) {
   const webpack = new Webpack()
   let { files, info } = await webpack.bundleApp()
   // TODO put in cache and use in gulp scripts pipeline + ignoreInitial
+  console.log(files, info)
 
-  await gulp.init(opts)
+  await gulp.init({ options, files })
   await gulp.afterBuild()
 }
 
-export async function build(opts = {}) {
+export async function build(options = {}) {
   try {
     if (!started)
-      await startup({ ...opts, build: true })
+      await startup({ ...options, build: true })
 
     await Promise.all([
       bundler.remakeInstallDir(),
@@ -57,11 +58,11 @@ export async function build(opts = {}) {
     ])
     await Promise.all([
       gulp.assets(),
-      scripts({ once: opts.once })
+      scripts({ once: options.once })
     ])
     await bundler.all()
     await builder.build()
-    if (opts.once) return
+    if (options.once) return
     print()
     process.exit()
   }
@@ -70,17 +71,17 @@ export async function build(opts = {}) {
   }
 }
 
-export async function run(opts) {
+export async function run(options) {
   try {
-    await startup(opts)
-    if (opts.watch) gulp.assets()
+    await startup(options)
+    if (options.watch) gulp.assets()
     await server.run()
     await activateBridge()
     activateEditor(bridge)
     await scripts()
     cache.serialize() // write out cache
     await bundler.all()
-    if (opts.watch) await builder.build()
+    if (options.watch) await builder.build()
     keys.init()
   }
   catch(e) {

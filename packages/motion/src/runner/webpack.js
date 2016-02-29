@@ -12,36 +12,41 @@ class Webpack {
 
   pack() {
     return new Promise(async (res, rej) => {
-      let files = []
-      let allInfo = []
+      try {
+        let files = []
+        let allInfo = []
 
-      await webpack({
-        name: 'app',
-        onFinish: stats => {
-          files = stats.modules.map(file => file.name).filter(name => name.indexOf('./') == 0)
-        },
-        // TODO on error
-        config: {
-          context: process.cwd(),
-          entry: './'+opts('config').entry,
-          externals: userExternals(),
-          babel: config.file(fileInfo => {
-            allInfo.push(fileInfo)
-          }),
-          module: {
-            loaders: [
-              {
-                test: /\.js$/,
-                loader: 'babel',
-              }
-            ]
+        await webpack({
+          name: 'app',
+          onFinish: stats => {
+            files = stats.modules.map(file => file.name).filter(name => name.indexOf('./') == 0)
+          },
+          // TODO on error
+          config: {
+            context: process.cwd(),
+            entry: './'+opts('config').entry,
+            externals: userExternals(),
+            babel: config.file(fileInfo => {
+              allInfo.push(fileInfo)
+            }),
+            module: {
+              loaders: [
+                {
+                  test: /\.js$/,
+                  loader: 'babel',
+                }
+              ]
+            }
           }
-        }
-      })
+        })
 
-      let info = files.map(file => allInfo.filter(i => './' + i.name == file))
+        let info = _.flatten(files.map(file => allInfo.filter(i => './' + i.name == file)))
 
-      res({ files, info })
+        res({ files, info })
+      }
+      catch(e) {
+        rej(e)
+      }
     })
   }
 }

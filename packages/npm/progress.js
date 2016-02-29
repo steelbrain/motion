@@ -1,11 +1,13 @@
 import exec from 'sb-exec'
-import { Spinner } from '../../../shared/console'
-import opts from '../../opts'
-import { p, log, handleError } from '../../lib/fns'
+import { p, log, handleError } from 'motion-fs-extra-plus'
+
+// TODO: spinner -> event, opts passed in
+// import { Spinner } from '../../../shared/console'
+// import opts from '../../opts'
 
 const LOG = 'externals'
 
-export default async function progress(label, cmd, name, index, total) {
+export default async function progress({ label, cmd, name, index, total, options }) {
   let spinner
 
   try {
