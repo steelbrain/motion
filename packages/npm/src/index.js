@@ -18,7 +18,7 @@ export default class Install {
   }
 
   // npm uninstall --save 'name'
-  async function unsave(name) {
+  async unsave(name) {
     try {
       await exec(`npm uninstall --save ${name}`)
     }
