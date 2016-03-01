@@ -9,15 +9,15 @@ import { exec } from 'sb-exec'
 import semver from 'semver'
 import { versionFromRange, manifestPath } from './helpers'
 
-type Install$Options = {
+type Installer$Options = {
   rootDirectory: string,
   filter: Function
 }
 
 class Installer {
-  options: Install$Options;
+  options: Installer$Options;
 
-  constructor({rootDirectory, filter}: Install$Options) {
+  constructor({rootDirectory, filter}: Installer$Options) {
     invariant(typeof rootDirectory === 'string', 'rootDirectory must be a string')
     invariant(!filter || typeof filter === 'function', 'filter must be a function')
 
