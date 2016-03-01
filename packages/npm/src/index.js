@@ -42,7 +42,7 @@ class Installer {
 
     if (peerDependencies && typeof peerDependencies === 'object') {
       let dependencies = Object.keys(peerDependencies)
-      if (this.options.validate) {
+      if (this.options.filter) {
         dependencies = this.options.filter(dependencies)
       }
       const versions = dependencies.map(function(name) {
