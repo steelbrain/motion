@@ -2,98 +2,89 @@
 
 /* @flow */
 
-import path from 'path'
-import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
+import Path from 'path'
+import invariant from 'assert'
+import { exists, readJSON, handleError, rm } from 'motion-fs-extra-plus'
 import { exec } from 'sb-exec'
 import semver from 'semver'
+import { versionFromRange } from './helpers'
 
-class Install {
-  constructor(options) {
-    this.options = {
-      where: __dirname,
-      filter: i => i,
-      ...options
-    }
+type Install$Options = {
+  rootDirectory: string,
+  filter: Function
+}
+
+class Installer {
+  options: Install$Options;
+
+  constructor({rootDirectory, filter}: Install$Options) {
+    invariant(typeof rootDirectory === 'string', 'rootDirectory must be a string')
+    invariant(!filter || typeof filter === 'function', 'filter must be a function')
+
+    this.options = { rootDirectory, filter }
   }
-
-  async save(name) {
-    await exec('npm', ['install', '--save', name])
-    await this.installPeerDeps(name)
+  async install(name: string): Promise<void> {
+    await exec('npm', ['install', '--save', name], { cwd: this.options.rootDirectory })
   }
-
-  // npm uninstall --save 'name'
-  async unsave(name) {
-    try {
-      await exec('npm', ['uninstall', '--save', name])
-    }
-    catch(e) {
-      // manual uninstall
-      await rm(path.join(this.options.where, name))
-
-
-      // TODO need to write to packagejson to remove
-      // await disk.packageJSON.write((current, write) => {
-      //   delete current.dependencies[name]
-      //   write(current)
-      // })
-    }
+  async uninstall(name: string): Promise<void> {
+    await exec('npm', ['uninstall', '--save', name], { cwd: this.options.rootDirectory })
   }
+  async installPeerDependencies(
+    name: string,
+    onStarted?: ((packages: Array<Array<string>>) => void),
+    onProgress?: ((packageName: string, error: ?Error) => void),
+    onComplete?: (() => void)
+  ): Promise<void> {
+    const rootDirectory = this.options.rootDirectory
+    const manifestPath = Installer.manifestPath(rootDirectory, name)
+    const manifestContents = await readJSON(manifestPath)
+    const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 
-  splitVersions(range) {
-    const found = range.match(/[0-9\.]+/g)
-    return found.length ? found : range
-  }
+    if (peerDependencies && typeof peerDependencies === 'object') {
+      let dependencies = Object.keys(peerDependencies)
+      if (this.options.validate) {
+        dependencies = this.options.filter(dependencies)
+      }
+      const versions = dependencies.map(function(name) {
+        const range = peerDependencies[name]
+        const version = semver.maxSatisfying(versionFromRange(range), range)
+        return [name, version]
+      })
 
-  latestVersion(name, range) {
-    try {
-      return semver.maxSatisfying(this.splitVersions(range), range)
-    }
-    catch(e) {
-      const simpleFindVer = range.replace(/[^0-9\. ]+/g, '').split(' ')[0]
+      if (onStarted) {
+        onStarted(versions)
+      }
 
-      print(`  Error in semver of package ${name} ${e.message}`.yellow)
-      print("  Attempting ", simpleFindVer)
+      await Promise.all(versions.map(async function([name, version]) {
+        try {
+          await exec('npm', ['install', `${name}@${version}`], { cwd: rootDirectory })
+          if (onProgress) {
+            onProgress(name, null)
+          }
+        } catch (_) {
+          if (onProgress) {
+            onProgress(name, _)
+          } else throw _
+        }
+      }))
 
-      return simpleFindVer
-    }
-  }
-
-  async installPeerDeps(name) {
-    // instead of using npm view we just read package.json, safer
-    const pkg = await readJSON(this.packagePath(name))
-    const peers = pkg.peerDependencies
-
-    // install peerdeps
-    if (peers && typeof peers == 'object') {
-      const peersArr = this.filter(Object.keys(peers))
-
-      if (peersArr.length) {
-        print(`  Installing ${name} peerDependencies`.bold)
-
-        const peersFull = peersArr.map(name => {
-          const version = latestVersion(name, peers[name])
-
-          if (!version)
-            throw new Error(`No valid version range for package ${name}@${peers[name]}`)
-
-          return `${name}@${version}`
-        })
-
-        await Promise.all(
-          peersFull.map(full =>
-            exec('npm', ['install', '--save', full, this.options.where])
-          )
-        )
-
-        print('  ✓'.green, peersArr.join(', '))
-        return peersArr
+      if (onComplete) {
+        onComplete()
       }
     }
   }
-
-  packagePath(name) {
-    return path.join(this.options.where, name, 'package.json')
+  static async manifestPath(rootDirectory: string, name: string): Promise<string> {
+    // $PROJECT_PATH/node_modules/$NAME/package.json
+    let manifestPath = Path.join(rootDirectory, 'node_modules', name, 'package.json')
+    if (!await exists(manifestPath)) {
+      // $PROJECT_PATH/../node_modules/$NAME/package.json
+      manifestPath = Path.normalize(Path.join(rootDirectory, '..', 'node_modules', name, 'package.json'))
+    }
+    if (!await exists(manifestPath)) {
+      throw new Error(`Unable to determine package installation path for ${name}`)
+    }
+    return manifestPath
   }
 }
 
-module.exports = Install
+module.exports = Installer
