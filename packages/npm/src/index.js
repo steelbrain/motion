@@ -4,10 +4,10 @@
 
 import Path from 'path'
 import invariant from 'assert'
-import { exists, readJSON, handleError, rm } from 'motion-fs-extra-plus'
+import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
 import { exec } from 'sb-exec'
 import semver from 'semver'
-import { versionFromRange } from './helpers'
+import { versionFromRange, manifestPath } from './helpers'
 
 type Install$Options = {
   rootDirectory: string,
@@ -36,7 +36,7 @@ class Installer {
     onComplete?: (() => void)
   ): Promise<void> {
     const rootDirectory = this.options.rootDirectory
-    const manifestPath = Installer.manifestPath(rootDirectory, name)
+    const manifestPath = manifestPath(rootDirectory, name)
     const manifestContents = await readJSON(manifestPath)
     const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 
@@ -72,18 +72,6 @@ class Installer {
         onComplete()
       }
     }
-  }
-  static async manifestPath(rootDirectory: string, name: string): Promise<string> {
-    // $PROJECT_PATH/node_modules/$NAME/package.json
-    let manifestPath = Path.join(rootDirectory, 'node_modules', name, 'package.json')
-    if (!await exists(manifestPath)) {
-      // $PROJECT_PATH/../node_modules/$NAME/package.json
-      manifestPath = Path.normalize(Path.join(rootDirectory, '..', 'node_modules', name, 'package.json'))
-    }
-    if (!await exists(manifestPath)) {
-      throw new Error(`Unable to determine package installation path for ${name}`)
-    }
-    return manifestPath
   }
 }
 
