@@ -7,4 +7,4 @@ dependencies:
     - apm install
 test:
   override:
-    - apm test
+    - npm test
