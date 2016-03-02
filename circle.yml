@@ -4,7 +4,7 @@ dependencies:
     - sudo dpkg --install atom-amd64.deb || true
     - sudo apt-get update
     - sudo apt-get -f install
-    - apm install
+    - make bootstrap
 test:
   override:
     - npm test
