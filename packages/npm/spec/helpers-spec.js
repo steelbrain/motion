@@ -1,7 +1,9 @@
 'use babel'
 
+import Path from 'path'
+import { exists, versionFromRange, manifestPath } from '../lib/helpers'
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)
-import { exists, versionFromRange } from '../lib/helpers'
+const rootDirectory = Path.normalize(Path.join(__dirname, '..'))
 
 describe('exists', function() {
   it('works', async function() {
@@ -18,5 +20,20 @@ describe('versionFromRange', function() {
   it('works even on complex ranges', function() {
     const version = '>=1.4.0 <2.0.0'
     expect(versionFromRange(version)).toEqual(['1.4.0', '2.0.0'])
+  })
+})
+
+describe('manifestPath', function() {
+  it('works on children', async function() {
+    expect(await manifestPath('sb-promisify', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'sb-promisify', 'package.json'))
+    try {
+      await manifestPath('sb-hello', rootDirectory)
+      expect(false).toBe(true)
+    } catch (_) {
+      expect(_.message).toContain('Unable to determine')
+    }
+  })
+  it('works on parents', async function() {
+    expect(await manifestPath('babel', rootDirectory)).toBe(Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json')))
   })
 })
