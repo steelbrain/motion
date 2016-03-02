@@ -3,11 +3,14 @@
 /* @flow */
 
 import Path from 'path'
+import FS from 'fs'
 import invariant from 'assert'
-import { readJSON, handleError, rm } from 'motion-fs-extra-plus'
+import promisify from 'sb-promisify'
 import { exec } from 'sb-exec'
 import semver from 'semver'
 import { versionFromRange, manifestPath } from './helpers'
+
+const readFile = promisify(FS.readFile)
 
 type Installer$Options = {
   rootDirectory: string,
@@ -37,7 +40,7 @@ class Installer {
   ): Promise<void> {
     const rootDirectory = this.options.rootDirectory
     const manifestPath = manifestPath(rootDirectory, name)
-    const manifestContents = await readJSON(manifestPath)
+    const manifestContents = JSON.parse(await readFile(manifestPath))
     const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 
     if (peerDependencies && typeof peerDependencies === 'object') {

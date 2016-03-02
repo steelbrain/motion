@@ -3,7 +3,15 @@
 /* @flow */
 
 import Path from 'path'
-import { exists } from 'motion-fs-extra-plus'
+import FS from 'fs'
+
+export function exists(path: string): Promise<boolean> {
+  return new Promise(function(resolve) {
+    FS.access(path, function(error) {
+      resolve(error === null)
+    })
+  })
+}
 
 export function versionFromRange(range: string): Array<string> {
   const matches = range.match(/[0-9\.]+/g)
