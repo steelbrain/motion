@@ -4,10 +4,14 @@
 # This is our helper script that's gonna execute specs in all of our packages for us
 #
 
-PACKAGES_PATH=$( cd $(dirname $0) ; pwd -P )/../packages/
+ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
+PACKAGES_PATH=${ROOT_DIRECTORY}/packages/
 PACKAGES_WITH_SPECS=( "npm" )
+
+# Helper script that specs are going to require
+export SPEC_HELPER_SCRIPT=${ROOT_DIRECTORY}/spec/helpers.js
 
 for name in "${PACKAGES_WITH_SPECS[@]}"
 do :
-  ( cd $PACKAGES_PATH/$name ; apm test )
+  ( cd ${PACKAGES_PATH}/${name} ; apm test )
 done
