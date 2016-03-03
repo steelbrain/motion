@@ -68,6 +68,7 @@
     "replace": "0.3.0",
     "replace-ext": "0.0.1",
     "sb-event-kit": "1.0.3",
+    "sb-exec": "^1.0.1",
     "sb-promisify": "1.1.0",
     "sb-string_score": "0.1.20",
     "semver": "5.1.0",
