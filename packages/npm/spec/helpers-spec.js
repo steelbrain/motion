@@ -1,7 +1,7 @@
 'use babel'
 
 import Path from 'path'
-import { exists, versionFromRange, manifestPath } from '../lib/helpers'
+import { exists, versionFromRange, getManifestPath } from '../lib/helpers'
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 const rootDirectory = Path.normalize(Path.join(__dirname, '..'))
 
@@ -23,17 +23,17 @@ describe('versionFromRange', function() {
   })
 })
 
-describe('manifestPath', function() {
+describe('getManifestPath', function() {
   it('works on children', async function() {
-    expect(await manifestPath('sb-promisify', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'sb-promisify', 'package.json'))
+    expect(await getManifestPath('sb-promisify', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'sb-promisify', 'package.json'))
     try {
-      await manifestPath('sb-hello', rootDirectory)
+      await getManifestPath('sb-hello', rootDirectory)
       expect(false).toBe(true)
     } catch (_) {
       expect(_.message).toContain('Unable to determine')
     }
   })
   it('works on parents', async function() {
-    expect(await manifestPath('babel', rootDirectory)).toBe(Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json')))
+    expect(await getManifestPath('babel', rootDirectory)).toBe(Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json')))
   })
 })

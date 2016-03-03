@@ -8,7 +8,7 @@ import invariant from 'assert'
 import promisify from 'sb-promisify'
 import { exec } from 'sb-exec'
 import semver from 'semver'
-import { versionFromRange, manifestPath } from './helpers'
+import { versionFromRange, getManifestPath } from './helpers'
 
 const readFile = promisify(FS.readFile)
 
@@ -39,7 +39,7 @@ class Installer {
     onComplete?: (() => void)
   ): Promise<void> {
     const rootDirectory = this.options.rootDirectory
-    const manifestPath = manifestPath(rootDirectory, name)
+    const manifestPath = await getManifestPath(rootDirectory, name)
     const manifestContents = JSON.parse(await readFile(manifestPath))
     const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 

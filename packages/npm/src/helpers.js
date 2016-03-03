@@ -18,7 +18,7 @@ export function versionFromRange(range: string): Array<string> {
   return matches && matches.length ? matches : []
 }
 
-export async function manifestPath(name: string, rootDirectory: string): Promise<string> {
+export async function getManifestPath(name: string, rootDirectory: string): Promise<string> {
   // $PROJECT_PATH/node_modules/$NAME/package.json
   let manifestPath = Path.join(rootDirectory, 'node_modules', name, 'package.json')
   if (!await exists(manifestPath)) {
