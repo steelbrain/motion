@@ -1,43 +1,21 @@
-import _glob from 'globby'
-import readdirp from 'readdirp'
-import _path from 'path'
-import _replace from 'replace'
-import fse from 'fs-extra'
+'use strict'
 
-// helpers
-export const replace = _replace
-export const path = _path
-export const p = _path.join
+/* @flow */
 
-// files
-export const fs = fse
-export const rm = promisify(fs.remove)
-export const mkdir = promisify(fs.mkdirs)
-export const move = promisify(fs.move)
-export const writeFile = promisify(fs.writeFile)
-const _readdir = promisify(readdirp)
-export const readdir = (dir, opts = {}) => _readdir(Object.assign({ root: dir }, opts)).then(res => res.files)
-const readFilePromise = promisify(fs.readFile)
-export const readFile = file => readFilePromise(file, 'utf-8')
-export const readJSON = file => readFile(file).then(res => JSON.parse(res))
-export const writeJSON = (path, str) => writeFile(path, JSON.stringify(str))
-export const touch = promisify(fs.ensureFile)
-export const copy = promisify(fs.copy)
-export const glob = _glob
-export const exists = where => new Promise((res, rej) => fs.stat(where, err => res(!err)))
-// TODO use promises
-export const recreateDir = (dir) =>
-  new Promise((res, rej) => {
-    fs.remove(dir, err => {
-      if (err) return rej(err)
-      fs.mkdirs(dir, err => {
-        if (err) return rej(err)
-        res(dir)
-      });
+import FS from 'fs'
+import Path from 'path'
+import promisify from 'sb-promisify'
+
+export const readFile = promisify(FS.readFile)
+export const writeFile = promisify(FS.writeFile)
+export async function readJSON(filePath: string, encoding: string = 'utf8'): Promise {
+  const contents = await readFile(filePath)
+  return JSON.parse(contents.toString(encoding))
+}
+export function exists(filePath: string): Promise<boolean> {
+  return new Promise(function(resolve) {
+    FS.access(filePath, FS.R_OK, function(error) {
+      resolve(error === null)
     })
   })
-
-export async function globCopy(pattern, dest, opts = {}) {
-  const srcs = await glob(pattern, { dot: false, nodir: true, ...opts })
-  await Promise.all(srcs.map(f => _copy(p(opts.cwd || '', f), p(dest, f))))
 }
