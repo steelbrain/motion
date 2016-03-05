@@ -13,7 +13,7 @@ import { readJSON } from 'motion-fs'
 
 type Installer$Options = {
   rootDirectory: string,
-  filter: Function
+  filter: ?Function
 }
 
 class Installer {
