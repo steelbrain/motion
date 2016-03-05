@@ -5,7 +5,6 @@
 import Path from 'path'
 import FS from 'fs'
 import invariant from 'assert'
-import promisify from 'sb-promisify'
 import { exec } from 'sb-exec'
 import semver from 'semver'
 import { versionFromRange, getManifestPath } from './helpers'
