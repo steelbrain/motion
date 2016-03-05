@@ -1,7 +1,7 @@
 {
   "name": "motion-fs",
   "version": "1.0.0",
-  "description": "FS Extra + Nice File Functions + Nice defaults + Promisified",
+  "description": "FS functions for Motion",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,10 +9,6 @@
   "author": "Motion <natewienert@gmail.com> (motion.io)",
   "license": "MIT",
   "dependencies": {
-    "fs-extra": "^0.26.5",
-    "globby": "^4.0.0",
-    "readdirp": "^2.0.0",
-    "replace": "^0.3.0",
     "sb-promisify": "^1.1.1"
   }
 }
