@@ -30,6 +30,9 @@ do :
     done
   fi
 
+  printf "Installing dependencies\n"
+  npm install --production
+
   printf "Linking self\n"
   npm link --loglevel=error
 
