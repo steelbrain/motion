@@ -4,14 +4,7 @@
 
 import Path from 'path'
 import FS from 'fs'
-
-export function exists(path: string): Promise<boolean> {
-  return new Promise(function(resolve) {
-    FS.access(path, function(error) {
-      resolve(error === null)
-    })
-  })
-}
+import { exists } from 'motion-fs'
 
 export function versionFromRange(range: string): Array<string> {
   const matches = range.match(/[0-9\.]+/g)

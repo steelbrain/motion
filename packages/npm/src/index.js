@@ -9,8 +9,7 @@ import promisify from 'sb-promisify'
 import { exec } from 'sb-exec'
 import semver from 'semver'
 import { versionFromRange, getManifestPath } from './helpers'
-
-const readFile = promisify(FS.readFile)
+import { readJSON } from 'motion-fs'
 
 type Installer$Options = {
   rootDirectory: string,
@@ -40,7 +39,7 @@ class Installer {
   ): Promise<void> {
     const rootDirectory = this.options.rootDirectory
     const manifestPath = await getManifestPath(rootDirectory, name)
-    const manifestContents = JSON.parse(await readFile(manifestPath))
+    const manifestContents = readJSON(manifestPath)
     const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 
     if (peerDependencies && typeof peerDependencies === 'object') {
