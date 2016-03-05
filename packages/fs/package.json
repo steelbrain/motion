@@ -1,5 +1,5 @@
 {
-  "name": "motion-fs-extra-plus",
+  "name": "motion-fs",
   "version": "1.0.0",
   "description": "FS Extra + Nice File Functions + Nice defaults + Promisified",
   "main": "lib/index.js",
