@@ -1,7 +1,6 @@
 import { _, path, log } from '../../lib/fns'
 import opts from '../../opts'
 import cache from '../../cache'
-import NpmInstallPlugin from 'npm-install-webpack-plugin'
 import extend from 'deep-extend'
 
 let runnerRoot = path.resolve(path.join(__dirname, '..', '..', '..', '..'))
@@ -67,9 +66,6 @@ export default function webpackConfig(filename, config = {}) {
       ]
     }
   }, config)
-
-  // const npmInstall = new NpmInstallPlugin()
-  // result.plugins = [npmInstall]
 
   return result
 }
