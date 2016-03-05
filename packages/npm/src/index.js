@@ -25,11 +25,21 @@ class Installer {
 
     this.options = { rootDirectory, filter }
   }
-  async install(name: string): Promise<void> {
-    await exec('npm', ['install', '--save', name], { cwd: this.options.rootDirectory })
+  async install(name: string, save: boolean = false): Promise<void> {
+    const parameters = ['install']
+    if (save) {
+      parameters.push('--save')
+    }
+    parameters.push(name)
+    await exec('npm', parameters, { cwd: this.options.rootDirectory })
   }
-  async uninstall(name: string): Promise<void> {
-    await exec('npm', ['uninstall', '--save', name], { cwd: this.options.rootDirectory })
+  async uninstall(name: string, save: boolean = false): Promise<void> {
+    const parameters = ['uninstall']
+    if (save) {
+      parameters.push('--save')
+    }
+    parameters.push(name)
+    await exec('npm', parameters, { cwd: this.options.rootDirectory })
   }
   async installPeerDependencies(
     name: string,
