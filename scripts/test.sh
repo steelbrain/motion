@@ -5,7 +5,7 @@
 #
 
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
-PACKAGES_PATH=${ROOT_DIRECTORY}/packages/
+PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 PACKAGES_WITH_SPECS=( "npm" "motion" )
 
 # Helper script that specs are going to require
