@@ -39,12 +39,27 @@ describe('Installer', function() {
   })
 
   it('installs without saving', async function() {
-    console = require('console')
     const installer = new Installer({rootDirectory: testRoot})
     await installer.install('sb-promisify')
     expect(await exists(testPackagePath)).toBe(true)
     const manifest = await readJSON(Path.join(testRoot, 'package.json'))
     expect(typeof manifest.dependencies['sb-promisify']).toBe('undefined')
+  })
+
+  it('uninstalls and saves properly', async function() {
+    const installer = new Installer({rootDirectory: testRoot})
+    await installer.install('sb-promisify', true)
+    await installer.uninstall('sb-promisify', true)
+    const manifest = await readJSON(Path.join(testRoot, 'package.json'))
+    expect(typeof manifest.dependencies['sb-promisify']).toBe('undefined')
+  })
+
+  it('uninstalls without saving', async function() {
+    const installer = new Installer({rootDirectory: testRoot})
+    await installer.install('sb-promisify', true)
+    await installer.uninstall('sb-promisify')
+    const manifest = await readJSON(Path.join(testRoot, 'package.json'))
+    expect(typeof manifest.dependencies['sb-promisify']).toBe('string')
   })
 
 })
