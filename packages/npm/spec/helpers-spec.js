@@ -1,7 +1,7 @@
 'use babel'
 
 import Path from 'path'
-import { versionFromRange, getManifestPath } from '../lib/helpers'
+import { versionFromRange, getManifestPath, isNPMError } from '../lib/helpers'
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 const rootDirectory = Path.normalize(Path.join(__dirname, '..'))
 
@@ -28,5 +28,14 @@ describe('getManifestPath', function() {
   })
   it('works on parents', async function() {
     expect(await getManifestPath('babel', rootDirectory)).toBe(Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json')))
+  })
+})
+
+describe('isNPMError', function() {
+  it('stays silent on warn', function() {
+    expect(isNPMError('npm WARN')).toBe(false)
+  })
+  it('cries on error', function() {
+    expect(isNPMError('npm ERR')).toBe(true)
   })
 })

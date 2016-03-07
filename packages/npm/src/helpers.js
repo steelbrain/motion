@@ -29,5 +29,5 @@ export async function getManifestPath(name: string, rootDirectory: string): Prom
 }
 
 export function isNPMError(stdoutContents: string): boolean {
-  return stdoutContents.indexOf('npm ERR') === -1
+  return stdoutContents.indexOf('npm ERR') !== -1
 }
