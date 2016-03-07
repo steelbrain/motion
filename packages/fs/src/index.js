@@ -6,6 +6,7 @@ import FS from 'fs'
 import Path from 'path'
 import promisify from 'sb-promisify'
 
+export const unlink = promisify(FS.unlink)
 export const readFile = promisify(FS.readFile)
 export const writeFile = promisify(FS.writeFile)
 export async function readJSON(filePath: string, encoding: string = 'utf8'): Promise {
