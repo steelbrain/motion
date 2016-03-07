@@ -6,7 +6,11 @@
 
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
-PACKAGES_WITH_SPECS=$SPEC_PACKAGE || ( "npm" "motion" "fs" )
+if [ "$SPEC_PACKAGE" != "" ]; then
+  PACKAGES_WITH_SPECS=$SPEC_PACKAGE
+else
+  PACKAGES_WITH_SPECS=( "npm" "motion" "fs" )
+fi
 
 # Helper script that specs are going to require
 export SPEC_HELPER_SCRIPT=${ROOT_DIRECTORY}/spec/helpers.js
