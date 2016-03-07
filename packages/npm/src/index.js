@@ -7,7 +7,7 @@ import FS from 'fs'
 import invariant from 'assert'
 import { exec } from 'sb-exec'
 import semver from 'semver'
-import { versionFromRange, getManifestPath } from './helpers'
+import { versionFromRange, getManifestPath, isNPMError } from './helpers'
 import { readJSON } from 'motion-fs'
 
 type Installer$Options = {
@@ -29,16 +29,22 @@ class Installer {
     if (save) {
       parameters.push('--save')
     }
-    parameters.push(name)
-    await exec('npm', parameters, { cwd: this.options.rootDirectory })
+    parameters.push(name, '--loglevel=error', '--no-color')
+    const result = await exec('npm', parameters, { cwd: this.options.rootDirectory, stream: 'stderr' })
+    if (result && isNPMError(result)) {
+      throw new Error('NPM Error: ' + result)
+    }
   }
   async uninstall(name: string, save: boolean = false): Promise<void> {
     const parameters = ['uninstall']
     if (save) {
       parameters.push('--save')
     }
-    parameters.push(name)
-    await exec('npm', parameters, { cwd: this.options.rootDirectory })
+    parameters.push(name, '--loglevel=error', '--no-color')
+    const result = await exec('npm', parameters, { cwd: this.options.rootDirectory, stream: 'stderr' })
+    if (result && isNPMError(result)) {
+      throw new Error('NPM Error: ' + result)
+    }
   }
   async installPeerDependencies(
     name: string,
