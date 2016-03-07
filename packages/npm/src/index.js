@@ -53,8 +53,8 @@ class Installer {
     onComplete?: (() => void)
   ): Promise<void> {
     const rootDirectory = this.options.rootDirectory
-    const manifestPath = await getManifestPath(rootDirectory, name)
-    const manifestContents = readJSON(manifestPath)
+    const manifestPath = await getManifestPath(name, rootDirectory)
+    const manifestContents = await readJSON(manifestPath)
     const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
 
     if (peerDependencies && typeof peerDependencies === 'object') {
@@ -74,7 +74,7 @@ class Installer {
 
       await Promise.all(versions.map(async function([name, version]) {
         try {
-          await exec('npm', ['install', `${name}@${version}`], { cwd: rootDirectory })
+          await exec('npm', ['install', `${name}@${version}`, '--loglevel=error', '--no-color'], { cwd: rootDirectory })
           if (onProgress) {
             onProgress(name, null)
           }
