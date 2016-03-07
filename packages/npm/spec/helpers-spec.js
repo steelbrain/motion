@@ -1,16 +1,9 @@
 'use babel'
 
 import Path from 'path'
-import { exists, versionFromRange, getManifestPath } from '../lib/helpers'
+import { versionFromRange, getManifestPath } from '../lib/helpers'
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 const rootDirectory = Path.normalize(Path.join(__dirname, '..'))
-
-describe('exists', function() {
-  it('works', async function() {
-    expect(await exists(__filename)).toBe(true)
-    expect(await exists('/tmp/non-existent-file')).toBe(false)
-  })
-})
 
 describe('versionFromRange', function() {
   it('extracts a version from semver range', function() {
