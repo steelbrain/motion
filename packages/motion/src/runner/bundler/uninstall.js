@@ -36,7 +36,7 @@ export async function uninstall(rebundle) {
     print(`\n  Uninstalling...`.bold)
 
     // do uninstalls
-    const npm = new NPM(opts('motionDir'))
+    const npm = new NPM({rootDirectory: opts('motionDir')})
     const attempted = await Promise.all(toUninstall.map(async dep => {
       try {
         await npm.uninstall(dep, true)

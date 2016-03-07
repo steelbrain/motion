@@ -78,7 +78,7 @@ export async function installAll(requires) {
 
 function runInstall(prevInstalled, toInstall) {
   let isDone = false
-  const npm = new NPM(opts('motionDir'))
+  const npm = new NPM({rootDirectory: opts('motionDir')})
 
   async function installNext() {
     const dep = installing[0]
