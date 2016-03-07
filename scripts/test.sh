@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-#
-# This is our helper script that's gonna execute specs in all of our packages for us
-#
+# Usage:
+# To run specs in all packages do `./test.sh`
+# To run specs in a specific package named 'fs' do `SPEC_PACKAGE=fs ./test.sh`
 
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
-PACKAGES_WITH_SPECS=( "npm" "motion" )
+PACKAGES_WITH_SPECS=$SPEC_PACKAGE || ( "npm" "motion" "fs" )
 
 # Helper script that specs are going to require
 export SPEC_HELPER_SCRIPT=${ROOT_DIRECTORY}/spec/helpers.js
