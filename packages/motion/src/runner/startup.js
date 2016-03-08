@@ -5,8 +5,8 @@ import builder from './builder'
 import Webpack from './webpack'
 import opts from './opts'
 import disk from './disk'
-import gulp from './gulp'
-import cache from './cache'
+import Gulp from './gulp'
+import Cache from './cache'
 import keys from './keys'
 import watchDeletes from './lib/watchDeletes'
 import { logError, handleError, path, log } from './lib/fns'
@@ -20,7 +20,6 @@ export async function startup(options = {}) {
   started = true
   if (process.env.startedat) print('startup time: ', Date.now() - process.env.startedat)
 
-  // space
   print()
 
   // order important!
@@ -30,7 +29,7 @@ export async function startup(options = {}) {
   await builder.clear.init() // ensures internal directories set up
   await Promise.all([
     opts.serialize(), // write out opts to state file
-    cache.init(),
+    Cache.init(),
     bundler.init()
   ])
 
@@ -40,11 +39,10 @@ export async function startup(options = {}) {
 async function scripts(options) {
   const webpack = new Webpack()
   let { files, info } = await webpack.bundleApp()
-  // TODO put in cache and use in gulp scripts pipeline + ignoreInitial
-  console.log(files, info)
 
-  await gulp.init({ options, files })
-  await gulp.afterBuild()
+  Cache.setFiles(info)
+  await Gulp.init({ options, files })
+  await Gulp.afterBuild()
 }
 
 export async function build(options = {}) {
@@ -57,7 +55,7 @@ export async function build(options = {}) {
       builder.clear.buildDir()
     ])
     await Promise.all([
-      gulp.assets(),
+      Gulp.assets(),
       scripts({ once: options.once })
     ])
     await bundler.all()
@@ -74,12 +72,13 @@ export async function build(options = {}) {
 export async function run(options) {
   try {
     await startup(options)
-    if (options.watch) gulp.assets()
+    if (options.watch)
+      Gulp.assets()
     await server.run()
     await activateBridge()
     activateEditor(bridge)
     await scripts()
-    cache.serialize() // write out cache
+    Cache.serialize() // write out cache
     await bundler.all()
     if (options.watch) await builder.build()
     keys.init()

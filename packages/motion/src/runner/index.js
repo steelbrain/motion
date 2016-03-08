@@ -1,7 +1,8 @@
 import { run, build } from './startup'
 
-// print - so we can easily weed out console.logs
-// print = we want to log this out, keep it
+// so we can easily weed out console.logs
+// print = keep
+// console.log = delete
 global.print = console.log.bind(console)
 
 export default { run, build }

@@ -13,6 +13,10 @@ class Webpack {
   pack() {
     return new Promise(async (res, rej) => {
       try {
+        let babelConfig = config.file(fileInfo => {
+          allInfo.push(fileInfo)
+        })
+
         let files = []
         let allInfo = []
 
@@ -25,15 +29,19 @@ class Webpack {
           config: {
             context: process.cwd(),
             entry: './'+opts('config').entry,
-            externals: userExternals(),
-            babel: config.file(fileInfo => {
-              allInfo.push(fileInfo)
-            }),
+            externals: {
+              ...userExternals(),
+              'babel-runtime': 'exports.babel-runtime',
+              'core-js': 'exports.core-js'
+            },
+            babel: babelConfig,
             module: {
               loaders: [
                 {
                   test: /\.js$/,
+                  exclude: /(node_modules)/,
                   loader: 'babel',
+                  plugins: ['transform-runtime']
                 }
               ]
             }
