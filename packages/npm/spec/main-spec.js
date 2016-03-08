@@ -85,4 +85,10 @@ describe('Installer', function() {
     expect(onProgress.mostRecentCall.args).toEqual(['sb-debounce', null])
   })
 
+  it('tells if a module is installed or not', async function() {
+    const installer = new Installer({rootDirectory: __dirname})
+    expect(await installer.isInstalled('some-package')).toBe(false)
+    expect(await installer.isInstalled('motion-fs')).toBe(true)
+  })
+
 })
