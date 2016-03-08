@@ -9,7 +9,7 @@ PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 if [ "$SPEC_PACKAGE" != "" ]; then
   PACKAGES_WITH_SPECS=$SPEC_PACKAGE
 else
-  PACKAGES_WITH_SPECS=( "npm" "motion" "fs" )
+  PACKAGES_WITH_SPECS=( "npm" "motion" "fs" "webpack-npm" )
 fi
 
 # Helper script that specs are going to require
