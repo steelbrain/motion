@@ -8,8 +8,7 @@ import Installer from '../'
 import { exec } from 'sb-exec'
 import { readJSON, writeJSON, exists } from 'motion-fs'
 
-// const { it } = require(process.env.SPEC_HELPER_SCRIPT)
-const { it } = require('/Users/steel/w/motion/scripts/../spec/helpers.js')
+const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 
 describe('Installer', function() {
   const testRoot = '/tmp/motion-spec'
