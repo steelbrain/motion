@@ -12,8 +12,8 @@ watch: clean
 
 bootstrap:
 	npm install
-	node scripts/bootstrap.js
 	scripts/build.sh
+	scripts/bootstrap.sh
 	# ensure linked before motion build
 	(cd packages/motion && npm link)
 	(cd apps/tools && motion build)

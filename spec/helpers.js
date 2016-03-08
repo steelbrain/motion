@@ -5,7 +5,7 @@ export function it(name, callback) {
   global.it(name, function() {
     const value = callback()
     if (value && value.constructor.name === 'Promise') {
-      waitsForPromise(function() {
+      waitsForPromise({timeout: 10 * 1000}, function() {
         return value
       })
     }
