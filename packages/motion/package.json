@@ -20,7 +20,7 @@
     "atom-text-buffer-point": "1.0.0",
     "autoprefixer": "6.2.3",
     "babel-core": "^5.8.35",
-    "babel-loader": "^6.2.3",
+    "babel-loader": "^5.3.3",
     "babel-runtime": "5.8.29",
     "chalk": "1.1.1",
     "chokidar": "1.4.2",
