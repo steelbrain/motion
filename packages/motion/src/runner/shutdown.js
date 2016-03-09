@@ -7,7 +7,7 @@ process.on('uncaughtException', cleanExit)
 function cleanExit(e) {
   if (e) console.log(e.stack)
 
-  const children = Object.keys(process.children)
+  const children = Object.keys(process.children || {})
 
   // kill children
   children.forEach(key => {
