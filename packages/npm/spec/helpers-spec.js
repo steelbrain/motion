@@ -18,7 +18,7 @@ describe('versionFromRange', function() {
 
 describe('getManifestPath', function() {
   it('works on children', async function() {
-    expect(await getManifestPath('sb-promisify', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'sb-promisify', 'package.json'))
+    expect(await getManifestPath('motion-fs', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'motion-fs', 'package.json'))
     try {
       await getManifestPath('sb-hello', rootDirectory)
       expect(false).toBe(true)
