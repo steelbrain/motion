@@ -1,7 +1,7 @@
 import autoprefixer from 'autoprefixer'
 import postcss from 'postcss'
 import { writeFile, log, handleError, path } from './fns'
-import bridge from '../bridge'
+import bridge from '../../core/bridge'
 import opts from '../opts'
 
 let styleDir

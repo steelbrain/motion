@@ -2,10 +2,10 @@
 import { Emitter, CompositeDisposable } from 'sb-event-kit'
 import { Server } from 'ws'
 import disposableEvent from 'disposable-event'
-import websocketPort from './lib/wport'
-import Cache from './cache'
-import { log, handleError } from './lib/fns'
-import getOptions from './opts'
+import websocketPort from '../runner/lib/wport'
+import Cache from '../runner/cache'
+import { log, handleError } from '../runner/lib/fns'
+import getOptions from '../runner/opts'
 
 import type { Disposable } from 'sb-event-kit'
 import type WebSocket from 'ws'
@@ -135,4 +135,5 @@ export class Bridge {
   }
 }
 
+// TODO: Remove this when all of the package has moved to an isolated internal APIs
 export default new Bridge()

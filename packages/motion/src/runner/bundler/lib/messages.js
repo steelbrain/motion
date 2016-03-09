@@ -1,4 +1,4 @@
-import bridge from '../../bridge'
+import bridge from '../../../core/bridge'
 import opts from '../../opts'
 import cache from '../../cache'
 import log from '../../lib/log'

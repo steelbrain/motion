@@ -1,7 +1,7 @@
 // handles meta info on views passed from babel
 // eventually given to atom for IDE
 
-import bridge from '../../bridge'
+import bridge from '../../../core/bridge'
 import cache from '../../cache'
 import exec from '../../lib/exec'
 

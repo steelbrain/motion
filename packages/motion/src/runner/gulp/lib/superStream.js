@@ -4,7 +4,7 @@ import { gulp } from './helpers'
 import { event } from '../index'
 import opts from '../../opts'
 import cache from '../../cache'
-import bridge from '../../bridge'
+import bridge from '../../../core/bridge'
 import { _, path, log, vinyl, emitter } from '../../lib/fns'
 
 // time we wait for browser load before we just force push

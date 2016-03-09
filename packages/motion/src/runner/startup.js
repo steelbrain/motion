@@ -1,4 +1,4 @@
-import bridge from './bridge'
+import bridge from '../core/bridge'
 import server from './server'
 import bundler from './bundler'
 import builder from './builder'

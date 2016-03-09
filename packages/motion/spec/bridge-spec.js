@@ -1,7 +1,7 @@
 'use babel'
 
 import {EventEmitter} from 'events'
-import { Bridge } from '../lib/runner/bridge.js'
+import { Bridge } from '../lib/core/bridge.js'
 const { it, wait } = require(process.env.SPEC_HELPER_SCRIPT)
 
 describe('Bridge', function() {

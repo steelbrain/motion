@@ -1,4 +1,4 @@
-import bridge from '../bridge'
+import bridge from '../../core/bridge'
 import raven from 'raven'
 import logError from './logError'
 import unicodeToChar from './unicodeToChar'

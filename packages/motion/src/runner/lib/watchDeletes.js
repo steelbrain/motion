@@ -1,7 +1,7 @@
 import path from 'path'
 import opts from '../opts'
 import cache from '../cache'
-import bridge from '../bridge'
+import bridge from '../../core/bridge'
 import { internals } from '../bundler/internals'
 import { p, rm, log, handleError } from './fns'
 
