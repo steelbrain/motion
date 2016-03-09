@@ -29,7 +29,7 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
       if (config.onStarted) {
         config.onStarted(id, [[moduleName, 'x.x.x']])
       }
-      npm.install(moduleName, config.save).then(function() {
+      return npm.install(moduleName, config.save).then(function() {
         if (config.onProgress) {
           config.onProgress(id, moduleName, null)
         }
@@ -54,6 +54,8 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
         }
         next()
       })
+    }).catch(function(error) {
+      console.error('[motion-webpack-npm] Uncaught error', error)
     })
   }
 }
