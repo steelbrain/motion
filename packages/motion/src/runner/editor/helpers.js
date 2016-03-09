@@ -1,7 +1,3 @@
-import {motionFile} from '../gulp/babel'
-import {Scanner} from '../gulp/scanner'
-import Cache from '../cache'
-
 const NEWLINE_REGEX = /\r\n|\n|\r/g
 export const POSITION_TYPE = {
   VIEW_TOP: 'VIEW_TOP',
@@ -10,24 +6,7 @@ export const POSITION_TYPE = {
 }
 
 export function collectViews(contents) {
-  const filePath = '__editor__'
-  try {
-    let views = {}
-    Scanner.pre(filePath, contents, function(contents) {
-      motionFile({
-        contents,
-        path: filePath,
-        relative: filePath,
-        sourceMap: false
-      })
-    })
-    return Cache.getFileMeta(filePath) || {}
-  } catch (_) {
-    if (typeof _.pos !== 'undefined') {
-      // Syntax error
-      return {}
-    } else throw _
-  }
+  throw new Error('To be rewritten')
 }
 
 export function pointWithinRange(point, range) {
