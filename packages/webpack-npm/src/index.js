@@ -18,20 +18,23 @@ class Installer {
     this.installID = 0
   }
   apply(compiler: Object) {
-    compiler.resolvers.loader.plugin('module', (result, next) => {
+    var _this = this
+    compiler.resolvers.loader.plugin('module', function(result, next) {
       let { path: modulePath, request: moduleName } = result
       if (!moduleName.match(/\-loader$/)) {
         moduleName += '-loader'
       }
-      this.resolveDependency(compiler, modulePath, moduleName, next, true)
+      _this.resolveDependency(compiler, modulePath, moduleName, next, true)
+      this.fileSystem.purge()
     })
-    compiler.resolvers.normal.plugin('module', (result, next) => {
+    compiler.resolvers.normal.plugin('module', function(result, next) {
       const { path: modulePath, request: moduleName } = result
       if (modulePath.match('node_modules')) {
         next()
         return
       }
-      this.resolveDependency(compiler, modulePath, moduleName, next, false)
+      _this.resolveDependency(compiler, modulePath, moduleName, next, false)
+      this.fileSystem.purge()
     })
   }
   resolveDependency(compiler: Object, modulePath: string, moduleName: string, next: Function, loader: boolean): void {
