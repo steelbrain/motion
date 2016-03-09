@@ -1,0 +1,14 @@
+{
+  "name": "motion-fs",
+  "version": "1.0.0",
+  "description": "FS functions for Motion",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Motion <natewienert@gmail.com> (motion.io)",
+  "license": "MIT",
+  "dependencies": {
+    "sb-promisify": "^1.1.1"
+  }
+}

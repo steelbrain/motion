@@ -4,7 +4,12 @@ dependencies:
     - sudo dpkg --install atom-amd64.deb || true
     - sudo apt-get update
     - sudo apt-get -f install
-    - apm install
+    - nvm use 5.1.0
+    - make bootstrap
 test:
   override:
-    - apm test
+    - npm test
+
+machine:
+  node:
+    version: 5.1.0

@@ -1,7 +1,7 @@
 import cache from '../cache'
 import opts from '../opts'
 import normalize from './lib/normalize'
-import npm from './lib/npm'
+import NPM from 'motion-npm'
 import filterWithPath from './lib/filterWithPath'
 import { readPackageJSON, readInstalled } from './lib/installed'
 import { writeExternals } from './externals'
@@ -36,9 +36,10 @@ export async function uninstall(rebundle) {
     print(`\n  Uninstalling...`.bold)
 
     // do uninstalls
+    const npm = new NPM({rootDirectory: opts('motionDir')})
     const attempted = await Promise.all(toUninstall.map(async dep => {
       try {
-        await npm.unsave(dep, toUninstall.indexOf(dep), toUninstall.length)
+        await npm.uninstall(dep, true)
         print(`  ✘ ${dep}`.red)
         return dep
       }

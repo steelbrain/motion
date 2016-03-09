@@ -6,7 +6,8 @@ import { log, logError, emitter, readFile } from '../lib/fns'
 
 export default function webpacker({ name, config, onFinish }) {
   return new Promise((res, rej) => {
-    const compiler = webpack(webpackConfig(`${name}.js`, config))
+    const _conf = webpackConfig(`${name}.js`, config)
+    const compiler = webpack(_conf)
     const watching = opts('watching')
 
     // continue if watching

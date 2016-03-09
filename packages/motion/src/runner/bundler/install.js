@@ -3,7 +3,7 @@ import { _, log, handleError } from '../lib/fns'
 import cache from '../cache'
 import opts from '../opts'
 import { onStart, onFinish, onError } from './lib/messages'
-import npm from './lib/npm'
+import NPM from 'motion-npm'
 import normalize from './lib/normalize'
 import remakeInstallDir from './lib/remakeInstallDir'
 import { uninstall } from './uninstall'
@@ -78,6 +78,7 @@ export async function installAll(requires) {
 
 function runInstall(prevInstalled, toInstall) {
   let isDone = false
+  const npm = new NPM({rootDirectory: opts('motionDir')})
 
   async function installNext() {
     const dep = installing[0]
@@ -91,7 +92,7 @@ function runInstall(prevInstalled, toInstall) {
     onStart(dep)
 
     try {
-      await npm.save(dep)
+      await npm.install(dep, true)
       log.externals('install', 'succces, saved', dep)
       successful.push(dep)
       onFinish(dep)

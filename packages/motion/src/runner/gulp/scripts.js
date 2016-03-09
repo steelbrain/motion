@@ -9,7 +9,6 @@ import bridge from '../bridge'
 import Cache from '../cache'
 import builder from '../builder'
 import bundler from '../bundler'
-import scanner from './scanner'
 import opts from '../opts'
 
 const serializeCache = _.debounce(Cache.serialize, 600)
@@ -52,7 +51,6 @@ export function scripts({ inFiles = [], userStream }) {
       .pipe($.fn(reset))
       .pipe($.plumber(catchError))
       .pipe($.fn(setLastFile))
-      .pipe(scanner('pre'))
       .pipe($.sourcemaps.init())
       .pipe(babel.file())
       // json

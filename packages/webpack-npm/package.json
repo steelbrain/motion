@@ -1,0 +1,29 @@
+{
+  "name": "motion-webpack-npm",
+  "version": "0.9.0",
+  "description": "WebPack NPM helper for motion",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motion/motion.git"
+  },
+  "author": "motion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motion/motion/issues"
+  },
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": {
+    "motion-npm": "^0.9.0",
+    "resolve": "^1.1.7",
+    "sb-promisify": "^1.1.1"
+  },
+  "devDependencies": {
+    "motion-fs": "1.0.0",
+    "sb-exec": "^1.0.1",
+    "webpack": "^1.12.14"
+  }
+}

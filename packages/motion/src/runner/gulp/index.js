@@ -6,9 +6,9 @@ import { styles } from './styles'
 import { app } from './app'
 import { assets } from './assets'
 
-export async function init({ once = false } = {}) {
+export async function init({ options, files }) {
   try {
-    const inFiles = await glob(SCRIPTS_GLOB)
+    const inFiles = await glob(files)
     const _outFiles = await readdir(opts('outDir'))
     const outFiles = _outFiles
       .map(file => file.path)

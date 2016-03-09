@@ -1,3 +1,5 @@
+/* @flow */
+
 import disk from './disk'
 import handleError from './lib/handleError'
 import opts from './opts'
@@ -10,11 +12,15 @@ type ViewArray = Array<string>
 type ImportArray = Array<string>
 
 type File = {
+  // TODO: move current views to viewNames,
+  // then put babel meta info on views into views,
+  // finally, rename views to components
+  // viewNames?: Array<string>;
   views?: ViewArray;
   imports?: ImportArray;
   error?: object;
-  src: string;
-  meta: object;
+  src?: string;
+  meta?: object;
 }
 
 type CacheState = {
@@ -97,6 +103,15 @@ const Cache = {
     log.cache('baseDir', baseDir)
   },
 
+  setFiles(files : Array<object>) {
+    files.forEach(file => {
+      let cur = Cache.add(file.file)
+
+      cur.imports = file.imports
+      cur.views = Object.keys(file.views)
+    })
+  },
+
   baseDir() {
     return baseDir
   },
@@ -108,7 +123,8 @@ const Cache = {
   add(file: string) {
     if (!file) return
     const n = relative(file)
-    cache.files[n] = cache.files[n] || {}
+    if (cache.files[n]) return cache.files[n]
+    cache.files[n] = {}
     cache.files[n].added = Date.now()
     return cache.files[n]
   },
@@ -233,7 +249,9 @@ const Cache = {
 
   // npm
   getExternals(file?: string) {
-    if (!file) return Cache._getFileKeys('externals')
+    if (!file)
+      return Cache._getFileKeys('externals')
+
     return getFile(file).externals
   },
 
@@ -245,7 +263,10 @@ const Cache = {
 
   // npm + local
   getImports(file?: string) {
-    return [].concat(cache.getInterals(file), cache.getExternals(file))
+    return [].concat(
+      Cache.getInterals(file),
+      Cache.getExternals(file)
+    )
   },
 
   getInternalImporters() {

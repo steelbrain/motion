@@ -1,0 +1,13 @@
+{
+  "name": "motion-npm",
+  "version": "0.9.0",
+  "description": "",
+  "main": "lib/index.js",
+  "author": "Motion <natewienert@gmail.com> (motion.io)",
+  "license": "MIT",
+  "dependencies": {
+    "sb-exec": "^1.0.1",
+    "semver": "^5.1.0",
+    "motion-fs": "^1.0.0"
+  }
+}
