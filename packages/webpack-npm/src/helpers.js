@@ -16,7 +16,7 @@ export function getModuleName(result: Object, loader: boolean): string {
   return moduleName
 }
 
-export function isBuiltin(moduleName: string): string {
+export function isBuiltin(moduleName: string): boolean {
   try {
     return require.resolve(moduleName) === moduleName
   } catch (_) {
