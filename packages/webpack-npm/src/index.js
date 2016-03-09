@@ -19,44 +19,35 @@ class Installer {
   }
   apply(compiler: Object) {
     compiler.resolvers.loader.plugin('module', (result, next) => {
-      this.resolveLoader(compiler, result, next)
+      let { path: modulePath, request: moduleName } = result
+      if (!moduleName.match(/\-loader$/)) {
+        moduleName += '-loader'
+      }
+      this.resolveDependency(compiler, modulePath, moduleName, next, true)
     })
     compiler.resolvers.normal.plugin('module', (result, next) => {
-      this.resolveNormal(compiler, result, next)
-    })
-  }
-  resolveLoader(compiler: Object, result: Object, next: Function): void {
-    let { path: modulePath, request: moduleName } = result
-    if (!moduleName.match(/\-loader$/)) {
-      moduleName += '-loader'
-    }
-    const npm = new NPM({rootDirectory: getRootDirectory(modulePath)})
-    npm.isInstalled(moduleName).then(function(status) {
-      if (status) {
+      const { path: modulePath, request: moduleName } = result
+      if (modulePath.match('node_modules')) {
         next()
         return
       }
-      this.installPackage(npm, moduleName).then(next)
+      this.resolveDependency(compiler, modulePath, moduleName, next, false)
     })
   }
-  resolveNormal(compiler: Object, result: Object, next: Function): void {
-    const { path: modulePath, request: moduleName } = result
-    if (modulePath.match('node_modules')) {
-      next()
-      return
-    }
+  resolveDependency(compiler: Object, modulePath: string, moduleName: string, next: Function, loader: boolean): void {
     if (this.locks.has(moduleName)) {
       next()
       return
     }
     this.locks.add(moduleName)
-    compiler.resolvers.normal.resolve(modulePath, moduleName, (error, filePath) => {
+    const keyName = loader ? 'loader' : 'normal'
+    compiler.resolvers[keyName].resolve(modulePath, moduleName, (error, filePath) => {
+      this.locks.delete(moduleName)
       if (!error) {
         next()
         return
       }
 
-      this.locks.delete(moduleName)
       const npm = new NPM({rootDirectory: getRootDirectory(modulePath)})
       npm.isInstalled(moduleName).then(status => {
         if (status) {
