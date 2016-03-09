@@ -6,8 +6,8 @@
 
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
-if [ "$SPEC_PACKAGE" != "" ]; then
-  PACKAGES_WITH_SPECS=$SPEC_PACKAGE
+if [ "$PACKAGE_NAME" != "" ]; then
+  PACKAGES_WITH_SPECS=$PACKAGE_NAME
 else
   PACKAGES_WITH_SPECS=( "npm" "motion" "fs" "webpack-npm" )
 fi
