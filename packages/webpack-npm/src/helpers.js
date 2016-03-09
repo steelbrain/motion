@@ -15,3 +15,11 @@ export function getModuleName(result: Object, loader: boolean): string {
   }
   return moduleName
 }
+
+export function isBuiltin(moduleName: string): string {
+  try {
+    return require.resolve(moduleName) === moduleName
+  } catch (_) {
+    return false
+  }
+}
