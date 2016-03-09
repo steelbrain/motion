@@ -17,5 +17,9 @@ export SPEC_HELPER_SCRIPT=${ROOT_DIRECTORY}/spec/helpers.js
 
 for name in "${PACKAGES_WITH_SPECS[@]}"
 do :
-  ( cd ${PACKAGES_PATH}/${name} ; apm test )
+  cd ${PACKAGES_PATH}/${name}
+  apm test
+  if [ $? -eq 1 ]; then
+    exit 1
+  fi
 done
