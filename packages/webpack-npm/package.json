@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "motion-fs": "1.0.0",
+    "sb-exec": "^1.0.1",
     "webpack": "^1.12.14"
   }
 }
