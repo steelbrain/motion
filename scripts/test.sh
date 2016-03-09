@@ -6,10 +6,10 @@
 
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
-if [ "$SPEC_PACKAGE" != "" ]; then
-  PACKAGES_WITH_SPECS=$SPEC_PACKAGE
+if [ "$PACKAGE_NAME" != "" ]; then
+  PACKAGES_WITH_SPECS=$PACKAGE_NAME
 else
-  PACKAGES_WITH_SPECS=( "npm" "motion" "fs" )
+  PACKAGES_WITH_SPECS=( "npm" "motion" "fs" "webpack-npm" )
 fi
 
 # Helper script that specs are going to require
@@ -17,5 +17,9 @@ export SPEC_HELPER_SCRIPT=${ROOT_DIRECTORY}/spec/helpers.js
 
 for name in "${PACKAGES_WITH_SPECS[@]}"
 do :
-  ( cd ${PACKAGES_PATH}/${name} ; apm test )
+  cd ${PACKAGES_PATH}/${name}
+  apm test
+  if [ $? -eq 1 ]; then
+    exit 1
+  fi
 done

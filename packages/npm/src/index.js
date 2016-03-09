@@ -46,6 +46,14 @@ class Installer {
       throw new Error('NPM Error: ' + result)
     }
   }
+  async isInstalled(name: string): Promise<boolean> {
+    try {
+      await getManifestPath(name, this.options.rootDirectory)
+      return true
+    } catch (_) {
+      return false
+    }
+  }
   async installPeerDependencies(
     name: string,
     onStarted?: ((packages: Array<Array<string>>) => void),

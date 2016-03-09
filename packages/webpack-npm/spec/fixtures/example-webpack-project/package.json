@@ -1,0 +1,9 @@
+{
+  "main": "./bundle.js",
+  "dependencies": {
+    "inherits": "^2.0.1",
+    "randomcolor": "^0.4.3",
+    "sb-exec": "^1.0.1",
+    "sb-promisify": "^1.1.1"
+  }
+}

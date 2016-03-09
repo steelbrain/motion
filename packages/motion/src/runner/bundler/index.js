@@ -1,4 +1,5 @@
 import opts from '../opts'
+import execPromise from '../lib/execPromise'
 import { install, installAll, isInstalling, finishedInstalling } from './install'
 import { uninstall } from './uninstall'
 import { scanFile } from './scanFile'
@@ -7,6 +8,7 @@ import { runExternals, writeExternals } from './externals'
 import remakeInstallDir from './lib/remakeInstallDir'
 
 async function init() {
+  await execPromise('npm install', opts('motionDir'))
   await remakeInstallDir()
 }
 

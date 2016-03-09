@@ -8,8 +8,7 @@ import Installer from '../'
 import { exec } from 'sb-exec'
 import { readJSON, writeJSON, exists } from 'motion-fs'
 
-// const { it } = require(process.env.SPEC_HELPER_SCRIPT)
-const { it } = require('/Users/steel/w/motion/scripts/../spec/helpers.js')
+const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 
 describe('Installer', function() {
   const testRoot = '/tmp/motion-spec'
@@ -83,6 +82,12 @@ describe('Installer', function() {
 
     expect(onStarted.mostRecentCall.args[0]).toEqual([['sb-debounce', '1.0.0']])
     expect(onProgress.mostRecentCall.args).toEqual(['sb-debounce', null])
+  })
+
+  it('tells if a module is installed or not', async function() {
+    const installer = new Installer({rootDirectory: __dirname})
+    expect(await installer.isInstalled('some-package')).toBe(false)
+    expect(await installer.isInstalled('motion-fs')).toBe(true)
   })
 
 })

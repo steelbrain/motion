@@ -21,7 +21,6 @@
     "autoprefixer": "6.2.3",
     "babel-core": "^5.8.35",
     "babel-loader": "^5.4.0",
-    "babel-plugin-transform-runtime": "^6.6.0",
     "babel-runtime": "5.8.29",
     "chalk": "1.1.1",
     "chokidar": "1.4.2",
