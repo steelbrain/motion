@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/motion/motion/issues"
   },
-  "homepage": "https://github.com/motion/motion#readme"
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": {
+    "motion-npm": "^0.9.0"
+  }
 }
