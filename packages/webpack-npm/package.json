@@ -20,5 +20,9 @@
     "motion-npm": "^0.9.0",
     "resolve": "^1.1.7",
     "sb-promisify": "^1.1.1"
+  },
+  "devDependencies": {
+    "motion-fs": "1.0.0",
+    "webpack": "^1.12.14"
   }
 }
