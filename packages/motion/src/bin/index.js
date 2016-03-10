@@ -51,9 +51,21 @@ if (command === 'new') {
     `))
   }, handleError)
 } else if (command === 'build') {
-  console.log('Motion Build')
+  getMotion().then(function(motion) {
+    return motion.build()
+  }).then(function() {
+    console.log(chalk.green('App built successfully'))
+  }, handleError)
 } else if (command === 'init') {
-  console.log('Motion Init')
+  getMotion().then(function(motion) {
+    return motion.init()
+  }).then(function() {
+    console.log(trim(`
+      ${chalk.green('Motion initialized successfully! Enjoy')}
+      ${chalk.yellow('To run motion in your new app, do')}
+        $ motion
+    `))
+  }, handleError)
 } else if (!commands.length && !showHelp) { // run
   console.log('Motion Run')
 } else {
