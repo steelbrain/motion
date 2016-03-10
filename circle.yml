@@ -9,6 +9,8 @@ dependencies:
 test:
   override:
     - npm test
+    # TODO: Make this required soon
+    - npm run lint || true
 
 machine:
   node:
