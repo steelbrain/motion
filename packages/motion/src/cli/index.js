@@ -1,3 +1,9 @@
 #!/usr/bin/env node
 
-console.log('I am a placeholder')
+const Motion = require('../')
+const motion = new Motion({
+  rootDirectory: process.cwd()
+})
+
+console.log('Initializing Motion app for you')
+motion.init()

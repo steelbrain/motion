@@ -1,6 +1,7 @@
 /* @flow */
 
-import { exists } from 'motion-fs'
+import Path from 'path'
+import { exists, copy, mkdir } from 'motion-fs'
 import { CompositeDisposable } from 'sb-event-kit'
 import { MotionError, ERROR_CODE } from './error'
 import { fillConfig } from './helpers'
@@ -26,6 +27,14 @@ class Motion {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     console.log('I should run the app')
+  }
+
+  async init(): Promise {
+    if (await this.exists()) {
+      throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
+    }
+    await mkdir(this.config.dataDirectory)
+    await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.dataDirectory)
   }
 
   dispose() {
