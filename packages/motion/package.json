@@ -10,5 +10,7 @@
   "bin": {
     "motion": "./lib/cli/index.js"
   },
-  "dependencies": { }
+  "dependencies": {
+    "sb-event-kit": "^1.1.2"
+  }
 }
