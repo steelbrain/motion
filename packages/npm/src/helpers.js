@@ -1,9 +1,6 @@
-'use strict'
-
 /* @flow */
 
 import Path from 'path'
-import FS from 'fs'
 import { exists } from 'motion-fs'
 
 export function versionFromRange(range: string): Array<string> {
@@ -16,11 +13,15 @@ export async function getManifestPath(name: string, rootDirectory: string): Prom
   let manifestPath = Path.join(rootDirectory, 'node_modules', name, 'package.json')
   if (!await exists(manifestPath)) {
     // $PROJECT_PATH/../node_modules/$NAME/package.json
-    manifestPath = Path.normalize(Path.join(rootDirectory, '..', 'node_modules', name, 'package.json'))
+    manifestPath = Path.normalize(
+      Path.join(rootDirectory, '..', 'node_modules', name, 'package.json')
+    )
   }
   if (!await exists(manifestPath)) {
     // $PROJECT_PATH/../../node_modules/$NAME/package.json
-    manifestPath = Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', name, 'package.json'))
+    manifestPath = Path.normalize(
+      Path.join(rootDirectory, '..', '..', 'node_modules', name, 'package.json')
+    )
   }
   if (!await exists(manifestPath)) {
     throw new Error(`Unable to determine package installation path for ${name}`)

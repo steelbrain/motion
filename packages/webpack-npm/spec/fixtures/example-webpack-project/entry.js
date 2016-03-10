@@ -1,2 +1,2 @@
-console.log(require('randomcolor')())
-console.log(require('sb-promisify'))
+require('randomcolor')()
+require('sb-promisify')

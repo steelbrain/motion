@@ -1,5 +1,3 @@
-'use strict'
-
 /* @flow */
 
 import { getResolver } from './resolver'

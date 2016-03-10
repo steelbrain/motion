@@ -6,16 +6,16 @@ module.exports = {
   },
   plugins: [
     new (require('../../../'))({
-      onStarted: function(id, versions) {
+      onStarted(id, versions) {
         console.log('started', id, versions)
       },
-      onProgress: function(id, name, error) {
+      onProgress(id, name, error) {
         console.log('progress', id, name, error)
       },
-      onComplete: function(id) {
+      onComplete(id) {
         console.log('complete', id)
       }
     })
   ],
   cache: false
-};
+}

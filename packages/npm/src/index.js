@@ -1,9 +1,5 @@
-'use strict'
-
 /* @flow */
 
-import Path from 'path'
-import FS from 'fs'
 import invariant from 'assert'
 import { exec } from 'sb-exec'
 import semver from 'semver'
@@ -18,7 +14,7 @@ type Installer$Options = {
 class Installer {
   options: Installer$Options;
 
-  constructor({rootDirectory, filter}: Installer$Options) {
+  constructor({ rootDirectory, filter }: Installer$Options) {
     invariant(typeof rootDirectory === 'string', 'rootDirectory must be a string')
     invariant(!filter || typeof filter === 'function', 'filter must be a function')
 
@@ -30,9 +26,11 @@ class Installer {
       parameters.push('--save')
     }
     parameters.push(name, '--loglevel=error', '--no-color')
-    const result = await exec('npm', parameters, { cwd: this.options.rootDirectory, stream: 'stderr' })
+    const result = await exec('npm', parameters, {
+      cwd: this.options.rootDirectory, stream: 'stderr'
+    })
     if (result && isNPMError(result)) {
-      throw new Error('NPM Error: ' + result)
+      throw new Error(`NPM Error: ${result}`)
     }
   }
   async uninstall(name: string, save: boolean = false): Promise<void> {
@@ -41,9 +39,11 @@ class Installer {
       parameters.push('--save')
     }
     parameters.push(name, '--loglevel=error', '--no-color')
-    const result = await exec('npm', parameters, { cwd: this.options.rootDirectory, stream: 'stderr' })
+    const result = await exec('npm', parameters, {
+      cwd: this.options.rootDirectory, stream: 'stderr'
+    })
     if (result && isNPMError(result)) {
-      throw new Error('NPM Error: ' + result)
+      throw new Error(`NPM Error: ${result}`)
     }
   }
   async isInstalled(name: string): Promise<boolean> {
@@ -70,19 +70,24 @@ class Installer {
       if (this.options.filter) {
         dependencies = this.options.filter(dependencies)
       }
-      const versions = dependencies.map(function(name) {
-        const range = peerDependencies[name]
+      const versions = dependencies.map(function(dependencyName) {
+        const range = peerDependencies[dependencyName]
         const version = semver.maxSatisfying(versionFromRange(range), range)
-        return [name, version]
+        return [dependencyName, version]
       })
 
       if (onStarted) {
         onStarted(versions)
       }
 
-      await Promise.all(versions.map(async function([name, version]) {
+      await Promise.all(versions.map(async function([dependencyName, version]) {
         try {
-          await exec('npm', ['install', `${name}@${version}`, '--loglevel=error', '--no-color'], { cwd: rootDirectory })
+          await exec('npm',
+            ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color'],
+            {
+              cwd: rootDirectory
+            }
+          )
           if (onProgress) {
             onProgress(name, null)
           }
@@ -91,6 +96,7 @@ class Installer {
             onProgress(name, _)
           } else throw _
         }
+        return true
       }))
 
       if (onComplete) {

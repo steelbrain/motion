@@ -3,7 +3,6 @@
 /* @flow */
 
 import Path from 'path'
-import FS from 'fs'
 import Installer from '../'
 import { exec } from 'sb-exec'
 import { readJSON, writeJSON, exists } from 'motion-fs'
@@ -18,7 +17,7 @@ describe('Installer', function() {
   beforeEach(function() {
     waitsForPromise(async function() {
       await exec(process.env.SHELL, ['-c', `mkdir -p ${testRoot}`])
-      await writeJSON(Path.join(testRoot, 'package.json'), {dependencies: {}})
+      await writeJSON(Path.join(testRoot, 'package.json'), { dependencies: {} })
     })
   })
 
@@ -29,8 +28,7 @@ describe('Installer', function() {
   })
 
   it('installs and saves properly', async function() {
-    console = require('console')
-    const installer = new Installer({rootDirectory: testRoot})
+    const installer = new Installer({ rootDirectory: testRoot })
     await installer.install(testPackageName, true)
     expect(await exists(testPackagePath)).toBe(true)
     const manifest = await readJSON(Path.join(testRoot, 'package.json'))
@@ -38,7 +36,7 @@ describe('Installer', function() {
   })
 
   it('installs without saving', async function() {
-    const installer = new Installer({rootDirectory: testRoot})
+    const installer = new Installer({ rootDirectory: testRoot })
     await installer.install(testPackageName)
     expect(await exists(testPackagePath)).toBe(true)
     const manifest = await readJSON(Path.join(testRoot, 'package.json'))
@@ -46,7 +44,7 @@ describe('Installer', function() {
   })
 
   it('uninstalls and saves properly', async function() {
-    const installer = new Installer({rootDirectory: testRoot})
+    const installer = new Installer({ rootDirectory: testRoot })
     await installer.install(testPackageName, true)
     await installer.uninstall(testPackageName, true)
     const manifest = await readJSON(Path.join(testRoot, 'package.json'))
@@ -54,7 +52,7 @@ describe('Installer', function() {
   })
 
   it('uninstalls without saving', async function() {
-    const installer = new Installer({rootDirectory: testRoot})
+    const installer = new Installer({ rootDirectory: testRoot })
     await installer.install(testPackageName, true)
     await installer.uninstall(testPackageName)
     const manifest = await readJSON(Path.join(testRoot, 'package.json'))
@@ -62,14 +60,17 @@ describe('Installer', function() {
   })
 
   it('installs peer dependencies properly', async function() {
-
     const onStarted = jasmine.createSpy('onStarted')
     const onProgress = jasmine.createSpy('onProgress')
     const onComplete = jasmine.createSpy('onComplete')
 
-    const installer = new Installer({rootDirectory: testRoot})
+    const installer = new Installer({ rootDirectory: testRoot })
     await installer.install(testPackageName, true)
-    await writeJSON(Path.join(testPackagePath, 'package.json'), {name: testPackageName, version: '0.0.0', peerDependencies: {'sb-debounce': '>=1.0.0'}})
+    await writeJSON(Path.join(testPackagePath, 'package.json'), {
+      name: testPackageName,
+      version: '0.0.0',
+      peerDependencies: { 'sb-debounce': '>=1.0.0' }
+    })
     await installer.installPeerDependencies(testPackageName, onStarted, onProgress, onComplete)
 
     expect(onStarted).toHaveBeenCalled()
@@ -85,9 +86,8 @@ describe('Installer', function() {
   })
 
   it('tells if a module is installed or not', async function() {
-    const installer = new Installer({rootDirectory: __dirname})
+    const installer = new Installer({ rootDirectory: __dirname })
     expect(await installer.isInstalled('some-package')).toBe(false)
     expect(await installer.isInstalled('motion-fs')).toBe(true)
   })
-
 })

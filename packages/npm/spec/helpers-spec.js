@@ -18,7 +18,9 @@ describe('versionFromRange', function() {
 
 describe('getManifestPath', function() {
   it('works on children', async function() {
-    expect(await getManifestPath('motion-fs', rootDirectory)).toBe(Path.join(rootDirectory, 'node_modules', 'motion-fs', 'package.json'))
+    expect(await getManifestPath('motion-fs', rootDirectory)).toBe(
+      Path.join(rootDirectory, 'node_modules', 'motion-fs', 'package.json')
+    )
     try {
       await getManifestPath('sb-hello', rootDirectory)
       expect(false).toBe(true)
@@ -27,7 +29,9 @@ describe('getManifestPath', function() {
     }
   })
   it('works on parents', async function() {
-    expect(await getManifestPath('babel', rootDirectory)).toBe(Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json')))
+    expect(await getManifestPath('babel', rootDirectory)).toBe(
+      Path.normalize(Path.join(rootDirectory, '..', '..', 'node_modules', 'babel', 'package.json'))
+    )
   })
 })
 
