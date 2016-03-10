@@ -1,6 +1,21 @@
 {
   "parser": "babel-eslint",
+  "extends": "airbnb",
   "rules": {
-    "no-unused-vars": 2
+    "semi": [2, "never"],
+    "prefer-arrow-callback": 0,
+    "space-before-function-paren": [2, "never"],
+    "func-names": 0,
+    "no-param-reassign": 0,
+    "comma-dangle": [2, "never"]
+  },
+  "globals": {
+    "it": true,
+    "waitsForPromise": true,
+    "describe": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "jasmine": true,
+    "expect": true
   }
 }
