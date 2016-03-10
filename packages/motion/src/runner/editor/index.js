@@ -1,10 +1,9 @@
 'use babel'
 
 import Point from 'atom-text-buffer-point'
-import {CompositeDisposable} from 'sb-event-kit'
+import { CompositeDisposable } from 'sb-event-kit'
 import Autocomplete from './autocomplete'
-import {logError} from '../lib/fns'
-import {collectViews, getObjectAtPosition, POSITION_TYPE} from './helpers'
+import { collectViews, getObjectAtPosition, POSITION_TYPE } from './helpers'
 
 export default class Editor {
   constructor() {

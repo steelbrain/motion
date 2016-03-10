@@ -200,5 +200,5 @@ export default [
     description: 'Outline on form and link elements',
     auto: 'none',
     strength: 100
-  },
+  }
 ]

@@ -5,7 +5,7 @@ export const POSITION_TYPE = {
   STYLE: 'STYLE'
 }
 
-export function collectViews(contents) {
+export function collectViews() {
   throw new Error('To be rewritten')
 }
 
@@ -15,9 +15,11 @@ export function pointWithinRange(point, range) {
 
 export function getObjectAtPosition(objects, position) {
   for (const key in objects) {
-    const value = objects[key]
-    if (pointWithinRange(position, value.location)) {
-      return value
+    if (objects.hasOwnProperty(key)) {
+      const value = objects[key]
+      if (pointWithinRange(position, value.location)) {
+        return value
+      }
     }
   }
   return null
