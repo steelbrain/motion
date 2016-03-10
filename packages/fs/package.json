@@ -9,6 +9,9 @@
   "author": "Motion <natewienert@gmail.com> (motion.io)",
   "license": "MIT",
   "dependencies": {
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "rimraf": "^2.5.2",
     "sb-promisify": "^1.1.1"
   }
 }
