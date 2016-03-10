@@ -43,8 +43,8 @@ class Motion {
     if (await this.exists()) {
       throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
     }
-    await mkdir(this.config.dataDirectory)
-    await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.dataDirectory)
+    await mkdir(this.config.rootDirectory)
+    await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.rootDirectory)
     this.state.write()
   }
 
@@ -53,10 +53,9 @@ class Motion {
   }
 
   static async create(config: Motion$Config): Promise<Motion> {
-    if (!await exists(config.rootDirectory)) {
-      throw new MotionError(ERROR_CODE.ENOENT)
+    if (await exists(config.rootDirectory)) {
+      config.rootDirectory = await realpath(config.rootDirectory)
     }
-    config.rootDirectory = await realpath(config.rootDirectory)
     fillConfig(config)
     const state = await State.create(Path.join(config.dataDirectory, 'state.json'))
     return new Motion(state, config)
