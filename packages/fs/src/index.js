@@ -10,6 +10,7 @@ export const copy = promisify(ncp)
 export const unlink = promisify(FS.unlink)
 export const readFile = promisify(FS.readFile)
 export const writeFile = promisify(FS.writeFile)
+export const realpath = promisify(FS.realpath)
 
 export function mkdir(target: string): Promise {
   return new Promise(function(resolve, reject) {
