@@ -13,7 +13,7 @@ export const writeFile = promisify(FS.writeFile)
 
 export function mkdir(target: string): Promise {
   return new Promise(function(resolve, reject) {
-    mkdirp(target, { mode: 755 }, function(error) {
+    mkdirp(target, function(error) {
       if (error) {
         reject(error)
       } else resolve()

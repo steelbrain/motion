@@ -104,4 +104,15 @@ describe('File system helpers', function() {
       await Helpers.unlink(nonExistentFile)
     })
   })
+
+  describe('mkdir and rm', function() {
+    it('writes and removes dirs', async function() {
+      const testDirPath = Path.join(__dirname, 'fixtures', 'test_dir')
+      expect(await Helpers.exists(testDirPath)).toBe(false)
+      await Helpers.mkdir(testDirPath)
+      expect(await Helpers.exists(testDirPath)).toBe(true)
+      await Helpers.rm(testDirPath)
+      expect(await Helpers.exists(testDirPath)).toBe(false)
+    })
+  })
 })
