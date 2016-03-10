@@ -78,14 +78,14 @@ describe('File system helpers', function() {
     })
     it('throws if the file does not exist', async function() {
       try {
-        const contents = await Helpers.readJSON(nonExistentFile)
+        await Helpers.readJSON(nonExistentFile)
       } catch (_) {
         expect(_.message).toContain('ENOENT')
       }
     })
     it('reads properly if possible', async function() {
       const contents = await Helpers.readJSON(Path.join(__dirname, 'fixtures', 'example.json'))
-      expect(contents).toEqual({some: 'thing'})
+      expect(contents).toEqual({ some: 'thing' })
     })
   })
 
@@ -99,10 +99,9 @@ describe('File system helpers', function() {
       }
     })
     it('can write properly', async function() {
-      await Helpers.writeJSON(nonExistentFile, {some: 'thing'})
-      expect(await Helpers.readJSON(nonExistentFile)).toEqual({some: 'thing'})
+      await Helpers.writeJSON(nonExistentFile, { some: 'thing' })
+      expect(await Helpers.readJSON(nonExistentFile)).toEqual({ some: 'thing' })
       await Helpers.unlink(nonExistentFile)
     })
   })
-
 })

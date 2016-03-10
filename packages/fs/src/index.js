@@ -1,9 +1,6 @@
-'use strict'
-
 /* @flow */
 
 import FS from 'fs'
-import Path from 'path'
 import promisify from 'sb-promisify'
 
 export const unlink = promisify(FS.unlink)
