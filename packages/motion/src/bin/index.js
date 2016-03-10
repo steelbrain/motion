@@ -12,6 +12,8 @@ process.on('unhandledRejection', function(reason, promise) {
 
 const Path = require('path')
 const Motion = require('../')
+const chalk = require('chalk')
+const trim = require('cool-trim')
 const manifest = require('../../package.json')
 const parameters = process.argv.slice(2)
 const command = parameters[0]
@@ -40,7 +42,14 @@ if (command === 'new') {
   }
   getMotion(Path.join(process.cwd(), name)).then(function(motion) {
     return motion.init()
-  }).catch(handleError)
+  }).then(function() {
+    console.log(trim(`
+      ${chalk.green('App created successfully! Enjoy')}
+      ${chalk.yellow('To run motion in your new app, do')}
+        $ cd ${name}
+        $ motion
+    `))
+  }, handleError)
 } else if (command === 'build') {
   console.log('Motion Build')
 } else if (command === 'init') {
@@ -52,7 +61,7 @@ if (command === 'new') {
 }
 
 if (showHelp) {
-  console.log(`
+  console.log(trim(`
     Motion v${manifest.version}, Usage:
       motion                        Run current Motion app
       motion -h, --help             Show this help
@@ -60,6 +69,6 @@ if (showHelp) {
       motion new $name              Create new Motion app with $name as name
       motion build                  Built current Motion app
       motion init                   Add Motion config to current app
-    `.trim())
+    `))
   process.exit(1)
 }

@@ -1,9 +1,9 @@
 /* @flow */
 
 export const ERROR_CODE = {
-  NOT_MOTION_APP: 1,
-  ALREADY_MOTION_APP: 2,
-  ENOENT: 3
+  NOT_MOTION_APP: 'NOT_MOTION_APP',
+  ALREADY_MOTION_APP: 'ALREADY_MOTION_APP',
+  ENOENT: 'ENOENT'
 }
 
 export const MESSAGES = {
@@ -13,10 +13,10 @@ export const MESSAGES = {
 }
 
 export class MotionError extends Error {
-  code: number;
+  code: string;
   motion: boolean;
 
-  constructor(code: number) {
+  constructor(code: string) {
     super(MESSAGES[code])
     this.code = code
     this.motion = true

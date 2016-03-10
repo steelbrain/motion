@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "chalk": "^1.1.1",
+    "cool-trim": "^1.0.0",
     "meow": "^3.7.0",
     "minimist": "^1.2.0",
     "motion-fs": "^1.0.0",
