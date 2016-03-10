@@ -32,14 +32,14 @@ class Motion {
     return await exists(this.config.dataDirectory)
   }
 
-  async watch(): Promise {
+  async watch(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     console.log('I should watch the app')
   }
 
-  async build(): Promise {
+  async build(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
