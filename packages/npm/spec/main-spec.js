@@ -4,7 +4,7 @@
 
 import Path from 'path'
 import Installer from '../'
-import { exec } from 'sb-exec'
+import { exec, mkdir } from 'sb-exec'
 import { readJSON, writeJSON, exists } from 'motion-fs'
 
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)

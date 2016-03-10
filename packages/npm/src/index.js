@@ -63,7 +63,7 @@ class Installer {
     const rootDirectory = this.options.rootDirectory
     const manifestPath = await getManifestPath(name, rootDirectory)
     const manifestContents = await readJSON(manifestPath)
-    const peerDependencies = manifestContents && manifestContents.peerDependencies || {}
+    const peerDependencies = manifestContents && manifestContents.peerDependencies
 
     if (peerDependencies && typeof peerDependencies === 'object') {
       let dependencies = Object.keys(peerDependencies)
@@ -89,11 +89,11 @@ class Installer {
             }
           )
           if (onProgress) {
-            onProgress(name, null)
+            onProgress(dependencyName, null)
           }
         } catch (_) {
           if (onProgress) {
-            onProgress(name, _)
+            onProgress(dependencyName, _)
           } else throw _
         }
         return true
