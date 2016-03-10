@@ -1,21 +1,26 @@
 /* @flow */
 
+import invariant from 'assert'
 import Path from 'path'
 import { exists, copy, mkdir } from 'motion-fs'
 import { CompositeDisposable } from 'sb-event-kit'
+import State from './state'
 import { MotionError, ERROR_CODE } from './error'
 import { fillConfig } from './helpers'
 import type { Motion$Config } from './types'
 
 class Motion {
+  state: State;
   config: Motion$Config;
   subscriptions: CompositeDisposable;
 
-  constructor(config: Motion$Config) {
+  constructor(state: State, config: Motion$Config) {
+    invariant(state instanceof State && typeof config === 'object',
+      'Use Motion.create instead of constructor')
+
+    this.state = state
     this.config = config
     this.subscriptions = new CompositeDisposable()
-
-    fillConfig(config)
   }
 
   async exists(): Promise<boolean> {
@@ -35,10 +40,17 @@ class Motion {
     }
     await mkdir(this.config.dataDirectory)
     await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.dataDirectory)
+    this.state.write()
   }
 
   dispose() {
     this.subscriptions.dispose()
+  }
+
+  static async create(config: Motion$Config): Promise<Motion> {
+    fillConfig(config)
+    const state = await State.create(Path.join(config.dataDirectory, 'state.json'))
+    return new Motion(state, config)
   }
 }
 
