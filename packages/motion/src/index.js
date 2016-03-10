@@ -1,6 +1,8 @@
 /* @flow */
 
+import { exists } from 'motion-fs'
 import { CompositeDisposable } from 'sb-event-kit'
+import { fillConfig } from './helpers'
 import type { Motion$Config } from './types'
 
 class Motion {
@@ -10,6 +12,12 @@ class Motion {
   constructor(config: Motion$Config) {
     this.config = config
     this.subscriptions = new CompositeDisposable()
+
+    fillConfig(config)
+  }
+
+  async exists(): Promise<boolean> {
+    return await exists(this.config.dataDirectory)
   }
 
   dispose() {
