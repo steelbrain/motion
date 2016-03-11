@@ -30,6 +30,9 @@ export default class Main {
     })
     // TODO: Read manifest scripts and prompt to run them here
   }
+  log(...parameters: any) {
+    this.cli.log(...parameters)
+  }
   dispose() {
     this.cli.dispose()
   }

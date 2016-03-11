@@ -36,14 +36,17 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    console.log('I should watch the app')
+    if (terminal && process.stdin.isTTY) {
+      this.cli.activate()
+    }
+    this.cli.log('I should build the app')
   }
 
   async build(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    console.log('I should build the app')
+    this.cli.log('I should build the app')
   }
 
   async init(): Promise {

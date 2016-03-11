@@ -46,7 +46,11 @@ export default class CLI {
         contents.push(inspect(value))
       }
     }
-    this.instance.log(contents.join(' '))
+    if (this.active) {
+      this.instance.log(contents.join(''))
+    } else {
+      console.log(contents.join(''))
+    }
   }
   dispose() {
     if (this.active) {
