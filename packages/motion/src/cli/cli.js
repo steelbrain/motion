@@ -5,8 +5,9 @@ import { CompositeDisposable, Emitter } from 'sb-event-kit'
 import vorpal from 'vorpal'
 import chalk from 'chalk'
 
-const CLI_DELIMITER = `${chalk.blue('motion')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
-const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')} ${chalk.yellow('Welcome to Motion')} ${chalk.red('♥ ♥ ♥ ♥ ♥')}`
+const CLI_DELIMITER = `${chalk.blue('♥ motion ♥')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
+const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Welcome to Motion')}\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
+const BYE_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Bye from Motion')}\t\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
 
 export default class CLI {
   active: boolean;
@@ -27,6 +28,10 @@ export default class CLI {
     this.instance.show()
     this.active = true
     this.instance.log(WELCOME_MESSAGE)
+    this.replaceCommand('exit', 'Exit motion daemon', function() {
+      this.log(BYE_MESSAGE)
+      process.exit(0)
+    })
   }
   addCommand(name: string, helpText: string, callback: Function) {
     this.instance.command(name, helpText).action((args, keepRunning) => {
@@ -35,6 +40,13 @@ export default class CLI {
         result.then(keepRunning, keepRunning)
       } else keepRunning()
     })
+  }
+  replaceCommand(name: string, helpText: string, callback: Function) {
+    const command = this.instance.find(name)
+    if (command) {
+      command.remove()
+    }
+    this.addCommand(name, helpText, callback)
   }
   log() {
     const contents = []
