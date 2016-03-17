@@ -1,6 +1,7 @@
 /* @flow */
 
 import Path from 'path'
+import webpack from 'webpack'
 import WebPackPluginNPM from 'motion-webpack-npm'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
@@ -22,11 +23,10 @@ export function getRandomNumber(min: number, max: number): number {
 
 export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean): Object {
   const configuration = {
-    entry: {
-      app: ['./index.js']
-    },
+    devtool: null,
+    entry: ['../index.js'],
     output: {
-      path: Path.join(config.dataDirectory, 'dist'),
+      path: Path.join(config.dataDirectory, '_'),
       filename: 'bundle.js'
     },
     plugins: [
@@ -53,11 +53,18 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
           }
         }
       })
-    ]
+    ],
+    resolve: {
+      root: config.rootDirectory,
+      modulesDirectories: ['./.motion/node_modules'],
+      packageMains: ['webpack', 'browser', 'web', 'browserify', 'jsnext:main', 'main']
+    }
   }
 
   if (development) {
-    configuration.entry.app.unshift('webpack-dev-server/client?http://localhost:8080/', 'webpack/hot/dev-server')
+    configuration.devtool = 'source-map'
+    configuration.entry.unshift('webpack-dev-server/client?http://localhost:8080/', 'webpack/hot/dev-server')
+    configuration.plugins.push(new webpack.HotModuleReplacementPlugin())
   }
 
   return configuration

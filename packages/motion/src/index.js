@@ -45,18 +45,22 @@ class Motion {
     if (EXECUTING_ON.has(this.config.rootDirectory)) {
       throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
     }
-    EXECUTING_ON.add(this.config.rootDirectory)
-    process.chdir(this.config.rootDirectory)
+    EXECUTING_ON.add(this.config.dataDirectory)
+    process.chdir(this.config.dataDirectory)
     if (terminal) {
       this.cli.activate()
     }
     const compiler = webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, true))
-    const server = new WebpackDevServer(compiler)
+    const server = new WebpackDevServer(compiler, {
+      hot: true,
+      quiet: true,
+      publicPath: '/_/'
+    })
     const disposable = new Disposable(() => {
       this.subscriptions.remove(disposable)
       this.cli.deactivate()
       server.close()
-      EXECUTING_ON.delete(this.config.rootDirectory)
+      EXECUTING_ON.delete(this.config.dataDirectory)
     })
 
     this.subscriptions.add(disposable)
@@ -68,7 +72,7 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    if (!ignoreExecution && EXECUTING_ON.has(this.config.rootDirectory)) {
+    if (!ignoreExecution && EXECUTING_ON.has(this.config.dataDirectory)) {
       throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
     }
     process.chdir(this.config.rootDirectory)
