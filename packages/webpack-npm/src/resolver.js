@@ -20,7 +20,7 @@ function niceResolve(moduleName: string, basedir: string): Promise<?string> {
 
 export function getResolver(config: Installer$Config, compiler: Object, loader: boolean): Function {
   const locks = new Set()
-  const npm = new NPM({ rootDirectory: getRootDirectory(compiler), environment: config.development ? 'development' : 'production' })
+  const npm = new NPM({ rootDirectory: getRootDirectory(), environment: config.development ? 'development' : 'production' })
 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
@@ -54,7 +54,7 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
     locks.delete(moduleName)
     let path = await niceResolve(moduleName, result.path)
     if (path === null && compiler.options.resolve.root) {
-      path = await niceResolve(moduleName, getRootDirectory(compiler))
+      path = await niceResolve(moduleName, getRootDirectory())
     }
     if (path) {
       next(null, Object.assign({}, result, {

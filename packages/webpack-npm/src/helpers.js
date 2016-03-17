@@ -14,12 +14,7 @@ export function extractModuleName(moduleName: string): ?string {
   return null
 }
 
-export function getRootDirectory(compiler: Object): string {
-  const options = compiler.options
-  const rootDirectory = options.resolve && options.resolve.root
-  if (rootDirectory) {
-    return Array.isArray(rootDirectory) ? rootDirectory[0] : rootDirectory
-  }
+export function getRootDirectory(): string {
   return process.cwd()
 }
 
