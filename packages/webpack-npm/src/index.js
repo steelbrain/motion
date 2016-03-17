@@ -7,6 +7,7 @@ class Installer {
   config: Installer$Config;
   constructor(config: Installer$Config = {}) {
     config.save = Boolean(typeof config.save !== 'undefined' ? config.save : true)
+    config.development = Boolean(config.development)
 
     this.config = config
   }

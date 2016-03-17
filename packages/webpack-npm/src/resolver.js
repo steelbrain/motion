@@ -10,7 +10,7 @@ let installID = 0
 
 export function getResolver(config: Installer$Config, compiler: Object, loader: boolean): Function {
   const locks = new Set()
-  const npm = new NPM({ rootDirectory: getRootDirectory() })
+  const npm = new NPM({ rootDirectory: getRootDirectory(), environment: config.development ? 'development' : 'production' })
 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
