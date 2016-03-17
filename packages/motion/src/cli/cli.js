@@ -5,7 +5,7 @@ import { CompositeDisposable, Emitter } from 'sb-event-kit'
 import vorpal from 'vorpal'
 import chalk from 'chalk'
 
-const CLI_DELIMITER = `${chalk.blue('♥ motion ♥')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
+const CLI_DELIMITER = `${chalk.yellow('♥ motion ♥')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
 const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Welcome to Motion')}\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
 const BYE_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Bye from Motion')}\t\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
 
