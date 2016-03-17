@@ -2,7 +2,7 @@
 
 import promisify from 'sb-promisify'
 import NPM from 'motion-npm'
-import { getModuleName, getRootDirectory, isBuiltin } from './helpers'
+import { getModuleName, getRootDirectory, extractModuleName, isBuiltin } from './helpers'
 import type { Installer$Config } from './types'
 
 const resolve = promisify(require('resolve'))
@@ -14,7 +14,12 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
-    const moduleName = getModuleName(result, loader)
+    const moduleNameRaw = extractModuleName(result.request)
+    if (!moduleNameRaw) {
+      next()
+      return
+    }
+    const moduleName = getModuleName(moduleNameRaw, loader)
     let error = null
 
     if (locks.has(moduleName) || isBuiltin(moduleName) || await npm.isInstalled(moduleName)) {

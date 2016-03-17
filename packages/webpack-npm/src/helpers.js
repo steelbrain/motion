@@ -1,13 +1,17 @@
 /* @flow */
 
-const MODULE_EXTRACTION_REGEX = /([^\/\\]+)/
+const MODULE_EXTRACTION_REGEX = /^(\w[^\/\\]+)/
 
-export function extractModuleName(moduleName: string): string {
+export function extractModuleName(moduleName: string): ?string {
+  if (moduleName.indexOf(' ') !== -1) {
+    return null
+  }
+
   const matches = MODULE_EXTRACTION_REGEX.exec(moduleName)
   if (matches) {
     return matches[1]
   }
-  return moduleName
+  return null
 }
 
 export function getRootDirectory(): string {
@@ -16,8 +20,7 @@ export function getRootDirectory(): string {
   return process.cwd()
 }
 
-export function getModuleName(result: Object, loader: boolean): string {
-  let moduleName = extractModuleName(result.request)
+export function getModuleName(moduleName: string, loader: boolean): string {
   if (loader && !moduleName.match(/\-loader$/)) {
     moduleName += '-loader'
   }

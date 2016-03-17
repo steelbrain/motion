@@ -37,5 +37,9 @@ describe('Helpers', function() {
     it('extracts names from deep requires', function() {
       expect(Helpers.extractModuleName('webpack/asd/asd')).toBe('webpack')
     })
+    it('returns null for invalid ones', function() {
+      expect(Helpers.extractModuleName('~asd')).toBe(null)
+      expect(Helpers.extractModuleName('webpack and amd')).toBe(null)
+    })
   })
 })
