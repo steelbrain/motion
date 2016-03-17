@@ -3,14 +3,14 @@
 import invariant from 'assert'
 import Path from 'path'
 import { exists, copy, mkdir, realpath } from 'motion-fs'
-import { CompositeDisposable } from 'sb-event-kit'
+import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import State from './state'
 import CLI from './cli'
 import { MotionError, ERROR_CODE } from './error'
 import { fillConfig } from './helpers'
 import type { Motion$Config } from './types'
 
-const WATCHING: Set<string> = new Set()
+const EXECUTING_ON: Set<string> = new Set()
 
 class Motion {
   cli: CLI;
@@ -36,20 +36,34 @@ class Motion {
     return await exists(this.config.dataDirectory)
   }
 
-  async watch(terminal: boolean = false): Promise {
+  async watch(terminal: boolean = false): Promise<Disposable> {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    if (terminal && process.stdin.isTTY) {
+    if (EXECUTING_ON.has(this.config.rootDirectory)) {
+      throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
+    }
+    EXECUTING_ON.add(this.config.rootDirectory)
+    process.chdir(this.config.rootDirectory)
+    if (terminal) {
       this.cli.activate()
     }
     this.cli.log('I should build the app')
+    return new Disposable(() => {
+      this.cli.deactivate()
+      EXECUTING_ON.delete(this.config.rootDirectory)
+      console.log('Boom, unwatch')
+    })
   }
 
-  async build(terminal: boolean = false): Promise {
+  async build(terminal: boolean = false, ignoreExecution: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
+    if (!ignoreExecution && EXECUTING_ON.has(this.config.rootDirectory)) {
+      throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
+    }
+    process.chdir(this.config.rootDirectory)
     this.cli.log('I should build the app')
   }
 

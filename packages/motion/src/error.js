@@ -3,7 +3,7 @@
 export const MESSAGES = {
   ENOENT: 'File or directory not found',
   NOT_MOTION_APP: 'Unable to run, directory is not a motion app',
-  ALREADY_WATCHING: 'Another instance of motion is already watching that directory in the same process',
+  ALREADY_EXECUTING: 'Another instance of motion is already running that directory in the same process',
   ALREADY_MOTION_APP: 'Directory is already a motion app'
 }
 // Note: This is generating automatically from MESSAGES

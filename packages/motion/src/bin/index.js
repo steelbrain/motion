@@ -52,7 +52,7 @@ if (command === 'new') {
   }, handleError)
 } else if (command === 'build') {
   getMotion().then(function(motion) {
-    return motion.build(true)
+    return motion.build(process.stdout.isTTY)
   }).then(function() {
     console.log(chalk.green('App built successfully'))
   }, handleError)
@@ -68,7 +68,7 @@ if (command === 'new') {
   }, handleError)
 } else if (!commands.length && !showHelp) { // run
   getMotion().then(function(motion) {
-    return motion.watch(true)
+    return motion.watch(process.stdout.isTTY)
   }).catch(handleError)
 } else {
   showHelp = true
