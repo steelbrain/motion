@@ -67,9 +67,9 @@ export default class CLI {
       }
     }
     if (this.active) {
-      this.instance.log(contents.join(''))
+      this.instance.log(contents.join(' '))
     } else {
-      console.log(contents.join(''))
+      console.log(contents.join(' '))
     }
   }
   dispose() {
