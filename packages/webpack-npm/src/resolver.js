@@ -26,7 +26,7 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
     const moduleNameRaw = extractModuleName(result.request)
-    if (!moduleNameRaw || result.path.indexOf('node_modules')) {
+    if (!moduleNameRaw || result.path.indexOf('node_modules') !== -1) {
       next()
       return
     }
