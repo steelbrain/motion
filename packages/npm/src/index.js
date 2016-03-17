@@ -80,11 +80,12 @@ class Installer {
       if (onStarted) {
         onStarted(versions)
       }
+      const _this = this
 
-      await Promise.all(versions.map(async ([dependencyName, version]) => {
+      await Promise.all(versions.map(async function([dependencyName, version]) {
         try {
           await exec('npm',
-            ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color', `--${this.options.environment}`],
+            ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color', `--${_this.options.environment}`],
             {
               cwd: rootDirectory
             }
