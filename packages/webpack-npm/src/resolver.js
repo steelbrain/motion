@@ -33,12 +33,8 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
     const moduleName = getModuleName(moduleNameRaw, loader)
     let error = null
 
-    if (locks.has(moduleName) || isBuiltin(moduleName)) {
+    if (locks.has(moduleName) || isBuiltin(moduleName) || await npm.isInstalled(moduleName)) {
       next()
-      return
-    }
-    if (await npm.isInstalled(moduleName)) {
-      await resolveGracefully(moduleName, result, next)
       return
     }
     locks.add(moduleName)
