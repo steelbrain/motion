@@ -3,6 +3,7 @@
 import invariant from 'assert'
 import Path from 'path'
 import webpack from 'webpack'
+import WebpackFS from 'motion-webpack-fs'
 import WebpackDevServer from 'webpack-dev-server'
 import { exists, copy, mkdir, realpath } from 'motion-fs'
 import { CompositeDisposable, Disposable } from 'sb-event-kit'
@@ -54,6 +55,10 @@ class Motion {
       this.cli.activate()
     }
     const compiler = webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, true))
+    // Unfortunately required due to https://goo.gl/TpOueD
+    compiler.inputFileSystem = WebpackFS
+    compiler.resolvers.normal.fileSystem = WebpackFS
+    compiler.resolvers.context.fileSystem = WebpackFS
     const server = new WebpackDevServer(compiler, {
       hot: true,
       quiet: true,

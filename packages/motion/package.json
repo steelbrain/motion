@@ -17,6 +17,7 @@
     "meow": "^3.7.0",
     "minimist": "^1.2.0",
     "motion-fs": "^1.0.0",
+    "motion-webpack-fs": "^0.9.0",
     "motion-webpack-npm": "^0.9.0",
     "open": "0.0.5",
     "ora": "^0.2.0",
