@@ -75,8 +75,14 @@ class Motion {
     if (!ignoreExecution && EXECUTING_ON.has(this.config.dataDirectory)) {
       throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
     }
-    process.chdir(this.config.rootDirectory)
-    this.cli.log('I should build the app')
+    process.chdir(this.config.dataDirectory)
+    await new Promise((resolve, reject) => {
+      webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, false), function(error) {
+        if (error) {
+          reject(error)
+        } else resolve()
+      })
+    })
   }
 
   async init(): Promise {
