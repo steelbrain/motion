@@ -81,7 +81,7 @@ class Installer {
         onStarted(versions)
       }
 
-      await Promise.all(versions.map(async function([dependencyName, version]) {
+      await Promise.all(versions.map(async ([dependencyName, version]) => {
         try {
           await exec('npm',
             ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color', `--${this.options.environment}`],
