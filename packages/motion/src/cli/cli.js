@@ -24,14 +24,22 @@ export default class CLI {
     this.subscriptions.add(this.emitter)
   }
   activate() {
+    if (this.active) {
+      this.instance.show()
+      return
+    }
+
+    this.active = true
     this.instance.delimiter(CLI_DELIMITER)
     this.instance.show()
-    this.active = true
     this.instance.log(WELCOME_MESSAGE)
     this.replaceCommand('exit', 'Exit motion daemon', function() {
       this.log(BYE_MESSAGE)
       process.exit(0)
     })
+  }
+  deactivate() {
+    this.instance.hide()
   }
   addCommand(name: string, helpText: string, callback: Function) {
     this.instance.command(name, helpText).action((args, keepRunning) => {

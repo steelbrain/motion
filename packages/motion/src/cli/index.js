@@ -14,6 +14,7 @@ const SPINNER_GLUE = ' & '
 export default class Main {
   cli: CLI;
   state: State;
+  active: boolean;
   config: Motion$Config;
   spinner: ?{
     texts: Array<string>,
@@ -23,9 +24,15 @@ export default class Main {
   constructor(state: State, config: Motion$Config) {
     this.cli = new CLI()
     this.state = state
+    this.active = false
     this.config = config
   }
   activate() {
+    if (this.active) {
+      this.cli.activate()
+      return
+    }
+
     const serverAddress = `http://localhost:${this.state.get().web_server_port}/`
 
     this.cli.activate()
@@ -38,6 +45,9 @@ export default class Main {
       await exec('atom', [this.config.rootDirectory])
     })
     // TODO: Read manifest scripts and prompt to run them here
+  }
+  deactivate() {
+    this.cli.deactivate()
   }
   log(...parameters: any) {
     this.cli.log(...parameters)
