@@ -1,15 +1,16 @@
 /* @flow */
 
-export const ERROR_CODE = {
-  NOT_MOTION_APP: 'NOT_MOTION_APP',
-  ALREADY_MOTION_APP: 'ALREADY_MOTION_APP',
-  ENOENT: 'ENOENT'
-}
-
 export const MESSAGES = {
+  ENOENT: 'File or directory not found',
   NOT_MOTION_APP: 'Unable to run, directory is not a motion app',
-  ALREADY_MOTION_APP: 'Directory is already a motion app',
-  ENOENT: 'File or directory not found'
+  ALREADY_WATCHING: 'Another instance of motion is already watching that directory in the same process',
+  ALREADY_MOTION_APP: 'Directory is already a motion app'
+}
+// Note: This is generating automatically from MESSAGES
+export const ERROR_CODE = {}
+
+for (const name of Object.keys(MESSAGES)) {
+  ERROR_CODE[name] = name
 }
 
 export class MotionError extends Error {
