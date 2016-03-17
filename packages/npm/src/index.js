@@ -7,25 +7,26 @@ import { versionFromRange, getManifestPath, isNPMError } from './helpers'
 import { readJSON } from 'motion-fs'
 
 type Installer$Options = {
-  rootDirectory: string,
-  filter: ?Function
+  filter: ?Function,
+  environment: 'development' | 'production',
+  rootDirectory: string
 }
 
 class Installer {
   options: Installer$Options;
 
-  constructor({ rootDirectory, filter }: Installer$Options) {
+  constructor({ rootDirectory, filter, environment } : Installer$Options) {
     invariant(typeof rootDirectory === 'string', 'rootDirectory must be a string')
     invariant(!filter || typeof filter === 'function', 'filter must be a function')
 
-    this.options = { rootDirectory, filter }
+    this.options = { rootDirectory, filter, environment: environment === 'development' ? environment : 'production' }
   }
   async install(name: string, save: boolean = false): Promise<void> {
     const parameters = ['install']
     if (save) {
       parameters.push('--save')
     }
-    parameters.push(name, '--loglevel=error', '--no-color')
+    parameters.push(name, '--loglevel=error', '--no-color', `--${this.options.environment}`)
     const result = await exec('npm', parameters, {
       cwd: this.options.rootDirectory, stream: 'stderr'
     })
@@ -38,7 +39,7 @@ class Installer {
     if (save) {
       parameters.push('--save')
     }
-    parameters.push(name, '--loglevel=error', '--no-color')
+    parameters.push(name, '--loglevel=error', '--no-color', `--${this.options.environment}`)
     const result = await exec('npm', parameters, {
       cwd: this.options.rootDirectory, stream: 'stderr'
     })
@@ -83,7 +84,7 @@ class Installer {
       await Promise.all(versions.map(async function([dependencyName, version]) {
         try {
           await exec('npm',
-            ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color'],
+            ['install', `${dependencyName}@${version}`, '--loglevel=error', '--no-color', `--${this.options.environment}`],
             {
               cwd: rootDirectory
             }
