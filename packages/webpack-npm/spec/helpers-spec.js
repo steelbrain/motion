@@ -9,12 +9,12 @@ const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 describe('Helpers', function() {
   describe('getModuleName', function() {
     it('returns name from a request', function() {
-      expect(Helpers.getModuleName({ request: 'some-module' })).toBe('some-module')
-      expect(Helpers.getModuleName({ request: 'motion' })).toBe('motion')
+      expect(Helpers.getModuleName('some-module')).toBe('some-module')
+      expect(Helpers.getModuleName('motion')).toBe('motion')
     })
     it('makes sure theres a loader in name for loaders', function() {
-      expect(Helpers.getModuleName({ request: 'babel-loader' }, true)).toBe('babel-loader')
-      expect(Helpers.getModuleName({ request: 'babel' }, true)).toBe('babel-loader')
+      expect(Helpers.getModuleName('babel-loader', true)).toBe('babel-loader')
+      expect(Helpers.getModuleName('babel', true)).toBe('babel-loader')
     })
   })
 
