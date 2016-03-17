@@ -14,9 +14,12 @@ export function extractModuleName(moduleName: string): ?string {
   return null
 }
 
-export function getRootDirectory(): string {
-  // TODO: Make this actually work
-  // NOTE: `npm-install-webpack-plugin` does the same by the way
+export function getRootDirectory(compiler: Object): string {
+  const options = compiler.options
+  const rootDirectory = options.resolve && options.resolve.root
+  if (rootDirectory) {
+    return Array.isArray(rootDirectory) ? rootDirectory[0] : rootDirectory
+  }
   return process.cwd()
 }
 
