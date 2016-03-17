@@ -1,27 +1,26 @@
 /* @flow */
 
-import promisify from 'sb-promisify'
 import NPM from 'motion-npm'
 import { getModuleName, getRootDirectory, extractModuleName, isBuiltin } from './helpers'
 import type { Installer$Config } from './types'
 
-const resolve = promisify(require('resolve'))
+const resolve = require('resolve')
 let installID = 0
 
-async function resolveGracefully(moduleName: string, result: Object, next: Function) {
-  try {
-    const path = await resolve(moduleName, { basedir: result.path })
-    next(null, Object.assign({}, result, {
-      path, resolved: true
-    }))
-  } catch (_) {
-    next()
-  }
+// Does not throw, instead returns null
+function niceResolve(moduleName: string, basedir: string): Promise<?string> {
+  return new Promise(function(resolvePromise) {
+    resolve(moduleName, { basedir }, function(error, path) {
+      if (error) {
+        resolvePromise(null)
+      } else resolvePromise(path)
+    })
+  })
 }
 
 export function getResolver(config: Installer$Config, compiler: Object, loader: boolean): Function {
   const locks = new Set()
-  const npm = new NPM({ rootDirectory: getRootDirectory(), environment: config.development ? 'development' : 'production' })
+  const npm = new NPM({ rootDirectory: getRootDirectory(compiler), environment: config.development ? 'development' : 'production' })
 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
@@ -53,6 +52,16 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
       config.onComplete(id)
     }
     locks.delete(moduleName)
-    await resolveGracefully(moduleName, result, next)
+    let path = await niceResolve(moduleName, result.path)
+    if (path === null && compiler.options.resolve.root) {
+      path = await niceResolve(moduleName, getRootDirectory(compiler))
+    }
+    if (path) {
+      next(null, Object.assign({}, result, {
+        path, resolved: true
+      }))
+    } else {
+      next()
+    }
   }
 }
