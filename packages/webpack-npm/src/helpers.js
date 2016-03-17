@@ -1,5 +1,15 @@
 /* @flow */
 
+const MODULE_EXTRACTION_REGEX = /([^\/\\]+)/
+
+export function extractModuleName(moduleName: string): string {
+  const matches = MODULE_EXTRACTION_REGEX.exec(moduleName)
+  if (matches) {
+    return matches[1]
+  }
+  return moduleName
+}
+
 export function getRootDirectory(): string {
   // TODO: Make this actually work
   // NOTE: `npm-install-webpack-plugin` does the same by the way
@@ -7,7 +17,7 @@ export function getRootDirectory(): string {
 }
 
 export function getModuleName(result: Object, loader: boolean): string {
-  let moduleName = result.request
+  let moduleName = extractModuleName(result.request)
   if (loader && !moduleName.match(/\-loader$/)) {
     moduleName += '-loader'
   }
