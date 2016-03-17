@@ -54,7 +54,11 @@ if (command === 'new') {
   getMotion().then(function(motion) {
     return motion.build(process.stdout.isTTY)
   }).then(function() {
-    console.log(chalk.green('App built successfully'))
+    console.log(trim(`
+      ${chalk.green('App built successfully')}
+      To access the built files, do
+        $ cd .motion/
+    `))
   }, handleError)
 } else if (command === 'init') {
   getMotion().then(function(motion) {
