@@ -54,6 +54,7 @@ class Motion {
     const server = new WebpackDevServer(compiler, {
       hot: true,
       quiet: true,
+      inline: true,
       publicPath: '/_/'
     })
     const disposable = new Disposable(() => {
