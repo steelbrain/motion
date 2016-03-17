@@ -8,6 +8,17 @@ import type { Installer$Config } from './types'
 const resolve = promisify(require('resolve'))
 let installID = 0
 
+async function resolveGracefully(moduleName: string, result: Object, next: Function) {
+  try {
+    const path = await resolve(moduleName, { basedir: result.path })
+    next(null, Object.assign({}, result, {
+      path, resolved: true
+    }))
+  } catch (_) {
+    next()
+  }
+}
+
 export function getResolver(config: Installer$Config, compiler: Object, loader: boolean): Function {
   const locks = new Set()
   const npm = new NPM({ rootDirectory: getRootDirectory(), environment: config.development ? 'development' : 'production' })
@@ -15,15 +26,19 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
   return async function(result: Object, next: Function): Promise {
     const id = ++installID
     const moduleNameRaw = extractModuleName(result.request)
-    if (!moduleNameRaw) {
+    if (!moduleNameRaw || result.path.indexOf('node_modules')) {
       next()
       return
     }
     const moduleName = getModuleName(moduleNameRaw, loader)
     let error = null
 
-    if (locks.has(moduleName) || isBuiltin(moduleName) || await npm.isInstalled(moduleName)) {
+    if (locks.has(moduleName) || isBuiltin(moduleName)) {
       next()
+      return
+    }
+    if (await npm.isInstalled(moduleName)) {
+      await resolveGracefully(moduleName, result, next)
       return
     }
     locks.add(moduleName)
@@ -42,13 +57,6 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
       config.onComplete(id)
     }
     locks.delete(moduleName)
-    try {
-      const path = await resolve(moduleName, { basedir: result.path })
-      next(null, Object.assign({}, result, {
-        path, resolved: true
-      }))
-    } catch (_) {
-      next()
-    }
+    await resolveGracefully(moduleName, result, next)
   }
 }
