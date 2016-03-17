@@ -20,10 +20,10 @@ export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
-export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean): Object {
+export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean): Object {
   const configuration = {
     entry: {
-      app: './index.js'
+      app: ['./index.js']
     },
     output: {
       path: Path.join(config.dataDirectory, 'dist'),
@@ -34,9 +34,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
         save: state.get().npm_save,
         onStarted(jobID: number, dependencies: Array<Array<string>>) {
           if (terminal) {
-            const dependencyNames = dependencies.map(function(dependency) {
-              return dependency[0]
-            })
+            const dependencyNames = dependencies.map(dependency => dependency[0])
             const installationMessage = `Installing ${dependencyNames.join(', ')}`
             INSTALLATION_MESSAGE.set(jobID, installationMessage)
             cli.addSpinner(installationMessage)
@@ -57,5 +55,10 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
       })
     ]
   }
+
+  if (development) {
+    configuration.entry.app.unshift('webpack-dev-server/client?http://localhost:8080/', 'webpack/hot/dev-server')
+  }
+
   return configuration
 }

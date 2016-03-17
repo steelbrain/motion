@@ -2,12 +2,14 @@
 
 import invariant from 'assert'
 import Path from 'path'
+import webpack from 'webpack'
+import WebpackDevServer from 'webpack-dev-server'
 import { exists, copy, mkdir, realpath } from 'motion-fs'
 import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import State from './state'
 import CLI from './cli'
 import { MotionError, ERROR_CODE } from './error'
-import { fillConfig } from './helpers'
+import { fillConfig, getWebpackConfig } from './helpers'
 import type { Motion$Config } from './types'
 
 const EXECUTING_ON: Set<string> = new Set()
@@ -48,12 +50,18 @@ class Motion {
     if (terminal) {
       this.cli.activate()
     }
-    this.cli.log('I should build the app')
-    return new Disposable(() => {
+    const compiler = webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, true))
+    const server = new WebpackDevServer(compiler)
+    const disposable = new Disposable(() => {
+      this.subscriptions.remove(disposable)
       this.cli.deactivate()
+      server.close()
       EXECUTING_ON.delete(this.config.rootDirectory)
-      console.log('Boom, unwatch')
     })
+
+    this.subscriptions.add(disposable)
+    server.listen(this.state.get().web_server_port)
+    return disposable
   }
 
   async build(terminal: boolean = false, ignoreExecution: boolean = false): Promise {
