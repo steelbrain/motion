@@ -32,6 +32,9 @@ class Motion {
     this.subscriptions = new CompositeDisposable()
 
     this.subscriptions.add(this.cli)
+    this.cli.onShouldBuild(async () => {
+      await this.build(false, true)
+    })
   }
 
   async exists(): Promise<boolean> {

@@ -1,11 +1,13 @@
 /* @flow */
 
+import { Emitter, CompositeDisposable } from 'sb-event-kit'
 import Ora from 'ora'
 import chalk from 'chalk'
 import open from 'open'
 import unique from 'lodash.uniq'
 import { exec } from 'sb-exec'
 import CLI from './cli'
+import type { Disposable } from 'sb-event-kit'
 import type State from '../state'
 import type { Motion$Config } from '../types'
 
@@ -20,12 +22,18 @@ export default class Main {
     texts: Array<string>,
     instance: Ora
   };
+  emitter: Emitter;
+  subscriptions: CompositeDisposable;
 
   constructor(state: State, config: Motion$Config) {
     this.cli = new CLI()
     this.state = state
     this.active = false
     this.config = config
+    this.emitter = new Emitter()
+    this.subscriptions = new CompositeDisposable()
+
+    this.subscriptions.add(this.emitter)
   }
   activate() {
     if (this.active) {
@@ -38,11 +46,15 @@ export default class Main {
     this.cli.activate()
     this.cli.log(`${chalk.green('Server running at')} ${serverAddress}`)
     this.cli.log(`${chalk.yellow(`Type ${chalk.underline('help')} to get list of available commands`)}`)
-    this.cli.addCommand('open', 'Open this project in Browser', () => {
+    this.cli.addCommand('open', 'Open this app in Browser', () => {
       open(serverAddress)
     })
-    this.cli.addCommand('editor', 'Open this project in Atom', async () => {
+    this.cli.addCommand('editor', 'Open this app in Atom', async () => {
       await exec('atom', [this.config.rootDirectory])
+    })
+    this.cli.addCommand('build', 'Build this app for production usage', async () => {
+      await this.emitter.emit('should-build')
+      this.cli.log('Dist files built successfully in', this.config.dataDirectory)
     })
     // TODO: Read manifest scripts and prompt to run them here
   }
@@ -90,7 +102,11 @@ export default class Main {
       this.cli.instance.ui.refresh()
     }
   }
+  onShouldBuild(callback: Function): Disposable {
+    return this.emitter.on('should-build', callback)
+  }
   dispose() {
     this.cli.dispose()
+    this.subscriptions.dispose()
   }
 }

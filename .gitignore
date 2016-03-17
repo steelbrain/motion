@@ -1,4 +1,4 @@
-apps/tools/.motion/.internal
+apps/tools/.motion/_
 .DS_Store
 node_modules
 npm-debug.log
