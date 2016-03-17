@@ -31,7 +31,8 @@ do :
   fi
 
   printf "Installing dependencies\n"
-  npm install --production
+  # to install devDependencies in packages
+  npm install --development
 
   printf "Linking self\n"
   npm link --loglevel=error
