@@ -9,6 +9,8 @@ import CLI from './cli'
 import type State from '../state'
 import type { Motion$Config } from '../types'
 
+const SPINNER_GLUE = ' & '
+
 export default class Main {
   cli: CLI;
   state: State;
@@ -36,12 +38,6 @@ export default class Main {
       await exec('atom', [this.config.rootDirectory])
     })
     // TODO: Read manifest scripts and prompt to run them here
-    setTimeout(() => {
-      this.addSpinner('Hey')
-      setTimeout(() => {
-        this.removeSpinner('Hey')
-      }, 5000)
-    }, 2000)
   }
   log(...parameters: any) {
     this.cli.log(...parameters)
@@ -50,7 +46,7 @@ export default class Main {
     const spinner = this.spinner
     if (spinner) {
       spinner.texts.push(text)
-      spinner.instance.text = unique(spinner.texts)
+      spinner.instance.text = unique(spinner.texts).join(SPINNER_GLUE)
     } else {
       const instance = new Ora({
         text,
@@ -71,7 +67,7 @@ export default class Main {
         spinner.texts.splice(index, 1)
       }
       if (spinner.texts.length) {
-        spinner.instance.text = unique(spinner.texts)
+        spinner.instance.text = unique(spinner.texts).join(SPINNER_GLUE)
       } else {
         this.removeAllSpinners()
       }

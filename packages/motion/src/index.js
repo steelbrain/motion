@@ -10,10 +10,13 @@ import { MotionError, ERROR_CODE } from './error'
 import { fillConfig } from './helpers'
 import type { Motion$Config } from './types'
 
+const WATCHING: Set<string> = new Set()
+
 class Motion {
   cli: CLI;
   state: State;
   config: Motion$Config;
+  watching: boolean;
   subscriptions: CompositeDisposable;
 
   constructor(state: State, config: Motion$Config) {
@@ -23,6 +26,7 @@ class Motion {
     this.cli = new CLI(state, config)
     this.state = state
     this.config = config
+    this.watching = false
     this.subscriptions = new CompositeDisposable()
 
     this.subscriptions.add(this.cli)

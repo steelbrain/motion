@@ -13,13 +13,17 @@
   "dependencies": {
     "chalk": "^1.1.1",
     "cool-trim": "^1.0.0",
+    "lodash.uniq": "^4.2.0",
     "meow": "^3.7.0",
     "minimist": "^1.2.0",
     "motion-fs": "^1.0.0",
+    "motion-webpack-npm": "^0.9.0",
     "open": "0.0.5",
+    "ora": "^0.2.0",
     "sb-event-kit": "^1.1.2",
     "sb-exec": "^1.0.1",
     "sb-promisify": "^1.1.1",
-    "vorpal": "^1.10.8"
+    "vorpal": "^1.10.8",
+    "webpack": "^1.12.14"
   }
 }
