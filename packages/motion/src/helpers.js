@@ -24,7 +24,7 @@ export function getRandomNumber(min: number, max: number): number {
 export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean): Object {
   const configuration = {
     devtool: null,
-    entry: ['../index.js'],
+    entry: ['motion-runtime', '../index.js'],
     output: {
       path: Path.join(config.dataDirectory, '_'),
       filename: 'bundle.js',

@@ -3,5 +3,4 @@
 if (module.hot) {
   module.hot.accept()
 }
-
-require('./accept')
+console.log('[Motion] Welcome to motion')
