@@ -3,6 +3,7 @@
 import Path from 'path'
 import webpack from 'webpack'
 import WebPackPluginNPM from 'motion-webpack-npm'
+import WebPackResolver from './webpack/resolver'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -24,7 +25,7 @@ export function getRandomNumber(min: number, max: number): number {
 export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean): Object {
   const configuration = {
     devtool: null,
-    entry: ['motion-runtime', '../index.js'],
+    entry: ['motion-runtime/lib/app'],
     output: {
       path: Path.join(config.dataDirectory, '_'),
       filename: 'bundle.js',
@@ -53,7 +54,8 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
             INSTALLATION_MESSAGE.delete(jobID)
           }
         }
-      })
+      }),
+      new WebPackResolver(config)
     ],
     resolve: {
       root: config.rootDirectory,

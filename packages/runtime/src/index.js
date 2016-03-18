@@ -1,6 +1,3 @@
 /* @flow */
 
-if (module.hot) {
-  module.hot.accept()
-}
-console.log('[Motion] Welcome to motion')
+console.log('You have required the motion runtime library')
