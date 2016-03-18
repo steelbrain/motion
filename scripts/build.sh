@@ -9,7 +9,7 @@ trap 'kill $(jobs -pr)' SIGINT SIGTERM
 if [ "$PACKAGE_NAME" != "" ]; then
   packages=$PACKAGE_NAME
 else
-  packages=("fs" "nice-styles" "transform" "client" "motion" "npm" "webpack-npm" "webpack-fs")
+  packages=("fs" "nice-styles" "transform" "client" "motion" "npm" "webpack-npm" "webpack-fs" "runtime")
 fi
 
 # build
