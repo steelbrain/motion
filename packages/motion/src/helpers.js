@@ -27,7 +27,8 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     entry: ['../index.js'],
     output: {
       path: Path.join(config.dataDirectory, '_'),
-      filename: 'bundle.js'
+      filename: 'bundle.js',
+      publicPath: '/_/'
     },
     plugins: [
       new WebPackPluginNPM({
@@ -65,7 +66,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     // $FlowIgnore: Why don't you let me replace a null with a string?!
     configuration.devtool = 'source-map'
     configuration.plugins.push(new webpack.HotModuleReplacementPlugin())
-    configuration.entry.unshift(`webpack-dev-server/client?http://localhost:${state.get().web_server_port}/`, 'webpack/hot/dev-server')
+    configuration.entry.unshift(`webpack-dev-server/client?http://localhost:${state.get().web_server_port}/`, 'webpack/hot/only-dev-server')
   }
 
   return configuration
