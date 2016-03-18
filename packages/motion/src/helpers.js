@@ -57,7 +57,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     ],
     resolve: {
       root: config.rootDirectory,
-      modulesDirectories: ['./.motion/node_modules'],
+      modulesDirectories: [Path.join(config.dataDirectory, 'node_modules')],
       packageMains: ['webpack', 'browser', 'web', 'browserify', 'jsnext:main', 'main']
     }
   }
