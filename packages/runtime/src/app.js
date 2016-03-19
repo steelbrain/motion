@@ -3,5 +3,5 @@
 if (module.hot) {
   module.hot.accept()
 }
-require('$index')
+require('$appMainFile')
 console.log('[Motion] Welcome to motion')

@@ -11,7 +11,7 @@ export default class Resolver {
   }
   apply(compiler: Object) {
     compiler.resolvers.normal.plugin('file', (result, next) => {
-      if (result.request === '$index') {
+      if (result.request === '$appMainFile') {
         next(null, Object.assign({}, result, {
           path: Path.join(this.config.rootDirectory, 'index.js'),
           resolved: true
