@@ -9,7 +9,13 @@ import type CLI from './cli'
 import type State from './state'
 import type { Motion$Config } from './types'
 
-const INSTALLATION_MESSAGE: Map<number, string> = new Map()
+const installationsInProgress: Map<number, {
+  names: Array<string>,
+  status: boolean,
+  message: string
+}> = new Map()
+export const X = '✗'
+export const TICK = '✓'
 
 export function fillConfig(config: Motion$Config) {
   if (typeof config.dataDirectory !== 'string') {
@@ -36,22 +42,30 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
         save: state.get().npm_save,
         onStarted(jobID: number, dependencies: Array<Array<string>>) {
           if (terminal) {
-            const dependencyNames = dependencies.map(dependency => dependency[0])
-            const installationMessage = `Installing ${dependencyNames.join(', ')}`
-            INSTALLATION_MESSAGE.set(jobID, installationMessage)
-            cli.addSpinner(installationMessage)
+            const names = dependencies.map(dependency => dependency[0])
+            const message = `Installing ${names.join(', ')}`
+            installationsInProgress.set(jobID, {
+              names,
+              status: true,
+              message
+            })
+            cli.addSpinner(message)
           }
         },
-        onProgress(_: number, packageName: string, error: ?Error) {
+        onProgress(jobID: number, packageName: string, error: ?Error) {
           if (terminal && error) {
             cli.log('Error installing dependency', packageName, error)
+            const info = installationsInProgress.get(jobID)
+            if (info) {
+              info.status = false
+            }
           }
         },
         onComplete(jobID: number) {
-          const message = INSTALLATION_MESSAGE.get(jobID)
-          if (message) {
-            cli.removeSpinner(message)
-            INSTALLATION_MESSAGE.delete(jobID)
+          const info = installationsInProgress.get(jobID)
+          if (info) {
+            cli.removeSpinner(info.message)
+            cli.log(`Install ${info.names.join(', ')} ${info.status ? TICK : X}`)
           }
         }
       }),
