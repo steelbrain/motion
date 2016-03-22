@@ -23,6 +23,10 @@ export function fillConfig(config: Motion$Config) {
   }
 }
 
+export function getLocalModulePath(name: string): string {
+  return Path.dirname(require.resolve(`${name}/package.json`))
+}
+
 // From: goo.gl/fZA6BF
 export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
@@ -73,7 +77,14 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     ],
     resolve: {
       root: config.rootDirectory,
-      modulesDirectories: [Path.join(config.dataDirectory, 'node_modules')],
+      modulesDirectories: [
+        Path.join(config.dataDirectory, 'node_modules'),
+        Path.join(getLocalModulePath('webpack'), 'node_modules'),
+        Path.join(getLocalModulePath('webpack-dev-server'), 'node_modules'),
+        Path.join(getLocalModulePath('motion-runtime'), 'node_modules'),
+        Path.join(Path.normalize(Path.join(__dirname, '..')), 'node_modules'),
+        Path.join(Path.normalize(Path.join(__dirname, '..', '..')), 'node_modules')
+      ],
       packageMains: ['webpack', 'browser', 'web', 'browserify', 'jsnext:main', 'main']
     }
   }

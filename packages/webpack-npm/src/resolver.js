@@ -7,8 +7,7 @@ import type { Installer$Config } from './types'
 const resolve = require('resolve')
 let installID = 0
 
-// Does not throw, instead returns null
-function niceResolve(moduleName: string, basedir: string): Promise<?string> {
+function tryResolve(moduleName: string, basedir: string): Promise<?string> {
   return new Promise(function(resolvePromise) {
     resolve(moduleName, { basedir }, function(error, path) {
       if (error) {
@@ -16,6 +15,25 @@ function niceResolve(moduleName: string, basedir: string): Promise<?string> {
       } else resolvePromise(path)
     })
   })
+}
+
+async function resolveModule(moduleName: string, compiler: Object, result: Object): Promise<?string> {
+  const resolveRoot = compiler.options.resolve && compiler.options.resolve.root
+  const resolveDirectories = compiler.options.resolve && compiler.options.resolve.modulesDirectories
+  let path = await tryResolve(moduleName, result.path) ||
+             await tryResolve(moduleName, getRootDirectory())
+  if (path === null && resolveRoot) {
+    path = await tryResolve(moduleName, resolveRoot)
+  }
+  if (path === null && resolveDirectories) {
+    for (const directory of resolveDirectories) {
+      path = await tryResolve(moduleName, directory)
+      if (path) {
+        break
+      }
+    }
+  }
+  return path
 }
 
 export function getResolver(config: Installer$Config, compiler: Object, loader: boolean): Function {
@@ -32,7 +50,7 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
     const moduleName = getModuleName(moduleNameRaw, loader)
     let error = null
 
-    if (locks.has(moduleName) || isBuiltin(moduleName) || await npm.isInstalled(moduleName)) {
+    if (locks.has(moduleName) || isBuiltin(moduleName) || await resolveModule(moduleName, compiler, result, next)) {
       next()
       return
     }
@@ -52,16 +70,11 @@ export function getResolver(config: Installer$Config, compiler: Object, loader: 
       config.onComplete(id)
     }
     locks.delete(moduleName)
-    let path = await niceResolve(moduleName, result.path)
-    if (path === null && compiler.options.resolve.root) {
-      path = await niceResolve(moduleName, getRootDirectory())
-    }
+    const path = await resolveModule(moduleName, compiler, result, next)
     if (path) {
       next(null, Object.assign({}, result, {
         path, resolved: true
       }))
-    } else {
-      next()
-    }
+    } else next()
   }
 }
