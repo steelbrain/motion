@@ -79,13 +79,26 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
       root: config.rootDirectory,
       modulesDirectories: [
         Path.join(config.dataDirectory, 'node_modules'),
-        Path.join(getLocalModulePath('webpack'), 'node_modules'),
-        Path.join(getLocalModulePath('webpack-dev-server'), 'node_modules'),
-        Path.join(getLocalModulePath('motion-runtime'), 'node_modules'),
         Path.join(Path.normalize(Path.join(__dirname, '..')), 'node_modules'),
         Path.join(Path.normalize(Path.join(__dirname, '..', '..')), 'node_modules')
       ],
       packageMains: ['webpack', 'browser', 'web', 'browserify', 'jsnext:main', 'main']
+    },
+    module: {
+      loaders: [{
+        test: /\.js$/,
+        loader: 'babel',
+        include: Path.join(config.rootDirectory),
+        exclude: /(node_modules|bower_components|\.motion)/,
+        query: {
+          presets: [require.resolve('babel-preset-steelbrain')],
+          plugins: [
+            [require.resolve('babel-plugin-transform-react-jsx'), {
+              pragma: 'Motion.createElement'
+            }]
+          ]
+        }
+      }]
     }
   }
 
@@ -95,6 +108,10 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     configuration.plugins.push(new webpack.HotModuleReplacementPlugin())
     configuration.entry.unshift(`webpack-dev-server/client?http://localhost:${state.get().web_server_port}/`,
       'webpack/hot/only-dev-server')
+  }
+  const bundledPackages = ['webpack', 'webpack-dev-server', 'motion-runtime', 'babel-core', 'babel-loader', 'babel-preset-steelbrain']
+  for (const packageName of bundledPackages) {
+    configuration.resolve.modulesDirectories.push(Path.join(getLocalModulePath(packageName), 'node_modules'))
   }
 
   return configuration
