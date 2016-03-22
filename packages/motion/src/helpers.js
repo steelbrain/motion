@@ -4,6 +4,7 @@ import Path from 'path'
 import webpack from 'webpack'
 import WebPackPluginNPM from 'motion-webpack-npm'
 import WebPackResolver from './webpack/resolver'
+import resolve from 'resolve'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -93,7 +94,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
         query: {
           presets: [require.resolve('babel-preset-steelbrain')],
           plugins: [
-            [require.resolve('babel-plugin-transform-react-jsx'), {
+            [resolve.sync('babel-plugin-transform-react-jsx', { basedir: getLocalModulePath('babel-preset-steelbrain') }), {
               pragma: 'Motion.createElement'
             }]
           ]
