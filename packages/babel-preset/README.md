@@ -1,3 +1,3 @@
-## babel-preset-steelbrian
+## babel-preset-motion
 
 [`Motion`](https://motion.io/) Babel Preset
