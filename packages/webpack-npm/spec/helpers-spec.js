@@ -18,12 +18,6 @@ describe('Helpers', function() {
     })
   })
 
-  describe('getRootDirectory', function() {
-    it('returns the root directory', function() {
-      expect(Helpers.getRootDirectory()).toBe(process.cwd())
-    })
-  })
-
   describe('extractModuleName', function() {
     it('extracts names from deep requires', function() {
       expect(Helpers.extractModuleName('webpack/asd/asd')).toBe('webpack')

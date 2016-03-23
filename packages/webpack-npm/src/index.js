@@ -1,7 +1,7 @@
 /* @flow */
 
 import NPM from 'motion-npm'
-import { extractModuleName } from './helpers'
+import { extractModuleName, resolveModule } from './helpers'
 import type { Installer$Config, Compiler, Factory, Result } from './types'
 
 let installationID = 0
@@ -50,6 +50,13 @@ class WebpackNPM {
             resolve()
             return
           }
+          const path = resolveModule(moduleName, compiler, result)
+          if (path) {
+            next(null, Object.assign({}, result, {
+              path, resolved: true
+            }))
+            return
+          }
 
           const id = ++installationID
           const npm = new NPM({
@@ -78,7 +85,11 @@ class WebpackNPM {
       })
       this.inProgress.set(moduleName, lock)
     }
-    lock.then(next)
+    lock.then(function(output) {
+      if (result) {
+        next(null, output)
+      } else next()
+    })
   }
   static attachToFactory(factory: Factory) {
     factory.plugin('before-resolve', function(result, next) {
