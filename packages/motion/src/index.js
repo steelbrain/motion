@@ -44,6 +44,11 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
+
+    this.state.get().running = true
+    this.state.get().process_id = process.pid
+    await this.state.write()
+
     if (terminal) {
       this.cli.activate()
     }
@@ -60,6 +65,8 @@ class Motion {
       contentBase: this.config.dataDirectory
     })
     const disposable = new Disposable(() => {
+      this.state.get().running = false
+      this.state.write()
       this.subscriptions.remove(disposable)
       this.cli.deactivate()
       server.close()
