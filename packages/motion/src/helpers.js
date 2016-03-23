@@ -34,6 +34,7 @@ export function getRandomNumber(min: number, max: number): number {
 
 export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean): Object {
   const configuration = {
+    context: config.dataDirectory,
     devtool: null,
     entry: ['motion-runtime/lib/app'],
     output: {

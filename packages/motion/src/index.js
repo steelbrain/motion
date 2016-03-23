@@ -13,8 +13,6 @@ import { MotionError, ERROR_CODE } from './error'
 import { fillConfig, getWebpackConfig } from './helpers'
 import type { Motion$Config } from './types'
 
-const EXECUTING_ON: Set<string> = new Set()
-
 class Motion {
   cli: CLI;
   state: State;
@@ -34,7 +32,7 @@ class Motion {
 
     this.subscriptions.add(this.cli)
     this.cli.onShouldBuild(async () => {
-      await this.build(false, true)
+      await this.build(false)
     })
   }
 
@@ -46,11 +44,6 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    if (EXECUTING_ON.has(this.config.rootDirectory)) {
-      throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
-    }
-    EXECUTING_ON.add(this.config.dataDirectory)
-    process.chdir(this.config.dataDirectory)
     if (terminal) {
       this.cli.activate()
     }
@@ -69,7 +62,6 @@ class Motion {
       this.subscriptions.remove(disposable)
       this.cli.deactivate()
       server.close()
-      EXECUTING_ON.delete(this.config.dataDirectory)
     })
 
     this.subscriptions.add(disposable)
@@ -77,14 +69,10 @@ class Motion {
     return disposable
   }
 
-  async build(terminal: boolean = false, ignoreExecution: boolean = false): Promise {
+  async build(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    if (!ignoreExecution && EXECUTING_ON.has(this.config.dataDirectory)) {
-      throw new MotionError(ERROR_CODE.ALREADY_EXECUTING)
-    }
-    process.chdir(this.config.dataDirectory)
     await new Promise((resolve, reject) => {
       webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, false), function(error) {
         if (error) {
