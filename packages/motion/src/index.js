@@ -56,7 +56,8 @@ class Motion {
       hot: true,
       quiet: true,
       inline: true,
-      publicPath: '/_/'
+      publicPath: '/_/',
+      contentBase: this.config.dataDirectory
     })
     const disposable = new Disposable(() => {
       this.subscriptions.remove(disposable)
