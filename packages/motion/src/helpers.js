@@ -95,7 +95,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
           presets: [require.resolve('babel-preset-steelbrain')],
           plugins: [
             [resolve.sync('babel-plugin-transform-react-jsx', { basedir: getLocalModulePath('babel-preset-steelbrain') }), {
-              pragma: 'Motion.createElement'
+//              pragma: 'Motion.createElement'
             }]
           ]
         }
