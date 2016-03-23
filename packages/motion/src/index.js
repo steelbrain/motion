@@ -34,6 +34,9 @@ class Motion {
     this.cli.onShouldBuild(async () => {
       await this.build(false)
     })
+    this.cli.onShouldDispose(() => {
+      this.dispose()
+    })
   }
 
   async exists(): Promise<boolean> {

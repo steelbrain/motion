@@ -56,6 +56,10 @@ export default class Main {
       await this.emitter.emit('should-build')
       this.cli.log('Dist files built successfully in', this.config.dataDirectory)
     })
+    this.cli.replaceCommand('exit', 'Exit motion daemon', () => {
+      this.emitter.emit('should-dispose')
+      process.exit()
+    })
     // TODO: Read manifest scripts and prompt to run them here
   }
   deactivate() {
@@ -104,6 +108,9 @@ export default class Main {
   }
   onShouldBuild(callback: Function): Disposable {
     return this.emitter.on('should-build', callback)
+  }
+  onShouldDispose(callback: Function): Disposable {
+    return this.emitter.on('should-dispose', callback)
   }
   dispose() {
     this.cli.dispose()

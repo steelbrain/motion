@@ -1,7 +1,7 @@
 /* @flow */
 
 import { inspect } from 'util'
-import { CompositeDisposable, Emitter } from 'sb-event-kit'
+import { CompositeDisposable } from 'sb-event-kit'
 import vorpal from 'vorpal'
 import chalk from 'chalk'
 
@@ -11,17 +11,13 @@ const BYE_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Bye fr
 
 export default class CLI {
   active: boolean;
-  emitter: Emitter;
   instance: vorpal;
   subscriptions: CompositeDisposable;
 
   constructor() {
     this.active = false
-    this.emitter = new Emitter()
     this.instance = vorpal()
     this.subscriptions = new CompositeDisposable()
-
-    this.subscriptions.add(this.emitter)
   }
   activate() {
     if (this.active) {
@@ -33,10 +29,6 @@ export default class CLI {
     this.instance.delimiter(CLI_DELIMITER)
     this.instance.show()
     this.instance.log(WELCOME_MESSAGE)
-    this.replaceCommand('exit', 'Exit motion daemon', function() {
-      this.log(BYE_MESSAGE)
-      process.exit(0)
-    })
   }
   deactivate() {
     this.instance.hide()
@@ -74,6 +66,7 @@ export default class CLI {
   }
   dispose() {
     if (this.active) {
+      this.instance.log(BYE_MESSAGE)
       this.instance.hide()
       this.active = false
     }
