@@ -7,7 +7,7 @@ printf "\n\n"
 ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 # NOTE: Order is important
-PACKAGES_TO_LINK=( "fs" "npm" "runtime" "webpack-fs" "webpack-npm" "transform" "nice-styles" "client" "motion" )
+PACKAGES_TO_LINK=(  "babel-preset" "fs" "npm" "runtime" "webpack-fs" "webpack-npm" "transform" "nice-styles" "client" "motion" )
 NPM_ROOT=$( npm root -g )
 
 for name in "${PACKAGES_TO_LINK[@]}"
