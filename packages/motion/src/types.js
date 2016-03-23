@@ -13,3 +13,7 @@ export type Motion$State = {
   websocket_server_port: number,
   npm_save: boolean
 }
+
+export type Motion$StateConfig = {
+  include_polyfills: boolean
+}

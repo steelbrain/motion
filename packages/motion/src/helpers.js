@@ -98,6 +98,10 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     }
   }
 
+  if (state.getConfig().include_polyfills) {
+    configuration.entry.unshift('babel-polyfill')
+  }
+
   if (development) {
     // $FlowIgnore: Why don't you let me replace a null with a string?!
     configuration.devtool = 'source-map'

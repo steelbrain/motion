@@ -111,7 +111,7 @@ class Motion {
       config.rootDirectory = await realpath(config.rootDirectory)
     }
     fillConfig(config)
-    const state = await State.create(Path.join(config.dataDirectory, 'state.json'))
+    const state = await State.create(Path.join(config.dataDirectory, 'state.json'), Path.join(config.dataDirectory, 'config.json'))
     return new Motion(state, config)
   }
 }
