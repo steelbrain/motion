@@ -110,9 +110,15 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     configuration.entry.unshift(`webpack-dev-server/client?http://localhost:${state.get().web_server_port}/`,
       'webpack/hot/only-dev-server')
   }
+
   const bundledPackages = ['webpack', 'webpack-dev-server', 'motion-runtime', 'babel-core', 'babel-loader', 'babel-preset-steelbrain']
   for (const packageName of bundledPackages) {
     configuration.resolve.modulesDirectories.push(Path.join(getLocalModulePath(packageName), 'node_modules'))
+  }
+
+  const babelPlugins = ['babel-plugin-transform-class-properties']
+  for (const pluginName of babelPlugins) {
+    configuration.module.loaders[0].query.plugins.push(resolve.sync(pluginName, { basedir: getLocalModulePath('babel-preset-steelbrain') }))
   }
 
   return configuration

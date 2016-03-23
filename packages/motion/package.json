@@ -13,6 +13,7 @@
   "dependencies": {
     "babel-core": "^6.7.2",
     "babel-loader": "^6.2.4",
+    "babel-plugin-transform-class-properties": "^6.6.0",
     "babel-preset-steelbrain": "^2.0.1",
     "chalk": "^1.1.1",
     "cool-trim": "^1.0.0",
