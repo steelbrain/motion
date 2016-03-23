@@ -1,7 +1,7 @@
 /* @flow */
 
 import NPM from 'motion-npm'
-import { extractModuleName, getRootDirectory } from './helpers'
+import { extractModuleName } from './helpers'
 import type { Installer$Config, Compiler, Factory, Result } from './types'
 
 let installationID = 0
@@ -52,7 +52,10 @@ class WebpackNPM {
           }
 
           const id = ++installationID
-          const npm = new NPM({ rootDirectory: getRootDirectory(), environment: this.config.development ? 'development' : 'production' })
+          const npm = new NPM({
+            rootDirectory: compiler.options.context,
+            environment: this.config.development ? 'development' : 'production'
+          })
           if (this.config.onStarted) {
             this.config.onStarted(id, [[moduleName, 'x.x.x']])
           }

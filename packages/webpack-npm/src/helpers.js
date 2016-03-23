@@ -20,7 +20,3 @@ export function extractModuleName(moduleName: string, loader: boolean): ?string 
   }
   return null
 }
-
-export function getRootDirectory(): string {
-  return process.cwd()
-}
