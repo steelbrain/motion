@@ -102,7 +102,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     configuration.devtool = 'source-map'
     configuration.plugins.push(new webpack.HotModuleReplacementPlugin())
     configuration.entry.unshift(`webpack-dev-server/client?http://localhost:${state.get().web_server_port}/`,
-      'webpack/hot/only-dev-server')
+      'webpack/hot/dev-server')
   }
 
   const bundledPackages = ['webpack', 'webpack-dev-server', 'motion-runtime', 'babel-core', 'babel-loader']

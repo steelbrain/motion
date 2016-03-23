@@ -10,7 +10,8 @@
     "comma-dangle": [2, "never"],
     "prefer-rest-params": 0,
     "max-len": [1, 150],
-    "no-console": 0
+    "no-console": 0,
+    "react/react-in-jsx-scope": 0
   },
   "globals": {
     "it": true,
