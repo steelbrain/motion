@@ -4,7 +4,6 @@ import Path from 'path'
 import webpack from 'webpack'
 import WebPackPluginNPM from 'motion-webpack-npm'
 import WebPackResolver from './webpack/resolver'
-import resolve from 'resolve'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -92,12 +91,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
         include: Path.join(config.rootDirectory),
         exclude: /(node_modules|bower_components|\.motion)/,
         query: {
-          presets: [require.resolve('babel-preset-steelbrain')],
-          plugins: [
-            [resolve.sync('babel-plugin-transform-react-jsx', { basedir: getLocalModulePath('babel-preset-steelbrain') }), {
-//              pragma: 'Motion.createElement'
-            }]
-          ]
+          presets: [require.resolve('babel-preset-motion')]
         }
       }]
     }
@@ -111,14 +105,9 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
       'webpack/hot/only-dev-server')
   }
 
-  const bundledPackages = ['webpack', 'webpack-dev-server', 'motion-runtime', 'babel-core', 'babel-loader', 'babel-preset-steelbrain']
+  const bundledPackages = ['webpack', 'webpack-dev-server', 'motion-runtime', 'babel-core', 'babel-loader']
   for (const packageName of bundledPackages) {
     configuration.resolve.modulesDirectories.push(Path.join(getLocalModulePath(packageName), 'node_modules'))
-  }
-
-  const babelPlugins = ['babel-plugin-transform-class-properties']
-  for (const pluginName of babelPlugins) {
-    configuration.module.loaders[0].query.plugins.push(resolve.sync(pluginName, { basedir: getLocalModulePath('babel-preset-steelbrain') }))
   }
 
   return configuration

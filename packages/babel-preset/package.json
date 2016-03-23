@@ -1,0 +1,24 @@
+{
+  "name": "babel-preset-motion",
+  "version": "0.9.0",
+  "description": "Motion Babel Preset",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motion/motion.git"
+  },
+  "author": "motion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motion/motion/issues"
+  },
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": {
+    "babel-plugin-transform-react-jsx": "^6.7.4",
+    "babel-preset-steelbrain": "^2.0.1"
+  },
+  "devDependencies": {}
+}
