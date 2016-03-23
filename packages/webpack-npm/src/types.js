@@ -7,3 +7,7 @@ export type Installer$Config = {
   onProgress?: ((jobID: number, name: string, error: ?Error) => any),
   onComplete?: ((jobID: number) => any)
 }
+
+export type Compiler = Object
+export type Factory = Object
+export type Result = Object

@@ -17,8 +17,7 @@
   },
   "homepage": "https://github.com/motion/motion#readme",
   "dependencies": {
-    "motion-npm": "^0.9.0",
-    "resolve": "^1.1.7"
+    "motion-npm": "^0.9.0"
   },
   "devDependencies": {
     "motion-fs": "1.0.0",
