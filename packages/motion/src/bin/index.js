@@ -4,7 +4,7 @@
 process.title = 'motion'
 
 process.on('uncaughtException', function(error) {
-  console.log('Uncaught Exception', error)
+  console.log('Uncaught Exception', error && error.stack || error)
 })
 process.on('unhandledRejection', function(reason, promise) {
   console.log('Unhandled Rejection at: Promise ', promise, ' reason: ', reason)
