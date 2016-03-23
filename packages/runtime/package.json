@@ -1,6 +1,6 @@
 {
   "name": "motion-runtime",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "WebPack runtime for motion",
   "main": "lib/index.js",
   "scripts": {
@@ -16,6 +16,6 @@
     "url": "https://github.com/motion/motion/issues"
   },
   "homepage": "https://github.com/motion/motion#readme",
-  "dependencies": { },
-  "devDependencies": { }
+  "dependencies": {},
+  "devDependencies": {}
 }
