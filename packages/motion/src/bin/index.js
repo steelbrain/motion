@@ -30,7 +30,7 @@ function getMotion(rootDirectory: string = process.cwd()): Promise<Motion> {
   return Motion.create({ rootDirectory })
 }
 function handleError(error: Error) {
-  console.error(error)
+  console.error(error && error.stack || error)
   process.exit(1)
 }
 
