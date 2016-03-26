@@ -1,6 +1,6 @@
 {
   "name": "motion-fs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FS functions for Motion",
   "main": "lib/index.js",
   "scripts": {
