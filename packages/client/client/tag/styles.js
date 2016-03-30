@@ -22,16 +22,16 @@ const prefix = '$'
 // TODO remove <name-tag />
 // originalTag || tag
 // key, index, repeatItem, name, tag
-export default function elementStyles(el, view, props) {
+export default function elementStyles(Motion, el, view, props) {
   if (typeof el.name !== 'string') return
 
   let styles, parentStyles, parentStylesStatic, parentStylesStaticView, parentStylesRoot
+  let parent = view.__motion ? view.__motion : view
 
   // attach view styles from $ to element matching view name lowercase
   const tag = el.name
-  const Motion = view.Motion
-  const isRootName = view.name && view.name.toLowerCase() == el.name
-  const hasOneRender = view.renders.length <= 1
+  const isRootName = parent.name && parent.name.toLowerCase() == el.name
+  const hasOneRender = !parent.renders || parent.renders.length <= 1
   const isWrapperOrRoot = props && (props.__motionIsWrapper || props.root)
   const deservesRootStyles = !!(isRootName && hasOneRender || isWrapperOrRoot)
 
@@ -44,14 +44,14 @@ export default function elementStyles(el, view, props) {
       const parentName = view.props.__motion.parentName
       parentStyles = view.props.__motion.parentStyles
       parentStylesStatic = Motion.styleObjects[parentName]
-      parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${view.name}`]
+      parentStylesStaticView = parentStylesStatic && parentStylesStatic[`$${parent.name}`]
 
       const parentRoot = Motion.viewRoots[parentName]
 
       // parent $={} styles pass to child
       //    view Main { <Child root />  $ = { background: 'red' }  }   <-- makes these styles work!
       //    view Child { <child /> $ = { background: 'yellow' } }
-      if (parentRoot === view.name) {
+      if (parentRoot === parent.name) {
         parentStylesRoot = parentStylesStatic && parentStylesStatic.$
       }
     }
@@ -61,15 +61,23 @@ export default function elementStyles(el, view, props) {
     if (viewClassName) addClassName(viewClassName)
   }
 
-  if (view.styles || parentStylesStatic || parentStylesStaticView) {
+  if (parent.styles || parentStylesStatic || parentStylesStaticView) {
     // if <foobar> is root, then apply both the base ($) and ($foobar)
     const diffName = el.name !== tag
     const hasTag = typeof tag == 'string'
-    const tagStyle = hasTag && view.styles[tag] && view.styles[tag](el.repeatItem, el.index)
 
-    const classes = Motion.styleClasses[view.name]
-    const viewStyle = view.styles[prefix] && view.styles[prefix](el.index)
-    const nameStyle = diffName && view.styles[el.name] && view.styles[el.name](el.repeatItem, el.index)
+    const classes = Motion.styleClasses[parent.name]
+    let tagStyle = hasTag && parent.styles[tag]
+    let viewStyle = parent.styles[prefix]
+    let nameStyle = diffName && parent.styles[el.name]
+
+    // only views have wrapped style objects with functions for repeat
+    if (typeof tagStyle == 'function')
+      tagStyle = tagStyle(el.repeatItem, el.index)
+    if (typeof viewStyle == 'function')
+      viewStyle = viewStyle(el.index)
+    if (typeof nameStyle == 'function')
+      nameStyles = nameStyle(el.repeatItem, el.index)
 
     // merge styles
 
@@ -81,15 +89,15 @@ export default function elementStyles(el, view, props) {
       // base style
       deservesRootStyles && viewStyle,
       // passed down styles
-      parentStyles && parentStyles[`${prefix}${view.name}`],
+      parentStyles && parentStyles[`${prefix}${parent.name}`],
       // passed down styles using $
       parentStylesRoot
     )
 
     // for use in className loop
-    const viewStaticStyles = Motion.styleObjects[view.name]
+    const viewStaticStyles = Motion.styleObjects[parent.name]
 
-    if (view.doRenderToRoot || view.doRenderInlineStyles) {
+    if (parent.doRenderToRoot || parent.doRenderInlineStyles) {
       result = mergeStyles(result,
         diffName && viewStaticStyles && viewStaticStyles[`${prefix}${el.name}`],
         hasTag && viewStaticStyles && viewStaticStyles[`${prefix}${tag}`],
@@ -106,8 +114,8 @@ export default function elementStyles(el, view, props) {
 
         if (isLowerCase(className[0])) {
 
-          if (view.styles[className]) {
-            result = mergeStyles(result, view.styles[className](el.repeatItem, el.index))
+          if (parent.styles[className]) {
+            result = mergeStyles(result, parent.styles[className](el.repeatItem, el.index))
           }
 
           // ensure static class styles overwrite dynamic tag/name styles
@@ -184,7 +192,7 @@ export default function elementStyles(el, view, props) {
 
   // set body bg to Main view bg
   if (
-    view.name == 'Main' &&
+    parent.name == 'Main' &&
     el.name == 'view.Main' &&
     typeof document != 'undefined'
   ) {
@@ -199,7 +207,7 @@ export default function elementStyles(el, view, props) {
     }
   }
 
-  if (Object.keys(styles).length)
+  if (styles && Object.keys(styles).length)
     return styles
   else
     return null

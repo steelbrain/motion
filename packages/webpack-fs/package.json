@@ -1,0 +1,21 @@
+{
+  "name": "motion-webpack-fs",
+  "version": "0.9.0",
+  "description": "WebPack FS helper for motion",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motion/motion.git"
+  },
+  "author": "motion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motion/motion/issues"
+  },
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": { },
+  "devDependencies": { }
+}

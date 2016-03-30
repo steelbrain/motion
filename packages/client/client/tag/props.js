@@ -16,7 +16,9 @@ function niceProps(props) {
   return props
 }
 
-export default function elementProps({ name, whitelisted, key, index, isView }, view, Motion, props) {
+export default function elementProps(Motion, { name, whitelisted, key, index }, view, props) {
+  const viewName = view.__motion ? view.__motion.name : view.name
+
   if (props) {
     props = niceProps(props)
   }
@@ -74,7 +76,7 @@ export default function elementProps({ name, whitelisted, key, index, isView }, 
     )
 
     if (!attr) {
-      reportError({ message: 'sync attribute not supported on this input type yet', fileName: `${view.name}, <${name}>` })
+      reportError({ message: 'sync attribute not supported on this input type yet', fileName: `${viewName}, <${name}>` })
     }
 
     props.onChange = function(e) {
@@ -88,11 +90,11 @@ export default function elementProps({ name, whitelisted, key, index, isView }, 
   }
 
   // if not external component
-  if (isView || typeof component != 'function') {
+  if (typeof component != 'function') {
     props.__motion = {
       parentStyles: view.styles,
-      parentStylesStatic: Motion.styleObjects[view.name],
-      parentName: view.name,
+      parentStylesStatic: Motion.styleObjects[viewName],
+      parentName: viewName,
       key,
       index,
       tagName: name
@@ -100,7 +102,7 @@ export default function elementProps({ name, whitelisted, key, index, isView }, 
 
     // only for tags
     if (name[0] == name[0].toLowerCase()) {
-      props.className = addClassName(props, view.name.replace('.', '-'))
+      props.className = addClassName(props, viewName.replace('.', '-'))
     }
   }
 

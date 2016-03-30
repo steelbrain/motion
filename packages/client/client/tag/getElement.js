@@ -1,5 +1,6 @@
 import type { Identifier, Element } from './types'
-import { whitelist } from './constants'
+import { blacklist } from './constants'
+import ReactCreateElement from '../lib/ReactCreateElement'
 
 /*
 
@@ -11,8 +12,7 @@ import { whitelist } from './constants'
 */
 
 
-export default function getElement(identifier: Identifier, view, props, getView): Element {
-  let isView = false
+export default function getElement(Motion, identifier: Identifier, view, props): Element {
   let name, tagName, key, index, component, repeatItem
 
   // used directly by user
@@ -20,8 +20,10 @@ export default function getElement(identifier: Identifier, view, props, getView)
     name = identifier
   }
   // passing in a variable as the view
-  else if (typeof identifier[0] !== 'string') {
+  else if (typeof identifier[0] != 'string') {
     [component, name, key, repeatItem, index] = identifier
+
+    component = Motion.getComponent(component)
   }
   // passing in string ref as view
   else {
@@ -29,32 +31,28 @@ export default function getElement(identifier: Identifier, view, props, getView)
   }
 
   if (!name)
-    return React.createElement('div', null, 'No name given!')
+    return ReactCreateElement('div', null, 'No name given!')
 
-  let whitelisted
+  let blacklisted
 
   // find element
   if (typeof name != 'string') {
-    component = name
+    component = Motion.getComponent(name)
   }
   else {
     let isHTMLElement = name[0].toLowerCase() == name[0]
 
     if (isHTMLElement) {
       tagName = (
+        // TODO this is definitely a bug but works in single element case, move this to props.js
         // yield isnt merged in at this point so we check for it
-        view.props && view.props.yield && view.props.tagName
+        view && view.props && view.props.yield && view.props.tagName
         // otherwise use prop tagname
         || props && props.tagName
       )
 
-      // whitelist
-      whitelisted = whitelist.indexOf(name) >= 0
-    }
-    // find a view
-    else if (!component) {
-      isView = true
-      component = getView(name)
+      // blacklist
+      blacklisted = blacklist.indexOf(name) >= 0
     }
   }
 
@@ -65,7 +63,6 @@ export default function getElement(identifier: Identifier, view, props, getView)
     index,
     repeatItem,
     component,
-    whitelisted,
-    isView
+    blacklisted,
   }
 }

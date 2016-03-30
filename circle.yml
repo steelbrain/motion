@@ -2,8 +2,16 @@ dependencies:
   override:
     - curl -L https://atom.io/download/deb -o atom-amd64.deb
     - sudo dpkg --install atom-amd64.deb || true
+    - sudo apt-get update
     - sudo apt-get -f install
+    - nvm use 5.1.0
     - make bootstrap
 test:
   override:
-    - apm test
+    - npm test
+    # TODO: Make this required soon
+    - npm run lint || true
+
+machine:
+  node:
+    version: 5.1.0

@@ -56,7 +56,7 @@ export default function requireFactory(root) {
   function safeGet(obj, _ns, names, folder) {
     const ns = `${app}-${_ns}`
     if (!obj[ns]) {
-      console.error(`${_ns} not bundled, looking for ${names[0]}`)
+      console.error(`exports["${ns}"] ${names[0]} not found`)
       return {}
     }
 

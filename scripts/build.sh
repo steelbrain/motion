@@ -6,7 +6,11 @@ set -e
 trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
 # order important so they build for each other
-packages=("nice-styles" "transform" "client" "motion")
+if [ "$PACKAGE_NAME" != "" ]; then
+  packages=$PACKAGE_NAME
+else
+  packages=("babel-preset" "fs" "nice-styles" "transform" "client" "motion" "npm" "webpack-npm" "webpack-fs" "runtime")
+fi
 
 # build
 for p in "${packages[@]}"; do
@@ -45,6 +49,12 @@ if [ "$1" = "--watch" ]; then
   cd packages/motion
   npm link --loglevel=error --no-progress
   cd ../..
+
+  # this is expensive
+  # while true; do
+  #   sleep 20
+  #   (cd packages/client && node prepublish)
+  # done
 fi
 
 # wait for bg tasks

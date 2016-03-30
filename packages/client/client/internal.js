@@ -42,7 +42,7 @@ export function init(name) {
 
     resetViewState(views) {
       Internal.views = {}
-      Internal.mountedViews = {}
+      // Internal.mountedViews = {}
       Internal.lastWorkingViews = {}
     },
 

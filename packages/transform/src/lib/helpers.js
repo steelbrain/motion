@@ -12,6 +12,46 @@ export default function init(_options, _t) {
 export function t() {}
 export function options() {}
 
+export function isComponentReturn(node) {
+  return (
+    t.isCallExpression(node) && node.callee.name == '$'
+  )
+}
+
+// array of dom+style
+export function componentReturn(node) {
+  const args = node.arguments
+
+  for (let i = 0; i < args.length; i++) {
+    let el = args[i]
+
+    if (t.isJSXElement(el)) {
+      args[i] = t.functionExpression(null, [], t.blockStatement([ t.returnStatement(el) ]))
+    }
+  }
+
+  node = t.callExpression(t.identifier('this.__motionRender'), [node])
+
+  return node
+}
+
+export function component({ name, node, type = component.CLASS }) {
+  if (type == component.SIMPLE) {
+    // add view as first parameter
+    node.params = [ t.identifier('view'), ...node.params ]
+  }
+
+  const wrapped = t.callExpression(t.identifier(type), [t.literal(name), node])
+  wrapped.isMotionHot = true
+  return wrapped
+}
+
+component.SIMPLE = 'Motion.componentFn'
+component.CLASS = 'Motion.componentClass'
+
+component.simple = opts => component({ ...opts, type: component.SIMPLE })
+component.class = opts => component({ ...opts, type: component.CLASS })
+
 let niceAttrs = {
   className: 'class',
   htmlFor: 'for',
@@ -182,7 +222,11 @@ export function parentFunctionNode(scope) {
   if (t.isArrowFunctionExpression(scope.parentBlock.init))
     return scope.parentBlock.init
 
-  const parentFunc = scope.path.findParent(p => p.isFunction())
+  const parentFunc = scope.path.findParent(p => {
+    // console.log(p.type)
+    return p.isFunction() || p.isMethodDefinition()
+  })
+
   return parentFunc && parentFunc.node
 }
 

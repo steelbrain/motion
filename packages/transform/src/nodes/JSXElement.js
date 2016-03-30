@@ -37,8 +37,8 @@ export default {
       let arr = [t.literal(name), t.literal(key)]
 
       // track meta
-      if (state.meta.views[state.currentView]) {
-        state.meta.views[state.currentView].els[name] = {
+      if (state.file.views[state.currentView]) {
+        state.file.views[state.currentView].els[name] = {
           location: normalizeLocation(el.loc), key
         }
       }
@@ -109,18 +109,7 @@ export default {
         }
       }
 
-      // wrap outermost JSX elements (in views) in this.render()
-      let wrap = idFn
-      const isDirectChildOfView = scope.hasOwnBinding('view')
-
-      if (isDirectChildOfView)
-        wrap = node => t.callExpression(t.identifier('view.render'), [
-          t.functionExpression(null, [], t.blockStatement([
-            t.returnStatement(node)
-          ]))
-        ])
-
-      return wrap(iff(route(rpt(node))))
+      return iff(route(rpt(node)))
     }
   }
 }
