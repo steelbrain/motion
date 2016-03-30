@@ -17,7 +17,7 @@ function niceProps(props) {
 }
 
 export default function elementProps(Motion, { name, whitelisted, key, index }, view, props) {
-  const viewName = view.__motion ? view.__motion.name : view.name
+  const viewName = view.__motion ? view.__motion.name : view.name || 'unnamed'
 
   if (props) {
     props = niceProps(props)
