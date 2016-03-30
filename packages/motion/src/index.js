@@ -2,6 +2,7 @@
 
 import invariant from 'assert'
 import Path from 'path'
+import express from 'express'
 import webpack from 'webpack'
 import WebpackFS from 'motion-webpack-fs'
 import WebpackDevServer from 'webpack-dev-server'
@@ -67,6 +68,7 @@ class Motion {
       publicPath: '/_/',
       contentBase: this.config.dataDirectory
     })
+    server.app.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
     const disposable = new Disposable(() => {
       this.state.get().running = false
       this.state.write()
