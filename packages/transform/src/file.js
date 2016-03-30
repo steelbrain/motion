@@ -19,15 +19,13 @@ export default function createPlugin(options) {
     return MotionPlugin(options)
 
   // plugin
-  return function MotionPlugin({ Plugin, types: t }) {
+  return function MotionPlugin({ types: t }) {
 
     // init
     init()
     helpersInit(options, t)
 
-    return new Plugin('motion-transform', {
-      metadata: {},
-
+    return {
       visitor: {
         Program,
         ExportDeclaration,
@@ -42,6 +40,6 @@ export default function createPlugin(options) {
         AssignmentExpression,
         ClassDeclaration
       }
-    })
+    }
   }
 }

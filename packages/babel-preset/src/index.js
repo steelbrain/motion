@@ -1,5 +1,7 @@
 /* @flow */
 
+// const motionTransform = require('motion-transform')
+
 const plugins = [
   // ES2015
   require('babel-plugin-transform-es2015-template-literals'),
@@ -37,7 +39,10 @@ const plugins = [
   require('babel-plugin-transform-flow-strip-types'),
   require('babel-plugin-syntax-flow'),
   require('babel-plugin-syntax-jsx'),
-  require('babel-plugin-transform-react-display-name')
+  require('babel-plugin-transform-react-display-name'),
+
+  // Motion
+  // motionTransform.file({})
 ]
 
 module.exports = {
