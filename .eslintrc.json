@@ -3,6 +3,7 @@
   "extends": "airbnb",
   "rules": {
     "semi": [2, "never"],
+    "strict": 0,
     "prefer-arrow-callback": 0,
     "space-before-function-paren": [2, "never"],
     "func-names": 0,

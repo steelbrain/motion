@@ -9,8 +9,9 @@ PM_PREFIX=$(npm get prefix)
 rm -rf "$NPM_PREFIX"/bin/motion*
 rm -rf "$NPM_PREFIX"/lib/node_modules/motion*
 
-ROOT_DIRECTORY=$( cd $(dirname $0) ; pwd -P )/..
+ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
+PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/_read_dependencies.js"
 # NOTE: Order is important
 PACKAGES_TO_LINK=(  "babel-preset" "fs" "npm" "runtime" "webpack-fs" "webpack-npm" "transform" "nice-styles" "client" "motion" )
 NPM_ROOT=$( npm root -g )
@@ -25,15 +26,12 @@ do :
   find node_modules -name "motion-*" -exec rm -r "{}" \;
 
   printf "Linking in other packages\n"
-  manifest_contents=$(cat package.json)
-  dependencies=$(printf "${manifest_contents#*dependencies}" | grep -E "motion-.*?\": " | perl -pe 's|"(\S+)":.*|\1|')
-  if [ -n "${dependencies}" ]; then
-    for dependency in ${dependencies}
-    do :
-      printf "Linking "${dependency}" in "${name}"\n"
-      npm link ${dependency} --loglevel=error
-    done
-  fi
+  dependencies=$( ${PACKAGE_EXTRACTION_FILE} ${PACKAGES_PATH}/${name}/package.json )
+  for dependency in ${dependencies}
+  do :
+    printf "Linking "${dependency}" in "${name}"\n"
+    npm link ${dependency} --loglevel=error
+  done
 
   printf "Installing dependencies\n"
   # to install devDependencies in packages
