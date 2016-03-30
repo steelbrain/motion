@@ -88,7 +88,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
     module: {
       loaders: [{
         test: /\.js$/,
-        loader: 'babel',
+        loader: require.resolve('babel-loader'),
         include: Path.join(config.rootDirectory),
         exclude: /(node_modules|bower_components|\.motion)/,
         query: {
