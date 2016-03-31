@@ -60,7 +60,7 @@ export default {
     //
     //   const classNamesObject = t.objectExpression(
     //     Object.keys(stylesheet).reduce((acc, key) => {
-    //       acc.push(t.property(null, t.literal(key), t.literal(stylesheet[key])))
+    //       acc.push(t.property(null, t.stringLiteral(key), t.stringLiteral(stylesheet[key])))
     //       return acc
     //     }, [])
     //   )
@@ -73,7 +73,7 @@ export default {
     //   // inline the static styles as js object for use when needing to override dynamics
     //   const stylesObject = t.objectExpression(
     //     Object.keys(styles).reduce((acc, key) => {
-    //       acc.push(t.property(null, t.literal(key), t.objectExpression(styles[key])))
+    //       acc.push(t.property(null, t.stringLiteral(key), t.objectExpression(styles[key])))
     //       return acc
     //     }, [])
     //   )
@@ -81,7 +81,7 @@ export default {
     //   // Motion.staticStyles('ViewName', {}, ``)
     //   const staticStyleExpr = t.expressionStatement(
     //     t.callExpression(t.identifier('Motion.staticStyles'), [
-    //       t.literal(viewName),
+    //       t.stringLiteral(viewName),
     //       classNamesObject,
     //       stylesObject
     //     ])
@@ -90,7 +90,7 @@ export default {
     //   // Motion.viewRoots["Name"] = "RootElementName"
     //   if (shouldStyleAsRoot()) {
     //     const viewRootNodeExpr = t.expressionStatement(
-    //       t.assignmentExpression('=', t.identifier(`Motion.viewRoots["${viewName}"]`), t.literal(getRootTagName()))
+    //       t.assignmentExpression('=', t.identifier(`Motion.viewRoots["${viewName}"]`), t.stringLiteral(getRootTagName()))
     //     )
     //     return [ staticStyleExpr, viewRootNodeExpr, node ]
     //   }

@@ -19,26 +19,26 @@ export default function createPlugin(options) {
     return MotionPlugin(options)
 
   // plugin
-  return function MotionPlugin({ types: t }) {
+  return function MotionPlugin({ types }) {
 
     // init
     init()
-    helpersInit(options, t)
+    helpersInit(options, types)
 
     return {
       visitor: {
-        Program,
-        ExportDeclaration,
-        ImportDeclaration,
-        Statement,
+        // Program,
+        // ExportDeclaration,
+        // ImportDeclaration,
+        // Statement,
         JSXElement,
         JSXAttribute,
-        ArrowFunctionExpression,
-        ReturnStatement,
-        CallExpression,
-        VariableDeclaration,
-        AssignmentExpression,
-        ClassDeclaration
+        // ArrowFunctionExpression,
+        // ReturnStatement,
+        // CallExpression,
+        // VariableDeclaration,
+        // AssignmentExpression,
+        // ClassDeclaration
       }
     }
   }
