@@ -16,7 +16,7 @@ export default {
         t.identifier('__motion'),
         t.objectExpression(
           [
-            t.property(null, t.identifier('name'), t.literal(name)),
+            t.property(null, t.identifier('name'), t.stringLiteral(name)),
             t.property(null, t.identifier('styles'), t.objectExpression([])),
             t.property(null, t.identifier('styleObjects'), t.objectExpression([])),
           ]

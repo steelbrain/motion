@@ -3,8 +3,7 @@ var path = require('path');
 
 module.exports = function(opts) {
   var entry = {
-    motion: './client/motion',
-    devtools: './tools/index',
+    motion: './client/motion'
   }
 
   var plugins = [
@@ -16,40 +15,27 @@ module.exports = function(opts) {
     })
   ]
 
-  // split react if not node
-  if (opts.target != 'node') {
-    splitReact(opts.name)
-    // splitBabelRuntime(opts.name)
-  }
-
   // if node, shim fetch
-  if (opts.target == 'node') {
-    plugins.push(
-      new webpack.ProvidePlugin({
-        'fetch': 'imports?this=>global!exports?global.fetch!node-fetch'
-      })
-    )
-  }
+  if (opts.target == 'node')
+    plugins.push(new webpack.ProvidePlugin({ 'fetch': 'imports?this=>global!exports?global.fetch!node-fetch' }))
 
   if (opts.minify)
-    plugins.push(
-      new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } })
-    )
+    plugins.push(new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }))
 
   if (opts.dedupe)
     plugins.push(new webpack.optimize.DedupePlugin())
+
+  var target = opts.libraryTarget || 'commonjs'
 
   function splitReact(name) {
     plugins.push(new webpack.optimize.CommonsChunkPlugin('react', 'react.'+name+'.js'))
     entry.react = ['react', 'react-dom']
   }
 
-  // function splitBabelRuntime(name) {
-  //   plugins.push(new webpack.optimize.CommonsChunkPlugin('babel-runtime', 'babel-runtime.'+name+'.js'))
-  //   entry['babel-runtime'] = ['babel-runtime']
-  // }
-
-  var target = opts.libraryTarget || 'commonjs'
+  // split react if not node
+  if (opts.target != 'node') {
+    splitReact(opts.name)
+  }
 
   return {
     target: opts.target || 'web',

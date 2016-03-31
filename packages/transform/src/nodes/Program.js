@@ -22,7 +22,7 @@ export default {
       node.body = [t.expressionStatement(
         // closure
         t.callExpression(t.functionExpression(null, [], t.blockStatement([
-          t.callExpression(t.identifier('Motion.file'), [t.literal(location),
+          t.callExpression(t.identifier('Motion.file'), [t.stringLiteral(location),
             t.functionExpression(null, [],
               t.blockStatement(node.body)
             )

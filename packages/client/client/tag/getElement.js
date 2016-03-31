@@ -11,7 +11,6 @@ import ReactCreateElement from '../lib/ReactCreateElement'
 
 */
 
-
 export default function getElement(Motion, identifier: Identifier, view, props): Element {
   let name, tagName, key, index, component, repeatItem
 

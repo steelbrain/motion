@@ -7,7 +7,7 @@ export function updateState() {
 export function wrapSetter(name, node, scope, postfix, method = 'set') {
   if (node.hasSetter) return
   if (scope.hasBinding('view')) {
-    let args = [t.literal(name), node]
+    let args = [t.stringLiteral(name), node]
     if (postfix) args = args.concat([postfix, t.identifier('true')])
     const expr = t.callExpression(t.identifier(`view.${method}`), args)
     node.hasSetter = true
@@ -41,14 +41,14 @@ export function wrapPropertyDeclarator(name, node, scope) {
 }
 
 export function getter(name, val, ...args) {
-  return t.callExpression(t.identifier('view.get'), [t.literal(name), val, ...args])
+  return t.callExpression(t.identifier('view.get'), [t.stringLiteral(name), val, ...args])
 }
 
 export function viewGetter(name, val, scope, file) {
   let comesFromFile = file.scope.hasOwnBinding(val.name)
 
   if (comesFromFile)
-    return getter(name, val, t.literal('fromFile'))
+    return getter(name, val, t.stringLiteral('fromFile'))
 
   return getter(name, val)
 }

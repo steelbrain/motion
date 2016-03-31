@@ -1,3 +1,4 @@
+
 import 'whatwg-fetch'
 import 'reapp-object-assign'
 
@@ -475,4 +476,5 @@ const Motion = {
   }
 }
 
-root.exports.motion = Motion
+Motion.init()
+root.Motion = Motion.run('app')

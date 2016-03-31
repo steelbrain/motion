@@ -47,7 +47,7 @@ export function extractAndAssign(node, file) {
 
     if (isChildView || isChildViewClassed) {
       const uniq = hash(statKeys)
-      result.push(exprStatement(t.literal(uniq)))
+      result.push(exprStatement(t.stringLiteral(uniq)))
     }
 
     // if dynamic + static clash, put that inside view to trigger hot reloads
@@ -58,7 +58,7 @@ export function extractAndAssign(node, file) {
           uniq += hash(statKeys[key] + dynKeys[key]) + hash(key)
         }
       })
-      result.push(exprStatement(t.literal(uniq)))
+      result.push(exprStatement(t.stringLiteral(uniq)))
     }
 
     // return statement

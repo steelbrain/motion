@@ -3,9 +3,9 @@ import state from '../state'
 
 let T
 
-export default function init(_options, _t) {
+export default function init(_options, types) {
   // redefine t??
-  t = t.t = _t
+  t = t.t = types
   options = _options
 }
 
@@ -41,7 +41,7 @@ export function component({ name, node, type = component.CLASS }) {
     node.params = [ t.identifier('view'), ...node.params ]
   }
 
-  const wrapped = t.callExpression(t.identifier(type), [t.literal(name), node])
+  const wrapped = t.callExpression(t.identifier(type), [t.stringLiteral(name), node])
   wrapped.isMotionHot = true
   return wrapped
 }
@@ -209,7 +209,7 @@ export function isJSXAttributeOfName(attr, name) {
 }
 
 export function tracker(name, type = 'dec') {
-  return t.expressionStatement(t.callExpression(t.identifier(`view.${type}`), [t.literal(name), t.identifier(name)]))
+  return t.expressionStatement(t.callExpression(t.identifier(`view.${type}`), [t.stringLiteral(name), t.identifier(name)]))
 }
 
 export function destructureTrackers(id, wrapType) {
