@@ -7,17 +7,18 @@ import webpack from 'webpack'
 import WebpackFS from 'motion-webpack-fs'
 import WebpackDevServer from 'webpack-dev-server'
 import { exists, copy, mkdir, realpath } from 'motion-fs'
-import { CompositeDisposable, Disposable } from 'sb-event-kit'
+import { CompositeDisposable, Disposable, Emitter } from 'sb-event-kit'
 import State from './state'
 import CLI from './cli'
 import { MotionError, ERROR_CODE } from './error'
-import { fillConfig, getWebpackConfig } from './helpers'
+import { fillConfig, getWebpackConfig, webPackErrorFromStats } from './helpers'
 import type { Motion$Config } from './types'
 
 class Motion {
   cli: CLI;
   state: State;
   config: Motion$Config;
+  emitter: Emitter;
   watching: boolean;
   subscriptions: CompositeDisposable;
 
@@ -28,9 +29,11 @@ class Motion {
     this.cli = new CLI(state, config)
     this.state = state
     this.config = config
+    this.emitter = new Emitter()
     this.watching = false
     this.subscriptions = new CompositeDisposable()
 
+    this.subscriptions.add(this.emitter)
     this.subscriptions.add(this.cli)
     this.cli.onShouldBuild(async () => {
       await this.build(false)
@@ -39,11 +42,9 @@ class Motion {
       this.dispose()
     })
   }
-
   async exists(): Promise<boolean> {
     return await exists(this.config.dataDirectory)
   }
-
   async watch(terminal: boolean = false): Promise<Disposable> {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
@@ -61,6 +62,12 @@ class Motion {
     compiler.inputFileSystem = WebpackFS
     compiler.resolvers.normal.fileSystem = WebpackFS
     compiler.resolvers.context.fileSystem = WebpackFS
+    compiler.plugin('done', stats => {
+      const error = webPackErrorFromStats(stats)
+      if (error) {
+        this.emitter.emit('did-error', error)
+      }
+    })
     const server = new WebpackDevServer(compiler, {
       hot: true,
       quiet: true,
@@ -81,20 +88,19 @@ class Motion {
     server.listen(this.state.get().web_server_port)
     return disposable
   }
-
   async build(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     await new Promise((resolve, reject) => {
-      webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, false), function(error) {
+      webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, false)).plugin('done', function(stats) {
+        const error = webPackErrorFromStats(stats)
         if (error) {
           reject(error)
         } else resolve()
       })
     })
   }
-
   async init(): Promise {
     if (await this.exists()) {
       throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
@@ -103,7 +109,9 @@ class Motion {
     await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.rootDirectory)
     this.state.write()
   }
-
+  onDidError(callback: Function): Disposable {
+    return this.emitter.on('did-error', callback)
+  }
   dispose() {
     this.subscriptions.dispose()
   }
