@@ -1,5 +1,5 @@
 {
-  "name": "motion-styled",
+  "name": "motion-style",
   "version": "1.0.0",
   "description": "Higher order component enabling style property on components",
   "main": "lib/index.js",
@@ -16,6 +16,13 @@
     "url": "https://github.com/motion/motion/issues"
   },
   "homepage": "https://github.com/motion/motion#readme",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "motion-nice-styles": "~0.9.0"
+  },
+  "devDependencies": {
+    "react": ">= 0.14.0 || ~15.0.0"
+  },
+  "peerDependencies": {
+    "react": ">= 0.14.0 || ~15.0.0"
+  }
 }

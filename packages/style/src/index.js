@@ -15,7 +15,7 @@ const mergeStyles = (obj, ...styles)  => {
   }, obj)
 }
 
-export default function Styled(ComposedComponent) {
+export default function Style(ComposedComponent) {
   return class extends ComposedComponent {
     constructor() {
       super(...arguments)
