@@ -14,8 +14,10 @@ const installationsInProgress: Map<number, {
   status: boolean,
   message: string
 }> = new Map()
+
 export const X = '✗'
 export const TICK = '✓'
+const WEBPACK_ERROR_REGEX = /ERROR in (.*)\n([\S \n]+)/
 
 export function fillConfig(config: Motion$Config) {
   if (typeof config.dataDirectory !== 'string') {
@@ -116,4 +118,16 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
   }
 
   return configuration
+}
+
+export function webPackErrorFromStats(stats: Object): ?Error {
+  if (!(stats.hasErrors() || stats.hasWarnings())) {
+    return null
+  }
+  const stringish = stats.toString()
+  const matches = WEBPACK_ERROR_REGEX.exec(stringish)
+  if (matches) {
+    return new Error(matches[2], matches[1])
+  }
+  return stringish
 }
