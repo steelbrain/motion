@@ -45,7 +45,7 @@ export default function Style(ComposedComponent) {
 
       let cloneProps = {}
 
-      if (React.isValidElement(child)) {
+      if (this.style && React.isValidElement(child)) {
         // <name style={} /> styles
         const style$ = child.props.style || []
 
