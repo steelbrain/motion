@@ -1,0 +1,21 @@
+{
+  "name": "motion-styled",
+  "version": "1.0.0",
+  "description": "Higher order component enabling style property on components",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motion/motion.git"
+  },
+  "author": "motion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motion/motion/issues"
+  },
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}
