@@ -85,7 +85,7 @@ export function getWebpackConfig(state: State, config: Motion$Config, cli: CLI, 
         Path.join(Path.normalize(Path.join(__dirname, '..')), 'node_modules'),
         Path.join(Path.normalize(Path.join(__dirname, '..', '..')), 'node_modules')
       ],
-      packageMains: ['webpack', 'browser', 'web', 'browserify', 'jsnext:main', 'main']
+      packageMains: ['webpack', 'browser', 'web', 'browserify', 'main', 'jsnext:main']
     },
     module: {
       loaders: [{
