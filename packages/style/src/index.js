@@ -26,7 +26,7 @@ export default function Style(ComposedComponent) {
     }
 
     styleAll(children) {
-      if (!Array.isArray(children) && !children.props)
+      if (!children || !Array.isArray(children) && !children.props)
         return children
 
       const count = React.Children.count(children)
