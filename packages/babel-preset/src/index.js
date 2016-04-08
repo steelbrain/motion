@@ -24,6 +24,7 @@ const plugins = [
   require('babel-plugin-transform-es2015-typeof-symbol'),
   require('babel-plugin-transform-es2015-modules-commonjs'),
   require('babel-plugin-transform-class-properties'),
+  require('babel-plugin-syntax-class-properties'),
 
   // Personal
   require('babel-plugin-syntax-async-functions'),
