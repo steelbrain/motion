@@ -9,7 +9,7 @@ trap 'kill $(jobs -pr)' SIGINT SIGTERM
 if [ "$PACKAGE_NAME" != "" ]; then
   packages=$PACKAGE_NAME
 else
-  packages=("babel-preset" "fs" "nice-styles" "transform" "client" "motion" "npm" "runtime" "style")
+  packages=("babel-preset" "fs" "nice-styles" "transform" "client" "motion" "runtime" "style")
 fi
 
 # build

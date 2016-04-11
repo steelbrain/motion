@@ -13,7 +13,7 @@ ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/_read_dependencies.js"
 # NOTE: Order is important
-PACKAGES_TO_LINK=(  "babel-preset" "fs" "npm" "runtime" "transform" "nice-styles" "client" "motion" "style" )
+PACKAGES_TO_LINK=(  "babel-preset" "fs" "runtime" "transform" "nice-styles" "client" "motion" "style" )
 NPM_ROOT=$( npm root -g )
 
 for name in "${PACKAGES_TO_LINK[@]}"
@@ -22,7 +22,6 @@ do :
 
   printf "Pruning in "${name}"\n"
   npm prune 1>/dev/null 2>/dev/null
-  rm -r lib
   mkdir -p node_modules
   find node_modules -name "motion-*" -exec rm -r "{}" \;
 
