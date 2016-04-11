@@ -37,12 +37,12 @@ done
 
 if [ "$1" = "--watch" ]; then
   # watch tools after first build
-  if [ "$2" != '--notools' ]; then
-    sleep 4
-    cd apps/tools
-    motion build --watch &
-    cd ../..
-  fi
+  # if [ "$2" != '--notools' ]; then
+  #   sleep 4
+  #   cd apps/tools
+  #   motion build --watch &
+  #   cd ../..
+  # fi
 
   # relink cli automatically
   chsum1=""

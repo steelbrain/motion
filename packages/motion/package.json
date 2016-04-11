@@ -16,6 +16,7 @@
     "babel-preset-motion": "^0.9.0",
     "babel-pundle": "^0.0.5",
     "chalk": "^1.1.1",
+    "colors": "^1.1.2",
     "cool-trim": "^1.0.0",
     "express": "^4.13.4",
     "lodash.uniq": "^4.2.0",
@@ -33,6 +34,7 @@
     "sb-event-kit": "^1.1.2",
     "sb-exec": "^1.0.1",
     "sb-promisify": "^1.1.1",
+    "semver-compare": "^1.0.0",
     "vorpal": "^1.10.8"
   }
 }

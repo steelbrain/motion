@@ -22,6 +22,7 @@ do :
 
   printf "Pruning in "${name}"\n"
   npm prune 1>/dev/null 2>/dev/null
+  rm -r lib
   mkdir -p node_modules
   find node_modules -name "motion-*" -exec rm -r "{}" \;
 
