@@ -1,5 +1,8 @@
 #!/bin/bash
 
+ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
+export PATH=$PATH:${ROOT_DIRECTORY}/node_modules/.bin
+
 set -e
 
 # kill bg tasks on exit
@@ -19,16 +22,16 @@ for p in "${packages[@]}"; do
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
-    node ../../node_modules/webpack/bin/webpack --config webpack.config.js $1 &
+    webpack --config webpack.config.js $1 &
     echo "running $f webpack for $f"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
 
-    node ./node_modules/babel-cli/bin/babel "$f/src" \
+    babel "$f/src" \
       --out-dir "$f/lib" \
-      --presets es2015-node4,stage-2 \
+      --presets steelbrain,stage-2 \
       --plugins transform-async-to-generator,transform-flow-strip-types,syntax-flow \
       --source-maps \
       --copy-files $1 &
