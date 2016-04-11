@@ -5,7 +5,7 @@ printf 'export MOTION_DEBUG="true"'
 printf "\n\n"
 
 # Unlink previously installed packages
-PM_PREFIX=$(npm get prefix)
+NPM_PREFIX=$(npm get prefix)
 rm -rf "$NPM_PREFIX"/bin/motion*
 rm -rf "$NPM_PREFIX"/lib/node_modules/motion*
 
