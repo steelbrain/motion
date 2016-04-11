@@ -26,7 +26,8 @@ do :
   find node_modules -name "motion-*" -exec rm -r "{}" \;
 
   printf "Linking in other packages\n"
-  dependencies=$( ${PACKAGE_EXTRACTION_FILE} ${PACKAGES_PATH}/${name}/package.json )
+  manifest_contents=$(cat package.json)
+  dependencies=$(printf "${manifest_contents#*dependencies}" | grep -E "motion.*?\": " | perl -pe 's|"(\S+)":.*|\1|')
   for dependency in ${dependencies}
   do :
     printf "Linking "${dependency}" in "${name}"\n"
