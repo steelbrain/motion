@@ -14,6 +14,7 @@
     "babel-core": "^6.7.2",
     "babel-loader": "^6.2.4",
     "babel-preset-motion": "^0.9.0",
+    "babel-pundle": "0.0.3",
     "chalk": "^1.1.1",
     "cool-trim": "^1.0.0",
     "express": "^4.13.4",
@@ -23,16 +24,15 @@
     "motion-client": "^0.9.12",
     "motion-fs": "^1.0.0",
     "motion-runtime": "^0.9.1",
-    "motion-webpack-fs": "^0.9.0",
-    "motion-webpack-npm": "^0.9.0",
     "open": "0.0.5",
     "ora": "^0.2.0",
+    "pundle": "0.0.3",
+    "pundle-dev": "0.0.3",
+    "pundle-npm-installer": "0.0.3",
     "resolve": "^1.1.7",
     "sb-event-kit": "^1.1.2",
     "sb-exec": "^1.0.1",
     "sb-promisify": "^1.1.1",
-    "vorpal": "^1.10.8",
-    "webpack": "^1.12.14",
-    "webpack-dev-server": "^1.14.1"
+    "vorpal": "^1.10.8"
   }
 }

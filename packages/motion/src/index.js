@@ -2,16 +2,13 @@
 
 import invariant from 'assert'
 import Path from 'path'
-import express from 'express'
-import webpack from 'webpack'
-import WebpackFS from 'motion-webpack-fs'
-import WebpackDevServer from 'webpack-dev-server'
-import { exists, copy, mkdir, realpath } from 'motion-fs'
+// import express from 'express'
+import { exists, copy, mkdir, realpath, writeFile } from 'motion-fs'
 import { CompositeDisposable, Disposable, Emitter } from 'sb-event-kit'
 import State from './state'
 import CLI from './cli'
 import { MotionError, ERROR_CODE } from './error'
-import { fillConfig, getWebpackConfig, webPackErrorFromStats } from './helpers'
+import { fillConfig, getPundleInstance } from './helpers'
 import type { Motion$Config } from './types'
 
 class Motion {
@@ -57,49 +54,29 @@ class Motion {
     if (terminal) {
       this.cli.activate()
     }
-    const compiler = webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, true))
-    // Unfortunately required due to https://goo.gl/TpOueD
-    compiler.inputFileSystem = WebpackFS
-    compiler.resolvers.normal.fileSystem = WebpackFS
-    compiler.resolvers.context.fileSystem = WebpackFS
-    compiler.plugin('done', stats => {
-      const error = webPackErrorFromStats(stats)
-      if (error) {
-        this.emitter.emit('did-error', error)
-      }
+    const pundle = getPundleInstance(this.state, this.config, this.cli, terminal, true, error => {
+      this.emitter.emit('did-error', error)
     })
-    const server = new WebpackDevServer(compiler, {
-      hot: true,
-      quiet: true,
-      inline: true,
-      publicPath: '/_/',
-      contentBase: this.config.dataDirectory
-    })
-    server.app.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
+    pundle.listen(this.state.get().web_server_port)
+    // server.app.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
     const disposable = new Disposable(() => {
       this.state.get().running = false
       this.state.write()
       this.subscriptions.remove(disposable)
-      this.cli.deactivate()
-      server.close()
+      pundle.dispose()
     })
 
     this.subscriptions.add(disposable)
-    server.listen(this.state.get().web_server_port)
     return disposable
   }
   async build(terminal: boolean = false): Promise {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    await new Promise((resolve, reject) => {
-      webpack(getWebpackConfig(this.state, this.config, this.cli, terminal, false)).plugin('done', function(stats) {
-        const error = webPackErrorFromStats(stats)
-        if (error) {
-          reject(error)
-        } else resolve()
-      })
+    const compilation = getPundleInstance(this.state, this.config, this.cli, terminal, false, error => {
+      this.emitter.emit('did-error', error)
     })
+    await writeFile(Path.join(this.config.dataDirectory, '_/bundle.js'), compilation.compile())
   }
   async init(): Promise {
     if (await this.exists()) {

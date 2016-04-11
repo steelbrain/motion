@@ -1,3 +1,3 @@
 ## motion-runtime
 
-Webpack Runtime for [`motion`](https://motion.io/)
+Pundle Runtime for [`motion`](https://motion.io/)

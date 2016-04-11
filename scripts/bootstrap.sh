@@ -13,7 +13,7 @@ ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/_read_dependencies.js"
 # NOTE: Order is important
-PACKAGES_TO_LINK=(  "babel-preset" "fs" "npm" "runtime" "webpack-fs" "webpack-npm" "transform" "nice-styles" "client" "motion" "style" )
+PACKAGES_TO_LINK=(  "babel-preset" "fs" "npm" "runtime" "transform" "nice-styles" "client" "motion" "style" )
 NPM_ROOT=$( npm root -g )
 
 for name in "${PACKAGES_TO_LINK[@]}"
