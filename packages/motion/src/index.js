@@ -54,7 +54,7 @@ class Motion {
     if (terminal) {
       this.cli.activate()
     }
-    const pundle = getPundleInstance(this.state, this.config, this.cli, terminal, true, error => {
+    const pundle = await getPundleInstance(this.state, this.config, this.cli, terminal, true, error => {
       this.emitter.emit('did-error', error)
     })
     pundle.listen(this.state.get().web_server_port)
@@ -73,10 +73,11 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    const compilation = getPundleInstance(this.state, this.config, this.cli, terminal, false, error => {
+    const compilation = await getPundleInstance(this.state, this.config, this.cli, terminal, false, error => {
       this.emitter.emit('did-error', error)
     })
-    await writeFile(Path.join(this.config.dataDirectory, '_/bundle.js'), compilation.compile())
+    await mkdir(Path.join(this.config.dataDirectory, '_'))
+    await writeFile(Path.join(this.config.dataDirectory, '_/bundle.js'), await compilation.compile())
   }
   async init(): Promise {
     if (await this.exists()) {

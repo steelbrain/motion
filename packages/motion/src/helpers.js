@@ -26,7 +26,7 @@ export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
-export function getPundleInstance(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean, errorCallback: Function): Object {
+export async function getPundleInstance(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean, errorCallback: Function): Object {
   const pundleConfig = {
     hmr: development,
     entry: [require.resolve('motion-runtime/lib/app')],
@@ -66,7 +66,8 @@ export function getPundleInstance(state: State, config: Motion$Config, cli: CLI,
   }], require.resolve('./pundle/resolver')]
   if (!development) {
     const pundle = new Pundle(pundleConfig)
-    pundle.loadPlugins(plugins)
+    await pundle.loadPlugins(plugins)
+    return pundle
   }
   const pundle = new PundleDev({
     pundle: pundleConfig,
@@ -85,6 +86,6 @@ export function getPundleInstance(state: State, config: Motion$Config, cli: CLI,
       port: state.get().web_server_port
     }
   })
-  pundle.pundle.loadPlugins(plugins)
+  await pundle.pundle.loadPlugins(plugins)
   return pundle
 }
