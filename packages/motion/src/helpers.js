@@ -3,8 +3,10 @@
 import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
-import express from 'express'
 import { DIRECTORY_NAME } from './config'
+import type CLI from './cli'
+import type State from './state'
+import type { Motion$Config } from './types'
 
 export const X = '✗'
 export const TICK = '✓'
@@ -77,7 +79,7 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     middleware: {
       sourceMap: true,
       sourceRoot: config.dataDirectory,
-      publicPath: '/_',
+      publicPath: '/',
       publicBundlePath: '/_/bundle.js'
     },
     server: {
@@ -85,6 +87,5 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     }
   })
   await pundle.pundle.loadPlugins(plugins)
-  pundle.server.get('*', express.static(Path.join(config.dataDirectory, 'index.html')))
   return pundle
 }
