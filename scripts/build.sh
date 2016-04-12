@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
-export PATH=$PATH:${ROOT_DIRECTORY}/node_modules/.bin
+export PATH=${ROOT_DIRECTORY}/node_modules/.bin:$PATH
 
 set -e
 
@@ -61,5 +61,15 @@ if [ "$1" = "--watch" ]; then
 fi
 
 # wait for bg tasks
+FAIL=0
 
-wait
+for job in `jobs -p`
+do
+  wait $job || let "FAIL+=1"
+done
+
+if [ "$FAIL" == "0" ]; then
+  exit 0
+else
+  exit 1
+fi

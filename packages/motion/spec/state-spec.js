@@ -2,8 +2,14 @@
 
 /* @flow */
 
+import { allowUnsafeEval } from 'loophole'
 import Path from 'path'
-import State from '../lib/state'
+
+let State
+
+allowUnsafeEval(function() {
+  State = require('../lib/state').default
+})
 
 const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 

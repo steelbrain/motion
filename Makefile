@@ -14,8 +14,6 @@ bootstrap:
 	npm install
 	scripts/build.sh
 	scripts/bootstrap.sh
-	# ensure linked before motion build
-	(cd packages/motion && npm link)
 
 ready:
 	git pull --rebase
