@@ -6,10 +6,10 @@ import Path from 'path'
 
 function pundleResolver(pundle: Object) {
   pundle.path.onBeforeModuleResolve(function(event) {
-    if (event.moduleName.indexOf('$rootDirectory') !== 0) {
+    if (event.moduleName.indexOf('$root') !== 0) {
       return
     }
-    event.path = Path.join(pundle.config.rootDirectory, Path.relative('$rootDirectory', event.moduleName))
+    event.path = Path.join(pundle.config.rootDirectory, Path.relative('$root', event.moduleName))
   })
 }
 

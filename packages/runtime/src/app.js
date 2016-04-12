@@ -5,7 +5,7 @@ if (module.hot) {
 }
 import Motion from 'react'
 import MotionDOM from 'react-dom'
-import MainView from '$rootDirectory/index.js'
+import MainView from '$root/index.js'
 
 if (typeof MainView === 'function') {
   MotionDOM.render(Motion.createElement(MainView), document.getElementById('app'))
