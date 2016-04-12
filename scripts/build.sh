@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
-export PATH=$PATH:${ROOT_DIRECTORY}/node_modules/.bin
+export PATH=${ROOT_DIRECTORY}/node_modules/.bin:$PATH
 
 set -e
 
