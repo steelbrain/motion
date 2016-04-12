@@ -23,8 +23,6 @@ const plugins = [
   require('babel-plugin-transform-es2015-modules-commonjs'),
   require('babel-plugin-transform-class-properties'),
   require('babel-plugin-syntax-class-properties'),
-
-  // Commented out because it conflicts with flow types and produces 'Missing class properties transform' error
   require('babel-plugin-transform-es2015-classes'),
 
   // Personal
