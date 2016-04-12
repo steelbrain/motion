@@ -23,15 +23,16 @@ const plugins = [
   require('babel-plugin-transform-es2015-modules-commonjs'),
   require('babel-plugin-transform-class-properties'),
   require('babel-plugin-syntax-class-properties'),
+
+  // Decorators
+  require('babel-plugin-transform-decorators-legacy').default,
+
   require('babel-plugin-transform-es2015-classes'),
 
   // Personal
   require('babel-plugin-syntax-async-functions'),
   require('babel-plugin-syntax-async-generators'),
   require('babel-plugin-transform-async-to-generator'),
-
-  // Decorators
-  require('babel-plugin-transform-decorators-legacy').default,
 
   // React
   [require('babel-plugin-transform-react-jsx'), {
