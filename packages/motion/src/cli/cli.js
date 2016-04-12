@@ -20,6 +20,10 @@ export default class CLI {
     this.subscriptions = new CompositeDisposable()
   }
   activate() {
+    if (process.versions.electron) {
+      // Vorpal crashes electron
+      return
+    }
     if (this.active) {
       this.instance.show()
       return
