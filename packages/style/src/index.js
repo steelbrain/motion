@@ -1,28 +1,25 @@
 import React from 'react'
 import niceStyles from 'motion-nice-styles'
-
-const mergeStyles = (obj, ...styles)  => {
-  return styles.reduce((acc, style) => {
-    if (style && style.constructor === Array)
-     for (var i = 0; i < style.length; i++)
-       acc = mergeStyles(acc, style[i])
-    else if (typeof style === 'object' && style !== null) {
-      if (!acc) acc = {}
-      Object.assign(acc, style)
-    }
-
-    return acc
-  }, obj)
-}
+import { StyleSheet, css } from 'aphrodite'
 
 export default function Style(ComposedComponent) {
-  return class extends ComposedComponent {
+  class StyledComponent extends ComposedComponent {
     constructor() {
       super(...arguments)
+
+      if (this.style) {
+        const styles = Object.assign({}, this.style)
+
+        for (let style in styles) {
+          niceStyles(styles[style])
+        }
+
+        this.stylesheet = StyleSheet.create(styles)
+      }
     }
 
     render() {
-      return this.styleAll.call(this, super.render())
+      return this.stylesheet ? this.styleAll.call(this, super.render()) : super.render()
     }
 
     styleAll(children) {
@@ -46,31 +43,18 @@ export default function Style(ComposedComponent) {
       let cloneProps = {}
 
       if (this.style && React.isValidElement(child)) {
-        // <name style={} /> styles
-        const style$ = child.props.style || []
-
         // <View /> or <tag /> styles
         const name = child.type && (child.type.name || child.type)
-        const name$ = this.style[name] || []
-
         // <name $tag /> styles
-        const styleKeys = Object.keys(child.props)
+        const tagged = Object.keys(child.props)
           .filter(key => key[0] == '$') // only $props
           .map(key => key.slice(1)) // remove $
 
-        const tagged$ = styleKeys.length ?
-          styleKeys.map(key => this.style[key]) :
-          []
+        const styles =  [name, ...tagged]
+          .map(i => this.stylesheet[i])
+          .reduce((acc, cur) => acc.concat(cur || []), [])
 
-        // set style prop
-        cloneProps.style = mergeStyles({}, [
-          name$,
-          ...tagged$,
-          style$
-        ])
-
-        // helpers for array styles
-        niceStyles(cloneProps.style)
+        cloneProps.className = css(...styles)
       }
 
       if (child.props && child.props.children)
@@ -79,4 +63,6 @@ export default function Style(ComposedComponent) {
       return React.cloneElement(child, cloneProps)
     }
   }
+
+  return StyledComponent
 }
