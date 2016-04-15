@@ -21,6 +21,7 @@ const plugins = [
   require('babel-plugin-transform-es2015-block-scoping'),
   require('babel-plugin-transform-es2015-typeof-symbol'),
   require('babel-plugin-transform-es2015-modules-commonjs'),
+
   require('babel-plugin-transform-class-properties'),
   require('babel-plugin-syntax-class-properties'),
 
@@ -33,6 +34,9 @@ const plugins = [
   require('babel-plugin-syntax-async-functions'),
   require('babel-plugin-syntax-async-generators'),
   require('babel-plugin-transform-async-to-generator'),
+
+  require('babel-plugin-transform-object-rest-spread'),
+  require('babel-plugin-syntax-object-rest-spread'),
 
   // React
   [require('babel-plugin-transform-react-jsx'), {
