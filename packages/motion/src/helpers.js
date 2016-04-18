@@ -4,6 +4,7 @@ import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
 import express from 'express'
+import send from 'send'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -89,5 +90,30 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
   })
   await pundle.pundle.loadPlugins(plugins)
   pundle.server.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
+  pundle.server.use('*', function serveRequest(req, res, next, error = false) {
+    // Ignore both bundle and it's map
+    if (req.baseUrl.indexOf('/_/bundle.js') === 0) {
+      next()
+      return
+    }
+    // Ignore the client requests
+    if (req.baseUrl.indexOf('/client/') === 0) {
+      next()
+      return
+    }
+    send(req, req.baseUrl, { root: config.dataDirectory, index: 'index.html' })
+      .on('error', function() {
+        if (error) {
+          next()
+        } else {
+          req.baseUrl = '/index.html'
+          serveRequest(req, res, next, true)
+        }
+      })
+      .on('directory', function() {
+        next()
+      })
+      .pipe(res)
+  })
   return pundle
 }
