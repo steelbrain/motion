@@ -10,16 +10,17 @@ export default function Style(ComposedComponent) {
       if (this.style) {
         const styles = Object.assign({}, this.style)
 
-        for (let style in styles) {
+        for (let style in styles)
           niceStyles(styles[style])
-        }
 
         this.stylesheet = StyleSheet.create(styles)
       }
     }
 
     render() {
-      return this.stylesheet ? this.styleAll.call(this, super.render()) : super.render()
+      return this.stylesheet ?
+        this.styleAll.call(this, super.render()) :
+        super.render()
     }
 
     styleAll(children) {
@@ -38,11 +39,12 @@ export default function Style(ComposedComponent) {
     }
 
     styleOne(child) {
-      if (!child) return child
+      if (!child || !React.isValidElement(child))
+        return child
 
       let cloneProps = {}
 
-      if (this.style && React.isValidElement(child)) {
+      if (this.style) {
         // <View /> or <tag /> styles
         const name = child.type && (child.type.name || child.type)
         // <name $tag /> styles

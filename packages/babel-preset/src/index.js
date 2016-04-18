@@ -45,7 +45,27 @@ const plugins = [
   require('babel-plugin-transform-flow-strip-types'),
   require('babel-plugin-syntax-flow'),
   require('babel-plugin-syntax-jsx'),
-  require('babel-plugin-transform-react-display-name'),
+
+  // display name updated for 6
+  // function ({ Plugin, types: t }) {
+  //   return {
+  //     visitor: {
+  //       ClassDeclaration({ node, parent, scope }) {
+  //         console.log('got a class declaration', this.get("superClass").matchesPattern("Component"))
+  //         if (this.get("superClass").matchesPattern("Component")) {
+  //           // take the "export default class ..." form into account
+  //           (parent.type === 'ExportDefaultDeclaration' ? this.parentPath : this).insertAfter([
+  //             t.expressionStatement(t.assignmentExpression(
+  //               "=",
+  //               t.memberExpression(node.id, t.identifier("displayName")),
+  //               t.literal(node.id.name)
+  //             ))
+  //           ]);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 ]
 
 module.exports = {
