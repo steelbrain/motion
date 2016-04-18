@@ -1,43 +1,7 @@
 /* @flow */
 
 const plugins = [
-  // ES2015
-  require('babel-plugin-transform-es2015-template-literals'),
-  require('babel-plugin-transform-es2015-literals'),
-  require('babel-plugin-transform-es2015-function-name'),
-  require('babel-plugin-transform-es2015-arrow-functions'),
-  require('babel-plugin-transform-es2015-block-scoped-functions'),
-  require('babel-plugin-transform-es2015-object-super'),
-  require('babel-plugin-transform-es2015-shorthand-properties'),
-  require('babel-plugin-transform-es2015-duplicate-keys'),
-  require('babel-plugin-transform-es2015-computed-properties'),
-  require('babel-plugin-transform-es2015-for-of'),
-  require('babel-plugin-transform-es2015-sticky-regex'),
-  require('babel-plugin-transform-es2015-unicode-regex'),
-  require('babel-plugin-check-es2015-constants'),
-  require('babel-plugin-transform-es2015-spread'),
-  require('babel-plugin-transform-es2015-parameters'),
-  require('babel-plugin-transform-es2015-destructuring'),
-  require('babel-plugin-transform-es2015-block-scoping'),
-  require('babel-plugin-transform-es2015-typeof-symbol'),
-  require('babel-plugin-transform-es2015-modules-commonjs'),
-
-  require('babel-plugin-transform-class-properties'),
-  require('babel-plugin-syntax-class-properties'),
-
-  // Decorators
-  require('babel-plugin-transform-decorators-legacy').default,
-
-  require('babel-plugin-transform-es2015-classes'),
-
-  // Personal
-  require('babel-plugin-syntax-async-functions'),
-  require('babel-plugin-syntax-async-generators'),
-  require('babel-plugin-transform-async-to-generator'),
-
-  require('babel-plugin-transform-object-rest-spread'),
-  require('babel-plugin-syntax-object-rest-spread'),
-
+  require.resolve('babel-plugin-transform-decorators-legacy'),
   // React
   [require('babel-plugin-transform-react-jsx'), {
     pragma: 'Motion.createElement'
@@ -45,29 +9,12 @@ const plugins = [
   require('babel-plugin-transform-flow-strip-types'),
   require('babel-plugin-syntax-flow'),
   require('babel-plugin-syntax-jsx'),
-
-  // display name updated for 6
-  // function ({ Plugin, types: t }) {
-  //   return {
-  //     visitor: {
-  //       ClassDeclaration({ node, parent, scope }) {
-  //         console.log('got a class declaration', this.get("superClass").matchesPattern("Component"))
-  //         if (this.get("superClass").matchesPattern("Component")) {
-  //           // take the "export default class ..." form into account
-  //           (parent.type === 'ExportDefaultDeclaration' ? this.parentPath : this).insertAfter([
-  //             t.expressionStatement(t.assignmentExpression(
-  //               "=",
-  //               t.memberExpression(node.id, t.identifier("displayName")),
-  //               t.literal(node.id.name)
-  //             ))
-  //           ]);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  require('babel-plugin-transform-react-display-name')
 ]
 
 module.exports = {
+  presets: [
+    require.resolve('babel-preset-es2015'), require.resolve('babel-preset-stage-0')
+  ],
   plugins
 }
