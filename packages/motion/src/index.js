@@ -2,7 +2,6 @@
 
 import invariant from 'assert'
 import Path from 'path'
-import express from 'express'
 import { exists, copy, mkdir, realpath, writeFile } from 'motion-fs'
 import { CompositeDisposable, Disposable, Emitter } from 'sb-event-kit'
 import State from './state'
@@ -57,7 +56,6 @@ class Motion {
     const pundle = await getPundleInstance(this.state, this.config, this.cli, terminal, true, error => {
       this.emitter.emit('did-error', error)
     })
-    pundle.server.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
     pundle.listen(this.state.get().web_server_port)
     const disposable = new Disposable(() => {
       this.state.get().running = false

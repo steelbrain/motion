@@ -3,6 +3,7 @@
 import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
+import express from 'express'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -87,5 +88,6 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     }
   })
   await pundle.pundle.loadPlugins(plugins)
+  pundle.server.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
   return pundle
 }
