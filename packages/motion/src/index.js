@@ -57,11 +57,18 @@ class Motion {
       this.emitter.emit('did-error', error)
     })
     pundle.listen(this.state.get().web_server_port)
+    const reloadHook = this.cli.onShouldReload(async () => {
+      for (const entry of pundle.pundle.compilations) {
+        entry.clearCache()
+        await entry.compile()
+      }
+    })
     const disposable = new Disposable(() => {
       this.state.get().running = false
       this.state.write()
       this.subscriptions.remove(disposable)
       pundle.dispose()
+      reloadHook.dispose()
     })
 
     this.subscriptions.add(disposable)

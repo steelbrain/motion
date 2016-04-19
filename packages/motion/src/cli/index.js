@@ -56,6 +56,14 @@ export default class Main {
       await this.emitter.emit('should-build')
       this.cli.log('Dist files built successfully in', this.config.dataDirectory)
     })
+    this.cli.addCommand('reload', 'Rebuild the bundle clearing all cache', async () => {
+      try {
+        await this.emitter.emit('should-reload')
+        this.cli.log('Bundle reloaded successfully')
+      } catch (_) {
+        this.cli.log('Unable to reload the bundle', _)
+      }
+    })
     this.cli.replaceCommand('exit', 'Exit motion daemon', () => {
       this.emitter.emit('should-dispose')
       process.exit()
@@ -108,6 +116,9 @@ export default class Main {
   }
   onShouldBuild(callback: Function): Disposable {
     return this.emitter.on('should-build', callback)
+  }
+  onShouldReload(callback: Function): Disposable {
+    return this.emitter.on('should-reload', callback)
   }
   onShouldDispose(callback: Function): Disposable {
     return this.emitter.on('should-dispose', callback)
