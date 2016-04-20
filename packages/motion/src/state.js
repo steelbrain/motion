@@ -34,7 +34,6 @@ export default class State {
       running: false,
       process_id: process.pid,
       web_server_port: getRandomNumber(8090, 9500),
-      websocket_server_port: getRandomNumber(8090, 9500),
       npm_save: true
     }
     const config = configFileExists ? await readJSON(configFile) : {
