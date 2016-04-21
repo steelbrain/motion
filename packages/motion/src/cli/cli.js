@@ -58,6 +58,8 @@ export default class CLI {
       const value = arguments[i]
       if (typeof value === 'string') {
         contents.push(value)
+      } else if (value && value.constructor.name.endsWith('Error')) {
+        contents.push(`[${value.constructor.name}: ${value.message} ${value.stack.split('\n')[1].trim()}]`)
       } else {
         contents.push(inspect(value))
       }
