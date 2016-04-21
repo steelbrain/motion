@@ -13,6 +13,7 @@
   "dependencies": {
     "babel-preset-motion": "^0.9.0",
     "babel-pundle": "^0.2.2",
+    "babel-regenerator-runtime": "^6.5.0",
     "chalk": "^1.1.1",
     "colors": "^1.1.2",
     "cool-trim": "^1.0.0",
