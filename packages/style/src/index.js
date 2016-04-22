@@ -18,6 +18,8 @@ export default function Style(ComposedComponent) {
     }
 
     render() {
+      console.log('testing 124')
+
       return this.stylesheet ?
         this.styleAll.call(this, super.render()) :
         super.render()
@@ -29,6 +31,8 @@ export default function Style(ComposedComponent) {
 
       const count = React.Children.count(children)
       const styler = this.styleOne.bind(this)
+
+      console.log(children)
 
       if (Array.isArray(children))
         return children.map(styler)

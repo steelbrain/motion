@@ -12,7 +12,7 @@ trap 'kill $(jobs -pr)' SIGINT SIGTERM
 if [ "$PACKAGE_NAME" != "" ]; then
   packages=$PACKAGE_NAME
 else
-  packages=("babel-preset" "fs" "nice-styles" "transform" "client" "motion" "runtime" "style")
+  packages=("babel-preset" "fs" "nice-styles" "transform" "motion" "runtime" "style")
 fi
 
 # build
@@ -39,25 +39,11 @@ for p in "${packages[@]}"; do
 done
 
 if [ "$1" = "--watch" ]; then
-  # watch tools after first build
-  # if [ "$2" != '--notools' ]; then
-  #   sleep 4
-  #   cd apps/tools
-  #   motion build --watch &
-  #   cd ../..
-  # fi
-
   # relink cli automatically
   chsum1=""
   cd packages/motion
   npm link --loglevel=error --no-progress
   cd ../..
-
-  # this is expensive
-  # while true; do
-  #   sleep 20
-  #   (cd packages/client && node prepublish)
-  # done
 fi
 
 # wait for bg tasks

@@ -89,15 +89,9 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     }
   })
   await pundle.pundle.loadPlugins(plugins)
-  pundle.server.use('/client', express.static(Path.dirname(require.resolve('motion-client/package.json'))))
   pundle.server.use('*', function serveRequest(req, res, next, error = false) {
     // Ignore both bundle and it's map
     if (req.baseUrl.indexOf('/_/bundle.js') === 0) {
-      next()
-      return
-    }
-    // Ignore the client requests
-    if (req.baseUrl.indexOf('/client/') === 0) {
       next()
       return
     }

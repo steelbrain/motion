@@ -4,9 +4,6 @@ clean:
 build: clean
 	./scripts/build.sh
 
-watch-core: clean
-	scripts/build.sh --watch --notools
-
 watch: clean
 	scripts/build.sh --watch
 
@@ -32,9 +29,6 @@ patch-tools: ready
 
 patch-motion: ready
 	node scripts/release.js --patch motion
-
-patch-client: ready
-	node scripts/release.js --patch client
 
 patch-transform: ready
 	node scripts/release.js --patch transform
