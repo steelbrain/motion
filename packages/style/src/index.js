@@ -18,21 +18,17 @@ export default function Style(ComposedComponent) {
     }
 
     render() {
-      console.log('testing 124')
-
       return this.stylesheet ?
         this.styleAll.call(this, super.render()) :
         super.render()
     }
 
     styleAll(children) {
-      if (!children || !Array.isArray(children) && !children.props)
+      if (!children || !Array.isArray(children) && !children.props || !this.style)
         return children
 
       const count = React.Children.count(children)
       const styler = this.styleOne.bind(this)
-
-      console.log(children)
 
       if (Array.isArray(children))
         return children.map(styler)
@@ -46,22 +42,23 @@ export default function Style(ComposedComponent) {
       if (!child || !React.isValidElement(child))
         return child
 
+      // <View /> + <tag /> keys
+      const name = child.type && (child.type.name || child.type)
+
+      // <name $tag /> keys
+      const tagged = Object.keys(child.props)
+        .filter(key => key[0] == '$' && child.props[key] === true) // only $props
+        .map(key => key.slice(1)) // remove $
+
+      // styles
+      const styles = [name, ...tagged]
+        .map(i => this.stylesheet[i])
+        .reduce((acc, cur) => acc.concat(cur || []), [])
+
       let cloneProps = {}
 
-      if (this.style) {
-        // <View /> or <tag /> styles
-        const name = child.type && (child.type.name || child.type)
-        // <name $tag /> styles
-        const tagged = Object.keys(child.props)
-          .filter(key => key[0] == '$') // only $props
-          .map(key => key.slice(1)) // remove $
-
-        const styles =  [name, ...tagged]
-          .map(i => this.stylesheet[i])
-          .reduce((acc, cur) => acc.concat(cur || []), [])
-
+      if (styles.length)
         cloneProps.className = css(...styles)
-      }
 
       if (child.props && child.props.children)
         cloneProps.children = this.styleAll(child.props.children)
