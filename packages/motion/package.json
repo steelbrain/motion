@@ -2,7 +2,7 @@
   "name": "motion",
   "version": "0.9.24",
   "description": "motion - moving development forward",
-  "main": "lib/main.js",
+  "main": "lib/index.js",
   "scripts": {},
   "author": "Motion",
   "license": "MIT",
