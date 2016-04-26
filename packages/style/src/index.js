@@ -1,6 +1,6 @@
 import React from 'react'
 import niceStyles from 'motion-nice-styles'
-import { StyleSheet, css } from 'motion-aphrodite'
+import { StyleSheet, css } from 'cd aphrodite'
 
 export default function Style(ComposedComponent) {
   class StyledComponent extends ComposedComponent {
