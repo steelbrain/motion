@@ -60,8 +60,10 @@ export default function Style(ComposedComponent) {
       if (styles.length)
         cloneProps.className = css(...styles)
 
-      if (child.props && child.props.children)
-        cloneProps.children = this.styleAll(child.props.children)
+      if (child.props) {
+        if (child.props.children)
+          cloneProps.children = this.styleAll(child.props.children)
+      }
 
       return React.cloneElement(child, cloneProps)
     }
