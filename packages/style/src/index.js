@@ -39,6 +39,9 @@ export default function Style(ComposedComponent) {
     }
 
     styleOne(child) {
+      if (Array.isArray(child))
+        return this.styleAll(child)
+
       if (!child || !React.isValidElement(child))
         return child
 
