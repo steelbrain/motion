@@ -28,10 +28,15 @@ export default function Style(ComposedComponent) {
       if (!children || !Array.isArray(children) && !children.props || !this.style) return children
 
       const styler = this.styleOne.bind(this)
-      if (Array.isArray(children)) return children.map(styler)
+      if (Array.isArray(children)) {
+        return children.map(styler)
+      }
 
       const count = React.Children.count(children)
-      if (count > 1) return React.Children.map(children, styler)
+      if (count > 1) {
+        return React.Children.map(children, styler)
+      }
+
       return styler(children)
     }
 
@@ -53,8 +58,20 @@ export default function Style(ComposedComponent) {
         .reduce((acc, cur) => acc.concat(cur || []), [])
 
       const cloneProps = {}
-      if (styles.length) cloneProps.className = css(...styles)
-      if (child.props && child.props.children) cloneProps.children = this.styleAll(child.props.children)
+
+      if (styles.length) {
+        cloneProps.className = css(...styles)
+
+        if (child.props && child.props.className) {
+          if (typeof child.props.className === 'string') {
+            cloneProps.className += ` ${child.props.className}`
+          }
+        }
+      }
+
+      if (child.props && child.props.children) {
+        cloneProps.children = this.styleAll(child.props.children)
+      }
 
       return React.cloneElement(child, cloneProps)
     }
