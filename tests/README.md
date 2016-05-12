@@ -1,1 +1,0 @@
-Integration tests. These tests are to ensure releases don't go out broken. Making sure common workflows aren't broken..

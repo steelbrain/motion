@@ -1,0 +1,29 @@
+{
+  "name": "motion-style",
+  "version": "1.0.6",
+  "description": "Higher order component enabling style property on components",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motion/motion.git"
+  },
+  "author": "motion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motion/motion/issues"
+  },
+  "homepage": "https://github.com/motion/motion#readme",
+  "dependencies": {
+    "aphrodite": "^0.3.0",
+    "motion-nice-styles": "~0.9.0"
+  },
+  "devDependencies": {
+    "react": ">= 0.14.0 || ~15.0.0"
+  },
+  "peerDependencies": {
+    "react": ">= 0.14.0 || ~15.0.0"
+  }
+}

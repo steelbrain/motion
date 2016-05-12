@@ -2,7 +2,9 @@ import state from '../state'
 import { t, options, idFn, isUpperCase, nodeToNameString, normalizeLocation, getVar } from '../lib/helpers'
 
 export default {
-  enter(node, parent, scope, file) {
+  enter(path) {
+    let { node, scope, file } = path
+
     const el = node.openingElement
 
     // avoid reprocessing
@@ -34,11 +36,11 @@ export default {
       else
         key = state.keyBase[name] = 1
 
-      let arr = [t.literal(name), t.literal(key)]
+      let arr = [t.stringLiteral(name), t.stringLiteral(key)]
 
       // track meta
-      if (state.meta.views[state.currentView]) {
-        state.meta.views[state.currentView].els[name] = {
+      if (state.file.views[state.currentView]) {
+        state.file.views[state.currentView].els[name] = {
           location: normalizeLocation(el.loc), key
         }
       }
@@ -72,7 +74,7 @@ export default {
 
       for (let attr of el.attributes) {
         const attrName = attr.name && attr.name.name
-        const expr = attr.value && (attr.value.expression || t.literal(attr.value.value))
+        const expr = attr.value && (attr.value.expression || t.stringLiteral(attr.value.value))
 
         if (attrName == 'class' && isUpperCase(name))
           state.viewHasChildWithClass = true
@@ -109,18 +111,7 @@ export default {
         }
       }
 
-      // wrap outermost JSX elements (in views) in this.render()
-      let wrap = idFn
-      const isDirectChildOfView = scope.hasOwnBinding('view')
-
-      if (isDirectChildOfView)
-        wrap = node => t.callExpression(t.identifier('view.render'), [
-          t.functionExpression(null, [], t.blockStatement([
-            t.returnStatement(node)
-          ]))
-        ])
-
-      return wrap(iff(route(rpt(node))))
+      return iff(route(rpt(node)))
     }
   }
 }

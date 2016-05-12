@@ -1,12 +1,19 @@
 #!/bin/bash
 
+ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
+export PATH=${ROOT_DIRECTORY}/node_modules/.bin:$PATH
+
 set -e
 
 # kill bg tasks on exit
 trap 'kill $(jobs -pr)' SIGINT SIGTERM
 
 # order important so they build for each other
-packages=("nice-styles" "transform" "client" "motion")
+if [ "$PACKAGE_NAME" != "" ]; then
+  packages=$PACKAGE_NAME
+else
+  packages=("babel-preset" "fs" "nice-styles" "transform" "motion" "runtime" "style")
+fi
 
 # build
 for p in "${packages[@]}"; do
@@ -15,16 +22,16 @@ for p in "${packages[@]}"; do
   # webpack packages
   if [ -f "$f/webpack.config.js" ]; then
     cd $f
-    node ../../node_modules/webpack/bin/webpack --config webpack.config.js $1 &
+    webpack --config webpack.config.js $1 &
     echo "running $f webpack for $f"
     cd ../..
   # or just babel
   elif [ -d "$f/src" ]; then
     echo "running babel on $f"
 
-    node ./node_modules/babel-cli/bin/babel "$f/src" \
+    babel "$f/src" \
       --out-dir "$f/lib" \
-      --presets es2015-node4,stage-2 \
+      --presets steelbrain,stage-2 \
       --plugins transform-async-to-generator,transform-flow-strip-types,syntax-flow \
       --source-maps \
       --copy-files $1 &
@@ -32,14 +39,6 @@ for p in "${packages[@]}"; do
 done
 
 if [ "$1" = "--watch" ]; then
-  # watch tools after first build
-  if [ "$2" != '--notools' ]; then
-    sleep 4
-    cd apps/tools
-    motion build --watch &
-    cd ../..
-  fi
-
   # relink cli automatically
   chsum1=""
   cd packages/motion
@@ -48,7 +47,6 @@ if [ "$1" = "--watch" ]; then
 fi
 
 # wait for bg tasks
-
 FAIL=0
 
 for job in `jobs -p`

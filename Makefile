@@ -4,19 +4,13 @@ clean:
 build: clean
 	./scripts/build.sh
 
-watch-core: clean
-	scripts/build.sh --watch --notools
-
 watch: clean
 	scripts/build.sh --watch
 
 bootstrap:
 	npm install
-	node scripts/bootstrap.js
 	scripts/build.sh
-	# ensure linked before motion build
-	(cd packages/motion && npm link)
-	(cd apps/tools && motion build)
+	scripts/bootstrap.sh
 
 ready:
 	git pull --rebase
@@ -35,9 +29,6 @@ patch-tools: ready
 
 patch-motion: ready
 	node scripts/release.js --patch motion
-
-patch-client: ready
-	node scripts/release.js --patch client
 
 patch-transform: ready
 	node scripts/release.js --patch transform
