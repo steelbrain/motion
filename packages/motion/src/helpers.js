@@ -3,7 +3,6 @@
 import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
-import express from 'express'
 import send from 'send'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
@@ -34,12 +33,12 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     entry: [require.resolve('babel-regenerator-runtime'), require.resolve('motion-runtime/lib/app')],
     rootDirectory: config.rootDirectory,
     resolve: {
-      root: config.dataDirectory
+      root: config.rootDirectory
     }
   }
   const plugins = [[require.resolve('pundle-npm-installer'), {
     save: state.get().npm_save,
-    rootDirectory: config.dataDirectory,
+    rootDirectory: config.rootDirectory,
     onBeforeInstall(id, name) {
       if (terminal) {
         const message = `Installing ${name}`
