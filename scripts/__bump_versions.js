@@ -8,7 +8,7 @@ if (manifestContents.dependencies) {
   for (key in manifestContents.dependencies) {
     if (manifestContents.dependencies.hasOwnProperty(key)) {
       if (key.indexOf('motion') !== -1) {
-        manifestContents.dependencies[key] = '^' + process.argv[3].substr(1)
+        manifestContents.dependencies[key] = process.argv[3].substr(1)
       }
     }
   }

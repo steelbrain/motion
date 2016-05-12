@@ -4,9 +4,10 @@ ACTION=$1
 
 # Usage: ./scripts/release.sh (major|minor|patch)
 
-. ${ROOT_DIRECTORY}/scripts/__variables.sh
 
 ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
+. ${ROOT_DIRECTORY}/scripts/__variables.sh
+
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 PACKAGES=${PACKAGE_NAMES}
 
