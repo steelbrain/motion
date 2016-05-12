@@ -12,11 +12,12 @@ trap 'kill $(jobs -pr)' SIGINT SIGTERM
 if [ "$PACKAGE_NAME" != "" ]; then
   packages=$PACKAGE_NAME
 else
-  packages=("babel-preset" "fs" "nice-styles" "transform" "motion" "runtime" "style")
+  . ${ROOT_DIRECTORY}/scripts/__variables.sh
+  packages=${PACKAGE_NAMES}
 fi
 
 # build
-for p in "${packages[@]}"; do
+for p in $packages; do
   f="packages/$p"
 
   # webpack packages

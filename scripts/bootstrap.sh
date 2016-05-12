@@ -8,15 +8,15 @@ printf "\n\n"
 NPM_PREFIX=$(npm get prefix)
 rm -rf "$NPM_PREFIX"/bin/motion*
 rm -rf "$NPM_PREFIX"/lib/node_modules/motion*
+. ${ROOT_DIRECTORY}/scripts/__variables.sh
 
 ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/_read_dependencies.js"
-# NOTE: Order is important
-PACKAGES_TO_LINK=(  "babel-preset" "fs" "runtime" "transform" "nice-styles" "motion" "style" )
+PACKAGES_TO_LINK=${PACKAGE_NAMES}
 NPM_ROOT=$( npm root -g )
 
-for name in "${PACKAGES_TO_LINK[@]}"
+for name in $PACKAGES_TO_LINK
 do :
   cd ${PACKAGES_PATH}/${name}
 
