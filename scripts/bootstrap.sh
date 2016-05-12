@@ -12,7 +12,7 @@ rm -rf "$NPM_PREFIX"/lib/node_modules/motion*
 
 ROOT_DIRECTORY=$( cd $(dirname $0)/.. ; pwd -P )
 PACKAGES_PATH=${ROOT_DIRECTORY}/packages
-PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/_read_dependencies.js"
+PACKAGE_EXTRACTION_FILE="${ROOT_DIRECTORY}/scripts/__read_dependencies.js"
 PACKAGES_TO_LINK=${PACKAGE_NAMES}
 NPM_ROOT=$( npm root -g )
 
