@@ -1,6 +1,6 @@
 {
   "name": "motion-style",
-  "version": "1.0.6",
+  "version": "1.0.0",
   "description": "Higher order component enabling style property on components",
   "main": "lib/index.js",
   "scripts": {
