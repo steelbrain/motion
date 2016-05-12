@@ -17,7 +17,6 @@
     "chalk": "^1.1.1",
     "colors": "^1.1.2",
     "cool-trim": "^1.0.0",
-    "express": "^4.13.4",
     "lodash.uniq": "^4.2.0",
     "meow": "^3.7.0",
     "minimist": "^1.2.0",

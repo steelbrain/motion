@@ -3,7 +3,6 @@
 import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
-import express from 'express'
 import send from 'send'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
