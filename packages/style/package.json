@@ -1,6 +1,6 @@
 {
   "name": "motion-style",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Higher order component enabling style property on components",
   "main": "lib/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/motion/motion#readme",
   "dependencies": {
     "aphrodite": "^0.3.0",
-    "motion-nice-styles": "1.1.1"
+    "motion-nice-styles": "1.1.2"
   },
   "devDependencies": {
     "react": ">= 0.14.0 || ~15.0.0"
