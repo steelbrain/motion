@@ -32,7 +32,7 @@ for p in $packages; do
 
     babel "$f/src" \
       --out-dir "$f/lib" \
-      --presets steelbrain,stage-2 \
+      --presets react,es2015,stage-0 \
       --plugins transform-async-to-generator,transform-flow-strip-types,syntax-flow \
       --source-maps \
       --copy-files $1 &
