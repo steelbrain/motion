@@ -1,8 +1,8 @@
 /* @flow */
 
-import React from 'react'
+import Motion from 'react'
 
-class Main extends React.Component {
+class Main extends Motion.Component {
   render() {
     return <div>Hello World</div>
   }
