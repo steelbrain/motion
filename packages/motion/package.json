@@ -21,7 +21,6 @@
     "meow": "^3.7.0",
     "minimist": "^1.2.0",
     "motion-fs": "^1.1.0",
-    "motion-runtime": "^1.1.0",
     "open": "0.0.5",
     "ora": "^0.2.0",
     "pundle": "^v0.2.8",

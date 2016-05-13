@@ -30,7 +30,7 @@ export function getRandomNumber(min: number, max: number): number {
 export async function getPundleInstance(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean, errorCallback: Function): Object {
   const pundleConfig = {
     hmr: development,
-    entry: [require.resolve('babel-regenerator-runtime'), require.resolve('motion-runtime/lib/app')],
+    entry: [require.resolve('babel-regenerator-runtime'), config.rootDirectory],
     rootDirectory: config.rootDirectory,
     resolve: {
       root: config.rootDirectory

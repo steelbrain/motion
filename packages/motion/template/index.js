@@ -1,11 +1,15 @@
 /* @flow */
 
-import Motion from 'react'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Main from './main'
 
-class Main extends Motion.Component {
-  render() {
-    return <div>Hello World</div>
-  }
+if (typeof Main === 'function') {
+  ReactDOM.render(React.createElement(Main), document.getElementById('app'))
+} else {
+  console.error('No default view exported from the main file')
 }
 
-export default Main
+if (process.env.NODE_ENV === 'development' && module.hot) {
+  module.hot.accept()
+}
