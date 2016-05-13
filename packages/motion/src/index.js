@@ -2,7 +2,7 @@
 
 import invariant from 'assert'
 import Path from 'path'
-import { exists, copy, mkdir, realpath, writeFile } from 'motion-fs'
+import { exists, copy, mkdir, realpath, writeFile } from './fs'
 import { CompositeDisposable, Disposable, Emitter } from 'sb-event-kit'
 import State from './state'
 import CLI from './cli'

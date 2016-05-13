@@ -1,6 +1,6 @@
 /* @flow */
 
-import { exists, readJSON, writeJSON } from 'motion-fs'
+import { exists, readJSON, writeJSON } from './fs'
 import { getRandomNumber } from './helpers'
 import type { Motion$State, Motion$StateConfig } from './types'
 
