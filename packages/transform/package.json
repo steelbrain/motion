@@ -1,10 +1,10 @@
 {
   "name": "motion-transform",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Motion babel transform",
   "main": "lib/index.js",
   "dependencies": {
-    "motion-nice-styles": "1.2.0",
+    "motion-nice-styles": "1.2.1",
     "hash-sum": "1.0.2",
     "object-to-css": "1.0.3"
   }

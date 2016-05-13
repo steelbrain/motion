@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "motion - moving development forward",
   "main": "lib/index.js",
   "scripts": {},
@@ -11,8 +11,8 @@
     "motion": "./lib/bin/index.js"
   },
   "dependencies": {
-    "babel-preset-motion": "1.2.0",
-    "babel-pundle": "^v0.2.8",
+    "babel-preset-motion": "1.2.1",
+    "babel-pundle": "0.2.11",
     "babel-regenerator-runtime": "^6.5.0",
     "chalk": "^1.1.1",
     "colors": "^1.1.2",
@@ -24,9 +24,9 @@
     "ncp": "^2.0.0",
     "open": "0.0.5",
     "ora": "^0.2.0",
-    "pundle": "^v0.2.8",
-    "pundle-dev": "^v0.2.8",
-    "pundle-npm-installer": "^v0.2.8",
+    "pundle": "0.2.11",
+    "pundle-dev": "0.2.11",
+    "pundle-npm-installer": "0.2.11",
     "resolve": "^1.1.7",
     "rimraf": "^2.5.2",
     "sb-event-kit": "^1.1.2",
