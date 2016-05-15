@@ -2,9 +2,9 @@ import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
 
-export default function Style(ComposedComponent, componentName) {
+export default function Style(ComposedComponent) {
   class StyledComponent extends ComposedComponent {
-    static displayName = ComposedComponent.displayName || componentName
+    static displayName = ComposedComponent.displayName || ComposedComponent.name
 
     constructor() {
       super(...arguments)
