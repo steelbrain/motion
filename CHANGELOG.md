@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming
+
+- Update `reload` message, change `successfully` to `peacefully` :ok:
+
 ## 1.2.0
 
 - Nuke motion-fs

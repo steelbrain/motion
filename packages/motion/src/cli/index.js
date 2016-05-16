@@ -59,7 +59,7 @@ export default class Main {
     this.cli.addCommand('reload', 'Rebuild the bundle clearing all cache', async () => {
       try {
         await this.emitter.emit('should-reload')
-        this.cli.log('Bundle reloaded successfully')
+        this.cli.log('Bundle reloaded peacefully')
       } catch (_) {
         this.cli.log('Unable to reload the bundle', _)
       }
