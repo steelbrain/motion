@@ -6,19 +6,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "babel": "^6.5.2",
     "babel-cli": "^6.5.1",
     "babel-eslint": "^6.0.0",
-    "babel-loader": "^6.2.2",
     "babel-preset-es2015-without-strict-and-regenerator": "0.0.1",
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
     "eslint": "^2.4.0",
     "eslint-config-airbnb": "^6.0.2",
     "eslint-plugin-react": "^4.3.0",
-    "json-loader": "^0.5.3",
-    "lodash": "^4.0.0",
-    "shelljs": "^0.5.1",
-    "webpack": "^1.12.2"
   }
 }
