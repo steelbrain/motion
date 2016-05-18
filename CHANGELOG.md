@@ -2,6 +2,7 @@
 
 ## Upcoming
 
+- Set `process.env.NODE_ENV` properly
 - Update `reload` message, change `successfully` to `peacefully` :ok:
 
 ## 1.2.0
