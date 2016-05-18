@@ -34,6 +34,9 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     rootDirectory: config.rootDirectory,
     resolve: {
       root: config.rootDirectory
+    },
+    replaceVariables: {
+      'process.env.NODE_ENV': `"${development ? 'development' : 'production'}"`
     }
   }
   const plugins = [[require.resolve('pundle-npm-installer'), {
