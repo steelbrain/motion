@@ -4,13 +4,9 @@
   A simple CLI for running React projects.
 </p>
 
-----
-
 <p align="center">
   For questions and support please visit the <a href="https://motion-slack.herokuapp.com">Slack community</a>!
 </p>
-
-----
 
 <p align="center">
   <a href="http://badge.fury.io/js/motion"><img alt="npm version" src="https://badge.fury.io/js/motion.svg"></a>
