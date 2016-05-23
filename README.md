@@ -65,6 +65,7 @@ to automate a few painful things with building modern web apps:
 - Running - A consistent interface runs your app server and builds your files
 - Configuring - Use your own configuration for babel.
 - Hot reloads - Hot reloads come out of the box, powered by [pundle](https://github.com/motion/pundle)
+- Automatic NPM installs - Add an import and motion installs your packages for you without needing a reload
 - Testing - **Pending**
 
 ## Status
@@ -78,3 +79,7 @@ npm dependencies that worked better than [the current best](https://github.com/e
 Another big thing we wanted was faster hot reloads. Webpack on our medium size project was taking about 400ms. We got it down to nearly instant.
 
 Finally, we just wanted a nice bundler that's code was self-documenting, typed, and had a foundation that would allow for extensibility. The result is [Pundle](https://github.com/motion/pundle), the peaceful bundler. It still needs some love: documentation, node_module watching, and code splitting for example. But we use daily at our company of four and we all love it.
+
+## Configuration
+
+**pending**
