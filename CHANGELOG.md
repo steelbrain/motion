@@ -3,6 +3,7 @@
 ## Upcoming
 
 - Set `process.env.NODE_ENV` properly
+- Bump pundle to 0.2.13
 - Update `reload` message, change `successfully` to `peacefully` :ok:
 
 ## 1.2.0
