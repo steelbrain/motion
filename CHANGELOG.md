@@ -1,6 +1,8 @@
 # Changelog
 
-## Upcoming
+## 1.4.0
+
+( Skipped 1.3.0 because a version of `motion-nice-styles` already existed with that version, wat? )
 
 - Set `process.env.NODE_ENV` properly
 - Bump pundle to 0.2.14
