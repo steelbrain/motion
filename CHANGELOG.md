@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming
+
+- Add support for `babel.plugins` in `.motion/config.json`
+
 ## 1.4.0
 
 ( Skipped 1.3.0 because a version of `motion-nice-styles` already existed with that version, wat? )
