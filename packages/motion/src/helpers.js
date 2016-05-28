@@ -48,7 +48,9 @@ export async function getPundleInstance(
   }
 
   const userPlugins = (state.config.babel && state.config.babel.plugins || [])
-    .map(plugin => require.resolve(Path.join(config.rootDirectory, '.motion', plugin)))
+    .map(function(plugin) {
+      return plugin.substr(0, 1) === '.' ? Path.join(config.rootDirectory, plugin) : Path.join(config.rootDirectory, 'node_modules', plugin)
+    })
 
   const plugins = [
     [require.resolve('pundle-npm-installer'), {
