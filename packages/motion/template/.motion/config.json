@@ -1,3 +1,6 @@
 {
-  "include_polyfills": false
+  "include_polyfills": false,
+  "babel": {
+    "plugins": []
+  }
 }
