@@ -27,7 +27,14 @@ export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
-export async function getPundleInstance(state: State, config: Motion$Config, cli: CLI, terminal: boolean, development: boolean, errorCallback: Function): Object {
+export async function getPundleInstance(
+  state: State,
+  config: Motion$Config,
+  cli: CLI,
+  terminal: boolean,
+  development: boolean,
+  errorCallback: Function
+): Object {
   const pundleConfig = {
     hmr: development,
     entry: [require.resolve('babel-regenerator-runtime'), config.rootDirectory],
@@ -39,7 +46,15 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
       'process.env.NODE_ENV': `"${development ? 'development' : 'production'}"`
     }
   }
-  const plugins = [[require.resolve('pundle-npm-installer'), {
+
+  const userPlugins = (
+    state.config.babel && state.config.babel.plugins || []
+  )
+  .map(plugin =>
+    require.resolve(Path.join(config.rootDirectory, '.motion', plugin))
+  )
+
+  const plugins = [userPlugins, [require.resolve('pundle-npm-installer'), {
     save: state.get().npm_save,
     rootDirectory: config.rootDirectory,
     onBeforeInstall(id, name) {
@@ -68,6 +83,7 @@ export async function getPundleInstance(state: State, config: Motion$Config, cli
     },
     ignored: /(node_modules|bower_components|\.motion)/
   }], require.resolve('./pundle/resolver')]
+
   if (!development) {
     const pundle = new Pundle(pundleConfig)
     await pundle.loadPlugins(plugins)
