@@ -47,42 +47,43 @@ export async function getPundleInstance(
     }
   }
 
-  const userPlugins = (
-    state.config.babel && state.config.babel.plugins || []
-  )
-  .map(plugin =>
-    require.resolve(Path.join(config.rootDirectory, '.motion', plugin))
-  )
+  const userPlugins = (state.config.babel && state.config.babel.plugins || [])
+    .map(plugin => require.resolve(Path.join(config.rootDirectory, '.motion', plugin)))
 
-  const plugins = [userPlugins, [require.resolve('pundle-npm-installer'), {
-    save: state.get().npm_save,
-    rootDirectory: config.rootDirectory,
-    onBeforeInstall(id, name) {
-      if (terminal) {
-        const message = `Installing ${name}`
-        cli.addSpinner(message)
-      }
-    },
-    onAfterInstall(id, name, error) {
-      if (terminal) {
-        const message = `Installing ${name}`
-        cli.removeSpinner(message)
-        if (error) {
-          cli.log(`Install ${name} ${X}`)
-          cli.log(error)
-        } else {
-          cli.log(`Install ${name} ${TICK}`)
+  const plugins = [
+    [require.resolve('pundle-npm-installer'), {
+      save: state.get().npm_save,
+      rootDirectory: config.rootDirectory,
+      onBeforeInstall(id, name) {
+        if (terminal) {
+          const message = `Installing ${name}`
+          cli.addSpinner(message)
         }
-      } else if (error) {
-        errorCallback(error)
+      },
+      onAfterInstall(id, name, error) {
+        if (terminal) {
+          const message = `Installing ${name}`
+          cli.removeSpinner(message)
+          if (error) {
+            cli.log(`Install ${name} ${X}`)
+            cli.log(error)
+          } else {
+            cli.log(`Install ${name} ${TICK}`)
+          }
+        } else if (error) {
+          errorCallback(error)
+        }
       }
-    }
-  }], [require.resolve('babel-pundle'), {
-    config: {
-      presets: [require.resolve('babel-preset-motion')]
-    },
-    ignored: /(node_modules|bower_components|\.motion)/
-  }], require.resolve('./pundle/resolver')]
+    }],
+    [require.resolve('babel-pundle'), {
+      config: {
+        presets: [require.resolve('babel-preset-motion')],
+        plugins: userPlugins
+      },
+      ignored: /(node_modules|bower_components|\.motion)/
+    }],
+    require.resolve('./pundle/resolver')
+  ]
 
   if (!development) {
     const pundle = new Pundle(pundleConfig)
