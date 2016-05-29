@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 1.4.1
 
 - Add support for `babel.plugins` in `.motion/config.json`
 
