@@ -83,8 +83,7 @@ export async function getPundleInstance(
         plugins: userPlugins
       },
       ignored: /(node_modules|bower_components|\.motion)/
-    }],
-    require.resolve('./pundle/resolver')
+    }]
   ]
 
   if (!development) {

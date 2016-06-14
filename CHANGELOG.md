@@ -3,6 +3,7 @@
 ## Upcoming
 
 - Simplify babel-preset by importing `babel-preset-react`
+- Remove `$` support in import, in favor of auto-replacement in atom package
 
 ## 1.4.1
 
