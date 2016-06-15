@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 2.0.0
 
 - Simplify babel-preset by importing `babel-preset-react` (**API BREAKING**)
 - Remove `$` support in import, in favor of auto-replacement in atom package (**API BREAKING**)
