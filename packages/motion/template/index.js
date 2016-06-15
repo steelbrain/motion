@@ -1,7 +1,5 @@
 /* @flow */
 
-import React from 'react'
-import ReactDOM from 'react-dom'
 import Main from './main'
 
 if (typeof Main === 'function') {

@@ -1,5 +1,10 @@
 # Changelog
 
+## Upcoming
+
+- Simplify babel-preset by importing `babel-preset-react` (**API BREAKING**)
+- Remove `$` support in import, in favor of auto-replacement in atom package (**API BREAKING**)
+
 ## 1.4.1
 
 - Add support for `babel.plugins` in `.motion/config.json`
