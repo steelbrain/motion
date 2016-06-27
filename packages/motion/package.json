@@ -37,6 +37,7 @@
     "vorpal": "^1.10.8"
   },
   "devDependencies": {
+    "jasmine-fix": "^1.0.0",
     "loophole": "^1.1.0"
   }
 }

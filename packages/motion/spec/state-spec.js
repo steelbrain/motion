@@ -2,16 +2,15 @@
 
 /* @flow */
 
-import { allowUnsafeEval } from 'loophole'
 import Path from 'path'
+import { allowUnsafeEval } from 'loophole'
+import { it } from 'jasmine-fix'
 
 let State
 
 allowUnsafeEval(function() {
   State = require('../lib/state').default
 })
-
-const { it } = require(process.env.SPEC_HELPER_SCRIPT)
 
 describe('Motion State', function() {
   it('resumes an existing state', async function() {

@@ -3,8 +3,7 @@
 /* @flow */
 
 import { MotionError, ERROR_CODE } from '../lib/error'
-
-const { it } = require(process.env.SPEC_HELPER_SCRIPT)
+import { it } from 'jasmine-fix'
 
 describe('MotionError', function() {
   it('sets message and code according to given code', function() {
