@@ -17,15 +17,11 @@ function Style(ComposedComponent) {
         let styles = Object.assign({}, this.style)
 
         // merge theme onto style
-        // like so, given this.props.theme === 'dark' and this.style:
-        //   { dark: { button: { color: 'black' } } }
-        // then flatten it to:
-        //   { dark-button: { color: 'black' } }
-        // why? because StyleSheet.create takes a flat object,
+        // given this.props.theme == 'dark' and this.style == { dark: { h1: { color: 'red' } } }
+        // flatten it to: { dark-button: { color: 'black' } }
+        // why? because StyleSheet.create takes a flat object
         // and `-` not allowed in jsx tags/props so safe to use
-
         const themeKey = this.props.theme
-
         if (opts.theme && themeKey) {
           const themeStyles = styles[themeKey]
 
