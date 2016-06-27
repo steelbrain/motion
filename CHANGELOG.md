@@ -3,6 +3,7 @@
 ## Upcoming
 
 - Fix errors when `.motion/state.js` is empty (#359)
+- Show successfully compiled files (#360)
 
 ## 2.0.0
 
