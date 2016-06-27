@@ -4,6 +4,7 @@ import Path from 'path'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
 import send from 'send'
+import chalk from 'chalk'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -128,6 +129,13 @@ export async function getPundleInstance(
         next()
       })
       .pipe(res)
+  })
+  pundle.pundle.observeCompilations(function(compilation) {
+    compilation.onDidCompile(function({ filePath }) {
+      if (filePath.substr(0, 6) === '$root/') {
+        cli.log(`${chalk.dim(filePath)} ${chalk.green('✓')}`)
+      }
+    })
   })
   return pundle
 }
