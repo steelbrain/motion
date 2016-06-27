@@ -28,8 +28,6 @@ export default class State {
   }
 
   static async create(stateFile: string, configFile: string): Promise<State> {
-    const stateFileContents = await exists(stateFile) ? (await readFile(stateFile, 'utf8')).trim() : null
-    const configFileContents = await exists(configFile) ? (await readFile(configFile, 'utf8')).trim() : null
     let state = {
       running: false,
       process_id: process.pid,
@@ -39,14 +37,16 @@ export default class State {
     let config = {
       include_polyfills: false
     }
-    if (stateFileContents) {
+    if (await exists(stateFile)) {
+      const stateFileContents = (await readFile(stateFile, 'utf8')).trim()
       try {
         state = Object.assign(state, JSON.parse(stateFileContents))
       } catch (_) {
         throw new Error(`Malformed state file at ${stateFile}`)
       }
     }
-    if (configFileContents) {
+    if (await exists(configFile)) {
+      const configFileContents = (await readFile(configFile, 'utf8')).trim()
       try {
         config = Object.assign(config, JSON.parse(configFileContents))
       } catch (_) {
