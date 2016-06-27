@@ -31,7 +31,7 @@ function processTransform(transform: Transform): string {
 function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
     return typeof style === 'number' ? `${style}px` : style
-  })
+  }).join(' ')
 }
 
 function processStyles(styles: Object, includeEmpty: boolean = false): Object {
@@ -41,15 +41,11 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       continue
     }
     const value = styles[key]
-    if (!value && !includeEmpty) {
+    if ((typeof value === 'undefined' || value === null) && !includeEmpty) {
       continue
     }
-    if (typeof value === 'string') {
+    if (typeof value === 'string' || typeof value === 'number') {
       toReturn[key] = value
-      continue
-    }
-    if (typeof value === 'number') {
-      toReturn[key] = `${value}px`
       continue
     }
     if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color') !== -1) {

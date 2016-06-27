@@ -13,7 +13,13 @@ export default function Style(ComposedComponent) {
         const styles = Object.assign({}, this.style)
 
         for (const style in styles) {
-          if (style) niceStyles(styles[style])
+          if (!styles.hasOwnProperty(style)) {
+            continue
+          }
+          const value = styles[style]
+          if (value) {
+            styles[style] = niceStyles(value)
+          }
         }
 
         this.stylesheet = StyleSheet.create(styles)
