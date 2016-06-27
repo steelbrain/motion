@@ -39,18 +39,22 @@ export default class State {
     }
     if (await exists(stateFile)) {
       const stateFileContents = (await readFile(stateFile, 'utf8')).trim()
-      try {
-        state = Object.assign(state, JSON.parse(stateFileContents))
-      } catch (_) {
-        throw new Error(`Malformed state file at ${stateFile}`)
+      if (stateFileContents.length) {
+        try {
+          state = Object.assign(state, JSON.parse(stateFileContents))
+        } catch (_) {
+          throw new Error(`Malformed state file at ${stateFile}`)
+        }
       }
     }
     if (await exists(configFile)) {
       const configFileContents = (await readFile(configFile, 'utf8')).trim()
-      try {
-        config = Object.assign(config, JSON.parse(configFileContents))
-      } catch (_) {
-        throw new Error(`Malformed state file at ${configFile}`)
+      if (configFileContents.length) {
+        try {
+          config = Object.assign(config, JSON.parse(configFileContents))
+        } catch (_) {
+          throw new Error(`Malformed state file at ${configFile}`)
+        }
       }
     }
 
