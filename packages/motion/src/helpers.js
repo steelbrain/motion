@@ -132,7 +132,7 @@ export async function getPundleInstance(
   })
   pundle.pundle.observeCompilations(function(compilation) {
     compilation.onDidCompile(function({ filePath }) {
-      if (filePath.substr(0, 6) === '$root/') {
+      if (filePath.substr(0, 5) === '$root') {
         cli.log(`${chalk.dim(filePath)} ${chalk.green('✓')}`)
       }
     })
