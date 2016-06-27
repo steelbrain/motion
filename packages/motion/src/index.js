@@ -70,6 +70,12 @@ class Motion {
       pundle.dispose()
       reloadHook.dispose()
     })
+    if (terminal) {
+      this.cli.log('Creating compile cache')
+      for (const entry of pundle.pundle.compilations) {
+        await entry.compile()
+      }
+    }
 
     this.subscriptions.add(disposable)
     return disposable

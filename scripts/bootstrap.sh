@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-printf "HEY! LISTEN!\nPUT THIS IN YOUR SHELL TO GET DEBUGS:\n"
-printf 'export MOTION_DEBUG="true"'
-printf "\n\n"
-
 # Unlink previously installed packages
 NPM_PREFIX=$(npm get prefix)
 rm -rf "$NPM_PREFIX"/bin/motion*

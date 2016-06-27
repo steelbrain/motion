@@ -1,5 +1,17 @@
 # Changelog
 
+## Upcoming
+
+- Show successfully compiled files (#360)
+- Fix errors when `.motion/state.js` is empty (#359)
+- Automatically create compile cache on startup (#351)
+- Support deep styles in `@media` queries in `motion-nice-styles`
+
+## 2.0.0
+
+- Simplify babel-preset by importing `babel-preset-react` (**API BREAKING**)
+- Remove `$` support in import, in favor of auto-replacement in atom package (**API BREAKING**)
+
 ## 1.4.1
 
 - Add support for `babel.plugins` in `.motion/config.json`

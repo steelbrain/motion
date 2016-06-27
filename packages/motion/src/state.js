@@ -1,6 +1,6 @@
 /* @flow */
 
-import { exists, readJSON, writeJSON } from './fs'
+import { exists, readFile, writeJSON } from './fs'
 import { getRandomNumber } from './helpers'
 import type { Motion$State, Motion$StateConfig } from './types'
 
@@ -28,16 +28,34 @@ export default class State {
   }
 
   static async create(stateFile: string, configFile: string): Promise<State> {
-    const stateFileExists = await exists(stateFile)
-    const configFileExists = await exists(configFile)
-    const state = stateFileExists ? await readJSON(stateFile) : {
+    let state = {
       running: false,
       process_id: process.pid,
       web_server_port: getRandomNumber(8090, 9500),
       npm_save: true
     }
-    const config = configFileExists ? await readJSON(configFile) : {
+    let config = {
       include_polyfills: false
+    }
+    if (await exists(stateFile)) {
+      const stateFileContents = (await readFile(stateFile, 'utf8')).trim()
+      if (stateFileContents.length) {
+        try {
+          state = Object.assign(state, JSON.parse(stateFileContents))
+        } catch (_) {
+          throw new Error(`Malformed state file at ${stateFile}`)
+        }
+      }
+    }
+    if (await exists(configFile)) {
+      const configFileContents = (await readFile(configFile, 'utf8')).trim()
+      if (configFileContents.length) {
+        try {
+          config = Object.assign(config, JSON.parse(configFileContents))
+        } catch (_) {
+          throw new Error(`Malformed state file at ${configFile}`)
+        }
+      }
     }
 
     return new State(state, config, stateFile, configFile)
