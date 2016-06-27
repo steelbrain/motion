@@ -34,15 +34,22 @@ function processArray(array: Array<number | string>): string {
   })
 }
 
-function processStyles(styles: Object): Object {
+function processStyles(styles: Object, includeEmpty: boolean = false): Object {
   const toReturn = {}
   for (const key in styles) {
     if (!styles.hasOwnProperty(key)) {
       continue
     }
     const value = styles[key]
+    if (!value && !includeEmpty) {
+      continue
+    }
     if (typeof value === 'string') {
       toReturn[key] = value
+      continue
+    }
+    if (typeof value === 'number') {
+      toReturn[key] = `${value}px`
       continue
     }
     if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color') !== -1) {
