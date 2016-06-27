@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming
+
+- Fix errors when `.motion/state.js` is empty (#359)
+
 ## 2.0.0
 
 - Simplify babel-preset by importing `babel-preset-react` (**API BREAKING**)
