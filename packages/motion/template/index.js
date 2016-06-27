@@ -1,6 +1,8 @@
 /* @flow */
 
 import Main from './main'
+import React from 'react'
+import ReactDOM from 'react-dom'
 
 if (typeof Main === 'function') {
   ReactDOM.render(React.createElement(Main), document.getElementById('app'))
