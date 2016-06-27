@@ -45,7 +45,7 @@ function processStyles(styles: Object): Object {
       toReturn[key] = value
       continue
     }
-    if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color')) {
+    if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color') !== -1) {
       toReturn[key] = processColor(value)
       continue
     }
