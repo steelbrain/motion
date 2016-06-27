@@ -2,6 +2,7 @@
 
 ## Upcoming
 
+- Support deep styles in `@media` queries in `motion-nice-styles`
 - Fix errors when `.motion/state.js` is empty (#359)
 - Show successfully compiled files (#360)
 
