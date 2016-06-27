@@ -59,6 +59,7 @@ function processStyles(styles: Object): Object {
     }
     if (Array.isArray(value)) {
       toReturn[key] = processArray(value)
+      continue
     }
     throw new Error(`Invalid style value for ${key}`)
   }
