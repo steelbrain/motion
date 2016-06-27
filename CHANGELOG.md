@@ -2,9 +2,10 @@
 
 ## Upcoming
 
-- Support deep styles in `@media` queries in `motion-nice-styles`
-- Fix errors when `.motion/state.js` is empty (#359)
 - Show successfully compiled files (#360)
+- Fix errors when `.motion/state.js` is empty (#359)
+- Automatically create compile cache on startup (#351)
+- Support deep styles in `@media` queries in `motion-nice-styles`
 
 ## 2.0.0
 
