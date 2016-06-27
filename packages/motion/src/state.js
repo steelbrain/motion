@@ -41,14 +41,14 @@ export default class State {
     }
     if (stateFileContents) {
       try {
-        state = Object.assign(JSON.parse(stateFileContents), state)
+        state = Object.assign(state, JSON.parse(stateFileContents))
       } catch (_) {
         throw new Error(`Malformed state file at ${stateFile}`)
       }
     }
     if (configFileContents) {
       try {
-        config = Object.assign(JSON.parse(configFileContents), config)
+        config = Object.assign(config, JSON.parse(configFileContents))
       } catch (_) {
         throw new Error(`Malformed state file at ${configFile}`)
       }
