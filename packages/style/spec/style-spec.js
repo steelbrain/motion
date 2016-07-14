@@ -6,6 +6,7 @@ import style from '../lib/index'
 import { it } from 'jasmine-fix'
 import React from 'react'
 import { mount } from 'enzyme'
+import BasicComponent from './basicComponent'
 
 @style()
 class StyledComponent extends React.Component {
@@ -40,7 +41,7 @@ class StyledComponent extends React.Component {
 
 describe('MotionStyle', () => {
   it('applies styles', () => {
-    const el = mount(<StyledComponent />)
+    const el = mount(<BasicComponent />)
 
     const h1 = el.find('h1')
     const instance = el.component.getInstance()

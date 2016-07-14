@@ -19,7 +19,7 @@ module.exports = (opts = {
       // flatten it to: { dark-button: { color: 'black' } }
       // why? because StyleSheet.create takes a flat object
       // and `-` not allowed in jsx tags/props so safe to use
-      if (opts.theme) {
+      if (opts.theme && styles.theme) {
         Object.keys(styles.theme).forEach(themeKey => {
           const themeStyles = styles.theme[themeKey]
 
