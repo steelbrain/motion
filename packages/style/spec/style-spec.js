@@ -2,14 +2,12 @@
 
 /* @flow */
 
-import styler from '../lib/index'
+import style from '../lib/index'
 import { it } from 'jasmine-fix'
 import React from 'react'
 import { mount } from 'enzyme'
 
-const style = styler()
-
-@style
+@style()
 class StyledComponent extends React.Component {
   render() {
     return (
