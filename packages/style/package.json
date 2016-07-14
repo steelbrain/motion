@@ -21,7 +21,11 @@
     "motion-nice-styles": "2.0.0"
   },
   "devDependencies": {
-    "react": ">= 0.14.0 || ~15.0.0"
+    "enzyme": "^2.4.1",
+    "jasmine-fix": "^1.0.0",
+    "react": "^15.1.0",
+    "react-addons-test-utils": "^15.1.0",
+    "react-dom": "^15.1.0"
   },
   "peerDependencies": {
     "react": ">= 0.14.0 || ~15.0.0"
