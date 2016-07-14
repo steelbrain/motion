@@ -9,15 +9,6 @@ import { mount } from 'enzyme'
 
 @style()
 class StyledComponent extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>Hello</h1>
-        <h2>Hello</h2>
-      </div>
-    )
-  }
-
   static style = {
     h1: {
       background: 'red'
@@ -35,6 +26,15 @@ class StyledComponent extends React.Component {
         }
       }
     }
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Hello</h1>
+        <h2>Hello</h2>
+      </div>
+    )
   }
 }
 
@@ -56,7 +56,6 @@ describe('MotionStyle', () => {
   it('applies complex styles', () => {
     const el = mount(<StyledComponent />)
 
-    const h2 = el.find('h2')
     const instance = el.component.getInstance()
 
     // applies style
@@ -67,7 +66,6 @@ describe('MotionStyle', () => {
   it('applies themes', () => {
     const el = mount(<StyledComponent theme="black" />)
 
-    const h1 = el.find('h1')
     const instance = el.component.getInstance()
 
     // applies style
