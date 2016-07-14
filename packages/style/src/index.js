@@ -2,7 +2,7 @@ import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
 
-export default (opts = {
+module.exports = (opts = {
   theme: true,
   themeKey: 'theme'
 }) => {
