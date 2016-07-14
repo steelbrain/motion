@@ -7,6 +7,10 @@
 - Automatically create compile cache on startup (#351)
 - Support deep styles in `@media` queries in `motion-nice-styles`
 
+## 3.0.0
+
+- Add themes and use static styles `motion-style` (**API BREAKING**)
+
 ## 2.0.0
 
 - Simplify babel-preset by importing `babel-preset-react` (**API BREAKING**)
