@@ -9,7 +9,7 @@ PACKAGES_PATH=${ROOT_DIRECTORY}/packages
 if [ "$PACKAGE_NAME" != "" ]; then
   PACKAGES_WITH_SPECS=$PACKAGE_NAME
 else
-  PACKAGES_WITH_SPECS=( "motion" "fs" "style" )
+  PACKAGES_WITH_SPECS=( "style" )
 fi
 
 # Helper script that specs are going to require

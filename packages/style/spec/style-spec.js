@@ -20,7 +20,7 @@ class StyledComponent extends React.Component {
     )
   }
 
-  style = {
+  static style = {
     h1: {
       background: 'red'
     },
@@ -50,9 +50,9 @@ describe('MotionStyle', () => {
     // has classname
     expect(!!h1.props().className).toBe(true)
     // matches stylesheet
-    expect(h1.props().className).toBe(instance.stylesheet.h1._name)
+    expect(h1.props().className).toBe(instance.styles.h1._name)
     // applies style
-    expect(instance.stylesheet.h1._definition.background).toBe('red')
+    expect(instance.styles.h1._definition.background).toBe('red')
   })
 
   it('applies complex styles', () => {
@@ -62,8 +62,8 @@ describe('MotionStyle', () => {
     const instance = el.component.getInstance()
 
     // applies style
-    expect(instance.stylesheet.h2._definition.transform).toBe('translateX(0px)')
-    expect(instance.stylesheet.h2._definition.border).toBe('1px solid #ccc')
+    expect(instance.styles.h2._definition.transform).toBe('translateX(0px)')
+    expect(instance.styles.h2._definition.border).toBe('1px solid #ccc')
   })
 
   it('applies themes', () => {
@@ -74,6 +74,6 @@ describe('MotionStyle', () => {
 
     // applies style
     // TODO test this better so its checking actual className match
-    expect(instance.stylesheet['black-h1']._definition.background).toBe('black')
+    expect(instance.styles['black-h1']._definition.background).toBe('black')
   })
 })
