@@ -26,8 +26,6 @@ module.exports = (opts = {
           if (opts.theme && propTheme) {
             const themeStyles = styles.theme[propTheme]
 
-            console.log(JSON.stringify(styles))
-
             if (typeof themeStyles === 'object') {
               styles = {
                 ...styles,
