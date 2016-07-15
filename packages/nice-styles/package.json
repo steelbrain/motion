@@ -9,5 +9,8 @@
   "keywords": [],
   "author": "Motion",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "jasmine-fix": "^1.0.0"
+  }
 }

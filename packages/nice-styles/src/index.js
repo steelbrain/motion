@@ -24,8 +24,13 @@ function processTransform(transform: Transform): string {
   return toReturn.join(' ')
 }
 
+function isCSSAble(val) {
+  return (typeof val).match(/function|object/) && typeof val.css === 'function'
+}
+
 function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
+    if (isCSSAble(style)) return style.css()
     return typeof style === 'number' ? `${style}px` : style
   }).join(' ')
 }
@@ -42,6 +47,10 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
     }
     if (typeof value === 'string' || typeof value === 'number') {
       toReturn[key] = value
+      continue
+    }
+    if (isCSSAble(value)) {
+      toReturn[key] = value.css()
       continue
     }
     if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color') !== -1) {
