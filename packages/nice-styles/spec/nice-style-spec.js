@@ -20,6 +20,9 @@ describe('NiceStyles', function() {
       transform: {
         x: 0,
         y: 10
+      },
+      hover: {
+        background: { css: () => 'yellow' }
       }
     })
 
@@ -31,7 +34,10 @@ describe('NiceStyles', function() {
     expect(str(complex)).toBe(str({
       background: 'rgba(0, 200, 0, 0.5)',
       color: 'blue',
-      transform: 'translateX(0px) translateY(10px)'
+      transform: 'translateX(0px) translateY(10px)',
+      ':hover': {
+        background: 'yellow'
+      }
     }))
   })
 })
