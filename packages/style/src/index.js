@@ -112,32 +112,32 @@ module.exports = function motionStyle(opts = {
           // remove $
           .map(key => key.slice(1))
 
-        // collect style keys
-        const styleKeys = [name, ...tags]
+        // tag + $props
+        const allKeys = [name, ...tags]
+        let styleKeys = [...allKeys]
 
-        // styles
-        let tagStyles = styleKeys
-          .map(i => styles.static[i])
-          // .reduce((acc, cur) => acc.concat(cur || []), [])
-
+        // add theme keys
         if (opts.theme) {
-          // theme styles from theme prop
-          if (this.props[opts.themeKey]) {
-            tagStyles = [...tagStyles, ...styleKeys.map(k => tagStyles[`${this.props[opts.themeKey]}-${k}`])]
+          const addTheme = (keys, prop) => [...keys, ...allKeys.map(k => `${prop}-${k}`)]
+
+          // theme prop
+          if (opts.themeKey && this.props[opts.themeKey]) {
+            styleKeys = addTheme(styleKeys, this.props[opts.themeKey])
           }
 
-          // theme styles from booleans
-          if (this.constructor.themeProps) {
-            Object.keys(this.constructor.themeProps).forEach(prop => {
-              // if active
-              if (this.props[prop]) {
-                tagStyles = [...tagStyles, ...styleKeys.map(k => tagStyles[`${prop}-${k}`])]
-              }
+          // boolean prop
+          const themeProps = this.constructor.themeProps
+          if (themeProps && themeProps.length) {
+            themeProps.forEach(prop => {
+              if (this.props[prop]) styleKeys = addTheme(styleKeys, prop)
             })
           }
         }
 
-        // dynamic styles
+        // add static styles
+        let final = styleKeys.map(i => styles.static[i])
+
+        // add dynamic styles
         if (styles.dynamic && tags.length) {
           // gather
           const dynamicKeys = tags.filter(k => styles.dynamic[k])
@@ -150,16 +150,16 @@ module.exports = function motionStyle(opts = {
           const dynamicSheet = StyleSheet.create(makeNiceStyles(dynamics))
           // expose to public
           this.__dynamicStyles = dynamicSheet
-          // add to tagStyles list
-          tagStyles = [...tagStyles, ...dynamicKeys.map(k => dynamicSheet[k])]
+          // add to final list
+          final = [...final, ...dynamicKeys.map(k => dynamicSheet[k])]
         }
 
         // gather properties to be cloned
         const cloneProps = {}
 
-        if (tagStyles.length) {
+        if (final.length) {
           // apply styles
-          cloneProps.className = css(...tagStyles)
+          cloneProps.className = css(...final)
 
           // keep original classNames
           if (child.props && child.props.className) {

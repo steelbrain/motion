@@ -75,6 +75,9 @@ describe('MotionStyle', () => {
     const el = mount(<StyledComponent look="black" />)
 
     const instance = el.component.getInstance()
+    const h1 = el.find('h1')
+
+    expect(h1.props().className).toBe('h1_10ip45p-o_O-black-h1_19kvw7e')
 
     // applies style
     // TODO test this better so its checking actual className match
