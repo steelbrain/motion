@@ -75,6 +75,9 @@ module.exports = function motionStyle(opts = {
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
 
+      __staticStyles = styles.static
+      __dynamicStyles = null
+
       render() {
         return this.styleAll.call(this, super.render())
       }
@@ -115,7 +118,7 @@ module.exports = function motionStyle(opts = {
         // styles
         let tagStyles = styleKeys
           .map(i => styles.static[i])
-          .reduce((acc, cur) => acc.concat(cur || []), [])
+          // .reduce((acc, cur) => acc.concat(cur || []), [])
 
         if (opts.theme) {
           // theme styles from theme prop
@@ -139,13 +142,16 @@ module.exports = function motionStyle(opts = {
           // gather
           const dynamicKeys = tags.filter(k => styles.dynamic[k])
           // run
-          const dynamics = dynamicKeys.reduce((acc, k) =>
-            ({ ...acc, [k]: styles.dynamic[k](child.props[`$${k}`]) })
-          , {})
+          const dynamics = dynamicKeys.reduce((acc, k) => ({
+            ...acc,
+            [k]: styles.dynamic[k](child.props[`$${k}`])
+          }), {})
           // make sheet
-          const dynamicSheet = StyleSheet.create(dynamics)
+          const dynamicSheet = StyleSheet.create(makeNiceStyles(dynamics))
+          // expose to public
+          this.__dynamicStyles = dynamicSheet
           // add to tagStyles list
-          tagStyles = [...tagStyles, dynamicKeys.map(k => dynamicSheet[k])]
+          tagStyles = [...tagStyles, ...dynamicKeys.map(k => dynamicSheet[k])]
         }
 
         // gather properties to be cloned
