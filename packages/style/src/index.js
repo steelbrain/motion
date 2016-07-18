@@ -105,7 +105,7 @@ module.exports = function motionStyle(opts = {
         // <name $tag /> keys
         const tags = Object.keys(child.props)
           // only leading $
-          .filter(key => key[0] === '$' && child.props[key] !== false)
+          .filter(key => key[0] === '$' && child.props[key] !== false && typeof child.props[key] !== 'undefined')
           // remove $
           .map(key => key.slice(1))
 
