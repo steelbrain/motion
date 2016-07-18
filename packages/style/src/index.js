@@ -1,6 +1,7 @@
 import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
+import { omit } from 'lodash'
 
 const filterObject = (obj, cond) => Object.keys(obj)
   .filter(item => cond(obj[item]))
@@ -105,15 +106,18 @@ module.exports = function motionStyle(opts = {
         // <View /> + <tag /> keys
         const name = child.type && (child.type.name || child.type)
 
-        // <name $tag /> keys
-        const tags = Object.keys(child.props)
+        // <name $one $two /> keys
+        const tagAttrs = Object.keys(child.props)
           // only leading $
-          .filter(key => key[0] === '$' && child.props[key] !== false && typeof child.props[key] !== 'undefined')
-          // remove $
+          .filter(key => key[0] === '$')
+
+        // remove $
+        const activeAttrs = tagAttrs
+          .filter(key => child.props[key] !== false && typeof child.props[key] !== 'undefined')
           .map(key => key.slice(1))
 
         // tag + $props
-        const allKeys = [name, ...tags]
+        const allKeys = [name, ...activeAttrs]
         let styleKeys = [...allKeys]
 
         // add theme keys
@@ -138,9 +142,9 @@ module.exports = function motionStyle(opts = {
         let final = styleKeys.map(i => styles.static[i])
 
         // add dynamic styles
-        if (styles.dynamic && tags.length) {
+        if (styles.dynamic && activeAttrs.length) {
           // gather
-          const dynamicKeys = tags.filter(k => styles.dynamic[k])
+          const dynamicKeys = activeAttrs.filter(k => styles.dynamic[k])
           // run
           const dynamics = dynamicKeys.reduce((acc, k) => ({
             ...acc,
@@ -154,27 +158,28 @@ module.exports = function motionStyle(opts = {
           final = [...final, ...dynamicKeys.map(k => dynamicSheet[k])]
         }
 
-        // gather properties to be cloned
-        const cloneProps = {}
+        // recreate child (without style props)
+        const { key, ref, props, type } = child
+        const newProps = omit(props, tagAttrs)
+        if (ref) newProps.ref = ref
+        if (key) newProps.key = key
 
         if (final.length) {
           // apply styles
-          cloneProps.className = css(...final)
+          newProps.className = css(...final)
 
           // keep original classNames
-          if (child.props && child.props.className) {
-            if (typeof child.props.className === 'string') {
-              cloneProps.className += ` ${child.props.className}`
-            }
+          if (props && props.className && typeof props.className === 'string') {
+            newProps.className += ` ${props.className}`
           }
         }
 
         // recurse to children
-        if (child.props && child.props.children) {
-          cloneProps.children = this.styleAll(child.props.children)
+        if (newProps && newProps.children) {
+          newProps.children = this.styleAll(child.props.children)
         }
 
-        return React.cloneElement(child, cloneProps)
+        return React.createElement(type, newProps)
       }
     }
   }
