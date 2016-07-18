@@ -53,8 +53,6 @@ describe('MotionStyle', () => {
     const h1 = el.find('h1')
     const instance = el.component.getInstance()
 
-    console.log(instance.__staticStyles)
-
     // has classname
     expect(!!h1.props().className).toBe(true)
     // matches stylesheet
