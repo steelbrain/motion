@@ -2,70 +2,80 @@ import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
 
-module.exports = (opts = {
+const filterObject = (obj, cond) => Object.keys(obj)
+  .filter(cond)
+  .reduce((acc, cur) => ({ ...acc, [cur]: obj[cur] }))
+
+// flatten theme key
+// { theme: { dark: { h1: { color: 'red' } } } }
+// => { dark-button: { h1: { color: 'red' } } }
+const flattenThemes = styles => {
+  if (!styles.theme) return styles
+  let result = styles
+
+  Object.keys(styles.theme).forEach(themeKey => {
+    const themeStyles = styles.theme[themeKey]
+
+    if (typeof themeStyles === 'object') {
+      result = {
+        ...result,
+        // flatten themes to `theme-tag: {}`
+        ...Object.keys(themeStyles)
+            .reduce((res, key) => ({ ...res, [`${themeKey}-${key}`]: themeStyles[key] }), {})
+      }
+    } else {
+      console.log(`Note: themes must be an object, "${themeKey}" isn't an object`)
+    }
+  })
+
+  return result
+}
+
+// TODO: rewrite functionally
+const applyNiceStyles = (styles, themeKey) => {
+  for (const style in styles) {
+    if (!styles.hasOwnProperty(style) || style === themeKey) {
+      continue
+    }
+    const value = styles[style]
+    if (value) {
+      styles[style] = niceStyles(value)
+    }
+  }
+
+  return styles
+}
+
+module.exports = function motionStyle(opts = {
   theme: true,
   themeKey: 'theme'
-}) => {
-  const styleCache = {}
+}) {
+  return Child => {
+    let styles = Child.style
 
-  return ComposedComponent => {
     // gather static styles into stylesheet
-    if (ComposedComponent.style && !ComposedComponent.__motionStyleKey) {
-      const componentKey = ComposedComponent.__motionStyleKey = `${Math.random()}`
-      let styles = { ...ComposedComponent.style }
-
-      // merge theme onto style
-      // given this.props.theme == 'dark' and this.style == { dark: { h1: { color: 'red' } } }
-      // flatten it to: { dark-button: { color: 'black' } }
-      // why? because StyleSheet.create takes a flat object
-      // and `-` not allowed in jsx tags/props so safe to use
-      if (opts.theme && styles.theme) {
-        Object.keys(styles.theme).forEach(themeKey => {
-          const themeStyles = styles.theme[themeKey]
-
-          if (typeof themeStyles === 'object') {
-            styles = {
-              ...styles,
-              // flatten themes to `theme-tag: {}`
-              ...Object.keys(themeStyles)
-                  .reduce((res, key) => ({ ...res, [`${themeKey}-${key}`]: themeStyles[key] }), {})
-            }
-          } else {
-            console.log(`Note: themes must be an object, "${themeKey}" isn't an object`)
-          }
-        })
-      }
-
+    if (styles) {
+      // filter functions
+      styles = filterObject(styles, style => typeof style !== 'function')
+      // flatten themes
+      if (opts.theme) styles = flattenThemes(styles)
       // nice style them
-      for (const style in styles) {
-        if (!styles.hasOwnProperty(style) || style === opts.themeKey) {
-          continue
-        }
-        const value = styles[style]
-        if (value) {
-          styles[style] = niceStyles(value)
-        }
-      }
-
-      styleCache[componentKey] = StyleSheet.create(styles)
+      styles = applyNiceStyles(styles, opts.themeKey)
+      // cache styles
+      styles = StyleSheet.create(styles)
     }
 
-    return class StyledComponent extends ComposedComponent {
-      static displayName = ComposedComponent.displayName || ComposedComponent.name
-
-      constructor() {
-        super(...arguments)
-        this.styles = ComposedComponent.__motionStyleKey && styleCache[ComposedComponent.__motionStyleKey]
-      }
+    return class StyledComponent extends Child {
+      static displayName = Child.displayName || Child.name
 
       render() {
-        return this.styles ?
+        return styles ?
           this.styleAll.call(this, super.render()) :
           super.render()
       }
 
       styleAll(children) {
-        if (!children || !Array.isArray(children) && !children.props || !this.styles) return children
+        if (!children || !Array.isArray(children) && !children.props || !styles) return children
 
         const styler = this.styleOne.bind(this)
         if (Array.isArray(children)) {
@@ -95,21 +105,33 @@ module.exports = (opts = {
         const styleKeys = [name, ...tagged]
 
         // styles
-        let styles = styleKeys
-          .map(i => this.styles[i])
+        let tagStyles = styleKeys
+          .map(i => styles[i])
           .reduce((acc, cur) => acc.concat(cur || []), [])
 
-        // theme styles
-        if (opts.theme && this.props[opts.themeKey]) {
-          styles = [...styles, ...styleKeys.map(k => this.styles[`${this.props[opts.themeKey]}-${k}`])]
+        if (opts.theme) {
+          // theme styles from theme prop
+          if (this.props[opts.themeKey]) {
+            tagStyles = [...tagStyles, ...styleKeys.map(k => tagStyles[`${this.props[opts.themeKey]}-${k}`])]
+          }
+
+          // theme styles from booleans
+          if (this.constructor.themeProps) {
+            Object.keys(this.constructor.themeProps).forEach(prop => {
+              // if active
+              if (this.props[prop]) {
+                tagStyles = [...tagStyles, ...styleKeys.map(k => tagStyles[`${prop}-${k}`])]
+              }
+            })
+          }
         }
 
         // gather properties to be cloned
         const cloneProps = {}
 
-        if (styles.length) {
+        if (tagStyles.length) {
           // apply styles
-          cloneProps.className = css(...styles)
+          cloneProps.className = css(...tagStyles)
 
           // keep original classNames
           if (child.props && child.props.className) {

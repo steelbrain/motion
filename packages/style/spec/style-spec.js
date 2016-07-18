@@ -8,8 +8,13 @@ import React from 'react'
 import { mount } from 'enzyme'
 import BasicComponent from './basicComponent'
 
-@style()
+@style({
+  mergeStyleProp: true,
+  theme: true,
+  themeKey: 'look'
+})
 class StyledComponent extends React.Component {
+  static themeProps = ['black']
   static style = {
     h1: {
       background: 'red'
@@ -20,6 +25,7 @@ class StyledComponent extends React.Component {
       },
       border: [1, 'solid', '#ccc']
     },
+    color: color => ({ color }),
     theme: {
       black: {
         h1: {
@@ -31,7 +37,7 @@ class StyledComponent extends React.Component {
 
   render() {
     return (
-      <div>
+      <div $color={this.props.color}>
         <h1>Hello</h1>
         <h2>Hello</h2>
       </div>
@@ -40,7 +46,7 @@ class StyledComponent extends React.Component {
 }
 
 describe('MotionStyle', () => {
-  it('applies styles', () => {
+  it('applies simple styles', () => {
     const el = mount(<BasicComponent />)
 
     const h1 = el.find('h1')
@@ -54,7 +60,7 @@ describe('MotionStyle', () => {
     expect(instance.styles.h1._definition.background).toBe('red')
   })
 
-  it('applies complex styles', () => {
+  it('handles complex styles', () => {
     const el = mount(<StyledComponent />)
 
     const instance = el.component.getInstance()
@@ -65,12 +71,42 @@ describe('MotionStyle', () => {
   })
 
   it('applies themes', () => {
-    const el = mount(<StyledComponent theme="black" />)
+    const el = mount(<StyledComponent look="black" />)
 
     const instance = el.component.getInstance()
 
     // applies style
     // TODO test this better so its checking actual className match
     expect(instance.styles['black-h1']._definition.background).toBe('black')
+  })
+
+  it('applies booleans theme props', () => {
+    const el = mount(<StyledComponent black />)
+
+    const instance = el.component.getInstance()
+
+    // applies style
+    // TODO test this better so its checking actual className match
+    expect(instance.styles['black-h1']._definition.background).toBe('black')
+  })
+
+  it('passes values to styles', () => {
+    const el = mount(<StyledComponent color="yellow" />)
+
+    const instance = el.component.getInstance()
+
+    // applies style
+    // TODO test this better so its checking actual className match
+    // expect(instance.styles['black-h1']._definition.background).toBe('yellow')
+  })
+
+  it('merges style props', () => {
+    const el = mount(<StyledComponent color="yellow" style={{ color: 'green' }} />)
+
+    const instance = el.component.getInstance()
+
+    // applies style
+    // TODO test this better so its checking actual className match
+    // expect(instance.styles['black-h1']._definition.background).toBe('green')
   })
 })
