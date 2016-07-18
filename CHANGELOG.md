@@ -7,6 +7,10 @@
 - Automatically create compile cache on startup (#351)
 - Support deep styles in `@media` queries in `motion-nice-styles`
 
+## 3.1.0
+ - Add themeProps as an option to styles, allowing boolean themes
+ - Add dynamic style support
+
 ## 3.0.2
  - Add .css() support to objects passed in as values to motion-nice-style (and motion-style)
 
