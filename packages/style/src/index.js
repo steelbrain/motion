@@ -3,8 +3,8 @@ import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
 
 const filterObject = (obj, cond) => Object.keys(obj)
-  .filter(cond)
-  .reduce((acc, cur) => ({ ...acc, [cur]: obj[cur] }))
+  .filter(item => cond(obj[item]))
+  .reduce((acc, cur) => ({ ...acc, [cur]: obj[cur] }), {})
 
 // flatten theme key
 // { theme: { dark: { h1: { color: 'red' } } } }
@@ -28,6 +28,7 @@ const flattenThemes = styles => {
     }
   })
 
+  delete result.theme
   return result
 }
 
@@ -46,36 +47,40 @@ const applyNiceStyles = (styles, themeKey) => {
   return styles
 }
 
+const isFunc = x => typeof x === 'function'
+
 module.exports = function motionStyle(opts = {
   theme: true,
   themeKey: 'theme'
 }) {
-  return Child => {
-    let styles = Child.style
+  const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
 
-    // gather static styles into stylesheet
-    if (styles) {
-      // filter functions
-      styles = filterObject(styles, style => typeof style !== 'function')
-      // flatten themes
-      if (opts.theme) styles = flattenThemes(styles)
-      // nice style them
-      styles = applyNiceStyles(styles, opts.themeKey)
-      // cache styles
-      styles = StyleSheet.create(styles)
+  return Child => {
+    if (!Child.style) return Child
+
+    let styles = { ...Child.style }
+
+    // flatten themes
+    styles = opts.theme ? flattenThemes(styles) : styles
+
+    // split dynamic
+    const dynamicStyles = filterObject(styles, isFunc)
+    const staticStyles = filterObject(styles, x => !isFunc(x))
+
+    styles = {
+      static: StyleSheet.create(makeNiceStyles(staticStyles)),
+      dynamic: dynamicStyles
     }
 
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
 
       render() {
-        return styles ?
-          this.styleAll.call(this, super.render()) :
-          super.render()
+        return this.styleAll.call(this, super.render())
       }
 
       styleAll(children) {
-        if (!children || !Array.isArray(children) && !children.props || !styles) return children
+        if (!children || !Array.isArray(children) && !children.props) return children
 
         const styler = this.styleOne.bind(this)
         if (Array.isArray(children)) {
@@ -98,15 +103,18 @@ module.exports = function motionStyle(opts = {
         const name = child.type && (child.type.name || child.type)
 
         // <name $tag /> keys
-        const tagged = Object.keys(child.props)
-          .filter(key => key[0] === '$' && child.props[key] === true) // only $props
-          .map(key => key.slice(1)) // remove $
+        const tags = Object.keys(child.props)
+          // only leading $
+          .filter(key => key[0] === '$' && child.props[key] !== false)
+          // remove $
+          .map(key => key.slice(1))
 
-        const styleKeys = [name, ...tagged]
+        // collect style keys
+        const styleKeys = [name, ...tags]
 
         // styles
         let tagStyles = styleKeys
-          .map(i => styles[i])
+          .map(i => styles.static[i])
           .reduce((acc, cur) => acc.concat(cur || []), [])
 
         if (opts.theme) {
@@ -124,6 +132,20 @@ module.exports = function motionStyle(opts = {
               }
             })
           }
+        }
+
+        // dynamic styles
+        if (styles.dynamic && tags.length) {
+          // gather
+          const dynamicKeys = tags.filter(k => styles.dynamic[k])
+          // run
+          const dynamics = dynamicKeys.reduce((acc, k) =>
+            ({ ...acc, [k]: styles.dynamic[k](child.props[`$${k}`]) })
+          , {})
+          // make sheet
+          const dynamicSheet = StyleSheet.create(dynamics)
+          // add to tagStyles list
+          tagStyles = [...tagStyles, dynamicKeys.map(k => dynamicSheet[k])]
         }
 
         // gather properties to be cloned
