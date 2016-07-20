@@ -61,7 +61,12 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       toReturn[key] = processTransform(value)
       continue
     }
-    if (PSEUDO.has(key) || key.substr(0, 1) === '@') {
+    // recurse into object (psuedo or media query)
+    if (key.substr(0, 1) === '@') {
+      toReturn[key] = processStyles(value)
+      continue
+    }
+    if (PSEUDO.has(key)) {
       toReturn[`:${key}`] = processStyles(value)
       continue
     }

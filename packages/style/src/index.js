@@ -33,7 +33,6 @@ const flattenThemes = styles => {
   return result
 }
 
-// TODO: rewrite functionally
 const applyNiceStyles = (styles, themeKey) => {
   for (const style in styles) {
     if (!styles.hasOwnProperty(style) || style === themeKey) {
