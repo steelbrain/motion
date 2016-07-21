@@ -18,7 +18,7 @@ const style = styler({
   render() {
     return (
       <name>
-        <h1 $black>Test</h1>
+        <h1 $black $bg="#fff">Test</h1>
       </name>
     )
   }
@@ -38,6 +38,10 @@ const style = styler({
     black: {
       color: 'black',
     },
+    bg: color => ({
+      background: color,
+      borderBottom: [2, 'solid', color]
+    }),
   }
 }
 ```
