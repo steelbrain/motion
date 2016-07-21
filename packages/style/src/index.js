@@ -57,7 +57,7 @@ module.exports = function motionStyle(opts = {
   // helpers
   const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
   const getDynamicStyles = (active, props, styles, propPrefix = '$') => {
-    const dynamicKeys = active.filter(k => styles[k])
+    const dynamicKeys = active.filter(k => styles[k] && typeof styles[k] === 'function')
     const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
     const dynamics = dynamicKeys.reduce(dynamicsReduce, {})
     return dynamics
@@ -151,11 +151,15 @@ module.exports = function motionStyle(opts = {
             themeProps.forEach(prop => {
               if (this.props[prop] === true) finalKeys = addTheme(finalKeys, prop)
               // dynamic themes
-              else if (typeof this.props[prop] !== 'undefined') {
-                finalStyles = [
-                  ...finalStyles,
-                  ...getDynamicSheets(getDynamicStyles([prop], this.props, styles.theme, '')[prop])
-                ]
+              else if (typeof this.props[prop] !== 'undefined' && styles.theme[prop]) {
+                const dynStyles = getDynamicStyles([prop], this.props, styles.theme, '')[prop]
+
+                if (dynStyles) {
+                  finalStyles = [
+                    ...finalStyles,
+                    ...getDynamicSheets(dynStyles)
+                  ]
+                }
               }
             })
           }
