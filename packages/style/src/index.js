@@ -135,30 +135,34 @@ module.exports = function motionStyle(opts = {
         // collect styles
         let finalStyles = []
 
-        // add theme keys
+        //
+        // theme styles
+        //
         if (opts.theme) {
           const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
           const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
 
-          // theme prop
+          // theme=""
           if (opts.themeKey && this.props[opts.themeKey]) {
             finalKeys = addTheme(finalKeys, this.props[opts.themeKey])
           }
 
-          // boolean prop
+          // direct
           const themeProps = this.constructor.themeProps
           if (themeProps && themeProps.length) {
             themeProps.forEach(prop => {
-              if (this.props[prop] === true) finalKeys = addTheme(finalKeys, prop)
-              // dynamic themes
-              else if (typeof this.props[prop] !== 'undefined' && styles.theme[prop]) {
+              if (this.props[prop] === true) {
+                // static theme
+                finalKeys = addTheme(finalKeys, prop)
+              } else if (
+                typeof this.props[prop] !== 'undefined' &&
+                styles.theme[prop]
+              ) {
+                // dynamic themes
                 const dynStyles = getDynamicStyles([prop], this.props, styles.theme, '')[prop]
 
                 if (dynStyles) {
-                  finalStyles = [
-                    ...finalStyles,
-                    ...getDynamicSheets(dynStyles)
-                  ]
+                  finalStyles = [...finalStyles, ...getDynamicSheets(dynStyles)]
                 }
               }
             })
