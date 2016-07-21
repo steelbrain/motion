@@ -48,35 +48,50 @@ const applyNiceStyles = (styles, themeKey) => {
 }
 
 const isFunc = x => typeof x === 'function'
+const filterStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] !== '$')
+const filterParentStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] === '$')
+
 
 module.exports = function motionStyle(opts = {
   theme: true,
   themeKey: 'theme'
 }) {
+  // helpers
   const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
+  const getDynamicStyles = (active, props, styles) => {
+    const dynamicKeys = active.filter(k => styles[k])
+    const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`$${k}`]) })
+    const dynamics = dynamicKeys.reduce(dynamicsReduce, {})
+    const sheet = StyleSheet.create(makeNiceStyles(dynamics))
+    return { sheet, dynamicKeys, dynamics }
+  }
 
-  return Child => {
-    if (!Child.style) return Child
-
-    let styles = { ...Child.style }
+  const processStyles = _styles => {
+    let styles = { ..._styles }
 
     // flatten themes
     styles = opts.theme ? flattenThemes(styles) : styles
 
-    // split dynamic
-    const dynamicStyles = filterObject(styles, isFunc)
-    const staticStyles = filterObject(styles, x => !isFunc(x))
+    // split dynamic/static
+    const dynamics = filterObject(styles, isFunc)
+    const statics = filterObject(styles, x => !isFunc(x))
 
-    styles = {
-      static: StyleSheet.create(makeNiceStyles(staticStyles)),
-      dynamic: dynamicStyles
+    return {
+      statics: StyleSheet.create(makeNiceStyles(statics)),
+      dynamics
     }
+  }
+
+  // decorator
+  const decorator = (Child, parentStyles) => {
+    if (!Child.style) return Child
+
+    const styles = processStyles(Child.style)
 
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
 
-      __staticStyles = styles.static
-      __dynamicStyles = null
+      __styles = styles
 
       render() {
         return this.styleAll.call(this, super.render())
@@ -106,18 +121,17 @@ module.exports = function motionStyle(opts = {
         const name = child.type && (child.type.name || child.type)
 
         // <name $one $two /> keys
-        const tagAttrs = Object.keys(child.props)
-          // only leading $
-          .filter(key => key[0] === '$')
+        const propKeys = Object.keys(child.props)
+        const styleKeys = filterStyleKeys(propKeys)
 
         // remove $
-        const activeAttrs = tagAttrs
+        const activeKeys = styleKeys
           .filter(key => child.props[key] !== false && typeof child.props[key] !== 'undefined')
           .map(key => key.slice(1))
 
         // tag + $props
-        const allKeys = [name, ...activeAttrs]
-        let styleKeys = [...allKeys]
+        const allKeys = [name, ...activeKeys]
+        let finalKeys = [...allKeys]
 
         // add theme keys
         if (opts.theme) {
@@ -125,47 +139,69 @@ module.exports = function motionStyle(opts = {
 
           // theme prop
           if (opts.themeKey && this.props[opts.themeKey]) {
-            styleKeys = addTheme(styleKeys, this.props[opts.themeKey])
+            finalKeys = addTheme(finalKeys, this.props[opts.themeKey])
           }
 
           // boolean prop
           const themeProps = this.constructor.themeProps
           if (themeProps && themeProps.length) {
             themeProps.forEach(prop => {
-              if (this.props[prop]) styleKeys = addTheme(styleKeys, prop)
+              if (this.props[prop]) finalKeys = addTheme(finalKeys, prop)
             })
           }
         }
 
         // add static styles
-        let final = styleKeys.map(i => styles.static[i])
+        let finalStyles = []
 
-        // add dynamic styles
-        if (styles.dynamic && activeAttrs.length) {
-          // gather
-          const dynamicKeys = activeAttrs.filter(k => styles.dynamic[k])
-          // run
-          const dynamics = dynamicKeys.reduce((acc, k) => ({
-            ...acc,
-            [k]: styles.dynamic[k](child.props[`$${k}`])
-          }), {})
-          // make sheet
-          const dynamicSheet = StyleSheet.create(makeNiceStyles(dynamics))
-          // expose to public
-          this.__dynamicStyles = dynamicSheet
-          // add to final list
-          final = [...final, ...dynamicKeys.map(k => dynamicSheet[k])]
+        //
+        // parent styles
+        //
+        let parentStyleKeys = []
+        if (parentStyles) {
+          parentStyleKeys = filterParentStyleKeys(propKeys)
+
+          if (parentStyleKeys.length) {
+            const keys = parentStyleKeys.map(k => k.replace('$$', ''))
+
+            // dynamic
+            if (parentStyles.dynamics) {
+              finalStyles = [
+                ...finalStyles,
+                ...getDynamicStyles(keys, child.props, parentStyles.dynamics)
+              ]
+            }
+
+            // static
+            if (parentStyles.statics) {
+              const parentStaticStyles = keys.map(k => parentStyles.statics[k])
+              finalStyles = [...finalStyles, ...parentStaticStyles]
+            }
+          }
+        }
+
+        //
+        // own styles
+        //
+        // static
+        finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
+
+        // dynamic
+        if (styles.dynamics && activeKeys.length) {
+          const { dynamicKeys, sheet } = getDynamicStyles(activeKeys, child.props, styles.dynamics)
+          this.__dynamicStylesResolved = sheet
+          finalStyles = [...finalStyles, ...dynamicKeys.map(k => sheet[k])]
         }
 
         // recreate child (without style props)
         const { key, ref, props, type } = child
-        const newProps = omit(props, tagAttrs)
+        const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
         if (ref) newProps.ref = ref
         if (key) newProps.key = key
 
-        if (final.length) {
+        if (finalStyles.length) {
           // apply styles
-          newProps.className = css(...final)
+          newProps.className = css(...finalStyles)
 
           // keep original classNames
           if (props && props.className && typeof props.className === 'string') {
@@ -182,4 +218,8 @@ module.exports = function motionStyle(opts = {
       }
     }
   }
+
+  decorator.parent = styles => Child => decorator(Child, processStyles(styles))
+
+  return decorator
 }

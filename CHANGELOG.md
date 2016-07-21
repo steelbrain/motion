@@ -5,7 +5,10 @@
 - Show successfully compiled files (#360)
 - Fix errors when `.motion/state.js` is empty (#359)
 - Automatically create compile cache on startup (#351)
-- Support deep styles in `@media` queries in `motion-nice-styles`
+
+## 3.2.0
+ - Add parent styles through @style.parent
+ - Fix media queries
 
 ## 3.1.0
  - Add themeProps as an option to styles, allowing boolean themes

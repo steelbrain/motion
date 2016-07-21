@@ -2,6 +2,7 @@
 
 /* @flow */
 
+import console from 'console'
 import style from '../lib/index'
 import { it } from 'jasmine-fix'
 import React from 'react'
@@ -56,9 +57,9 @@ describe('MotionStyle', () => {
     // has classname
     expect(!!h1.props().className).toBe(true)
     // matches stylesheet
-    expect(h1.props().className).toBe(instance.__staticStyles.h1._name)
+    expect(h1.props().className).toBe(instance.__styles.statics.h1._name)
     // applies style
-    expect(instance.__staticStyles.h1._definition.background).toBe('red')
+    expect(instance.__styles.statics.h1._definition.background).toBe('red')
   })
 
   it('handles complex styles', () => {
@@ -67,8 +68,8 @@ describe('MotionStyle', () => {
     const instance = el.component.getInstance()
 
     // applies style
-    expect(instance.__staticStyles.h2._definition.transform).toBe('translateX(0px)')
-    expect(instance.__staticStyles.h2._definition.border).toBe('1px solid #ccc')
+    expect(instance.__styles.statics.h2._definition.transform).toBe('translateX(0px)')
+    expect(instance.__styles.statics.h2._definition.border).toBe('1px solid #ccc')
   })
 
   it('applies themes', () => {
@@ -81,7 +82,7 @@ describe('MotionStyle', () => {
 
     // applies style
     // TODO test this better so its checking actual className match
-    expect(instance.__staticStyles['black-h1']._definition.background).toBe('black')
+    expect(instance.__styles.statics['black-h1']._definition.background).toBe('black')
   })
 
   it('applies booleans theme props', () => {
@@ -91,7 +92,7 @@ describe('MotionStyle', () => {
 
     // applies style
     // TODO test this better so its checking actual className match
-    expect(instance.__staticStyles['black-h1']._definition.background).toBe('black')
+    expect(instance.__styles.statics['black-h1']._definition.background).toBe('black')
   })
 
   it('passes values to styles', () => {
