@@ -42,6 +42,48 @@ const style = styler({
 }
 ```
 
+### Themes
+
+Use themes and themeProps to easily theme an entire component a different way. `themeProps` will accept boolean props.
+
+```js
+@style class Title extends React.Component {
+  render() {
+    return (
+      <base>
+        <h1>Test</h1>
+      </base>
+    )
+  }
+
+  static themeProps = ['big']
+
+  static style = {
+    base: {
+      padding: 10,
+    },
+    h1: {
+      fontSize: 22,
+    },
+    theme: {
+      big: {
+        base: {
+          padding: 20,
+        },
+        h1: {
+          fontSize: 50,
+        }
+      }
+    },
+  }
+}
+
+
+// Use
+React.render(<Title big />, document.getElementById('app'))
+```
+
+
 ### Parent Styles
 
 Helpful for maintaining a common set of styles for every component. Use `$$` to access, to keep things explicit.
