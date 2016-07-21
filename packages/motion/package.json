@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "description": "motion - moving development forward",
   "main": "lib/index.js",
   "scripts": {},
@@ -11,7 +11,7 @@
     "motion": "./lib/bin/index.js"
   },
   "dependencies": {
-    "babel-preset-motion": "3.2.3",
+    "babel-preset-motion": "3.2.4",
     "babel-pundle": "0.2.15",
     "babel-regenerator-runtime": "^6.5.0",
     "chalk": "^1.1.1",
