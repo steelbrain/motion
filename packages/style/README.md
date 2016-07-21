@@ -77,14 +77,18 @@ Use themes and themeProps to easily theme an entire component a different way. `
         h1: {
           fontSize: 50,
         }
-      }
+      },
+      tint: color => ({
+        color,
+        background: [color, 0.5],
+      }),
     },
   }
 }
 
 
 // Use
-React.render(<Title big />, document.getElementById('app'))
+React.render(<Title big tint="yellow" />, document.getElementById('app'))
 ```
 
 

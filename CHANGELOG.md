@@ -6,6 +6,9 @@
 - Fix errors when `.motion/state.js` is empty (#359)
 - Automatically create compile cache on startup (#351)
 
+## 3.2.1
+ - motion-style Dynamic themes
+
 ## 3.2.0
  - Add parent styles through @style.parent
  - Fix media queries
