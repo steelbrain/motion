@@ -1,11 +1,7 @@
 import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
-import { omit } from 'lodash'
-
-const filterObject = (obj, cond) => Object.keys(obj)
-  .filter(item => cond(obj[item]))
-  .reduce((acc, cur) => ({ ...acc, [cur]: obj[cur] }), {})
+import { omit, identity, pickBy } from 'lodash'
 
 // flatten theme key
 // { theme: { dark: { h1: { color: 'red' } } } }
@@ -24,8 +20,8 @@ const flattenThemes = styles => {
         ...Object.keys(themeStyles)
             .reduce((res, key) => ({ ...res, [`${themeKey}-${key}`]: themeStyles[key] }), {})
       }
-    } else {
-      console.log(`Note: themes must be an object, "${themeKey}" isn't an object`)
+    } else if (typeof themeStyles !== 'function') {
+      console.log(`Note: themes must be an object or function, "${themeKey}" is a ${typeof themeKey}`)
     }
   })
 
@@ -51,34 +47,32 @@ const isFunc = x => typeof x === 'function'
 const filterStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] !== '$')
 const filterParentStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] === '$')
 
-
 module.exports = function motionStyle(opts = {
   theme: true,
   themeKey: 'theme'
 }) {
   // helpers
   const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
-  const getDynamicStyles = (active, props, styles) => {
+  const getDynamicStyles = (active, props, styles, propPrefix = '$') => {
     const dynamicKeys = active.filter(k => styles[k])
-    const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`$${k}`]) })
+    const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
     const dynamics = dynamicKeys.reduce(dynamicsReduce, {})
     const sheet = StyleSheet.create(makeNiceStyles(dynamics))
-    return { sheet, dynamicKeys, dynamics }
+    return dynamicKeys.map(k => sheet[k])
   }
 
   const processStyles = _styles => {
-    let styles = { ..._styles }
+    console.log(_styles)
 
-    // flatten themes
-    styles = opts.theme ? flattenThemes(styles) : styles
-
-    // split dynamic/static
-    const dynamics = filterObject(styles, isFunc)
-    const statics = filterObject(styles, x => !isFunc(x))
+    const preprocess = opts.theme ? flattenThemes : identity
+    const styles = preprocess(_styles)
+    const dynamics = pickBy(styles, isFunc)
+    const statics = pickBy(styles, x => !isFunc(x))
 
     return {
       statics: StyleSheet.create(makeNiceStyles(statics)),
-      dynamics
+      dynamics,
+      theme: _styles.theme
     }
   }
 
@@ -133,6 +127,9 @@ module.exports = function motionStyle(opts = {
         const allKeys = [name, ...activeKeys]
         let finalKeys = [...allKeys]
 
+        // collect styles
+        let finalStyles = []
+
         // add theme keys
         if (opts.theme) {
           const addTheme = (keys, prop) => [...keys, ...allKeys.map(k => `${prop}-${k}`)]
@@ -146,13 +143,29 @@ module.exports = function motionStyle(opts = {
           const themeProps = this.constructor.themeProps
           if (themeProps && themeProps.length) {
             themeProps.forEach(prop => {
-              if (this.props[prop]) finalKeys = addTheme(finalKeys, prop)
+              console.log('checking dynamic theme',
+                typeof this.props[prop] !== 'undefined',
+                styles.theme,
+                styles.theme && typeof styles.theme[prop] === 'function'
+              )
+
+              if (this.props[prop] === true) finalKeys = addTheme(finalKeys, prop)
+              // dynamic themes
+              else if (
+                typeof this.props[prop] !== 'undefined' &&
+                styles.theme &&
+                typeof styles.theme[prop] === 'function'
+              ) {
+                console.log('getting dynamic theme', getDynamicStyles([prop], this.props, styles.statics.theme, ''))
+
+                finalStyles = [
+                  ...finalStyles,
+                  ...getDynamicStyles([prop], this.props, styles.statics.theme, '')
+                ]
+              }
             })
           }
         }
-
-        // add static styles
-        let finalStyles = []
 
         //
         // parent styles
@@ -174,8 +187,10 @@ module.exports = function motionStyle(opts = {
 
             // static
             if (parentStyles.statics) {
-              const parentStaticStyles = keys.map(k => parentStyles.statics[k])
-              finalStyles = [...finalStyles, ...parentStaticStyles]
+              finalStyles = [
+                ...finalStyles,
+                ...keys.map(k => parentStyles.statics[k])
+              ]
             }
           }
         }
@@ -185,12 +200,12 @@ module.exports = function motionStyle(opts = {
         //
         // static
         finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
-
         // dynamic
         if (styles.dynamics && activeKeys.length) {
-          const { dynamicKeys, sheet } = getDynamicStyles(activeKeys, child.props, styles.dynamics)
-          this.__dynamicStylesResolved = sheet
-          finalStyles = [...finalStyles, ...dynamicKeys.map(k => sheet[k])]
+          finalStyles = [
+            ...finalStyles,
+            ...getDynamicStyles(activeKeys, child.props, styles.dynamics)
+          ]
         }
 
         // recreate child (without style props)
@@ -219,7 +234,10 @@ module.exports = function motionStyle(opts = {
     }
   }
 
-  decorator.parent = styles => Child => decorator(Child, processStyles(styles))
+  decorator.parent = styles => {
+    const parentStyles = processStyles(styles)
+    return Child => decorator(Child, parentStyles)
+  }
 
   return decorator
 }
