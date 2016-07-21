@@ -1,6 +1,6 @@
 {
   "name": "babel-preset-motion",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Motion Babel Preset",
   "main": "lib/index.js",
   "scripts": {
