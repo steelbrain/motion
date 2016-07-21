@@ -175,7 +175,7 @@ module.exports = function motionStyle(opts = {
             if (parentStyles.dynamics) {
               finalStyles = [
                 ...finalStyles,
-                ...getDynamicSheets(getDynamicStyles(keys, child.props, parentStyles.dynamics))
+                ...getDynamicSheets(getDynamicStyles(keys, child.props, parentStyles.dynamics, '$$'))
               ]
             }
 
