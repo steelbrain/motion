@@ -79,8 +79,12 @@ Use themes and themeProps to easily theme an entire component a different way. `
         }
       },
       tint: color => ({
-        color,
-        background: [color, 0.5],
+        base: {
+          background: [color, 0.5],
+        },
+        h1: {
+          color,
+        },
       }),
     },
   }
