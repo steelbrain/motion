@@ -11,16 +11,7 @@ export const unlink = promisify(FS.unlink)
 export const readFile = promisify(FS.readFile)
 export const writeFile = promisify(FS.writeFile)
 export const realpath = promisify(FS.realpath)
-
-export function mkdir(target: string): Promise {
-  return new Promise(function(resolve, reject) {
-    mkdirp(target, function(error) {
-      if (error) {
-        reject(error)
-      } else resolve()
-    })
-  })
-}
+export const mkdir = promisify(mkdirp)
 
 export function rm(target: string): Promise {
   return new Promise(function(resolve, reject) {
