@@ -2,7 +2,6 @@
 
 /* @flow */
 
-import console from 'console'
 import style from '../lib/index'
 import { it } from 'jasmine-fix'
 import React from 'react'
