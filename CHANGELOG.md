@@ -1,6 +1,11 @@
 # Changelog
 
-## Upcoming
+## 3.3.0
+
+- Upgrade to Pundle@1.0 :tada:
+- Hide `node_modules` files from compiled messages
+
+## 3.2.4
 
 - Show successfully compiled files (#360)
 - Fix errors when `.motion/state.js` is empty (#359)
