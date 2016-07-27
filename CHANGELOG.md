@@ -3,6 +3,7 @@
 ## 3.3.0
 
 - Upgrade to Pundle@1.0 :tada:
+ - Added ability to use FileSystem polling by setting the `PUNDLE_FS_USE_POLLING` env variable
 - Hide `node_modules` files from compiled messages
 
 ## 3.2.4
