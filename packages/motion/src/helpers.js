@@ -37,7 +37,7 @@ export async function getPundleInstance(
   errorCallback: Function
 ): Object {
   const pundleConfig = {
-    entry: [require.resolve('regenerator-runtime'), 'index.js'],
+    entry: [require.resolve('babel-regenerator-runtime'), 'index.js'],
     pathType: development ? 'filePath' : 'number',
     rootDirectory: config.rootDirectory,
     replaceVariables: {
