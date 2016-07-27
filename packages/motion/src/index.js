@@ -56,12 +56,9 @@ class Motion {
     const pundle = await getPundleInstance(this.state, this.config, this.cli, terminal, true, error => {
       this.emitter.emit('did-error', error)
     })
-    pundle.listen(this.state.get().web_server_port)
+    await pundle.activate()
     const reloadHook = this.cli.onShouldReload(async () => {
-      for (const entry of pundle.pundle.compilations) {
-        entry.clearCache()
-        await entry.compile()
-      }
+      pundle.pundle.clearCache()
     })
     const disposable = new Disposable(() => {
       this.state.get().running = false
@@ -70,33 +67,28 @@ class Motion {
       pundle.dispose()
       reloadHook.dispose()
     })
-    if (terminal) {
-      this.cli.log('Creating compile cache')
-      for (const entry of pundle.pundle.compilations) {
-        await entry.compile()
-      }
-    }
 
     this.subscriptions.add(disposable)
     return disposable
   }
-  async build(terminal: boolean = false): Promise {
+  async build(terminal: boolean = false): Promise<void> {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     const compilation = await getPundleInstance(this.state, this.config, this.cli, terminal, false, error => {
       this.emitter.emit('did-error', error)
     })
+    await compilation.compile()
     await mkdir(Path.join(this.config.dataDirectory, '_'))
-    await writeFile(Path.join(this.config.dataDirectory, '_/bundle.js'), await compilation.compile())
+    await writeFile(Path.join(this.config.dataDirectory, '_/bundle.js'), compilation.generate().contents)
   }
-  async init(): Promise {
+  async init(): Promise<void> {
     if (await this.exists()) {
       throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
     }
     await mkdir(this.config.rootDirectory)
     await copy(Path.normalize(Path.join(__dirname, '..', 'template')), this.config.rootDirectory)
-    this.state.write()
+    await this.state.write()
   }
   onDidError(callback: Function): Disposable {
     return this.emitter.on('did-error', callback)

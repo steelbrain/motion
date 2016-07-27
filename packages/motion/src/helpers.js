@@ -1,10 +1,10 @@
 /* @flow */
 
 import Path from 'path'
-import Pundle from 'pundle'
-import PundleDev from 'pundle-dev'
 import send from 'send'
 import chalk from 'chalk'
+import Pundle from 'pundle'
+import PundleDev from 'pundle-dev'
 import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
 import type State from './state'
@@ -37,14 +37,11 @@ export async function getPundleInstance(
   errorCallback: Function
 ): Object {
   const pundleConfig = {
-    hmr: development,
-    entry: [require.resolve('babel-regenerator-runtime'), config.rootDirectory],
+    entry: [require.resolve('regenerator-runtime'), 'index.js'],
+    pathType: development ? 'filePath' : 'number',
     rootDirectory: config.rootDirectory,
-    resolve: {
-      root: config.rootDirectory
-    },
     replaceVariables: {
-      'process.env.NODE_ENV': `"${development ? 'development' : 'production'}"`
+      'process.env.NODE_ENV': development ? 'development' : 'production'
     }
   }
 
@@ -57,13 +54,13 @@ export async function getPundleInstance(
     [require.resolve('pundle-npm-installer'), {
       save: state.get().npm_save,
       rootDirectory: config.rootDirectory,
-      onBeforeInstall(id, name) {
+      beforeInstall(name) {
         if (terminal) {
           const message = `Installing ${name}`
           cli.addSpinner(message)
         }
       },
-      onAfterInstall(id, name, error) {
+      afterInstall(name, error) {
         if (terminal) {
           const message = `Installing ${name}`
           cli.removeSpinner(message)
@@ -93,26 +90,27 @@ export async function getPundleInstance(
     return pundle
   }
   const pundle = new PundleDev({
-    pundle: pundleConfig,
-    watcher: {
-      onError(error) {
+    server: {
+      hmr: true,
+      port: state.get().web_server_port,
+      hmrPath: '/_/bundle_hmr',
+      bundlePath: '/_/bundle.js',
+      sourceRoot: config.dataDirectory,
+      sourceMapPath: '/_/bundle.js.map',
+      error(error) {
         errorCallback(error)
       }
     },
-    middleware: {
-      sourceMap: true,
-      sourceRoot: config.dataDirectory,
-      publicPath: '/',
-      publicBundlePath: '/_/bundle.js'
-    },
-    server: {
-      port: state.get().web_server_port
+    pundle: pundleConfig,
+    watcher: { },
+    generator: {
+      wrapper: 'hmr',
+      sourceMap: true
     }
   })
   await pundle.pundle.loadPlugins(plugins)
   pundle.server.use('*', function serveRequest(req, res, next, error = false) {
-    // Ignore both bundle and it's map
-    if (req.baseUrl.indexOf('/_/bundle.js') === 0) {
+    if (['/_/bundle.js', '/_/bundle.js.map', '/_/bundle_hmr'].indexOf(req.baseUrl) !== -1) {
       next()
       return
     }
@@ -120,22 +118,17 @@ export async function getPundleInstance(
       .on('error', function() {
         if (error) {
           next()
-        } else {
-          req.baseUrl = '/index.html'
-          serveRequest(req, res, next, true)
+          return
         }
+        req.baseUrl = '/index.html'
+        serveRequest(req, res, next, true)
       })
-      .on('directory', function() {
-        next()
-      })
-      .pipe(res)
+      .on('directory', () => next()).pipe(res)
   })
-  pundle.pundle.observeCompilations(function(compilation) {
-    compilation.onDidCompile(function({ filePath }) {
-      if (filePath.substr(0, 5) === '$root') {
-        cli.log(`${chalk.dim(filePath)} ${chalk.green('✓')}`)
-      }
-    })
+  pundle.pundle.onDidProcess(function({ filePath }) {
+    if (filePath.indexOf('$root') === 0 && filePath.indexOf('node_modules') === -1 && filePath.indexOf('../') === -1) {
+      cli.log(`${chalk.dim(filePath)} ${chalk.green('✓')}`)
+    }
   })
   return pundle
 }
