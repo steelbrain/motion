@@ -19,22 +19,28 @@ export function getRandomNumber(min: number, max: number): number {
 // NOTE: The reason we are not replacing these in config is because when we then save the config
 // We'd end up with absolute paths in it, using this function in every config user function
 // will let us avoid that.
-export function normalizeConfig(projectPath: string, config: Config): Config {
-  const toReturn: Config = Object.assign({}, config)
-  if (toReturn.bundleDirectory.substr(0, 1) === '.') {
-    toReturn.bundleDirectory = Path.resolve(projectPath, toReturn.bundleDirectory)
+export function normalizeConfig(projectPath: string, givenConfig: Config): Config {
+  const config: Config = Object.assign({}, givenConfig, {
+    babel: Object.assign({}, givenConfig.babel)
+  })
+  if (config.bundleDirectory.substr(0, 1) === '.') {
+    config.bundleDirectory = Path.resolve(projectPath, config.bundleDirectory)
   }
-  if (toReturn.publicDirectory.substr(0, 1) === '.') {
-    toReturn.publicDirectory = Path.resolve(projectPath, toReturn.publicDirectory)
+  if (config.publicDirectory.substr(0, 1) === '.') {
+    config.publicDirectory = Path.resolve(projectPath, config.publicDirectory)
   }
   if (!config.babel || typeof config.babel !== 'object') {
     config.babel = { plugins: [], presets: [] }
   }
   if (!Array.isArray(config.babel.plugins)) {
     config.babel.plugins = []
+  } else {
+    config.babel.plugins = config.babel.plugins.slice()
   }
   if (!Array.isArray(config.babel.presets)) {
     config.babel.presets = []
+  } else {
+    config.babel.presets = config.babel.presets.slice()
   }
   if (config.babel.presets.indexOf('babel-preset-motion') !== -1) {
     config.babel.presets.splice(config.babel.presets.indexOf('babel-preset-motion'), 1,
@@ -47,7 +53,7 @@ export function normalizeConfig(projectPath: string, config: Config): Config {
     }
     return Path.join(projectPath, 'node_modules', entry)
   })
-  return toReturn
+  return config
 }
 
 export async function getPundleInstance(
@@ -59,7 +65,8 @@ export async function getPundleInstance(
   errorCallback: Function
 ): Object {
   const config = normalizeConfig(projectPath, givenConfig)
-  const pundleEntry = config.includePolyfills && config.babel.presets.indexOf('babel-preset-motion') !== -1 ?
+  const pundleEntry = config.includePolyfills &&
+    Array.isArray(givenConfig.babel.presets) && givenConfig.babel.presets.indexOf('babel-preset-motion') !== -1 ?
     [require.resolve('babel-regenerator-runtime'), 'index.js'] :
     ['index.js']
   const pundleConfig = {
