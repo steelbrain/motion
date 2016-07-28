@@ -15,6 +15,12 @@ export default class Config {
     this.configPath = configPath
     this.projectPath = projectPath
   }
+  getBundleDirectory() {
+    return Path.resolve(this.projectPath, this.get('bundleDirectory'))
+  }
+  getPublicDirectory() {
+    return Path.resolve(this.projectPath, this.get('publicDirectory'))
+  }
   get(key: $Keys<ConfigStruct>): any {
     return this.config[key]
   }
@@ -30,8 +36,8 @@ export default class Config {
       webServerPort: Helpers.getRandomNumber(8000, 15000),
       saveNpmModules: true,
       bundleDirectory: '.',
-      publicDirectory: './static',
-      includePolyfills: false
+      publicDirectory: './public',
+      includePolyfills: true
     }
     const configPath = Path.join(projectPath, '.motion.json')
     try {

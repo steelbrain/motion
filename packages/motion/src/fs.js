@@ -17,12 +17,8 @@ export async function readJSON(filePath: string, encoding: string = 'utf8'): Pro
   return JSON.parse(contents.toString(encoding))
 }
 
-export async function writeJSON(
-  filePath: string,
-  contents: Object,
-  pretty: boolean = false
-): Promise<void> {
-  const serialized = pretty ? JSON.stringify(contents, null, 4) : JSON.stringify(contents)
+export async function writeJSON(filePath: string, contents: Object, pretty: boolean = true): Promise<void> {
+  const serialized = pretty ? JSON.stringify(contents, null, 2) : JSON.stringify(contents)
   await writeFile(filePath, serialized)
 }
 

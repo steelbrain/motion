@@ -27,7 +27,7 @@ if (options.v || options.version) {
 }
 
 function getMotion(rootDirectory: string = process.cwd()): Promise<Motion> {
-  return Motion.create({ rootDirectory }).then(function(motion) {
+  return Motion.create(rootDirectory).then(function(motion) {
     motion.onDidError(function(error) {
       motion.cli.log(error)
     })

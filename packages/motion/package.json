@@ -11,6 +11,8 @@
     "motion": "./lib/bin/index.js"
   },
   "dependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015-sane": "^6.6.0",
     "babel-preset-motion": "3.2.4",
     "babel-pundle": "^1.0.0",
     "babel-regenerator-runtime": "^6.5.0",
@@ -22,6 +24,7 @@
     "ncp": "^2.0.0",
     "open": "0.0.5",
     "ora": "^0.2.3",
+    "process-bootstrap": "^1.0.0",
     "pundle": "^1.0.2",
     "pundle-dev": "^1.0.2",
     "pundle-npm-installer": "^1.0.0",

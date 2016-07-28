@@ -25,9 +25,8 @@ export default class Main {
   emitter: Emitter;
   subscriptions: CompositeDisposable;
 
-  constructor(state: State, config: Motion$Config) {
+  constructor(config: Motion$Config) {
     this.cli = new CLI()
-    this.state = state
     this.active = false
     this.config = config
     this.emitter = new Emitter()
@@ -41,7 +40,7 @@ export default class Main {
       return
     }
 
-    const serverAddress = `http://localhost:${this.state.get().web_server_port}/`
+    const serverAddress = `http://localhost:${this.config.get('webServerPort')}/`
 
     this.cli.activate()
     this.cli.log(`${chalk.green('Server running at')} ${serverAddress}`)
