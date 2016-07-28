@@ -37,7 +37,9 @@ export function normalizeConfig(projectPath: string, config: Config): Config {
     config.babel.presets = []
   }
   if (config.babel.presets.indexOf('babel-preset-motion') !== -1) {
-    config.babel.presets.splice(config.babel.presets.indexOf('babel-preset-motion'), 1, require.resolve('babel-preset-motion'))
+    config.babel.presets.splice(config.babel.presets.indexOf('babel-preset-motion'), 1,
+      require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
+      require.resolve('babel-preset-motion'))
   }
   config.babel.plugins = config.babel.plugins.map(function(entry) {
     if (entry.substr(0, 1) === '.') {
@@ -57,7 +59,9 @@ export async function getPundleInstance(
   errorCallback: Function
 ): Object {
   const config = normalizeConfig(projectPath, givenConfig)
-  const pundleEntry = config.includePolyfills ? [require.resolve('babel-regenerator-runtime'), 'index.js'] : ['index.js']
+  const pundleEntry = config.includePolyfills && config.babel.presets.indexOf('babel-preset-motion') !== -1 ?
+    [require.resolve('babel-regenerator-runtime'), 'index.js'] :
+    ['index.js']
   const pundleConfig = {
     entry: pundleEntry,
     pathType: development ? 'filePath' : 'number',
