@@ -12,7 +12,7 @@ export const writeFile = promisify(FS.writeFile)
 export const realpath = promisify(FS.realpath)
 export const mkdir = promisify(mkdirp)
 
-export async function readJSON(filePath: string, encoding: string = 'utf8'): Promise {
+export async function readJSON(filePath: string, encoding: string = 'utf8'): Promise<Object> {
   const contents = await readFile(filePath)
   return JSON.parse(contents.toString(encoding))
 }
@@ -21,7 +21,7 @@ export async function writeJSON(
   filePath: string,
   contents: Object,
   pretty: boolean = false
-): Promise {
+): Promise<void> {
   const serialized = pretty ? JSON.stringify(contents, null, 4) : JSON.stringify(contents)
   await writeFile(filePath, serialized)
 }
