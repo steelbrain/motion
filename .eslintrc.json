@@ -1,10 +1,28 @@
 {
-  "extends": "steelbrain",
+  "parser": "babel-eslint",
+  "extends": "airbnb",
   "rules": {
-    "import/prefer-default-export": 0,
-    "no-param-reassign": 0
+    "semi": [2, "never"],
+    "strict": 0,
+    "prefer-arrow-callback": 0,
+    "space-before-function-paren": [2, "never"],
+    "func-names": 0,
+    "no-param-reassign": 0,
+    "comma-dangle": [2, "never"],
+    "prefer-rest-params": 0,
+    "max-len": [1, 150],
+    "no-console": 0,
+    "react/react-in-jsx-scope": 0,
+    "react/prefer-stateless-function": 0,
+    "react/prop-types": 0
   },
   "globals": {
-    "$Keys": true
+    "it": true,
+    "waitsForPromise": true,
+    "describe": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "jasmine": true,
+    "expect": true
   }
 }
