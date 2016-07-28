@@ -19,7 +19,7 @@ export async function readJSON(filePath: string, encoding: string = 'utf8'): Pro
 
 export async function writeJSON(filePath: string, contents: Object, pretty: boolean = true): Promise<void> {
   const serialized = pretty ? JSON.stringify(contents, null, 2) : JSON.stringify(contents)
-  await writeFile(filePath, serialized)
+  await writeFile(filePath, `${serialized}\n`)
 }
 
 export function exists(filePath: string): Promise<boolean> {
