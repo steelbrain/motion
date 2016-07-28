@@ -5,55 +5,83 @@ import send from 'send'
 import chalk from 'chalk'
 import Pundle from 'pundle'
 import PundleDev from 'pundle-dev'
-import { DIRECTORY_NAME } from './config'
 import type CLI from './cli'
-import type State from './state'
-import type { Motion$Config } from './types'
+import type { Config } from './types'
 
 export const X = '✗'
 export const TICK = '✓'
-
-export function fillConfig(config: Motion$Config) {
-  if (typeof config.dataDirectory !== 'string') {
-    config.dataDirectory = Path.join(config.rootDirectory, DIRECTORY_NAME)
-  }
-}
-
-export function getLocalModulePath(name: string): string {
-  return Path.dirname(require.resolve(`${name}/package.json`))
-}
 
 // From: goo.gl/fZA6BF
 export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
+// NOTE: The reason we are not replacing these in config is because when we then save the config
+// We'd end up with absolute paths in it, using this function in every config user function
+// will let us avoid that.
+export function normalizeConfig(projectPath: string, givenConfig: Config): Config {
+  const config: Config = Object.assign({}, givenConfig, {
+    babel: Object.assign({}, givenConfig.babel)
+  })
+  if (config.bundleDirectory.substr(0, 1) === '.') {
+    config.bundleDirectory = Path.resolve(projectPath, config.bundleDirectory)
+  }
+  if (config.publicDirectory.substr(0, 1) === '.') {
+    config.publicDirectory = Path.resolve(projectPath, config.publicDirectory)
+  }
+  if (!config.babel || typeof config.babel !== 'object') {
+    config.babel = { plugins: [], presets: [] }
+  }
+  if (!Array.isArray(config.babel.plugins)) {
+    config.babel.plugins = []
+  } else {
+    config.babel.plugins = config.babel.plugins.slice()
+  }
+  if (!Array.isArray(config.babel.presets)) {
+    config.babel.presets = []
+  } else {
+    config.babel.presets = config.babel.presets.slice()
+  }
+  if (config.babel.presets.indexOf('babel-preset-motion') !== -1) {
+    config.babel.presets.splice(config.babel.presets.indexOf('babel-preset-motion'), 1,
+      require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
+      require.resolve('babel-preset-motion'))
+  }
+  config.babel.plugins = config.babel.plugins.map(function(entry) {
+    if (entry.substr(0, 1) === '.') {
+      return Path.resolve(projectPath, entry)
+    }
+    return Path.join(projectPath, 'node_modules', entry)
+  })
+  return config
+}
+
 export async function getPundleInstance(
-  state: State,
-  config: Motion$Config,
   cli: CLI,
   terminal: boolean,
+  projectPath: string,
   development: boolean,
+  givenConfig: Config,
   errorCallback: Function
 ): Object {
+  const config = normalizeConfig(projectPath, givenConfig)
+  const pundleEntry = config.includePolyfills &&
+    Array.isArray(givenConfig.babel.presets) && givenConfig.babel.presets.indexOf('babel-preset-motion') !== -1 ?
+    [require.resolve('babel-regenerator-runtime'), 'index.js'] :
+    ['index.js']
   const pundleConfig = {
-    entry: [require.resolve('babel-regenerator-runtime'), 'index.js'],
+    entry: pundleEntry,
     pathType: development ? 'filePath' : 'number',
-    rootDirectory: config.rootDirectory,
+    rootDirectory: config.bundleDirectory,
     replaceVariables: {
       'process.env.NODE_ENV': development ? 'development' : 'production'
     }
   }
 
-  const userPlugins = (state.config.babel && state.config.babel.plugins || [])
-    .map(function(plugin) {
-      return plugin.substr(0, 1) === '.' ? Path.join(config.rootDirectory, plugin) : Path.join(config.rootDirectory, 'node_modules', plugin)
-    })
-
   const plugins = [
     [require.resolve('pundle-npm-installer'), {
-      save: state.get().npm_save,
-      rootDirectory: config.rootDirectory,
+      save: config.saveNpmModules,
+      rootDirectory: config.bundleDirectory,
       beforeInstall(name) {
         if (terminal) {
           const message = `Installing ${name}`
@@ -75,13 +103,7 @@ export async function getPundleInstance(
         }
       }
     }],
-    [require.resolve('babel-pundle'), {
-      config: {
-        presets: [require.resolve('babel-preset-motion')],
-        plugins: userPlugins
-      },
-      ignored: /(node_modules|bower_components|\.motion)/
-    }]
+    [require.resolve('babel-pundle'), { config: config.babel }]
   ]
 
   if (!development) {
@@ -92,10 +114,10 @@ export async function getPundleInstance(
   const pundle = new PundleDev({
     server: {
       hmr: true,
-      port: state.get().web_server_port,
+      port: config.webServerPort,
       hmrPath: '/_/bundle_hmr',
       bundlePath: '/_/bundle.js',
-      sourceRoot: config.dataDirectory,
+      sourceRoot: config.publicDirectory,
       sourceMapPath: '/_/bundle.js.map',
       error(error) {
         errorCallback(error)
@@ -114,7 +136,7 @@ export async function getPundleInstance(
       next()
       return
     }
-    send(req, req.baseUrl, { root: config.dataDirectory, index: 'index.html' })
+    send(req, req.baseUrl, { root: config.publicDirectory, index: 'index.html' })
       .on('error', function() {
         if (error) {
           next()
@@ -127,7 +149,7 @@ export async function getPundleInstance(
   })
   pundle.pundle.onDidProcess(function({ filePath }) {
     if (filePath.indexOf('$root') === 0 && filePath.indexOf('node_modules') === -1 && filePath.indexOf('../') === -1) {
-      cli.log(`${chalk.dim(filePath)} ${chalk.green('✓')}`)
+      cli.log(`${chalk.dim(filePath)} ${chalk.green(TICK)}`)
     }
   })
   return pundle

@@ -1,18 +1,13 @@
 /* @flow */
 
-export type Motion$Config = {
-  rootDirectory: string,
-  // Optional
-  dataDirectory: string
-}
-
-export type Motion$State = {
-  running: boolean,
-  process_id: number,
-  web_server_port: number,
-  npm_save: boolean
-}
-
-export type Motion$StateConfig = {
-  include_polyfills: boolean
+export type Config = {
+  babel: {
+    plugins: Array<string>,
+    presets: Array<string>
+  },
+  webServerPort: number,
+  saveNpmModules: boolean,
+  bundleDirectory: string,
+  publicDirectory: string,
+  includePolyfills: boolean,
 }

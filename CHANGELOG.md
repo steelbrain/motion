@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.0
+
+- Move config file to `.motion.json` to project root
+- Allow full babel control from the configuration file
+- Remove `.motion` folder in favor of new `public` folder
+- Only includes regenerator runtime when `includesPolyfill` config is enabled
+
 ## 3.3.0
 
 - Upgrade to Pundle@1.0 :tada:
