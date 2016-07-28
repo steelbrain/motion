@@ -57,14 +57,13 @@ if (command === 'new') {
   }, handleError)
 } else if (command === 'build') {
   getMotion().then(function(motion) {
-    return motion.build(process.stdout.isTTY)
-  }).then(function() {
-    console.log(trim(`
-      ${chalk.green('App built successfully')}
-      To access the built files, do
-        $ cd .motion/
-    `))
-  }, handleError)
+    return motion.build(process.stdout.isTTY).then(function() {
+      console.log(trim(`
+        ${chalk.green('App built successfully')}
+        They are accessible in your public files directory
+      `))
+    })
+  }).catch(handleError)
 } else if (command === 'init') {
   getMotion().then(function(motion) {
     return motion.init()

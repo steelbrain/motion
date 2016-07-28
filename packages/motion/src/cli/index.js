@@ -8,16 +8,14 @@ import unique from 'lodash.uniq'
 import { exec } from 'sb-exec'
 import CLI from './cli'
 import type { Disposable } from 'sb-event-kit'
-import type State from '../state'
-import type { Motion$Config } from '../types'
+import type Config from '../config'
 
 const SPINNER_GLUE = ' & '
 
 export default class Main {
   cli: CLI;
-  state: State;
   active: boolean;
-  config: Motion$Config;
+  config: Config;
   spinner: ?{
     texts: Array<string>,
     instance: Ora
@@ -25,7 +23,7 @@ export default class Main {
   emitter: Emitter;
   subscriptions: CompositeDisposable;
 
-  constructor(config: Motion$Config) {
+  constructor(config: Config) {
     this.cli = new CLI()
     this.active = false
     this.config = config
@@ -49,11 +47,11 @@ export default class Main {
       open(serverAddress)
     })
     this.cli.addCommand('editor', 'Open this app in Atom', async () => {
-      await exec('atom', [this.config.rootDirectory])
+      await exec('atom', [this.config.get('bundleDirectory')])
     })
     this.cli.addCommand('build', 'Build this app for production usage', async () => {
       await this.emitter.emit('should-build')
-      this.cli.log('Dist files built successfully in', this.config.dataDirectory)
+      this.cli.log('Dist files built successfully in', this.config.get('publicDirectory'))
     })
     this.cli.addCommand('reload', 'Rebuild the bundle clearing all cache', async () => {
       try {
