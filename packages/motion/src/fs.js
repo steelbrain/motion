@@ -3,7 +3,6 @@
 import FS from 'fs'
 import promisify from 'sb-promisify'
 import mkdirp from 'mkdirp'
-import rimraf from 'rimraf'
 import ncp from 'ncp'
 
 export const copy = promisify(ncp)
@@ -12,16 +11,6 @@ export const readFile = promisify(FS.readFile)
 export const writeFile = promisify(FS.writeFile)
 export const realpath = promisify(FS.realpath)
 export const mkdir = promisify(mkdirp)
-
-export function rm(target: string): Promise {
-  return new Promise(function(resolve, reject) {
-    rimraf(target, { disableGlob: true }, function(error) {
-      if (error) {
-        reject(error)
-      } else resolve()
-    })
-  })
-}
 
 export async function readJSON(filePath: string, encoding: string = 'utf8'): Promise {
   const contents = await readFile(filePath)
