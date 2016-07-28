@@ -23,10 +23,15 @@ export default class Config {
   }
   static async create(projectPath: string): Promise<Config> {
     const config = {
+      babel: {
+        plugins: [],
+        presets: ['babel-preset-motion']
+      },
       webServerPort: Helpers.getRandomNumber(8000, 15000),
-      bundleDirectory: projectPath,
-      publicDirectory: Path.join(projectPath, 'static'),
-      includePolyfills: false,
+      saveNpmModules: true,
+      bundleDirectory: '.',
+      publicDirectory: './static',
+      includePolyfills: false
     }
     const configPath = Path.join(projectPath, '.motion.json')
     try {
