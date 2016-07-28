@@ -47,11 +47,11 @@ export default class Main {
       open(serverAddress)
     })
     this.cli.addCommand('editor', 'Open this app in Atom', async () => {
-      await exec('atom', [this.config.get('bundleDirectory')])
+      await exec('atom', [this.config.getBundleDirectory()])
     })
     this.cli.addCommand('build', 'Build this app for production usage', async () => {
       await this.emitter.emit('should-build')
-      this.cli.log('Dist files built successfully in', this.config.get('publicDirectory'))
+      this.cli.log('Dist files built successfully in', this.config.getPublicDirectory())
     })
     this.cli.addCommand('reload', 'Rebuild the bundle clearing all cache', async () => {
       try {
