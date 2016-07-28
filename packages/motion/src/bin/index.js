@@ -1,96 +1,76 @@
 #!/usr/bin/env node
+/* @flow */
 
-// NOTE: To allow `pidof motion`
-process.title = 'motion'
+require('process-bootstrap')('motion')
 
-process.on('uncaughtException', function(error) {
-  console.log('Uncaught Exception', error && error.stack || error)
-})
-process.on('unhandledRejection', function(reason, promise) {
-  console.log('Unhandled Rejection at: Promise ', promise, ' reason: ', reason)
-})
+import Path from 'path'
+import chalk from 'chalk'
+import coolTrim from 'cool-trim'
+import commander from 'commander'
+import manifest from '../../package.json'
+import { getMotion } from './helpers'
 
-const Path = require('path')
-const Motion = require('../')
-const chalk = require('chalk')
-const trim = require('cool-trim')
-const manifest = require('../../package.json')
-const parameters = process.argv.slice(2)
-const command = parameters[0]
-const options = require('minimist')(parameters)
-const commands = options._
-let showHelp = options.h || options.help
+const currentDirectory = process.cwd()
 
-if (options.v || options.version) {
-  console.log(`Motion v${manifest.version}`)
-  process.exit()
-}
+commander
+  .version(manifest.version)
 
-function getMotion(rootDirectory: string = process.cwd()): Promise<Motion> {
-  return Motion.create(rootDirectory).then(function(motion) {
-    motion.onDidError(function(error) {
-      motion.cli.log(error)
+commander
+  .command('new [name]')
+  .description('Create a new motion app with the given name')
+  .action(function(name) {
+    getMotion(Path.join(currentDirectory, name), function(motion) {
+      return motion.init().then(function() {
+        console.log(coolTrim`
+          ${chalk.green('App created successfully! Enjoy')}
+          ${chalk.yellow('To run motion in your new app, do')}
+            $ cd ${name}
+            $ motion
+        `)
+      })
     })
-    return motion
   })
-}
-function handleError(error: Error) {
-  console.error(error && error.stack || error)
-  process.exit(1)
-}
-
-if (command === 'new') {
-  const name = commands[1]
-  if (!name) {
-    console.error('Please enter a valid app name')
-    process.exit(1)
-  }
-  getMotion(Path.join(process.cwd(), name)).then(function(motion) {
-    return motion.init()
-  }).then(function() {
-    console.log(trim(`
-      ${chalk.green('App created successfully! Enjoy')}
-      ${chalk.yellow('To run motion in your new app, do')}
-        $ cd ${name}
-        $ motion
-    `))
-  }, handleError)
-} else if (command === 'build') {
-  getMotion().then(function(motion) {
-    return motion.build(process.stdout.isTTY).then(function() {
-      console.log(trim(`
-        ${chalk.green('App built successfully')}
-        They are accessible in your public files directory
-      `))
+commander
+  .command('build')
+  .description('Build dist files of the current motion app')
+  .action(function() {
+    getMotion(currentDirectory, function(motion) {
+      return motion.build(process.stdout.isTTY).then(function() {
+        console.log(coolTrim`
+          ${chalk.green('App built successfully')}
+          To access the built files, do
+            $ cd ${Path.relative(currentDirectory, motion.config.getPublicDirectory())}
+        `)
+      })
     })
-  }).catch(handleError)
-} else if (command === 'init') {
-  getMotion().then(function(motion) {
-    return motion.init()
-  }).then(function() {
-    console.log(trim(`
-      ${chalk.green('Motion initialized successfully! Enjoy')}
-      ${chalk.yellow('To run motion in your new app, do')}
-        $ motion
-    `))
-  }, handleError)
-} else if (!commands.length && !showHelp) { // run
-  getMotion().then(function(motion) {
-    return motion.watch(process.stdout.isTTY)
-  }).catch(handleError)
-} else {
-  showHelp = true
-}
+  })
+commander
+  .command('watch', null, { isDefault: true })
+  .action(function() {
+    getMotion(currentDirectory, function(motion) {
+      return motion.watch(process.stdout.isTTY)
+    })
+  })
+commander
+  .command('init')
+  .description('Try to transition current directory to a motion app')
+  .action(function() {
+    getMotion(currentDirectory, function(motion) {
+      return motion.init().then(function() {
+        console.log(coolTrim`
+          ${chalk.green('Motion initialized successfully! Enjoy')}
+          ${chalk.yellow('To run motion in your new app, do')}
+            $ motion
+        `)
+      })
+    })
+  })
 
-if (showHelp) {
-  console.log(trim(`
-    Motion v${manifest.version}, Usage:
-      motion                        Run current Motion app
-      motion -h, --help             Show this help
-      motion -v, --version          Show Motion version
-      motion new $name              Create new Motion app with $name as name
-      motion build                  Built current Motion app
-      motion init                   Add Motion config to current app
-    `))
-  process.exit(1)
+commander.parse(process.argv)
+
+if (!commander.args.length) {
+  // Execute default watch command
+  getMotion(currentDirectory, function(motion) {
+    return motion.watch(process.stdout.isTTY)
+  })
 }
