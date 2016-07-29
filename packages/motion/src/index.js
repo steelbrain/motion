@@ -2,7 +2,7 @@
 
 import Path from 'path'
 import invariant from 'assert'
-import { CompositeDisposable, Disposable, Emitter } from 'sb-event-kit'
+import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import * as FS from './fs'
 import CLI from './cli'
 import Config from './config'
@@ -12,7 +12,6 @@ import { getPundleInstance } from './helpers'
 class Motion {
   cli: CLI;
   config: Config;
-  emitter: Emitter;
   watching: boolean;
   projectPath: string;
   subscriptions: CompositeDisposable;
@@ -22,12 +21,10 @@ class Motion {
 
     this.cli = new CLI(config)
     this.config = config
-    this.emitter = new Emitter()
     this.watching = false
     this.projectPath = projectPath
     this.subscriptions = new CompositeDisposable()
 
-    this.subscriptions.add(this.emitter)
     this.subscriptions.add(this.cli)
     this.cli.onShouldBuild(async () => {
       await this.build(false)
@@ -48,11 +45,12 @@ class Motion {
       this.cli.activate()
     }
     const pundle = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, error => {
-      this.emitter.emit('did-error', error)
+      this.cli.log(error)
     })
     await pundle.activate()
     const reloadHook = this.cli.onShouldReload(async () => {
       pundle.pundle.clearCache()
+      await pundle.pundle.compile()
     })
     const disposable = new Disposable(() => {
       this.subscriptions.remove(disposable)
@@ -67,9 +65,13 @@ class Motion {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
-    const compilation = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, error => {
-      this.emitter.emit('did-error', error)
+    let error
+    const compilation = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, givenError => {
+      error = givenError
     })
+    if (error) {
+      throw error
+    }
     await compilation.compile()
     await FS.mkdir(Path.join(this.config.getPublicDirectory(), '_'))
     await FS.writeFile(Path.join(this.config.getPublicDirectory(), '_/bundle.js'), compilation.generate().contents)
@@ -83,9 +85,6 @@ class Motion {
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'bundle')), this.config.getBundleDirectory())
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'public')), this.config.getPublicDirectory())
     await this.config.write()
-  }
-  onDidError(callback: Function): Disposable {
-    return this.emitter.on('did-error', callback)
   }
   dispose() {
     this.subscriptions.dispose()
