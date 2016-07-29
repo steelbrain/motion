@@ -5,8 +5,8 @@ dependencies:
     - sudo apt-get update
     - sudo apt-get -f install
     - nvm use 5.1.0
-    - ./scripts/build.sh
-    - make bootstrap
+    - npm install
+    - npm run bootstrap
 test:
   override:
     - npm test
