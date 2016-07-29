@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.1
+
+- Fix a bug where `reload` won't work in Motion CLI
+- Fix a bug where Motion server errors won't be logged in console
+
 ## 4.0.0
 
 - Move config file to `.motion.json` to project root
