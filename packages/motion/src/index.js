@@ -53,6 +53,7 @@ class Motion {
     await pundle.activate()
     const reloadHook = this.cli.onShouldReload(async () => {
       pundle.pundle.clearCache()
+      await pundle.pundle.compile()
     })
     const disposable = new Disposable(() => {
       this.subscriptions.remove(disposable)
