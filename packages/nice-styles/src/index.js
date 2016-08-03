@@ -25,7 +25,9 @@ function processTransform(transform: Transform): string {
 }
 
 function isCSSAble(val) {
-  return (typeof val).match(/function|object/) && typeof val.css === 'function'
+  return (typeof val).match(/function|object/) && (
+    val.toString || typeof val.css === 'function'
+  )
 }
 
 function processArray(array: Array<number | string>): string {
