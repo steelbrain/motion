@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "publish": "npm run compile; lerna publish",
     "test": "lerna exec --concurrency 1 -- apm test",
-    "watch": "npm run clean; lerna exec -- ucompiler watch"
+    "watch": "npm run clean; lerna exec -- babel src --out-dir lib --presets react,es2015-sane,stage-0 --source-maps --watch"
   },
   "dependencies": {
     "babel-cli": "^6.5.1",
