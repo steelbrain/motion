@@ -1,39 +1,22 @@
-## Motion Style
+# motion-style
 
-Higher order component for styling components. Uses Aphrodite to extract everything to stylesheets. Uses motion-nice-style to provide some nice helpers for styles.
+HOC for styling React components. Inline styles for all.
 
-Applies styles in the static style object to the render elements based on tags and `$` props.
+Combines a few things to make your life easy: [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction, [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply.
 
-Example:
+```jsx
+import style from 'motion-style'
 
-```js
-import styler from 'motion-style'
-
-const style = styler({
-  theme: true,
-  themeKey: 'theme'
-})
-
-@style class extends React.Component {
+@style() class extends Component {
   render() {
-    return (
-      <name>
-        <h1 $black $bg="#fff">Test</h1>
-      </name>
-    )
+    return <h1 $black $bg="#fff">Test</h1>
   }
 
   static style = {
-    name: {
-      flex: 1,
-    },
     h1: {
       fontSize: 22,
-      transform: {
-        rotate: '45deg',
-      },
-      border: [1, 'solid', '#ccc'],
       color: [255, 255, 255],
+      hover: { color: 'red', },
     },
     black: {
       color: 'black',
@@ -46,11 +29,24 @@ const style = styler({
 }
 ```
 
-### Themes
+features
+---
+
+- small library, relies on other small libraries
+- auto prefixes
+- supports pseudos
+- supports media queries
+- themes are far easier way to restyle multiple elements
+- powerful js object-based styles
+- dynamic and static styles
+- keeps html easy to read
+
+themes
+---
 
 Use themes and themeProps to easily theme an entire component a different way. `themeProps` will accept boolean props.
 
-```js
+```jsx
 @style class Title extends React.Component {
   render() {
     return (
@@ -60,11 +56,14 @@ Use themes and themeProps to easily theme an entire component a different way. `
     )
   }
 
-  static themeProps = ['big']
+  static themeProps = ['big', 'tint']
 
   static style = {
     base: {
       padding: 10,
+      transform: {
+        rotate: '45deg',
+      },
     },
     h1: {
       fontSize: 22,
@@ -90,15 +89,14 @@ Use themes and themeProps to easily theme an entire component a different way. `
   }
 }
 
-
 // Use
 React.render(<Title big tint="yellow" />, document.getElementById('app'))
 ```
 
+parent styles
+---
 
-### Parent Styles
-
-Helpful for maintaining a common set of styles for every component. Use `$$` to access, to keep things explicit.
+Helpful for maintaining a common set of styles for every component. Using `$$` to access keeps things explicit.
 
 ```js
 @style.parent({
