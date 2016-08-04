@@ -1,6 +1,6 @@
 {
   "name": "motion-style",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Higher order component enabling style property on components",
   "main": "lib/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "aphrodite": "^0.5.0",
     "lodash": "^4.14.0",
-    "motion-nice-styles": "^4.0.3"
+    "motion-nice-styles": "^4.0.4"
   },
   "devDependencies": {
     "enzyme": "^2.4.1",
