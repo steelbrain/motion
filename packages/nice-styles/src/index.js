@@ -36,7 +36,6 @@ function getCSSVal(val) {
 
 function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
-    console.log(style)
     if (isCSSAble(style)) return getCSSVal(style)
     return typeof style === 'number' ? `${style}px` : style
   }).join(' ')
