@@ -7,6 +7,7 @@ import { it } from 'jasmine-fix'
 import React from 'react'
 import { mount } from 'enzyme'
 import BasicComponent from './basicComponent'
+import console from 'console'
 
 @style({
   mergeStyleProp: true,
@@ -46,8 +47,28 @@ class StyledComponent extends React.Component {
   }
 }
 
+@style() class SimpleComponent extends React.Component {
+  static style = {
+    h1: {
+      background: 'red'
+    },
+    prop: {
+      background: 'blue'
+    }
+  }
+
+  render() { return <h1 $prop={this.props.bool} /> }
+}
+
 describe('MotionStyle', () => {
   it('applies simple styles', () => {
+    const el = mount(<SimpleComponent />)
+    const el2 = mount(<SimpleComponent bool />)
+    expect(el.find('h1').props().className).toBe('h1_10ip45p')
+    expect(el2.find('h1').props().className).toBe('h1_10ip45p-o_O-prop_1nxhvta')
+  })
+
+  it('applies a few more styles', () => {
     const el = mount(<BasicComponent />)
 
     const h1 = el.find('h1')

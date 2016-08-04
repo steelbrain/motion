@@ -2,6 +2,7 @@ import React from 'react'
 import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite/no-important'
 import { omit, identity, pickBy, zip, flatten } from 'lodash'
+// import console from 'console'
 
 // flatten theme key
 // { theme: { dark: { h1: { color: 'red' } } } }
