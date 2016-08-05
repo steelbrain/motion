@@ -47,7 +47,15 @@ export function normalizeConfig(projectPath: string, givenConfig: Config): Confi
       require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
       require.resolve('babel-preset-motion'))
   }
+  if (config.babel.plugins.indexOf('motion-style/transform') !== -1) {
+    config.babel.plugins.splice(config.babel.plugins.indexOf('motion-style/transform'), 1,
+      require.resolve('motion-style/transform')
+    )
+  }
   config.babel.plugins = config.babel.plugins.map(function(entry) {
+    if (Path.isAbsolute(entry)) {
+      return entry
+    }
     if (entry.substr(0, 1) === '.') {
       return Path.resolve(projectPath, entry)
     }
