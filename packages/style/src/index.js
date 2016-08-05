@@ -2,9 +2,8 @@ import React from 'react'
 import { StyleSheet, css } from 'aphrodite/no-important'
 import { omit, pickBy } from 'lodash'
 import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys, joinZip } from './helpers'
+import { STYLE_KEY } from './constants'
 // import console from 'console'
-
-const styleKey = 'motion$style'
 
 const defaultOpts = {
   themes: true
@@ -73,7 +72,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
         if (!child || !React.isValidElement(child)) return child
 
         // only style tags from within current view
-        if (child.props[styleKey] !== this[styleKey]) return child
+        if (child.props[STYLE_KEY] !== this[STYLE_KEY]) return child
 
         // <name $one $two /> keys
         const propKeys = Object.keys(child.props)
@@ -176,7 +175,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
         //
         // recreate child (without style props)
         const { key, ref, props, type } = child
-        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, styleKey])
+        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, STYLE_KEY])
         if (ref) newProps.ref = ref
         if (key) newProps.key = key
 
