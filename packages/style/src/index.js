@@ -176,7 +176,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
         //
         // recreate child (without style props)
         const { key, ref, props, type } = child
-        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, 'motion$style'])
+        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, styleKey])
         if (ref) newProps.ref = ref
         if (key) newProps.key = key
 
