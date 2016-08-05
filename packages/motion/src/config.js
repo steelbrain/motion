@@ -30,7 +30,7 @@ export default class Config {
   static async create(projectPath: string): Promise<Config> {
     const config = {
       babel: {
-        plugins: [],
+        plugins: ['motion-style/transform'],
         presets: ['babel-preset-motion']
       },
       webServerPort: Helpers.getRandomNumber(8000, 15000),

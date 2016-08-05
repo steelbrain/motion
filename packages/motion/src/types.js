@@ -2,7 +2,7 @@
 
 export type Config = {
   babel: {
-    plugins: Array<string>,
+    plugins: Array<string | [string, Object]>,
     presets: Array<string>
   },
   webServerPort: number,
