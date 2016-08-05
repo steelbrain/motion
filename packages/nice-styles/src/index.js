@@ -25,12 +25,18 @@ function processTransform(transform: Transform): string {
 }
 
 function isCSSAble(val) {
-  return (typeof val).match(/function|object/) && typeof val.css === 'function'
+  return (typeof val).match(/function|object/) && (
+    typeof val.toCSS === 'function' || typeof val.css === 'function'
+  )
+}
+
+function getCSSVal(val) {
+  return val.css ? val.css() : val.toCSS()
 }
 
 function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
-    if (isCSSAble(style)) return style.css()
+    if (isCSSAble(style)) return getCSSVal(style)
     return typeof style === 'number' ? `${style}px` : style
   }).join(' ')
 }
@@ -50,7 +56,7 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       continue
     }
     if (isCSSAble(value)) {
-      toReturn[key] = value.css()
+      toReturn[key] = getCSSVal(value)
       continue
     }
     if (COLOR_KEYS.has(key) || key.toLowerCase().indexOf('color') !== -1) {

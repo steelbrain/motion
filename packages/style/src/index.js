@@ -1,7 +1,8 @@
 import React from 'react'
-import { StyleSheet, css } from 'aphrodite'
+import { StyleSheet, css } from 'aphrodite/no-important'
 import { omit, pickBy } from 'lodash'
-import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys } from './helpers'
+import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys, joinZip } from './helpers'
+// import console from 'console'
 
 const styleKey = 'motion$style'
 
@@ -37,9 +38,10 @@ module.exports = function motionStyle(opts = defaultOpts) {
 
   // decorator
   const decorator = (Child, parentStyles) => {
-    if (!Child.style) return Child
+    if (!Child.style && !parentStyles) return Child
 
     const styles = processStyles(Child.style, opts.themes ? Child.theme : null)
+    const hasOwnStyles = !!(Child.style || Child.theme)
 
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
@@ -73,9 +75,6 @@ module.exports = function motionStyle(opts = defaultOpts) {
         // only style tags from within current view
         if (child.props[styleKey] !== this[styleKey]) return child
 
-        // <View /> + <tag /> keys
-        const name = child.type && (child.type.name || child.type)
-
         // <name $one $two /> keys
         const propKeys = Object.keys(child.props)
         const styleKeys = filterStyleKeys(propKeys)
@@ -86,7 +85,10 @@ module.exports = function motionStyle(opts = defaultOpts) {
           .map(key => key.slice(1))
 
         // tag + $props
-        const allKeys = [name, ...activeKeys]
+        // don't style <Components />!
+        const isTag = typeof child.type === 'string'
+        const name = child.type
+        const allKeys = isTag ? [name, ...activeKeys] : activeKeys
         let finalKeys = [...allKeys]
 
         // collect styles
@@ -95,9 +97,9 @@ module.exports = function motionStyle(opts = defaultOpts) {
         //
         // theme styles
         //
-        if (opts.themes) {
+        if (hasOwnStyles && opts.themes) {
           const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
-          const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
+          const addTheme = (keys, prop) => joinZip(keys, themeKeys(prop))
 
           // direct
           const themes = this.constructor.theme
@@ -155,15 +157,23 @@ module.exports = function motionStyle(opts = defaultOpts) {
         // own styles
         //
         // static
-        finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
-        // dynamic
-        if (styles.dynamics && activeKeys.length) {
-          finalStyles = [
-            ...finalStyles,
-            ...getDynamicSheets(getDynamicStyles(activeKeys, child.props, styles.dynamics))
-          ]
+        if (hasOwnStyles) {
+          if (styles.statics) {
+            finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
+          }
+
+          // dynamic
+          if (styles.dynamics && activeKeys.length) {
+            finalStyles = [
+              ...finalStyles,
+              ...getDynamicSheets(getDynamicStyles(activeKeys, child.props, styles.dynamics))
+            ]
+          }
         }
 
+        //
+        // finish
+        //
         // recreate child (without style props)
         const { key, ref, props, type } = child
         const newProps = omit(props, [...styleKeys, ...parentStyleKeys, 'motion$style'])
