@@ -47,13 +47,13 @@ export function normalizeConfig(projectPath: string, givenConfig: Config): Confi
       require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
       require.resolve('babel-preset-motion'))
   }
-  if (config.babel.plugins.indexOf('motion-style/transform') !== -1) {
-    config.babel.plugins.splice(config.babel.plugins.indexOf('motion-style/transform'), 1,
-      require.resolve('motion-style/transform')
-    )
-  }
   config.babel.plugins = config.babel.plugins.map(function(entry) {
-    if (Path.isAbsolute(entry)) {
+    if (Array.isArray(entry) && entry[0] === 'motion-style/transform') {
+      entry[0] = require.resolve('motion-style/transform')
+    } else if (entry === 'motion-style/transform') {
+      entry = require.resolve('motion-style/transform')
+    }
+    if (typeof entry !== 'string' || Path.isAbsolute(entry)) {
       return entry
     }
     if (entry.substr(0, 1) === '.') {
