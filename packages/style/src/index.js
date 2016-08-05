@@ -10,7 +10,7 @@ const defaultOpts = {
 
 module.exports = function motionStyle(opts = defaultOpts) {
   // helpers
-  const getDynamicStyles = (active, props, styles, propPrefix = '$') => {
+  const getDynamicStyles = (active: Array, props: Object, styles: Object, propPrefix = '$') => {
     const dynamicKeys = active.filter(k => styles[k] && typeof styles[k] === 'function')
     const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
     const dynamics = dynamicKeys.reduce(dynamicsReduce, {})
@@ -113,10 +113,12 @@ module.exports = function motionStyle(opts = defaultOpts) {
                 styles.theme[prop]
               ) {
                 // dynamic themes
-                const dynStyles = getDynamicStyles([prop], this.props, styles.theme, '')[prop]
+                const dynStyles = styles.theme[prop](this.props[prop])
+                const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
 
-                if (dynStyles) {
-                  finalStyles = [...finalStyles, ...getDynamicSheets(dynStyles)]
+                if (dynKeys.length) {
+                  const activeStyles = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
+                  finalStyles = [...finalStyles, ...getDynamicSheets(activeStyles)]
                 }
               }
             })
