@@ -104,7 +104,6 @@ module.exports = function motionStyle(opts = defaultOpts) {
           const themeProps = themes && Object.keys(themes)
 
           if (themes && themeProps.length) {
-            console.log('themeProps', themeProps)
             themeProps.forEach(prop => {
               if (this.props[prop] === true) {
                 // static theme
