@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "motion - moving development forward",
   "main": "lib/index.js",
   "scripts": {},
@@ -21,7 +21,7 @@
     "cool-trim": "^1.1.0",
     "lodash.uniq": "^4.4.0",
     "mkdirp": "^0.5.1",
-    "motion-style": "^4.0.5",
+    "motion-style": "^4.1.0",
     "open": "0.0.5",
     "ora": "^0.2.3",
     "process-bootstrap": "^1.0.0",
