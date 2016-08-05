@@ -47,19 +47,22 @@ export function normalizeConfig(projectPath: string, givenConfig: Config): Confi
       require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
       require.resolve('babel-preset-motion'))
   }
-  config.babel.plugins = config.babel.plugins.map(function(entry) {
-    if (Array.isArray(entry) && entry[0] === 'motion-style/transform') {
+  config.babel.plugins = config.babel.plugins.map(function(givenEntry) {
+    if (!givenEntry) {
+      return givenEntry
+    }
+    const entry = Array.isArray(givenEntry) ? givenEntry : [givenEntry, {}]
+    if (entry[0] === 'motion-style/transform') {
       entry[0] = require.resolve('motion-style/transform')
-    } else if (entry === 'motion-style/transform') {
-      entry = require.resolve('motion-style/transform')
     }
-    if (typeof entry !== 'string' || Path.isAbsolute(entry)) {
-      return entry
+    if (!Path.isAbsolute(entry[0])) {
+      if (entry[0].substr(0, 1) === '.') {
+        entry[0] = Path.resolve(projectPath, entry[0])
+      } else {
+        entry[0] = Path.join(projectPath, 'node_modules', entry[0])
+      }
     }
-    if (entry.substr(0, 1) === '.') {
-      return Path.resolve(projectPath, entry)
-    }
-    return Path.join(projectPath, 'node_modules', entry)
+    return entry
   })
   return config
 }
