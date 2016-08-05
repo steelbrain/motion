@@ -98,7 +98,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
         //
         if (hasOwnStyles && opts.themes) {
           const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
-          const addTheme = (keys, prop) => joinZip(keys, themeKeys(prop))
+          const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
 
           // direct
           const themes = this.constructor.theme
