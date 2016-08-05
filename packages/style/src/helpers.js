@@ -1,4 +1,3 @@
-import { flatten, zip } from 'lodash'
 import niceStyles from 'motion-nice-styles'
 
 // flatten theme key
@@ -47,4 +46,3 @@ export const applyNiceStyles = (styles, themeKey) => {
 export const isFunc = x => typeof x === 'function'
 export const filterStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] !== '$')
 export const filterParentStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] === '$')
-export const joinZip = (a, b) => flatten(zip(a, b))

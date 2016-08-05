@@ -1,9 +1,8 @@
 import React from 'react'
 import { StyleSheet, css } from 'aphrodite/no-important'
 import { omit, pickBy } from 'lodash'
-import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys, joinZip } from './helpers'
+import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys } from './helpers'
 import { STYLE_KEY } from './constants'
-// import console from 'console'
 
 const defaultOpts = {
   themes: true
