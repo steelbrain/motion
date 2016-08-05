@@ -4,10 +4,13 @@ HOC for styling React components. Inline styles for all.
 
 Combines a few things to make your life easy: [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction, [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply.
 
+
 ```jsx
 import style from 'motion-style'
 
-@style() class extends Component {
+const styler = style({ theme: true })
+
+@style class extends Component {
   render() {
     return <h1 $black $bg="#fff">Test</h1>
   }
@@ -17,6 +20,7 @@ import style from 'motion-style'
       fontSize: 22,
       color: [255, 255, 255],
       hover: { color: 'red', },
+      borderBottom: [2, 'solid yellow']
     },
     black: {
       color: 'black',
@@ -28,6 +32,22 @@ import style from 'motion-style'
   }
 }
 ```
+
+install
+---
+Comes with motion cli out of the box. It comes with a babel-transform that allows it to run, available from motion-style/transform.
+
+To add to babel:
+```js
+{
+  "babel": {
+    "plugins": [
+      ["motion-style/transform", { "decoratorName": "style" }]
+    ]
+  }
+}
+```
+
 
 features
 ---
@@ -56,8 +76,6 @@ Use themes and themeProps to easily theme an entire component a different way. `
     )
   }
 
-  static themeProps = ['big', 'tint']
-
   static style = {
     base: {
       padding: 10,
@@ -68,24 +86,25 @@ Use themes and themeProps to easily theme an entire component a different way. `
     h1: {
       fontSize: 22,
     },
-    theme: {
-      big: {
-        base: {
-          padding: 20,
-        },
-        h1: {
-          fontSize: 50,
-        }
+  }
+
+  static theme = {
+    big: {
+      base: {
+        padding: 20,
       },
-      tint: color => ({
-        base: {
-          background: [color, 0.5],
-        },
-        h1: {
-          color,
-        },
-      }),
+      h1: {
+        fontSize: 50,
+      }
     },
+    tint: color => ({
+      base: {
+        background: [color, 0.5],
+      },
+      h1: {
+        color,
+      },
+    }),
   }
 }
 
