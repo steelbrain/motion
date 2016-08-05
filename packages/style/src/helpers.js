@@ -3,29 +3,29 @@ import niceStyles from 'motion-nice-styles'
 // flatten theme key
 // { theme: { dark: { h1: { color: 'red' } } } }
 // => { dark-button: { h1: { color: 'red' } } }
-export const flattenThemes = styles => {
-  if (!styles.theme) return styles
-  let result = styles
+export const flattenThemes = themes => {
+  if (!themes) return {}
 
-  Object.keys(styles.theme).forEach(themeKey => {
-    const themeStyles = styles.theme[themeKey]
+  let result = {}
 
-    if (typeof themeStyles === 'object') {
+  Object.keys(themes).forEach(tKey => {
+    const theme = themes[tKey]
+
+    if (typeof theme === 'object') {
       result = {
         ...result,
         // flatten themes to `theme-tag: {}`
-        ...Object.keys(themeStyles)
-            .reduce((res, key) => ({ ...res, [`${themeKey}-${key}`]: themeStyles[key] }), {})
+        ...Object.keys(theme)
+            .reduce((res, key) => ({ ...res, [`${tKey}-${key}`]: theme[key] }), {})
       }
-    } else if (typeof themeStyles === 'function') {
+    } else if (typeof theme === 'function') {
       // skip function themes
       return
     } else {
-      console.log(`Note: themes must be an object or function, "${themeKey}" is a ${typeof themeKey}`)
+      console.log(`Note: themes must be an object or function, "${tKey}" is a ${typeof tKey}`)
     }
   })
 
-  delete result.theme
   return result
 }
 

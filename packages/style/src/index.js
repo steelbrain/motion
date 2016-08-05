@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, css } from 'aphrodite'
-import { omit, identity, pickBy } from 'lodash'
+import { omit, pickBy } from 'lodash'
 import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys } from './helpers'
 
 const styleKey = 'motion$style'
@@ -26,16 +26,15 @@ module.exports = function motionStyle(opts = defaultOpts) {
     return Object.keys(dynamics).map(k => sheet[k])
   }
 
-  const processStyles = _styles => {
-    const preprocess = opts.theme ? flattenThemes : identity
-    const styles = preprocess(Object.assign({}, _styles))
+  const processStyles = (userStyles, theme) => {
+    const styles = { ...userStyles, ...flattenThemes(theme) }
     const dynamics = pickBy(styles, isFunc)
     const statics = pickBy(styles, x => !isFunc(x))
 
     return {
       statics: StyleSheet.create(makeNiceStyles(statics)),
       dynamics,
-      theme: _styles.theme
+      theme
     }
   }
 
@@ -43,7 +42,9 @@ module.exports = function motionStyle(opts = defaultOpts) {
   const decorator = (Child, parentStyles) => {
     if (!Child.style) return Child
 
-    const styles = processStyles(Child.style)
+    console.log('hello')
+
+    const styles = processStyles(Child.style, opts.theme ? Child.theme : null)
 
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
@@ -75,7 +76,8 @@ module.exports = function motionStyle(opts = defaultOpts) {
         if (!child || !React.isValidElement(child)) return child
 
         // only style tags from within current view
-        if (child[styleKey] !== this[styleKey]) return child
+        console.log(child.props[styleKey], this[styleKey])
+        if (child.props[styleKey] !== this[styleKey]) return child
 
         // <View /> + <tag /> keys
         const name = child.type && (child.type.name || child.type)
@@ -109,7 +111,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
           }
 
           // direct
-          const themeProps = this.constructor.themeProps
+          const themeProps = Object.keys(this.constructor.theme)
           if (themeProps && themeProps.length) {
             themeProps.forEach(prop => {
               if (this.props[prop] === true) {
