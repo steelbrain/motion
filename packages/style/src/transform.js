@@ -1,6 +1,5 @@
-import { STYLE_KEY } from './constants'
-
 /* @flow */
+import { STYLE_KEY } from './constants'
 
 export default function({ types: t }: { types: Object }) {
   const classBodyVisitor = {
