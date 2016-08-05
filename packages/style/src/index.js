@@ -1,61 +1,19 @@
 import React from 'react'
-import niceStyles from 'motion-nice-styles'
 import { StyleSheet, css } from 'aphrodite'
 import { omit, identity, pickBy } from 'lodash'
+import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentStyleKeys } from './helpers'
 
-// flatten theme key
-// { theme: { dark: { h1: { color: 'red' } } } }
-// => { dark-button: { h1: { color: 'red' } } }
-const flattenThemes = styles => {
-  if (!styles.theme) return styles
-  let result = styles
+const styleKey = 'motion$style'
 
-  Object.keys(styles.theme).forEach(themeKey => {
-    const themeStyles = styles.theme[themeKey]
-
-    if (typeof themeStyles === 'object') {
-      result = {
-        ...result,
-        // flatten themes to `theme-tag: {}`
-        ...Object.keys(themeStyles)
-            .reduce((res, key) => ({ ...res, [`${themeKey}-${key}`]: themeStyles[key] }), {})
-      }
-    } else if (typeof themeStyles === 'function') {
-      // skip function themes
-      return
-    } else {
-      console.log(`Note: themes must be an object or function, "${themeKey}" is a ${typeof themeKey}`)
-    }
-  })
-
-  delete result.theme
-  return result
-}
-
-const applyNiceStyles = (styles, themeKey) => {
-  for (const style in styles) {
-    if (!styles.hasOwnProperty(style) || style === themeKey) {
-      continue
-    }
-    const value = styles[style]
-    if (value) {
-      styles[style] = niceStyles(value)
-    }
-  }
-
-  return styles
-}
-
-const isFunc = x => typeof x === 'function'
-const filterStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] !== '$')
-const filterParentStyleKeys = arr => arr.filter(key => key[0] === '$' && key[1] === '$')
-
-module.exports = function motionStyle(opts = {
-  theme: true,
+const defaultOpts = {
+  themes: true,
   themeKey: 'theme'
-}) {
+}
+
+module.exports = function motionStyle(opts = defaultOpts) {
   // helpers
   const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
+
   const getDynamicStyles = (active, props, styles, propPrefix = '$') => {
     const dynamicKeys = active.filter(k => styles[k] && typeof styles[k] === 'function')
     const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
@@ -115,6 +73,9 @@ module.exports = function motionStyle(opts = {
       styleOne(child) {
         if (Array.isArray(child)) return this.styleAll(child)
         if (!child || !React.isValidElement(child)) return child
+
+        // only style tags from within current view
+        if (child[styleKey] !== this[styleKey]) return child
 
         // <View /> + <tag /> keys
         const name = child.type && (child.type.name || child.type)
@@ -212,7 +173,7 @@ module.exports = function motionStyle(opts = {
 
         // recreate child (without style props)
         const { key, ref, props, type } = child
-        const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
+        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, 'motion$style'])
         if (ref) newProps.ref = ref
         if (key) newProps.key = key
 
