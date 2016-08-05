@@ -29,6 +29,7 @@ export default function({ types: t }: { types: Object }) {
           const id = path.scope.generateUidIdentifier('motion$style')
           path.scope.push({ id, init: t.objectExpression([]) })
           state.set('motion$style', id.name)
+          node.body.body.push(t.classProperty(t.identifier('motion$style'), t.identifier(id.name)))
           path.traverse(classBodyVisitor, state)
         }
       }
