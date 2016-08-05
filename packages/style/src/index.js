@@ -110,7 +110,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
                 finalKeys = addTheme(finalKeys, prop)
               } else if (
                 typeof this.props[prop] !== 'undefined' &&
-                styles.theme[prop]
+                typeof styles.theme[prop] === 'function'
               ) {
                 // dynamic themes
                 const dynStyles = styles.theme[prop](this.props[prop])
