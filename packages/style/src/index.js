@@ -6,14 +6,11 @@ import { applyNiceStyles, flattenThemes, isFunc, filterStyleKeys, filterParentSt
 const styleKey = 'motion$style'
 
 const defaultOpts = {
-  themes: true,
-  themeKey: 'theme'
+  themes: true
 }
 
 module.exports = function motionStyle(opts = defaultOpts) {
   // helpers
-  const makeNiceStyles = styles => applyNiceStyles(styles, opts.themeKey)
-
   const getDynamicStyles = (active, props, styles, propPrefix = '$') => {
     const dynamicKeys = active.filter(k => styles[k] && typeof styles[k] === 'function')
     const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
@@ -22,7 +19,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
   }
 
   const getDynamicSheets = dynamics => {
-    const sheet = StyleSheet.create(makeNiceStyles(dynamics))
+    const sheet = StyleSheet.create(applyNiceStyles(dynamics))
     return Object.keys(dynamics).map(k => sheet[k])
   }
 
@@ -32,7 +29,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
     const statics = pickBy(styles, x => !isFunc(x))
 
     return {
-      statics: StyleSheet.create(makeNiceStyles(statics)),
+      statics: StyleSheet.create(applyNiceStyles(statics)),
       dynamics,
       theme
     }
@@ -42,9 +39,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
   const decorator = (Child, parentStyles) => {
     if (!Child.style) return Child
 
-    console.log('hello')
-
-    const styles = processStyles(Child.style, opts.theme ? Child.theme : null)
+    const styles = processStyles(Child.style, opts.themes ? Child.theme : null)
 
     return class StyledComponent extends Child {
       static displayName = Child.displayName || Child.name
@@ -76,7 +71,6 @@ module.exports = function motionStyle(opts = defaultOpts) {
         if (!child || !React.isValidElement(child)) return child
 
         // only style tags from within current view
-        console.log(child.props[styleKey], this[styleKey])
         if (child.props[styleKey] !== this[styleKey]) return child
 
         // <View /> + <tag /> keys
@@ -101,18 +95,16 @@ module.exports = function motionStyle(opts = defaultOpts) {
         //
         // theme styles
         //
-        if (opts.theme) {
+        if (opts.themes) {
           const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
           const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
 
-          // theme=""
-          if (opts.themeKey && this.props[opts.themeKey]) {
-            finalKeys = addTheme(finalKeys, this.props[opts.themeKey])
-          }
-
           // direct
-          const themeProps = Object.keys(this.constructor.theme)
-          if (themeProps && themeProps.length) {
+          const themes = this.constructor.theme
+          const themeProps = themes && Object.keys(themes)
+
+          if (themes && themeProps.length) {
+            console.log('themeProps', themeProps)
             themeProps.forEach(prop => {
               if (this.props[prop] === true) {
                 // static theme
