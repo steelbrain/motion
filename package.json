@@ -4,11 +4,11 @@
   "scripts": {
     "bootstrap": "lerna bootstrap; npm run compile",
     "clean": "rm -rf packages/*/lib",
-    "compile": "npm run clean; lerna exec -- babel src --out-dir lib --presets react,es2015-sane,stage-0 --source-maps",
+    "compile": "npm run clean; lerna exec -- babel src --out-dir lib --source-maps",
     "lint": "eslint .",
     "publish": "npm run compile; lerna publish",
     "test": "lerna exec --concurrency 1 -- apm test",
-    "watch": "npm run clean; lerna exec --concurrency 99 -- babel src --out-dir lib --presets react,es2015-sane,stage-0 --source-maps --watch"
+    "watch": "npm run clean; lerna exec --concurrency 99 -- babel src --out-dir lib --source-maps --watch"
   },
   "dependencies": {
     "babel-cli": "^6.5.1",
