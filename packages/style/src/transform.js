@@ -9,6 +9,21 @@ export default function({ types: t }: { types: Object }) {
         t.jSXIdentifier(STYLE_KEY),
         t.jSXExpressionContainer(t.identifier(styleKey))
       ))
+    },
+    ClassMethod(path: Object) {
+      if (path.node.key.name === 'render') {
+        path.node.body.body.unshift(
+          t.expressionStatement(
+            t.assignmentExpression('=',
+              t.memberExpression(
+                t.identifier('React'),
+                t.identifier('createElement')
+              ),
+              t.identifier('this.fancyElement.bind(this)')
+            )
+          )
+        )
+      }
     }
   }
 

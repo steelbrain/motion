@@ -2,17 +2,18 @@ import React from 'react'
 import { css } from 'aphrodite/no-important'
 import { omit } from 'lodash'
 import { filterStyleKeys, filterParentStyleKeys } from './helpers'
-import { STYLE_KEY } from './constants'
+
+const originalCreateElement = React.createElement
 
 // factory that return the this.fancyElement helper
 export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicSheets) => {
   const hasOwnStyles = !!(Child.style || Child.theme)
   const shouldTheme = hasOwnStyles && opts.themes
 
-  return function fancyElement(type, props, children) {
-    // only style tags from within current view
-    if (!props || props[STYLE_KEY] !== this[STYLE_KEY]) {
-      return React.createElement(type, props, children)
+  return function fancyElement(type, props, ...children) {
+    // check for no props, no this (functional component), or no style key match
+    if (!props || !this) {
+      return originalCreateElement(type, props, ...children)
     }
 
     // <name $one $two /> keys
@@ -117,7 +118,7 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     // finish
     //
     // recreate child (without style props)
-    const newProps = omit(props, [...styleKeys, ...parentStyleKeys, STYLE_KEY])
+    const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
 
     if (finalStyles.length) {
       // apply styles
@@ -129,6 +130,6 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
       }
     }
 
-    return React.createElement(type, newProps, children)
+    return originalCreateElement(type, newProps, ...children)
   }
 }
