@@ -12,12 +12,12 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
 
   return function fancyElement(type, props, ...children) {
     // check for no props, no this (functional component), or no style key match
-    if (!props || !this) {
+    if (!this) {
       return originalCreateElement(type, props, ...children)
     }
 
     // <name $one $two /> keys
-    const propKeys = Object.keys(props)
+    const propKeys = props ? Object.keys(props) : []
     const styleKeys = filterStyleKeys(propKeys)
 
     // remove $
