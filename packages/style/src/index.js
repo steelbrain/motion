@@ -41,163 +41,133 @@ module.exports = function motionStyle(opts = defaultOpts) {
     const styles = processStyles(Child.style, opts.themes ? Child.theme : null)
     const hasOwnStyles = !!(Child.style || Child.theme)
 
-    return class StyledComponent extends Child {
-      static displayName = Child.displayName || Child.name
+    // add to Child.prototype, so the decorated class can access:
+    // this.fancyElement
 
-      __styles = styles
-
-      render() {
-        return this.styleAll.call(this, super.render())
+    Child.prototype.fancyElement = function(type, props, children) {
+      // only style tags from within current view
+      if (!props || props[STYLE_KEY] !== this[STYLE_KEY]) {
+        return React.createElement(type, props, children)
       }
 
-      styleAll(children) {
-        if (!children || !Array.isArray(children) && !children.props) return children
+      // <name $one $two /> keys
+      const propKeys = Object.keys(props)
+      const styleKeys = filterStyleKeys(propKeys)
 
-        const styler = this.styleOne.bind(this)
-        if (Array.isArray(children)) {
-          return children.map(styler)
-        }
+      // remove $
+      const activeKeys = styleKeys
+        .filter(key => props[key] !== false && typeof props[key] !== 'undefined')
+        .map(key => key.slice(1))
 
-        const count = React.Children.count(children)
-        if (count > 1) {
-          return React.Children.map(children, styler)
-        }
+      // tag + $props
+      // don't style <Components />!
+      const isTag = typeof type === 'string'
+      const name = type
+      const allKeys = isTag ? [name, ...activeKeys] : activeKeys
+      let finalKeys = [...allKeys]
 
-        return styler(children)
-      }
+      // collect styles
+      let finalStyles = []
 
-      styleOne(child) {
-        if (Array.isArray(child)) return this.styleAll(child)
-        if (!child || !React.isValidElement(child)) return child
+      //
+      // theme styles
+      //
+      if (hasOwnStyles && opts.themes) {
+        const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
+        const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
 
-        // only style tags from within current view
-        if (child.props[STYLE_KEY] !== this[STYLE_KEY]) return child
+        // direct
+        const themes = this.constructor.theme
+        const themeProps = themes && Object.keys(themes)
 
-        // <name $one $two /> keys
-        const propKeys = Object.keys(child.props)
-        const styleKeys = filterStyleKeys(propKeys)
+        if (themes && themeProps.length) {
+          themeProps.forEach(prop => {
+            if (this.props[prop] === true) {
+              // static theme
+              finalKeys = addTheme(finalKeys, prop)
+            } else if (
+              typeof this.props[prop] !== 'undefined' &&
+              typeof styles.theme[prop] === 'function'
+            ) {
+              // dynamic themes
+              const dynStyles = styles.theme[prop](this.props[prop])
+              const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
 
-        // remove $
-        const activeKeys = styleKeys
-          .filter(key => child.props[key] !== false && typeof child.props[key] !== 'undefined')
-          .map(key => key.slice(1))
-
-        // tag + $props
-        // don't style <Components />!
-        const isTag = typeof child.type === 'string'
-        const name = child.type
-        const allKeys = isTag ? [name, ...activeKeys] : activeKeys
-        let finalKeys = [...allKeys]
-
-        // collect styles
-        let finalStyles = []
-
-        //
-        // theme styles
-        //
-        if (hasOwnStyles && opts.themes) {
-          const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
-          const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
-
-          // direct
-          const themes = this.constructor.theme
-          const themeProps = themes && Object.keys(themes)
-
-          if (themes && themeProps.length) {
-            themeProps.forEach(prop => {
-              if (this.props[prop] === true) {
-                // static theme
-                finalKeys = addTheme(finalKeys, prop)
-              } else if (
-                typeof this.props[prop] !== 'undefined' &&
-                typeof styles.theme[prop] === 'function'
-              ) {
-                // dynamic themes
-                const dynStyles = styles.theme[prop](this.props[prop])
-                const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
-
-                if (dynKeys.length) {
-                  const activeStyles = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
-                  finalStyles = [...finalStyles, ...getDynamicSheets(activeStyles)]
-                }
+              if (dynKeys.length) {
+                const activeStyles = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
+                finalStyles = [...finalStyles, ...getDynamicSheets(activeStyles)]
               }
-            })
-          }
-        }
-
-        //
-        // parent styles
-        //
-        let parentStyleKeys = []
-        if (parentStyles) {
-          parentStyleKeys = filterParentStyleKeys(propKeys)
-
-          if (parentStyleKeys.length) {
-            const keys = parentStyleKeys.map(k => k.replace('$$', ''))
-
-            // dynamic
-            if (parentStyles.dynamics) {
-              finalStyles = [
-                ...finalStyles,
-                ...getDynamicSheets(getDynamicStyles(keys, child.props, parentStyles.dynamics, '$$'))
-              ]
             }
-
-            // static
-            if (parentStyles.statics) {
-              finalStyles = [
-                ...finalStyles,
-                ...keys.map(k => parentStyles.statics[k])
-              ]
-            }
-          }
+          })
         }
+      }
 
-        //
-        // own styles
-        //
-        // static
-        if (hasOwnStyles) {
-          if (styles.statics) {
-            finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
-          }
+      //
+      // parent styles
+      //
+      let parentStyleKeys = []
+      if (parentStyles) {
+        parentStyleKeys = filterParentStyleKeys(propKeys)
+
+        if (parentStyleKeys.length) {
+          const keys = parentStyleKeys.map(k => k.replace('$$', ''))
 
           // dynamic
-          if (styles.dynamics && activeKeys.length) {
+          if (parentStyles.dynamics) {
             finalStyles = [
               ...finalStyles,
-              ...getDynamicSheets(getDynamicStyles(activeKeys, child.props, styles.dynamics))
+              ...getDynamicSheets(getDynamicStyles(keys, props, parentStyles.dynamics, '$$'))
+            ]
+          }
+
+          // static
+          if (parentStyles.statics) {
+            finalStyles = [
+              ...finalStyles,
+              ...keys.map(k => parentStyles.statics[k])
             ]
           }
         }
-
-        //
-        // finish
-        //
-        // recreate child (without style props)
-        const { key, ref, props, type } = child
-        const newProps = omit(props, [...styleKeys, ...parentStyleKeys, STYLE_KEY])
-        if (ref) newProps.ref = ref
-        if (key) newProps.key = key
-
-        if (finalStyles.length) {
-          // apply styles
-          newProps.className = css(...finalStyles)
-
-          // keep original classNames
-          if (props && props.className && typeof props.className === 'string') {
-            newProps.className += ` ${props.className}`
-          }
-        }
-
-        // recurse to children
-        if (newProps && newProps.children) {
-          newProps.children = this.styleAll(child.props.children)
-        }
-
-        return React.createElement(type, newProps)
       }
+
+      //
+      // own styles
+      //
+      // static
+      if (hasOwnStyles) {
+        if (styles.statics) {
+          finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
+        }
+
+        // dynamic
+        if (styles.dynamics && activeKeys.length) {
+          finalStyles = [
+            ...finalStyles,
+            ...getDynamicSheets(getDynamicStyles(activeKeys, props, styles.dynamics))
+          ]
+        }
+      }
+
+      //
+      // finish
+      //
+      // recreate child (without style props)
+      const newProps = omit(props, [...styleKeys, ...parentStyleKeys, STYLE_KEY])
+
+      if (finalStyles.length) {
+        // apply styles
+        newProps.className = css(...finalStyles)
+
+        // keep original classNames
+        if (props && props.className && typeof props.className === 'string') {
+          newProps.className += ` ${props.className}`
+        }
+      }
+
+      return React.createElement(type, newProps, children)
     }
+
+    return Child
   }
 
   decorator.parent = styles => {
