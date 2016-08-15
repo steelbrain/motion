@@ -1,14 +1,21 @@
 /* @flow */
-import { STYLE_KEY } from './constants'
 
 export default function({ types: t }: { types: Object }) {
   const classBodyVisitor = {
-    JSXOpeningElement(path: Object, state: Object) {
-      const styleKey = state.get(STYLE_KEY)
-      path.node.attributes.push(t.jSXAttribute(
-        t.jSXIdentifier(STYLE_KEY),
-        t.jSXExpressionContainer(t.identifier(styleKey))
-      ))
+    ClassMethod(path: Object) {
+      if (path.node.key.name === 'render') {
+        path.node.body.body.unshift(
+          t.expressionStatement(
+            t.assignmentExpression('=',
+              t.memberExpression(
+                t.identifier('React'),
+                t.identifier('createElement')
+              ),
+              t.identifier('this.fancyElement.bind(this)')
+            )
+          )
+        )
+      }
     }
   }
 
@@ -27,10 +34,6 @@ export default function({ types: t }: { types: Object }) {
         })
         // -- Add a unique var to scope and all of JSX elements
         if (isMotionStyle) {
-          const id = path.scope.generateUidIdentifier(STYLE_KEY)
-          path.scope.push({ id, init: t.objectExpression([]) })
-          state.set(STYLE_KEY, id.name)
-          node.body.body.push(t.classProperty(t.identifier(STYLE_KEY), t.identifier(id.name)))
           path.traverse(classBodyVisitor, state)
         }
       }
