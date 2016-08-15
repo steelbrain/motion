@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.2.0
+
+- Motion style now uses it's own createElement rather than adding keys
+- Motion style is much faster, simpler, more correct
+
 ## 4.0.1
 
 - Fix a bug where `reload` won't work in Motion CLI
