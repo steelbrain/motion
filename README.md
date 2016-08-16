@@ -16,11 +16,6 @@
   </a>
 </p>
 
-<p align="center">
-  <a href="http://issuestats.com/github/motion/motion"><img alt="Issue Stats" src="http://issuestats.com/github/motion/motion/badge/pr?style=flat"></a>
-  <a href="http://issuestats.com/github/motion/motion"><img alt="Issue Stats" src="http://issuestats.com/github/motion/motion/badge/issue?style=flat"></a>
-</p>
-
 ----
 
 ## Installing
