@@ -16,7 +16,7 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
       return originalCreateElement(type, props, ...children)
     }
 
-    // <name $one $two /> keys
+    // <... $one $two /> keys
     const propKeys = props ? Object.keys(props) : []
     const styleKeys = filterStyleKeys(propKeys)
 
@@ -117,6 +117,7 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     //
     // finish
     //
+
     // recreate child (without style props)
     const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
 
