@@ -28,89 +28,89 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     // tag + $props
     // don't style <Components />!
     const isTag = typeof type === 'string'
-    const name = type
-    const allKeys = isTag ? [name, ...activeKeys] : activeKeys
-    let finalKeys = [...allKeys]
+    const allKeys = isTag ? [type, ...activeKeys] : activeKeys
 
-    // collect styles
-    let finalStyles = []
-
-    //
-    // theme styles
-    //
-    if (shouldTheme) {
-      const themeKeys = prop => allKeys.map(k => `${prop}-${k}`)
-      const addTheme = (keys, prop) => [...keys, ...themeKeys(prop)]
-
-      // direct
-      const themes = this.constructor.theme
-      const themeProps = themes && Object.keys(themes)
-
-      if (themes && themeProps.length) {
-        themeProps.forEach(prop => {
-          if (this.props[prop] === true) {
-            // static theme
-            finalKeys = addTheme(finalKeys, prop)
-          } else if (
-            typeof this.props[prop] !== 'undefined' &&
-            typeof styles.theme[prop] === 'function'
-          ) {
-            // dynamic themes
-            const dynStyles = styles.theme[prop](this.props[prop])
-            const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
-
-            if (dynKeys.length) {
-              const activeStyles = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
-              finalStyles = [...finalStyles, ...getDynamicSheets(activeStyles)]
-            }
-          }
-        })
-      }
-    }
+    // collect styles, in order
+    // { propKey: [styles] }
+    const finalStyles = allKeys.reduce((acc, cur) => ({ ...acc, [cur]: [] }), { parents: [] })
 
     //
-    // parent styles
+    // 1. parent styles
     //
     let parentStyleKeys = []
     if (parentStyles) {
       parentStyleKeys = filterParentStyleKeys(propKeys)
 
       if (parentStyleKeys.length) {
-        const keys = parentStyleKeys.map(k => k.replace('$$', ''))
+        parentStyleKeys = parentStyleKeys.map(k => k.replace('$$', ''))
 
         // dynamic
         if (parentStyles.dynamics) {
-          finalStyles = [
-            ...finalStyles,
-            ...getDynamicSheets(getDynamicStyles(keys, props, parentStyles.dynamics, '$$'))
-          ]
+          const dynamics = getDynamicSheets(getDynamicStyles(parentStyleKeys, props, parentStyles.dynamics, '$$'))
+          dynamics.forEach(sheet => {
+            finalStyles.parents.push(sheet)
+          })
         }
 
         // static
         if (parentStyles.statics) {
-          finalStyles = [
-            ...finalStyles,
-            ...keys.map(k => parentStyles.statics[k])
-          ]
+          parentStyleKeys.forEach(key => {
+            finalStyles.parents.push(parentStyles.statics[key])
+          })
         }
       }
     }
 
     //
-    // own styles
+    // 2. own styles
     //
     // static
     if (hasOwnStyles) {
       if (styles.statics) {
-        finalStyles = [...finalStyles, ...finalKeys.map(i => styles.statics[i])]
+        allKeys.forEach(key => {
+          finalStyles[key].push(styles.statics[key])
+        })
       }
 
       // dynamic
       if (styles.dynamics && activeKeys.length) {
-        finalStyles = [
-          ...finalStyles,
-          ...getDynamicSheets(getDynamicStyles(activeKeys, props, styles.dynamics))
-        ]
+        const dynamics = getDynamicSheets(getDynamicStyles(activeKeys, props, styles.dynamics))
+        dynamics.forEach(sheet => {
+          finalStyles[sheet.key].push(sheet)
+        })
+      }
+    }
+
+    //
+    // 3. theme styles
+    //
+    if (shouldTheme) {
+      // direct
+      const themes = this.constructor.theme
+      const themeProps = themes && Object.keys(themes)
+
+      if (themes && themeProps.length) {
+        themeProps.forEach(prop => {
+          // static theme
+          if (this.props[prop] === true) {
+            allKeys.forEach(key => {
+              finalStyles[key].push(styles.statics[`${prop}-${key}`])
+            })
+          }
+          // dynamic themes
+          else if (typeof this.props[prop] !== 'undefined' && typeof styles.theme[prop] === 'function') {
+            const dynStyles = styles.theme[prop](this.props[prop])
+            const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
+
+            if (dynKeys.length) {
+              const activeDynamics = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
+              const dynamics = getDynamicSheets(activeDynamics)
+              dynamics.forEach(sheet => {
+                finalStyles[sheet.key].push(sheet)
+              })
+            }
+          }
+        })
       }
     }
 
@@ -120,9 +120,12 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     // recreate child (without style props)
     const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
 
-    if (finalStyles.length) {
+    const toArray = obj => Object.keys(obj).reduce((acc, cur) => [...acc, ...obj[cur]], [])
+    const activeStyles = toArray(finalStyles)
+
+    if (activeStyles.length) {
       // apply styles
-      newProps.className = css(...finalStyles)
+      newProps.className = css(...activeStyles)
 
       // keep original classNames
       if (props && props.className && typeof props.className === 'string') {

@@ -10,16 +10,22 @@ const defaultOpts = {
 
 module.exports = function motionStyle(opts = defaultOpts) {
   // option-based helpers
-  const getDynamicStyles = (active: Array, props: Object, styles: Object, propPrefix = '$') => {
-    const dynamicKeys = active.filter(k => styles[k] && typeof styles[k] === 'function')
-    const dynamicsReduce = (acc, k) => ({ ...acc, [k]: styles[k](props[`${propPrefix}${k}`]) })
-    const dynamics = dynamicKeys.reduce(dynamicsReduce, {})
+  const getDynamicStyles = (activeKeys: Array, props: Object, styles: Object, propPrefix = '$') => {
+    const dynamicKeys = activeKeys
+      .filter(k => styles[k] && typeof styles[k] === 'function')
+
+    const dynamics = dynamicKeys
+      .reduce((acc, key) => ({
+        ...acc,
+        [key]: styles[key](props[`${propPrefix}${key}`])
+      }), {})
+
     return dynamics
   }
 
   const getDynamicSheets = dynamics => {
     const sheet = StyleSheet.create(applyNiceStyles(dynamics))
-    return Object.keys(dynamics).map(k => sheet[k])
+    return Object.keys(dynamics).map(key => ({ ...sheet[key], isDynamic: true, key }))
   }
 
   const getStyles = (userStyles, theme) => {
