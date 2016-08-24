@@ -123,7 +123,6 @@ Helpful for maintaining a common set of styles for every component. Using `$$` t
     flexFlow: 'row',
   },
 })
-@style
 class extends React.Component {
   render() {
     return (
