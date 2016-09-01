@@ -11,32 +11,32 @@
     "motion": "./lib/bin/index.js"
   },
   "dependencies": {
-    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015": "^6.14.0",
     "babel-preset-es2015-sane": "^6.6.0",
     "babel-preset-motion": "^4.0.1",
-    "babel-pundle": "^1.0.0",
+    "babel-pundle": "^1.1.3",
     "babel-regenerator-runtime": "^6.5.0",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "cool-trim": "^1.1.0",
-    "lodash.uniq": "^4.4.0",
+    "lodash.uniq": "^4.5.0",
     "mkdirp": "^0.5.1",
     "motion-style": "^4.2.1",
     "open": "0.0.5",
-    "ora": "^0.2.3",
+    "ora": "^0.3.0",
     "process-bootstrap": "^1.0.0",
-    "pundle": "^1.0.2",
-    "pundle-dev": "^1.0.2",
-    "pundle-npm-installer": "^1.0.0",
+    "pundle": "^1.1.6",
+    "pundle-dev": "^1.1.6",
+    "pundle-npm-installer": "^1.1.3",
     "sb-copy": "^1.0.1",
     "sb-event-kit": "^2.0.0",
-    "sb-exec": "^2.0.5",
-    "sb-promisify": "^1.3.0",
+    "sb-exec": "^3.0.1",
+    "sb-promisify": "^2.0.1",
     "send": "^0.14.1",
-    "vorpal": "^1.11.2"
+    "vorpal": "^1.11.4"
   },
   "devDependencies": {
-    "jasmine-fix": "^1.0.0",
+    "jasmine-fix": "^1.0.1",
     "loophole": "^1.1.0"
   }
 }
