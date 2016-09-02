@@ -3,7 +3,7 @@
 export const MESSAGES = {
   ENOENT: 'File or directory not found',
   NOT_MOTION_APP: 'Unable to run, directory is not a motion app',
-  ALREADY_EXECUTING: 'Another instance of motion is already running that directory in the same process',
+  INVALID_MANIFEST: "There are syntax errors in your '.motion.js' file",
   ALREADY_MOTION_APP: 'Directory is already a motion app'
 }
 

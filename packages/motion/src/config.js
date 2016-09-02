@@ -3,6 +3,7 @@
 import Path from 'path'
 import * as FS from './fs'
 import * as Helpers from './helpers'
+import { MotionError, ERROR_CODE } from './error'
 import type { Config as ConfigStruct } from './types'
 
 export default class Config {
@@ -42,7 +43,11 @@ export default class Config {
     const configPath = Path.join(projectPath, '.motion.json')
     try {
       Object.assign(config, await FS.readJSON(configPath))
-    } catch (_) { /* No Op */ }
+    } catch (error) {
+      if (error && error.name === 'SyntaxError') {
+        throw new MotionError(ERROR_CODE.INVALID_MANIFEST)
+      }
+    }
     return new Config(config, configPath, projectPath)
   }
 }
