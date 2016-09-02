@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.2.1
+## 4.2.2
 
 - Fix a bug where error would be suppressed if `.motion.json` contains syntax errors
 - Upgrade `pundle` version to include a bugfix where pundle would be stuck in loop if there are errors on boot
