@@ -7,7 +7,6 @@ import { it } from 'jasmine-fix'
 import React from 'react'
 import { mount } from 'enzyme'
 import BasicComponent from './basicComponent'
-import console from 'console'
 
 @style({
   mergeStyleProp: true,
@@ -47,7 +46,7 @@ class StyledComponent extends React.Component {
   }
 }
 
-@style() class SimpleComponent extends React.Component {
+@style() class SimpleComponent extends React.Component { // eslint-disable-line react/no-multi-comp
   static style = {
     h1: {
       background: 'red'
