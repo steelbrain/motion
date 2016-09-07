@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0
+
+- motion-style => gloss
+
 ## 4.0.1
 
 - Fix a bug where `reload` won't work in Motion CLI

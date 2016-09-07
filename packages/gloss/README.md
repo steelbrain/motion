@@ -1,11 +1,11 @@
-# motion-style
+# gloss
 
 HOC for styling React components. Inline styles for all.
 
 Combines a few things to make your life easy: [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction, [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply.
 
 ```jsx
-import style from 'motion-style'
+import style from 'gloss'
 
 @style() class extends Component {
   render() {
