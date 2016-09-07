@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.3
+
+- motion-style => gloss
+
 ## 4.2.2
 
 - Fix a bug where error would be suppressed if `.motion.json` contains syntax errors
