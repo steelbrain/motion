@@ -1,4 +1,4 @@
-# motion-style
+# gloss
 
 HOC for styling React components. Inline styles for all.
 
@@ -6,7 +6,7 @@ Combines a few things to make your life easy: [Aphrodite](https://github.com/Kha
 
 
 ```jsx
-import style from 'motion-style'
+import style from 'gloss'
 
 const styler = style({ theme: true })
 

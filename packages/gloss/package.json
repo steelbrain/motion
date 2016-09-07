@@ -1,10 +1,10 @@
 {
-  "name": "motion-style",
+  "name": "gloss",
   "version": "4.2.2",
-  "description": "Higher order component enabling style property on components",
+  "description": "Higher order component for nicer component styles",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "apm test"
   },
   "repository": {
     "type": "git",
