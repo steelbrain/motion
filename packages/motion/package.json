@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "motion - moving development forward",
   "main": "lib/index.js",
   "scripts": {},
