@@ -45,6 +45,16 @@ module.exports = function motionStyle(opts = defaultOpts) {
     // add to Child.prototype, so the decorated class can access: this.fancyElement
     const styles = getStyles(Child.style, opts.themes ? Child.theme : null)
     Child.prototype.fancyElement = fancyElementFactory(Child, parentStyles, styles, opts, getDynamicStyles, getDynamicSheets)
+
+    // allows this.addTheme('theme') from within a component
+    const setTheme = val => function(...names) {
+      for (const name of names) {
+        this.__activeThemes = this.__activeThemes || {}
+        this.__activeThemes[name] = val
+      }
+    }
+    Child.prototype.addTheme = setTheme(true)
+    Child.prototype.removeTheme = setTheme(false)
     return Child
   }
 
