@@ -39,9 +39,8 @@ const styler = style({ theme: true })
 
 install
 ---
-Comes with motion cli out of the box. It comes with a babel-transform that allows it to run, available from motion-style/transform.
+Add babel transform:
 
-To add to babel:
 ```js
 {
   "babel": {
