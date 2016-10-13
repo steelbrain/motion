@@ -1,8 +1,12 @@
-# gloss
+# gloss 💅
 
-HOC for styling React components. Inline styles for all.
+HOC for making style a first class citizen of components. Inline styles for all.
 
-Combines a few things to make your life easy: [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction, [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply.
+Combines a few things:
+
+- [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction
+- [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply
+- it's own theme engine
 
 
 ```js
@@ -42,7 +46,7 @@ To add to babel:
 {
   "babel": {
     "plugins": [
-      ["motion-style/transform", { "decoratorName": "style" }]
+      ["gloss/transform", { "decoratorName": "style" }]
     ]
   }
 }
@@ -112,7 +116,7 @@ Use themes and themeProps to easily theme an entire component a different way. `
 React.render(<Title big tint="yellow" />, document.getElementById('app'))
 ```
 
-parent styles
+base styles
 ---
 
 Helpful for maintaining a common set of styles for every component. Using `$$` to access keeps things explicit.
