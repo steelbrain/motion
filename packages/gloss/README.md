@@ -5,8 +5,9 @@ HOC for making style a first class citizen of components. Inline styles for all.
 Combines a few things:
 
 - [Aphrodite](https://github.com/Khan/aphrodite) for stylesheet extraction
-- [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS style syntax, themes, and a React wrapper that makes them easy to apply
+- [motion-nice-styles](https://github.com/motion/motion/tree/master/packages/nice-styles) for powerful JS syntax for styles
 - it's own theme engine
+- $style props
 
 
 ```js
