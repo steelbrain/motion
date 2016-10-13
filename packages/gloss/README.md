@@ -68,7 +68,8 @@ features
 themes
 ---
 
-Use themes and themeProps to easily theme an entire component a different way. `themeProps` will accept boolean props.
+Use themes for really easy variant looks for components. Gives you complete control to
+change multiple elements with a single prop.
 
 ```js
 @style class Title extends React.Component {
@@ -144,3 +145,15 @@ class extends React.Component {
   }
 }
 ```
+
+risks
+---
+
+Gloss is used in production for a very large app we're building. Technically, it's fast
+and full featured. We think there are a few more features that would really make it shine,
+but we've held off promoting it further until we get a chance to integrate those well and
+round out the branding/documentation.
+
+Until then, it won't have the community support of other libraries. That said, we do
+have the name `gloss` now and are very close to ready. The library itself is not very large,
+so would be easy to maintain or fork.
