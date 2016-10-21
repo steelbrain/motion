@@ -34,6 +34,7 @@ export default class Config {
         plugins: ['motion-style/transform'],
         presets: ['babel-preset-motion']
       },
+      pathType: 'filePath',
       webServerPort: Helpers.getRandomNumber(8000, 15000),
       saveNpmModules: true,
       bundleDirectory: '.',

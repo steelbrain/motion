@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.3.0
+
+- Make `pathType` in motion a configuration
+
 ## 4.2.3
 
 - motion-style => gloss

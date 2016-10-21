@@ -82,7 +82,7 @@ export async function getPundleInstance(
     ['index.js']
   const pundleConfig = {
     entry: pundleEntry,
-    pathType: development ? 'filePath' : 'number',
+    pathType: config.pathType === 'number' ? 'number' : 'filePath',
     rootDirectory: config.bundleDirectory,
     replaceVariables: {
       'process.env.NODE_ENV': development ? 'development' : 'production'

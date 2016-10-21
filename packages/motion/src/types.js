@@ -5,6 +5,7 @@ export type Config = {
     plugins: Array<string | [string, Object]>,
     presets: Array<string>
   },
+  pathType: 'filePath' | 'number',
   webServerPort: number,
   saveNpmModules: boolean,
   bundleDirectory: string,
