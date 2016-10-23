@@ -37,27 +37,24 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     //
     // 1. parent styles
     //
-    let parentStyleKeys = []
-    if (parentStyles) {
-      parentStyleKeys = filterParentStyleKeys(propKeys)
+    const parentStyleKeys = filterParentStyleKeys(propKeys)
 
-      if (parentStyleKeys.length) {
-        parentStyleKeys = parentStyleKeys.map(k => k.replace('$$', ''))
+    if (parentStyles && parentStyleKeys.length) {
+      const parentStyleNames = parentStyleKeys.map(k => k.replace('$$', ''))
 
-        // dynamic
-        if (parentStyles.dynamics) {
-          const dynamics = getDynamicSheets(getDynamicStyles(parentStyleKeys, props, parentStyles.dynamics, '$$'))
-          dynamics.forEach(sheet => {
-            finalStyles.parents.push(sheet)
-          })
-        }
+      // dynamic
+      if (parentStyles.dynamics) {
+        const dynamics = getDynamicSheets(getDynamicStyles(parentStyleNames, props, parentStyles.dynamics, '$$'))
+        dynamics.forEach(sheet => {
+          finalStyles.parents.push(sheet)
+        })
+      }
 
-        // static
-        if (parentStyles.statics) {
-          parentStyleKeys.forEach(key => {
-            finalStyles.parents.push(parentStyles.statics[key])
-          })
-        }
+      // static
+      if (parentStyles.statics) {
+        parentStyleNames.forEach(key => {
+          finalStyles.parents.push(parentStyles.statics[key])
+        })
       }
     }
 
@@ -119,7 +116,6 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
 
     // recreate child (without style props)
     const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
-
     const toArray = obj => Object.keys(obj).reduce((acc, cur) => [...acc, ...obj[cur]], [])
     const activeStyles = toArray(finalStyles)
 
