@@ -45,16 +45,16 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
       // dynamic
       if (parentStyles.dynamics) {
         const dynamics = getDynamicSheets(getDynamicStyles(parentStyleNames, props, parentStyles.dynamics, '$$'))
-        dynamics.forEach(sheet => {
+        for (const sheet of dynamics) {
           finalStyles.parents.push(sheet)
-        })
+        }
       }
 
       // static
       if (parentStyles.statics) {
-        parentStyleNames.forEach(key => {
+        for (const key of parentStyleNames) {
           finalStyles.parents.push(parentStyles.statics[key])
-        })
+        }
       }
     }
 
@@ -64,17 +64,17 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     // static
     if (hasOwnStyles) {
       if (styles.statics) {
-        allKeys.forEach(key => {
+        for (const key of allKeys) {
           finalStyles[key].push(styles.statics[key])
-        })
+        }
       }
 
       // dynamic
       if (styles.dynamics && activeKeys.length) {
         const dynamics = getDynamicSheets(getDynamicStyles(activeKeys, props, styles.dynamics))
-        dynamics.forEach(sheet => {
+        for (const sheet of dynamics) {
           finalStyles[sheet.key].push(sheet)
-        })
+        }
       }
     }
 
@@ -87,12 +87,12 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
       const themeProps = themes && Object.keys(themes)
 
       if (themes && themeProps.length) {
-        themeProps.forEach(prop => {
+        for (const prop of themeProps) {
           // static theme
           if (this.props[prop] === true) {
-            allKeys.forEach(key => {
+            for (const key of allKeys) {
               finalStyles[key].push(styles.statics[`${prop}-${key}`])
-            })
+            }
           } else if (typeof this.props[prop] !== 'undefined' && typeof styles.theme[prop] === 'function') {
             // dynamic themes
             const dynStyles = styles.theme[prop](this.props[prop])
@@ -101,12 +101,17 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
             if (dynKeys.length) {
               const activeDynamics = dynKeys.reduce((acc, cur) => ({ ...acc, [cur]: dynStyles[cur] }), {})
               const dynamics = getDynamicSheets(activeDynamics)
-              dynamics.forEach(sheet => {
+              for (const sheet of dynamics) {
                 finalStyles[sheet.key].push(sheet)
-              })
+              }
             }
           }
-        })
+          // media queries as themes
+          // else if (prop[0] === '@') {
+          //   for (const key of themeProps[prop]) {
+          //   }
+          // }
+        }
       }
     }
 
