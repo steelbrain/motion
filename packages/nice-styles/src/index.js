@@ -11,14 +11,30 @@ const TRANSFORM_KEYS_MAP = {
   z: 'translateZ'
 }
 
-function processTransform(transform: Transform): string {
+function isFloat(n) {
+  return n === +n && n !== (n | 0)
+}
+
+function formattedValue(key, value) {
+  if (isFloat(value)) {
+    return value
+  }
+
+  if (key === 'scale') {
+    return value
+  }
+
+  return typeof value === 'number' ? `${value}px` : value
+}
+
+function processObject(transform: Transform): string {
   const toReturn = []
   for (const key in transform) {
     if (!transform.hasOwnProperty(key)) {
       continue
     }
     let value = transform[key]
-    value = typeof value === 'number' ? `${value}px` : value
+    value = formattedValue(key, value)
     toReturn.push(`${TRANSFORM_KEYS_MAP[key] || key}(${value})`)
   }
   return toReturn.join(' ')
@@ -36,7 +52,15 @@ function getCSSVal(val) {
 
 function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
-    if (isCSSAble(style)) return getCSSVal(style)
+    // recurse
+    if (Array.isArray(style)) {
+      return processArray(style)
+    }
+    // toCSS support
+    if (isCSSAble(style)) {
+      return getCSSVal(style)
+    }
+
     return typeof style === 'number' ? `${style}px` : style
   }).join(' ')
 }
@@ -63,8 +87,8 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       toReturn[key] = objectToColor(value)
       continue
     }
-    if (key === 'transform') {
-      toReturn[key] = processTransform(value)
+    if (key === 'transform' || key === 'filter') {
+      toReturn[key] = processObject(value)
       continue
     }
     // recurse into object (psuedo or media query)
