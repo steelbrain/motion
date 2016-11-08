@@ -20,7 +20,11 @@ function formattedValue(key, value) {
     return value
   }
 
-  if (key === 'scale') {
+  if (
+    key === 'scale' ||
+    key === 'grayscale' ||
+    key === 'brightness'
+  ) {
     return value
   }
 
