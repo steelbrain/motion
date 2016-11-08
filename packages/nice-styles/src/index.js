@@ -12,6 +12,14 @@ const TRANSFORM_KEYS_MAP = {
   dropShadow: 'drop-shadow'
 }
 
+function getFalsyValue(key, value) {
+  switch(key) {
+    case 'background':
+    case 'border':
+      return 'none'
+  }
+}
+
 function isFloat(n) {
   return n === +n && n !== (n | 0)
 }
@@ -90,6 +98,10 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
     }
     if (typeof value === 'string' || typeof value === 'number') {
       toReturn[key] = value
+      continue
+    }
+    if (value === false) {
+      toReturn[key] = getFalsyValue(key, value)
       continue
     }
     if (isCSSAble(value)) {
