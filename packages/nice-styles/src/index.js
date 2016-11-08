@@ -8,40 +8,12 @@ const COLOR_KEYS = new Set(['background'])
 const TRANSFORM_KEYS_MAP = {
   x: 'translateX',
   y: 'translateY',
-  z: 'translateZ'
+  z: 'translateZ',
+  dropShadow: 'drop-shadow'
 }
 
 function isFloat(n) {
   return n === +n && n !== (n | 0)
-}
-
-function formattedValue(key, value) {
-  if (isFloat(value)) {
-    return value
-  }
-
-  if (
-    key === 'scale' ||
-    key === 'grayscale' ||
-    key === 'brightness'
-  ) {
-    return value
-  }
-
-  return typeof value === 'number' ? `${value}px` : value
-}
-
-function processObject(transform: Transform): string {
-  const toReturn = []
-  for (const key in transform) {
-    if (!transform.hasOwnProperty(key)) {
-      continue
-    }
-    let value = transform[key]
-    value = formattedValue(key, value)
-    toReturn.push(`${TRANSFORM_KEYS_MAP[key] || key}(${value})`)
-  }
-  return toReturn.join(' ')
 }
 
 function isCSSAble(val) {
@@ -58,7 +30,7 @@ function processArray(array: Array<number | string>): string {
   return array.map(function(style) {
     // recurse
     if (Array.isArray(style)) {
-      return processArray(style)
+      return objectToColor(style)
     }
     // toCSS support
     if (isCSSAble(style)) {
@@ -67,6 +39,43 @@ function processArray(array: Array<number | string>): string {
 
     return typeof style === 'number' ? `${style}px` : style
   }).join(' ')
+}
+
+function objectValue(key, value) {
+  if (isFloat(value)) {
+    return value
+  }
+
+  if (
+    key === 'scale' ||
+    key === 'grayscale' ||
+    key === 'brightness'
+  ) {
+    return value
+  }
+
+  if (typeof value === 'number') {
+    return `${value}px`
+  }
+
+  if (Array.isArray(value)) {
+    return processArray(value)
+  }
+
+  return value
+}
+
+function processObject(transform: Transform): string {
+  const toReturn = []
+  for (const key in transform) {
+    if (!transform.hasOwnProperty(key)) {
+      continue
+    }
+    let value = transform[key]
+    value = objectValue(key, value)
+    toReturn.push(`${TRANSFORM_KEYS_MAP[key] || key}(${value})`)
+  }
+  return toReturn.join(' ')
 }
 
 function processStyles(styles: Object, includeEmpty: boolean = false): Object {
