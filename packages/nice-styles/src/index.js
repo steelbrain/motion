@@ -26,7 +26,12 @@ function getCSSVal(val) {
   return val.css ? val.css() : val.toCSS()
 }
 
-function processArray(array: Array<number | string>): string {
+function processArray(key: string, array: Array<number | string>): string {
+  // solid default option for borders
+  if (key === 'border' && array.length === 2) {
+    array.push('solid')
+  }
+
   return array.map(function(style) {
     // recurse
     if (Array.isArray(style)) {
@@ -59,7 +64,7 @@ function objectValue(key, value) {
   }
 
   if (Array.isArray(value)) {
-    return processArray(value)
+    return processArray(key, value)
   }
 
   return value
@@ -114,7 +119,7 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       continue
     }
     if (Array.isArray(value)) {
-      toReturn[key] = processArray(value)
+      toReturn[key] = processArray(key, value)
       continue
     }
     throw new Error(`Invalid style value for ${key}`)
