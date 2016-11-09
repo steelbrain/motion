@@ -28,7 +28,7 @@ function getCSSVal(val) {
 
 function processArray(key: string, array: Array<number | string>): string {
   // solid default option for borders
-  if (key === 'border' && array.length === 2) {
+  if (key.indexOf('border') === 0 && array.length === 2) {
     array.push('solid')
   }
 
