@@ -139,6 +139,9 @@ change multiple elements with a single prop.
       transform: {
         rotate: '45deg',
       },
+      filter: {
+        grayscale: 0,
+      }
     },
     h1: {
       fontSize: 22,
