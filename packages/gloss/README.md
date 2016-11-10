@@ -9,7 +9,8 @@ Combines a few things:
 - it's own theme engine
 - $style props
 
-Syntax:
+example
+---
 
 ```js
 import style from 'gloss'
@@ -39,7 +40,8 @@ const styler = style({ theme: true })
 }
 ```
 
-Example of making a simple styled component:
+better example
+---
 
 ```js
 import gloss from 'gloss'
