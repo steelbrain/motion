@@ -26,7 +26,7 @@ export default function({ types: t }: { types: Object }) {
         if (!node.decorators || !node.decorators.length) {
           return
         }
-        console.log('test')
+
         // -- Validate if class is what we're looking for
         // Default to @style
         const decoratorName = state.opts.decoratorName || 'style'
