@@ -38,13 +38,13 @@ export default function({ types: t }: { types: Object }) {
             return true
           }
           if (
-            t.isCallExpression(item.expression) && t.isMemberExpression(item.expression.callee) &&
+            item.expression.callee && t.isMemberExpression(item.expression.callee) &&
             item.expression.callee.object.name === decoratorName
           ) {
             return true
           }
           if (
-            t.isMemberExpression(item.expression) && item.expression.object.name === decoratorName
+            item.expression.object && item.expression.object.name === decoratorName
           ) {
             return true
           }
