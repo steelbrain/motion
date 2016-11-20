@@ -42,6 +42,13 @@ export default function({ types: t }: { types: Object }) {
           ) {
             return true
           }
+          if (
+            t.isMemberExpression(item.expression) && item.expression.object.name === decoratorName
+          ) {
+            return true
+          }
+
+          return false
         })
         // -- Add a unique var to scope and all of JSX elements
         if (isMotionStyle) {
