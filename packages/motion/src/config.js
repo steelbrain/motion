@@ -39,7 +39,6 @@ export default class Config {
       saveNpmModules: true,
       bundleDirectory: '.',
       publicDirectory: './public',
-      includePolyfills: true
     }
     const configPath = Path.join(projectPath, '.motion.json')
     try {

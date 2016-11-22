@@ -1,10 +1,12 @@
 /* @flow */
 
 import Path from 'path'
-import send from 'send'
 import chalk from 'chalk'
 import Pundle from 'pundle'
-import PundleDev from 'pundle-dev'
+import { createPlugin } from 'pundle-api'
+import { createServer } from 'pundle-dev'
+import { CompositeDisposable } from 'sb-event-kit'
+
 import type CLI from './cli'
 import type { Config } from './types'
 
@@ -44,7 +46,7 @@ export function normalizeConfig(projectPath: string, givenConfig: Config): Confi
   }
   if (config.babel.presets.indexOf('babel-preset-motion') !== -1) {
     config.babel.presets.splice(config.babel.presets.indexOf('babel-preset-motion'), 1,
-      require.resolve(config.includePolyfills ? 'babel-preset-es2015' : 'babel-preset-es2015-sane'),
+      require.resolve('babel-preset-es2015-sane'),
       require.resolve('babel-preset-motion'))
   }
   config.babel.plugins = config.babel.plugins.map(function(givenEntry) {
@@ -74,94 +76,69 @@ export async function getPundleInstance(
   development: boolean,
   givenConfig: Config,
   errorCallback: Function
-): Object {
+): Promise<{ pundle: Object, subscription: CompositeDisposable }> {
   const config = normalizeConfig(projectPath, givenConfig)
-  const pundleEntry = config.includePolyfills &&
-    Array.isArray(givenConfig.babel.presets) && givenConfig.babel.presets.indexOf('babel-preset-motion') !== -1 ?
-    [require.resolve('babel-regenerator-runtime'), 'index.js'] :
-    ['index.js']
-  const pundleConfig = {
-    entry: pundleEntry,
-    pathType: config.pathType === 'number' ? 'number' : 'filePath',
-    rootDirectory: config.bundleDirectory,
-    replaceVariables: {
-      'process.env.NODE_ENV': development ? 'development' : 'production'
-    }
-  }
+  const pundleEntry = ['./']
 
-  const plugins = [
-    [require.resolve('pundle-npm-installer'), {
-      save: config.saveNpmModules,
-      rootDirectory: config.bundleDirectory,
-      beforeInstall(name) {
-        if (terminal) {
-          const message = `Installing ${name}`
-          cli.addSpinner(message)
-        }
+  const subscription = new CompositeDisposable()
+  const pundle = await Pundle.create({
+    entry: pundleEntry,
+    presets: [[require.resolve('pundle-preset-default'), {
+      generator: {
+        pathType: config.pathType === 'number' ? 'number' : 'filePath',
       },
-      afterInstall(name, error) {
-        if (terminal) {
-          const message = `Installing ${name}`
-          cli.removeSpinner(message)
-          if (error) {
-            cli.log(`Install ${name} ${X}`)
-            cli.log(error)
-          } else {
-            cli.log(`Install ${name} ${TICK}`)
+    }]],
+    components: [
+      [require.resolve('pundle-plugin-npm-installer'), {
+        save: config.saveNpmModules,
+        beforeInstall(name) {
+          if (terminal) {
+            const message = `Installing ${name}`
+            cli.addSpinner(message)
           }
-        } else if (error) {
-          errorCallback(error)
+        },
+        afterInstall(name, error) {
+          if (terminal) {
+            const message = `Installing ${name}`
+            cli.removeSpinner(message)
+            console.log('')
+            // ^ To insert a new line to allow default logger of Pundle to output
+          } else if (error) {
+            errorCallback(error)
+          }
+        },
+        include: ['*.js'],
+      }],
+      [require.resolve('pundle-transformer-babel'), {
+        babelPath: require.resolve('babel-core'),
+        config: config.babel,
+        include: ['*.js'],
+      }],
+      [createPlugin(function(_: Object, file: Object) {
+        if (development && file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) {
+          cli.log(`${chalk.dim(Path.join('$root', Path.relative(projectPath, file.filePath)))} ${chalk.green(TICK)}`)
         }
-      }
-    }],
-    [require.resolve('babel-pundle'), { config: config.babel }]
-  ]
+      }), {}]
+    ],
+    rootDirectory: projectPath,
+    replaceVariables: {
+      'process.env.NODE_ENV': JSON.stringify(development ? 'development' : 'production'),
+    },
+  })
+  subscription.add(pundle)
 
   if (!development) {
-    const pundle = new Pundle(pundleConfig)
-    await pundle.loadPlugins(plugins)
-    return pundle
+    return { pundle, subscription }
   }
-  const pundle = new PundleDev({
-    server: {
-      hmr: true,
-      port: config.webServerPort,
-      hmrPath: '/_/bundle_hmr',
-      bundlePath: '/_/bundle.js',
-      sourceRoot: config.publicDirectory,
-      sourceMapPath: '/_/bundle.js.map',
-      error(error) {
-        errorCallback(error)
-      }
-    },
-    pundle: pundleConfig,
-    watcher: { },
-    generator: {
-      wrapper: 'hmr',
-      sourceMap: true
-    }
+  const server = await createServer(pundle, {
+    port: config.webServerPort,
+    directory: config.publicDirectory,
+    hmrPath: '/_/bundle_hmr',
+    bundlePath: '/_/bundle.js',
+    publicPath: '/',
+    sourceMapPath: '/_/bundle.js.map',
   })
-  await pundle.pundle.loadPlugins(plugins)
-  pundle.server.use('*', function serveRequest(req, res, next, error = false) {
-    if (['/_/bundle.js', '/_/bundle.js.map', '/_/bundle_hmr'].indexOf(req.baseUrl) !== -1) {
-      next()
-      return
-    }
-    send(req, req.baseUrl, { root: config.publicDirectory, index: 'index.html' })
-      .on('error', function() {
-        if (error) {
-          next()
-          return
-        }
-        req.baseUrl = '/index.html'
-        serveRequest(req, res, next, true)
-      })
-      .on('directory', () => next()).pipe(res)
-  })
-  pundle.pundle.onDidProcess(function({ filePath }) {
-    if (filePath.indexOf('$root') === 0 && filePath.indexOf('node_modules') === -1 && filePath.indexOf('../') === -1) {
-      cli.log(`${chalk.dim(filePath)} ${chalk.green(TICK)}`)
-    }
-  })
-  return pundle
+  subscription.add(server)
+
+  return { pundle, subscription }
 }

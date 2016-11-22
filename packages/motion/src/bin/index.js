@@ -35,6 +35,7 @@ commander
   .description('Build dist files of the current motion app')
   .action(function() {
     getMotion(currentDirectory, function(motion) {
+      // $FlowIgnore: Flow doesn't recognize this prop
       return motion.build(process.stdout.isTTY).then(function() {
         console.log(coolTrim`
           ${chalk.green('App built successfully')}
@@ -48,6 +49,7 @@ commander
   .command('watch', null, { isDefault: true })
   .action(function() {
     getMotion(currentDirectory, function(motion) {
+      // $FlowIgnore: Flow doesn't recognize this prop
       return motion.watch(process.stdout.isTTY)
     })
   })
@@ -71,6 +73,7 @@ commander.parse(process.argv)
 if (!commander.args.length) {
   // Execute default watch command
   getMotion(currentDirectory, function(motion) {
+    // $FlowIgnore: Flow doesn't recognize this prop
     return motion.watch(process.stdout.isTTY)
   })
 }
