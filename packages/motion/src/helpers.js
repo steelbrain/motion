@@ -137,6 +137,7 @@ export async function getPundleInstance(
     bundlePath: '/_/bundle.js',
     publicPath: '/',
     sourceMapPath: '/_/bundle.js.map',
+    redirectNotFoundToIndex: true,
   })
   subscription.add(server)
 
