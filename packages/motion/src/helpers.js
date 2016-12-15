@@ -87,6 +87,9 @@ export async function getPundleInstance(
       generator: {
         pathType: config.pathType === 'number' ? 'number' : 'filePath',
       },
+      reporter: {
+        log: o => cli.log(o),
+      },
     }]],
     components: [
       [require.resolve('pundle-plugin-npm-installer'), {
@@ -101,7 +104,6 @@ export async function getPundleInstance(
           if (terminal) {
             const message = `Installing ${name}`
             cli.removeSpinner(message)
-            console.log('')
             // ^ To insert a new line to allow default logger of Pundle to output
           } else if (error) {
             errorCallback(error)
