@@ -67,7 +67,7 @@ class Motion {
       if (error) {
         throw error
       }
-      const generated = await pundle.generate({
+      const generated = await pundle.generate(null, {
         sourceMap: false,
       })
       await FS.mkdir(Path.join(this.config.getPublicDirectory(), '_'))
