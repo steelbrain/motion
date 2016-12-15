@@ -112,7 +112,7 @@ export async function getPundleInstance(
       [require.resolve('pundle-transformer-babel'), {
         babelPath: require.resolve('babel-core'),
         config: config.babel,
-        include: ['*.js'],
+        extensions: ['js'],
       }],
       [createPlugin(function(_: Object, file: Object) {
         if (development && file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) {
