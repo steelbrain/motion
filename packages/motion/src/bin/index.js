@@ -5,20 +5,16 @@ require('process-bootstrap')('motion')
 
 import Path from 'path'
 import chalk from 'chalk'
+import command from 'sb-command'
 import coolTrim from 'cool-trim'
-import commander from 'commander'
 import manifest from '../../package.json'
 import { getMotion } from './helpers'
 
 const currentDirectory = process.cwd()
 
-commander
-  .version(manifest.version)
-
-commander
-  .command('new [name]')
-  .description('Create a new motion app with the given name')
-  .action(function(name) {
+command
+  .version(`Motion v${manifest.version}`)
+  .command('new <name>', 'Create a new motion app with the given name', function(options, name) {
     getMotion(Path.join(currentDirectory, name), function(motion) {
       return motion.init().then(function() {
         console.log(coolTrim`
@@ -30,10 +26,7 @@ commander
       })
     })
   })
-commander
-  .command('build')
-  .description('Build dist files of the current motion app')
-  .action(function() {
+  .command('build', 'Build dist files of the current motion app', function() {
     getMotion(currentDirectory, function(motion) {
       // $FlowIgnore: Flow doesn't recognize this prop
       return motion.build(process.stdout.isTTY).then(function() {
@@ -45,18 +38,13 @@ commander
       })
     })
   })
-commander
-  .command('watch', null, { isDefault: true })
-  .action(function() {
+  .command('watch', 'Make the Motion CLI run Dev server and watch the files for changes', function() {
     getMotion(currentDirectory, function(motion) {
       // $FlowIgnore: Flow doesn't recognize this prop
       return motion.watch(process.stdout.isTTY)
     })
   })
-commander
-  .command('init')
-  .description('Try to transition current directory to a motion app')
-  .action(function() {
+  .command('init', 'Copy motion configuation files into the current directory', function() {
     getMotion(currentDirectory, function(motion) {
       return motion.init().then(function() {
         console.log(coolTrim`
@@ -67,13 +55,14 @@ commander
       })
     })
   })
-
-commander.parse(process.argv)
-
-if (!commander.args.length) {
-  // Execute default watch command
-  getMotion(currentDirectory, function(motion) {
-    // $FlowIgnore: Flow doesn't recognize this prop
-    return motion.watch(process.stdout.isTTY)
+  .default(function(_, ...commands) {
+    if (commands.length !== 0) {
+      command.showHelp()
+      process.exit(1)
+    }
+    getMotion(currentDirectory, function(motion) {
+      // $FlowIgnore: Flow doesn't recognize this prop
+      return motion.watch(process.stdout.isTTY)
+    })
   })
-}
+  .parse(process.argv)
