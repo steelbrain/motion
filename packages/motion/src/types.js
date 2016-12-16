@@ -10,5 +10,4 @@ export type Config = {
   saveNpmModules: boolean,
   bundleDirectory: string,
   publicDirectory: string,
-  includePolyfills: boolean,
 }
