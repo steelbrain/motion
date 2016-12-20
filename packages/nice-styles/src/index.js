@@ -83,7 +83,7 @@ function processObject(transform: Transform): string {
   return toReturn.join(' ')
 }
 
-function processStyles(styles: Object, includeEmpty: boolean = false): Object {
+function processStyles(styles: Object, includeEmpty: boolean = false, errorMessage: string = ''): Object {
   const toReturn = {}
   for (const key in styles) {
     if (!styles.hasOwnProperty(key)) {
@@ -122,7 +122,7 @@ function processStyles(styles: Object, includeEmpty: boolean = false): Object {
       toReturn[key] = processArray(key, value)
       continue
     }
-    throw new Error(`Invalid style value for ${key}`)
+    throw new Error(`${errorMessage}: Invalid style value for ${key}`)
   }
   return toReturn
 }

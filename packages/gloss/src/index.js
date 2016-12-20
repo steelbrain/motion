@@ -28,13 +28,15 @@ module.exports = function motionStyle(opts = defaultOpts) {
     return Object.keys(dynamics).map(key => ({ ...sheet[key], isDynamic: true, key }))
   }
 
-  const getStyles = (userStyles, theme) => {
-    const styles = { ...userStyles, ...flattenThemes(theme) }
+  const getStyles = (Child, theme) => {
+    const styles = { ...Child.style, ...flattenThemes(theme) }
     const dynamics = pickBy(styles, isFunc)
     const statics = pickBy(styles, x => !isFunc(x))
 
+    const niceStatics = applyNiceStyles(statics, `${Child.name}:`)
+
     return {
-      statics: StyleSheet.create(applyNiceStyles(statics)),
+      statics: StyleSheet.create(niceStatics),
       dynamics,
       theme
     }
@@ -43,7 +45,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
   // decorator
   const decorator = (Child, parentStyles) => {
     // add to Child.prototype, so the decorated class can access: this.fancyElement
-    const styles = getStyles(Child.style, opts.themes ? Child.theme : null)
+    const styles = getStyles(Child, opts.themes ? Child.theme : null)
     Child.prototype.fancyElement = fancyElementFactory(Child, parentStyles, styles, opts, getDynamicStyles, getDynamicSheets)
 
     // allows this.addTheme('theme') from within a component
