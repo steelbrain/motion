@@ -134,7 +134,7 @@ export async function getPundleInstance(
   }
   const server = await createServer(pundle, {
     port: config.webServerPort,
-    directory: config.publicDirectory,
+    rootDirectory: config.publicDirectory,
     hmrPath: '/_/bundle_hmr',
     bundlePath: '/_/bundle.js',
     publicPath: '/',
