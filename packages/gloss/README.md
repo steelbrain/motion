@@ -136,7 +136,7 @@ Helpful for maintaining a common set of styles for every component. Using `$$` t
 import gloss from 'gloss'
 
 const style = gloss({
-  parentStyles: {
+  baseStyles: {
     row: {
       flexFlow: 'row',
     },
@@ -171,7 +171,7 @@ how to make low level components
 import gloss from 'gloss'
 
 const style = gloss({
-  parentStyles: {
+  baseStyles: {
     red: {
       background: 'red',
     },

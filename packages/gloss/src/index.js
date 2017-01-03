@@ -42,17 +42,17 @@ module.exports = function motionStyle(opts = defaultOpts) {
     }
   }
 
-  let parentStyles
+  let baseStyles
 
-  if (opts.parentStyles) {
-    parentStyles = getStyles({ name: 'Gloss Parent Styles', style: opts.parentStyles }, null)
+  if (opts.baseStyles) {
+    baseStyles = getStyles({ name: 'Gloss Parent Styles', style: opts.baseStyles }, null)
   }
 
   // decorator
   const decorator = (Child) => {
     // add to Child.prototype, so the decorated class can access: this.fancyElement
     const styles = getStyles(Child, opts.themes ? Child.theme : null)
-    Child.prototype.fancyElement = fancyElementFactory(Child, parentStyles, styles, opts, getDynamicStyles, getDynamicSheets)
+    Child.prototype.fancyElement = fancyElementFactory(Child, baseStyles, styles, opts, getDynamicStyles, getDynamicSheets)
 
     // allows this.addTheme('theme') from within a component
     const setTheme = val => function(...names) {
