@@ -4,9 +4,7 @@ import { pickBy } from 'lodash'
 import { applyNiceStyles, flattenThemes, isFunc } from './helpers'
 
 // defaults
-const defaultOpts = {
-  themes: true
-}
+const defaultOpts = {}
 
 module.exports = function motionStyle(opts = defaultOpts) {
   // option-based helpers
@@ -51,7 +49,7 @@ module.exports = function motionStyle(opts = defaultOpts) {
   // decorator
   const decorator = (Child) => {
     // add to Child.prototype, so the decorated class can access: this.fancyElement
-    const styles = getStyles(Child, opts.themes ? Child.theme : null)
+    const styles = getStyles(Child, opts.dontTheme ? null : Child.theme)
     Child.prototype.fancyElement = fancyElementFactory(Child, baseStyles, styles, opts, getDynamicStyles, getDynamicSheets)
 
     // allows this.addTheme('theme') from within a component

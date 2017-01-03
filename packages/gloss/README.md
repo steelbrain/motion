@@ -55,6 +55,20 @@ Add babel transform:
 }
 ```
 
+usage
+---
+Gloss supports just two options for now:
+
+```js
+import gloss from 'gloss'
+
+const style = gloss({
+  dontTheme: false, // turn on to ignore Child.theme
+  baseStyles: null, // object: styles
+})
+
+```
+
 
 features
 ---
