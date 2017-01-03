@@ -116,11 +116,11 @@ export async function getPundleInstance(
         config: config.babel,
         extensions: ['js'],
       }],
-      [createPlugin(function(_: Object, file: Object) {
+      createPlugin(function(_: Object, file: Object) {
         if (development && file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) {
           cli.log(`${chalk.dim(Path.join('$root', Path.relative(projectPath, file.filePath)))} ${chalk.green(TICK)}`)
         }
-      }), {}]
+      }),
     ],
     rootDirectory: projectPath,
     replaceVariables: {
