@@ -32,7 +32,10 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
 
     // collect styles, in order
     // { propKey: [styles] }
-    const finalStyles = allKeys.reduce((acc, cur) => ({ ...acc, [cur]: [] }), { parents: [] })
+    const finalStyles = allKeys.reduce((acc, cur) => {
+      acc[cur] = []
+      return acc
+    }, { parents: [] })
 
     //
     // 1. parent styles
