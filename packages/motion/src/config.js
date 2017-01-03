@@ -31,7 +31,7 @@ export default class Config {
   static async create(projectPath: string): Promise<Config> {
     const config = {
       babel: {
-        plugins: ['motion-style/transform'],
+        plugins: ['gloss/transform'],
         presets: ['babel-preset-motion']
       },
       pathType: 'filePath',

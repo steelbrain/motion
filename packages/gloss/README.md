@@ -9,6 +9,8 @@ Combines a few things:
 - it's own theme engine
 - $style props
 
+example
+---
 
 ```js
 import style from 'gloss'
@@ -34,6 +36,56 @@ const styler = style({ theme: true })
       background: color,
       borderBottom: [2, 'solid', color]
     }),
+  }
+}
+```
+
+better example
+---
+
+```js
+import gloss from 'gloss'
+
+const style = gloss.parent({
+  style: obj => obj,
+})
+
+@style
+export default class Section {
+  static defaultProps = {
+    maxHeight: 'auto',
+    minHeight: 800,
+    background: colors.primary,
+    height: 'auto',
+    color: '#444',
+    position: 'relative',
+    overflow: 'hidden',
+    padding: [90, 0],
+    [media.small]: {
+      padding: [50, 0],
+    },
+  }
+
+  render() {
+    const { children, windowHeight, maxHeight, minHeight, attach, ...props } = this.props
+
+    if (windowHeight) {
+      props.height = Math.max(minHeight, Math.min(maxHeight, window.innerHeight))
+    }
+
+    return (
+      <section $$style={props} {...attach}>
+        {children}
+      </section>
+    )
+  }
+
+  static theme = {
+    centered: {
+      section: {
+        justifyContent: 'center',
+      },
+    },
   }
 }
 ```
@@ -87,6 +139,9 @@ change multiple elements with a single prop.
       transform: {
         rotate: '45deg',
       },
+      filter: {
+        grayscale: 0,
+      }
     },
     h1: {
       fontSize: 22,

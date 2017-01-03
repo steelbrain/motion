@@ -29,14 +29,14 @@ export const flattenThemes = themes => {
   return result
 }
 
-export const applyNiceStyles = (styles, themeKey) => {
+export const applyNiceStyles = (styles, errorMessage) => {
   for (const style in styles) {
-    if (!styles.hasOwnProperty(style) || style === themeKey) {
+    if (!styles.hasOwnProperty(style)) {
       continue
     }
     const value = styles[style]
     if (value) {
-      styles[style] = niceStyles(value)
+      styles[style] = niceStyles(value, false, errorMessage)
     }
   }
 

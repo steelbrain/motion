@@ -26,11 +26,30 @@ export default function({ types: t }: { types: Object }) {
         if (!node.decorators || !node.decorators.length) {
           return
         }
+
         // -- Validate if class is what we're looking for
         // Default to @style
         const decoratorName = state.opts.decoratorName || 'style'
-        const isMotionStyle = node.decorators.some(function(item) {
-          return item.expression && item.expression.type === 'Identifier' && item.expression.name === decoratorName
+        const isMotionStyle = node.decorators.some(item => {
+          if (!item.expression) {
+            return false
+          }
+          if (item.expression.type === 'Identifier' && item.expression.name === decoratorName) {
+            return true
+          }
+          if (
+            item.expression.callee && t.isMemberExpression(item.expression.callee) &&
+            item.expression.callee.object.name === decoratorName
+          ) {
+            return true
+          }
+          if (
+            item.expression.object && item.expression.object.name === decoratorName
+          ) {
+            return true
+          }
+
+          return false
         })
         // -- Add a unique var to scope and all of JSX elements
         if (isMotionStyle) {

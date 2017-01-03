@@ -1,6 +1,6 @@
 {
   "name": "gloss",
-  "version": "4.3.0",
+  "version": "4.3.10",
   "description": "Higher order component for nicer component styles",
   "main": "lib/index.js",
   "scripts": {
@@ -17,18 +17,17 @@
   },
   "homepage": "https://github.com/motion/motion#readme",
   "dependencies": {
-    "aphrodite": "^0.5.0",
+    "aphrodite": "^1.1.0",
     "lodash": "^4.14.0",
-    "motion-nice-styles": "^4.2.3"
+    "motion-nice-styles": "^4.3.7"
   },
   "devDependencies": {
     "enzyme": "^2.4.1",
     "jasmine-fix": "^1.0.0",
-    "react": "^15.1.0",
-    "react-addons-test-utils": "^15.1.0",
-    "react-dom": "^15.1.0"
+    "react-addons-test-utils": "^15.1.0"
   },
   "peerDependencies": {
-    "react": ">= 0.14.0 || ~15.0.0"
+    "react": ">= 0.15.0",
+    "react-dom": ">= 0.15.0"
   }
 }
