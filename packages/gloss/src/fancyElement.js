@@ -3,6 +3,7 @@ import { css } from 'aphrodite/no-important'
 import { omit } from 'lodash'
 import { filterStyleKeys, filterParentStyleKeys } from './helpers'
 
+const objToFlatArray = obj => Object.keys(obj).reduce((acc, cur) => [...acc, ...obj[cur]], [])
 const originalCreateElement = React.createElement
 
 // factory that return the this.fancyElement helper
@@ -122,10 +123,11 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     // finish
     //
 
-    // recreate child (without style props)
+    // remove style props
     const newProps = omit(props, [...styleKeys, ...parentStyleKeys])
-    const toArray = obj => Object.keys(obj).reduce((acc, cur) => [...acc, ...obj[cur]], [])
-    const activeStyles = toArray(finalStyles)
+
+    // gather styles flat
+    const activeStyles = objToFlatArray(finalStyles)
 
     if (activeStyles.length) {
       // apply styles

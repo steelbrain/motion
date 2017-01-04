@@ -1,6 +1,6 @@
 {
   "name": "gloss",
-  "version": "4.3.10",
+  "version": "4.4.0",
   "description": "Higher order component for nicer component styles",
   "main": "lib/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "aphrodite": "^1.1.0",
     "lodash": "^4.14.0",
-    "motion-nice-styles": "^4.3.7"
+    "motion-nice-styles": "^4.4.0"
   },
   "devDependencies": {
     "enzyme": "^2.4.1",

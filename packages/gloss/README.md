@@ -9,13 +9,14 @@ Combines a few things:
 - it's own theme engine
 - $style props
 
+
 example
 ---
 
 ```js
-import style from 'gloss'
+import gloss from 'gloss'
 
-const styler = style({ theme: true })
+const style = gloss()
 
 @style class extends Component {
   render() {
@@ -40,56 +41,6 @@ const styler = style({ theme: true })
 }
 ```
 
-better example
----
-
-```js
-import gloss from 'gloss'
-
-const style = gloss.parent({
-  style: obj => obj,
-})
-
-@style
-export default class Section {
-  static defaultProps = {
-    maxHeight: 'auto',
-    minHeight: 800,
-    background: colors.primary,
-    height: 'auto',
-    color: '#444',
-    position: 'relative',
-    overflow: 'hidden',
-    padding: [90, 0],
-    [media.small]: {
-      padding: [50, 0],
-    },
-  }
-
-  render() {
-    const { children, windowHeight, maxHeight, minHeight, attach, ...props } = this.props
-
-    if (windowHeight) {
-      props.height = Math.max(minHeight, Math.min(maxHeight, window.innerHeight))
-    }
-
-    return (
-      <section $$style={props} {...attach}>
-        {children}
-      </section>
-    )
-  }
-
-  static theme = {
-    centered: {
-      section: {
-        justifyContent: 'center',
-      },
-    },
-  }
-}
-```
-
 install
 ---
 Add babel transform:
@@ -102,6 +53,20 @@ Add babel transform:
     ]
   }
 }
+```
+
+usage
+---
+Gloss supports just two options for now:
+
+```js
+import gloss from 'gloss'
+
+const style = gloss({
+  dontTheme: false, // turn on to ignore Child.theme
+  baseStyles: null, // object: styles
+})
+
 ```
 
 
@@ -124,6 +89,10 @@ Use themes for really easy variant looks for components. Gives you complete cont
 change multiple elements with a single prop.
 
 ```js
+import gloss from 'gloss'
+
+const style = gloss()
+
 @style class Title extends React.Component {
   render() {
     return (
@@ -178,11 +147,17 @@ base styles
 Helpful for maintaining a common set of styles for every component. Using `$$` to access keeps things explicit.
 
 ```js
-@style.parent({
-  row: {
-    flexFlow: 'row',
+import gloss from 'gloss'
+
+const style = gloss({
+  baseStyles: {
+    row: {
+      flexFlow: 'row',
+    },
   },
 })
+
+@style
 class extends React.Component {
   render() {
     return (
@@ -201,14 +176,59 @@ class extends React.Component {
 }
 ```
 
-risks
+
+more advanced
 ---
+how to make low level components
 
-Gloss is used in production for a very large app we're building. Technically, it's fast
-and full featured. We think there are a few more features that would really make it shine,
-but we've held off promoting it further until we get a chance to integrate those well and
-round out the branding/documentation.
+```js
+import gloss from 'gloss'
 
-Until then, it won't have the community support of other libraries. That said, we do
-have the name `gloss` now and are very close to ready. The library itself is not very large,
-so would be easy to maintain or fork.
+const style = gloss({
+  baseStyles: {
+    red: {
+      background: 'red',
+    },
+    style: obj => obj,
+  }
+})
+
+@style
+export default class Section {
+  static defaultProps = {
+    maxHeight: 'auto',
+    minHeight: 800,
+    background: colors.primary,
+    height: 'auto',
+    color: '#444',
+    position: 'relative',
+    overflow: 'hidden',
+    padding: [90, 0],
+    [media.small]: {
+      padding: [50, 0],
+    },
+  }
+
+  render() {
+    const { children, windowHeight, maxHeight, minHeight, attach, ...props } = this.props
+
+    if (windowHeight) {
+      props.height = Math.max(minHeight, Math.min(maxHeight, window.innerHeight))
+    }
+
+    return (
+      <section $$style={props} $$red {...attach}>
+        {children}
+      </section>
+    )
+  }
+
+  static theme = {
+    centered: {
+      section: {
+        justifyContent: 'center',
+      },
+    },
+  }
+}
+```
