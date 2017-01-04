@@ -8,8 +8,9 @@ const originalCreateElement = React.createElement
 
 // factory that return the this.fancyElement helper
 export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicSheets) => {
-  const hasOwnStyles = !!(Child.style || Child.theme)
-  const shouldTheme = hasOwnStyles && opts.themes
+  const shouldTheme = !opts.dontTheme
+  const processTheme = shouldTheme && Child.theme
+  const hasOwnStyles = !!(Child.style || shouldTheme && Child.theme)
 
   return function fancyElement(type, props, ...children) {
     // check for no props, no this (functional component), or no style key match
@@ -85,7 +86,7 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
     //
     // 3. theme styles
     //
-    if (shouldTheme) {
+    if (processTheme) {
       // direct
       const themes = this.constructor.theme
       const themeProps = themes && Object.keys(themes)
