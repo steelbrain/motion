@@ -126,12 +126,12 @@ const style = gloss()
         fontSize: 50,
       }
     },
-    tint: color => ({
+    tint: props => ({
       base: {
-        background: [color, 0.5],
+        background: [props.color, 0.5],
       },
       h1: {
-        color,
+        color: props.color,
       },
     }),
   }
@@ -140,6 +140,11 @@ const style = gloss()
 // Use
 React.render(<Title big tint="yellow" />, document.getElementById('app'))
 ```
+
+#### Differences between style and theme:
+
+- Theme requires a further nesting of objects, to specify which tag to target for each style
+- Theme passes in all props if you specify a function! This gives more power to use any prop to affect the styling within a given specific theme property.
 
 base styles
 ---
