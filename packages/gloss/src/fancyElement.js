@@ -100,7 +100,7 @@ export default (Child, parentStyles, styles, opts, getDynamicStyles, getDynamicS
             }
           } else if (typeof this.props[prop] !== 'undefined' && typeof styles.theme[prop] === 'function') {
             // dynamic themes
-            const dynStyles = styles.theme[prop](this.props[prop])
+            const dynStyles = styles.theme[prop](this.props)
             const dynKeys = Object.keys(dynStyles).filter(tag => allKeys.indexOf(tag) > -1)
 
             if (dynKeys.length) {
