@@ -21,7 +21,6 @@
     "cool-trim": "^1.1.0",
     "lodash.uniq": "^4.5.0",
     "mkdirp": "^0.5.1",
-    "gloss": "^4.5.0",
     "open": "0.0.5",
     "ora": "^0.3.0",
     "process-bootstrap": "^1.0.0",
