@@ -52,9 +52,6 @@ export function normalizeConfig(projectPath: string, givenConfig: Config): Confi
       return givenEntry
     }
     const entry = Array.isArray(givenEntry) ? givenEntry : [givenEntry, {}]
-    if (entry[0] === 'gloss/transform') {
-      entry[0] = require.resolve('gloss/transform')
-    }
     if (!Path.isAbsolute(entry[0])) {
       if (entry[0].substr(0, 1) === '.') {
         entry[0] = Path.resolve(projectPath, entry[0])
