@@ -3,7 +3,7 @@
 import Path from 'path'
 import chalk from 'chalk'
 import Pundle from 'pundle'
-import { createPlugin, createWatcher } from 'pundle-api'
+import { createPlugin } from 'pundle-api'
 import { createServer } from 'pundle-dev'
 import { CompositeDisposable } from 'sb-event-kit'
 
@@ -89,6 +89,7 @@ export async function getPundleInstance(
       },
     }]],
     components: [
+      require.resolve('pundle-plugin-dedupe'),
       [require.resolve('pundle-plugin-npm-installer'), {
         save: config.saveNpmModules,
         beforeInstall(name) {
@@ -118,13 +119,6 @@ export async function getPundleInstance(
           cli.log(`${chalk.dim(Path.join('$root', Path.relative(projectPath, file.filePath)))} ${chalk.green(TICK)}`)
         }
       }),
-      createWatcher({
-        ready(_, initalStatus) {
-          if (initalStatus === false) {
-            cli.log(chalk.red('Initialized with errors'))
-          }
-        },
-      })
     ],
     rootDirectory: projectPath,
     replaceVariables: {
