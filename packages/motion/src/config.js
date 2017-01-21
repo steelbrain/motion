@@ -31,6 +31,7 @@ export default class Config {
   static async create(projectPath: string): Promise<Config> {
     const config = {
       babel: {
+        plugins: ['react-hot-loader/babel'],
         presets: ['babel-preset-motion']
       },
       pathType: 'filePath',

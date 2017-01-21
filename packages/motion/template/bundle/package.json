@@ -4,5 +4,7 @@
   "license": "",
   "author": "",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "react-hot-loader": "^3.0.0-beta.6"
+  }
 }
