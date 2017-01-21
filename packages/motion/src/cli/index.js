@@ -47,7 +47,9 @@ export default class Main {
       open(serverAddress)
     })
     this.cli.addCommand('editor', 'Open this app in Atom', async () => {
-      await exec('atom', [this.config.getBundleDirectory()])
+      const defaultEditor = /^win/.test(process.platform) ? 'notepad' : 'atom'
+      const editor = process.env.EDITOR || defaultEditor
+      await exec(editor, [this.config.getBundleDirectory()])
     })
     this.cli.addCommand('build', 'Build this app for production usage', async () => {
       await this.emitter.emit('should-build')
