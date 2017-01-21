@@ -6,6 +6,8 @@ import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import * as FS from './fs'
 import CLI from './cli'
 import Config from './config'
+import { exec } from 'sb-exec'
+
 import { MotionError, ERROR_CODE } from './error'
 import { getPundleInstance } from './helpers'
 
@@ -85,13 +87,19 @@ class Motion {
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'bundle')), this.config.getBundleDirectory())
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'public')), this.config.getPublicDirectory())
     await this.config.write()
+
+    if (!(await FS.exists(Path.join(this.projectPath, 'node_modules')))) {
+      console.log(' 🎁  installing packages...', this.projectPath)
+      await exec('npm', ['i'], { cwd: this.projectPath })
+    }
   }
   dispose() {
     this.subscriptions.dispose()
   }
 
   static async create(projectRoot: string): Promise<Motion> {
-    return new Motion(projectRoot, await Config.create(projectRoot))
+    const config = await Config.create(projectRoot)
+    return new Motion(projectRoot, config)
   }
 }
 
