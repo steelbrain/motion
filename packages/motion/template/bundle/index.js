@@ -1,4 +1,5 @@
 // @flow
+import 'react-hot-loader/patch'
 import Main from './main'
 import React from 'react'
 import ReactDOM from 'react-dom'
