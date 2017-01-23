@@ -5,12 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { AppContainer } from 'react-hot-loader'
 
-const PROD = process.env.NODE_ENV !== 'development'
-
-if (PROD) {
-  ReactDOM.render(<Main />, document.getElementById('app'))
-}
-else {
+if (process.env.NODE_ENV === 'development') {
   if (typeof Main === 'function') {
     ReactDOM.render(
       <AppContainer>
@@ -25,4 +20,7 @@ else {
   if (process.env.NODE_ENV === 'development' && module.hot) {
     module.hot.accept()
   }
+}
+else {
+  ReactDOM.render(<Main />, document.getElementById('app'))
 }

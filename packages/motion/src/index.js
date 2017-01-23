@@ -78,7 +78,7 @@ class Motion {
       subscription.dispose()
     }
   }
-  async init(): Promise<void> {
+  async init(installDependencies: boolean = false, callbacks: Object = {}): Promise<void> {
     if (await this.exists()) {
       throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
     }
@@ -88,9 +88,25 @@ class Motion {
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'public')), this.config.getPublicDirectory())
     await this.config.write()
 
-    if (!(await FS.exists(Path.join(this.projectPath, 'node_modules')))) {
-      console.log(' 🎁  installing packages...', this.projectPath)
-      await exec('npm', ['i'], { cwd: this.projectPath })
+    if (callbacks.init) {
+      await callbacks.init()
+    }
+
+    const manifestPath = Path.join(this.projectPath, 'package.json')
+    const nodeModulesPath = Path.join(this.projectPath, 'node_modules')
+    if (await FS.exists(manifestPath) && installDependencies) {
+      const manifest = await FS.readJSON(manifestPath)
+      const hasDependencies = Object.keys(manifest.dependencies || {}).length ||
+                              Object.keys(manifest.devDependencies || {}).length
+      if (hasDependencies && !await FS.exists(nodeModulesPath)) {
+        if (callbacks.installStart) {
+          await callbacks.installStart()
+        }
+        await exec('npm', ['i'], { cwd: this.projectPath, ignoreExitCode: true, stream: 'both' })
+        if (callbacks.installFinish) {
+          await callbacks.installFinish()
+        }
+      }
     }
   }
   dispose() {
