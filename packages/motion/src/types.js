@@ -5,6 +5,10 @@ export type Config = {
     plugins: Array<string | [string, Object]>,
     presets: Array<string>
   },
+  pundle: {
+    presets: Array<string>,
+    components: Array<string>,
+  },
   pathType: 'filePath' | 'number',
   webServerPort: number,
   saveNpmModules: boolean,

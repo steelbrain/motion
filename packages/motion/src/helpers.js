@@ -87,7 +87,7 @@ export async function getPundleInstance(
       reporter: {
         log: o => cli.log(o),
       },
-    }]],
+    }]].concat(config.pundle.presets),
     components: [
       require.resolve('pundle-plugin-dedupe'),
       [require.resolve('pundle-plugin-npm-installer'), {
@@ -122,6 +122,7 @@ export async function getPundleInstance(
           }
         }
       }),
+      ...config.pundle.components,
     ],
     rootDirectory: projectPath,
     replaceVariables: {

@@ -34,6 +34,10 @@ export default class Config {
         plugins: [],
         presets: ['babel-preset-motion']
       },
+      pundle: {
+        presets: [],
+        components: [],
+      },
       pathType: 'filePath',
       webServerPort: Helpers.getRandomNumber(8000, 15000),
       saveNpmModules: true,
