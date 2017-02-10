@@ -115,8 +115,11 @@ export async function getPundleInstance(
         extensions: ['js'],
       }],
       createPlugin(function(_: Object, file: Object) {
-        if (development && file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) {
-          cli.log(`${chalk.dim(Path.join('$root', Path.relative(projectPath, file.filePath)))} ${chalk.green(TICK)}`)
+        if (development) {
+          if ((file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) || process.env.MOTION_DEBUG_TICK_ALL) {
+            const relative = Path.relative(projectPath, file.filePath)
+            cli.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
+          }
         }
       }),
     ],
