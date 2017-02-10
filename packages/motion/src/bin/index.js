@@ -16,21 +16,13 @@ command
   .version(`Motion v${manifest.version}`)
   .command('new <name>', 'Create a new motion app with the given name', function(options, name) {
     getMotion(Path.join(currentDirectory, name), function(motion) {
-      return motion.init(true, {
-        init() {
-          console.log(coolTrim`
-            ${chalk.green('App created successfully! Enjoy')}
-            ${chalk.yellow('To run motion in your new app, do')}
-              $ cd ${name}
-              $ motion
-          `)
-        },
-        installStart() {
-          console.log(chalk.yellow('Installing dependencies...'))
-        },
-        installFinish() {
-          console.log(chalk.green('Installed! 🎁'))
-        },
+      return motion.init().then(function() {
+        console.log(coolTrim`
+          ${chalk.green('App created successfully! Enjoy')}
+          ${chalk.yellow('To run motion in your new app, do')}
+            $ cd ${name}
+            $ motion
+        `)
       })
     })
   })

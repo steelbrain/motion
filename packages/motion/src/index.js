@@ -6,7 +6,6 @@ import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import * as FS from './fs'
 import CLI from './cli'
 import Config from './config'
-import { exec } from 'sb-exec'
 
 import { MotionError, ERROR_CODE } from './error'
 import { getPundleInstance } from './helpers'
@@ -78,7 +77,7 @@ class Motion {
       subscription.dispose()
     }
   }
-  async init(installDependencies: boolean = false, callbacks: Object = {}): Promise<void> {
+  async init(): Promise<void> {
     if (await this.exists()) {
       throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
     }
@@ -87,27 +86,6 @@ class Motion {
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'bundle')), this.config.getBundleDirectory())
     await FS.copy(Path.normalize(Path.join(__dirname, '..', 'template', 'public')), this.config.getPublicDirectory())
     await this.config.write()
-
-    if (callbacks.init) {
-      await callbacks.init()
-    }
-
-    const manifestPath = Path.join(this.projectPath, 'package.json')
-    const nodeModulesPath = Path.join(this.projectPath, 'node_modules')
-    if (await FS.exists(manifestPath) && installDependencies) {
-      const manifest = await FS.readJSON(manifestPath)
-      const hasDependencies = Object.keys(manifest.dependencies || {}).length ||
-                              Object.keys(manifest.devDependencies || {}).length
-      if (hasDependencies && !await FS.exists(nodeModulesPath)) {
-        if (callbacks.installStart) {
-          await callbacks.installStart()
-        }
-        await exec('npm', ['i'], { cwd: this.projectPath, ignoreExitCode: true, stream: 'both' })
-        if (callbacks.installFinish) {
-          await callbacks.installFinish()
-        }
-      }
-    }
   }
   dispose() {
     this.subscriptions.dispose()
