@@ -75,11 +75,10 @@ export async function getPundleInstance(
   errorCallback: Function
 ): Promise<{ pundle: Object, subscription: CompositeDisposable }> {
   const config = normalizeConfig(projectPath, givenConfig)
-  const pundleEntry = ['./']
 
   const subscription = new CompositeDisposable()
   const pundle = await Pundle.create({
-    entry: pundleEntry,
+    entry: ['./'],
     presets: [[require.resolve('pundle-preset-default'), {
       generator: {
         pathType: config.pathType === 'number' ? 'number' : 'filePath',
@@ -124,7 +123,7 @@ export async function getPundleInstance(
       }),
       ...config.pundle.components,
     ],
-    rootDirectory: projectPath,
+    rootDirectory: config.bundleDirectory,
     replaceVariables: {
       'process.env.NODE_ENV': JSON.stringify(development ? 'development' : 'production'),
     },
