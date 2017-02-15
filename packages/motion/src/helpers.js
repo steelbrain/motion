@@ -3,8 +3,8 @@
 import Path from 'path'
 import chalk from 'chalk'
 import Pundle from 'pundle'
+import PundleDevServer from 'pundle-dev'
 import { createPlugin } from 'pundle-api'
-import { createServer } from 'pundle-dev'
 import { CompositeDisposable } from 'sb-event-kit'
 
 import type CLI from './cli'
@@ -106,7 +106,7 @@ export async function getPundleInstance(
             errorCallback(error)
           }
         },
-        include: ['*.js'],
+        extensions: ['js'],
       }],
       [require.resolve('pundle-transformer-babel'), {
         babelPath: require.resolve('babel-core'),
@@ -133,16 +133,18 @@ export async function getPundleInstance(
   if (!development) {
     return { pundle, subscription }
   }
-  const server = await createServer(pundle, {
+  const server = new PundleDevServer(pundle, {
     port: config.webServerPort,
     rootDirectory: config.publicDirectory,
     hmrPath: '/_/bundle_hmr',
     bundlePath: '/_/bundle.js',
+    useCache: true, // TODO: make this configurable
     publicPath: '/',
     sourceMapPath: '/_/bundle.js.map',
     redirectNotFoundToIndex: true,
   })
   subscription.add(server)
+  await server.activate()
 
   return { pundle, subscription }
 }
