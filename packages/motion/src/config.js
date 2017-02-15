@@ -31,14 +31,18 @@ export default class Config {
   static async create(projectPath: string): Promise<Config> {
     const config = {
       babel: {
+        plugins: [],
         presets: ['babel-preset-motion']
+      },
+      pundle: {
+        presets: [],
+        components: [],
       },
       pathType: 'filePath',
       webServerPort: Helpers.getRandomNumber(8000, 15000),
       saveNpmModules: true,
       bundleDirectory: '.',
       publicDirectory: './public',
-      includePolyfills: true
     }
     const configPath = Path.join(projectPath, '.motion.json')
     try {

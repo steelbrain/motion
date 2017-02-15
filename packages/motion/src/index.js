@@ -6,6 +6,7 @@ import { CompositeDisposable, Disposable } from 'sb-event-kit'
 import * as FS from './fs'
 import CLI from './cli'
 import Config from './config'
+
 import { MotionError, ERROR_CODE } from './error'
 import { getPundleInstance } from './helpers'
 
@@ -36,7 +37,7 @@ class Motion {
   async exists(): Promise<boolean> {
     return await FS.exists(Path.join(this.projectPath, '.motion.json'))
   }
-  async watch(terminal: boolean = false): Promise<Disposable> {
+  async watch(terminal: boolean = false, useCache: boolean = true): Promise<Disposable> {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
@@ -44,18 +45,12 @@ class Motion {
     if (terminal) {
       this.cli.activate()
     }
-    const pundle = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, error => {
+    const { subscription } = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, useCache, error => {
       this.cli.log(error)
     })
-    await pundle.activate()
-    const reloadHook = this.cli.onShouldReload(async () => {
-      pundle.pundle.clearCache()
-      await pundle.pundle.compile()
-    })
     const disposable = new Disposable(() => {
-      this.subscriptions.remove(disposable)
-      pundle.dispose()
-      reloadHook.dispose()
+      this.subscriptions.delete(disposable)
+      subscription.dispose()
     })
 
     this.subscriptions.add(disposable)
@@ -66,15 +61,21 @@ class Motion {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     let error
-    const compilation = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, givenError => {
+    const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, false, givenError => {
       error = givenError
     })
-    if (error) {
-      throw error
+    try {
+      if (error) {
+        throw error
+      }
+      const generated = await pundle.generate(null, {
+        sourceMap: false,
+      })
+      await FS.mkdir(Path.join(this.config.getPublicDirectory(), '_'))
+      await FS.writeFile(Path.join(this.config.getPublicDirectory(), '_/bundle.js'), generated.contents)
+    } finally {
+      subscription.dispose()
     }
-    await compilation.compile()
-    await FS.mkdir(Path.join(this.config.getPublicDirectory(), '_'))
-    await FS.writeFile(Path.join(this.config.getPublicDirectory(), '_/bundle.js'), compilation.generate().contents)
   }
   async init(): Promise<void> {
     if (await this.exists()) {
@@ -91,7 +92,8 @@ class Motion {
   }
 
   static async create(projectRoot: string): Promise<Motion> {
-    return new Motion(projectRoot, await Config.create(projectRoot))
+    const config = await Config.create(projectRoot)
+    return new Motion(projectRoot, config)
   }
 }
 

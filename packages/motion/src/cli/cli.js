@@ -1,7 +1,6 @@
 /* @flow */
 
 import { inspect } from 'util'
-import { CompositeDisposable } from 'sb-event-kit'
 import vorpal from 'vorpal'
 import chalk from 'chalk'
 
@@ -12,12 +11,10 @@ const BYE_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Bye fr
 export default class CLI {
   active: boolean;
   instance: vorpal;
-  subscriptions: CompositeDisposable;
 
   constructor() {
     this.active = false
     this.instance = vorpal()
-    this.subscriptions = new CompositeDisposable()
   }
   activate() {
     if (process.versions.electron) {
@@ -76,6 +73,5 @@ export default class CLI {
       this.instance.hide()
       this.active = false
     }
-    this.subscriptions.dispose()
   }
 }
