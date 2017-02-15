@@ -2,7 +2,11 @@
 
 import Motion from '../'
 
-export function getMotion(rootDirectory: string = process.cwd(), callback: ((motion: Motion) => any)) {
+export function getMotion(options: Object, rootDirectory: string = process.cwd(), callback: ((motion: Motion) => any)) {
+  if (options.debug) {
+    process.env.PUNDLE_DEBUG_REPORTS = '1'
+  }
+
   return Motion.create(rootDirectory).then(function(motion) {
     let motionIsAlive = true
     function killMotion() {

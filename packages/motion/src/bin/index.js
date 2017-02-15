@@ -14,8 +14,10 @@ const currentDirectory = process.cwd()
 
 command
   .version(`Motion v${manifest.version}`)
-  .command('new <name>', 'Create a new motion app with the given name', function(options, name) {
-    getMotion(Path.join(currentDirectory, name), function(motion) {
+  .option('--debug', 'Enable stack traces of errors, useful for debugging', false)
+  .option('--disable-cache', 'Disable use of dev server cache', false)
+  .command('new <name>', 'Create a new motion app with the given name', function(options: Object, name) {
+    getMotion(options, Path.join(currentDirectory, name), function(motion) {
       return motion.init().then(function() {
         console.log(coolTrim`
           ${chalk.green('App created successfully! Enjoy')}
@@ -26,10 +28,10 @@ command
       })
     })
   })
-  .command('build', 'Build dist files of the current motion app', function() {
-    getMotion(currentDirectory, function(motion) {
+  .command('build', 'Build dist files of the current motion app', function(options: Object) {
+    getMotion(options, currentDirectory, function(motion) {
       // $FlowIgnore: Flow doesn't recognize this prop
-      return motion.build(process.stdout.isTTY).then(function() {
+      return motion.build(process.stdout.isTTY, !options.disableCache).then(function() {
         console.log(coolTrim`
           ${chalk.green('App built successfully')}
           To access the built files, do
@@ -38,14 +40,14 @@ command
       })
     })
   })
-  .command('watch', 'Make the Motion CLI run Dev server and watch the files for changes', function() {
-    getMotion(currentDirectory, function(motion) {
+  .command('watch', 'Make the Motion CLI run Dev server and watch the files for changes', function(options: Object) {
+    getMotion(options, currentDirectory, function(motion) {
       // $FlowIgnore: Flow doesn't recognize this prop
       return motion.watch(process.stdout.isTTY)
     })
   })
-  .command('init', 'Copy motion configuation files into the current directory', function() {
-    getMotion(currentDirectory, function(motion) {
+  .command('init', 'Copy motion configuation files into the current directory', function(options: Object) {
+    getMotion(options, currentDirectory, function(motion) {
       return motion.init(false, {
         init() {
           console.log(coolTrim`
@@ -57,14 +59,14 @@ command
       })
     })
   })
-  .default(function(_, ...commands) {
+  .default(function(options: Object, ...commands) {
     if (commands.length !== 0) {
       command.showHelp()
       process.exit(1)
     }
-    getMotion(currentDirectory, function(motion) {
+    getMotion(options, currentDirectory, function(motion) {
       // $FlowIgnore: Flow doesn't recognize this prop
-      return motion.watch(process.stdout.isTTY)
+      return motion.watch(process.stdout.isTTY, !options.disableCache)
     })
   })
   .parse(process.argv)

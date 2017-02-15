@@ -72,6 +72,7 @@ export async function getPundleInstance(
   projectPath: string,
   development: boolean,
   givenConfig: Config,
+  useCache: boolean,
   errorCallback: Function
 ): Promise<{ pundle: Object, subscription: CompositeDisposable }> {
   const config = normalizeConfig(projectPath, givenConfig)
@@ -138,7 +139,7 @@ export async function getPundleInstance(
     rootDirectory: config.publicDirectory,
     hmrPath: '/_/bundle_hmr',
     bundlePath: '/_/bundle.js',
-    useCache: true, // TODO: make this configurable
+    useCache,
     publicPath: '/',
     sourceMapPath: '/_/bundle.js.map',
     redirectNotFoundToIndex: true,

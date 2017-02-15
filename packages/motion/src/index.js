@@ -37,7 +37,7 @@ class Motion {
   async exists(): Promise<boolean> {
     return await FS.exists(Path.join(this.projectPath, '.motion.json'))
   }
-  async watch(terminal: boolean = false): Promise<Disposable> {
+  async watch(terminal: boolean = false, useCache: boolean = true): Promise<Disposable> {
     if (!await this.exists()) {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
@@ -45,7 +45,7 @@ class Motion {
     if (terminal) {
       this.cli.activate()
     }
-    const { subscription } = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, error => {
+    const { subscription } = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, useCache, error => {
       this.cli.log(error)
     })
     const disposable = new Disposable(() => {
@@ -61,7 +61,7 @@ class Motion {
       throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
     }
     let error
-    const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, givenError => {
+    const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, false, givenError => {
       error = givenError
     })
     try {
