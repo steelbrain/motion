@@ -4,9 +4,8 @@ import { inspect } from 'util'
 import vorpal from 'vorpal'
 import chalk from 'chalk'
 
-const CLI_DELIMITER = `${chalk.yellow('♥ motion ♥')} ${chalk.red('❯')}${chalk.yellow('❯')}${chalk.green('❯')}`
-const WELCOME_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Welcome to Motion')}\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
-const BYE_MESSAGE = `${chalk.red('♥ ♥ ♥ ♥ ♥')}\t${chalk.yellow('Bye from Motion')}\t\t${chalk.red('♥ ♥ ♥ ♥ ♥')}`
+const CLI_DELIMITER = `${chalk.yellow('❯')}`
+const BYE_MESSAGE = `${chalk.yellow('Bye')}`
 
 export default class CLI {
   active: boolean;
@@ -29,7 +28,6 @@ export default class CLI {
     this.active = true
     this.instance.delimiter(CLI_DELIMITER)
     this.instance.show()
-    this.instance.log(WELCOME_MESSAGE)
   }
   deactivate() {
     this.instance.hide()
