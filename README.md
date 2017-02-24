@@ -87,7 +87,9 @@ Using a `.motion.js` file in your app root:
 }
 ```
 
-- `pathType`:
+- **pathType**: `"filePath" | "number"` Use number to mimic production build short paths in your build.
+- **bundleDirectory**: `string` Entry directory to your app (looks for index.js file there)
+- **publicDirectory**: `string` Entry to your static assets (looks for index.html there)
 
 Customize your package.json to use motion:
 
@@ -100,7 +102,7 @@ Customize your package.json to use motion:
 }
 ```
 
-The default `babel-preset-motion` defines the following:
+The default babel settings, `babel-preset-motion`:
 
 ```js
 {
@@ -114,4 +116,23 @@ The default `babel-preset-motion` defines the following:
 }
 ```
 
+## Project structure
 
+Motion apps are kept very simple on purpose. This allows motion to be lightweight, which lets you plug motion apps into bigger apps easily. By default you just need:
+
+```
+  .motion.js
+  index.js
+  public/
+    index.html
+```
+
+You can see an example of the initial structure by running `motion new app`.
+
+## Running linting, flow, tests
+
+Motion is not opinionated on these but also doesn't get in your way. You can easily drop in an eslint file, flow config, and test suite of your choosing. An example of a more mature starting point that uses motion, flow, eslint and lerna [is right here](https://github.com/motion/starter).
+
+## More information
+
+Motion uses pundle behind the scenes to provide lightning fast hot module reloads and a nice foundation for adding really advancted features. [Read more about pundle here](https://github.com/motion/pundle).
