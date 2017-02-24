@@ -45,7 +45,7 @@ cd app
 motion
 ```
 
-To build your app bundle
+To build your production bundle:
 
 ```bash
 motion build
@@ -53,28 +53,65 @@ motion build
 
 ## Features
 
-Motion gives you a [vorpal](https://github.com/dthree/vorpal) powered CLI that is built
-to automate a few painful things with building modern web apps:
+Motion is a lightweight CLI for running any javascript. No configuration to mess with by default, yet completely flexible access to customize your plugins.
 
-- Startup - Motion creates all the files you need to start from package.json to gitignore to index.html.
-- Running - A consistent interface runs your app server and builds your files
-- Configuring - Use your own configuration for babel.
+Comes with:
+
 - Hot reloads - Hot reloads come out of the box, powered by [pundle](https://github.com/motion/pundle)
-- Automatic NPM installs - Add an import and motion installs your packages for you without needing a reload
-- Testing - **Pending**
-
-## Status
-
-Motion is in early development. It's foundation is solid and it was designed out of real-world use cases.
-But, it's currently powered by our own bundler, which means you may not want to use it yet.
-
-The bundler, pundle, was born out of a number of frustrations with Webpack. We wanted auto-installing
-npm dependencies that worked better than [the current best](https://github.com/ericclemmons/npm-install-webpack-plugin), but we couldn't get around certain API's. As we dug in further, we found a variety of problems.
-
-Another big thing we wanted was faster hot reloads. Webpack on our medium size project was taking about 400ms. We got it down to nearly instant.
-
-Finally, we just wanted a nice bundler that's code was self-documenting, typed, and had a foundation that would allow for extensibility. The result is [Pundle](https://github.com/motion/pundle), the peaceful bundler. It still needs some love: code splitting for example. But we use daily at our company of four and we all love it.
+- Automatic NPM installs - typing an import installs packages and works with HMR
+- Cached startup for really fast resuming of development
 
 ## Configuration
 
-**pending**
+Using a `.motion.js` file in your app root:
+
+```json
+{
+  "babel": {
+    "plugins": [
+      "motion-view/transform",
+      "babel-plugin-jsx-if",
+      ["gloss/transform", {
+        "decoratorName": "view"
+      }]
+    ],
+    "presets": [
+      "babel-preset-motion"
+    ]
+  },
+  "pathType": "filePath",
+  "webServerPort": 4444,
+  "saveNpmModules": true,
+  "bundleDirectory": ".",
+  "publicDirectory": "./public"
+}
+```
+
+- `pathType`:
+
+Customize your package.json to use motion:
+
+```json
+{
+  "scripts": {
+    "start": "motion",
+    "build": "motion build"
+  }
+}
+```
+
+The default `babel-preset-motion` defines the following:
+
+```js
+{
+  "presets": [
+    "babel-preset-stage-0",
+    "babel-preset-react"
+  ],
+  "plugins": [
+    "babel-plugin-transform-decorators-legacy"
+  ]
+}
+```
+
+
