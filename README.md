@@ -136,3 +136,20 @@ Motion is not opinionated on these but also doesn't get in your way. You can eas
 ## More information
 
 Motion uses pundle behind the scenes to provide lightning fast hot module reloads and a nice foundation for adding really advancted features. [Read more about pundle here](https://github.com/motion/pundle).
+
+## Contributing
+
+Clone the repo and run these two commands for initial setup
+
+```
+ $ npm install
+ $ npm run bootstrap
+```
+
+Then run either the `watch` or the `compile` npm scripts depending on the occasion.
+
+After running those for the first time, make sure to link in the cli by running `cd packages/motion; npm link`. You can then use the `motion` cli (presuming you've added npm bin path to your PATH env var).
+
+## License
+
+This project is licensed under the terms of MIT License. See the LICENSE file for more info.
