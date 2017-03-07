@@ -125,6 +125,10 @@ export async function getPundleInstance(
       }),
       ...config.pundle.components,
     ],
+    output: {
+      bundlePath: 'bundle.js',
+      publicRoot: '/_/',
+    },
     rootDirectory: config.bundleDirectory,
     replaceVariables: {
       'process.env.NODE_ENV': JSON.stringify(development ? 'development' : 'production'),
