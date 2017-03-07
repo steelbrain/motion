@@ -68,11 +68,23 @@ class Motion {
       if (error) {
         throw error
       }
-      const generated = await pundle.generate(null, {
+      const outputs = await pundle.generate(null, {
         sourceMap: false,
       })
-      await FS.mkdir(Path.join(this.config.getPublicDirectory(), '_'))
-      await FS.writeFile(Path.join(this.config.getPublicDirectory(), '_/bundle.js'), generated.contents)
+      const outputDirectory = this.config.getPublicDirectory()
+      await FS.mkdir(outputDirectory)
+
+      await Promise.all(outputs.map(function(output) {
+        return FS.writeFile(Path.join(outputDirectory, '_', `bundle.${output.label}.js`), output.contents)
+      }))
+
+      const indexHtmlSource = Path.join(this.config.getBundleDirectory(), 'index.html')
+      const indexHtmlTarget = Path.join(outputDirectory, 'index.html')
+      const indexHtml = pundle.fill(await FS.readFile(indexHtmlSource, 'utf8'), outputs.map(o => o.chunk), {
+        publicRoot: pundle.config.output.publicRoot,
+        bundlePath: pundle.config.output.bundlePath,
+      })
+      await FS.writeFile(indexHtmlTarget, indexHtml)
     } finally {
       subscription.dispose()
     }

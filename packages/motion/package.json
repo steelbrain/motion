@@ -26,6 +26,7 @@
     "pundle-dev": "^2.0.0-beta16",
     "pundle-plugin-dedupe": "^2.0.0-beta16",
     "pundle-plugin-npm-installer": "^2.0.0-beta16",
+    "pundle-plugin-commons-chunk": "^2.0.0-beta16",
     "pundle-preset-default": "^2.0.0-beta16",
     "pundle-transformer-babel": "^2.0.0-beta16",
     "sb-command": "^1.0.0",

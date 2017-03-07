@@ -90,6 +90,7 @@ export async function getPundleInstance(
     }]].concat(config.pundle.presets),
     components: [
       require.resolve('pundle-plugin-dedupe'),
+      require.resolve('pundle-plugin-commons-chunk'),
       [require.resolve('pundle-plugin-npm-installer'), {
         save: config.saveNpmModules,
         beforeInstall(name) {
@@ -124,6 +125,10 @@ export async function getPundleInstance(
       }),
       ...config.pundle.components,
     ],
+    output: {
+      bundlePath: 'bundle.js',
+      publicRoot: '/_/',
+    },
     rootDirectory: config.bundleDirectory,
     replaceVariables: {
       'process.env.NODE_ENV': JSON.stringify(development ? 'development' : 'production'),
