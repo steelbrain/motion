@@ -33,57 +33,45 @@ class Motion {
   async exists(): Promise<boolean> {
     return await FS.exists(Path.join(this.projectPath, CONFIG_FILE_NAME))
   }
-  async watch(terminal: boolean = false, useCache: boolean = true): Promise<Disposable> {
+  async watch(useCache: boolean = true): Promise<Disposable> {
     if (!await this.exists()) {
       throw new Error('Unable to run, directory is not a motion app')
     }
-
-    if (terminal) {
-      this.cli.activate()
-    }
-    const { subscription } = await getPundleInstance(this.cli, terminal, this.projectPath, true, this.config.config, useCache, error => {
-      this.cli.log(error)
-    })
-    const disposable = new Disposable(() => {
-      this.subscriptions.delete(disposable)
-      subscription.dispose()
-    })
-
-    this.subscriptions.add(disposable)
-    return disposable
+    await this.compilation.watch(useCache)
   }
-  async build(terminal: boolean = false): Promise<void> {
+  async build(useCache: boolean = true): Promise<void> {
     if (!await this.exists()) {
       throw new Error('Unable to run, directory is not a motion app')
     }
-    let error
-    const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, false, givenError => {
-      error = givenError
-    })
-    try {
-      if (error) {
-        throw error
-      }
-      const outputs = await pundle.generate(null, {
-        sourceMap: false,
-      })
-      const outputDirectory = this.config.getPublicDirectory()
-      await FS.mkdirp(Path.join(outputDirectory, '_'))
-
-      await Promise.all(outputs.map(function(output) {
-        return FS.writeFile(Path.join(outputDirectory, '_', `bundle.${output.label}.js`), output.contents)
-      }))
-
-      const indexHtmlSource = Path.join(this.config.getBundleDirectory(), 'index.html')
-      const indexHtmlTarget = Path.join(outputDirectory, 'index.html')
-      const indexHtml = pundle.fill(await FS.readFile(indexHtmlSource, 'utf8'), outputs.map(o => o.chunk), {
-        publicRoot: pundle.config.output.publicRoot,
-        bundlePath: pundle.config.output.bundlePath,
-      })
-      await FS.writeFile(indexHtmlTarget, indexHtml)
-    } finally {
-      subscription.dispose()
-    }
+    await this.compilation.build(useCache)
+    // let error
+    // const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, false, givenError => {
+    //   error = givenError
+    // })
+    // try {
+    //   if (error) {
+    //     throw error
+    //   }
+    //   const outputs = await pundle.generate(null, {
+    //     sourceMap: false,
+    //   })
+    //   const outputDirectory = this.config.getPublicDirectory()
+    //   await FS.mkdirp(Path.join(outputDirectory, '_'))
+    //
+    //   await Promise.all(outputs.map(function(output) {
+    //     return FS.writeFile(Path.join(outputDirectory, '_', `bundle.${output.label}.js`), output.contents)
+    //   }))
+    //
+    //   const indexHtmlSource = Path.join(this.config.getBundleDirectory(), 'index.html')
+    //   const indexHtmlTarget = Path.join(outputDirectory, 'index.html')
+    //   const indexHtml = pundle.fill(await FS.readFile(indexHtmlSource, 'utf8'), outputs.map(o => o.chunk), {
+    //     publicRoot: pundle.config.output.publicRoot,
+    //     bundlePath: pundle.config.output.bundlePath,
+    //   })
+    //   await FS.writeFile(indexHtmlTarget, indexHtml)
+    // } finally {
+    //   subscription.dispose()
+    // }
   }
   async init(): Promise<void> {
     if (await this.exists()) {
