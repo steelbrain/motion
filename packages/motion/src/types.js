@@ -12,6 +12,5 @@ export type Config = {
   pathType: 'filePath' | 'number',
   saveNpmModules: boolean,
   webServerPort: number,
-  rootDirectory: string,
   outputDirectory: string,
 }

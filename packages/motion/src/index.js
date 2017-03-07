@@ -6,17 +6,16 @@ import Path from 'path'
 import ConfigFile from 'sb-config-file'
 import { CompositeDisposable, Disposable } from 'sb-event-kit'
 
-import CLI from './cli'
+import Compilation from './compilation'
 import type { Config } from './types'
 import { CONFIG_FILE_NAME, CONFIG_FILE_DEFAULT, CONFIG_FILE_OPTIONS } from './helpers'
 
 const PRIVATE_VAR = {}
 
 class Motion {
-  cli: CLI;
   config: Config;
-  watching: boolean;
   projectPath: string;
+  compilation: Compilation;
   subscriptions: CompositeDisposable;
 
   constructor(privateVar: Object, projectPath: string, config: Config) {
@@ -24,19 +23,12 @@ class Motion {
       throw new Error('Invalid invocation of new Motion(). Use Motion.get() instead')
     }
 
-    this.cli = new CLI(config)
     this.config = config
-    this.watching = false
     this.projectPath = projectPath
+    this.compilation = new Compilation(config, projectPath)
     this.subscriptions = new CompositeDisposable()
 
-    this.subscriptions.add(this.cli)
-    this.cli.onShouldBuild(async () => {
-      await this.build(false)
-    })
-    this.cli.onShouldDispose(() => {
-      this.dispose()
-    })
+    this.subscriptions.add(this.config)
   }
   async exists(): Promise<boolean> {
     return await FS.exists(Path.join(this.projectPath, CONFIG_FILE_NAME))
@@ -97,15 +89,15 @@ class Motion {
     if (await this.exists()) {
       throw new Error('Directory is already a motion app')
     }
-    await FS.mkdirp(this.config.rootDirectory)
+    await FS.mkdirp(this.projectPath)
     await FS.mkdirp(this.config.outputDirectory)
-    await copy(Path.normalize(Path.join(__dirname, '..', 'template', 'bundle')), this.config.rootDirectory, {
+    await copy(Path.normalize(Path.join(__dirname, '..', 'template', 'bundle')), this.projectPath, {
       failIfExists: false,
     })
     await copy(Path.normalize(Path.join(__dirname, '..', 'template', 'dist')), this.config.outputDirectory, {
       failIfExists: false,
     })
-    await FS.writeFile(Path.join(this.config.rootDirectory, CONFIG_FILE_NAME), JSON.stringify(CONFIG_FILE_DEFAULT, null, 2))
+    await FS.writeFile(Path.join(this.projectPath, CONFIG_FILE_NAME), JSON.stringify(CONFIG_FILE_DEFAULT, null, 2))
   }
   dispose() {
     this.subscriptions.dispose()
@@ -115,7 +107,6 @@ class Motion {
     const configFile = await ConfigFile.get(Path.join(projectRoot, CONFIG_FILE_NAME), CONFIG_FILE_DEFAULT, CONFIG_FILE_OPTIONS)
     const config: Config = await configFile.get()
 
-    config.rootDirectory = Path.resolve(projectRoot, config.rootDirectory)
     config.outputDirectory = Path.resolve(projectRoot, config.outputDirectory)
 
     return new Motion(PRIVATE_VAR, projectRoot, config)

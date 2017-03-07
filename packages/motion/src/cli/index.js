@@ -8,7 +8,7 @@ import unique from 'lodash.uniq'
 import { exec } from 'sb-exec'
 import CLI from './cli'
 import type { Disposable } from 'sb-event-kit'
-import type Config from '../config'
+import type { Config } from '../types'
 
 const SPINNER_GLUE = ' & '
 

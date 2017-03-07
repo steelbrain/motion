@@ -31,7 +31,6 @@ export const CONFIG_FILE_DEFAULT = {
   get webServerPort() {
     return getRandomNumber(8000, 15000)
   },
-  rootDirectory: '.',
   outputDirectory: './dist',
 }
 export const CONFIG_FILE_OPTIONS = {
