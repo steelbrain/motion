@@ -72,7 +72,7 @@ class Motion {
         sourceMap: false,
       })
       const outputDirectory = this.config.getPublicDirectory()
-      await FS.mkdir(outputDirectory)
+      await FS.mkdir(Path.join(outputDirectory, '_'))
 
       await Promise.all(outputs.map(function(output) {
         return FS.writeFile(Path.join(outputDirectory, '_', `bundle.${output.label}.js`), output.contents)
