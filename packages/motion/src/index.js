@@ -5,11 +5,10 @@ import copy from 'sb-copy'
 import Path from 'path'
 import ConfigFile from 'sb-config-file'
 import { CompositeDisposable, Disposable } from 'sb-event-kit'
-import CLI from './cli'
 
-import { MotionError, ERROR_CODE } from './error'
-import { CONFIG_FILE_NAME, CONFIG_FILE_DEFAULT, CONFIG_FILE_OPTIONS } from './helpers'
+import CLI from './cli'
 import type { Config } from './types'
+import { CONFIG_FILE_NAME, CONFIG_FILE_DEFAULT, CONFIG_FILE_OPTIONS } from './helpers'
 
 const PRIVATE_VAR = {}
 
@@ -40,11 +39,11 @@ class Motion {
     })
   }
   async exists(): Promise<boolean> {
-    return await FS.exists(Path.join(this.projectPath, '.motion.json'))
+    return await FS.exists(Path.join(this.projectPath, CONFIG_FILE_NAME))
   }
   async watch(terminal: boolean = false, useCache: boolean = true): Promise<Disposable> {
     if (!await this.exists()) {
-      throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
+      throw new Error('Unable to run, directory is not a motion app')
     }
 
     if (terminal) {
@@ -63,7 +62,7 @@ class Motion {
   }
   async build(terminal: boolean = false): Promise<void> {
     if (!await this.exists()) {
-      throw new MotionError(ERROR_CODE.NOT_MOTION_APP)
+      throw new Error('Unable to run, directory is not a motion app')
     }
     let error
     const { subscription, pundle } = await getPundleInstance(this.cli, terminal, this.projectPath, false, this.config.config, false, givenError => {
@@ -96,7 +95,7 @@ class Motion {
   }
   async init(): Promise<void> {
     if (await this.exists()) {
-      throw new MotionError(ERROR_CODE.ALREADY_MOTION_APP)
+      throw new Error('Directory is already a motion app')
     }
     await FS.mkdirp(this.config.rootDirectory)
     await FS.mkdirp(this.config.outputDirectory)
@@ -106,7 +105,7 @@ class Motion {
     await copy(Path.normalize(Path.join(__dirname, '..', 'template', 'dist')), this.config.outputDirectory, {
       failIfExists: false,
     })
-    // TODO: Init and write the config here
+    await FS.writeFile(Path.join(this.config.rootDirectory, CONFIG_FILE_NAME), JSON.stringify(CONFIG_FILE_DEFAULT, null, 2))
   }
   dispose() {
     this.subscriptions.dispose()
