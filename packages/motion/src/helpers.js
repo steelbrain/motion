@@ -27,3 +27,15 @@ export const CONFIG_FILE_OPTIONS = {
   prettyPrint: true,
   createIfNonExistent: false,
 }
+
+const NPM_ERROR_EXTRACTION_REGEX = /npm ERR! code .*?\n\nnpm ERR! .*? (.*)/gm
+export function getNpmErrorMessage(contents: string): string {
+  if (!contents.includes('npm ERR!')) {
+    return contents
+  }
+  const match = NPM_ERROR_EXTRACTION_REGEX.exec(contents)
+  if (match) {
+    return match[1]
+  }
+  return contents
+}

@@ -1,6 +1,5 @@
 /* @flow */
 
-import Ora from 'ora'
 import open from 'open'
 import Path from 'path'
 import chalk from 'chalk'

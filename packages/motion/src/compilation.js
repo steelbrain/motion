@@ -10,7 +10,7 @@ import { CompositeDisposable } from 'sb-event-kit'
 import type { GeneratorResult } from 'pundle-api/types'
 
 import CLI from './cli'
-import { TICK } from './helpers'
+import { TICK, getNpmErrorMessage } from './helpers'
 import type { Config } from './types'
 
 export default class Compilation {
@@ -86,29 +86,29 @@ export default class Compilation {
         require.resolve('pundle-plugin-commons-chunk'),
         [require.resolve('pundle-plugin-npm-installer'), {
           save: this.config.saveNpmModules,
-          beforeInstall(name) {
-            // TODO: Enable this
-            // if (terminal) {
-            //   const message = `Installing ${name}`
-            //   cli.addSpinner(message)
-            // }
-            console.log('installing', name)
+          silent: true,
+          beforeInstall: (name) => {
+            if (!development) {
+              return
+            }
+            this.cli.addSpinner(`Installing ${name}`)
           },
-          afterInstall(name) {
-            // TODO: Enable this
-            // if (terminal) {
-            //   const message = `Installing ${name}`
-            //   cli.removeSpinner(message)
-            //   // ^ To insert a new line to allow default logger of Pundle to output
-            // } else if (error) {
-            //   errorCallback(error)
-            // }
-            console.log('installed', name)
+          afterInstall: (name, error) => {
+            if (!development) {
+              return
+            }
+            this.cli.removeSpinner(`Installing ${name}`)
+            if (error) {
+              this.cli.log(`Failed to install ${name} because ${getNpmErrorMessage(error.message)}`)
+            } else {
+              this.cli.log(`Successfully installed ${name}`)
+            }
           },
           extensions: ['js'],
         }],
         [require.resolve('pundle-transformer-babel'), {
           babelPath: require.resolve('babel-core'),
+          // TODO: Replace the default babel preset with the one done by motion
           config: this.config.babel,
           extensions: ['js'],
         }],
