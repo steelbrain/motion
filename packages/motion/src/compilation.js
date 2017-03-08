@@ -126,7 +126,7 @@ export default class Compilation {
           }
           if (this.options.debugTickAll || (file.filePath.indexOf(this.projectPath) === 0 && file.filePath.indexOf('node_modules') === -1)) {
             const relative = Path.relative(this.projectPath, file.filePath)
-            this.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
+            this.log(`${chalk.dim(Path.join('$root', relative))} ${chalk.green(TICK)}`)
           }
         }),
         ...this.config.pundle.components,
