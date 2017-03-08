@@ -27,7 +27,7 @@ export default class CLI {
   projectPath: string;
   subscriptions: CompositeDisposable;
 
-  constructor(config: Config, projectPath: string) {
+  constructor(projectPath: string, config: Config) {
     this.vorpal = new Vorpal()
     this.active = false
     this.config = config

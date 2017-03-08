@@ -11,20 +11,22 @@ import type { GeneratorResult } from 'pundle-api/types'
 
 import CLI from './cli'
 import { TICK, getNpmErrorMessage } from './helpers'
-import type { Config } from './types'
+import type { Config, Options } from './types'
 
 export default class Compilation {
   cli: CLI;
   config: Config;
+  options: Options;
   projectPath: string;
   subscriptions: CompositeDisposable;
-  constructor(config: Config, projectPath: string) {
-    this.cli = new CLI(config, projectPath)
+  constructor(projectPath: string, config: Config, options: Options) {
+    this.cli = new CLI(projectPath, config, options)
     this.config = config
+    this.options = options
     this.projectPath = projectPath
     this.subscriptions = new CompositeDisposable()
 
-    this.cli.onShouldBuild(() => this.build(true))
+    this.cli.onShouldBuild(() => this.build(this.options.useCache))
   }
   async watch(useCache: boolean): Promise<void> {
     const pundle = await this.getPundle(true)
@@ -77,13 +79,14 @@ export default class Compilation {
 
     return await Pundle.create({
       entry: ['./'],
+      debug: this.options.debug,
 
       presets: [[require.resolve('pundle-preset-default'), {
         generator: {
           pathType: this.config.pathType === 'number' ? 'number' : 'filePath',
         },
         reporter: {
-          log: o => this.cli.log(o),
+          log: o => this.log(o),
         },
       }], ...this.config.pundle.presets],
 
@@ -105,9 +108,9 @@ export default class Compilation {
             }
             this.cli.removeSpinner(`Installing ${name}`)
             if (error) {
-              this.cli.log(`Failed to install ${name} because ${getNpmErrorMessage(error.message)}`)
+              this.log(`Failed to install ${name} because ${getNpmErrorMessage(error.message)}`)
             } else {
-              this.cli.log(`Successfully installed ${name}`)
+              this.log(`Successfully installed ${name}`)
             }
           },
           extensions: ['js'],
@@ -121,9 +124,9 @@ export default class Compilation {
           if (!development) {
             return
           }
-          if ((file.filePath.indexOf(this.projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) || process.env.MOTION_DEBUG_TICK_ALL) {
+          if (this.options.debugTickAll || (file.filePath.indexOf(this.projectPath) === 0 && file.filePath.indexOf('node_modules') === -1)) {
             const relative = Path.relative(this.projectPath, file.filePath)
-            this.cli.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
+            this.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
           }
         }),
         ...this.config.pundle.components,
@@ -138,6 +141,9 @@ export default class Compilation {
         'process.env.NODE_ENV': JSON.stringify(development ? 'development' : 'production'),
       },
     })
+  }
+  log(contents: string): void {
+    this.cli.log(contents)
   }
   dispose() {
     this.subscriptions.dispose()
