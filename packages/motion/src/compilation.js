@@ -3,6 +3,7 @@
 import FS from 'sb-fs'
 import Path from 'path'
 import Pundle from 'pundle'
+import PundleDevServer from 'pundle-dev'
 import { createPlugin } from 'pundle-api'
 import { CompositeDisposable } from 'sb-event-kit'
 import type { GeneratorResult } from 'pundle-api/types'
@@ -18,7 +19,19 @@ export default class Compilation {
     this.subscriptions = new CompositeDisposable()
   }
   async watch(useCache: boolean): Promise<void> {
-    console.log('useCache', useCache)
+    const pundle = await this.getPundle(true)
+    const server = new PundleDevServer(pundle, {
+      port: this.config.webServerPort,
+      rootDirectory: this.config.outputDirectory,
+      hmrPath: '/_/bundle_hmr',
+      bundlePath: '/_/bundle.js',
+      useCache,
+      publicPath: '/',
+      sourceMapPath: '/_/bundle.js.map',
+      redirectNotFoundToIndex: true,
+    })
+    this.subscriptions.add(server)
+    await server.activate()
   }
   async build(useCache: boolean): Promise<void> {
     const pundle = await this.getPundle(false)
