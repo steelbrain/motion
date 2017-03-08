@@ -15,7 +15,7 @@ export default class CLI {
     this.active = false
     this.instance = vorpal()
   }
-  activate() {
+  activate(projectName: string) {
     if (process.versions.electron) {
       // Vorpal crashes electron
       return
@@ -26,7 +26,7 @@ export default class CLI {
     }
 
     this.active = true
-    this.instance.delimiter(CLI_DELIMITER)
+    this.instance.delimiter(`  ${chalk.green(projectName)} ${CLI_DELIMITER}`)
     this.instance.show()
   }
   deactivate() {
