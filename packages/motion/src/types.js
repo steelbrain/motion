@@ -10,8 +10,7 @@ export type Config = {
     components: Array<string>,
   },
   pathType: 'filePath' | 'number',
-  webServerPort: number,
   saveNpmModules: boolean,
-  bundleDirectory: string,
-  publicDirectory: string,
+  webServerPort: number,
+  outputDirectory: string,
 }

@@ -30,20 +30,18 @@ command
   })
   .command('build', 'Build dist files of the current motion app', function(options: Object) {
     getMotion(options, currentDirectory, function(motion) {
-      // $FlowIgnore: Flow doesn't recognize this prop
-      return motion.build(process.stdout.isTTY, !options.disableCache).then(function() {
+      return motion.build(!options.disableCache).then(function() {
         console.log(coolTrim`
           ${chalk.green('App built successfully')}
           To access the built files, do
-            $ cd ${Path.relative(currentDirectory, motion.config.getPublicDirectory())}
+            $ cd ${Path.relative(currentDirectory, motion.config.outputDirectory)}
         `)
       })
     })
   })
   .command('watch', 'Make the Motion CLI run Dev server and watch the files for changes', function(options: Object) {
     getMotion(options, currentDirectory, function(motion) {
-      // $FlowIgnore: Flow doesn't recognize this prop
-      return motion.watch(process.stdout.isTTY)
+      return motion.watch(!options.disableCache)
     })
   })
   .command('init', 'Copy motion configuation files into the current directory', function(options: Object) {
@@ -65,8 +63,7 @@ command
       process.exit(1)
     }
     getMotion(options, currentDirectory, function(motion) {
-      // $FlowIgnore: Flow doesn't recognize this prop
-      return motion.watch(process.stdout.isTTY, !options.disableCache)
+      return motion.watch(!options.disableCache)
     })
   })
   .parse(process.argv)
