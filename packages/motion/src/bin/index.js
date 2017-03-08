@@ -35,7 +35,7 @@ command
         console.log(coolTrim`
           ${chalk.green('App built successfully')}
           To access the built files, do
-            $ cd ${Path.relative(currentDirectory, motion.config.getPublicDirectory())}
+            $ cd ${Path.relative(currentDirectory, motion.config.outputDirectory)}
         `)
       })
     })
