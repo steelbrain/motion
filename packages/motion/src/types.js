@@ -14,3 +14,9 @@ export type Config = {
   webServerPort: number,
   outputDirectory: string,
 }
+
+export type Options = {
+  debug: boolean,
+  debugTickAll: boolean,
+  useCache: boolean,
+}

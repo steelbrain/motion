@@ -27,7 +27,7 @@
     "pundle-plugin-npm-installer": "^2.0.0-beta16",
     "pundle-preset-default": "^2.0.0-beta16",
     "pundle-transformer-babel": "^2.0.0-beta16",
-    "sb-command": "^1.0.0",
+    "sb-command": "^2.0.6",
     "sb-config-file": "^3.0.2",
     "sb-copy": "^1.0.1",
     "sb-event-kit": "^3.0.0",
