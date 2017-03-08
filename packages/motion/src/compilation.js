@@ -69,6 +69,12 @@ export default class Compilation {
     await FS.writeFile(indexHtmlTarget, indexHtml)
   }
   async getPundle(development: boolean = false): Promise<Object> {
+    const babelConfig = {
+      ...this.config.babel,
+      presets: (this.config.babel.presets || [])
+        .map(e => ((e === 'babel-preset-steelbrain' || e === 'steelbrain') ? require.resolve('babel-preset-steelbrain') : e))
+    }
+
     return await Pundle.create({
       entry: ['./'],
 
@@ -108,8 +114,7 @@ export default class Compilation {
         }],
         [require.resolve('pundle-transformer-babel'), {
           babelPath: require.resolve('babel-core'),
-          // TODO: Replace the default babel preset with the one done by motion
-          config: this.config.babel,
+          config: babelConfig,
           extensions: ['js'],
         }],
         createPlugin((_: Object, file: Object) => {
