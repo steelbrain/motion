@@ -1,5 +1,6 @@
 /* @flow */
 
+import Ora from 'ora'
 import open from 'open'
 import Path from 'path'
 import chalk from 'chalk'
@@ -81,6 +82,11 @@ export default class CLI {
     }
   }
   addSpinner(text: string) {
+    if (!this.active) {
+      this.log(text)
+      return
+    }
+
     const spinner = this.spinner
     if (spinner) {
       spinner.texts.push(text)
@@ -98,6 +104,10 @@ export default class CLI {
     }
   }
   removeSpinner(text: string) {
+    if (!this.active) {
+      return
+    }
+
     const spinner = this.spinner
     if (spinner) {
       const index = spinner.texts.indexOf(text)
@@ -112,6 +122,9 @@ export default class CLI {
     }
   }
   removeAllSpinners() {
+    if (!this.active) {
+      return
+    }
     const spinner = this.spinner
     if (spinner) {
       spinner.instance.stop()

@@ -17,6 +17,7 @@
     "cool-trim": "^1.1.0",
     "lodash.uniq": "^4.5.0",
     "open": "0.0.5",
+    "ora": "^1.1.0",
     "process-bootstrap": "^1.0.0",
     "pundle": "^2.0.0-beta16",
     "pundle-api": "^2.0.0-beta16",
