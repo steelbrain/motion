@@ -37,8 +37,20 @@
     "strip-ansi": "^3.0.1",
     "vorpal": "^1.11.4"
   },
-  "devDependencies": {
-    "jasmine-fix": "^1.0.1",
-    "loophole": "^1.1.0"
+  "scripts": {
+    "clean": "rm -rf lib",
+    "compile": "npm run clean; babel src --out-dir lib --source-maps",
+    "watch": "npm run compile -- -w",
+    "lint": "eslint .",
+    "test": "apm test"
+  },
+  "dependencies": {
+    "babel-cli": "^6.5.1",
+    "babel-eslint": "^6.0.0",
+    "babel-preset-steelbrain": "^5.0.2",
+    "eslint": "^2.4.0",
+    "eslint-config-airbnb": "^6.0.2",
+    "eslint-plugin-react": "^4.3.0",
+    "flow-bin": "^0.31.1"
   }
 }

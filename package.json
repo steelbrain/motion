@@ -1,23 +1,5 @@
 {
   "private": true,
   "license": "MIT",
-  "scripts": {
-    "bootstrap": "lerna bootstrap; npm run compile",
-    "clean": "rm -rf packages/*/lib",
-    "compile": "npm run clean; lerna exec -- babel src --out-dir lib --source-maps",
-    "lint": "eslint .",
-    "publish": "npm run compile; lerna publish",
-    "test": "lerna exec --concurrency 1 -- apm test",
-    "watch": "npm run clean; lerna exec --concurrency 99 -- babel src --out-dir lib --source-maps --watch"
-  },
-  "dependencies": {
-    "babel-cli": "^6.5.1",
-    "babel-eslint": "^6.0.0",
-    "babel-preset-steelbrain": "^5.0.2",
-    "eslint": "^2.4.0",
-    "eslint-config-airbnb": "^6.0.2",
-    "eslint-plugin-react": "^4.3.0",
-    "flow-bin": "^0.31.1",
-    "lerna": "2.0.0-beta.24"
-  }
+
 }
