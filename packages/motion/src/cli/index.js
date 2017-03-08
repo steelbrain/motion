@@ -38,14 +38,14 @@ export default class CLI {
     this.subscriptions.add(this.emitter)
   }
   activate() {
-    if (this.active) {
-      this.vorpal.activate()
-      return
-    }
-
     const serverAddress = `http://localhost:${this.config.webServerPort}/`
+    const manifest = {}
+    try {
+      // $FlowIgnore: Flow doesn't like dynamic requires
+      Object.assign({}, require(Path.join(this.projectPath), 'package.json'))
+    } catch (_) { /* No Op */ }
 
-    this.vorpal.activate()
+    this.vorpal.activate(manifest.name || Path.basename(this.projectPath))
     this.vorpal.log(`${chalk.green('Server running at')} ${serverAddress}`)
     this.vorpal.log(`${chalk.yellow(`Type ${chalk.underline('help')} to get list of available commands`)}`)
     this.vorpal.addCommand('open', 'Open this app in Browser', () => {
