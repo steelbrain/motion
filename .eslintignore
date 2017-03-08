@@ -1,6 +1,4 @@
 .git
 .idea
 node_modules
-packages/*/lib
-packages/*/dist
-packages/*/spec/fixtures
+lib
