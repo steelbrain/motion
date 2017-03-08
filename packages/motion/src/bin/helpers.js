@@ -23,7 +23,7 @@ export function getMotion(options: Object, rootDirectory: string = process.cwd()
     process.on('exit', killMotion)
     return callback(motion)
   }).catch(function(error) {
-    console.error('Error:', error && (error.motion ? error.message : error.stack))
+    console.error('Error:', error && (options.debug ? error.stack : error.message))
     process.exitCode = 1
   })
 }
