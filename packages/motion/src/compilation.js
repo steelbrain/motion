@@ -2,21 +2,29 @@
 
 import FS from 'sb-fs'
 import Path from 'path'
+import chalk from 'chalk'
 import Pundle from 'pundle'
 import PundleDevServer from 'pundle-dev'
 import { createPlugin } from 'pundle-api'
 import { CompositeDisposable } from 'sb-event-kit'
 import type { GeneratorResult } from 'pundle-api/types'
+
+import CLI from './cli'
+import { TICK } from './helpers'
 import type { Config } from './types'
 
 export default class Compilation {
+  cli: CLI;
   config: Config;
   projectPath: string;
   subscriptions: CompositeDisposable;
   constructor(config: Config, projectPath: string) {
+    this.cli = new CLI(config, projectPath)
     this.config = config
     this.projectPath = projectPath
     this.subscriptions = new CompositeDisposable()
+
+    this.cli.onShouldBuild(() => this.build(true))
   }
   async watch(useCache: boolean): Promise<void> {
     const pundle = await this.getPundle(true)
@@ -31,6 +39,9 @@ export default class Compilation {
       redirectNotFoundToIndex: true,
     })
     this.subscriptions.add(server)
+    if (process.stdout.isTTY) {
+      this.cli.activate()
+    }
     await server.activate()
   }
   async build(useCache: boolean): Promise<void> {
@@ -66,8 +77,7 @@ export default class Compilation {
           pathType: this.config.pathType === 'number' ? 'number' : 'filePath',
         },
         reporter: {
-          // TODO: Enable this
-          // log: o => cli.log(o),
+          log: o => this.cli.log(o),
         },
       }], ...this.config.pundle.presets],
 
@@ -102,14 +112,14 @@ export default class Compilation {
           config: this.config.babel,
           extensions: ['js'],
         }],
-        createPlugin(function(_: Object, file: Object) {
-          // if (development) {
-          //   if ((file.filePath.indexOf(projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) || process.env.MOTION_DEBUG_TICK_ALL) {
-          //     const relative = Path.relative(projectPath, file.filePath)
-          //     cli.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
-          //   }
-          // }
-          console.log('tick', file.filePath)
+        createPlugin((_: Object, file: Object) => {
+          if (!development) {
+            return
+          }
+          if ((file.filePath.indexOf(this.projectPath) === 0 && file.filePath.indexOf('node_modules') === -1) || process.env.MOTION_DEBUG_TICK_ALL) {
+            const relative = Path.relative(this.projectPath, file.filePath)
+            this.cli.log(`${chalk.dim(Path.join('$root', relative.substr(0, 2) === '..' ? file.filePath : relative))} ${chalk.green(TICK)}`)
+          }
         }),
         ...this.config.pundle.components,
       ],

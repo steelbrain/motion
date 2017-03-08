@@ -36,6 +36,7 @@
     "sb-exec": "^3.0.1",
     "sb-fs": "^2.0.0",
     "sb-promisify": "^2.0.1",
+    "strip-ansi": "^3.0.1",
     "vorpal": "^1.11.4"
   },
   "devDependencies": {
