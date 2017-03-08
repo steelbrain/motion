@@ -1,12 +1,8 @@
-apps/tools/.motion/_
 .DS_Store
 node_modules
 npm-debug.log
 *.log
 *.cache
-/packages/*/lib
-build/
-deps/
-out/
+lib
 .tmp
 npm-shrinkwrap.json
