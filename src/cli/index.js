@@ -52,9 +52,14 @@ export default class CLI {
       open(serverAddress)
     })
     this.vorpal.addCommand('editor', 'Open this app in Atom', async () => {
-      // TODO: Most oses have nano as default, and it's not a desktop app, fix this
       const defaultEditor = /^win/.test(process.platform) ? 'notepad' : 'atom'
-      const editor = process.env.EDITOR || defaultEditor
+      let editor = process.env.EDITOR || defaultEditor
+
+      const editorName = Path.basename(editor)
+      if (editorName === 'nano' || editorName === 'vi' || editorName === 'vim') {
+        editor = defaultEditor
+      }
+
       await exec(editor, [this.projectPath])
     })
     this.vorpal.addCommand('build', 'Build this app for production usage', async () => {
