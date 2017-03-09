@@ -111,7 +111,7 @@ export default class Compilation {
         }],
         [require.resolve('pundle-transformer-babel'), {
           babelPath: require.resolve('babel-core'),
-          config: normalizeBabelConfig(this.projectPath, this.config.babel),
+          config: await normalizeBabelConfig(this.projectPath, this.config.babel),
           extensions: ['js'],
         }],
         createPlugin((_: Object, file: Object) => {
