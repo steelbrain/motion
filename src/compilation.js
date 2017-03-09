@@ -10,7 +10,7 @@ import { CompositeDisposable } from 'sb-event-kit'
 import type { GeneratorResult } from 'pundle-api/types'
 
 import CLI from './cli'
-import { TICK, getNpmErrorMessage } from './helpers'
+import { TICK, normalizeBabelConfig, getNpmErrorMessage } from './helpers'
 import type { Config, Options } from './types'
 
 export default class Compilation {
@@ -71,12 +71,6 @@ export default class Compilation {
     await FS.writeFile(indexHtmlTarget, indexHtml)
   }
   async getPundle(development: boolean = false): Promise<Object> {
-    const babelConfig = {
-      ...this.config.babel,
-      presets: (this.config.babel.presets || [])
-        .map(e => ((e === 'babel-preset-steelbrain' || e === 'steelbrain') ? require.resolve('babel-preset-steelbrain') : e))
-    }
-
     return await Pundle.create({
       entry: ['./'],
       debug: this.options.debug,
@@ -117,7 +111,7 @@ export default class Compilation {
         }],
         [require.resolve('pundle-transformer-babel'), {
           babelPath: require.resolve('babel-core'),
-          config: babelConfig,
+          config: normalizeBabelConfig(this.projectPath, this.config.babel),
           extensions: ['js'],
         }],
         createPlugin((_: Object, file: Object) => {
