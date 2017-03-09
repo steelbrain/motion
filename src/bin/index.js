@@ -13,6 +13,7 @@ const currentDirectory = process.cwd()
 command
   .version(`Motion v${manifest.version}`)
   .option('--debug', 'Enable stack traces of errors, useful for debugging', false)
+  .option('--debug-dedupe', 'Enable logs about things dedupe picks and leaves out', false)
   .option('--debug-tick-all', 'Show all files in watcher ticks instead including files in node_modules', false)
   .option('--disable-cache', 'Disable use of cache when bundling files', false)
   .command('new <name>', 'Create a new motion app with the given name', function(options: Object, name) {

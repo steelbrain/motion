@@ -7,6 +7,7 @@ import Motion from '../'
 export function getMotion(options: Object, rootDirectory: string = process.cwd(), callback: ((motion: Motion) => any)) {
   return Motion.create(rootDirectory, {
     debug: options.debug,
+    debugDedupe: options.debugDedupe,
     debugTickAll: options.debugTickAll,
     useCache: !options.disableCache,
   }).then(function(motion) {

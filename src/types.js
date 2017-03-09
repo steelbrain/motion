@@ -17,6 +17,7 @@ export type Config = {
 
 export type Options = {
   debug: boolean,
+  debugDedupe: boolean,
   debugTickAll: boolean,
   useCache: boolean,
 }
