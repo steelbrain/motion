@@ -1,5 +1,9 @@
 /* @flow */
 
+import promisify from 'sb-promisify'
+
+const resolve = promisify(require('resolve'))
+
 // From: goo.gl/fZA6BF
 export function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min
@@ -38,4 +42,38 @@ export function getNpmErrorMessage(contents: string): string {
     return match[1]
   }
   return contents
+}
+
+export async function normalizeBabelConfig(rootDirectory: string, config: Object): Promise<Object> {
+  const plugins = []
+  const presets = []
+
+  if (Array.isArray(config.presets)) {
+    for (const entry of config.presets) {
+      // eslint-disable-next-line prefer-const
+      let [name, options = {}] = Array.isArray(entry) ? entry : [entry]
+      if (name === 'babel-preset-steelbrain' || name === 'steelbrain') {
+        name = require.resolve('babel-preset-steelbrain')
+      } else if (typeof entry === 'string') {
+        name = await resolve(entry, { basedir: rootDirectory })
+      }
+      presets.push([name, options])
+    }
+  }
+  if (Array.isArray(config.plugins)) {
+    for (const entry of config.plugins) {
+      // eslint-disable-next-line prefer-const
+      let [name, options = {}] = Array.isArray(entry) ? entry : [entry]
+      if (typeof entry === 'string') {
+        name = await resolve(entry, { basedir: rootDirectory })
+      }
+      plugins.push([name, options])
+    }
+  }
+
+  return {
+    ...config,
+    presets,
+    plugins
+  }
 }
