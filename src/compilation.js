@@ -114,7 +114,7 @@ export default class Compilation {
           config: await normalizeBabelConfig(this.projectPath, this.config.babel),
           extensions: ['js'],
         }],
-        createPlugin((_: Object, file: Object) => {
+        createPlugin((_: Object, __: Object, file: Object) => {
           if (!development) {
             return
           }
