@@ -44,6 +44,7 @@ export function getNpmErrorMessage(contents: string): string {
   return contents
 }
 
+// TODO: Move this relative resolution logic to pundle
 export async function normalizeBabelConfig(rootDirectory: string, config: Object): Promise<Object> {
   const plugins = []
   const presets = []
@@ -51,11 +52,11 @@ export async function normalizeBabelConfig(rootDirectory: string, config: Object
   if (Array.isArray(config.presets)) {
     for (const entry of config.presets) {
       // eslint-disable-next-line prefer-const
-      let [name, options = {}] = Array.isArray(entry) ? entry : [entry]
+      let [name, options = null] = Array.isArray(entry) ? entry : [entry]
       if (name === 'babel-preset-steelbrain' || name === 'steelbrain') {
         name = require.resolve('babel-preset-steelbrain')
-      } else if (typeof entry === 'string') {
-        name = await resolve(entry, { basedir: rootDirectory })
+      } else if (typeof name === 'string') {
+        name = await resolve(name, { basedir: rootDirectory })
       }
       presets.push([name, options])
     }
@@ -63,9 +64,9 @@ export async function normalizeBabelConfig(rootDirectory: string, config: Object
   if (Array.isArray(config.plugins)) {
     for (const entry of config.plugins) {
       // eslint-disable-next-line prefer-const
-      let [name, options = {}] = Array.isArray(entry) ? entry : [entry]
-      if (typeof entry === 'string') {
-        name = await resolve(entry, { basedir: rootDirectory })
+      let [name, options = null] = Array.isArray(entry) ? entry : [entry]
+      if (typeof name === 'string') {
+        name = await resolve(name, { basedir: rootDirectory })
       }
       plugins.push([name, options])
     }
