@@ -1,6 +1,6 @@
 {
   "name": "motion",
-  "version": "5.0.0-beta18",
+  "version": "5.0.0-beta18-2",
   "description": "motion - moving development forward",
   "main": "lib/index.js",
   "scripts": {
