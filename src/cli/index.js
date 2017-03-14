@@ -52,7 +52,7 @@ export default class CLI {
       open(serverAddress)
     })
     this.vorpal.addCommand('editor', 'Open this app in Atom', async () => {
-      const defaultEditor = /^win/.test(process.platform) ? 'notepad' : 'atom'
+      const defaultEditor = 'atom'
       let editor = process.env.EDITOR || defaultEditor
 
       const editorName = Path.basename(editor)
