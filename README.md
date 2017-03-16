@@ -69,11 +69,7 @@ Using a `.motion.js` file in your app root:
 {
   "babel": {
     "plugins": [
-      "motion-view/transform",
-      "babel-plugin-jsx-if",
-      ["gloss/transform", {
-        "decoratorName": "view"
-      }]
+      "babel-plugin-jsx-if"
     ],
     "presets": [
       "babel-preset-motion"
