@@ -13,7 +13,8 @@
   <a href="https://npmjs.org/package/motion"><img alt="Downloads" src="http://img.shields.io/npm/dm/motion.svg"></a>
   <a href="https://circleci.com/gh/motion/motion/tree/master">
     <img src="https://img.shields.io/circleci/project/motion/motion/master.svg" alt="CircleCI Build Status">
-  </a>
+  </a><br/>
+  <a href="https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmotion%2Fmotion?ref=badge_large" alt="FOSSA Status"><img src="https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmotion%2Fmotion.svg?size=large"/></a>
 </p>
 
 ----
