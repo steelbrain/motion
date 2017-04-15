@@ -58,7 +58,12 @@ export async function normalizeBabelConfig(rootDirectory: string, config: Object
       } else if (typeof name === 'string') {
         name = await resolve(name, { basedir: rootDirectory })
       }
-      presets.push([name, options])
+      if (options) {
+        presets.push([name, options])
+      }
+      else {
+        presets.push([name])
+      }
     }
   }
   if (Array.isArray(config.plugins)) {
