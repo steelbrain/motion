@@ -1,9 +1,0 @@
-{
-  "packages": [
-    "./"
-  ],
-  "dependencies": [
-    "motion/pundle"
-  ],
-  "configurations": []
-}
